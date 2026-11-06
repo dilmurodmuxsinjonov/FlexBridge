@@ -125,3 +125,22 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 17/17 sxema invariantlari real PostgreSQL dvigatelida tasdiqlandi.
 - Topshirilgan holat / keyingi qadam: `S1.2`, `S1.3` va `S1.4` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.1.1` — `backend/` katalogida FastAPI ilova asosi, konfiguratsiya, `/api/v1/health/live`, `/api/v1/health/ready` (`API-X05`, `API-X06`) va 1.4 DB sxema/invariant `pytest` paketini yaratish.
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-004 — 2026-11-07T00:05:30+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-004` / `2026-11-07T00:05:30+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.1.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S1.2..S1.4` yakunlanib PR `#4` (`5155b17`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#5` va `feature/s2-1-1-backend-db-foundation` tarmog'ida `backend/` Python FastAPI ilova asosini, `1.4 PDF` xavfsizlik/sig'im konfiguratsiyasini (`app/core/config.py`), `1.4` sxema va `DB-083` 8 ta retention policy tekshirgichini (`app/db/schema.py`), `API-X05` (`/api/v1/health/live`) va `API-X06` (`/api/v1/health/ready`) endpointlarini (`app/main.py`) hamda avtomatlashtirilgan `pytest` sinov to'plamini (`tests/test_s2_1_1_foundation.py`) yaratish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/pyproject.toml`, `backend/requirements.txt` yaratildi.
+  - `backend/app/__init__.py`, `backend/app/core/__init__.py`, `backend/app/core/config.py` yaratildi (PgBouncer `80/20/400`, L1/Redis `15s` TTL, `quarantine/` va `60s` signed URL, PDF `50 bet / 5000 obyekt / 20 MB` va 8 ta taqiqlangan PDF tokeni, P1 moliya circuit-breaker).
+  - `backend/app/db/__init__.py`, `backend/app/db/schema.py` yaratildi (`FlexBridge_model_1_4.json`, `FlexBridge_1_4_schema.sql`, `DB-083` 8 ta retention policy v1 va `v1_4_schema_verification.json` yuklagichlari).
+  - `backend/app/main.py` yaratildi (`GET /api/v1/health/live`, `GET /api/v1/health/ready`, `GET /api/v1/meta/schema-summary`).
+  - `backend/tests/test_s2_1_1_foundation.py` yaratildi (6 ta avtomatlashtirilgan `pytest` testi).
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi.
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`6 passed in 0.62s`** (`test_api_x05_health_live`, `test_api_x06_health_ready`, `test_1_4_security_and_pool_configuration`, `test_schema_and_model_1_4_exact_counts`, `test_db_083_retention_policies_v1`, `test_postgres_1_4_invariant_report_completeness`).
+- Muammo va cheklov: Dastlabki test ishga tushirilishida `model["counts"]` o'rniga `model["stats"]` va `trg_guard_audit_events` o'rniga `trg_immutable_audit_events` kaliti aniqlandi hamda darhol tuzatilib `6/6` o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.1.1` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.1.2` — Tranzaksiya boshqaruvchisi (`DEFERRABLE` / `SET CONSTRAINTS ALL IMMEDIATE`), `audit_events`/`consent_events`/`billing_ledger` append-only yordamchisi va P1 moliya circuit-breaker modulini yaratish.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
