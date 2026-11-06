@@ -1,0 +1,355 @@
+flowchart LR
+    U["Bitta shaxs: users"] --> M["Membership + rol + scope + amal"]
+    M --> G["Faol status, shaxsiy accept, legal basis, self-review tekshiruvi"]
+    subgraph IAM["Hisob, kirish va ruxsatlar"]
+    DB_001["DB-001 users"]
+    DB_002["DB-002 user_contacts"]
+    DB_003["DB-003 auth_challenges"]
+    DB_004["DB-004 sessions"]
+    DB_005["DB-005 mfa_credentials"]
+    DB_006["DB-006 recovery_requests"]
+    DB_007["DB-007 permission_catalog"]
+    DB_008["DB-008 role_catalog"]
+    DB_009["DB-009 role_permissions"]
+    DB_010["DB-010 platform_role_grants"]
+    DB_011["DB-011 consent_events"]
+    end
+    subgraph CAN["Nomzod, malaka va vaqt"]
+    DB_012["DB-012 candidate_profiles"]
+    DB_013["DB-013 skills"]
+    DB_014["DB-014 candidate_skills"]
+    DB_015["DB-015 enrollments"]
+    DB_016["DB-016 availability_rules"]
+    DB_017["DB-017 availability_exceptions"]
+    DB_018["DB-018 files"]
+    DB_019["DB-019 verification_cases"]
+    DB_020["DB-020 verification_evidence"]
+    end
+    subgraph ORG["Tashkilot va xodimlar"]
+    DB_021["DB-021 organizations"]
+    DB_022["DB-022 organization_capabilities"]
+    DB_023["DB-023 org_memberships"]
+    DB_024["DB-024 org_role_grants"]
+    DB_025["DB-025 org_invitations"]
+    DB_026["DB-026 org_invitation_roles"]
+    DB_027["DB-027 org_ownership_events"]
+    end
+    subgraph EDU["Muassasa va rasmiy biriktirish"]
+    DB_028["DB-028 institutions"]
+    DB_029["DB-029 institution_agreements"]
+    DB_030["DB-030 institution_memberships"]
+    DB_031["DB-031 institution_role_grants"]
+    DB_032["DB-032 institution_appointments"]
+    DB_033["DB-033 institution_invitations"]
+    DB_034["DB-034 student_supervisions"]
+    end
+    subgraph JOB["E’lon va qidiruv"]
+    DB_035["DB-035 opportunities"]
+    DB_036["DB-036 opportunity_revisions"]
+    DB_037["DB-037 opportunity_skills"]
+    DB_038["DB-038 opportunity_shifts"]
+    DB_039["DB-039 opportunity_hr_assignments"]
+    DB_040["DB-040 saved_opportunities"]
+    end
+    subgraph APP["Ariza, suhbat va ish"]
+    DB_041["DB-041 applications"]
+    DB_042["DB-042 application_attempts"]
+    DB_043["DB-043 application_events"]
+    DB_044["DB-044 interviews"]
+    DB_045["DB-045 interview_responses"]
+    DB_046["DB-046 offers"]
+    DB_047["DB-047 job_engagements"]
+    DB_048["DB-048 engagement_confirmations"]
+    end
+    subgraph INT["Amaliyot va reja"]
+    DB_049["DB-049 placements"]
+    DB_050["DB-050 placement_terms"]
+    DB_051["DB-051 mentor_assignments"]
+    DB_052["DB-052 academic_assignments"]
+    DB_053["DB-053 plan_tasks"]
+    DB_054["DB-054 placement_decisions"]
+    end
+    subgraph LOG["Kundalik va dalillar"]
+    DB_055["DB-055 daily_logs"]
+    DB_056["DB-056 log_revisions"]
+    DB_057["DB-057 log_task_entries"]
+    DB_058["DB-058 log_evidence"]
+    DB_059["DB-059 workplace_log_reviews"]
+    DB_060["DB-060 academic_log_reviews"]
+    DB_061["DB-061 log_amendment_requests"]
+    end
+    subgraph RAT["Baholash va apellyatsiya"]
+    DB_062["DB-062 rubric_versions"]
+    DB_063["DB-063 rubric_criteria"]
+    DB_064["DB-064 rating_submissions"]
+    DB_065["DB-065 rating_revisions"]
+    DB_066["DB-066 rating_scores"]
+    DB_067["DB-067 rating_appeals"]
+    DB_068["DB-068 rating_aggregates"]
+    end
+    subgraph BIL["Tarif, hisob va to‘lov"]
+    DB_069["DB-069 products"]
+    DB_070["DB-070 price_versions"]
+    DB_071["DB-071 orders"]
+    DB_072["DB-072 invoices"]
+    DB_073["DB-073 payment_attempts"]
+    DB_074["DB-074 payment_events"]
+    DB_075["DB-075 service_entitlements"]
+    DB_076["DB-076 refunds"]
+    DB_077["DB-077 billing_ledger"]
+    end
+    subgraph OPS["Moderatsiya, yordam va maxfiylik"]
+    DB_078["DB-078 moderation_cases"]
+    DB_079["DB-079 moderation_actions"]
+    DB_080["DB-080 support_tickets"]
+    DB_081["DB-081 support_messages"]
+    DB_082["DB-082 privacy_requests"]
+    DB_083["DB-083 retention_policies"]
+    DB_084["DB-084 legal_holds"]
+    end
+    subgraph SYS["Xabar, audit va boshqaruv"]
+    DB_085["DB-085 notification_preferences"]
+    DB_086["DB-086 outbox_events"]
+    DB_087["DB-087 notifications"]
+    DB_088["DB-088 notification_deliveries"]
+    DB_089["DB-089 audit_events"]
+    DB_090["DB-090 idempotency_keys"]
+    DB_091["DB-091 analytics_events"]
+    DB_092["DB-092 feature_flags"]
+    DB_093["DB-093 incidents"]
+    DB_094["DB-094 restore_runs"]
+    end
+    G --> CAP_001["CAP-001 E’lon qidirish"]
+    CAP_001 --> DB_035
+    CAP_001 --> DB_036
+    CAP_001 --> DB_037
+    CAP_001 --> DB_038
+    CAP_001 --> DB_021
+    CAP_001 --> DB_013
+    G --> CAP_002["CAP-002 Hisob va kirish"]
+    CAP_002 --> DB_001
+    CAP_002 --> DB_002
+    CAP_002 --> DB_003
+    CAP_002 --> DB_004
+    CAP_002 --> DB_005
+    CAP_002 --> DB_006
+    CAP_002 --> DB_011
+    G --> CAP_003["CAP-003 Profil va CV"]
+    CAP_003 --> DB_012
+    CAP_003 --> DB_014
+    CAP_003 --> DB_013
+    CAP_003 --> DB_018
+    G --> CAP_004["CAP-004 Ta’lim tarixi va tasdiq"]
+    CAP_004 --> DB_015
+    CAP_004 --> DB_028
+    CAP_004 --> DB_019
+    CAP_004 --> DB_020
+    CAP_004 --> DB_018
+    G --> CAP_005["CAP-005 Bo‘sh vaqt va istisno"]
+    CAP_005 --> DB_016
+    CAP_005 --> DB_017
+    G --> CAP_006["CAP-006 E’lon saqlash"]
+    CAP_006 --> DB_040
+    CAP_006 --> DB_035
+    G --> CAP_007["CAP-007 Ariza va qayta ariza"]
+    CAP_007 --> DB_041
+    CAP_007 --> DB_042
+    CAP_007 --> DB_043
+    CAP_007 --> DB_036
+    CAP_007 --> DB_090
+    G --> CAP_008["CAP-008 Nomzodni ko‘rish va saralash"]
+    CAP_008 --> DB_039
+    CAP_008 --> DB_041
+    CAP_008 --> DB_042
+    CAP_008 --> DB_043
+    CAP_008 --> DB_018
+    G --> CAP_009["CAP-009 Suhbat belgilash/javob"]
+    CAP_009 --> DB_044
+    CAP_009 --> DB_045
+    CAP_009 --> DB_041
+    G --> CAP_010["CAP-010 Taklif yaratish/bekor qilish"]
+    CAP_010 --> DB_046
+    CAP_010 --> DB_041
+    CAP_010 --> DB_042
+    G --> CAP_011["CAP-011 Taklif qabul qilish"]
+    CAP_011 --> DB_046
+    CAP_011 --> DB_041
+    CAP_011 --> DB_035
+    CAP_011 --> DB_047
+    CAP_011 --> DB_049
+    CAP_011 --> DB_090
+    G --> CAP_012["CAP-012 Ish boshlandi/yakun/nizo"]
+    CAP_012 --> DB_047
+    CAP_012 --> DB_048
+    CAP_012 --> DB_041
+    G --> CAP_013["CAP-013 Tashkilot va birinchi vakil"]
+    CAP_013 --> DB_021
+    CAP_013 --> DB_022
+    CAP_013 --> DB_019
+    CAP_013 --> DB_020
+    CAP_013 --> DB_027
+    G --> CAP_014["CAP-014 Xodim taklif va rol bekori"]
+    CAP_014 --> DB_023
+    CAP_014 --> DB_024
+    CAP_014 --> DB_025
+    CAP_014 --> DB_026
+    CAP_014 --> DB_027
+    G --> CAP_015["CAP-015 Xodim taklifini qabul"]
+    CAP_015 --> DB_025
+    CAP_015 --> DB_026
+    CAP_015 --> DB_023
+    CAP_015 --> DB_033
+    CAP_015 --> DB_032
+    CAP_015 --> DB_030
+    G --> CAP_016["CAP-016 E’lon yaratish/nashr/tahrir"]
+    CAP_016 --> DB_035
+    CAP_016 --> DB_036
+    CAP_016 --> DB_037
+    CAP_016 --> DB_038
+    CAP_016 --> DB_039
+    CAP_016 --> DB_075
+    G --> CAP_017["CAP-017 Amaliyot reja va mentor"]
+    CAP_017 --> DB_049
+    CAP_017 --> DB_050
+    CAP_017 --> DB_053
+    CAP_017 --> DB_051
+    CAP_017 --> DB_054
+    G --> CAP_018["CAP-018 Amaliyot shartlari va assignment qabuli"]
+    CAP_018 --> DB_049
+    CAP_018 --> DB_050
+    CAP_018 --> DB_051
+    CAP_018 --> DB_052
+    CAP_018 --> DB_054
+    G --> CAP_019["CAP-019 Rasmiy muassasa va tayinlov"]
+    CAP_019 --> DB_028
+    CAP_019 --> DB_029
+    CAP_019 --> DB_032
+    CAP_019 --> DB_033
+    CAP_019 --> DB_019
+    G --> CAP_020["CAP-020 Talaba va o‘qituvchi biriktirish"]
+    CAP_020 --> DB_034
+    CAP_020 --> DB_015
+    CAP_020 --> DB_030
+    CAP_020 --> DB_031
+    CAP_020 --> DB_052
+    G --> CAP_021["CAP-021 Akademik jarayonni kuzatish"]
+    CAP_021 --> DB_034
+    CAP_021 --> DB_052
+    CAP_021 --> DB_049
+    CAP_021 --> DB_055
+    CAP_021 --> DB_056
+    G --> CAP_022["CAP-022 Amaliyot kundaligi va dalil"]
+    CAP_022 --> DB_055
+    CAP_022 --> DB_056
+    CAP_022 --> DB_057
+    CAP_022 --> DB_058
+    CAP_022 --> DB_018
+    CAP_022 --> DB_061
+    G --> CAP_023["CAP-023 Ish joyi kundaligini tasdiqlash"]
+    CAP_023 --> DB_059
+    CAP_023 --> DB_051
+    CAP_023 --> DB_055
+    CAP_023 --> DB_056
+    CAP_023 --> DB_057
+    CAP_023 --> DB_058
+    G --> CAP_024["CAP-024 Akademik fikr va yakun"]
+    CAP_024 --> DB_060
+    CAP_024 --> DB_052
+    CAP_024 --> DB_056
+    CAP_024 --> DB_054
+    G --> CAP_025["CAP-025 Amaliyot yakuni/chiqish"]
+    CAP_025 --> DB_054
+    CAP_025 --> DB_049
+    CAP_025 --> DB_050
+    CAP_025 --> DB_053
+    CAP_025 --> DB_055
+    G --> CAP_026["CAP-026 Amaliyot hisobotini olish"]
+    CAP_026 --> DB_049
+    CAP_026 --> DB_055
+    CAP_026 --> DB_056
+    CAP_026 --> DB_059
+    CAP_026 --> DB_060
+    CAP_026 --> DB_018
+    CAP_026 --> DB_089
+    G --> CAP_027["CAP-027 Munosabatdan keyin baho"]
+    CAP_027 --> DB_062
+    CAP_027 --> DB_063
+    CAP_027 --> DB_064
+    CAP_027 --> DB_065
+    CAP_027 --> DB_066
+    G --> CAP_028["CAP-028 Bahoga e’tiroz va agregat"]
+    CAP_028 --> DB_067
+    CAP_028 --> DB_064
+    CAP_028 --> DB_065
+    CAP_028 --> DB_068
+    CAP_028 --> DB_078
+    G --> CAP_029["CAP-029 Tarif, order va hisob"]
+    CAP_029 --> DB_069
+    CAP_029 --> DB_070
+    CAP_029 --> DB_071
+    CAP_029 --> DB_072
+    CAP_029 --> DB_073
+    CAP_029 --> DB_075
+    CAP_029 --> DB_077
+    G --> CAP_030["CAP-030 Pul qaytarish va reconciliation"]
+    CAP_030 --> DB_076
+    CAP_030 --> DB_073
+    CAP_030 --> DB_074
+    CAP_030 --> DB_077
+    CAP_030 --> DB_071
+    G --> CAP_031["CAP-031 Xabar va kanal sozlash"]
+    CAP_031 --> DB_085
+    CAP_031 --> DB_087
+    CAP_031 --> DB_088
+    CAP_031 --> DB_086
+    CAP_031 --> DB_011
+    G --> CAP_032["CAP-032 Shikoyat va apellyatsiya"]
+    CAP_032 --> DB_078
+    CAP_032 --> DB_079
+    CAP_032 --> DB_018
+    G --> CAP_033["CAP-033 Tekshirish/moderatsiya"]
+    CAP_033 --> DB_019
+    CAP_033 --> DB_020
+    CAP_033 --> DB_078
+    CAP_033 --> DB_079
+    CAP_033 --> DB_021
+    CAP_033 --> DB_035
+    G --> CAP_034["CAP-034 Yordam murojaati"]
+    CAP_034 --> DB_080
+    CAP_034 --> DB_081
+    CAP_034 --> DB_018
+    G --> CAP_035["CAP-035 Rozilik, eksport, tuzatish/o‘chirish"]
+    CAP_035 --> DB_082
+    CAP_035 --> DB_083
+    CAP_035 --> DB_084
+    CAP_035 --> DB_011
+    CAP_035 --> DB_018
+    G --> CAP_036["CAP-036 Audit va vaqtli admin kirish"]
+    CAP_036 --> DB_089
+    CAP_036 --> DB_010
+    CAP_036 --> DB_009
+    CAP_036 --> DB_008
+    CAP_036 --> DB_007
+    CAP_036 --> DB_004
+    CAP_036 --> DB_093
+    G --> CAP_037["CAP-037 Flag, incident, backup va o‘lchov"]
+    CAP_037 --> DB_092
+    CAP_037 --> DB_093
+    CAP_037 --> DB_094
+    CAP_037 --> DB_091
+    CAP_037 --> DB_086
+    G --> CAP_038["CAP-038 Moliyaviy hisobot"]
+    CAP_038 --> DB_077
+    CAP_038 --> DB_071
+    CAP_038 --> DB_072
+    CAP_038 --> DB_075
+    G --> CAP_039["CAP-039 Ochiq xizmat va siyosat ma’lumoti"]
+    CAP_039 --> DB_069
+    CAP_039 --> DB_070
+    CAP_039 --> DB_011
+    CAP_039 --> DB_092
+    G --> CAP_040["CAP-040 Korxonaning ochiq reytingi"]
+    CAP_040 --> DB_068
+    CAP_040 --> DB_062
+    CAP_040 --> DB_021
+    CAP_040 --> DB_092

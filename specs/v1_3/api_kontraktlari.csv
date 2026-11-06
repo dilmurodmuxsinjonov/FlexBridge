@@ -1,0 +1,125 @@
+﻿API,Method,Path,CAP,Amal rollari,Scope,Kontrakt izohi
+API-001,GET,/api/v1/opportunities,CAP-001,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,"Faqat PUBLISHED, public fields","Public xizmat kartalari va qidiruv boshlash; Expired chiqarilgan e’lonlar; UZ/RU, hudud, kind, salary, skill, schedule; stable cursor"
+API-002,GET,/api/v1/onboarding/options,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"Nomzod, ish beruvchi, host va rasmiy xodim yo‘llari"
+API-003,POST,/api/v1/matching/preview,CAP-005,CANDIDATE; STUDENT,O‘z vaqti,"MATCH/CONFLICT/UNKNOWN, formula versiyasi va sabab; 28kun, commute, ALL/ANY, izoh"
+API-004,POST,/api/v1/saved-opportunities,CAP-006,CANDIDATE; STUDENT,O‘z saved qatori,"Toggle idempotent, faqat o‘z nomzodi"
+API-005,GET,/api/v1/opportunities/{id},CAP-001,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,"Faqat PUBLISHED, public fields","Public immutable published revision, maosh, eligibility va vacancy"
+API-006,POST,/api/v1/opportunities/{id}/applications,CAP-007,CANDIDATE; STUDENT,O‘z arizasi,Eligibility/schedule snapshot va Idempotency-Key
+API-007,POST,/api/v1/moderation-cases,CAP-032,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; TEACHER; COORDINATOR,Ko‘rilgan public yoki o‘z munosabat targeti,Target FK va asos
+API-008,GET,/api/v1/organizations/{id}/public,CAP-001,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,"Faqat PUBLISHED, public fields",Dalil hujjatini ochmasdan capability holati
+API-009,GET,/api/v1/organizations/{id}/opportunities,CAP-001,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,"Faqat PUBLISHED, public fields",Faqat publish e’lon
+API-010,GET,/api/v1/organizations/{id}/rating-summary,CAP-040,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR,Faqat ruxsatli public agregat,Flag OFFda ko‘rsatilmaydi; n<5 score yo‘q
+API-011,GET,/api/v1/services/public,CAP-039,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Faqat public katalog va versiyali siyosat matni,"Kimga, qanday shart, real xizmat chegarasi"
+API-012,GET,/api/v1/prices/public,CAP-039,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Faqat public katalog va versiyali siyosat matni,"Taklif narxi, 30kun, aktivatsiya va refund qoidasi"
+API-013,GET,/api/v1/help/{document},CAP-039,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Faqat public katalog va versiyali siyosat matni,Faqat ma’lumot mazmuni; CMS matni alohida versiyalanadi
+API-014,GET,/api/v1/policies/{document},CAP-039,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Faqat public katalog va versiyali siyosat matni,"Ochiq hujjat versiyasi, amal sanasi va aloqa"
+API-015,POST,/api/v1/auth/register,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"Bitta user, deklaratsiya va shart versiyasi"
+API-016,POST,/api/v1/auth/challenges,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,Email yoki PHONE WhatsApp/SMS; enumeration himoyasi
+API-017,GET,/api/v1/institution-onboarding/options,CAP-019,COORDINATOR,O‘z rasmiy topshirig‘i,Tayinlov hujjati va keyingi tekshiruv izohi
+API-018,POST,/api/v1/auth/login,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"Rate limit, generic failure va sessiya"
+API-019,POST,/api/v1/auth/mfa/verify,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,Sezgir rol TOTP/passkey; telefon kodi ikki omil emas
+API-020,POST,/api/v1/auth/challenges/{id}/consume,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"5min/5urinish, purpose va atomic consume"
+API-021,POST,/api/v1/auth/challenges/{id}/resend,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,60s; old kod invalid; provider failure holati
+API-022,POST,/api/v1/auth/recovery,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"Generic response, egasi tekshiriladi"
+API-023,GET,/api/v1/auth/recovery/{id},CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,"Yangi raqam eski shaxsiy data ochmaydi, cheklangan recovery"
+API-024,GET,/api/v1/invitations/{token},CAP-015,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Kontaktga mos o‘z taklifi,"Token serverda digest, org/institution va TTL"
+API-025,POST,/api/v1/invitations/{token}/accept,CAP-015,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,Kontaktga mos o‘z taklifi,"Kontakt mosligi, login va idempotent membership"
+API-026,PATCH,/api/v1/me/candidate,CAP-003,CANDIDATE; STUDENT,O‘z candidate_profile,"Minimal ma’lumot, talaba emasman yo‘li"
+API-027,POST,/api/v1/me/enrollments,CAP-004,CANDIDATE; STUDENT,O‘z enrollmenti,Umumiy ishga to‘sqinlik qilmaydi
+API-028,PUT,/api/v1/me/availability,CAP-005,CANDIDATE; STUDENT,O‘z vaqti,Haftalik intervallar va vaqt zonasi
+API-029,GET,/api/v1/me/applications/summary,CAP-007,CANDIDATE; STUDENT,O‘z arizasi,Ariza/suhbat/offer ko‘rsatkichlari
+API-030,GET,/api/v1/me/placements,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,Faqat o‘z munosabatlari; PLANNED/ACTIVE va yakun holati
+API-031,GET,/api/v1/me/notifications,CAP-031,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z inboxi/sozlamasi,"O‘z unread xabarlar; O‘z xabar, havolada joriy scope"
+API-032,PATCH,/api/v1/me/candidate/skills,CAP-003,CANDIDATE; STUDENT,O‘z candidate_profile,Self-declared va verified ajratiladi
+API-033,POST,/api/v1/me/candidate/cv,CAP-003,CANDIDATE; STUDENT,O‘z candidate_profile,Karantin va scan; private file
+API-034,GET,/api/v1/me/enrollments,CAP-004,CANDIDATE; STUDENT,O‘z enrollmenti,"Enrollment status, end va tekshiruv navbati"
+API-035,GET,/api/v1/me/availability,CAP-005,CANDIDATE; STUDENT,O‘z vaqti,Union qilingan interval muharriri
+API-036,PUT,/api/v1/me/availability/exceptions,CAP-005,CANDIDATE; STUDENT,O‘z vaqti,Sana bo‘yicha AVAILABLE/UNAVAILABLE
+API-037,GET,/api/v1/me/saved-opportunities,CAP-006,CANDIDATE; STUDENT,O‘z saved qatori,Yopilgan e’lon statusi saqlanadi
+API-038,DELETE,/api/v1/me/saved-opportunities/{id},CAP-006,CANDIDATE; STUDENT,O‘z saved qatori,Faqat o‘z qatori; repeat204
+API-039,GET,/api/v1/me/applications,CAP-007,CANDIDATE; STUDENT,O‘z arizasi,"Stable cursor, o‘z arizalari"
+API-040,POST,/api/v1/me/applications/{id}/reapply,CAP-007,CANDIDATE; STUDENT,O‘z arizasi,24h va limit; HR reopen zarur bo‘lsa izoh
+API-041,GET,/api/v1/me/applications/{id},CAP-007,CANDIDATE; STUDENT,O‘z arizasi,Original attempt snapshot va status timeline
+API-042,POST,/api/v1/interviews/{id}/responses,CAP-009,CANDIDATE; STUDENT; OWNER; HR,Ariza tomoni yoki ajratilgan HR,Candidate javobi
+API-043,POST,/api/v1/offers/{id}/respond,CAP-011,CANDIDATE; STUDENT,O‘z offeri,"Expiry/capacity, taklif joyni kafolatlamasligi"
+API-044,POST,/api/v1/me/applications/{id}/withdraw,CAP-007,CANDIDATE; STUDENT,O‘z arizasi,Transition sabab va audit
+API-045,GET,/api/v1/me/engagements/{id},CAP-012,CANDIDATE; STUDENT; OWNER; HR,O‘z ish munosabati yoki HR scope,"Oddiy ish, kundalik majburiy emas"
+API-046,POST,/api/v1/engagements/{id}/confirmations,CAP-012,CANDIDATE; STUDENT; OWNER; HR,O‘z ish munosabati yoki HR scope,Tomon bo‘yicha ikki tasdiq; Faqat PART_TIME munosabati
+API-047,POST,/api/v1/engagements/{id}/ratings,CAP-027,CANDIDATE; STUDENT; HR; HOST_COORDINATOR; MENTOR; TEACHER,Completed relation ishtirokchisi,Flag va completed eligibility
+API-048,POST,/api/v1/placements/{id}/accept,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,O‘z candidate side qabuli
+API-049,POST,/api/v1/placements/{id}/completion-requests,CAP-025,CANDIDATE; STUDENT; HOST_COORDINATOR; MENTOR; TEACHER; COORDINATOR,O‘z munosabatidagi tomon,Ochiq qaytgan log va reja sababi
+API-050,GET,/api/v1/placements/{id}/plan,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,Versiya va taraflar qabuli
+API-051,POST,/api/v1/placements/{id}/assignments/{assignment}/accept,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,Faqat tayinlangan shaxs
+API-052,POST,/api/v1/placements/{id}/exports,CAP-026,CANDIDATE; STUDENT; MENTOR; TEACHER; COORDINATOR,O‘ziga ruxsatli placement va minimal data,"Re-auth, audit, axborot PDF"
+API-053,GET,/api/v1/placements/{id}/logs,CAP-022,CANDIDATE; STUDENT,O‘z ACTIVE placementi,"Local_date, workplace va academic alohida"
+API-054,PUT,/api/v1/placements/{id}/logs/{date},CAP-022,CANDIDATE; STUDENT,O‘z ACTIVE placementi,"Version/If-Match, task minute SUM"
+API-055,POST,/api/v1/log-entries/{id}/evidence,CAP-022,CANDIDATE; STUDENT,O‘z ACTIVE placementi,Private file va scan
+API-056,POST,/api/v1/logs/{id}/submit,CAP-022,CANDIDATE; STUDENT,O‘z ACTIVE placementi,Future/past/overlap/limit va idempotency
+API-057,GET,/api/v1/me/ratings,CAP-027,CANDIDATE; STUDENT; HR; HOST_COORDINATOR; MENTOR; TEACHER,Completed relation ishtirokchisi,"Rubric versiya, n, score yo‘qligi tushuntiriladi"
+API-058,POST,/api/v1/ratings/{id}/appeals,CAP-028,CANDIDATE; STUDENT; OWNER; HR; MENTOR; TEACHER; MODERATOR,Baho tomoni; independent reviewer,"14kun, mustaqil queue, aggregate recompute"
+API-059,PUT,/api/v1/me/notification-preferences,CAP-031,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z inboxi/sozlamasi,Transactional/marketing alohida
+API-060,PATCH,/api/v1/me/security,CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,Step-up va kontaktni qayta tekshirish
+API-061,DELETE,/api/v1/me/sessions/{id},CAP-002,GUEST; CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z kontakt/sessiyasi,Joriy yoki boshqa sessiyani revoke
+API-062,POST,/api/v1/me/privacy-requests,CAP-035,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z data subject so‘rovi yoki maxsus vakolatli SUPPORT operator,"Export/delete/rectify, legal hold sababi"
+API-063,GET,/api/v1/me/support-tickets,CAP-034,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z ticketi yoki ajratilgan SUPPORT operator,"O‘z ticketlari, SLA va status"
+API-064,POST,/api/v1/support-tickets/{id}/messages,CAP-034,CANDIDATE; STUDENT; OWNER; HR; HOST_COORDINATOR; MENTOR; BILLING; COORDINATOR; TEACHER; MODERATOR; SUPPORT; FINANCE; ADMIN,O‘z ticketi yoki ajratilgan SUPPORT operator,"Private ilova, xodim OTP so‘ramaydi"
+API-065,POST,/api/v1/organizations,CAP-013,OWNER; HOST_COORDINATOR,O‘z organization so‘rovi,"STIR dedup, mavjud orgga mansublik request"
+API-066,POST,/api/v1/organizations/{id}/verification,CAP-013,OWNER; HOST_COORDINATOR,O‘z organization so‘rovi,JOB_EMPLOYER/INTERNSHIP_HOST alohida
+API-067,GET,/api/v1/organizations/{id}/verification,CAP-013,OWNER; HOST_COORDINATOR,O‘z organization so‘rovi,"2ishkun nishon, sabab va evidence revision"
+API-068,GET,/api/v1/organizations/{org}/dashboard,CAP-008,OWNER; HR; HOST_COORDINATOR,Aynan e’longa berilgan HR/host scope,Faqat foydalanuvchi scope agregati
+API-069,GET,/api/v1/organizations/{org}/placements,CAP-017,OWNER; HOST_COORDINATOR,O‘z host placementi,Host capability va scope; Host capability va haqiqiy qabul
+API-070,GET,/api/v1/organizations/{org}/entitlements,CAP-029,OWNER; BILLING,O‘z organizationi,Billing/ownerga muddat va kvota
+API-071,PATCH,/api/v1/organizations/{org},CAP-013,OWNER; HOST_COORDINATOR,O‘z organization so‘rovi,Material tekshiruv ma’lumotiga yangi case
+API-072,GET,/api/v1/organizations/{org}/capabilities,CAP-013,OWNER; HOST_COORDINATOR,O‘z organization so‘rovi,Public belgilar va private dalil ajratilgan
+API-073,GET,/api/v1/organizations/{org}/memberships,CAP-014,OWNER,Aynan o‘z orgi,Org/role/assignment kesishmasi
+API-074,POST,/api/v1/organizations/{org}/invitations,CAP-014,OWNER,Aynan o‘z orgi,"24h, target kontakt va explicit rol"
+API-075,POST,/api/v1/organizations/{org}/memberships/{id}/revoke,CAP-014,OWNER,Aynan o‘z orgi,Last-owner himoyasi va darhol revoke
+API-076,GET,/api/v1/organizations/{org}/opportunities,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,Scope bo‘yicha ro‘yxat
+API-077,POST,/api/v1/opportunities/{id}/transition,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,"Moderation, entitlement va transition lock"
+API-078,PUT,/api/v1/opportunities/{id}/draft,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,PART_TIME va INTERNSHIP formasi ajratiladi
+API-079,PUT,/api/v1/opportunities/{id}/draft/terms,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,"Salary, unpaid, end, talaba talabi validatsiya"
+API-080,PUT,/api/v1/opportunities/{id}/draft/schedule,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,"ALL/ANY, STRICT/NEGOTIABLE, capacity>=occupied"
+API-081,POST,/api/v1/opportunities/{id}/publish,CAP-016,OWNER; HR; HOST_COORDINATOR,Ajratilgan org capabilitysi,"Yangi revision, moderation va entitlement boshlanishi"
+API-082,GET,/api/v1/opportunities/{id}/applications,CAP-008,OWNER; HR; HOST_COORDINATOR,Aynan e’longa berilgan HR/host scope,Boshqa e’lon nomzodlari ochilmaydi
+API-083,POST,/api/v1/applications/{id}/transition,CAP-008,OWNER; HR; HOST_COORDINATOR,Aynan e’longa berilgan HR/host scope,Audit va allowed transition
+API-084,GET,/api/v1/applications/{id}/hr,CAP-008,OWNER; HR; HOST_COORDINATOR,Aynan e’longa berilgan HR/host scope,Aynan attemptdagi minimal snapshot
+API-085,POST,/api/v1/applications/{id}/interviews,CAP-009,CANDIDATE; STUDENT; OWNER; HR,Ariza tomoni yoki ajratilgan HR,Timezone va javob
+API-086,POST,/api/v1/applications/{id}/offers,CAP-010,OWNER; HR; HOST_COORDINATOR,Ajratilgan e’lon,"Narx/shart snapshot, expiry, capacity izohi"
+API-087,POST,/api/v1/placements/{id}/mentor-assignments,CAP-017,OWNER; HOST_COORDINATOR,O‘z host placementi,Ayni orgning faol MENTORi va qabul
+API-088,POST,/api/v1/placements/{id}/host-decisions,CAP-025,CANDIDATE; STUDENT; HOST_COORDINATOR; MENTOR; TEACHER; COORDINATOR,O‘z munosabatidagi tomon,Soat/vazifa va review shartlari
+API-089,GET,/api/v1/me/mentor-assignments,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,Qabuldan oldin yopiq kundalik yo‘q
+API-090,GET,/api/v1/me/mentor-review-queue,CAP-023,MENTOR,Qabul qilingan faol mentor assignmenti,Faqat own accepted assignment; due eskalatsiya
+API-091,GET,/api/v1/log-revisions/{revision}/workplace,CAP-023,MENTOR,Qabul qilingan faol mentor assignmenti,"Vazifa, vaqt, reja va ruxsatli dalil"
+API-092,POST,/api/v1/log-revisions/{revision}/workplace-reviews,CAP-023,MENTOR,Qabul qilingan faol mentor assignmenti,O‘z logi rad; qaror revisionga bog‘liq
+API-093,GET,/api/v1/organizations/{org}/billing,CAP-029,OWNER; BILLING,O‘z organizationi,"Plan/post, snapshot va ishlatilgan huquq"
+API-094,POST,/api/v1/organizations/{org}/orders,CAP-029,OWNER; BILLING,O‘z organizationi,Verified callback; pending/double/failure holat
+API-095,POST,/api/v1/orders/{id}/refund-requests,CAP-030,OWNER; BILLING; FINANCE,O‘z buyurtmasi yoki navbatdagi moliya case,Qoidaga mos request; finance mustaqil approval
+API-096,POST,/api/v1/institution-appointments,CAP-019,COORDINATOR,O‘z rasmiy topshirig‘i,"Rasmiy hujjat, identity va agreement"
+API-097,GET,/api/v1/institution-appointments/{id},CAP-019,COORDINATOR,O‘z rasmiy topshirig‘i,3ishkun nishon; domen yetarli emas
+API-098,GET,/api/v1/institutions/{inst}/supervisions,CAP-021,COORDINATOR; TEACHER,Koordinator purpose yoki qabul qilingan teacher assignment,Aniq enrollment va purpose scope
+API-099,GET,/api/v1/institutions/{inst}/assignment-queue,CAP-020,COORDINATOR,O‘z muassasasidagi aniq enrollmentlar,Faqat o‘z muassasasi
+API-100,POST,/api/v1/institutions/{inst}/exports,CAP-026,CANDIDATE; STUDENT; MENTOR; TEACHER; COORDINATOR,O‘ziga ruxsatli placement va minimal data,"Faqat ruxsatli placements, re-auth, audit"
+API-101,POST,/api/v1/student-supervisions,CAP-020,COORDINATOR,O‘z muassasasidagi aniq enrollmentlar,Uchala institution bir xil va legal basis
+API-102,POST,/api/v1/placements/{id}/academic-assignments,CAP-020,COORDINATOR,O‘z muassasasidagi aniq enrollmentlar,"Faol appointment, teacher accept"
+API-103,POST,/api/v1/academic-assignments/{id}/revoke,CAP-020,COORDINATOR,O‘z muassasasidagi aniq enrollmentlar,"Eski kirish yopiladi, tarix qoladi"
+API-104,GET,/api/v1/me/academic-assignments,CAP-018,CANDIDATE; STUDENT; MENTOR; TEACHER,Aniq placement/assignment,"Faqat o‘z taklifi, accept kerak"
+API-105,GET,/api/v1/me/academic-review-queue,CAP-021,COORDINATOR; TEACHER,Koordinator purpose yoki qabul qilingan teacher assignment,Accepted assignment doirasi
+API-106,GET,/api/v1/log-revisions/{revision}/academic,CAP-021,COORDINATOR; TEACHER,Koordinator purpose yoki qabul qilingan teacher assignment,Minimum academic purpose
+API-107,POST,/api/v1/log-revisions/{revision}/academic-reviews,CAP-024,TEACHER,Qabul qilingan academic assignment,"REVIEWED/NEEDS_REVISION, mentor o‘rniga emas"
+API-108,POST,/api/v1/placements/{id}/academic-decisions,CAP-024,TEACHER,Qabul qilingan academic assignment,Rasmiy grade/imzo flag va agreementga
+API-109,GET,/api/v1/operator/verification-cases,CAP-033,MODERATOR,"Biriktirilgan navbat, minimum evidence","Assigned queue, due va revision"
+API-110,POST,/api/v1/operator/verification-cases/{id}/decide,CAP-033,MODERATOR,"Biriktirilgan navbat, minimum evidence","Own-case taqiq, sabab majburiy"
+API-111,POST,/api/v1/operator/moderation-cases/{id}/actions,CAP-033,MODERATOR,"Biriktirilgan navbat, minimum evidence","Independent appeal, vaqtli hide va audit"
+API-112,GET,/api/v1/operator/support-tickets,CAP-034,SUPPORT,O‘z ticketi yoki ajratilgan SUPPORT operator,Ajratilgan minimal ticket scope
+API-113,POST,/api/v1/operator/support-tickets/{id}/messages,CAP-034,SUPPORT,O‘z ticketi yoki ajratilgan SUPPORT operator,Internal/public farqi
+API-114,POST,/api/v1/operator/privacy-requests/{id}/resolve,CAP-035,SUPPORT,O‘z data subject so‘rovi yoki maxsus vakolatli SUPPORT operator,"Shaxs tasdig‘i, hold va ruxsatli data"
+API-115,GET,/api/v1/operator/reconciliation,CAP-030,FINANCE,O‘z buyurtmasi yoki navbatdagi moliya case,"Ledger va provider farqi, PII emas"
+API-116,POST,/api/v1/operator/refunds/{id}/approve,CAP-030,FINANCE,O‘z buyurtmasi yoki navbatdagi moliya case,"Independent actor, capture sum lock"
+API-117,GET,/api/v1/operator/finance-summary,CAP-038,FINANCE,O‘z orgi yoki platforma moliya agregati,Cash/recognized revenue/deferred farqi
+API-118,GET,/api/v1/operator/audit-events,CAP-036,ADMIN,Vaqtli approved platform scope,"Append-only, object tarixiy identifikator"
+API-119,POST,/api/v1/operator/access-requests,CAP-036,ADMIN,Vaqtli approved platform scope,Reason+expiry+independent approval
+API-120,POST,/api/v1/operator/users/{id}/revoke-sessions,CAP-036,ADMIN,Vaqtli approved platform scope,"Faqat dalilli incident recovery, audit"
+API-121,PATCH,/api/v1/operator/feature-flags/{code},CAP-037,ADMIN,Vaqtli texnik operator scope,"Change reason, default OFF capabilityni bermaydi"
+API-122,POST,/api/v1/operator/incidents,CAP-037,ADMIN,Vaqtli texnik operator scope,P1 commander va tiklash reja
+API-123,GET,/api/v1/operator/restore-runs,CAP-037,ADMIN,Vaqtli texnik operator scope,RPO/RTO o‘lchov; pullik checkout gate
+API-124,GET,/api/v1/operator/analytics,CAP-037,ADMIN,Vaqtli texnik operator scope,"Dedup, cohort, ikkala tomon START tasdig‘i"

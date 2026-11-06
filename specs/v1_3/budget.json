@@ -1,0 +1,40 @@
+{
+  "version": "1.3",
+  "currency": "UZS",
+  "status": "Illustrative incremental sensitivity; not provider quotes or validated demand",
+  "original_fixed": [
+    3000000,
+    3500000,
+    6300000,
+    6500000,
+    6700000,
+    7900000
+  ],
+  "incremental_reserve": [
+    400000,
+    500000,
+    600000,
+    800000,
+    1100000,
+    1300000
+  ],
+  "revised_fixed": [
+    3400000,
+    4000000,
+    6900000,
+    7300000,
+    7800000,
+    9200000
+  ],
+  "one_off_total": 6000000,
+  "buffer_rate": 0.2,
+  "emergency_month": 9200000,
+  "zero_revenue_cash_reserve": 62720000,
+  "candidate_price": 0,
+  "proposed_org_plan_30d": 599000,
+  "proposed_post_30d": 149000,
+  "proposed_plan_concurrent_posts": 5,
+  "variable_reserve_note": "Payment2%+refund1%+cash uncertainty5% from old model is a sensitivity assumption, NOT tax rate. Confirm actual quote and avoid double-counting old SMS/hosting.",
+  "founder_cash": 0,
+  "founder_imputed_monthly": 8000000
+}
