@@ -196,3 +196,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha testlar birinchi urinishda 100% o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.2.1` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.2.2` — Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-008 — 2026-11-07T00:18:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-008` / `2026-11-07T00:18:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.2.2` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.2.1` yakunlanib PR `#12` (`a3305be`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#13` va `feature/s2-2-2-dual-control-and-scope` tarmog'ida tashkilot a'zoligi uchun Ikki shaxs qoidasi (`INV-11`: `created_by != approved_by`), tashkilotlararo va oliygohlararo scope chegarasi (`INV-12`, `AC-041`), `API-060` va `API-061` rol/muassasa tekshiruvlari hamda moderatsiya asoslari (`policy_code`, `reason_code`, `justification >= 15`) xizmatini (`app/services/governance.py`, `app/api/v1/governance.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/governance.py` yaratildi (`GovernanceScopeService`: `create_org_member_request`, `approve_org_member`, `create_academic_assignment_api_060`, `update_academic_assignment_api_061`, `record_moderation_action`).
+  - `backend/app/api/v1/governance.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_2_2_dual_control_scope.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.2` to'liq `Tekshiruvda` holatiga o'tkazildi, `S2.3.1` va `S2.4.1` rejalashtirildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`20 passed in 1.28s`** (`S2.1` 14 ta test + `S2.2.1` 3 ta test + `S2.2.2` 3 ta test: `test_inv_11_dual_control_blocks_self_approval_and_cross_org_scope`, `test_api_060_and_api_061_role_and_institution_scope_ac_041`, `test_moderation_action_requires_policy_reason_and_justification_ac_041`).
+- Muammo va cheklov: Yo'q; barcha 20 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.2.2` (va butun `S2.2`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.3.1` — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
