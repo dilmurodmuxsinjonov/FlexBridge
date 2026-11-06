@@ -25,6 +25,7 @@ class PaymentAttemptRequest(BaseModel):
     amount_uzs: int
     actor_user_id: str
     currency_code: str = "UZS"
+    provider_confirmed: bool = False
 
 
 class OpportunityQuotaPublishRequest(BaseModel):
@@ -80,6 +81,7 @@ def process_payment_attempt_endpoint(req: PaymentAttemptRequest):
             amount_uzs=req.amount_uzs,
             actor_user_id=req.actor_user_id,
             currency_code=req.currency_code,
+            provider_confirmed=req.provider_confirmed,
         )
         return {
             "attempt_id": attempt.id,

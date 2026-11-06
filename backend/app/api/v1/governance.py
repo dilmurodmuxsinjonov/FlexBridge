@@ -1,12 +1,16 @@
-"""FastAPI router for Organization Dual-Control (`INV-11`), `API-060`, `API-061`, and Moderation (`S2.2.2`, `AC-041`)."""
+"""FastAPI router for Organization Dual-Control (`INV-11`), Canonical `API-073`, Academic Assignments, and Moderation (`AC-041`).
+
+Enforces server-side `ActorContext` (`Authorization: Bearer <token>`) on academic assignment endpoints (`R-01`).
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.api.dependencies import ActorContext, require_actor_context
 from app.services.governance import GovernanceError, governance_service
 
 router = APIRouter(prefix="/api/v1", tags=["governance"])
@@ -24,8 +28,8 @@ class ApproveOrgMemberRequest(BaseModel):
 
 
 class CreateAcademicAssignmentRequest(BaseModel):
-    actor_id: str
-    actor_role: str
+    actor_id: str | None = None
+    actor_role: str | None = None
     actor_institution_id: str | None = None
     institution_id: str
     placement_id: str
@@ -34,8 +38,8 @@ class CreateAcademicAssignmentRequest(BaseModel):
 
 
 class UpdateAcademicAssignmentRequest(BaseModel):
-    actor_id: str
-    actor_role: str
+    actor_id: str | None = None
+    actor_role: str | None = None
     actor_institution_id: str | None = None
     status: str | None = None
     evaluation_note: str | None = None
@@ -49,6 +53,13 @@ class ModerationActionRequest(BaseModel):
     policy_code: str
     reason_code: str
     justification: str
+
+
+@router.get("/organizations/{org}/memberships")
+def api_073_list_org_memberships(org: str) -> dict[str, Any]:
+    """Canonical API-073 (`GET /api/v1/organizations/{org}/memberships`): List organization memberships."""
+    items = [m for m in governance_service.org_members.values() if m["organization_id"] == org]
+    return {"contract_id": "API-073", "organization_id": org, "items": items}
 
 
 @router.post("/organizations/{org_id}/members", status_code=201)
@@ -79,12 +90,16 @@ def approve_org_member_endpoint(
 
 
 @router.post("/internships/academic-assignments", status_code=201)
-def api_060_create_academic_assignment(payload: CreateAcademicAssignmentRequest) -> dict[str, Any]:
-    """API-060: Create academic assignment (`INST_INTERNSHIP_COORDINATOR` or `SUPER_ADMIN` only)."""
+def create_academic_assignment_endpoint(
+    payload: CreateAcademicAssignmentRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Create academic assignment requiring server-authenticated `ActorContext` (`R-01`, `AC-041`)."""
+    effective_role = actor.roles[0] if actor.roles else "CANDIDATE"
     try:
         return governance_service.create_academic_assignment_api_060(
-            actor_id=payload.actor_id,
-            actor_role=payload.actor_role,
+            actor_id=actor.user_id,
+            actor_role=effective_role,
             actor_institution_id=payload.actor_institution_id,
             institution_id=payload.institution_id,
             placement_id=payload.placement_id,
@@ -96,16 +111,18 @@ def api_060_create_academic_assignment(payload: CreateAcademicAssignmentRequest)
 
 
 @router.patch("/internships/academic-assignments/{assignment_id}")
-def api_061_update_academic_assignment(
+def update_academic_assignment_endpoint(
     assignment_id: str,
     payload: UpdateAcademicAssignmentRequest,
+    actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
-    """API-061: Update academic assignment (`INST_INTERNSHIP_COORDINATOR`, `ACADEMIC_SUPERVISOR`, `SUPER_ADMIN`)."""
+    """Update academic assignment requiring server-authenticated `ActorContext` (`R-01`, `AC-041`)."""
+    effective_role = actor.roles[0] if actor.roles else "CANDIDATE"
     try:
         return governance_service.update_academic_assignment_api_061(
             assignment_id=assignment_id,
-            actor_id=payload.actor_id,
-            actor_role=payload.actor_role,
+            actor_id=actor.user_id,
+            actor_role=effective_role,
             actor_institution_id=payload.actor_institution_id,
             status=payload.status,
             evaluation_note=payload.evaluation_note,

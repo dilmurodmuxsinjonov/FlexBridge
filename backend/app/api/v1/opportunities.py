@@ -16,7 +16,7 @@ class CreateOpportunityRevisionRequest(BaseModel):
     organization_id: str
     title: str
     opportunity_kind: str = "PART_TIME_JOB"
-    contract_type: str = "LABOR_PART_TIME"
+    contract_type: str
     compensation_type: str = "HOURLY"
     hourly_pay: int | None = None
     stipend_amount: int | None = None

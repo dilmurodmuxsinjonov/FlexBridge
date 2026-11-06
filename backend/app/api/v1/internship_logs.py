@@ -1,10 +1,11 @@
-"""FastAPI router for Internship Daily Logs and Separated Mentor vs Academic Reviews (`S2.6.1`, `INV-09`, `AC-040`)."""
+"""FastAPI router for Internship Daily Logs and Separated Mentor vs Academic Reviews (`S2.6.1`, `FIX-11`, `INV-09`, `AC-040`)."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
@@ -30,6 +31,7 @@ class CreateDailyLogRequest(BaseModel):
     log_date: str
     summary_text: str
     total_minutes: int = 240
+    day_type: str = "WORKED"
 
 
 class WorkplaceLogReviewRequest(BaseModel):
@@ -68,14 +70,25 @@ def create_academic_assignment_log_scope_endpoint(
 
 
 @router.post("/daily-logs", status_code=201)
-def create_daily_log_endpoint(payload: CreateDailyLogRequest) -> dict[str, Any]:
-    return internship_log_service.create_daily_log_with_revision(
-        placement_id=payload.placement_id,
-        author_id=payload.author_id,
-        log_date=payload.log_date,
-        summary_text=payload.summary_text,
-        total_minutes=payload.total_minutes,
-    )
+def create_daily_log_endpoint(payload: CreateDailyLogRequest) -> Any:
+    try:
+        return internship_log_service.create_daily_log_with_revision(
+            placement_id=payload.placement_id,
+            author_id=payload.author_id,
+            log_date=payload.log_date,
+            summary_text=payload.summary_text,
+            total_minutes=payload.total_minutes,
+            day_type=payload.day_type,
+        )
+    except InternshipLogScopeError as exc:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "detail": {"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+                "status": "REJECTED",
+                "current_revision_id": exc.rejected_revision_id,
+            },
+        )
 
 
 @router.post("/daily-logs/{daily_log_id}/workplace-reviews", status_code=201)
