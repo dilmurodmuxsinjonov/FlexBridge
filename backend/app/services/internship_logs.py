@@ -92,6 +92,7 @@ class InternshipLogService:
         summary_text: str,
         total_minutes: int,
         day_type: str = "WORKED",
+        allow_zero_draft: bool = False,
     ) -> None:
         if day_type not in ("WORKED", "ABSENT"):
             rev_id = str(uuid4())
@@ -110,7 +111,8 @@ class InternshipLogService:
                 rejected_revision_id=rev_id,
             )
 
-        if (day_type == "WORKED" and not (1 <= total_minutes <= 480)) or (
+        min_worked = 0 if allow_zero_draft else 1
+        if (day_type == "WORKED" and not (min_worked <= total_minutes <= 480)) or (
             day_type == "ABSENT" and total_minutes != 0
         ):
             rev_id = str(uuid4())
@@ -123,7 +125,7 @@ class InternshipLogService:
             }
             raise InternshipLogScopeError(
                 code="INVALID_DAILY_LOG_MINUTES",
-                message="WORKED kunlik log uchun 0 < total_minutes <= 480 (ABSENT uchun 0) bo'lishi shart (AC-040 / R-08)",
+                message="WORKED kunlik log uchun daqiqa chegarasi (SUBMIT: 1..480, DRAFT: 0..480, ABSENT: 0) buzildi (AC-040 / R-08)",
                 status_code=422,
                 sqlstate="23514",
                 rejected_revision_id=rev_id,
@@ -201,13 +203,14 @@ class InternshipLogService:
         total_minutes: int = 240,
         day_type: str = "WORKED",
     ) -> dict[str, Any]:
-        """API-054: Save a DRAFT daily log validating minutes (`0 < total_minutes <= 480`) and placement scope (`FIX-11`)."""
+        """API-054: Save a DRAFT daily log validating minutes (`0 <= total_minutes <= 480` for DRAFT) and placement scope (`FIX-11`, `AC-040`)."""
         self._validate_minutes_and_placement(
             placement_id=placement_id,
             author_id=author_id,
             summary_text=summary_text,
             total_minutes=total_minutes,
             day_type=day_type,
+            allow_zero_draft=True,
         )
         log_id = str(uuid4())
         rev_id = str(uuid4())
@@ -243,22 +246,49 @@ class InternshipLogService:
         placement_id: str,
         author_id: str,
         log_date: str,
+        log_id: str | None = None,
     ) -> dict[str, Any]:
-        """API-056: Submit a DRAFT daily log for mentor & academic review (`FIX-11`)."""
-        for log_row in self.daily_logs.values():
-            if log_row["placement_id"] == placement_id and log_row["log_date"] == log_date:
-                log_row["status"] = "SUBMITTED"
-                rev_id = log_row["current_revision_id"]
-                if rev_id in self.log_revisions:
-                    self.log_revisions[rev_id]["status"] = "SUBMITTED"
-                return {"contract_id": "API-056", **dict(log_row)}
-
-        raise InternshipLogScopeError(
-            code="DAILY_LOG_NOT_FOUND",
-            message=f"{placement_id} va {log_date} uchun kunlik log topilmadi",
-            status_code=404,
-            sqlstate="02000",
+        """API-056: Submit a DRAFT daily log for mentor & academic review enforcing author ownership (`FIX-11`, `REV-002`)."""
+        candidates = (
+            [self.daily_logs[log_id]]
+            if log_id and log_id in self.daily_logs
+            else [
+                r
+                for r in self.daily_logs.values()
+                if r["placement_id"] == placement_id and r["log_date"] == log_date
+            ]
         )
+        if not candidates:
+            raise InternshipLogScopeError(
+                code="DAILY_LOG_NOT_FOUND",
+                message=f"{placement_id} va {log_date} uchun kunlik log topilmadi",
+                status_code=404,
+                sqlstate="02000",
+            )
+
+        log_row = candidates[-1]
+        if log_row["author_id"] != author_id:
+            raise InternshipLogScopeError(
+                code="LOG_AUTHOR_FORBIDDEN",
+                message="API-056: Faqat kunlik log muallifi uni SUBMITTED holatiga o'tkaza oladi",
+                status_code=403,
+                sqlstate="42501",
+            )
+
+        rev_id = log_row["current_revision_id"]
+        rev_row = self.log_revisions.get(rev_id, {})
+        if log_row.get("day_type") == "WORKED" and not (1 <= int(rev_row.get("total_minutes", 0)) <= 480):
+            raise InternshipLogScopeError(
+                code="INVALID_SUBMIT_LOG_MINUTES",
+                message="AC-040: WORKED kunlik logni SUBMIT qilish uchun 0 < total_minutes <= 480 bo'lishi shart",
+                status_code=422,
+                sqlstate="23514",
+            )
+
+        log_row["status"] = "SUBMITTED"
+        if rev_id in self.log_revisions:
+            self.log_revisions[rev_id]["status"] = "SUBMITTED"
+        return {"contract_id": "API-056", **dict(log_row)}
 
     def submit_workplace_log_review(
         self,

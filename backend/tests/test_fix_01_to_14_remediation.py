@@ -319,3 +319,20 @@ def test_r08_r13_r12_r03_r07_logs_availability_argon2id_multiprocess_and_132_con
     contracts = model["apis"] + model["helper_apis"]
     matched = [a["id"] for a in contracts if (a["method"], normalize(a["path"])) in routes]
     assert len(matched) == 132
+
+
+def test_rev_002_all_30_checks_and_12_sections() -> None:
+    """Execute REV-002 recheck.py and verify 30/30 checks pass (defects_observed == 0, improvements_confirmed == 8)."""
+    recheck_script = ROOT / "reviews" / "2026-11-07" / "recheck_984fec5" / "recheck.py"
+    completed = subprocess.run(
+        [sys.executable, str(recheck_script)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
+    report = json.loads(completed.stdout)
+    assert report["checks"] == 30
+    assert report["defects_observed"] == 0
+    assert report["improvements_confirmed"] == 8

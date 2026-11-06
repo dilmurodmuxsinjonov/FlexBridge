@@ -1,9 +1,9 @@
-"""S2.8.1: FastAPI Endpoints for Tariffs, Payments, Concurrent Slot Quota (AC-042) & Refunds."""
+"""S2.8.1 & REV-002: FastAPI Endpoints for Tariffs, Payments, Concurrent Slot Quota (AC-042) & Refunds."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.services.billing import BillingInvariantError, BillingQuotaService
 
@@ -12,9 +12,11 @@ billing_service = BillingQuotaService()
 
 
 class CreateOrderRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     organization_id: str
     plan_code: str
-    created_by: str
+    created_by: str = "system-actor"
     currency_code: str = "UZS"
 
 
@@ -73,6 +75,7 @@ def create_order_endpoint(req: CreateOrderRequest):
 
 @router.post("/payments/attempts")
 def process_payment_attempt_endpoint(req: PaymentAttemptRequest):
+    """Initiate a payment attempt. Client `provider_confirmed` flag is ignored; only signed provider webhook (`API-X04`) can transition to `SUCCEEDED`."""
     try:
         attempt = billing_service.process_payment_attempt(
             invoice_id=req.invoice_id,
@@ -81,7 +84,7 @@ def process_payment_attempt_endpoint(req: PaymentAttemptRequest):
             amount_uzs=req.amount_uzs,
             actor_user_id=req.actor_user_id,
             currency_code=req.currency_code,
-            provider_confirmed=req.provider_confirmed,
+            provider_confirmed=False,
         )
         return {
             "attempt_id": attempt.id,

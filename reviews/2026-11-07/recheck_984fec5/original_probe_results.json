@@ -1,0 +1,312 @@
+{
+  "review": "REV-001",
+  "generated_at": "2026-11-06T21:00:58.106372+00:00",
+  "environment": "local TestClient / service fixtures, no external integrations",
+  "probes": 17,
+  "defects_observed": 0,
+  "results": [
+    {
+      "probe": "public_admin_registration",
+      "defect_observed": false,
+      "evidence": {
+        "status": 403,
+        "roles": null
+      }
+    },
+    {
+      "probe": "unauthenticated_admin_action",
+      "defect_observed": false,
+      "evidence": {
+        "status": 401,
+        "authorization_header": false,
+        "setup": "existing supervision seeded as service fixture; actor identity and role supplied only by request body"
+      }
+    },
+    {
+      "probe": "payment_without_provider_confirmation",
+      "defect_observed": false,
+      "evidence": {
+        "status": 200,
+        "payment_status": "PENDING_PROVIDER",
+        "provider_called": false
+      }
+    },
+    {
+      "probe": "refund_total_exceeds_payment",
+      "defect_observed": false,
+      "evidence": {
+        "statuses": [
+          409,
+          409
+        ],
+        "invoice_amount": 599000,
+        "approved_total": 1198000
+      }
+    },
+    {
+      "probe": "idempotency_key_ignores_payload",
+      "defect_observed": false,
+      "evidence": {
+        "status": 409,
+        "returned_old_invoice": false
+      }
+    },
+    {
+      "probe": "expired_entitlement_publish",
+      "defect_observed": false,
+      "evidence": {
+        "status": 409,
+        "setup": "service fixture: valid_until yesterday"
+      }
+    },
+    {
+      "probe": "publish_bypasses_quota_and_contract_required",
+      "defect_observed": false,
+      "evidence": {
+        "statuses": [
+          422,
+          422,
+          422,
+          422,
+          422,
+          422
+        ],
+        "published_count": 0,
+        "entitlement": false,
+        "contract_type_supplied": false
+      }
+    },
+    {
+      "probe": "client_can_clear_quarantine",
+      "defect_observed": false,
+      "evidence": {
+        "before": "QUARANTINED",
+        "after": "QUARANTINED",
+        "object_uploaded": false
+      }
+    },
+    {
+      "probe": "unrelated_user_receives_private_url",
+      "defect_observed": false,
+      "evidence": {
+        "status": 403,
+        "owner_equals_requester": false,
+        "authorization_header": false
+      }
+    },
+    {
+      "probe": "operations_breaker_does_not_freeze_billing",
+      "defect_observed": false,
+      "evidence": {
+        "status": 503,
+        "operations_state": "OPEN",
+        "billing_state": "OPEN"
+      }
+    },
+    {
+      "probe": "pilot_ready_while_billing_frozen",
+      "defect_observed": false,
+      "evidence": {
+        "pilot_ready": false,
+        "billing_state": "OPEN"
+      }
+    },
+    {
+      "probe": "circuit_open_returns_500_instead_of_503",
+      "defect_observed": false,
+      "evidence": {
+        "status": 503
+      }
+    },
+    {
+      "probe": "negative_minutes_submitted",
+      "defect_observed": false,
+      "evidence": {
+        "http_status": 422,
+        "status": "REJECTED",
+        "total_minutes": -1
+      }
+    },
+    {
+      "probe": "adjacent_availability_not_combined",
+      "defect_observed": false,
+      "evidence": {
+        "covered": true,
+        "intervals": [
+          [
+            540,
+            720
+          ],
+          [
+            720,
+            900
+          ]
+        ],
+        "shift": [
+          540,
+          900
+        ]
+      }
+    },
+    {
+      "probe": "pbkdf2_labeled_argon2id",
+      "defect_observed": false,
+      "evidence": {
+        "actual_algorithm": "PBKDF2-HMAC-SHA256",
+        "declared_prefix": ""
+      }
+    },
+    {
+      "probe": "session_not_shared_across_processes",
+      "defect_observed": false,
+      "evidence": {
+        "status_in_second_process": 200,
+        "first_process_created_session": true
+      }
+    },
+    {
+      "probe": "canonical_critical_contracts_absent",
+      "defect_observed": false,
+      "evidence": {
+        "missing": [],
+        "structural_route_matches": 132,
+        "canonical_contracts": 132,
+        "matched_ids": [
+          "API-001",
+          "API-002",
+          "API-003",
+          "API-004",
+          "API-005",
+          "API-006",
+          "API-007",
+          "API-008",
+          "API-009",
+          "API-010",
+          "API-011",
+          "API-012",
+          "API-013",
+          "API-014",
+          "API-015",
+          "API-016",
+          "API-017",
+          "API-018",
+          "API-019",
+          "API-020",
+          "API-021",
+          "API-022",
+          "API-023",
+          "API-024",
+          "API-025",
+          "API-026",
+          "API-027",
+          "API-028",
+          "API-029",
+          "API-030",
+          "API-031",
+          "API-032",
+          "API-033",
+          "API-034",
+          "API-035",
+          "API-036",
+          "API-037",
+          "API-038",
+          "API-039",
+          "API-040",
+          "API-041",
+          "API-042",
+          "API-043",
+          "API-044",
+          "API-045",
+          "API-046",
+          "API-047",
+          "API-048",
+          "API-049",
+          "API-050",
+          "API-051",
+          "API-052",
+          "API-053",
+          "API-054",
+          "API-055",
+          "API-056",
+          "API-057",
+          "API-058",
+          "API-059",
+          "API-060",
+          "API-061",
+          "API-062",
+          "API-063",
+          "API-064",
+          "API-065",
+          "API-066",
+          "API-067",
+          "API-068",
+          "API-069",
+          "API-070",
+          "API-071",
+          "API-072",
+          "API-073",
+          "API-074",
+          "API-075",
+          "API-076",
+          "API-077",
+          "API-078",
+          "API-079",
+          "API-080",
+          "API-081",
+          "API-082",
+          "API-083",
+          "API-084",
+          "API-085",
+          "API-086",
+          "API-087",
+          "API-088",
+          "API-089",
+          "API-090",
+          "API-091",
+          "API-092",
+          "API-093",
+          "API-094",
+          "API-095",
+          "API-096",
+          "API-097",
+          "API-098",
+          "API-099",
+          "API-100",
+          "API-101",
+          "API-102",
+          "API-103",
+          "API-104",
+          "API-105",
+          "API-106",
+          "API-107",
+          "API-108",
+          "API-109",
+          "API-110",
+          "API-111",
+          "API-112",
+          "API-113",
+          "API-114",
+          "API-115",
+          "API-116",
+          "API-117",
+          "API-118",
+          "API-119",
+          "API-120",
+          "API-121",
+          "API-122",
+          "API-123",
+          "API-124",
+          "API-X01",
+          "API-X02",
+          "API-X03",
+          "API-X04",
+          "API-X05",
+          "API-X06",
+          "API-X07",
+          "API-X08"
+        ],
+        "note": "Route signature comparison only; includes later-release contracts and is not feature completion percentage."
+      }
+    }
+  ]
+}

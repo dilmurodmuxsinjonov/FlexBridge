@@ -1,29 +1,57 @@
-"""SQLAlchemy 2.0 persistent database storage engine for FlexBridge R1 (FIX-02, R-03).
+"""SQLAlchemy 2.0 persistent database storage engine for FlexBridge R1 (FIX-02, R-03, REV-002).
 
-Provides cross-process, restart-safe SQL persistence for users, sessions, circuit-breaker state,
-idempotency keys, payment events, entitlements, and audit records.
-Uses `DATABASE_URL` when set, defaulting to a local WAL-enabled SQLite database at
-`backend/.data/flexbridge_r1.sqlite3` so multiple worker processes share committed state.
+Provides cross-process, restart-safe SQL persistence for all 94 canonical 1.4 tables,
+users, hashed-token sessions, circuit-breaker state, idempotency keys, payment events,
+orders, invoices, entitlements, and audit records.
+Resolves `FLEXBRIDGE_DATABASE_URL` or `DATABASE_URL` when set, defaulting to a local
+WAL-enabled SQLite database at `backend/.data/flexbridge_r1.sqlite3`.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Column, Integer, MetaData, String, Table, Text, create_engine, event, select
+from sqlalchemy import Column, Integer, MetaData, String, Table, Text, TypeDecorator, create_engine, event, select
 from sqlalchemy.engine import Engine
 
 DATA_DIR = Path(__file__).resolve().parents[2] / ".data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_SQLITE_URL = f"sqlite:///{(DATA_DIR / 'flexbridge_r1.sqlite3').as_posix()}"
+MODEL_JSON_PATH = Path(__file__).resolve().parents[3] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
 
 
 def get_database_url() -> str:
-    return os.environ.get("FLEXBRIDGE_DATABASE_URL") or DEFAULT_SQLITE_URL
+    """Resolve database URL from FLEXBRIDGE_DATABASE_URL, DATABASE_URL, or default SQLite path."""
+    return (
+        os.environ.get("FLEXBRIDGE_DATABASE_URL")
+        or os.environ.get("DATABASE_URL")
+        or DEFAULT_SQLITE_URL
+    )
+
+
+class HashedSessionIdType(TypeDecorator):
+    """Stores only the SHA-256 digest of a bearer session token in SQL while allowing transparent lookup."""
+
+    impl = String(128)
+    cache_ok = True
+
+    def process_bind_param(self, value: Any, dialect: Any) -> str | None:
+        if value is None:
+            return None
+        token_str = str(value)
+        if token_str.startswith("sha256:"):
+            return token_str
+        return "sha256:" + hashlib.sha256(token_str.encode("utf-8")).hexdigest()
+
+    def process_result_value(self, value: Any, dialect: Any) -> str | None:
+        if value is None:
+            return None
+        return str(value)
 
 
 metadata = MetaData()
@@ -45,7 +73,7 @@ users_table = Table(
 sessions_table = Table(
     "sessions",
     metadata,
-    Column("session_id", String(128), primary_key=True),
+    Column("session_id", HashedSessionIdType(), primary_key=True),
     Column("token_digest", String(128), nullable=False, index=True),
     Column("user_id", String(64), nullable=False, index=True),
     Column("status", String(32), nullable=False, default="ACTIVE"),
@@ -79,6 +107,37 @@ kv_records_table = Table(
 )
 
 
+def _register_canonical_94_tables() -> None:
+    """Register all 94 canonical 1.4 tables from FlexBridge_model_1_4.json in SQLAlchemy metadata."""
+    if not MODEL_JSON_PATH.exists():
+        return
+    raw_model = json.loads(MODEL_JSON_PATH.read_text(encoding="utf-8"))
+    for tbl in raw_model.get("tables", []):
+        table_name = tbl["name"]
+        if table_name in metadata.tables:
+            continue
+        cols: list[Column[Any]] = []
+        fields = tbl.get("fields", [])
+        has_pk = any(bool(f.get("pk")) for f in fields)
+        for idx, fld in enumerate(fields):
+            col_name = fld["name"]
+            is_pk = bool(fld.get("pk")) or (not has_pk and idx == 0)
+            col_type = Integer if fld.get("type") in ("integer", "bigint", "smallint") else Text
+            if is_pk and col_type is Text:
+                col_type = String(128)
+            cols.append(
+                Column(
+                    col_name,
+                    col_type,
+                    primary_key=is_pk,
+                    nullable=False if is_pk else bool(fld.get("nullable", True)),
+                )
+            )
+        Table(table_name, metadata, *cols)
+
+
+_register_canonical_94_tables()
+
 _ENGINE: Engine | None = None
 
 
@@ -98,6 +157,11 @@ def get_engine() -> Engine:
                 cursor.close()
         metadata.create_all(_ENGINE)
     return _ENGINE
+
+
+def init_storage() -> Engine:
+    """Initialize engine and ensure all canonical tables exist."""
+    return get_engine()
 
 
 def save_domain_record(namespace: str, record_id: str, payload: dict[str, Any]) -> None:

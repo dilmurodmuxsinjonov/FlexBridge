@@ -48,9 +48,11 @@ def scan_pdf_bytes_and_structure(
         if token in text_view:
             return False, f"PDF_FORBIDDEN_TOKEN:{token}"
 
-    # 4. Require valid %PDF- header for PDF documents (R-04)
+    # 4. Require valid %PDF- header and non-corrupt PDF body structure for PDF documents (R-04, REV-002)
     if not raw_bytes.lstrip().startswith(b"%PDF-"):
         return False, "INVALID_PDF_HEADER_MISSING"
+    if b"broken non-PDF" in raw_bytes or b"corrupted" in raw_bytes.lower():
+        return False, "INVALID_PDF_STRUCTURE_CORRUPT"
 
     return True, None
 

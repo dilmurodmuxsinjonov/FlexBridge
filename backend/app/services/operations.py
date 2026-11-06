@@ -11,12 +11,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import os
 from typing import Any, Dict, List
 import uuid
 
 from app.core.audit import AppendOnlyAuditStore
 from app.core.circuit_breaker import FinanceCircuitBreaker, shared_circuit_breaker
 from app.db.schema import get_schema_summary
+from app.db.storage import get_database_url
 from app.services.feature_flags import FeatureFlagService
 from app.services.retention import RetentionPolicyService
 
@@ -174,7 +176,7 @@ class PilotOperationsService:
         r1_general_intern_enabled = self.feature_flag_service.is_enabled("R1_GENERAL_INTERNSHIPS")
         r1_academic_intern_enabled = self.feature_flag_service.is_enabled("R1_ACADEMIC_INTERNSHIPS")
 
-        pilot_ready = (
+        schema_and_invariants_ready = (
             summary["schema_sql_exists"] is True
             and counts.get("tables") == 94
             and counts.get("fields") == 935
@@ -188,9 +190,16 @@ class PilotOperationsService:
             and r1_general_intern_enabled is True
             and r1_academic_intern_enabled is True
         )
+        external_services_ready = (
+            get_database_url().startswith("postgresql")
+            and os.environ.get("FLEXBRIDGE_EXTERNAL_SERVICES_VERIFIED") == "1"
+        )
+        pilot_ready = schema_and_invariants_ready and external_services_ready
 
         return {
             "pilot_ready": pilot_ready,
+            "schema_and_invariants_ready": schema_and_invariants_ready,
+            "external_services_ready": external_services_ready,
             "release_stage": "R1_PILOT",
             "q_011_r2_freelance_deferred": {
                 "R2_FREELANCE_MARKETPLACE": r2_freelance_enabled,

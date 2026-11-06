@@ -1,9 +1,8 @@
-"""P1 Finance & Security Circuit-Breaker for FlexBridge 1.4 (S2.1.2, FIX-13).
+"""P1 Finance & Security Circuit-Breaker for FlexBridge 1.4 (S2.1.2, FIX-13, REV-002).
 
 Implements section 7 of `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` and `TD-001` (`FIX-13`):
 - Shared persistent state across `BillingQuotaService`, `OperationsReadinessService`, and worker processes via SQLAlchemy `circuit_breaker_state` table.
-- When a P1 incident (financial ledger discrepancy, unauthorized scope access, or double-charge risk)
-  occurs, the finance circuit-breaker trips immediately.
+- Importing this module in a new worker process preserves any existing `OPEN` state in SQL storage without resetting it.
 - While tripped (`OPEN`), all payment, invoice checkout, and refund execution endpoints fail-closed
   with `503 P1_FINANCE_CIRCUIT_OPEN`, while read-only and non-financial workflows remain available.
 - Tripping and resetting the circuit-breaker both emit immutable `audit_events`.
@@ -24,15 +23,46 @@ from app.db.storage import circuit_breaker_table, get_engine
 class FinanceCircuitOpenError(Exception):
     """Raised when a financial operation is attempted while the P1 circuit-breaker is OPEN."""
 
-    def __init__(self, reason_code: str, incident_id: str) -> None:
+    def __init__(
+        self,
+        reason_code: str,
+        incident_id: str,
+        *,
+        invoice_id: str | None = None,
+        order_id: str | None = None,
+    ) -> None:
         super().__init__(f"P1 finance circuit-breaker is OPEN ({reason_code}, incident={incident_id})")
         self.code = "P1_FINANCE_CIRCUIT_OPEN"
         self.reason_code = reason_code
         self.incident_id = incident_id
+        self.invoice_id = invoice_id
+        self.order_id = order_id
         self.status_code = 503
 
 
+def _ensure_breaker_row_initialized() -> None:
+    """Insert default CLOSED row only if no row exists yet; never overwrite an existing OPEN state on import."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    with get_engine().begin() as conn:
+        existing = conn.execute(
+            select(circuit_breaker_table.c.key).where(circuit_breaker_table.c.key == "P1_FINANCE")
+        ).first()
+        if not existing:
+            conn.execute(
+                circuit_breaker_table.insert().values(
+                    key="P1_FINANCE",
+                    state="CLOSED",
+                    incident_id=None,
+                    reason_code=None,
+                    tripped_by=None,
+                    tripped_at=None,
+                    updated_at=now_iso,
+                )
+            )
+
+
 def _read_breaker_row() -> dict[str, Any]:
+    _ensure_breaker_row_initialized()
     with get_engine().begin() as conn:
         row = conn.execute(
             select(circuit_breaker_table).where(circuit_breaker_table.c.key == "P1_FINANCE")
@@ -88,14 +118,7 @@ def _write_breaker_row(
             )
 
 
-# Ensure clean CLOSED state at process startup while keeping all instances synchronized via DB
-_write_breaker_row(
-    state="CLOSED",
-    incident_id=None,
-    reason_code=None,
-    tripped_by=None,
-    tripped_at=None,
-)
+_ensure_breaker_row_initialized()
 
 
 @dataclass
@@ -165,13 +188,20 @@ class FinanceCircuitBreaker:
             },
         )
 
-    def require_closed(self) -> None:
+    def require_closed(
+        self,
+        *,
+        invoice_id: str | None = None,
+        order_id: str | None = None,
+    ) -> None:
         """Fail-closed if the P1 finance circuit-breaker is currently OPEN."""
         row = _read_breaker_row()
         if row["state"] != "CLOSED":
             raise FinanceCircuitOpenError(
                 reason_code=row["reason_code"] or "UNKNOWN_P1_INCIDENT",
                 incident_id=row["incident_id"] or "INC-UNKNOWN",
+                invoice_id=invoice_id,
+                order_id=order_id,
             )
 
     def reset(

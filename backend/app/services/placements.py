@@ -216,17 +216,42 @@ class ApplicationPlacementService:
         actor_roles: list[str],
         party: str | None = None,
     ) -> dict[str, Any]:
-        """API-046: Confirm engagement start deriving party from authenticated actor context (`FIX-10`)."""
+        """API-046: Confirm engagement start verifying placement ownership and actor role (`FIX-10`, `REV-002`)."""
         placement = self.placements.get(placement_id)
         if not placement:
             raise PlacementScopeError("PLACEMENT_NOT_FOUND", "Placement topilmadi", status_code=404)
 
-        resolved_party = party
-        if resolved_party is None:
-            if actor_user_id == placement["candidate_id"] or "CANDIDATE" in actor_roles:
+        org_roles = {"ORG_RECRUITER", "EMPLOYER", "OWNER", "HR", "HOST_COORDINATOR", "SUPER_ADMIN", "ADMIN"}
+        is_placement_candidate = actor_user_id == placement["candidate_id"]
+        is_org_rep = any(r in org_roles for r in actor_roles)
+
+        if party == "CANDIDATE":
+            if not is_placement_candidate:
+                raise PlacementScopeError(
+                    "ENGAGEMENT_ACTOR_FORBIDDEN",
+                    "API-046: Faqat placementga biriktirilgan nomzod CANDIDATE tomonini tasdiqlay oladi",
+                    status_code=403,
+                )
+            resolved_party = "CANDIDATE"
+        elif party == "ORGANIZATION":
+            if not is_org_rep or is_placement_candidate:
+                raise PlacementScopeError(
+                    "ENGAGEMENT_ACTOR_FORBIDDEN",
+                    "API-046: Faqat tashkilot vakili ORGANIZATION tomonini tasdiqlay oladi",
+                    status_code=403,
+                )
+            resolved_party = "ORGANIZATION"
+        else:
+            if is_placement_candidate:
                 resolved_party = "CANDIDATE"
-            else:
+            elif is_org_rep:
                 resolved_party = "ORGANIZATION"
+            else:
+                raise PlacementScopeError(
+                    "ENGAGEMENT_ACTOR_FORBIDDEN",
+                    "API-046: Foydalanuvchi ushbu placement ishtirokchisi emas",
+                    status_code=403,
+                )
 
         res = self.confirm_placement_start(placement_id=placement_id, party=resolved_party)
         return {"contract_id": "API-046", **res}

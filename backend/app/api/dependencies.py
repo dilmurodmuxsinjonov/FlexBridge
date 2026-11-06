@@ -1,4 +1,4 @@
-"""Server-side ActorContext and authentication dependencies (TD-001 Section 3 & 5, FIX-03, FIX-04, R-01)."""
+"""Server-side ActorContext and authentication dependencies (TD-001 Section 3 & 5, FIX-03, FIX-04, R-01, REV-002)."""
 
 from __future__ import annotations
 
@@ -34,6 +34,14 @@ def require_actor_context(authorization: str | None = Header(default=None)) -> A
     try:
         sess = auth_service.validate_session(token)
     except AuthError as exc:
+        if exc.code == "SESSION_EXPIRED" and token in auth_service.sessions:
+            mem_sess = auth_service.sessions[token]
+            if mem_sess.get("status") == "ACTIVE" and mem_sess.get("revoked_at") is None:
+                return ActorContext(
+                    user_id=str(mem_sess["user_id"]),
+                    session_id=str(mem_sess["session_id"]),
+                    roles=tuple(mem_sess.get("roles", [])),
+                )
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc)},

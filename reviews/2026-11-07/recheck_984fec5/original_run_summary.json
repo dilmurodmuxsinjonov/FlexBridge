@@ -1,0 +1,7 @@
+{
+  "command": "original REV-001 probes; report destination redirected only",
+  "exit_code": 1,
+  "probes": 17,
+  "defects_observed": 0,
+  "note": "No probe conditions changed. A false observation can mean a precondition was no longer reached."
+}

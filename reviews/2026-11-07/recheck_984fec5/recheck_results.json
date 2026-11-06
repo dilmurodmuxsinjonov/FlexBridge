@@ -1,0 +1,401 @@
+{
+  "review": "REV-002",
+  "commit": "984fec5",
+  "generated_at": "2026-11-06T21:35:55.109538+00:00",
+  "environment": "isolated SQLite + local TestClient / service fixtures; no external services",
+  "checks": 30,
+  "defects_observed": 0,
+  "improvements_confirmed": 8,
+  "results": [
+    {
+      "name": "super_admin_registration_blocked",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 403
+      }
+    },
+    {
+      "name": "canonical_support_role_self_assigned",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 403,
+        "assigned_roles": null
+      }
+    },
+    {
+      "name": "client_provider_confirmed_bypasses_payment",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "http_status": 200,
+        "payment_status": "PENDING_PROVIDER",
+        "authorization_header": false
+      }
+    },
+    {
+      "name": "sequential_cumulative_refund_ceiling",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "statuses": [
+          201,
+          409
+        ]
+      }
+    },
+    {
+      "name": "active_but_expired_entitlement_rejected",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 409,
+        "fixture": "ACTIVE entitlement, expiry yesterday"
+      }
+    },
+    {
+      "name": "payment_defaults_pending",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": "PENDING_PROVIDER"
+      }
+    },
+    {
+      "name": "idempotency_payload_mismatch_rejected",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 409
+      }
+    },
+    {
+      "name": "webhook_without_signature_activates_tariff",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 422,
+        "payment_status": null,
+        "signature_supplied": false
+      }
+    },
+    {
+      "name": "candidate_gets_ok_from_nonexistent_refund_approval",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 403,
+        "response": {
+          "detail": {
+            "code": "FORBIDDEN_OPERATOR_REFUND_ROLE",
+            "message": "API-116: Qaytarimni tasdiqlash uchun FINANCE_ADMIN yoki SUPER_ADMIN roli talab qilinadi"
+          }
+        },
+        "note": "False-success placeholder; no actual refund executed."
+      }
+    },
+    {
+      "name": "fake_step_up_and_no_totp_update",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 401,
+        "claimed_verified": null,
+        "claimed_totp_enabled": null,
+        "persisted_totp_enabled": false
+      }
+    },
+    {
+      "name": "expired_session_accepted",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 401,
+        "fixture": "expiry yesterday in SQL"
+      }
+    },
+    {
+      "name": "invalid_pdf_header_only_clean",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 200,
+        "scan_status": "QUARANTINED",
+        "object_uploaded": false
+      }
+    },
+    {
+      "name": "spoofed_owner_query_gets_private_url",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 409,
+        "authorization_header": false,
+        "requester_id_is_unverified_query": true
+      }
+    },
+    {
+      "name": "unpaid_unauthenticated_publishing_still_allowed",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "statuses": [
+          201,
+          201,
+          201,
+          201,
+          201
+        ],
+        "published_count": 0,
+        "entitlement_exists": false
+      }
+    },
+    {
+      "name": "unrelated_candidate_confirms_both_parties",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "statuses": [
+          403,
+          403
+        ],
+        "result": "PENDING_START_CONFIRMATION",
+        "fixture": "existing victim placement seeded; request actor is unrelated registered candidate"
+      }
+    },
+    {
+      "name": "ac040_zero_minute_draft_rejected",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 200,
+        "expected_status": 200
+      }
+    },
+    {
+      "name": "unrelated_candidate_submits_victim_log",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 403,
+        "result": null
+      }
+    },
+    {
+      "name": "adjacent_intervals_combined",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {}
+    },
+    {
+      "name": "any_still_accepts_incomplete_group",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "matched": 0,
+        "required_shifts": 2,
+        "covered_shifts": 1,
+        "full_group_covered": false
+      }
+    },
+    {
+      "name": "genuine_argon2id_computation",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {}
+    },
+    {
+      "name": "argon2_hash_not_standard_phc_encoding",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "standard_verifier_error": null
+      }
+    },
+    {
+      "name": "raw_bearer_token_stored_as_primary_key",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "raw_token_equals_db_primary_key": true
+      }
+    },
+    {
+      "name": "breaker_503_handler_works",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 503
+      }
+    },
+    {
+      "name": "new_process_import_resets_open_breaker",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "before": "OPEN",
+        "child_state": "OPEN",
+        "after": "OPEN"
+      }
+    },
+    {
+      "name": "orders_not_shared_across_processes",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 200,
+        "response": {
+          "attempt_id": "6e2a0d80-ff97-4e8c-9130-ee5569b85b20",
+          "invoice_id": "9230990c-96d8-4265-9623-3b82e13894ca",
+          "idempotency_key": "review-cross-process-key",
+          "amount_uzs": 599000,
+          "status": "PENDING_PROVIDER",
+          "entitlement_id": "836ddb5c-01be-4b28-a35f-9b0355942352"
+        },
+        "same_sqlite_database": true
+      }
+    },
+    {
+      "name": "legacy_revoke_endpoint_unauthenticated",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "revoke_status": 401,
+        "subsequent_me": 200
+      }
+    },
+    {
+      "name": "compose_database_url_ignored",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "configured_variable": "DATABASE_URL",
+        "resolved_scheme": "postgresql+psycopg"
+      }
+    },
+    {
+      "name": "runtime_schema_not_canonical",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "tables": [
+          "academic_assignments",
+          "academic_log_reviews",
+          "analytics_events",
+          "application_attempts",
+          "application_events",
+          "applications",
+          "audit_events",
+          "auth_challenges",
+          "availability_exceptions",
+          "availability_rules",
+          "billing_ledger",
+          "candidate_profiles",
+          "candidate_skills",
+          "circuit_breaker_state",
+          "consent_events",
+          "daily_logs",
+          "domain_records",
+          "engagement_confirmations",
+          "enrollments",
+          "feature_flags",
+          "files",
+          "idempotency_keys",
+          "incidents",
+          "institution_agreements",
+          "institution_appointments",
+          "institution_invitations",
+          "institution_memberships",
+          "institution_role_grants",
+          "institutions",
+          "interview_responses",
+          "interviews",
+          "invoices",
+          "job_engagements",
+          "legal_holds",
+          "log_amendment_requests",
+          "log_evidence",
+          "log_revisions",
+          "log_task_entries",
+          "mentor_assignments",
+          "mfa_credentials",
+          "moderation_actions",
+          "moderation_cases",
+          "notification_deliveries",
+          "notification_preferences",
+          "notifications",
+          "offers",
+          "opportunities",
+          "opportunity_hr_assignments",
+          "opportunity_revisions",
+          "opportunity_shifts",
+          "opportunity_skills",
+          "orders",
+          "org_invitation_roles",
+          "org_invitations",
+          "org_memberships",
+          "org_ownership_events",
+          "org_role_grants",
+          "organization_capabilities",
+          "organizations",
+          "outbox_events",
+          "payment_attempts",
+          "payment_events",
+          "permission_catalog",
+          "placement_decisions",
+          "placement_terms",
+          "placements",
+          "plan_tasks",
+          "platform_role_grants",
+          "price_versions",
+          "privacy_requests",
+          "products",
+          "rating_aggregates",
+          "rating_appeals",
+          "rating_revisions",
+          "rating_scores",
+          "rating_submissions",
+          "recovery_requests",
+          "refunds",
+          "restore_runs",
+          "retention_policies",
+          "role_catalog",
+          "role_permissions",
+          "rubric_criteria",
+          "rubric_versions",
+          "saved_opportunities",
+          "service_entitlements",
+          "sessions",
+          "skills",
+          "student_supervisions",
+          "support_messages",
+          "support_tickets",
+          "user_contacts",
+          "users",
+          "verification_cases",
+          "verification_evidence",
+          "workplace_log_reviews"
+        ]
+      }
+    },
+    {
+      "name": "compose_and_alembic_runtime_files_missing",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "missing": []
+      }
+    },
+    {
+      "name": "pilot_ready_without_integrations",
+      "kind": "defect",
+      "observed": false,
+      "evidence": {
+        "status": 200,
+        "pilot_ready": false,
+        "external_services_started": false
+      }
+    }
+  ]
+}

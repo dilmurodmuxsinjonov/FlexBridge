@@ -1,10 +1,13 @@
-"""Automated test suite for S2.4.1: `contract_type` & compensation matrix (`INV-03`), `group_code` shifts (`INV-02`), and `API-003` `ALL`/`ANY` matching (`AC-039`)."""
+"""Automated test suite for S2.4.1: `contract_type` & compensation matrix (`INV-03`), `group_code` shifts (`INV-02`), and `API-003` `ALL`/`ANY` matching (`AC-039`, `REV-002`)."""
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 
+from app.api.v1.billing import billing_service
 from app.main import app
+from app.services.billing import ServiceEntitlement
 
 client = TestClient(app)
 
@@ -58,16 +61,31 @@ def test_ac_039_contract_type_and_compensation_matrix_inv_03() -> None:
 
 
 def test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions() -> None:
-    """Verify `AC-039` / `API-003`:
+    """Verify `AC-039` / `API-003` (`REV-002` `R2-10`):
 
-    - Candidate has Monday `[540, 780)` (09:00-13:00), Wednesday `[540, 780)`, Friday `[540, 780)`.
-    - Opportunity has `GROUP_A` with 3 shifts: Mon `[540, 720)`, Wed `[540, 720)`, Fri `[840, 1020)` (14:00-17:00).
-      Candidate only covers 2 of 3 shifts in `GROUP_A`:
-      -> `ALL_SHIFTS_IN_GROUP` does NOT match `GROUP_A`.
-      -> `ANY_SHIFT_IN_GROUP` DOES match `GROUP_A`.
-    - When `GROUP_B` is added with Mon `[540, 720)` and Wed `[540, 720)`, `ALL_SHIFTS_IN_GROUP` matches via `GROUP_B`!
-    - When an `UNAVAILABLE` exception is added on `2026-11-16` `[600, 660)`, `ALL_SHIFTS_IN_GROUP` on `check_date=2026-11-16` excludes `GROUP_B`.
+    - Every `group_code` requires all of its shifts to be covered (`all(shift_matches)`).
+    - When an opportunity has `GROUP_A` (partially covered: 2 of 3 shifts) and `GROUP_B` (fully covered: 2 of 2 shifts):
+      -> `ANY_SHIFT_IN_GROUP` matches via `GROUP_B` (at least one complete shift group is covered).
+      -> `ALL_SHIFTS_IN_GROUP` does NOT match (because `GROUP_A` is incomplete: 1 of 2 groups covered).
+    - When Friday `[840, 1020)` availability is added so both `GROUP_A` and `GROUP_B` are completely covered:
+      -> `ALL_SHIFTS_IN_GROUP` matches with `["GROUP_A", "GROUP_B"]`.
+    - When an `UNAVAILABLE` exception is added on `2026-11-16` `[600, 660)`, `ALL_SHIFTS_IN_GROUP` on `check_date=2026-11-16` excludes the opportunity.
     """
+    now = datetime.now(timezone.utc)
+    ent = ServiceEntitlement(
+        id="ent-org-uzum-ac039",
+        organization_id="org-uzum",
+        plan_code="ORG_PLAN_30D",
+        total_post_credits=None,
+        used_post_credits=0,
+        concurrent_active_limit=5,
+        status="ACTIVE",
+        valid_from=now - timedelta(days=1),
+        valid_until=now + timedelta(days=29),
+    )
+    billing_service._entitlements[ent.id] = ent
+    billing_service._org_active_entitlement["org-uzum"] = ent.id
+
     cand_id = "cand-ac-039"
     for weekday in (1, 3, 5):
         r = client.post(
@@ -90,7 +108,7 @@ def test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions() -> None:
     assert rev_resp.status_code == 201
     rev_id = rev_resp.json()["id"]
 
-    # Add GROUP_A shifts: Mon 09-12, Wed 09-12, Fri 14-17 (candidate is NOT free Fri 14-17)
+    # Add GROUP_A shifts: Mon 09-12, Wed 09-12, Fri 14-17 (candidate is NOT free Fri 14-17 -> incomplete group)
     for wd, start_m, end_m in ((1, 540, 720), (3, 540, 720), (5, 840, 1020)):
         s = client.post(
             f"/api/v1/opportunities/revisions/{rev_id}/shifts",
@@ -106,24 +124,15 @@ def test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions() -> None:
     assert dup_shift.status_code == 409
     assert dup_shift.json()["detail"]["sqlstate"] == "23P01"
 
-    # 1. ALL_SHIFTS_IN_GROUP must NOT match GROUP_A (only 2/3 shifts covered)
-    feed_all_1 = client.get(
-        "/api/v1/opportunities/feed",
-        params={"candidate_id": cand_id, "schedule_match_mode": "ALL_SHIFTS_IN_GROUP"},
-    )
-    assert feed_all_1.status_code == 200
-    assert feed_all_1.json()["items"] == []
-
-    # 2. ANY_SHIFT_IN_GROUP MUST match GROUP_A (2/3 >= 1 shift covered)
-    feed_any_1 = client.get(
+    # 1. Incomplete single group (2/3 shifts covered) must NOT match under EITHER mode (REV-002 R2-10)
+    feed_incomplete = client.get(
         "/api/v1/opportunities/feed",
         params={"candidate_id": cand_id, "schedule_match_mode": "ANY_SHIFT_IN_GROUP"},
     )
-    assert feed_any_1.status_code == 200
-    assert len(feed_any_1.json()["items"]) == 1
-    assert feed_any_1.json()["items"][0]["matched_group_codes"] == ["GROUP_A"]
+    assert feed_incomplete.status_code == 200
+    assert feed_incomplete.json()["items"] == []
 
-    # 3. Add alternative GROUP_B (Mon 09-12, Wed 09-12) -> ALL_SHIFTS_IN_GROUP now matches GROUP_B!
+    # 2. Add alternative GROUP_B (Mon 09-12, Wed 09-12 -> 2/2 shifts covered)
     for wd in (1, 3):
         s_b = client.post(
             f"/api/v1/opportunities/revisions/{rev_id}/shifts",
@@ -131,12 +140,34 @@ def test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions() -> None:
         )
         assert s_b.status_code == 201
 
+    # ANY_SHIFT_IN_GROUP matches via GROUP_B (1 of 2 groups completely covered)
+    feed_any = client.get(
+        "/api/v1/opportunities/feed",
+        params={"candidate_id": cand_id, "schedule_match_mode": "ANY_SHIFT_IN_GROUP"},
+    )
+    assert len(feed_any.json()["items"]) == 1
+    assert feed_any.json()["items"][0]["matched_group_codes"] == ["GROUP_B"]
+
+    # ALL_SHIFTS_IN_GROUP does NOT match yet because GROUP_A is still incomplete
+    feed_all_partial = client.get(
+        "/api/v1/opportunities/feed",
+        params={"candidate_id": cand_id, "schedule_match_mode": "ALL_SHIFTS_IN_GROUP"},
+    )
+    assert feed_all_partial.json()["items"] == []
+
+    # 3. Add Friday 14-17 availability so GROUP_A is also completely covered -> ALL_SHIFTS_IN_GROUP matches both groups!
+    r_fri = client.post(
+        f"/api/v1/candidates/{cand_id}/availability-rules",
+        json={"weekday": 5, "start_minute": 840, "end_minute": 1020},
+    )
+    assert r_fri.status_code == 201
+
     feed_all_2 = client.get(
         "/api/v1/opportunities/feed",
         params={"candidate_id": cand_id, "schedule_match_mode": "ALL_SHIFTS_IN_GROUP"},
     )
     assert len(feed_all_2.json()["items"]) == 1
-    assert feed_all_2.json()["items"][0]["matched_group_codes"] == ["GROUP_B"]
+    assert feed_all_2.json()["items"][0]["matched_group_codes"] == ["GROUP_A", "GROUP_B"]
 
     # 4. Add UNAVAILABLE exception on 2026-11-16 [600, 660) -> blocks ALL_SHIFTS_IN_GROUP on that date
     exc = client.post(
