@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`), `S2.1` (`S2.1.1..S2.1.3`) va `S2.2` (`S2.2.1..S2.2.2`) to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `20/20` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi); navbatdagi qadam — `S2.3.1` (Nomzod profili, `int4range` `[)` bo'sh vaqt qoidalari va istisnolari `INV-01`).
+Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`), `S2.1` (`S2.1.1..S2.1.3`), `S2.2` (`S2.2.1..S2.2.2`) va `S2.3` (`S2.3.1`) bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `22/22` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi); navbatdagi qadam — `S2.4.1` (E'lon reviziyasi `contract_type`/maosh matritsasi, `group_code` smena guruhi va `API-003` `ALL`/`ANY` moslik dvigateli `INV-02`, `INV-03`, `AC-039`).
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -30,8 +30,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | --- | --- | --- | --- |
 | S2.1 | Loyiha asosi va DB migratsiyalari | Tekshiruvda (`S2.1.1..S2.1.3`) | Manbadagi sxema, constraint va tranzaksiyalar |
 | S2.2 | Hisob, sessiya, tashkilot va vakolatlar | Tekshiruvda (`S2.2.1..S2.2.2`) | Rol/scope, o'zini tasdiqlamaslik, revoke |
-| S2.3 | Nomzod profili va bo'sh vaqt | Rejada — navbatdagi (`S2.3.1`) | Vaqt intervallari va istisnolar |
-| S2.4 | E'lon, smena va moslik | Rejada | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
+| S2.3 | Nomzod profili va bo'sh vaqt | Tekshiruvda (`S2.3.1`) | Vaqt intervallari va istisnolar |
+| S2.4 | E'lon, smena va moslik | Rejada — navbatdagi (`S2.4.1`) | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
 | S2.5 | Ariza, suhbat, taklif, ish boshlanishi | Rejada | Holat o'tishlari va ikki tomon tasdig'i |
 | S2.6 | Akademik amaliyot, tayinlov, kundalik | Rejada | Mentor/o'qituvchi ajratilishi, AC-040 |
 | S2.7 | Xususiy fayllar, karantin, eksport | Rejada | Scan holati, ruxsat va signed URL; AC-042 |
@@ -48,8 +48,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | S2.1.3 | `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/retention.py`, `backend/app/services/feature_flags.py`, `backend/tests/test_s2_1_3_retention_flags.py` | 8 ta huquqiy saqlash muddati (`1 kun` .. `5 yil` / `23-kun ogohlantirish`) va `DB-092` feature flag holatlari `pytest`da (`14/14 passed`) tekshirildi (Issue `#9`) |
 | S2.2.1 | Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/auth.py`, `backend/app/api/v1/auth.py`, `backend/tests/test_s2_2_1_auth_revoke.py` | Parol/TOTP tekshiruvi, 18+ talabi, 15s kesh + event-driven revoke: sessiya bekor qilingan zahoti himoyalangan endpoint `401 AUTH_REVOKED` qaytardi (`AC-017`, `pytest` `17/17 passed`, Issue `#11`) |
 | S2.2.2 | Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/tests/test_s2_2_2_dual_control_scope.py` | O'z-o'zini tasdiqlash rad etildi (`409 SELF_APPROVAL_FORBIDDEN`), begona korxona/muassasa obyekti `403 SCOPE_VIOLATION` oldi, `API-060`/`061` va moderatsiya asoslari `pytest`da (`20/20 passed`) tasdiqlandi (Issue `#13`) |
-| S2.3.1 | Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolar (`INV-01`) | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/tests/test_s2_3_1_availability.py` | Ustma-ust tushuvchi `[)` intervallar `409 OVERLAPPING_INTERVAL` bilan rad etiladi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilinadi (`INV-01`) |
-| S2.4.1 | E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/tests/test_s2_4_1_matching_ac_039.py` | `contract_type` + maosh mosligi, `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` va ustma-ust istisno chegirilishi (`AC-039`) `pytest`da tekshiriladi |
+| S2.3.1 | Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolar (`INV-01`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/tests/test_s2_3_1_availability.py` | Ustma-ust tushuvchi `[)` intervallar `409 OVERLAPPING_AVAILABILITY_RULE` (`23P01`) bilan rad etildi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilindi (`INV-01`, `pytest` `22/22 passed`, Issue `#15`) |
+| S2.4.1 | E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`) | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/tests/test_s2_4_1_matching_ac_039.py` | `contract_type` + maosh mosligi, `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` va ustma-ust istisno chegirilishi (`AC-039`) `pytest`da tekshiriladi |
 
 ## Mahsulotning uzoq muddatli bosqichlari
 
@@ -204,3 +204,17 @@ Keyingi kichik qadam:
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `20 passed in 1.28s`.
 - Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
 - Keyingi kichik qadam: `S2.3.1` — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`).
+
+### S2.3.1 — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`, GitHub Issue #15)
+
+- ID / nom: `S2.3.1` / Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`)
+- Bosqich / manba: `S2.3` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.1-bo'lim, `INV-01`, `DB-013`, `DB-014`)
+- Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:20:19+05:00`
+- Holat: `Tekshiruvda`
+- Maqsad / doira / bog'liq vazifalar: Yarim-ochiq `[start_minute, end_minute)` (`int4range`) qoidalari va sana istisnolari (`availability_rules`, `availability_exceptions`) hamda ustma-ust tushishni (`&&`) bloklovchi `INV-01` xizmatini (`app/services/availability.py`, `app/api/v1/availability.py`) yaratish va `pytest`da tekshirish (`S2.2` ga tayanadi; `S2.4.1` moslik dvigateli uchun asos bo'ladi).
+- Tegiladigan fayllar: `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/app/main.py`, `backend/tests/test_s2_3_1_availability.py`
+- Qabul mezonlari: `0 <= start_minute < end_minute <= 1440` chegarasi tekshiriladi; bir xil `(candidate_id, weekday)` yoki `(candidate_id, exception_date)` uchun ustma-ust tushuvchi interval `409` (`23P01`) bilan rad etiladi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilinadi.
+- Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`22/22 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
+- Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `22 passed in 1.28s`.
+- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Keyingi kichik qadam: `S2.4.1` — E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`).

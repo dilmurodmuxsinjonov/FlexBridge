@@ -213,3 +213,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 20 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.2.2` (va butun `S2.2`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.3.1` — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-009 — 2026-11-07T00:21:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-009` / `2026-11-07T00:21:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.3.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.2.2` yakunlanib PR `#14` (`19a1996`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#15` va `feature/s2-3-1-candidate-availability` tarmog'ida nomzodning haftalik bo'sh vaqt qoidalari (`DB-013 availability_rules`) va sana istisnolari (`DB-014 availability_exceptions`) uchun yarim-ochiq `[start_minute, end_minute)` (`int4range`) hamda `INV-01` (`23P01` ustma-ust tushmaslik) xizmatini (`app/services/availability.py`, `app/api/v1/availability.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/availability.py` yaratildi (`CandidateAvailabilityService`, `ranges_overlap`, `range_contains`, `add_availability_rule`, `add_availability_exception`, `is_candidate_available_for_shift`).
+  - `backend/app/api/v1/availability.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_3_1_availability.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.3` `Tekshiruvda` holatiga o'tkazildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`22 passed in 1.28s`** (`S2.1` 14 ta + `S2.2` 6 ta + `S2.3.1` 2 ta test: `test_inv_01_half_open_availability_rules_overlap_and_adjacency`, `test_inv_01_availability_exceptions_and_bounds`).
+- Muammo va cheklov: Yo'q; barcha 22 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.3.1` (`S2.3`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.4.1` — E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
