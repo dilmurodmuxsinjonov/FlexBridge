@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`) va `S2.1..S2.8` (`S2.1.1..S2.8.1`) to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `30/30` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi); navbatdagi qadam — `S2.9.1` va `S2.10.1` (Moderatsiya/Audit/Retention zanjiri `AC-041` hamda R1 Pilot operatsion tayyorgarlik hisoboti `AC-001..042`).
+Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`) va `S2.1..S2.10` (`S2.1.1..S2.10.1`) R1 doirasidagi barcha kichik ish paketlari to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `32/32` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi; `Q-011` qaroriga ko'ra `R2_FREELANCE_MARKETPLACE=False` saqlandi).
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -36,8 +36,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | S2.6 | Akademik amaliyot, tayinlov, kundalik | Tekshiruvda (`S2.6.1`) | Mentor/o'qituvchi ajratilishi, AC-040 |
 | S2.7 | Xususiy fayllar, karantin, eksport | Tekshiruvda (`S2.7.1`) | Scan holati, ruxsat va signed URL; AC-042 |
 | S2.8 | Tarif, kvota, to'lov va qaytarish | Tekshiruvda (`S2.8.1`) | Parallel limit, pul yaxlitligi, dual-control |
-| S2.9 | Moderatsiya, audit va saqlash siyosati | Rejada — navbatdagi (`S2.9.1`) | Scope, o'zgarmas tarix, asoslangan retention; AC-041 |
-| S2.10 | Pilotga tayyorgarlik va operatsiyalar | Rejada — navbatdagi (`S2.10.1`) | Mavjud AC talablari, tiklash, alert va qo'llab-quvvatlash dalillari |
+| S2.9 | Moderatsiya, audit va saqlash siyosati | Tekshiruvda (`S2.9.1`) | Scope, o'zgarmas tarix, asoslangan retention; AC-041 |
+| S2.10 | Pilotga tayyorgarlik va operatsiyalar | Tekshiruvda (`S2.10.1`) | Mavjud AC talablari, tiklash, alert va qo'llab-quvvatlash dalillari |
 
 ### S2.1 va S2.2 bo'yicha maydalangan kichik ish paketlari (`S1.4` natijasi)
 
@@ -54,8 +54,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | S2.6.1 | Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py` | `workplace_log_reviews` va `academic_log_reviews` alohida jadvallarda yuritildi va begona placement kundaligini `409` (`23503`) bilan rad etdi (`AC-040`, `pytest` `27/27 passed`, Issue `#21`) |
 | S2.7.1 | Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/files_quarantine.py`, `backend/app/api/v1/files.py`, `backend/tests/test_s2_7_1_files_quarantine_ac_042.py` | `PENDING_SCAN`/`QUARANTINED` faylga signed URL berilmadi (`409`); `/JavaScript` yoki `/OpenAction` bor PDF karantinga olindi (`AC-042`, `pytest` `28/28 passed`, Issue `#23`) |
 | S2.8.1 | Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/billing.py`, `backend/app/api/v1/billing.py`, `backend/tests/test_s2_8_1_billing_quota_ac_042.py` | `ORG_PLAN_30D` 5 ta aktiv e'lon to'lganda 6-e'lonni `409 CONCURRENT_QUOTA_REACHED` bilan to'xtatdi (`AC-042`), 1 tasi yopilgach yangisiga ruxsat berdi (`pytest` `30/30 passed`, Issue `#25`) |
-| S2.9.1 | Moderatsiya, audit va huquqiy saqlash (`DB-083..086`) yagona tekshiruv oqimi (`AC-041`) | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Moderatsiya apellyatsiyasi, o'zgarmas audit zanjiri va retention ijrosi (`DB-084`) `pytest`da tekshiriladi |
-| S2.10.1 | R1 Pilot operatsion tayyorgarlik, zaxira/tiklash (`RPO=24s`, `RTO=4s`) va 42 AC yagona hisobot paketi | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Barcha `AC-001..042` va `INV-01..16` qabul dalillari yagona API va test hisobotida jamlanadi (`R2_FREELANCE_MARKETPLACE=False` saqlanadi, `Q-011`) |
+| S2.9.1 | Moderatsiya, audit va huquqiy saqlash (`DB-083..086`) yagona tekshiruv oqimi (`AC-041`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Moderatsiya apellyatsiyasi (`INV-11`, `AC-041`), o'zgarmas audit zanjiri va retention ijrosi (`DB-084`) `pytest`da (`32/32 passed`, Issue `#27`) tasdiqlandi |
+| S2.10.1 | R1 Pilot operatsion tayyorgarlik, zaxira/tiklash (`RPO=24s`, `RTO=4s`) va 42 AC yagona hisobot paketi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Barcha `AC-001..042` va `INV-01..16` qabul dalillari yagona API va test hisobotida jamlandi (`R2_FREELANCE_MARKETPLACE=False` saqlandi, `Q-011`, `pytest` `32/32 passed`, Issue `#27`) |
 
 ## Mahsulotning uzoq muddatli bosqichlari
 
@@ -294,3 +294,17 @@ Keyingi kichik qadam:
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `30 passed in 1.46s`.
 - Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
 - Keyingi kichik qadam: `S2.9.1` va `S2.10.1` — Moderatsiya/Audit/Retention zanjiri (`AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`).
+
+### S2.9.1 va S2.10.1 — Moderatsiya/Audit/Retention zanjiri (`AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`, GitHub Issue #27)
+
+- ID / nom: `S2.9.1` & `S2.10.1` / Moderatsiya, audit, retention ijrosi (`DB-082`, `DB-084`, `AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`, `Q-011`)
+- Bosqich / manba: `S2.9`, `S2.10` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (6, 7 va 8-bo'limlar; `INV-11`, `INV-13`, `AC-041`, `DB-079..086`, `DB-092`), `Q-011`
+- Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:41:29+05:00`
+- Holat: `Tekshiruvda`
+- Maqsad / doira / bog'liq vazifalar: `DB-082 moderation_appeals` da dastlabki moderatordan farqli apellyatsiya tekshiruvchisini (`original_moderator_id != appeal_reviewer_id`, `INV-11`) va kamida 15 belgili qaror izohini (`AC-041`), `DB-084 retention_executions` oqimini hamda `GET /api/v1/operations/pilot-readiness` endpointi orqali `RPO=24 soat`, `RTO=4 soat`, P1 circuit-breaker `CLOSED`, 94 jadval / 17/17 PostgreSQL invariantlari, 42 ta AC va `Q-011` (`R2_FREELANCE_MARKETPLACE=False`) chegarasini tekshirish (`S2.8.1` ga tayanadi; `S2` R1 dasturlash paketlarini yakunlaydi).
+- Tegiladigan fayllar: `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/app/main.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py`
+- Qabul mezonlari: O'z moderatsiya qarori ustidan tushgan apellyatsiyani ko'rib chiqish `409` (`INV-11`) bilan rad etiladi; `UNPUBLISHED_DRAFT` 25-kunida `WARN_EXPIRING` retention ijrosi yoziladi (`DB-084`); `/api/v1/operations/pilot-readiness` `pilot_ready: true` va `R2_FREELANCE_MARKETPLACE: false` qaytaradi.
+- Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`32/32 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
+- Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `32 passed in 1.44s`.
+- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Keyingi kichik qadam: Codex tomonidan `S1.1..S1.4` va `S2.1.1..S2.10.1` paketlarini ko'rib chiqish va qabul qilish (`Tekshiruvda` -> `Bajarildi`).
