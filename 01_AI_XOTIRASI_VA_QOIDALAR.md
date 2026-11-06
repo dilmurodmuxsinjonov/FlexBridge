@@ -298,3 +298,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 28 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.7.1` (`S2.7`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.8.1` — Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-014 — 2026-11-07T00:39:45+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-014` / `2026-11-07T00:39:45+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.8.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.7.1` yakunlanib PR `#24` (`bcedbf8`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#25` va `feature/s2-8-1-billing-quota-ac-042` tarmog'ida `DB-069 service_entitlements` (`SINGLE_POST_30D` = 149 000 UZS / 1 slot, `ORG_PLAN_30D` = 599 000 UZS / 5 parallel faol slot, `INV-04`), `AC-042` slot tekshiruvi (5 ta faol `PUBLISHED` e'lon to'lganda 6-chisini `409 CONCURRENT_QUOTA_REACHED` bilan bloklash va 1 tasi `CLOSED` bo'lgach ochish), `DB-070..072` (`orders`, `invoices`, `payment_attempts` idempotentlik kaliti `API-073`, `INV-05`, `INV-10`) hamda `DB-073 refunds` (`refund <= invoice` va `INV-11` dual-control) modulini (`app/services/billing.py`, `app/api/v1/billing.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/billing.py` yaratildi (`BillingQuotaService`, `create_order_and_invoice`, `process_payment_attempt`, `publish_opportunity_with_quota`, `update_opportunity_status`, `request_and_approve_refund`).
+  - `backend/app/api/v1/billing.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_8_1_billing_quota_ac_042.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.8` va `S2.8.1` `Tekshiruvda` holatiga o'tkazildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`30 passed in 1.46s`** (`S2.1..S2.7` 28 ta + `S2.8.1` 2 ta test: `test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042`, `test_refund_enforces_invoice_ceiling_inv_05_and_dual_control_inv_11`).
+- Muammo va cheklov: Yo'q; barcha 30 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.8.1` (`S2.8`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.9.1` va `S2.10.1` — Moderatsiya/Audit/Retention zanjiri (`AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`, `RPO=24s`, `RTO=4s`, `R2_FREELANCE_MARKETPLACE=False`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
