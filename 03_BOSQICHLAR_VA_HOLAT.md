@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1.1..S1.4` va `S2.1.1` bajarilib `Tekshiruvda` holatiga topshirildi (`backend/` FastAPI ilova asosi, `API-X05/X06`, `DB-083` 8 ta retention policy va 1.4 DB `pytest` sinovi `6/6` o'tdi); navbatdagi qadam — `S2.1.2` (Tranzaksiya boshqaruvchisi, `audit_events` append-only yordamchisi va P1 circuit-breaker).
+Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1.1..S1.4`, `S2.1.1` va `S2.1.2` bajarilib `Tekshiruvda` holatiga topshirildi (`DEFERRABLE` siklik FK tranzaksiya boshqaruvchisi, `audit_events`/`consent_events`/`billing_ledger` append-only himoyachisi va P1 moliya circuit-breaker `pytest`da `11/11` o'tdi); navbatdagi qadam — `S2.1.3` (`retention_policies` `DB-083` v1 va `feature_flags` `DB-092` servisi).
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -28,7 +28,7 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 
 | ID | Bo'lim | Holat | Tekshiruv yo'nalishi |
 | --- | --- | --- | --- |
-| S2.1 | Loyiha asosi va DB migratsiyalari | Jarayonda (`S2.1.1` Tekshiruvda, navbatdagi `S2.1.2`) | Manbadagi sxema, constraint va tranzaksiyalar |
+| S2.1 | Loyiha asosi va DB migratsiyalari | Jarayonda (`S2.1.1`, `S2.1.2` Tekshiruvda, navbatdagi `S2.1.3`) | Manbadagi sxema, constraint va tranzaksiyalar |
 | S2.2 | Hisob, sessiya, tashkilot va vakolatlar | Rejada | Rol/scope, o'zini tasdiqlamaslik, revoke |
 | S2.3 | Nomzod profili va bo'sh vaqt | Rejada | Vaqt intervallari va istisnolar |
 | S2.4 | E'lon, smena va moslik | Rejada | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
@@ -44,8 +44,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | Kichik ID | Kichik vazifa nomi | Holat | Mas'ul | Tegiladigan fayllar | Qabul va sinov mezoni |
 | --- | --- | --- | --- | --- | --- |
 | S2.1.1 | Backend ilova asosi, konfiguratsiya, `API-X05/X06` health va 1.4 DB migratsiya/invariant sinov paketi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/pyproject.toml`, `backend/requirements.txt`, `backend/app/core/config.py`, `backend/app/db/schema.py`, `backend/app/main.py`, `backend/tests/test_s2_1_1_foundation.py` | FastAPI `/api/v1/health/live`, `/api/v1/health/ready`, `/api/v1/meta/schema-summary` ishlaydi; `pytest` (`6/6 passed`) orqali 94 jadval, 935 maydon, 214 FK va 17/17 PostgreSQL invariantlari avtomatik tekshirildi (Issue `#5`) |
-| S2.1.2 | Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py` | Siklik FK (`opportunity ↔ revision`, `thread ↔ message`) bitta atomik tranzaksiyada yoziladi; `audit_events` va `consent_records` o'zgarmasligi hamda P1 moliya circuit-breaker `pytest`da tasdiqlanadi |
-| S2.1.3 | `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/retention.py`, `backend/app/services/feature_flags.py`, `backend/tests/test_s2_1_3_retention_flags.py` | 8 ta huquqiy saqlash muddati (`30 kun` .. `75 yil`) va feature flag holatlari API hamda servis darajasida tekshiriladi |
+| S2.1.2 | Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py` | Siklik FK (`opportunity ↔ revision`, `thread ↔ message`) bitta atomik tranzaksiyada yozildi; `audit_events`, `consent_events`, `billing_ledger` va revision o'zgarmasligi hamda P1 moliya circuit-breaker `pytest`da (`11/11 passed`) tasdiqlandi (Issue `#7`) |
+| S2.1.3 | `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/retention.py`, `backend/app/services/feature_flags.py`, `backend/tests/test_s2_1_3_retention_flags.py` | 8 ta huquqiy saqlash muddati (`30 kun` .. `75 yil`) va feature flag holatlari API hamda servis darajasida tekshiriladi |
 | S2.2.1 | Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/auth.py`, `backend/app/api/v1/auth.py`, `backend/tests/test_s2_2_1_auth_revoke.py` | Parol/TOTP tekshiruvi, 15s kesh + event-driven revoke: sessiya bekor qilingan zahoti himoyalangan endpoint `401 AUTH_REVOKED` qaytaradi (`AC-017`) |
 | S2.2.2 | Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/tests/test_s2_2_2_dual_control_scope.py` | O'z-o'zini tasdiqlash rad etiladi (`409 SELF_APPROVAL_FORBIDDEN`), begona korxona/muassasa obyekti `403 SCOPE_VIOLATION` oladi (`AC-041`) |
 
@@ -146,3 +146,17 @@ Keyingi kichik qadam:
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `6 passed in 0.62s`.
 - Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
 - Keyingi kichik qadam: `S2.1.2` — Tranzaksiya boshqaruvchisi (`DEFERRABLE` / `SET CONSTRAINTS ALL IMMEDIATE`), `audit_events` append-only yordamchisi va P1 moliya circuit-breaker modulini yaratish.
+
+### S2.1.2 — Tranzaksiya boshqaruvchisi (`DEFERRABLE`), `audit_events` append-only va P1 circuit-breaker (GitHub Issue #7)
+
+- ID / nom: `S2.1.2` / Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker
+- Bosqich / manba: `S2.1` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.4, 6 va 7-bo'limlar; `INV-06`, `INV-11`, `INV-13`, `INV-16`)
+- Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:08:22+05:00`
+- Holat: `Tekshiruvda`
+- Maqsad / doira / bog'liq vazifalar: Siklik FK juftliklari (`opportunities ↔ opportunity_revisions`, `daily_logs ↔ log_revisions`, `threads ↔ messages`) uchun `DEFERRABLE INITIALLY DEFERRED` va `SET CONSTRAINTS ALL IMMEDIATE` atomik tranzaksiya boshqaruvchisini (`app/db/session.py`), `audit_events`/`consent_events`/`billing_ledger` append-only hamda revision o'zgarmaslik himoyachisini (`app/core/audit.py`) va P1 moliya circuit-breaker modulini (`app/core/circuit_breaker.py`) yaratib `pytest`da tekshirish (`S2.1.1` ga tayanadi; `S2.1.3` va `S2.2..S2.9` uchun asos bo'ladi).
+- Tegiladigan fayllar: `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py`
+- Qabul mezonlari: Siklik FK yozuvlari bitta atomik tranzaksiya ichida `SET CONSTRAINTS ALL IMMEDIATE` bilan muvaffaqiyatli yoziladi, uzilgan FK bo'lsa to'liq `ROLLBACK` bo'ladi; `audit_events`, `consent_events`, `billing_ledger` da `UPDATE`/`DELETE` `23514` bilan rad etiladi; P1 circuit-breaker `OPEN` holatda moliya operatsiyalarini bloklaydi va tiklashda ikki shaxs (`actor_id != second_approver_id`) talab qiladi.
+- Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi va `pytest` (`11/11 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
+- Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `11 passed in 0.84s`.
+- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Keyingi kichik qadam: `S2.1.3` — `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisini yaratish.

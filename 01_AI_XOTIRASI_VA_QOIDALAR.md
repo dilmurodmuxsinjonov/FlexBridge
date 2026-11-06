@@ -144,3 +144,21 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Dastlabki test ishga tushirilishida `model["counts"]` o'rniga `model["stats"]` va `trg_guard_audit_events` o'rniga `trg_immutable_audit_events` kaliti aniqlandi hamda darhol tuzatilib `6/6` o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.1.1` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.1.2` — Tranzaksiya boshqaruvchisi (`DEFERRABLE` / `SET CONSTRAINTS ALL IMMEDIATE`), `audit_events`/`consent_events`/`billing_ledger` append-only yordamchisi va P1 moliya circuit-breaker modulini yaratish.
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-005 — 2026-11-07T00:09:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-005` / `2026-11-07T00:09:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.1.2` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.1.1` yakunlanib PR `#6` (`9ff7e8b`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#7` va `feature/s2-1-2-transactions-audit-circuit-breaker` tarmog'ida siklik FKlar uchun `DEFERRABLE` / `SET CONSTRAINTS ALL IMMEDIATE` tranzaksiya boshqaruvchisini (`app/db/session.py`), `audit_events`, `consent_events`, `billing_ledger` append-only va revision o'zgarmaslik himoyachisini (`app/core/audit.py`) hamda P1 moliya circuit-breaker modulini (`app/core/circuit_breaker.py`) yozib `pytest` orqali tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/db/session.py` yaratildi (`DeferredUnitOfWork`, `atomic_deferred`, `create_opportunity_with_initial_revision`, `create_thread_with_first_message`).
+  - `backend/app/core/audit.py` yaratildi (`AppendOnlyAuditStore`, `guard_opportunity_revision_update`, `guard_log_revision_update`).
+  - `backend/app/core/circuit_breaker.py` yaratildi (`FinanceCircuitBreaker` — P1 hodisasida moliya operatsiyalarini `P1_FINANCE_CIRCUIT_OPEN` bilan muzlatish va ikki shaxs tasdig'i bilan tiklash).
+  - `backend/tests/test_s2_1_2_transactions_audit.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi.
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`11 passed in 0.84s`** (`S2.1.1` 6 ta test + `S2.1.2` 5 ta test: `test_deferred_circular_fk_opportunity_and_thread_success`, `test_deferred_circular_fk_rollback_on_broken_reference`, `test_append_only_audit_consent_and_billing_ledger`, `test_published_opportunity_and_submitted_log_revision_immutability`, `test_p1_finance_circuit_breaker_and_dual_control_reset`).
+- Muammo va cheklov: Yo'q; barcha testlar birinchi urinishda 100% o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.1.2` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.1.3` — `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi hamda testlarini yaratib `S2.1` bo'limini yakunlash.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
