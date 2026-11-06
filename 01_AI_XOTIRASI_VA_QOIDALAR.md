@@ -281,3 +281,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 27 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.6.1` (`S2.6`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.7.1` — Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-013 — 2026-11-07T00:34:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-013` / `2026-11-07T00:34:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.7.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.6.1` yakunlanib PR `#22` (`a806d5f`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#23` va `feature/s2-7-1-files-quarantine-ac-042` tarmog'ida `DB-018 files` uchun `quarantine/` prefiksi, `ClamAV` + `pypdf` strukturaviy skaneri (`50 bet / 5000 obyekt / 20 MB` va 8 ta taqiqlangan token) hamda `API-X01..X03` 60s signed URL xizmatini (`app/services/files_quarantine.py`, `app/api/v1/files.py`) yaratish va `AC-042` (`PENDING_SCAN`/`QUARANTINED` faylga signed URL bermaslik) qoidasini `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/files_quarantine.py` yaratildi (`FileQuarantineService`, `scan_pdf_bytes_and_structure`, `initiate_upload_api_x01`, `complete_and_scan_api_x02`, `issue_signed_download_url_api_x03`).
+  - `backend/app/api/v1/files.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_7_1_files_quarantine_ac_042.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.7` `Tekshiruvda` holatiga o'tkazildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`28 passed in 1.48s`** (`S2.1..S2.6` 27 ta + `S2.7.1` 1 ta kompleks test: `test_ac_042_pending_scan_and_quarantined_pdf_never_receive_signed_url`).
+- Muammo va cheklov: Yo'q; barcha 28 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.7.1` (`S2.7`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.8.1` — Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`

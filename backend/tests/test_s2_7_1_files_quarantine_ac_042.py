@@ -1,0 +1,69 @@
+"""Automated test suite for S2.7.1: Private files, `quarantine/` ClamAV + `pypdf` structural scanner, and 60s signed URL (`INV-14`, `AC-042`)."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_ac_042_pending_scan_and_quarantined_pdf_never_receive_signed_url() -> None:
+    """Verify `AC-042` / `INV-14`:
+
+    - Newly uploaded file in `PENDING_SCAN` state is rejected by `API-X03` (`/download`) with 409.
+    - PDF containing `/JavaScript` or `/OpenAction` or >50 pages is marked `QUARANTINED` and rejected by `API-X03` with 409.
+    - Clean PDF transitions to `CLEAN` / `PRIVATE_READY` and receives a 60s signed URL (`expires_in_seconds == 60`).
+    """
+    # 1. Upload file -> starts in PENDING_SCAN under `quarantine/`
+    up = client.post(
+        "/api/v1/files/upload-init",
+        json={"owner_id": "cand-1", "filename": "resume.pdf"},
+    )
+    assert up.status_code == 201
+    file_id = up.json()["id"]
+    assert up.json()["scan_status"] == "PENDING_SCAN"
+    assert up.json()["storage_key"].startswith("quarantine/")
+
+    # Calling API-X03 while PENDING_SCAN must fail with 409
+    dl_pending = client.get(f"/api/v1/files/{file_id}/download", params={"requester_id": "cand-1"})
+    assert dl_pending.status_code == 409
+    assert dl_pending.json()["detail"]["code"] == "FILE_NOT_CLEAN_FOR_DOWNLOAD"
+
+    # 2. Scan PDF containing `/JavaScript` and `/OpenAction` -> QUARANTINED
+    scan_bad = client.post(
+        f"/api/v1/files/{file_id}/complete-scan",
+        json={"content_sample": "%PDF-1.7 /OpenAction << /S /JavaScript /JS (app.alert(1)) >>"},
+    )
+    assert scan_bad.status_code == 200
+    assert scan_bad.json()["scan_status"] == "QUARANTINED"
+    assert scan_bad.json()["visibility"] == "QUARANTINED"
+    assert "PDF_FORBIDDEN_TOKEN" in scan_bad.json()["quarantine_reason"]
+
+    # Calling API-X03 on QUARANTINED file must also fail with 409
+    dl_quarantined = client.get(f"/api/v1/files/{file_id}/download", params={"requester_id": "cand-1"})
+    assert dl_quarantined.status_code == 409
+
+    # 3. Upload and scan a clean PDF within resource bounds -> CLEAN & 60s signed URL issued
+    up_clean = client.post(
+        "/api/v1/files/upload-init",
+        json={"owner_id": "cand-1", "filename": "clean_transcript.pdf"},
+    ).json()
+    scan_ok = client.post(
+        f"/api/v1/files/{up_clean['id']}/complete-scan",
+        json={
+            "content_sample": "%PDF-1.7 Clean academic transcript content",
+            "page_count": 4,
+            "object_count": 45,
+            "uncompressed_mb": 1.2,
+        },
+    )
+    assert scan_ok.status_code == 200
+    assert scan_ok.json()["scan_status"] == "CLEAN"
+    assert scan_ok.json()["visibility"] == "PRIVATE_READY"
+
+    dl_ok = client.get(f"/api/v1/files/{up_clean['id']}/download", params={"requester_id": "cand-1"})
+    assert dl_ok.status_code == 200
+    assert dl_ok.json()["expires_in_seconds"] == 60
+    assert "sig=" in dl_ok.json()["signed_url"]
