@@ -1,0 +1,101 @@
+"""Automated test suite for S2.6.1: Internship daily logs, separated mentor vs academic teacher reviews, and `INV-09` cross-placement protection (`AC-040`)."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_ac_040_inv_09_workplace_vs_academic_log_reviews_and_placement_scope() -> None:
+    """Verify `AC-040` / `INV-09`:
+
+    - Workplace mentor review (`workplace_log_reviews`) and academic teacher review (`academic_log_reviews`)
+      are stored independently without overwriting each other.
+    - Attempting to review a daily log using a `mentor_assignment_id` or `academic_assignment_id`
+      belonging to a different `placement_id` fails with 409 (`23503`).
+    """
+    ma_p1 = client.post(
+        "/api/v1/internship-logs/mentor-assignments",
+        json={"placement_id": "pl-1", "organization_id": "org-1", "mentor_id": "mentor-1"},
+    ).json()
+    ma_p2 = client.post(
+        "/api/v1/internship-logs/mentor-assignments",
+        json={"placement_id": "pl-2", "organization_id": "org-1", "mentor_id": "mentor-2"},
+    ).json()
+
+    aa_p1 = client.post(
+        "/api/v1/internship-logs/academic-assignments",
+        json={"placement_id": "pl-1", "institution_id": "inst-1", "supervisor_id": "teacher-1"},
+    ).json()
+    aa_p2 = client.post(
+        "/api/v1/internship-logs/academic-assignments",
+        json={"placement_id": "pl-2", "institution_id": "inst-1", "supervisor_id": "teacher-2"},
+    ).json()
+
+    log_p1 = client.post(
+        "/api/v1/internship-logs/daily-logs",
+        json={
+            "placement_id": "pl-1",
+            "author_id": "student-1",
+            "log_date": "2026-11-07",
+            "summary_text": "PostgreSQL GiST va composite FK migratsiyalarini o'rgandim.",
+            "total_minutes": 240,
+        },
+    ).json()
+
+    # 1. Cross-placement mentor review (ma_p2 on log_p1) must fail with 409 (`23503`)
+    bad_wp = client.post(
+        f"/api/v1/internship-logs/daily-logs/{log_p1['id']}/workplace-reviews",
+        json={
+            "placement_id": "pl-1",
+            "mentor_assignment_id": ma_p2["id"],
+            "decision": "APPROVED",
+            "comment": "Boshqa placement mentori",
+        },
+    )
+    assert bad_wp.status_code == 409
+    assert bad_wp.json()["detail"]["sqlstate"] == "23503"
+
+    # 2. Cross-placement academic review (aa_p2 on log_p1) must fail with 409 (`23503`)
+    bad_ac = client.post(
+        f"/api/v1/internship-logs/daily-logs/{log_p1['id']}/academic-reviews",
+        json={
+            "placement_id": "pl-1",
+            "academic_assignment_id": aa_p2["id"],
+            "decision": "ACCEPTED",
+            "academic_grade": 95,
+            "comment": "Boshqa placement o'qituvchisi",
+        },
+    )
+    assert bad_ac.status_code == 409
+    assert bad_ac.json()["detail"]["sqlstate"] == "23503"
+
+    # 3. Valid workplace mentor review and academic supervisor review both succeed independently
+    ok_wp = client.post(
+        f"/api/v1/internship-logs/daily-logs/{log_p1['id']}/workplace-reviews",
+        json={
+            "placement_id": "pl-1",
+            "mentor_assignment_id": ma_p1["id"],
+            "decision": "APPROVED",
+            "comment": "Amaliy vazifa korxona talabi bo'yicha bajarildi.",
+        },
+    )
+    assert ok_wp.status_code == 201
+    assert ok_wp.json()["reviewer_kind"] == "WORKPLACE_MENTOR"
+
+    ok_ac = client.post(
+        f"/api/v1/internship-logs/daily-logs/{log_p1['id']}/academic-reviews",
+        json={
+            "placement_id": "pl-1",
+            "academic_assignment_id": aa_p1["id"],
+            "decision": "ACCEPTED",
+            "academic_grade": 96,
+            "comment": "O'quv dasturi bo'yicha a'lo baholandi.",
+        },
+    )
+    assert ok_ac.status_code == 201
+    assert ok_ac.json()["reviewer_kind"] == "ACADEMIC_SUPERVISOR"
+    assert ok_ac.json()["academic_grade"] == 96

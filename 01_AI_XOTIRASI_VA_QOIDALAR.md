@@ -264,3 +264,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 26 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.5.1` (`S2.5`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.6.1` — Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-012 — 2026-11-07T00:31:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-012` / `2026-11-07T00:31:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.6.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.5.1` yakunlanib PR `#20` (`d2cc277`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#21` va `feature/s2-6-1-internship-diary-ac-040` tarmog'ida amaliyot kundaligi (`daily_logs`, `log_revisions`) uchun korxona mentori (`workplace_log_reviews`) va oliygoh/texnikum o'qituvchisi (`academic_log_reviews`) baholarining alohida saqlanishi (`AC-040`) hamda `INV-09` composite FK (`23503`) tekshiruvini (`app/services/internship_logs.py`, `app/api/v1/internship_logs.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/internship_logs.py` yaratildi (`InternshipLogService`, `create_mentor_assignment`, `create_academic_assignment`, `create_daily_log_with_revision`, `submit_workplace_log_review`, `submit_academic_log_review`).
+  - `backend/app/api/v1/internship_logs.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_6_1_internship_diary_ac_040.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.6` `Tekshiruvda` holatiga o'tkazildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`27 passed in 1.44s`** (`S2.1..S2.5` 26 ta + `S2.6.1` 1 ta kompleks test: `test_ac_040_inv_09_workplace_vs_academic_log_reviews_and_placement_scope`).
+- Muammo va cheklov: Yo'q; barcha 27 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.6.1` (`S2.6`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.7.1` — Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`

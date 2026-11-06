@@ -16,6 +16,7 @@ from fastapi import FastAPI, HTTPException
 from app.api.v1.auth import router as auth_router
 from app.api.v1.availability import router as availability_router
 from app.api.v1.governance import router as governance_router
+from app.api.v1.internship_logs import router as internship_logs_router
 from app.api.v1.opportunities import router as opportunities_router
 from app.api.v1.placements import router as placements_router
 from app.core.config import settings
@@ -31,6 +32,7 @@ app.include_router(governance_router)
 app.include_router(availability_router)
 app.include_router(opportunities_router)
 app.include_router(placements_router)
+app.include_router(internship_logs_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])
