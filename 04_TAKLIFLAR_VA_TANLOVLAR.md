@@ -18,6 +18,7 @@ Manba: ushbu suhbatdagi 2026-11-06 topshirig'i va loyiha uchun berilgan AGENTS.m
 | Q-008 | Git va GitHub (`https://github.com/dilmurodmuxsinjonov/FlexBridge.git`) orqali Issue → Branch → Commit → PR → Code Review → Merge tartibida ishlanadi | Tasdiqlangan (2026-11-06); `origin/main` ulandi |
 | Q-009 | Amalga oshiruvchi AI sifatida `Antigravity` (`Gemini 4 Argon (High)`, sessiya `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) ishni boshlaydi | Tasdiqlangan (2026-11-06); `O-001` hal qilindi |
 | Q-010 | Foydalanuvchi (`2026-11-06`) texnik va me'moriy qarorlarni AI ixtiyoriga topshirdi va qurishni davom ettirishni tasdiqladi | Tasdiqlangan; `T-007` (Variant A) va `T-008` (Variant A) qabul qilindi |
+| Q-011 | Frilanserlik keyinchalik (`R2` bosqichida) qo'shiladi; hozir (`R1` doirasida) frilanserlik qo'shilmaydi (`"eslab qol keyinchalik firlanserlik qoshiladi lekin hozir uni qoshmaymiz"`, 2026-11-07) | Tasdiqlangan (2026-11-07); arxitektura va `DB-092 feature_flags` (`R2_FREELANCE_MARKETPLACE=False`) keyinchalik kengaytirishga tayyor holda saqlanadi, R1 kodida frilans oqimlari yozilmaydi |
 
 ## Mavjud hujjatlardagi takliflar
 

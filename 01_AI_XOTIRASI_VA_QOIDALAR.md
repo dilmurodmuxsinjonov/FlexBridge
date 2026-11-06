@@ -38,7 +38,7 @@ Texnik tafovutlarda 1.4 hujjatidagi aniq tuzatish asos bo'ladi. U barcha avvalgi
 
 ## Loyiha bo'yicha eslab qolish kerak bo'lgan asoslar
 
-- FlexBridge: 18+ nomzodlar uchun vaqt va malakaga mos yarim stavkali ish, umumiy va akademik amaliyot. Frilans keyingi bosqich.
+- FlexBridge: 18+ nomzodlar uchun vaqt va malakaga mos yarim stavkali ish, umumiy va akademik amaliyot. Frilans keyingi bosqich (`Q-011`, 2026-11-07: foydalanuvchi alohida eslatdi — keyinchalik `R2` da frilanserlik qo'shiladi, lekin hozir `R1` da frilanserlik qo'shilmaydi; arxitektura va `R2_FREELANCE_MARKETPLACE=False` bayrog'i keyingi kengayishga tayyor turadi).
 - Ish va akademik amaliyot alohida oqimlar; mentorning ish xulosasi bilan o'qituvchining akademik xulosasi ajratiladi.
 - Nomzodning ish qidirishi va arizasi bepul; oddiy ish maoshidan ulush olinmaydi.
 - Hozir papkada ilova kodi, ishga tushirish konfiguratsiyasi yoki amaldagi mahsulot dalili yo'q.
@@ -246,4 +246,21 @@ Tekshiruvchi AI / tekshiruv natijasi:
   - `python -m pytest D:\FlexBridge\backend -v` → **`24 passed in 1.32s`** (`S2.1..S2.3` 22 ta + `S2.4.1` 2 ta test: `test_ac_039_contract_type_and_compensation_matrix_inv_03`, `test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions`).
 - Muammo va cheklov: Yo'q; barcha 24 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.4.1` (`S2.4`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.5.1` — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-011 — 2026-11-07T00:27:30+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-011` / `2026-11-07T00:27:30+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.5.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.4.1` yakunlanib PR `#18` (`41ed9b2`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#19` va `feature/s2-5-1-placements-inv-08` tarmog'ida `applications`, `application_attempts`, `offers` va `placements` uchun `INV-08` cross-table composite FK (`23503`) tekshiruvlarini hamda nomzod va korxona ikki tomonlama ish boshlanishini tasdiqlash (`PENDING_START_CONFIRMATION` -> `ACTIVE`) oqimini (`app/services/placements.py`, `app/api/v1/placements.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/placements.py` yaratildi (`ApplicationPlacementService`, `create_application`, `create_application_attempt`, `create_offer`, `create_placement`, `confirm_placement_start`).
+  - `backend/app/api/v1/placements.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_5_1_placements_inv_08.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.5` `Tekshiruvda` holatiga o'tkazildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`26 passed in 1.41s`** (`S2.1..S2.4` 24 ta + `S2.5.1` 2 ta test: `test_inv_08_application_attempts_and_placements_composite_fk_scope`, `test_placement_requires_two_party_start_confirmation`).
+- Muammo va cheklov: Yo'q; barcha 26 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.5.1` (`S2.5`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.6.1` — Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
