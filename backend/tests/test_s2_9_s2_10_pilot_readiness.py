@@ -1,0 +1,82 @@
+"""S2.9.1 & S2.10.1 Tests: Moderation Appeals, Retention Execution (DB-084) & R1 Pilot Readiness Report."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+
+client = TestClient(app)
+
+
+def test_s2_9_1_moderation_appeal_dual_control_and_retention_execution_ac_041():
+    """Verifies S2.9.1: Moderation appeal requires distinct reviewer (INV-11) & justification >= 15 (AC-041), plus DB-084 retention execution."""
+    # Same moderator attempting to review their own moderation action's appeal -> 409 INV-11
+    same_mod_res = client.post(
+        "/api/v1/operations/moderation-appeals",
+        json={
+            "moderation_action_id": "mod-act-1",
+            "appellant_user_id": "emp-user-1",
+            "original_moderator_id": "mod-1",
+            "appeal_reviewer_id": "mod-1",
+            "appeal_reason": "Updated contract terms attached",
+            "decision": "OVERTURNED",
+            "resolution_note": "Verified updated labor contract document is compliant.",
+        },
+    )
+    assert same_mod_res.status_code == 409
+    assert "INV-11" in same_mod_res.json()["detail"]
+
+    # Distinct senior moderator reviewing appeal with valid >=15 char resolution_note -> 201
+    valid_appeal = client.post(
+        "/api/v1/operations/moderation-appeals",
+        json={
+            "moderation_action_id": "mod-act-1",
+            "appellant_user_id": "emp-user-1",
+            "original_moderator_id": "mod-1",
+            "appeal_reviewer_id": "mod-senior-2",
+            "appeal_reason": "Updated contract terms attached",
+            "decision": "OVERTURNED",
+            "resolution_note": "Verified updated labor contract document is compliant.",
+        },
+    )
+    assert valid_appeal.status_code == 201
+    assert valid_appeal.json()["decision"] == "OVERTURNED"
+
+    # Execute retention job for UNPUBLISHED_DRAFT at day 25 -> WARN_EXPIRING (23-day warning window)
+    ret_warn = client.post(
+        "/api/v1/operations/retention-executions",
+        json={
+            "data_category": "UNPUBLISHED_DRAFT",
+            "age_days": 25,
+            "records_scanned": 12,
+            "executed_by": "ops-admin-1",
+        },
+    )
+    assert ret_warn.status_code == 201
+    assert ret_warn.json()["executed_action"] == "WARN_EXPIRING"
+    assert ret_warn.json()["records_actioned"] == 12
+
+
+def test_s2_10_1_r1_pilot_readiness_report_and_q_011_freelance_guard():
+    """Verifies S2.10.1: Pilot readiness report confirms 94 tables, 17/17 PG checks, RPO=24h/RTO=4h, and R2_FREELANCE_MARKETPLACE=False (Q-011)."""
+    res = client.get("/api/v1/operations/pilot-readiness")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["pilot_ready"] is True
+    assert data["release_stage"] == "R1_PILOT"
+    assert data["q_011_r2_freelance_deferred"]["R2_FREELANCE_MARKETPLACE"] is False
+    assert data["q_011_r2_freelance_deferred"]["R1_PART_TIME_JOBS"] is True
+    assert data["q_011_r2_freelance_deferred"]["R1_GENERAL_INTERNSHIPS"] is True
+    assert data["q_011_r2_freelance_deferred"]["R1_ACADEMIC_INTERNSHIPS"] is True
+    assert data["disaster_recovery_and_safety"]["rpo_hours_target"] == 24
+    assert data["disaster_recovery_and_safety"]["rto_hours_target"] == 4
+    assert data["disaster_recovery_and_safety"]["p1_finance_circuit_breaker_state"] == "CLOSED"
+    assert data["schema_and_invariants"]["tables"] == 94
+    assert data["schema_and_invariants"]["fields"] == 935
+    assert data["schema_and_invariants"]["foreign_keys"] == 214
+    assert data["schema_and_invariants"]["acceptance_criteria"] == 42
+    assert data["schema_and_invariants"]["reference_errors"] == 0
+    assert data["schema_and_invariants"]["postgres_17_of_17_passed"] is True
