@@ -1,0 +1,203 @@
+{
+  "review": "REV-001",
+  "generated_at": "2026-11-06T19:52:08.283720+00:00",
+  "environment": "local TestClient / service fixtures, no external integrations",
+  "probes": 17,
+  "defects_observed": 17,
+  "results": [
+    {
+      "probe": "public_admin_registration",
+      "defect_observed": true,
+      "evidence": {
+        "status": 201,
+        "roles": [
+          "SUPER_ADMIN"
+        ]
+      }
+    },
+    {
+      "probe": "unauthenticated_admin_action",
+      "defect_observed": true,
+      "evidence": {
+        "status": 201,
+        "authorization_header": false,
+        "setup": "existing supervision seeded as service fixture; actor identity and role supplied only by request body"
+      }
+    },
+    {
+      "probe": "payment_without_provider_confirmation",
+      "defect_observed": true,
+      "evidence": {
+        "status": 200,
+        "payment_status": "SUCCEEDED",
+        "provider_called": false
+      }
+    },
+    {
+      "probe": "refund_total_exceeds_payment",
+      "defect_observed": true,
+      "evidence": {
+        "statuses": [
+          201,
+          201
+        ],
+        "invoice_amount": 599000,
+        "approved_total": 1198000
+      }
+    },
+    {
+      "probe": "idempotency_key_ignores_payload",
+      "defect_observed": true,
+      "evidence": {
+        "status": 200,
+        "returned_old_invoice": true
+      }
+    },
+    {
+      "probe": "expired_entitlement_publish",
+      "defect_observed": true,
+      "evidence": {
+        "status": 200,
+        "setup": "service fixture: valid_until yesterday"
+      }
+    },
+    {
+      "probe": "publish_bypasses_quota_and_contract_required",
+      "defect_observed": true,
+      "evidence": {
+        "statuses": [
+          201,
+          201,
+          201,
+          201,
+          201,
+          201
+        ],
+        "published_count": 6,
+        "entitlement": false,
+        "contract_type_supplied": false
+      }
+    },
+    {
+      "probe": "client_can_clear_quarantine",
+      "defect_observed": true,
+      "evidence": {
+        "before": "QUARANTINED",
+        "after": "CLEAN",
+        "object_uploaded": false
+      }
+    },
+    {
+      "probe": "unrelated_user_receives_private_url",
+      "defect_observed": true,
+      "evidence": {
+        "status": 200,
+        "owner_equals_requester": false,
+        "authorization_header": false
+      }
+    },
+    {
+      "probe": "operations_breaker_does_not_freeze_billing",
+      "defect_observed": true,
+      "evidence": {
+        "status": 201,
+        "operations_state": "OPEN",
+        "billing_state": "CLOSED"
+      }
+    },
+    {
+      "probe": "pilot_ready_while_billing_frozen",
+      "defect_observed": true,
+      "evidence": {
+        "pilot_ready": true,
+        "billing_state": "OPEN"
+      }
+    },
+    {
+      "probe": "circuit_open_returns_500_instead_of_503",
+      "defect_observed": true,
+      "evidence": {
+        "status": 500
+      }
+    },
+    {
+      "probe": "negative_minutes_submitted",
+      "defect_observed": true,
+      "evidence": {
+        "http_status": 201,
+        "status": "SUBMITTED",
+        "total_minutes": -1
+      }
+    },
+    {
+      "probe": "adjacent_availability_not_combined",
+      "defect_observed": true,
+      "evidence": {
+        "covered": false,
+        "intervals": [
+          [
+            540,
+            720
+          ],
+          [
+            720,
+            900
+          ]
+        ],
+        "shift": [
+          540,
+          900
+        ]
+      }
+    },
+    {
+      "probe": "pbkdf2_labeled_argon2id",
+      "defect_observed": true,
+      "evidence": {
+        "actual_algorithm": "PBKDF2-HMAC-SHA256",
+        "declared_prefix": "argon2id_v1"
+      }
+    },
+    {
+      "probe": "session_not_shared_across_processes",
+      "defect_observed": true,
+      "evidence": {
+        "status_in_second_process": 401,
+        "first_process_created_session": true
+      }
+    },
+    {
+      "probe": "canonical_critical_contracts_absent",
+      "defect_observed": true,
+      "evidence": {
+        "missing": [
+          {
+            "id": "API-003",
+            "method": "POST",
+            "path": "/api/v1/matching/preview"
+          },
+          {
+            "id": "API-060",
+            "method": "PATCH",
+            "path": "/api/v1/me/security"
+          },
+          {
+            "id": "API-061",
+            "method": "DELETE",
+            "path": "/api/v1/me/sessions/{id}"
+          }
+        ],
+        "structural_route_matches": 5,
+        "canonical_contracts": 132,
+        "matched_ids": [
+          "API-015",
+          "API-018",
+          "API-X03",
+          "API-X05",
+          "API-X06"
+        ],
+        "note": "Route signature comparison only; includes later-release contracts and is not feature completion percentage."
+      }
+    }
+  ]
+}

@@ -332,3 +332,41 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 32 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S1` (`S1.1..S1.4`) va `S2` (`S2.1..S2.10` / `S2.1.1..S2.10.1`) R1 doirasidagi barcha rejalashtirilgan kichik paketlar to'liq amalga oshirilib, `Tekshiruvda` holatiga topshirildi (`R2` frilans oqimi `Q-011` qaroriga muvofiq qo'shilmadi va `R2_FREELANCE_MARKETPLACE=False` holatida saqlandi).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-016 - 2026-11-07, Asia/Tashkent - Codex
+
+- AI / sessiya / model: Codex / sessiya identifikatori mavjud emas / aniq model identifikatori mavjud emas. Boshqa agentlar chaqirilmadi.
+- Vazifa ID / rol: `REV-001` / mustaqil tekshiruvchi. Foydalanuvchi: "qilingan ishlarga baho berib chiq".
+- Boshlang'ich holat: `8bb0ad2`, ishchi daraxt toza; S1/S2 `Tekshiruvda`, pilot readiness `true` qaytaradi.
+- Qilingan ish: kod, kanonik v1.4 JSON/SQL, talablar xaritasi, 01..04 hujjatlar va testlar solishtirildi. `reviews/2026-11-07/BAHOLASH.md`, `reproduce_findings.py`, `probe_results.json`, `reproduce_schema.ps1`, `schema_verification.json` yaratildi; 03-fayldagi S2 holatlari tekshiruv hukmi bilan yangilandi. Ilova kodi o'zgartirilmadi.
+- Haqiqiy tekshiruv: `cd backend; python -m pytest -q` -> 32 passed, 1 deprecation warning, 1.54s. Mavjud SQL verifieri alohida review hisobot yo'li bilan PGlite 0.5.15 / PostgreSQL 18.6 WASM da qayta bajarildi -> 17/17. Kanonik eski hisobot o'zgartirilmadi.
+- Salbiy tekshiruv: `python reviews/2026-11-07/reproduce_findings.py` -> 17/17 holatda kamchilik kuzatildi; bu qabul testlari o'tgani degani emas. Sinovlar sintetik, lokal TestClient va servis fixturelari orqali; tashqi to'lov yoki fayl omboriga yozilmadi.
+- Hukm: umumiy 4/10, pilotga tayyor emas. 13 ta ustuvor kamchilik: mijoz bergan vakolatga ishonish, provaydersiz SUCCEEDED to'lov, xotiradagi ma'lumotlar, haqiqiy skaner/ACL yo'qligi, kvota bypassi, ortiqcha jami refund, API/AC chalkashligi, noto'g'ri kundalik submiti, ajralgan breaker va yolg'on readiness, idempotency payloadi, tarif muddati, PBKDF2ni Argon2id deb belgilash, tutash availability qamrovi.
+- Oldingi yozuvlarga tuzatish: LOG-004..015 dagi "muammo yo'q", barcha AC va R1 tayyorligi talqini mustaqil tekshiruvda tasdiqlanmadi. 32 ta test hozirgi prototip xulqini tekshiradi; 42 ACning barchasi qabul qilinganini bildirmaydi. `API-060/061`, `API-073` va `AC-017/040` havolalari ayrim kod/test/jurnallarda kanonik modelga mos emas. SQL modelida 214 FK metadata, yangi DB introspeksiyasida 233 FK constraint bor; bu sonlar alohida ko'rsatiladi.
+- Chegara: PDF/PPTX manbalarining to'liq qayta auditi, production PostgreSQL 17, tashqi integratsiyalar, backup/restore, brauzer va end-to-end pilot sinovlari bajarilmadi. S1 va S2.1.3 avtomatik `Bajarildi` qilinmadi.
+- Topshirilgan holat: `REV-001` Bajarildi; S2 bo'limlari Tuzatish kerak. Keyingi qadam: hisobotdagi kanonik R1 kontraktlari, real DB va server-side auth/scope qatlamidan boshlab alohida kichik tuzatish paketlari.
+
+### LOG-017 — 2026-11-07, Asia/Tashkent — Codex
+
+- AI / sessiya / model: Codex / sessiya identifikatori mavjud emas / aniq model identifikatori mavjud emas. Boshqa agentlar chaqirilmadi.
+- Vazifa / rol: `TD-001`, foydalanuvchi aniqlangan tuzatishlar aynan qanday bajarilishini to'liq texnik tushuntirishni so'radi.
+- Natija: `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md` yaratildi: 19 bo'lim, mavjud SQL/API nomlari, arxitektura, 14 ta taklif etilgan FIX paketi, tranzaksiya/locking, auth/scope/revoke, pul/refund/idempotency, S3/AV/PDF, outbox, matching, ish/amaliyot, kundalik, retention/hold, readiness/restore va qabul mezonlari.
+- Aniqlashtirish: mavjud sxemada `sessions`, `payment_events`, `outbox_events`, `idempotency_keys`, `incidents`, `restore_runs` bor. DB-084 `legal_holds`; `retention_executions` emas. Oddiy ish `job_engagements`, amaliyot `placements`; shartnoma enumlari ham prototipdan farq qiladi. Yangi kerakli ustunlar tavsiya sifatida aniq ajratildi.
+- Qo'llangan ko'nikmalar: Deep Tech Engineering va Security First Design. Texnik tafsilotlar rasmiy PostgreSQL 17, SQLAlchemy 2.0, FastAPI, PgBouncer, Psycopg, S3, Redis va pypdf manbalari bilan tekshirildi; havolalar qo'llanmada.
+- Tekshiruv: jadvaldagi 13 API method/path v1.4 JSONga to'liq mos; 14 FIX paketi va code fence tuzilishi tekshirildi; `git diff --check` xatosiz. Ilova kodi va DB sxema o'zgartirilmadi; shu tushuntirish uchun mahsulot testlarini qayta bajarish talab qilinmadi.
+- Holat: `TD-001` Bajarildi; bu texnik loyihalash natijasi, FIX paketlari hali bajarilmagan. S2 `Tuzatish kerak` bo'lib qoladi. Keyingi amalga oshirish FIX-01 kontrakt xaritasi va FIX-02 haqiqiy PostgreSQL asosidan boshlanadi.
+
+### LOG-018 — 2026-11-07T01:18:45+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-018` / `2026-11-07T01:18:45+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `REV-001` va `TD-001` tahlili / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: Codex tomonidan `LOG-016` (`REV-001` — mustaqil baholash: `4/10`, 13 ta ustuvor kamchilik `R-01..R-13`, 17/17 salbiy probe `reproduce_findings.py`) va `LOG-017` (`TD-001` — `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md`, 19 bo'lim va 14 ta `FIX-01..FIX-14` tuzatish paketi) kiritilgan. Foydalanuvchi: `"topilgan hatiliklar boyicha Texnik qo‘llanma tayyorlandi va loyiha jurnaliga yozildi va baholashga kiritildi ularni organib chiqib"`. Maqsad: `reviews/2026-11-07/` ichidagi barcha 6 ta faylni va `01`, `03` jurnallardagi yangilanishlarni to'liq o'rganib chiqish hamda `FIX-01..FIX-14` rejasini `03_BOSQICHLAR_VA_HOLAT.md` ga (`Rejada` holatida) kiritish.
+- Qilingan ish / o'zgargan fayllar:
+  - `reviews/2026-11-07/BAHOLASH.md`, `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md`, `reviews/2026-11-07/reproduce_findings.py`, `reviews/2026-11-07/probe_results.json`, `reviews/2026-11-07/reproduce_schema.ps1`, `reviews/2026-11-07/schema_verification.json` hamda `01_AI_XOTIRASI_VA_QOIDALAR.md` (`LOG-016`, `LOG-017`) va `03_BOSQICHLAR_VA_HOLAT.md` to'liq o'qib chiqildi.
+  - `03_BOSQICHLAR_VA_HOLAT.md` ga `TD-001` asosidagi `FIX-01..FIX-14` tuzatish paketlari jadvali (`Rejada` holatida) qo'shildi. Ilova kodi ushbu o'rganish bosqichida o'zgartirilmadi.
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `git status -sb` va `read_file` orqali barcha 6 ta review artefakti (`BAHOLASH.md` 162 qator, `TUZATISH_TEXNIK_QOLLANMA.md` 395 qator, `reproduce_findings.py` 190 qator, `probe_results.json` 17/17 probe, `schema_verification.json` 94 jadval / 935+4 ustun / 233 DB FK constraint vs 214 model FK metadata) to'liq tahlil qilindi.
+- Muammo va cheklov: `REV-001` da qayd etilgan 13 ta ustuvor kamchilik (`R-01..R-13`) va 17 ta salbiy probe (`defect_observed: true`) to'liq tan olindi: hozirgi backend in-memory prototip bo'lib, kanonik API marshrutlari (`API-003`, `API-043`, `API-046`, `API-060`, `API-061`, `API-081`, `API-094`, `API-095`, `API-116`, `API-X01..X04`), server-side `ActorContext` autentifikatsiyasi, haqiqiy PostgreSQL/SQLAlchemy tranzaksiyalari va DB-level lock/trigger integratsiyasi `FIX-01..FIX-14` paketlarida bosqichma-bosqich amalga oshirilishi zarur.
+- Topshirilgan holat / keyingi qadam: `REV-001` va `TD-001` to'liq o'rganildi; `S2` bo'limlari `Tuzatish kerak` va `FIX-01..FIX-14` paketlari `Rejada` holatida turibdi. Keyingi qadam: `REV-001`/`TD-001` hujjatlarini GitHubga commit/PR qilish va `FIX-01` (`contracts/r1_api_matrix.csv`, kanonik API/AC/SQL nomlarini moslashtirish) hamda `FIX-02` (haqiqiy PostgreSQL + SQLAlchemy + Alembic) paketlaridan boshlab tuzatishni boshlash.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `REV-001 va TD-001 asosida FIX-01..FIX-14 ketma-ketligi belgilangan`
