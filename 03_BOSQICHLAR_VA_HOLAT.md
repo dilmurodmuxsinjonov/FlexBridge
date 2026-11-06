@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`), `S2.1` (`S2.1.1..S2.1.3`), `S2.2` (`S2.2.1..S2.2.2`), `S2.3` (`S2.3.1`) va `S2.4` (`S2.4.1`) to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `24/24` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi); navbatdagi qadam — `S2.5.1` (Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi va `INV-08` cross-table FK).
+Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`), `S2.1` (`S2.1.1..S2.1.3`), `S2.2` (`S2.2.1..S2.2.2`), `S2.3` (`S2.3.1`), `S2.4` (`S2.4.1`) va `S2.5` (`S2.5.1`) to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `26/26` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi); navbatdagi qadam — `S2.6.1` (Akademik amaliyot, tayinlov, kundalik va mentor vs o'qituvchi bahosi ajratilishi `INV-09`, `AC-040`).
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -32,8 +32,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | S2.2 | Hisob, sessiya, tashkilot va vakolatlar | Tekshiruvda (`S2.2.1..S2.2.2`) | Rol/scope, o'zini tasdiqlamaslik, revoke |
 | S2.3 | Nomzod profili va bo'sh vaqt | Tekshiruvda (`S2.3.1`) | Vaqt intervallari va istisnolar |
 | S2.4 | E'lon, smena va moslik | Tekshiruvda (`S2.4.1`) | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
-| S2.5 | Ariza, suhbat, taklif, ish boshlanishi | Rejada — navbatdagi (`S2.5.1`) | Holat o'tishlari va ikki tomon tasdig'i |
-| S2.6 | Akademik amaliyot, tayinlov, kundalik | Rejada | Mentor/o'qituvchi ajratilishi, AC-040 |
+| S2.5 | Ariza, suhbat, taklif, ish boshlanishi | Tekshiruvda (`S2.5.1`) | Holat o'tishlari va ikki tomon tasdig'i |
+| S2.6 | Akademik amaliyot, tayinlov, kundalik | Rejada — navbatdagi (`S2.6.1`) | Mentor/o'qituvchi ajratilishi, AC-040 |
 | S2.7 | Xususiy fayllar, karantin, eksport | Rejada | Scan holati, ruxsat va signed URL; AC-042 |
 | S2.8 | Tarif, kvota, to'lov va qaytarish | Rejada | Parallel limit, pul yaxlitligi, dual-control |
 | S2.9 | Moderatsiya, audit va saqlash siyosati | Rejada | Scope, o'zgarmas tarix, asoslangan retention; AC-041 |
@@ -50,8 +50,8 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 | S2.2.2 | Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/tests/test_s2_2_2_dual_control_scope.py` | O'z-o'zini tasdiqlash rad etildi (`409 SELF_APPROVAL_FORBIDDEN`), begona korxona/muassasa obyekti `403 SCOPE_VIOLATION` oldi, `API-060`/`061` va moderatsiya asoslari `pytest`da (`20/20 passed`) tasdiqlandi (Issue `#13`) |
 | S2.3.1 | Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolar (`INV-01`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/tests/test_s2_3_1_availability.py` | Ustma-ust tushuvchi `[)` intervallar `409 OVERLAPPING_AVAILABILITY_RULE` (`23P01`) bilan rad etildi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilindi (`INV-01`, `pytest` `22/22 passed`, Issue `#15`) |
 | S2.4.1 | E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/tests/test_s2_4_1_matching_ac_039.py` | `contract_type` + maosh mosligi, `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` va ustma-ust istisno chegirilishi (`AC-039`, `pytest` `24/24 passed`, Issue `#17`) |
-| S2.5.1 | Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/tests/test_s2_5_1_placements_inv_08.py` | `application_attempts` va `placements` boshqa e'longa bog'langan taklifni `409` (`23503`) bilan rad etadi (`INV-08`); ish boshlanishi ikki tomon tasdig'ini talab qiladi |
-| S2.6.1 | Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py` | `workplace_log_reviews` va `academic_log_reviews` alohida jadvallarda yuritiladi va begona placement kundaligini `409` (`23503`) bilan rad etadi (`AC-040`) |
+| S2.5.1 | Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/tests/test_s2_5_1_placements_inv_08.py` | `application_attempts` va `placements` boshqa e'longa bog'langan taklifni `409` (`23503`) bilan rad etdi (`INV-08`); ish boshlanishi ikki tomon tasdig'ini talab qildi (`pytest` `26/26 passed`, Issue `#19`) |
+| S2.6.1 | Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`) | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py` | `workplace_log_reviews` va `academic_log_reviews` alohida jadvallarda yuritiladi va begona placement kundaligini `409` (`23503`) bilan rad etadi (`AC-040`) |
 | S2.7.1 | Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/files_quarantine.py`, `backend/app/api/v1/files.py`, `backend/tests/test_s2_7_1_files_quarantine_ac_042.py` | `PENDING_SCAN`/`QUARANTINED` faylga signed URL berilmaydi (`409`/`403`); `/JS` yoki `/OpenAction` bor PDF karantinga olinadi (`AC-042`) |
 | S2.8.1 | Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`) | Rejada | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/billing.py`, `backend/app/api/v1/billing.py`, `backend/tests/test_s2_8_1_billing_quota_ac_042.py` | `ORG_PLAN_30D` 5 ta aktiv e'lon to'lganda 6-e'lonni `409 concurrent_quota_reached` bilan to'xtatadi (`AC-042`), 1 tasi yopilgach yangisiga ruxsat beradi |
 
@@ -236,3 +236,17 @@ Keyingi kichik qadam:
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `24 passed in 1.32s`.
 - Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
 - Keyingi kichik qadam: `S2.5.1` — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK.
+
+### S2.5.1 — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK (GitHub Issue #19)
+
+- ID / nom: `S2.5.1` / Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK
+- Bosqich / manba: `S2.5` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.3-bo'lim `INV-08`, `DB-031`, `DB-032`, `DB-038`, `DB-041`), `FlexBridge_Ustoz_uchun_loyiha_izohi.md`
+- Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:26:35+05:00`
+- Holat: `Tekshiruvda`
+- Maqsad / doira / bog'liq vazifalar: `applications`, `application_attempts`, `offers` va `placements` jadvallari o'rtasidagi `INV-08` composite FK (`23503`) tekshiruvlarini hamda nomzod va korxona ikki tomonlama ish boshlanishini tasdiqlash (`PENDING_START_CONFIRMATION` -> `ACTIVE`) oqimini (`app/services/placements.py`, `app/api/v1/placements.py`) yaratish va `pytest`da tekshirish (`S2.4.1` ga tayanadi; `S2.6.1` amaliyot kundaligi uchun asos bo'ladi).
+- Tegiladigan fayllar: `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/app/main.py`, `backend/tests/test_s2_5_1_placements_inv_08.py`
+- Qabul mezonlari: `application_attempts` va `placements` boshqa e'longa bog'langan `opportunity_id` bilan yuborilsa `409` (`23503`) qaytaradi; `placements` faqat ikkala tomon (`CANDIDATE` va `ORGANIZATION`) tasdiqlagandan keyin `ACTIVE` holatga o'tadi.
+- Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`26/26 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
+- Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `26 passed in 1.41s`.
+- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Keyingi kichik qadam: `S2.6.1` — Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`).
