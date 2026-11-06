@@ -13,6 +13,7 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 
+from app.api.v1.auth import router as auth_router
 from app.core.config import settings
 from app.db.schema import get_retention_policies_v1, get_schema_summary
 
@@ -21,6 +22,7 @@ app = FastAPI(
     version=settings.app_version,
     description="FlexBridge 1.4 R1 Backend API",
 )
+app.include_router(auth_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])
