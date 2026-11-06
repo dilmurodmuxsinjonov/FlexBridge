@@ -16,19 +16,20 @@ Manba: `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf`, 2–7-sahifalar.
 | PDF strukturaviy tekshiruvi | Python pypdf | Hujjatda belgilangan |
 | Kuchaytirilgan autentifikatsiya | Passkey / TOTP | Hujjatda ko'rsatilgan; kutubxona tanlanmagan |
 | Favqulodda bildirishnoma | Telegram / SMS | Hujjatdagi kanallar; provayder tanlanmagan |
+| Versiya nazorati va repozitoriy | Git + GitHub (`https://github.com/dilmurodmuxsinjonov/FlexBridge.git`), `gh` CLI | Foydalanuvchi qarori (`Q-008`, 2026-11-06) bilan tasdiqlangan va ulandi |
+| Ishlab chiquvchi AI / model | `Antigravity` / `Gemini 4 Argon (High)` | Foydalanuvchi qarori (`Q-009`, 2026-11-06) bilan amalga oshiruvchi AI sifatida ish boshladi |
+| Tekshiruvchi AI / model | `Codex` / aniq model nomi noma'lum | Foydalanuvchi tekshiruvchi va tuzatuvchi rolini belgilagan (`Q-002`) |
 
 ## Hali aniqlanmagan tanlovlar
 
 | Yo'nalish | Model / texnologiya | Holat |
 | --- | --- | --- |
-| Frontend | Belgilanmagan | Yangi stek o'zboshimchalik bilan tanlanmaydi |
-| Backend tili va framework | Belgilanmagan | pypdf tilidan butun backend tili chiqarib olinmaydi |
-| Worker va navbat | Belgilanmagan | Asinxron worker talabi bor, vositasi yo'q |
-| Hosting va deploy | Belgilanmagan | Provayder va platforma aniqlanmagan |
-| To'lov | Belgilanmagan | Provayder tanlanmagan |
+| Frontend | Belgilanmagan | Yangi stek o'zboshimchalik bilan tanlanmaydi (`T-008` taklifi kiritildi) |
+| Backend tili va framework | Belgilanmagan | pypdf tilidan butun backend tili chiqarib olinmaydi (`T-008` taklifi kiritildi) |
+| Worker va navbat | Belgilanmagan | Asinxron worker talabi bor, vositasi yo'q (`T-008` taklifi kiritildi) |
+| Hosting va deploy | Belgilanmagan | Provayder va platforma aniqlanmagan (`T-008` taklifi kiritildi) |
+| To'lov | Belgilanmagan | Provayder tanlanmagan (`T-008` taklifi kiritildi) |
 | Mobil ilova | Belgilanmagan | Keyingi bosqich |
 | Mahsulot ichidagi AI model | Belgilanmagan | Mavjud o'qilgan hujjatlarda aniq model berilmagan |
-| Ishlab chiquvchi AI / model | Belgilanmagan | Boshqa AI asosiy ishni bajaradi; nomi hali berilmagan |
-| Tekshiruvchi AI / model | Codex / aniq model nomi noma'lum | Foydalanuvchi tekshiruvchi va tuzatuvchi rolini belgilagan |
 
 Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foydalanuvchi qarori yoki tegishli manba IDsi bilan qayd etiladi.
