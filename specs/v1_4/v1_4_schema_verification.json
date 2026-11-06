@@ -1,0 +1,183 @@
+{
+  "verified_at": "2026-11-06T18:56:07.224Z",
+  "engine": "PostgreSQL 18.6 (PGlite 0.5.15) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.13 (e13ee988ce3d87a738dd8f3661d02223308c412a), 32-bit",
+  "model_stats": {
+    "tables": 94,
+    "fields": 935,
+    "foreign_keys": 214,
+    "roles": 14,
+    "capabilities": 40,
+    "pages": 48,
+    "sections": 131,
+    "api_contracts": 124,
+    "helper_apis": 8,
+    "acceptance_criteria": 42,
+    "reference_errors": 0
+  },
+  "database_introspection": {
+    "base_tables": 94,
+    "total_columns_including_generated": 939,
+    "generated_stored_columns": 4,
+    "non_generated_columns": 935,
+    "foreign_key_constraints": 233,
+    "retention_policy_v1_rows": 8
+  },
+  "all_checks_passed": true,
+  "total_checks": 17,
+  "passed_checks": 17,
+  "checks": [
+    {
+      "name": "INV-14_deferred_circular_insert_opportunity_and_revision",
+      "shouldPass": true,
+      "accepted": true,
+      "errorCode": null,
+      "expectedCode": null,
+      "passed": true,
+      "errorMessage": null
+    },
+    {
+      "name": "AC-039_reject_invalid_contract_type",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "new row for relation \"opportunity_revisions\" violates check constraint \"chk_opp_rev_contract_type\""
+    },
+    {
+      "name": "INV-07_reject_unpaid_with_salary",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "new row for relation \"opportunity_revisions\" violates check constraint \"chk_opp_rev_salary\""
+    },
+    {
+      "name": "INV-07_reject_paid_without_salary_period",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "new row for relation \"opportunity_revisions\" violates check constraint \"chk_opp_rev_salary\""
+    },
+    {
+      "name": "AC-039_shift_groups_and_int4range_matching",
+      "shouldPass": true,
+      "accepted": true,
+      "errorCode": null,
+      "expectedCode": null,
+      "passed": true,
+      "errorMessage": null
+    },
+    {
+      "name": "INV-01_reject_attempt_with_mismatched_opportunity_revision",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23503",
+      "expectedCode": "23503",
+      "passed": true,
+      "errorMessage": "insert or update on table \"application_attempts\" violates foreign key constraint \"fk_app_attempts_rev_same_opp\""
+    },
+    {
+      "name": "INV-14_reject_foreign_current_attempt_on_application",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23503",
+      "expectedCode": "23503",
+      "passed": true,
+      "errorMessage": "insert or update on table \"applications\" violates foreign key constraint \"fk_applications_current_attempt\""
+    },
+    {
+      "name": "AC-040_allow_zero_minute_draft_task_entry",
+      "shouldPass": true,
+      "accepted": true,
+      "errorCode": null,
+      "expectedCode": null,
+      "passed": true,
+      "errorMessage": null
+    },
+    {
+      "name": "AC-040_reject_submit_worked_day_with_zero_total_minutes",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "WORKED kunida total_minutes (0) > 0 va <= daily_limit_minutes (480) bo'lishi shart (INV-09 / AC-040)"
+    },
+    {
+      "name": "AC-017_AC-040_reject_overlapping_task_time_ranges_via_gist_exclude",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23P01",
+      "expectedCode": "23P01",
+      "passed": true,
+      "errorMessage": "conflicting key value violates exclusion constraint \"excl_log_task_entries_no_overlap\""
+    },
+    {
+      "name": "INV-09_accept_valid_submitted_worked_day_and_auto_sum_minutes",
+      "shouldPass": true,
+      "accepted": true,
+      "errorCode": null,
+      "expectedCode": null,
+      "passed": true,
+      "errorMessage": null
+    },
+    {
+      "name": "AC-041_reject_self_review_on_verification_cases",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "new row for relation \"verification_cases\" violates check constraint \"chk_verification_not_self_review\""
+    },
+    {
+      "name": "AC-041_reject_refund_with_duplicate_approvers",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "new row for relation \"refunds\" violates check constraint \"chk_refunds_independent_approvers\""
+    },
+    {
+      "name": "INV-12_reject_refund_exceeding_captured_amount",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "Jami refund summasi (600000.00) CAPTURED summadan (599000.00) oshib ketdi (INV-12)"
+    },
+    {
+      "name": "INV-12_accept_valid_dual_control_refund",
+      "shouldPass": true,
+      "accepted": true,
+      "errorCode": null,
+      "expectedCode": null,
+      "passed": true,
+      "errorMessage": null
+    },
+    {
+      "name": "INV-16_reject_update_on_audit_events",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "Jadval audit_events append-only (o'zgarmas); UPDATE amali taqiqlangan (INV-16)"
+    },
+    {
+      "name": "INV-16_reject_delete_on_audit_events",
+      "shouldPass": false,
+      "accepted": false,
+      "errorCode": "23514",
+      "expectedCode": "23514",
+      "passed": true,
+      "errorMessage": "Jadval audit_events append-only (o'zgarmas); DELETE amali taqiqlangan (INV-16)"
+    }
+  ]
+}

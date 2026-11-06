@@ -1,0 +1,2076 @@
+-- FlexBridge 1.4 | Complete PostgreSQL 17 Schema Specification | 2026-11-05
+-- Generated from verified FlexBridge 1.3 model + FlexBridge 1.4 Technical Specification (94 tables, 935 model fields, 214 model FKs).
+-- Includes: int4range STORED columns, GiST & EXCLUDE constraints, INV-01..16 composite/deferred FKs and triggers, Dual-Control checks, and DB-083 Retention Policy v1.
+BEGIN;
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE SCHEMA IF NOT EXISTS flexbridge;
+SET LOCAL search_path TO flexbridge, public;
+
+-- DB-001 Bitta shaxsning asosiy hisobi
+CREATE TABLE users (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    display_name text NOT NULL,
+    status text NOT NULL,
+    password_hash text,
+    locale text NOT NULL,
+    timezone text NOT NULL,
+    adult_declared_at timestamptz,
+    last_login_at timestamptz,
+    CHECK (status IN ('ACTIVE','LIMITED','SUSPENDED','DELETION_PENDING','ANONYMIZED'))
+ );
+-- DB-002 Tasdiqlangan yoki kutilayotgan login kontaktlari
+CREATE TABLE user_contacts (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    channel text NOT NULL,
+    normalized_value text NOT NULL,
+    verified_at timestamptz,
+    revoked_at timestamptz,
+    is_primary boolean NOT NULL,
+    UNIQUE (channel,normalized_value),
+    CHECK (channel IN ('EMAIL','PHONE'))
+ );
+-- DB-003 Maqsadga bog‘langan bir martalik kod
+CREATE TABLE auth_challenges (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid,
+    contact_id uuid,
+    destination_digest text NOT NULL,
+    channel text NOT NULL,
+    purpose text NOT NULL,
+    code_hmac text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    attempts integer NOT NULL,
+    consumed_at timestamptz,
+    superseded_at timestamptz,
+    CHECK (attempts >= 0 AND attempts <= 5)
+ );
+-- DB-004 Qurilma va sessiyani bekor qilish
+CREATE TABLE sessions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    token_digest text NOT NULL,
+    device_key_digest text,
+    assurance text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    last_seen_at timestamptz NOT NULL,
+    UNIQUE (token_digest)
+ );
+-- DB-005 TOTP/passkey va tiklash omili
+CREATE TABLE mfa_credentials (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    kind text NOT NULL,
+    credential_key text NOT NULL,
+    secret_encrypted text,
+    public_key text,
+    sign_count integer NOT NULL,
+    verified_at timestamptz,
+    revoked_at timestamptz,
+    UNIQUE (credential_key)
+ );
+-- DB-006 Kontakt, dublikat va oxirgi egani tiklash
+CREATE TABLE recovery_requests (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid,
+    kind text NOT NULL,
+    status text NOT NULL,
+    requester_contact_digest text NOT NULL,
+    reviewer_id uuid,
+    evidence_file_id uuid,
+    resolved_at timestamptz,
+    CONSTRAINT chk_recovery_not_self_review CHECK (reviewer_id IS NULL OR user_id IS NULL OR reviewer_id <> user_id)
+ );
+-- DB-007 Atomar imkoniyat kodi
+CREATE TABLE permission_catalog (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    code text NOT NULL,
+    description text NOT NULL,
+    UNIQUE (code)
+ );
+-- DB-008 Rol va uning ruxsat doirasi
+CREATE TABLE role_catalog (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    code text NOT NULL,
+    scope_kind text NOT NULL,
+    description text NOT NULL,
+    UNIQUE (code),
+    CHECK (scope_kind IN ('SELF','ORG','INSTITUTION','PLATFORM'))
+ );
+-- DB-009 Rol-imkoniyat bog‘lanishi
+CREATE TABLE role_permissions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    role_id uuid NOT NULL,
+    permission_id uuid NOT NULL,
+    UNIQUE (role_id,permission_id)
+ );
+-- DB-010 Operatorning vaqtli vakolati
+CREATE TABLE platform_role_grants (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    role_id uuid NOT NULL,
+    granted_by_id uuid NOT NULL,
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    CONSTRAINT chk_platform_grant_not_self CHECK (granted_by_id <> user_id)
+ );
+-- DB-011 Rozilik va huquqiy asos tarixi
+CREATE TABLE consent_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    purpose text NOT NULL,
+    policy_version text NOT NULL,
+    action text NOT NULL,
+    legal_basis text NOT NULL,
+    occurred_at timestamptz NOT NULL
+ );
+-- DB-012 Talaba bo‘lmagan va talaba nomzodning umumiy profili
+CREATE TABLE candidate_profiles (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    headline text NOT NULL,
+    region text NOT NULL,
+    bio text,
+    experience_months integer NOT NULL,
+    visibility text NOT NULL,
+    cv_file_id uuid,
+    UNIQUE (user_id),
+    CHECK (experience_months >= 0)
+ );
+-- DB-013 UZ/RU qidiruv uchun malaka katalogi
+CREATE TABLE skills (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    code text NOT NULL,
+    name_uz text NOT NULL,
+    name_ru text NOT NULL,
+    aliases jsonb NOT NULL,
+    active boolean NOT NULL,
+    UNIQUE (code)
+ );
+-- DB-014 Malaka va tasdiq manbasi
+CREATE TABLE candidate_skills (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    skill_id uuid NOT NULL,
+    level text NOT NULL,
+    verification_case_id uuid,
+    UNIQUE (candidate_id,skill_id)
+ );
+-- DB-015 Muassasaga oid ta’lim tarixi
+CREATE TABLE enrollments (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    institution_id uuid NOT NULL,
+    program text NOT NULL,
+    student_ref_digest text,
+    start_date date NOT NULL,
+    end_date date,
+    status text NOT NULL,
+    verification_case_id uuid,
+    UNIQUE (id,institution_id),
+    CHECK (end_date IS NULL OR end_date >= start_date)
+ );
+-- DB-016 Haftalik mavjudlik
+CREATE TABLE availability_rules (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    weekday integer NOT NULL,
+    start_minute integer NOT NULL,
+    end_minute integer NOT NULL,
+    valid_from date NOT NULL,
+    valid_to date,
+    timezone text NOT NULL,
+    minute_range int4range GENERATED ALWAYS AS (int4range(start_minute, end_minute, '[)')) STORED,
+    CHECK (weekday BETWEEN 1 AND 7),
+    CHECK (start_minute >= 0 AND end_minute <= 1440 AND start_minute < end_minute),
+    CHECK (valid_to IS NULL OR valid_to >= valid_from)
+ );
+-- DB-017 Sana bo‘yicha dars/istisno
+CREATE TABLE availability_exceptions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    local_date date NOT NULL,
+    kind text NOT NULL,
+    start_minute integer NOT NULL,
+    end_minute integer NOT NULL,
+    minute_range int4range GENERATED ALWAYS AS (int4range(start_minute, end_minute, '[)')) STORED,
+    CHECK (kind IN ('AVAILABLE','UNAVAILABLE')),
+    CHECK (start_minute >= 0 AND end_minute <= 1440 AND start_minute < end_minute)
+ );
+-- DB-018 Xususiy, skanerdan o‘tadigan fayl
+CREATE TABLE files (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    owner_user_id uuid NOT NULL,
+    storage_key text NOT NULL,
+    filename text NOT NULL,
+    mime_type text NOT NULL,
+    byte_size integer NOT NULL,
+    sha256 text NOT NULL,
+    scan_status text NOT NULL,
+    retention_class text NOT NULL,
+    deleted_at timestamptz,
+    UNIQUE (storage_key),
+    CHECK (byte_size > 0)
+ );
+-- DB-019 Shaxs, tashkilot yoki ta’limni tekshirish navbati
+CREATE TABLE verification_cases (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    requester_id uuid NOT NULL,
+    candidate_id uuid,
+    organization_id uuid,
+    institution_id uuid,
+    enrollment_id uuid,
+    appointment_id uuid,
+    kind text NOT NULL,
+    status text NOT NULL,
+    current_revision integer NOT NULL,
+    assigned_reviewer_id uuid,
+    due_at timestamptz NOT NULL,
+    decision_reason text,
+    decided_at timestamptz,
+    CHECK (num_nonnulls(candidate_id,organization_id,institution_id,enrollment_id,appointment_id) = 1),
+    CHECK (current_revision > 0),
+    CONSTRAINT chk_verification_not_self_review CHECK (assigned_reviewer_id IS NULL OR assigned_reviewer_id <> requester_id)
+ );
+-- DB-020 Tekshiruvga topshirilgan revision dalili
+CREATE TABLE verification_evidence (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    case_id uuid NOT NULL,
+    revision integer NOT NULL,
+    file_id uuid,
+    note text,
+    CHECK (revision > 0),
+    CHECK (file_id IS NOT NULL OR note IS NOT NULL)
+ );
+-- DB-021 STIR bo‘yicha yagona ish beruvchi/host
+CREATE TABLE organizations (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    tax_id text NOT NULL,
+    legal_name text NOT NULL,
+    public_name text NOT NULL,
+    region text NOT NULL,
+    description text,
+    website text,
+    status text NOT NULL,
+    UNIQUE (tax_id)
+ );
+-- DB-022 Ish e’loni va host huquqi
+CREATE TABLE organization_capabilities (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    capability text NOT NULL,
+    status text NOT NULL,
+    approved_case_id uuid,
+    UNIQUE (organization_id,capability),
+    CHECK (capability IN ('JOB_EMPLOYER','INTERNSHIP_HOST'))
+ );
+-- DB-023 Xodimning tashkilotga mansubligi
+CREATE TABLE org_memberships (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    status text NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    UNIQUE (organization_id,user_id),
+    UNIQUE (id,organization_id)
+ );
+-- DB-024 Tashkilot ichidagi rol
+CREATE TABLE org_role_grants (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    membership_id uuid NOT NULL,
+    role_id uuid NOT NULL,
+    granted_by_id uuid NOT NULL,
+    revoked_at timestamptz,
+    UNIQUE (membership_id,role_id)
+ );
+-- DB-025 Aniq kontaktga vaqtli taklif
+CREATE TABLE org_invitations (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    inviter_membership_id uuid NOT NULL,
+    contact_digest text NOT NULL,
+    token_digest text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    accepted_by_id uuid,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    UNIQUE (token_digest)
+ );
+-- DB-026 Taklifdagi ochiq ko‘rsatilgan rol
+CREATE TABLE org_invitation_roles (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    invitation_id uuid NOT NULL,
+    role_id uuid NOT NULL,
+    UNIQUE (invitation_id,role_id)
+ );
+-- DB-027 Birinchi va keyingi egani tayinlash dalili
+CREATE TABLE org_ownership_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    new_membership_id uuid NOT NULL,
+    previous_membership_id uuid,
+    verification_case_id uuid NOT NULL,
+    approved_by_id uuid NOT NULL,
+    effective_at timestamptz NOT NULL
+ );
+-- DB-028 Hamkor o‘quv muassasasi
+CREATE TABLE institutions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    registry_code text NOT NULL,
+    name text NOT NULL,
+    region text NOT NULL,
+    status text NOT NULL,
+    UNIQUE (registry_code)
+ );
+-- DB-029 Akademik xizmatning rasmiy chegarasi
+CREATE TABLE institution_agreements (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    institution_id uuid NOT NULL,
+    version integer NOT NULL,
+    status text NOT NULL,
+    valid_from date NOT NULL,
+    valid_to date,
+    purposes jsonb NOT NULL,
+    signed_file_id uuid,
+    UNIQUE (institution_id,version),
+    UNIQUE (id,institution_id),
+    CHECK (version > 0),
+    CHECK (valid_to IS NULL OR valid_to >= valid_from)
+ );
+-- DB-030 Rasmiy xodim mansubligi
+CREATE TABLE institution_memberships (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    institution_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    status text NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    UNIQUE (institution_id,user_id),
+    UNIQUE (id,institution_id)
+ );
+-- DB-031 Koordinator/o‘qituvchi roli
+CREATE TABLE institution_role_grants (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    membership_id uuid NOT NULL,
+    role_id uuid NOT NULL,
+    appointment_id uuid NOT NULL,
+    revoked_at timestamptz,
+    UNIQUE (membership_id,role_id,appointment_id)
+ );
+-- DB-032 Muassasa topshirig‘i va dalili
+CREATE TABLE institution_appointments (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    institution_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    document_file_id uuid NOT NULL,
+    status text NOT NULL,
+    verification_case_id uuid,
+    valid_from date NOT NULL,
+    valid_to date,
+    accepted_at timestamptz,
+    CHECK (valid_to IS NULL OR valid_to >= valid_from)
+ );
+-- DB-033 Muassasa tayinlovi taklifi
+CREATE TABLE institution_invitations (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    appointment_id uuid NOT NULL,
+    contact_digest text NOT NULL,
+    token_digest text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    accepted_by_id uuid,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    UNIQUE (token_digest)
+ );
+-- DB-034 Koordinatorning aniq ta’lim yozuviga doirasi
+CREATE TABLE student_supervisions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    enrollment_id uuid NOT NULL,
+    coordinator_membership_id uuid NOT NULL,
+    agreement_id uuid NOT NULL,
+    purpose text NOT NULL,
+    status text NOT NULL,
+    legal_basis text NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    institution_id uuid NOT NULL,
+    UNIQUE (enrollment_id,coordinator_membership_id,purpose),
+    UNIQUE (id,institution_id)
+ );
+-- DB-035 E’lon identifikatori va band o‘rin
+CREATE TABLE opportunities (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    kind text NOT NULL,
+    status text NOT NULL,
+    current_revision_id uuid,
+    capacity integer NOT NULL,
+    occupied_count integer NOT NULL,
+    published_at timestamptz,
+    expires_at timestamptz,
+    closed_at timestamptz,
+    UNIQUE (id,organization_id),
+    CHECK (kind IN ('PART_TIME','INTERNSHIP')),
+    CHECK (capacity > 0),
+    CHECK (occupied_count >= 0 AND occupied_count <= capacity)
+ );
+-- DB-036 E’lon shartlarining o‘zgarmas nusxasi
+CREATE TABLE opportunity_revisions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    opportunity_id uuid NOT NULL,
+    revision integer NOT NULL,
+    author_id uuid NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    region text NOT NULL,
+    work_mode text NOT NULL,
+    eligibility text NOT NULL,
+    program_required text,
+    salary_min numeric(18,2),
+    salary_max numeric(18,2),
+    currency text NOT NULL,
+    salary_period text,
+    salary_basis text,
+    is_paid boolean NOT NULL,
+    start_date date NOT NULL,
+    end_date date,
+    schedule_policy text NOT NULL,
+    shift_match_mode text NOT NULL,
+    snapshot_schema integer NOT NULL,
+    published_at timestamptz,
+    contract_type text NOT NULL DEFAULT 'LABOR_PART_TIME',
+    UNIQUE (opportunity_id,revision),
+    UNIQUE (id,opportunity_id),
+    CHECK (revision > 0),
+    CHECK (end_date IS NULL OR end_date >= start_date),
+    CHECK (salary_min IS NULL OR salary_min > 0),
+    CHECK (salary_max IS NULL OR salary_max >= salary_min),
+    CONSTRAINT chk_opp_rev_contract_type CHECK (contract_type IN ('LABOR_PART_TIME','CIVIL_GPC','INTERNSHIP_AGREEMENT','ACADEMIC_TRIPARTITE')),
+    CONSTRAINT chk_opp_rev_salary CHECK ((is_paid = false AND salary_min IS NULL AND salary_max IS NULL AND salary_period IS NULL AND salary_basis IS NULL) OR (is_paid = true AND salary_min IS NOT NULL AND salary_min > 0 AND salary_period IS NOT NULL AND salary_basis IS NOT NULL)),
+    CONSTRAINT chk_opp_rev_program CHECK (eligibility <> 'ENROLLMENT_PROGRAM' OR program_required IS NOT NULL)
+ );
+-- DB-037 E’lon revisionining malaka talabi
+CREATE TABLE opportunity_skills (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    revision_id uuid NOT NULL,
+    skill_id uuid NOT NULL,
+    required boolean NOT NULL,
+    minimum_level text,
+    UNIQUE (revision_id,skill_id)
+ );
+-- DB-038 E’lon revisioni smenalari
+CREATE TABLE opportunity_shifts (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    revision_id uuid NOT NULL,
+    weekday integer NOT NULL,
+    start_minute integer NOT NULL,
+    end_minute integer NOT NULL,
+    timezone text NOT NULL,
+    group_code text NOT NULL DEFAULT 'GROUP_A',
+    minute_range int4range GENERATED ALWAYS AS (int4range(start_minute, end_minute, '[)')) STORED,
+    CHECK (weekday BETWEEN 1 AND 7),
+    CHECK (start_minute >= 0 AND end_minute <= 1440 AND start_minute < end_minute)
+ );
+-- DB-039 HRning aynan e’longa doirasi
+CREATE TABLE opportunity_hr_assignments (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    opportunity_id uuid NOT NULL,
+    membership_id uuid NOT NULL,
+    assigned_by_id uuid NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    organization_id uuid NOT NULL,
+    UNIQUE (opportunity_id,membership_id)
+ );
+-- DB-040 Nomzod saqlagan e’lon
+CREATE TABLE saved_opportunities (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    opportunity_id uuid NOT NULL,
+    UNIQUE (candidate_id,opportunity_id)
+ );
+-- DB-041 Bitta nomzod va bitta e’lon munosabati
+CREATE TABLE applications (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    candidate_id uuid NOT NULL,
+    opportunity_id uuid NOT NULL,
+    status text NOT NULL,
+    current_attempt_id uuid,
+    version integer NOT NULL,
+    occupied_at timestamptz,
+    released_at timestamptz,
+    UNIQUE (candidate_id,opportunity_id),
+    UNIQUE (id,candidate_id,opportunity_id),
+    UNIQUE (id,opportunity_id),
+    CHECK (version > 0)
+ );
+-- DB-042 Qayta ariza va o‘sha paytdagi shartlar
+CREATE TABLE application_attempts (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    attempt_no integer NOT NULL,
+    revision_id uuid NOT NULL,
+    enrollment_id uuid,
+    profile_snapshot jsonb NOT NULL,
+    schedule_result text NOT NULL,
+    matching_version text NOT NULL,
+    proposed_slots jsonb,
+    submitted_at timestamptz NOT NULL,
+    idempotency_key text NOT NULL,
+    opportunity_id uuid NOT NULL,
+    UNIQUE (application_id,attempt_no),
+    UNIQUE (idempotency_key),
+    UNIQUE (id,application_id),
+    CHECK (attempt_no > 0)
+ );
+-- DB-043 Holat o‘zgarishi va qayta ochish
+CREATE TABLE application_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    attempt_id uuid,
+    actor_id uuid NOT NULL,
+    from_status text,
+    to_status text NOT NULL,
+    reason text,
+    occurred_at timestamptz NOT NULL
+ );
+-- DB-044 Suhbat va uning jadvali
+CREATE TABLE interviews (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    organizer_membership_id uuid NOT NULL,
+    starts_at timestamptz NOT NULL,
+    ends_at timestamptz NOT NULL,
+    timezone text NOT NULL,
+    mode text NOT NULL,
+    location_or_link text,
+    status text NOT NULL,
+    version integer NOT NULL,
+    CHECK (ends_at > starts_at),
+    CHECK (version > 0)
+ );
+-- DB-045 Suhbatga tomonlarning javobi
+CREATE TABLE interview_responses (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    interview_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    response text NOT NULL,
+    responded_at timestamptz,
+    UNIQUE (interview_id,user_id)
+ );
+-- DB-046 Muddati va shartlari aniq taklif
+CREATE TABLE offers (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    attempt_id uuid NOT NULL,
+    revision_id uuid NOT NULL,
+    issuer_membership_id uuid NOT NULL,
+    terms_snapshot jsonb NOT NULL,
+    status text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    accepted_at timestamptz,
+    idempotency_key text NOT NULL,
+    UNIQUE (idempotency_key)
+ );
+-- DB-047 Oddiy maoshli ishning boshlanish/yakun holati
+CREATE TABLE job_engagements (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    offer_id uuid NOT NULL,
+    status text NOT NULL,
+    start_date date NOT NULL,
+    end_date date,
+    terms_snapshot jsonb NOT NULL,
+    confirmed_started_at timestamptz,
+    UNIQUE (application_id),
+    UNIQUE (offer_id),
+    CHECK (end_date IS NULL OR end_date >= start_date)
+ );
+-- DB-048 Ish munosabatining ikki tomon tasdig‘i
+CREATE TABLE engagement_confirmations (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    engagement_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    side text NOT NULL,
+    action text NOT NULL,
+    response text NOT NULL,
+    occurred_at timestamptz NOT NULL,
+    UNIQUE (engagement_id,side,action),
+    CHECK (side IN ('CANDIDATE','EMPLOYER'))
+ );
+-- DB-049 Qabul qilingan amaliyot munosabati
+CREATE TABLE placements (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    application_id uuid NOT NULL,
+    offer_id uuid NOT NULL,
+    candidate_id uuid NOT NULL,
+    organization_id uuid NOT NULL,
+    enrollment_id uuid,
+    academic_track boolean NOT NULL,
+    status text NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    current_terms_id uuid,
+    version integer NOT NULL,
+    UNIQUE (application_id),
+    UNIQUE (offer_id),
+    UNIQUE (id,organization_id),
+    CHECK (end_date >= start_date),
+    CHECK (NOT academic_track OR enrollment_id IS NOT NULL),
+    CHECK (version > 0)
+ );
+-- DB-050 Amaliyot rejasining immutable versiyasi
+CREATE TABLE placement_terms (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid NOT NULL,
+    version integer NOT NULL,
+    schema_version integer NOT NULL,
+    terms_snapshot jsonb NOT NULL,
+    daily_limit_minutes integer NOT NULL,
+    weekly_limit_minutes integer NOT NULL,
+    required_minutes integer NOT NULL,
+    candidate_accepted_at timestamptz,
+    host_accepted_at timestamptz,
+    UNIQUE (placement_id,version),
+    UNIQUE (id,placement_id),
+    CHECK (version > 0),
+    CHECK (daily_limit_minutes > 0 AND daily_limit_minutes <= 1440),
+    CHECK (weekly_limit_minutes > 0 AND weekly_limit_minutes <= 10080),
+    CHECK (required_minutes >= 0)
+ );
+-- DB-051 Korxona ustozi shaxsiy qabuli
+CREATE TABLE mentor_assignments (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid NOT NULL,
+    membership_id uuid NOT NULL,
+    assigned_by_id uuid NOT NULL,
+    assigned_at timestamptz NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    organization_id uuid NOT NULL,
+    UNIQUE (id,placement_id)
+ );
+-- DB-052 O‘qituvchining ayni amaliyotga qabuli
+CREATE TABLE academic_assignments (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid NOT NULL,
+    teacher_membership_id uuid NOT NULL,
+    supervision_id uuid NOT NULL,
+    assigned_by_id uuid NOT NULL,
+    assigned_at timestamptz NOT NULL,
+    accepted_at timestamptz,
+    revoked_at timestamptz,
+    institution_id uuid NOT NULL,
+    UNIQUE (id,placement_id)
+ );
+-- DB-053 Rejaga bog‘langan natija va topshiriq
+CREATE TABLE plan_tasks (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    terms_id uuid NOT NULL,
+    code text NOT NULL,
+    title text NOT NULL,
+    expected_result text NOT NULL,
+    required boolean NOT NULL,
+    target_minutes integer,
+    UNIQUE (terms_id,code),
+    CHECK (target_minutes IS NULL OR target_minutes >= 0)
+ );
+-- DB-054 Faollashtirish/yakun/bekor qilish dalili
+CREATE TABLE placement_decisions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid NOT NULL,
+    actor_id uuid NOT NULL,
+    side text NOT NULL,
+    decision text NOT NULL,
+    terms_id uuid NOT NULL,
+    reason text,
+    decided_at timestamptz NOT NULL
+ );
+-- DB-055 Placement va mahalliy sana uchun bitta kun
+CREATE TABLE daily_logs (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid NOT NULL,
+    local_date date NOT NULL,
+    current_revision_id uuid,
+    version integer NOT NULL,
+    UNIQUE (placement_id,local_date),
+    UNIQUE (id,placement_id),
+    CHECK (version > 0)
+ );
+-- DB-056 Qoralama va topshirilgan kun versiyasi
+CREATE TABLE log_revisions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    daily_log_id uuid NOT NULL,
+    revision integer NOT NULL,
+    terms_id uuid NOT NULL,
+    author_id uuid NOT NULL,
+    day_type text NOT NULL,
+    summary text,
+    total_minutes integer NOT NULL,
+    status text NOT NULL,
+    submitted_at timestamptz,
+    idempotency_key text NOT NULL,
+    UNIQUE (daily_log_id,revision),
+    UNIQUE (idempotency_key),
+    UNIQUE (id,daily_log_id),
+    CHECK (revision > 0),
+    CHECK (total_minutes >= 0)
+ );
+-- DB-057 Kun ichidagi bajarilgan ishlar
+CREATE TABLE log_task_entries (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    revision_id uuid NOT NULL,
+    plan_task_id uuid,
+    result_text text NOT NULL,
+    minutes integer NOT NULL,
+    start_minute integer,
+    end_minute integer,
+    minute_range int4range GENERATED ALWAYS AS (CASE WHEN start_minute IS NOT NULL AND end_minute IS NOT NULL THEN int4range(start_minute, end_minute, '[)') ELSE NULL END) STORED,
+    CHECK (minutes >= 0),
+    CHECK ((start_minute IS NULL AND end_minute IS NULL) OR (start_minute IS NOT NULL AND end_minute IS NOT NULL AND start_minute >= 0 AND end_minute <= 1440 AND end_minute > start_minute AND minutes = end_minute - start_minute)),
+    CONSTRAINT excl_log_task_entries_no_overlap EXCLUDE USING gist (revision_id WITH =, minute_range WITH &&) WHERE (minute_range IS NOT NULL)
+ );
+-- DB-058 Topshiriq dalili uchun private fayl
+CREATE TABLE log_evidence (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    entry_id uuid NOT NULL,
+    file_id uuid NOT NULL,
+    visibility text NOT NULL,
+    UNIQUE (entry_id,file_id)
+ );
+-- DB-059 Mentorning aynan revisionga qarori
+CREATE TABLE workplace_log_reviews (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    revision_id uuid NOT NULL,
+    mentor_assignment_id uuid NOT NULL,
+    decision text NOT NULL,
+    comment text,
+    decided_at timestamptz NOT NULL,
+    placement_id uuid NOT NULL,
+    UNIQUE (revision_id,mentor_assignment_id)
+ );
+-- DB-060 O‘qituvchining alohida fikri
+CREATE TABLE academic_log_reviews (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    revision_id uuid NOT NULL,
+    academic_assignment_id uuid NOT NULL,
+    decision text NOT NULL,
+    comment text,
+    decided_at timestamptz NOT NULL,
+    placement_id uuid NOT NULL,
+    UNIQUE (revision_id,academic_assignment_id)
+ );
+-- DB-061 Yopilgan/kech kundalikni o‘zgartirish
+CREATE TABLE log_amendment_requests (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    daily_log_id uuid NOT NULL,
+    requester_id uuid NOT NULL,
+    reason text NOT NULL,
+    status text NOT NULL,
+    reviewer_id uuid,
+    resolved_at timestamptz
+ );
+-- DB-062 Versiyali baholash mezonlari
+CREATE TABLE rubric_versions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    family text NOT NULL,
+    version integer NOT NULL,
+    status text NOT NULL,
+    scale_min integer NOT NULL,
+    scale_max integer NOT NULL,
+    published_at timestamptz,
+    UNIQUE (family,version),
+    CHECK (version > 0),
+    CHECK (scale_max > scale_min)
+ );
+-- DB-063 Mezon va vazn
+CREATE TABLE rubric_criteria (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    rubric_id uuid NOT NULL,
+    code text NOT NULL,
+    title text NOT NULL,
+    weight integer NOT NULL,
+    required boolean NOT NULL,
+    UNIQUE (rubric_id,code),
+    UNIQUE (id,rubric_id),
+    CHECK (weight > 0 AND weight <= 100)
+ );
+-- DB-064 Haqiqiy yakuniy munosabatdan baho
+CREATE TABLE rating_submissions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    placement_id uuid,
+    engagement_id uuid,
+    rubric_id uuid NOT NULL,
+    rater_id uuid NOT NULL,
+    target_user_id uuid,
+    target_org_id uuid,
+    version integer NOT NULL,
+    status text NOT NULL,
+    comment text,
+    submitted_at timestamptz,
+    publish_after timestamptz,
+    UNIQUE (id,rubric_id),
+    CHECK (num_nonnulls(placement_id,engagement_id) = 1),
+    CHECK (num_nonnulls(target_user_id,target_org_id) = 1),
+    CHECK (target_user_id IS NULL OR target_user_id <> rater_id),
+    CHECK (version > 0)
+ );
+-- DB-065 Bahoning o‘zgarmas matn va formula nusxasi
+CREATE TABLE rating_revisions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    submission_id uuid NOT NULL,
+    version integer NOT NULL,
+    comment text,
+    submitted_at timestamptz NOT NULL,
+    rubric_snapshot jsonb NOT NULL,
+    UNIQUE (submission_id,version),
+    CHECK (version > 0)
+ );
+-- DB-066 Har mezonning dalilli bali
+CREATE TABLE rating_scores (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    rating_revision_id uuid NOT NULL,
+    criterion_id uuid NOT NULL,
+    score integer NOT NULL,
+    evidence_revision_id uuid,
+    rubric_id uuid NOT NULL,
+    UNIQUE (rating_revision_id,criterion_id)
+ );
+-- DB-067 Reyting nizosi va mustaqil qaror
+CREATE TABLE rating_appeals (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    rating_revision_id uuid NOT NULL,
+    appellant_id uuid NOT NULL,
+    reason text NOT NULL,
+    status text NOT NULL,
+    reviewer_id uuid,
+    decision text,
+    resolved_at timestamptz
+ );
+-- DB-068 Qayta hisoblanadigan ommaviy kesh
+CREATE TABLE rating_aggregates (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    target_user_id uuid,
+    target_org_id uuid,
+    rubric_id uuid NOT NULL,
+    sample_size integer NOT NULL,
+    score numeric(18,2),
+    window_start date NOT NULL,
+    window_end date NOT NULL,
+    computed_at timestamptz NOT NULL,
+    CHECK (num_nonnulls(target_user_id,target_org_id) = 1),
+    CHECK (sample_size >= 0),
+    CHECK (window_end >= window_start)
+ );
+-- DB-069 Sotiladigan xizmat turi
+CREATE TABLE products (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    code text NOT NULL,
+    name text NOT NULL,
+    service_kind text NOT NULL,
+    active boolean NOT NULL,
+    UNIQUE (code)
+ );
+-- DB-070 Tarif narxining immutable nusxasi
+CREATE TABLE price_versions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    product_id uuid NOT NULL,
+    version integer NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    duration_days integer NOT NULL,
+    tax_included boolean NOT NULL,
+    valid_from timestamptz NOT NULL,
+    valid_to timestamptz,
+    UNIQUE (product_id,version),
+    CHECK (amount >= 0),
+    CHECK (duration_days > 0),
+    CHECK (valid_to IS NULL OR valid_to > valid_from)
+ );
+-- DB-071 Tashkilot buyurtmasi va narx snapshot
+CREATE TABLE orders (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    purchaser_id uuid NOT NULL,
+    price_id uuid NOT NULL,
+    opportunity_id uuid,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    price_snapshot jsonb NOT NULL,
+    status text NOT NULL,
+    idempotency_key text NOT NULL,
+    UNIQUE (idempotency_key),
+    CHECK (amount >= 0)
+ );
+-- DB-072 Hisob va fiskal hujjat holati
+CREATE TABLE invoices (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    order_id uuid NOT NULL,
+    number text NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    fiscal_status text NOT NULL,
+    fiscal_reference text,
+    issued_at timestamptz NOT NULL,
+    paid_at timestamptz,
+    UNIQUE (number),
+    UNIQUE (order_id),
+    CHECK (amount >= 0)
+ );
+-- DB-073 Provayder tranzaksiyasi
+CREATE TABLE payment_attempts (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    order_id uuid NOT NULL,
+    provider text NOT NULL,
+    provider_transaction_id text,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    status text NOT NULL,
+    requested_at timestamptz NOT NULL,
+    confirmed_at timestamptz,
+    UNIQUE (provider,provider_transaction_id),
+    CHECK (amount >= 0)
+ );
+-- DB-074 Takror keluvchi callback deduplikatsiyasi
+CREATE TABLE payment_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    attempt_id uuid NOT NULL,
+    provider text NOT NULL,
+    event_key text NOT NULL,
+    payload_digest text NOT NULL,
+    normalized_payload jsonb NOT NULL,
+    processed_at timestamptz,
+    received_at timestamptz NOT NULL,
+    UNIQUE (provider,event_key)
+ );
+-- DB-075 Amaldagi xizmat, muddat va kvota
+CREATE TABLE service_entitlements (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    order_id uuid,
+    opportunity_id uuid,
+    service_kind text NOT NULL,
+    status text NOT NULL,
+    starts_at timestamptz,
+    ends_at timestamptz,
+    quota integer,
+    granted_by_id uuid,
+    grant_reason text,
+    concurrent_active_limit integer NOT NULL DEFAULT 5,
+    CHECK (ends_at IS NULL OR starts_at IS NULL OR ends_at > starts_at),
+    CHECK (quota IS NULL OR quota >= 0),
+    CHECK (concurrent_active_limit > 0)
+ );
+-- DB-076 Qaytarish va ikkita tasdiq
+CREATE TABLE refunds (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    payment_attempt_id uuid NOT NULL,
+    requester_id uuid NOT NULL,
+    approver_id uuid,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    reason text NOT NULL,
+    status text NOT NULL,
+    provider_refund_id text,
+    resolved_at timestamptz,
+    second_approver_id uuid,
+    UNIQUE (provider_refund_id),
+    CHECK (amount > 0),
+    CONSTRAINT chk_refunds_independent_approvers CHECK ((approver_id IS NULL OR approver_id <> requester_id) AND (second_approver_id IS NULL OR (second_approver_id <> requester_id AND (approver_id IS NULL OR second_approver_id <> approver_id))))
+ );
+-- DB-077 Pul va kreditning append-only jurnali
+CREATE TABLE billing_ledger (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    organization_id uuid NOT NULL,
+    order_id uuid,
+    payment_attempt_id uuid,
+    refund_id uuid,
+    entry_kind text NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    currency text NOT NULL,
+    occurred_at timestamptz NOT NULL,
+    dedupe_key text NOT NULL,
+    UNIQUE (dedupe_key)
+ );
+-- DB-078 E’lon, tashkilot, fayl yoki bahoga shikoyat
+CREATE TABLE moderation_cases (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    reporter_id uuid NOT NULL,
+    opportunity_id uuid,
+    organization_id uuid,
+    rating_id uuid,
+    file_id uuid,
+    category text NOT NULL,
+    status text NOT NULL,
+    severity text NOT NULL,
+    assigned_to_id uuid,
+    due_at timestamptz NOT NULL,
+    decision text,
+    decided_at timestamptz,
+    CHECK (num_nonnulls(opportunity_id,organization_id,rating_id,file_id) = 1)
+ );
+-- DB-079 Cheklash/ochish/apellyatsiya tarixi
+CREATE TABLE moderation_actions (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    case_id uuid NOT NULL,
+    actor_id uuid NOT NULL,
+    action text NOT NULL,
+    reason text NOT NULL,
+    expires_at timestamptz,
+    appealed_action_id uuid,
+    occurred_at timestamptz NOT NULL
+ );
+-- DB-080 Foydalanuvchi yordami
+CREATE TABLE support_tickets (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    requester_id uuid NOT NULL,
+    category text NOT NULL,
+    priority text NOT NULL,
+    status text NOT NULL,
+    assignee_id uuid,
+    subject text NOT NULL,
+    first_response_due_at timestamptz NOT NULL,
+    resolved_at timestamptz
+ );
+-- DB-081 Yordam yozishmasi va ilova
+CREATE TABLE support_messages (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    ticket_id uuid NOT NULL,
+    author_id uuid NOT NULL,
+    body text NOT NULL,
+    file_id uuid,
+    internal boolean NOT NULL
+ );
+-- DB-082 Eksport, tuzatish va o‘chirish
+CREATE TABLE privacy_requests (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    kind text NOT NULL,
+    status text NOT NULL,
+    verified_at timestamptz,
+    due_at timestamptz NOT NULL,
+    result_file_id uuid,
+    resolved_at timestamptz,
+    reason text
+ );
+-- DB-083 Ma’lumot toifasi va saqlash rejasi
+CREATE TABLE retention_policies (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    data_class text NOT NULL,
+    policy_version integer NOT NULL,
+    active_days integer,
+    backup_expiry_days integer NOT NULL,
+    legal_basis text NOT NULL,
+    status text NOT NULL,
+    UNIQUE (data_class,policy_version),
+    CHECK (active_days IS NULL OR active_days >= 0),
+    CHECK (backup_expiry_days > 0)
+ );
+-- DB-084 Nizo uchun minimal saqlash to‘xtatgichi
+CREATE TABLE legal_holds (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid,
+    organization_id uuid,
+    case_id uuid,
+    reason text NOT NULL,
+    authorized_by_id uuid NOT NULL,
+    expires_at timestamptz NOT NULL,
+    released_at timestamptz,
+    CHECK (num_nonnulls(user_id,organization_id,case_id) = 1)
+ );
+-- DB-085 Kanal va maqsad sozlamasi
+CREATE TABLE notification_preferences (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    channel text NOT NULL,
+    purpose text NOT NULL,
+    enabled boolean NOT NULL,
+    consent_event_id uuid,
+    UNIQUE (user_id,channel,purpose)
+ );
+-- DB-086 DB tranzaksiyasi bilan chiqadigan hodisa
+CREATE TABLE outbox_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    event_type text NOT NULL,
+    schema_version integer NOT NULL,
+    aggregate_key text NOT NULL,
+    payload jsonb NOT NULL,
+    dedupe_key text NOT NULL,
+    available_at timestamptz NOT NULL,
+    processed_at timestamptz,
+    attempts integer NOT NULL,
+    UNIQUE (dedupe_key),
+    CHECK (schema_version > 0),
+    CHECK (attempts >= 0)
+ );
+-- DB-087 Foydalanuvchiga sayt xabari
+CREATE TABLE notifications (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    event_id uuid NOT NULL,
+    template_code text NOT NULL,
+    opportunity_id uuid,
+    application_id uuid,
+    placement_id uuid,
+    ticket_id uuid,
+    read_at timestamptz,
+    UNIQUE (user_id,event_id,template_code)
+ );
+-- DB-088 Kanalga yuborish urinishlari
+CREATE TABLE notification_deliveries (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    notification_id uuid NOT NULL,
+    channel text NOT NULL,
+    provider text NOT NULL,
+    provider_message_id text,
+    status text NOT NULL,
+    attempt_no integer NOT NULL,
+    next_retry_at timestamptz,
+    delivered_at timestamptz,
+    error_code text,
+    UNIQUE (notification_id,channel,attempt_no),
+    CHECK (attempt_no > 0)
+ );
+-- DB-089 Vakolatli amallarning append-only izi
+CREATE TABLE audit_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    actor_id uuid,
+    session_id uuid,
+    action text NOT NULL,
+    object_type text NOT NULL,
+    object_key text NOT NULL,
+    scope_snapshot jsonb NOT NULL,
+    before_digest text,
+    after_digest text,
+    reason text,
+    request_id text NOT NULL,
+    occurred_at timestamptz NOT NULL
+ );
+-- DB-090 Sezgir HTTP amallarining bir marta natijasi
+CREATE TABLE idempotency_keys (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    user_id uuid NOT NULL,
+    operation text NOT NULL,
+    key text NOT NULL,
+    request_digest text NOT NULL,
+    response_status integer,
+    response_ref text,
+    expires_at timestamptz NOT NULL,
+    UNIQUE (user_id,operation,key)
+ );
+-- DB-091 O‘lchov va segment, PII emas
+CREATE TABLE analytics_events (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    event_key text NOT NULL,
+    event_name text NOT NULL,
+    actor_pseudonym text,
+    cohort text,
+    properties jsonb NOT NULL,
+    occurred_at timestamptz NOT NULL,
+    schema_version integer NOT NULL,
+    UNIQUE (event_key)
+ );
+-- DB-092 Xizmatni boshqariladigan ishga tushirish
+CREATE TABLE feature_flags (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    code text NOT NULL,
+    enabled boolean NOT NULL,
+    rule_schema jsonb NOT NULL,
+    changed_by_id uuid NOT NULL,
+    reason text NOT NULL,
+    UNIQUE (code)
+ );
+-- DB-093 Uzilish, egalik va tiklash dalili
+CREATE TABLE incidents (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    severity text NOT NULL,
+    status text NOT NULL,
+    commander_id uuid NOT NULL,
+    summary text NOT NULL,
+    started_at timestamptz NOT NULL,
+    resolved_at timestamptz,
+    postmortem_ref text
+ );
+-- DB-094 Backupni tiklash tekshiruvi
+CREATE TABLE restore_runs (
+    id uuid NOT NULL PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    started_at timestamptz NOT NULL,
+    finished_at timestamptz,
+    backup_ref text NOT NULL,
+    status text NOT NULL,
+    recovered_through timestamptz,
+    measured_rpo_minutes integer,
+    measured_rto_minutes integer,
+    checked_by_id uuid NOT NULL,
+    evidence_ref text
+ );
+CREATE INDEX ix_db_001_0 ON users (status,created_at);
+ALTER TABLE user_contacts ADD CONSTRAINT fk_db_002_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_002_0 ON user_contacts (user_id,channel);
+ALTER TABLE auth_challenges ADD CONSTRAINT fk_db_003_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE auth_challenges ADD CONSTRAINT fk_db_003_4 FOREIGN KEY (contact_id) REFERENCES user_contacts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_003_0 ON auth_challenges (destination_digest,purpose,created_at);
+CREATE INDEX ix_db_003_1 ON auth_challenges (expires_at);
+CREATE INDEX ix_db_003_2 ON auth_challenges (user_id);
+CREATE INDEX ix_db_003_3 ON auth_challenges (contact_id);
+ALTER TABLE sessions ADD CONSTRAINT fk_db_004_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_004_0 ON sessions (user_id,revoked_at);
+CREATE INDEX ix_db_004_1 ON sessions (expires_at);
+ALTER TABLE mfa_credentials ADD CONSTRAINT fk_db_005_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_005_0 ON mfa_credentials (user_id,revoked_at);
+ALTER TABLE recovery_requests ADD CONSTRAINT fk_db_006_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE recovery_requests ADD CONSTRAINT fk_db_006_7 FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE recovery_requests ADD CONSTRAINT fk_db_006_8 FOREIGN KEY (evidence_file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_006_0 ON recovery_requests (status,created_at);
+CREATE INDEX ix_db_006_1 ON recovery_requests (user_id);
+CREATE INDEX ix_db_006_2 ON recovery_requests (reviewer_id);
+CREATE INDEX ix_db_006_3 ON recovery_requests (evidence_file_id);
+ALTER TABLE role_permissions ADD CONSTRAINT fk_db_009_3 FOREIGN KEY (role_id) REFERENCES role_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE role_permissions ADD CONSTRAINT fk_db_009_4 FOREIGN KEY (permission_id) REFERENCES permission_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_009_0 ON role_permissions (permission_id);
+ALTER TABLE platform_role_grants ADD CONSTRAINT fk_db_010_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE platform_role_grants ADD CONSTRAINT fk_db_010_4 FOREIGN KEY (role_id) REFERENCES role_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE platform_role_grants ADD CONSTRAINT fk_db_010_5 FOREIGN KEY (granted_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_010_0 ON platform_role_grants (user_id,expires_at);
+CREATE INDEX ix_db_010_1 ON platform_role_grants (role_id);
+CREATE INDEX ix_db_010_2 ON platform_role_grants (granted_by_id);
+ALTER TABLE consent_events ADD CONSTRAINT fk_db_011_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_011_0 ON consent_events (user_id,purpose,occurred_at);
+ALTER TABLE candidate_profiles ADD CONSTRAINT fk_db_012_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE candidate_profiles ADD CONSTRAINT fk_db_012_9 FOREIGN KEY (cv_file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_012_0 ON candidate_profiles (region);
+CREATE INDEX ix_db_012_1 ON candidate_profiles (cv_file_id);
+ALTER TABLE candidate_skills ADD CONSTRAINT fk_db_014_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE candidate_skills ADD CONSTRAINT fk_db_014_4 FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE candidate_skills ADD CONSTRAINT fk_db_014_6 FOREIGN KEY (verification_case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_014_0 ON candidate_skills (skill_id);
+CREATE INDEX ix_db_014_1 ON candidate_skills (verification_case_id);
+ALTER TABLE enrollments ADD CONSTRAINT fk_db_015_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE enrollments ADD CONSTRAINT fk_db_015_4 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE enrollments ADD CONSTRAINT fk_db_015_10 FOREIGN KEY (verification_case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_015_0 ON enrollments (candidate_id,status);
+CREATE INDEX ix_db_015_1 ON enrollments (institution_id,status);
+CREATE INDEX ix_db_015_2 ON enrollments (verification_case_id);
+ALTER TABLE availability_rules ADD CONSTRAINT fk_db_016_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_016_0 ON availability_rules (candidate_id,weekday,valid_from);
+ALTER TABLE availability_exceptions ADD CONSTRAINT fk_db_017_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_017_0 ON availability_exceptions (candidate_id,local_date);
+ALTER TABLE files ADD CONSTRAINT fk_db_018_3 FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_018_0 ON files (owner_user_id,created_at);
+CREATE INDEX ix_db_018_1 ON files (scan_status,created_at);
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_3 FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_4 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_5 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_6 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_7 FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_8 FOREIGN KEY (appointment_id) REFERENCES institution_appointments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_cases ADD CONSTRAINT fk_db_019_12 FOREIGN KEY (assigned_reviewer_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_019_0 ON verification_cases (status,due_at);
+CREATE INDEX ix_db_019_1 ON verification_cases (assigned_reviewer_id,status);
+CREATE INDEX ix_db_019_2 ON verification_cases (requester_id);
+CREATE INDEX ix_db_019_3 ON verification_cases (candidate_id);
+CREATE INDEX ix_db_019_4 ON verification_cases (organization_id);
+CREATE INDEX ix_db_019_5 ON verification_cases (institution_id);
+CREATE INDEX ix_db_019_6 ON verification_cases (enrollment_id);
+CREATE INDEX ix_db_019_7 ON verification_cases (appointment_id);
+ALTER TABLE verification_evidence ADD CONSTRAINT fk_db_020_3 FOREIGN KEY (case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE verification_evidence ADD CONSTRAINT fk_db_020_5 FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_020_0 ON verification_evidence (case_id,revision);
+CREATE INDEX ix_db_020_1 ON verification_evidence (file_id);
+CREATE INDEX ix_db_021_0 ON organizations (status,region);
+ALTER TABLE organization_capabilities ADD CONSTRAINT fk_db_022_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE organization_capabilities ADD CONSTRAINT fk_db_022_6 FOREIGN KEY (approved_case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_022_0 ON organization_capabilities (approved_case_id);
+ALTER TABLE org_memberships ADD CONSTRAINT fk_db_023_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_memberships ADD CONSTRAINT fk_db_023_4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_023_0 ON org_memberships (user_id,status);
+ALTER TABLE org_role_grants ADD CONSTRAINT fk_db_024_3 FOREIGN KEY (membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_role_grants ADD CONSTRAINT fk_db_024_4 FOREIGN KEY (role_id) REFERENCES role_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_role_grants ADD CONSTRAINT fk_db_024_5 FOREIGN KEY (granted_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_024_0 ON org_role_grants (role_id);
+CREATE INDEX ix_db_024_1 ON org_role_grants (granted_by_id);
+ALTER TABLE org_invitations ADD CONSTRAINT fk_db_025_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_invitations ADD CONSTRAINT fk_db_025_4 FOREIGN KEY (inviter_membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_invitations ADD CONSTRAINT fk_db_025_8 FOREIGN KEY (accepted_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_025_0 ON org_invitations (organization_id,expires_at);
+CREATE INDEX ix_db_025_1 ON org_invitations (inviter_membership_id);
+CREATE INDEX ix_db_025_2 ON org_invitations (accepted_by_id);
+ALTER TABLE org_invitation_roles ADD CONSTRAINT fk_db_026_3 FOREIGN KEY (invitation_id) REFERENCES org_invitations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_invitation_roles ADD CONSTRAINT fk_db_026_4 FOREIGN KEY (role_id) REFERENCES role_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_026_0 ON org_invitation_roles (role_id);
+ALTER TABLE org_ownership_events ADD CONSTRAINT fk_db_027_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_ownership_events ADD CONSTRAINT fk_db_027_4 FOREIGN KEY (new_membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_ownership_events ADD CONSTRAINT fk_db_027_5 FOREIGN KEY (previous_membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_ownership_events ADD CONSTRAINT fk_db_027_6 FOREIGN KEY (verification_case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE org_ownership_events ADD CONSTRAINT fk_db_027_7 FOREIGN KEY (approved_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_027_0 ON org_ownership_events (organization_id,effective_at);
+CREATE INDEX ix_db_027_1 ON org_ownership_events (new_membership_id);
+CREATE INDEX ix_db_027_2 ON org_ownership_events (previous_membership_id);
+CREATE INDEX ix_db_027_3 ON org_ownership_events (verification_case_id);
+CREATE INDEX ix_db_027_4 ON org_ownership_events (approved_by_id);
+ALTER TABLE institution_agreements ADD CONSTRAINT fk_db_029_3 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_agreements ADD CONSTRAINT fk_db_029_9 FOREIGN KEY (signed_file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_029_0 ON institution_agreements (signed_file_id);
+ALTER TABLE institution_memberships ADD CONSTRAINT fk_db_030_3 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_memberships ADD CONSTRAINT fk_db_030_4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_030_0 ON institution_memberships (user_id,status);
+ALTER TABLE institution_role_grants ADD CONSTRAINT fk_db_031_3 FOREIGN KEY (membership_id) REFERENCES institution_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_role_grants ADD CONSTRAINT fk_db_031_4 FOREIGN KEY (role_id) REFERENCES role_catalog(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_role_grants ADD CONSTRAINT fk_db_031_5 FOREIGN KEY (appointment_id) REFERENCES institution_appointments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_031_0 ON institution_role_grants (role_id);
+CREATE INDEX ix_db_031_1 ON institution_role_grants (appointment_id);
+ALTER TABLE institution_appointments ADD CONSTRAINT fk_db_032_3 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_appointments ADD CONSTRAINT fk_db_032_4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_appointments ADD CONSTRAINT fk_db_032_5 FOREIGN KEY (document_file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_appointments ADD CONSTRAINT fk_db_032_7 FOREIGN KEY (verification_case_id) REFERENCES verification_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_032_0 ON institution_appointments (institution_id,status);
+CREATE INDEX ix_db_032_1 ON institution_appointments (user_id);
+CREATE INDEX ix_db_032_2 ON institution_appointments (document_file_id);
+CREATE INDEX ix_db_032_3 ON institution_appointments (verification_case_id);
+ALTER TABLE institution_invitations ADD CONSTRAINT fk_db_033_3 FOREIGN KEY (appointment_id) REFERENCES institution_appointments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE institution_invitations ADD CONSTRAINT fk_db_033_7 FOREIGN KEY (accepted_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_033_0 ON institution_invitations (appointment_id);
+CREATE INDEX ix_db_033_1 ON institution_invitations (accepted_by_id);
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_db_034_3 FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_db_034_4 FOREIGN KEY (coordinator_membership_id) REFERENCES institution_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_db_034_5 FOREIGN KEY (agreement_id) REFERENCES institution_agreements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_db_034_11 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_034_0 ON student_supervisions (coordinator_membership_id);
+CREATE INDEX ix_db_034_1 ON student_supervisions (agreement_id);
+CREATE INDEX ix_db_034_2 ON student_supervisions (institution_id);
+ALTER TABLE opportunities ADD CONSTRAINT fk_db_035_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunities ADD CONSTRAINT fk_db_035_6 FOREIGN KEY (current_revision_id) REFERENCES opportunity_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+CREATE INDEX ix_db_035_0 ON opportunities (status,published_at,id);
+CREATE INDEX ix_db_035_1 ON opportunities (organization_id,status);
+CREATE INDEX ix_db_035_2 ON opportunities (current_revision_id);
+ALTER TABLE opportunity_revisions ADD CONSTRAINT fk_db_036_3 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_revisions ADD CONSTRAINT fk_db_036_5 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_036_0 ON opportunity_revisions (opportunity_id,revision);
+CREATE INDEX ix_db_036_1 ON opportunity_revisions (author_id);
+ALTER TABLE opportunity_skills ADD CONSTRAINT fk_db_037_3 FOREIGN KEY (revision_id) REFERENCES opportunity_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_skills ADD CONSTRAINT fk_db_037_4 FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_037_0 ON opportunity_skills (skill_id);
+ALTER TABLE opportunity_shifts ADD CONSTRAINT fk_db_038_3 FOREIGN KEY (revision_id) REFERENCES opportunity_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_038_0 ON opportunity_shifts (revision_id,weekday);
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_db_039_3 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_db_039_4 FOREIGN KEY (membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_db_039_5 FOREIGN KEY (assigned_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_db_039_8 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_039_0 ON opportunity_hr_assignments (membership_id);
+CREATE INDEX ix_db_039_1 ON opportunity_hr_assignments (assigned_by_id);
+CREATE INDEX ix_db_039_2 ON opportunity_hr_assignments (organization_id);
+ALTER TABLE saved_opportunities ADD CONSTRAINT fk_db_040_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE saved_opportunities ADD CONSTRAINT fk_db_040_4 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_040_0 ON saved_opportunities (opportunity_id);
+ALTER TABLE applications ADD CONSTRAINT fk_db_041_3 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE applications ADD CONSTRAINT fk_db_041_4 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE applications ADD CONSTRAINT fk_db_041_6 FOREIGN KEY (current_attempt_id) REFERENCES application_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+CREATE INDEX ix_db_041_0 ON applications (opportunity_id,status,created_at);
+CREATE INDEX ix_db_041_1 ON applications (candidate_id,created_at);
+CREATE INDEX ix_db_041_2 ON applications (current_attempt_id);
+ALTER TABLE application_attempts ADD CONSTRAINT fk_db_042_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_attempts ADD CONSTRAINT fk_db_042_5 FOREIGN KEY (revision_id) REFERENCES opportunity_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_attempts ADD CONSTRAINT fk_db_042_6 FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_attempts ADD CONSTRAINT fk_db_042_13 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_042_0 ON application_attempts (revision_id);
+CREATE INDEX ix_db_042_1 ON application_attempts (enrollment_id);
+CREATE INDEX ix_db_042_2 ON application_attempts (opportunity_id);
+ALTER TABLE application_events ADD CONSTRAINT fk_db_043_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_events ADD CONSTRAINT fk_db_043_4 FOREIGN KEY (attempt_id) REFERENCES application_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_events ADD CONSTRAINT fk_db_043_5 FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_043_0 ON application_events (application_id,occurred_at);
+CREATE INDEX ix_db_043_1 ON application_events (attempt_id);
+CREATE INDEX ix_db_043_2 ON application_events (actor_id);
+ALTER TABLE interviews ADD CONSTRAINT fk_db_044_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE interviews ADD CONSTRAINT fk_db_044_4 FOREIGN KEY (organizer_membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_044_0 ON interviews (application_id,starts_at);
+CREATE INDEX ix_db_044_1 ON interviews (organizer_membership_id);
+ALTER TABLE interview_responses ADD CONSTRAINT fk_db_045_3 FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE interview_responses ADD CONSTRAINT fk_db_045_4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_045_0 ON interview_responses (user_id);
+ALTER TABLE offers ADD CONSTRAINT fk_db_046_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE offers ADD CONSTRAINT fk_db_046_4 FOREIGN KEY (attempt_id) REFERENCES application_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE offers ADD CONSTRAINT fk_db_046_5 FOREIGN KEY (revision_id) REFERENCES opportunity_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE offers ADD CONSTRAINT fk_db_046_6 FOREIGN KEY (issuer_membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_046_0 ON offers (application_id,status);
+CREATE INDEX ix_db_046_1 ON offers (status,expires_at);
+CREATE INDEX ix_db_046_2 ON offers (attempt_id);
+CREATE INDEX ix_db_046_3 ON offers (revision_id);
+CREATE INDEX ix_db_046_4 ON offers (issuer_membership_id);
+ALTER TABLE job_engagements ADD CONSTRAINT fk_db_047_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE job_engagements ADD CONSTRAINT fk_db_047_4 FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE engagement_confirmations ADD CONSTRAINT fk_db_048_3 FOREIGN KEY (engagement_id) REFERENCES job_engagements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE engagement_confirmations ADD CONSTRAINT fk_db_048_4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_048_0 ON engagement_confirmations (user_id);
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_3 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_4 FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_5 FOREIGN KEY (candidate_id) REFERENCES candidate_profiles(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_6 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_7 FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placements ADD CONSTRAINT fk_db_049_12 FOREIGN KEY (current_terms_id) REFERENCES placement_terms(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+CREATE INDEX ix_db_049_0 ON placements (candidate_id,status);
+CREATE INDEX ix_db_049_1 ON placements (organization_id,status);
+CREATE INDEX ix_db_049_2 ON placements (enrollment_id);
+CREATE INDEX ix_db_049_3 ON placements (current_terms_id);
+ALTER TABLE placement_terms ADD CONSTRAINT fk_db_050_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_db_051_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_db_051_4 FOREIGN KEY (membership_id) REFERENCES org_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_db_051_5 FOREIGN KEY (assigned_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_db_051_9 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_051_0 ON mentor_assignments (placement_id,revoked_at);
+CREATE INDEX ix_db_051_1 ON mentor_assignments (membership_id,revoked_at);
+CREATE INDEX ix_db_051_2 ON mentor_assignments (assigned_by_id);
+CREATE INDEX ix_db_051_3 ON mentor_assignments (organization_id);
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_db_052_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_db_052_4 FOREIGN KEY (teacher_membership_id) REFERENCES institution_memberships(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_db_052_5 FOREIGN KEY (supervision_id) REFERENCES student_supervisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_db_052_6 FOREIGN KEY (assigned_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_db_052_10 FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_052_0 ON academic_assignments (placement_id,revoked_at);
+CREATE INDEX ix_db_052_1 ON academic_assignments (teacher_membership_id,revoked_at);
+CREATE INDEX ix_db_052_2 ON academic_assignments (supervision_id);
+CREATE INDEX ix_db_052_3 ON academic_assignments (assigned_by_id);
+CREATE INDEX ix_db_052_4 ON academic_assignments (institution_id);
+ALTER TABLE plan_tasks ADD CONSTRAINT fk_db_053_3 FOREIGN KEY (terms_id) REFERENCES placement_terms(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placement_decisions ADD CONSTRAINT fk_db_054_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placement_decisions ADD CONSTRAINT fk_db_054_4 FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE placement_decisions ADD CONSTRAINT fk_db_054_7 FOREIGN KEY (terms_id) REFERENCES placement_terms(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_054_0 ON placement_decisions (placement_id,decided_at);
+CREATE INDEX ix_db_054_1 ON placement_decisions (actor_id);
+CREATE INDEX ix_db_054_2 ON placement_decisions (terms_id);
+ALTER TABLE daily_logs ADD CONSTRAINT fk_db_055_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE daily_logs ADD CONSTRAINT fk_db_055_5 FOREIGN KEY (current_revision_id) REFERENCES log_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+CREATE INDEX ix_db_055_0 ON daily_logs (placement_id,local_date);
+CREATE INDEX ix_db_055_1 ON daily_logs (current_revision_id);
+ALTER TABLE log_revisions ADD CONSTRAINT fk_db_056_3 FOREIGN KEY (daily_log_id) REFERENCES daily_logs(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_revisions ADD CONSTRAINT fk_db_056_5 FOREIGN KEY (terms_id) REFERENCES placement_terms(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_revisions ADD CONSTRAINT fk_db_056_6 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_056_0 ON log_revisions (terms_id);
+CREATE INDEX ix_db_056_1 ON log_revisions (author_id);
+ALTER TABLE log_task_entries ADD CONSTRAINT fk_db_057_3 FOREIGN KEY (revision_id) REFERENCES log_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_task_entries ADD CONSTRAINT fk_db_057_4 FOREIGN KEY (plan_task_id) REFERENCES plan_tasks(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_057_0 ON log_task_entries (revision_id);
+CREATE INDEX ix_db_057_1 ON log_task_entries (plan_task_id);
+ALTER TABLE log_evidence ADD CONSTRAINT fk_db_058_3 FOREIGN KEY (entry_id) REFERENCES log_task_entries(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_evidence ADD CONSTRAINT fk_db_058_4 FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_058_0 ON log_evidence (file_id);
+ALTER TABLE workplace_log_reviews ADD CONSTRAINT fk_db_059_3 FOREIGN KEY (revision_id) REFERENCES log_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE workplace_log_reviews ADD CONSTRAINT fk_db_059_4 FOREIGN KEY (mentor_assignment_id) REFERENCES mentor_assignments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE workplace_log_reviews ADD CONSTRAINT fk_db_059_8 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_059_0 ON workplace_log_reviews (mentor_assignment_id);
+CREATE INDEX ix_db_059_1 ON workplace_log_reviews (placement_id);
+ALTER TABLE academic_log_reviews ADD CONSTRAINT fk_db_060_3 FOREIGN KEY (revision_id) REFERENCES log_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_log_reviews ADD CONSTRAINT fk_db_060_4 FOREIGN KEY (academic_assignment_id) REFERENCES academic_assignments(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_log_reviews ADD CONSTRAINT fk_db_060_8 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_060_0 ON academic_log_reviews (academic_assignment_id);
+CREATE INDEX ix_db_060_1 ON academic_log_reviews (placement_id);
+ALTER TABLE log_amendment_requests ADD CONSTRAINT fk_db_061_3 FOREIGN KEY (daily_log_id) REFERENCES daily_logs(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_amendment_requests ADD CONSTRAINT fk_db_061_4 FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE log_amendment_requests ADD CONSTRAINT fk_db_061_7 FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_061_0 ON log_amendment_requests (status,created_at);
+CREATE INDEX ix_db_061_1 ON log_amendment_requests (daily_log_id);
+CREATE INDEX ix_db_061_2 ON log_amendment_requests (requester_id);
+CREATE INDEX ix_db_061_3 ON log_amendment_requests (reviewer_id);
+ALTER TABLE rubric_criteria ADD CONSTRAINT fk_db_063_3 FOREIGN KEY (rubric_id) REFERENCES rubric_versions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_3 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_4 FOREIGN KEY (engagement_id) REFERENCES job_engagements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_5 FOREIGN KEY (rubric_id) REFERENCES rubric_versions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_6 FOREIGN KEY (rater_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_7 FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_submissions ADD CONSTRAINT fk_db_064_8 FOREIGN KEY (target_org_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_064_0 ON rating_submissions (target_user_id,status);
+CREATE INDEX ix_db_064_1 ON rating_submissions (target_org_id,status);
+CREATE INDEX ix_db_064_2 ON rating_submissions (placement_id);
+CREATE INDEX ix_db_064_3 ON rating_submissions (engagement_id);
+CREATE INDEX ix_db_064_4 ON rating_submissions (rubric_id);
+CREATE INDEX ix_db_064_5 ON rating_submissions (rater_id);
+ALTER TABLE rating_revisions ADD CONSTRAINT fk_db_065_3 FOREIGN KEY (submission_id) REFERENCES rating_submissions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_scores ADD CONSTRAINT fk_db_066_3 FOREIGN KEY (rating_revision_id) REFERENCES rating_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_scores ADD CONSTRAINT fk_db_066_4 FOREIGN KEY (criterion_id) REFERENCES rubric_criteria(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_scores ADD CONSTRAINT fk_db_066_6 FOREIGN KEY (evidence_revision_id) REFERENCES log_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_scores ADD CONSTRAINT fk_db_066_7 FOREIGN KEY (rubric_id) REFERENCES rubric_versions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_066_0 ON rating_scores (criterion_id);
+CREATE INDEX ix_db_066_1 ON rating_scores (evidence_revision_id);
+CREATE INDEX ix_db_066_2 ON rating_scores (rubric_id);
+ALTER TABLE rating_appeals ADD CONSTRAINT fk_db_067_3 FOREIGN KEY (rating_revision_id) REFERENCES rating_revisions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_appeals ADD CONSTRAINT fk_db_067_4 FOREIGN KEY (appellant_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_appeals ADD CONSTRAINT fk_db_067_7 FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_067_0 ON rating_appeals (status,created_at);
+CREATE INDEX ix_db_067_1 ON rating_appeals (rating_revision_id);
+CREATE INDEX ix_db_067_2 ON rating_appeals (appellant_id);
+CREATE INDEX ix_db_067_3 ON rating_appeals (reviewer_id);
+ALTER TABLE rating_aggregates ADD CONSTRAINT fk_db_068_3 FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_aggregates ADD CONSTRAINT fk_db_068_4 FOREIGN KEY (target_org_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE rating_aggregates ADD CONSTRAINT fk_db_068_5 FOREIGN KEY (rubric_id) REFERENCES rubric_versions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_068_0 ON rating_aggregates (target_user_id);
+CREATE INDEX ix_db_068_1 ON rating_aggregates (target_org_id);
+CREATE INDEX ix_db_068_2 ON rating_aggregates (rubric_id);
+ALTER TABLE price_versions ADD CONSTRAINT fk_db_070_3 FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE orders ADD CONSTRAINT fk_db_071_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE orders ADD CONSTRAINT fk_db_071_4 FOREIGN KEY (purchaser_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE orders ADD CONSTRAINT fk_db_071_5 FOREIGN KEY (price_id) REFERENCES price_versions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE orders ADD CONSTRAINT fk_db_071_6 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_071_0 ON orders (organization_id,created_at);
+CREATE INDEX ix_db_071_1 ON orders (purchaser_id);
+CREATE INDEX ix_db_071_2 ON orders (price_id);
+CREATE INDEX ix_db_071_3 ON orders (opportunity_id);
+ALTER TABLE invoices ADD CONSTRAINT fk_db_072_3 FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE payment_attempts ADD CONSTRAINT fk_db_073_3 FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_073_0 ON payment_attempts (order_id,status);
+ALTER TABLE payment_events ADD CONSTRAINT fk_db_074_3 FOREIGN KEY (attempt_id) REFERENCES payment_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_074_0 ON payment_events (attempt_id);
+ALTER TABLE service_entitlements ADD CONSTRAINT fk_db_075_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE service_entitlements ADD CONSTRAINT fk_db_075_4 FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE service_entitlements ADD CONSTRAINT fk_db_075_5 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE service_entitlements ADD CONSTRAINT fk_db_075_11 FOREIGN KEY (granted_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_075_0 ON service_entitlements (organization_id,status,ends_at);
+CREATE INDEX ix_db_075_1 ON service_entitlements (order_id);
+CREATE INDEX ix_db_075_2 ON service_entitlements (opportunity_id);
+CREATE INDEX ix_db_075_3 ON service_entitlements (granted_by_id);
+ALTER TABLE refunds ADD CONSTRAINT fk_db_076_3 FOREIGN KEY (payment_attempt_id) REFERENCES payment_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE refunds ADD CONSTRAINT fk_db_076_4 FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE refunds ADD CONSTRAINT fk_db_076_5 FOREIGN KEY (approver_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE refunds ADD CONSTRAINT fk_db_076_12 FOREIGN KEY (second_approver_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_076_0 ON refunds (payment_attempt_id);
+CREATE INDEX ix_db_076_1 ON refunds (requester_id);
+CREATE INDEX ix_db_076_2 ON refunds (approver_id);
+CREATE INDEX ix_db_076_3 ON refunds (second_approver_id);
+ALTER TABLE billing_ledger ADD CONSTRAINT fk_db_077_3 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE billing_ledger ADD CONSTRAINT fk_db_077_4 FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE billing_ledger ADD CONSTRAINT fk_db_077_5 FOREIGN KEY (payment_attempt_id) REFERENCES payment_attempts(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE billing_ledger ADD CONSTRAINT fk_db_077_6 FOREIGN KEY (refund_id) REFERENCES refunds(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_077_0 ON billing_ledger (organization_id);
+CREATE INDEX ix_db_077_1 ON billing_ledger (order_id);
+CREATE INDEX ix_db_077_2 ON billing_ledger (payment_attempt_id);
+CREATE INDEX ix_db_077_3 ON billing_ledger (refund_id);
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_3 FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_4 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_5 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_6 FOREIGN KEY (rating_id) REFERENCES rating_submissions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_7 FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_cases ADD CONSTRAINT fk_db_078_11 FOREIGN KEY (assigned_to_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_078_0 ON moderation_cases (status,severity,due_at);
+CREATE INDEX ix_db_078_1 ON moderation_cases (reporter_id);
+CREATE INDEX ix_db_078_2 ON moderation_cases (opportunity_id);
+CREATE INDEX ix_db_078_3 ON moderation_cases (organization_id);
+CREATE INDEX ix_db_078_4 ON moderation_cases (rating_id);
+CREATE INDEX ix_db_078_5 ON moderation_cases (file_id);
+CREATE INDEX ix_db_078_6 ON moderation_cases (assigned_to_id);
+ALTER TABLE moderation_actions ADD CONSTRAINT fk_db_079_3 FOREIGN KEY (case_id) REFERENCES moderation_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_actions ADD CONSTRAINT fk_db_079_4 FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE moderation_actions ADD CONSTRAINT fk_db_079_8 FOREIGN KEY (appealed_action_id) REFERENCES moderation_actions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_079_0 ON moderation_actions (case_id,occurred_at);
+CREATE INDEX ix_db_079_1 ON moderation_actions (actor_id);
+CREATE INDEX ix_db_079_2 ON moderation_actions (appealed_action_id);
+ALTER TABLE support_tickets ADD CONSTRAINT fk_db_080_3 FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE support_tickets ADD CONSTRAINT fk_db_080_7 FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_080_0 ON support_tickets (status,priority,first_response_due_at);
+CREATE INDEX ix_db_080_1 ON support_tickets (requester_id,created_at);
+CREATE INDEX ix_db_080_2 ON support_tickets (assignee_id);
+ALTER TABLE support_messages ADD CONSTRAINT fk_db_081_3 FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE support_messages ADD CONSTRAINT fk_db_081_4 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE support_messages ADD CONSTRAINT fk_db_081_6 FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_081_0 ON support_messages (ticket_id,created_at);
+CREATE INDEX ix_db_081_1 ON support_messages (author_id);
+CREATE INDEX ix_db_081_2 ON support_messages (file_id);
+ALTER TABLE privacy_requests ADD CONSTRAINT fk_db_082_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE privacy_requests ADD CONSTRAINT fk_db_082_8 FOREIGN KEY (result_file_id) REFERENCES files(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_082_0 ON privacy_requests (status,due_at);
+CREATE INDEX ix_db_082_1 ON privacy_requests (user_id);
+CREATE INDEX ix_db_082_2 ON privacy_requests (result_file_id);
+ALTER TABLE legal_holds ADD CONSTRAINT fk_db_084_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE legal_holds ADD CONSTRAINT fk_db_084_4 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE legal_holds ADD CONSTRAINT fk_db_084_5 FOREIGN KEY (case_id) REFERENCES moderation_cases(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE legal_holds ADD CONSTRAINT fk_db_084_7 FOREIGN KEY (authorized_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_084_0 ON legal_holds (expires_at,released_at);
+CREATE INDEX ix_db_084_1 ON legal_holds (user_id);
+CREATE INDEX ix_db_084_2 ON legal_holds (organization_id);
+CREATE INDEX ix_db_084_3 ON legal_holds (case_id);
+CREATE INDEX ix_db_084_4 ON legal_holds (authorized_by_id);
+ALTER TABLE notification_preferences ADD CONSTRAINT fk_db_085_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notification_preferences ADD CONSTRAINT fk_db_085_7 FOREIGN KEY (consent_event_id) REFERENCES consent_events(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_085_0 ON notification_preferences (consent_event_id);
+CREATE INDEX ix_db_086_0 ON outbox_events (processed_at,available_at);
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_4 FOREIGN KEY (event_id) REFERENCES outbox_events(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_6 FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_7 FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_8 FOREIGN KEY (placement_id) REFERENCES placements(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE notifications ADD CONSTRAINT fk_db_087_9 FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_087_0 ON notifications (user_id,read_at,created_at);
+CREATE INDEX ix_db_087_1 ON notifications (event_id);
+CREATE INDEX ix_db_087_2 ON notifications (opportunity_id);
+CREATE INDEX ix_db_087_3 ON notifications (application_id);
+CREATE INDEX ix_db_087_4 ON notifications (placement_id);
+CREATE INDEX ix_db_087_5 ON notifications (ticket_id);
+ALTER TABLE notification_deliveries ADD CONSTRAINT fk_db_088_3 FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_088_0 ON notification_deliveries (status,next_retry_at);
+ALTER TABLE audit_events ADD CONSTRAINT fk_db_089_3 FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE audit_events ADD CONSTRAINT fk_db_089_4 FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_089_0 ON audit_events (actor_id,occurred_at);
+CREATE INDEX ix_db_089_1 ON audit_events (object_type,object_key,occurred_at);
+CREATE INDEX ix_db_089_2 ON audit_events (request_id);
+CREATE INDEX ix_db_089_3 ON audit_events (session_id);
+ALTER TABLE idempotency_keys ADD CONSTRAINT fk_db_090_3 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_090_0 ON idempotency_keys (expires_at);
+CREATE INDEX ix_db_091_0 ON analytics_events (event_name,occurred_at);
+ALTER TABLE feature_flags ADD CONSTRAINT fk_db_092_6 FOREIGN KEY (changed_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_092_0 ON feature_flags (changed_by_id);
+ALTER TABLE incidents ADD CONSTRAINT fk_db_093_5 FOREIGN KEY (commander_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_093_0 ON incidents (status,severity,started_at);
+CREATE INDEX ix_db_093_1 ON incidents (commander_id);
+ALTER TABLE restore_runs ADD CONSTRAINT fk_db_094_10 FOREIGN KEY (checked_by_id) REFERENCES users(id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+CREATE INDEX ix_db_094_0 ON restore_runs (started_at);
+CREATE INDEX ix_db_094_1 ON restore_runs (checked_by_id);
+
+-- 1.2 GiST range indexes for schedule & shift matching
+CREATE INDEX ix_availability_rules_gist ON availability_rules USING gist (candidate_id, weekday, minute_range);
+CREATE INDEX ix_availability_exceptions_gist ON availability_exceptions USING gist (candidate_id, local_date, minute_range);
+CREATE INDEX ix_opportunity_shifts_gist ON opportunity_shifts USING gist (revision_id, weekday, minute_range);
+
+-- Partial unique indexes (1.3 / 1.4)
+CREATE UNIQUE INDEX one_active_offer ON offers(application_id) WHERE status = 'OFFERED';
+CREATE UNIQUE INDEX one_current_mentor ON mentor_assignments(placement_id) WHERE revoked_at IS NULL AND accepted_at IS NOT NULL;
+CREATE UNIQUE INDEX one_current_teacher ON academic_assignments(placement_id) WHERE revoked_at IS NULL AND accepted_at IS NOT NULL;
+CREATE UNIQUE INDEX one_placement_rating ON rating_submissions(placement_id,rater_id,rubric_id) WHERE placement_id IS NOT NULL;
+CREATE UNIQUE INDEX one_engagement_rating ON rating_submissions(engagement_id,rater_id,rubric_id) WHERE engagement_id IS NOT NULL;
+CREATE UNIQUE INDEX one_user_aggregate ON rating_aggregates(target_user_id,rubric_id,window_start,window_end) WHERE target_user_id IS NOT NULL;
+CREATE UNIQUE INDEX one_org_aggregate ON rating_aggregates(target_org_id,rubric_id,window_start,window_end) WHERE target_org_id IS NOT NULL;
+
+-- 1.5 Composite Foreign Keys for cross-table scope integrity (INV-01..03, INV-10..11) and circular revisions (INV-14)
+-- INV-01: Application attempt and revision belong to the same opportunity_id
+ALTER TABLE application_attempts ADD CONSTRAINT fk_app_attempts_app_same_opp FOREIGN KEY (application_id, opportunity_id) REFERENCES applications(id, opportunity_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE application_attempts ADD CONSTRAINT fk_app_attempts_rev_same_opp FOREIGN KEY (revision_id, opportunity_id) REFERENCES opportunity_revisions(id, opportunity_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+-- INV-02: Inviter, HR assignment, and mentor assignment belong to the same organization_id
+ALTER TABLE org_invitations ADD CONSTRAINT fk_org_invitations_inviter_same_org FOREIGN KEY (inviter_membership_id, organization_id) REFERENCES org_memberships(id, organization_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_opp_hr_membership_same_org FOREIGN KEY (membership_id, organization_id) REFERENCES org_memberships(id, organization_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE opportunity_hr_assignments ADD CONSTRAINT fk_opp_hr_opportunity_same_org FOREIGN KEY (opportunity_id, organization_id) REFERENCES opportunities(id, organization_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_mentor_placement_same_org FOREIGN KEY (membership_id, organization_id) REFERENCES org_memberships(id, organization_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE mentor_assignments ADD CONSTRAINT fk_mentor_placement_org_match FOREIGN KEY (placement_id, organization_id) REFERENCES placements(id, organization_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+-- INV-03: Supervision coordinator, agreement, enrollment, and academic teacher belong to the same institution_id
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_supervision_coordinator_same_inst FOREIGN KEY (coordinator_membership_id, institution_id) REFERENCES institution_memberships(id, institution_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_supervision_enrollment_same_inst FOREIGN KEY (enrollment_id, institution_id) REFERENCES enrollments(id, institution_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE student_supervisions ADD CONSTRAINT fk_supervision_agreement_same_inst FOREIGN KEY (agreement_id, institution_id) REFERENCES institution_agreements(id, institution_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_academic_teacher_same_inst FOREIGN KEY (teacher_membership_id, institution_id) REFERENCES institution_memberships(id, institution_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_assignments ADD CONSTRAINT fk_academic_supervision_same_inst FOREIGN KEY (supervision_id, institution_id) REFERENCES student_supervisions(id, institution_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+-- INV-10: Workplace and academic log reviews belong to the same placement_id
+ALTER TABLE workplace_log_reviews ADD CONSTRAINT fk_wp_review_revision_same_pl FOREIGN KEY (mentor_assignment_id, placement_id) REFERENCES mentor_assignments(id, placement_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE academic_log_reviews ADD CONSTRAINT fk_acad_review_revision_same_pl FOREIGN KEY (academic_assignment_id, placement_id) REFERENCES academic_assignments(id, placement_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+-- INV-11: Rating criterion and revision belong to the same rubric_id
+ALTER TABLE rating_scores ADD CONSTRAINT fk_rating_scores_crit_same_rubric FOREIGN KEY (criterion_id, rubric_id) REFERENCES rubric_criteria(id, rubric_id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+-- INV-14: Circular parent-child current revision/attempt/terms composite FKs (DEFERRABLE INITIALLY DEFERRED)
+ALTER TABLE opportunities ADD CONSTRAINT fk_opportunities_current_revision FOREIGN KEY (current_revision_id, id) REFERENCES opportunity_revisions(id, opportunity_id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE applications ADD CONSTRAINT fk_applications_current_attempt FOREIGN KEY (current_attempt_id, id) REFERENCES application_attempts(id, application_id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE placements ADD CONSTRAINT fk_placements_current_terms FOREIGN KEY (current_terms_id, id) REFERENCES placement_terms(id, placement_id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE daily_logs ADD CONSTRAINT fk_daily_logs_current_revision FOREIGN KEY (current_revision_id, id) REFERENCES log_revisions(id, daily_log_id) DEFERRABLE INITIALLY DEFERRED;
+
+-- 1.3 Trigger: trg_validate_log_submission (INV-09, AC-040)
+CREATE OR REPLACE FUNCTION fn_validate_log_submission()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_placement_id uuid;
+    v_local_date date;
+    v_start_date date;
+    v_end_date date;
+    v_daily_limit integer;
+    v_sum_minutes integer;
+BEGIN
+    IF NEW.status = 'SUBMITTED' THEN
+        SELECT dl.placement_id, dl.local_date
+          INTO v_placement_id, v_local_date
+          FROM daily_logs dl
+         WHERE dl.id = NEW.daily_log_id;
+
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Daily log % topilmadi', NEW.daily_log_id
+                USING ERRCODE = '23503';
+        END IF;
+
+        SELECT p.start_date, p.end_date
+          INTO v_start_date, v_end_date
+          FROM placements p
+         WHERE p.id = v_placement_id;
+
+        IF v_local_date < v_start_date OR (v_end_date IS NOT NULL AND v_local_date > v_end_date) OR v_local_date > CURRENT_DATE THEN
+            RAISE EXCEPTION 'Kundalik sanasi (%) placement oralig''ida emas yoki kelajak sana (INV-09)', v_local_date
+                USING ERRCODE = '23514';
+        END IF;
+
+        SELECT pt.daily_limit_minutes
+          INTO v_daily_limit
+          FROM placement_terms pt
+         WHERE pt.id = NEW.terms_id AND pt.placement_id = v_placement_id;
+
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Placement terms % ushbu placement (%) ga tegishli emas (INV-09)', NEW.terms_id, v_placement_id
+                USING ERRCODE = '23503';
+        END IF;
+
+        SELECT COALESCE(SUM(lte.minutes), 0)
+          INTO v_sum_minutes
+          FROM log_task_entries lte
+         WHERE lte.revision_id = NEW.id;
+
+        NEW.total_minutes := v_sum_minutes;
+
+        IF NEW.day_type = 'WORKED' AND (NEW.total_minutes <= 0 OR NEW.total_minutes > v_daily_limit) THEN
+            RAISE EXCEPTION 'WORKED kunida total_minutes (%) > 0 va <= daily_limit_minutes (%) bo''lishi shart (INV-09 / AC-040)', NEW.total_minutes, v_daily_limit
+                USING ERRCODE = '23514';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_validate_log_submission BEFORE INSERT OR UPDATE ON log_revisions FOR EACH ROW EXECUTE FUNCTION fn_validate_log_submission();
+
+-- INV-10 & INV-11 Cross-table scope verification triggers for log reviews and rating scores
+CREATE OR REPLACE FUNCTION fn_validate_log_review_scope()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_log_placement_id uuid;
+BEGIN
+    SELECT dl.placement_id
+      INTO v_log_placement_id
+      FROM log_revisions lr
+      JOIN daily_logs dl ON dl.id = lr.daily_log_id
+     WHERE lr.id = NEW.revision_id;
+
+    IF v_log_placement_id IS NULL OR v_log_placement_id <> NEW.placement_id THEN
+        RAISE EXCEPTION 'Kundalik taqrizi placement_id (%) kundalik versiyasi placement_id (%) bilan mos emas (INV-10)', NEW.placement_id, v_log_placement_id
+            USING ERRCODE = '23503';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_validate_wp_review_scope BEFORE INSERT OR UPDATE ON workplace_log_reviews FOR EACH ROW EXECUTE FUNCTION fn_validate_log_review_scope();
+CREATE TRIGGER trg_validate_acad_review_scope BEFORE INSERT OR UPDATE ON academic_log_reviews FOR EACH ROW EXECUTE FUNCTION fn_validate_log_review_scope();
+
+CREATE OR REPLACE FUNCTION fn_validate_rating_score_rubric()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_sub_rubric_id uuid;
+BEGIN
+    SELECT rs.rubric_id
+      INTO v_sub_rubric_id
+      FROM rating_revisions rr
+      JOIN rating_submissions rs ON rs.id = rr.submission_id
+     WHERE rr.id = NEW.rating_revision_id;
+
+    IF v_sub_rubric_id IS NULL OR v_sub_rubric_id <> NEW.rubric_id THEN
+        RAISE EXCEPTION 'Rating score rubric_id (%) rating submission rubric_id (%) bilan mos emas (INV-11)', NEW.rubric_id, v_sub_rubric_id
+            USING ERRCODE = '23503';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER fk_rating_scores_rev_same_rubric BEFORE INSERT OR UPDATE ON rating_scores FOR EACH ROW EXECUTE FUNCTION fn_validate_rating_score_rubric();
+
+-- 1.4 Trigger: trg_validate_refund_limit (INV-12)
+CREATE OR REPLACE FUNCTION fn_validate_refund_limit()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_captured_amount numeric(18,2);
+    v_attempt_status text;
+    v_existing_refunds numeric(18,2);
+BEGIN
+    SELECT pa.amount, pa.status
+      INTO v_captured_amount, v_attempt_status
+      FROM payment_attempts pa
+     WHERE pa.id = NEW.payment_attempt_id
+       FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Payment attempt % topilmadi', NEW.payment_attempt_id
+            USING ERRCODE = '23503';
+    END IF;
+
+    IF v_attempt_status <> 'CAPTURED' THEN
+        RAISE EXCEPTION 'Faqat CAPTURED holatidagi to''lovdan refund qilish mumkin (joriy: %)', v_attempt_status
+            USING ERRCODE = '23514';
+    END IF;
+
+    SELECT COALESCE(SUM(r.amount), 0)
+      INTO v_existing_refunds
+      FROM refunds r
+     WHERE r.payment_attempt_id = NEW.payment_attempt_id
+       AND r.id <> NEW.id
+       AND r.status NOT IN ('REJECTED', 'CANCELLED', 'FAILED');
+
+    IF (v_existing_refunds + NEW.amount) > v_captured_amount THEN
+        RAISE EXCEPTION 'Jami refund summasi (%) CAPTURED summadan (%) oshib ketdi (INV-12)', (v_existing_refunds + NEW.amount), v_captured_amount
+            USING ERRCODE = '23514';
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_validate_refund_limit BEFORE INSERT OR UPDATE ON refunds FOR EACH ROW EXECUTE FUNCTION fn_validate_refund_limit();
+
+-- 1.5 Triggers: INV-16 Immutability guards (audit_events, consent_events, billing_ledger, opportunity_revisions, log_revisions)
+CREATE OR REPLACE FUNCTION fn_block_append_only_mutation()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RAISE EXCEPTION 'Jadval % append-only (o''zgarmas); % amali taqiqlangan (INV-16)', TG_TABLE_NAME, TG_OP
+        USING ERRCODE = '23514';
+END;
+$$;
+CREATE TRIGGER trg_immutable_audit_events BEFORE UPDATE OR DELETE ON audit_events FOR EACH ROW EXECUTE FUNCTION fn_block_append_only_mutation();
+CREATE TRIGGER trg_immutable_consent_events BEFORE UPDATE OR DELETE ON consent_events FOR EACH ROW EXECUTE FUNCTION fn_block_append_only_mutation();
+CREATE TRIGGER trg_immutable_billing_ledger BEFORE UPDATE OR DELETE ON billing_ledger FOR EACH ROW EXECUTE FUNCTION fn_block_append_only_mutation();
+
+CREATE OR REPLACE FUNCTION fn_guard_opportunity_revisions()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        RAISE EXCEPTION 'opportunity_revisions yozuvini o''chirish taqiqlangan (INV-16)'
+            USING ERRCODE = '23514';
+    END IF;
+    IF OLD.published_at IS NOT NULL THEN
+        RAISE EXCEPTION 'Nashr qilingan opportunity_revisions yozuvini tahrirlash taqiqlangan (INV-16)'
+            USING ERRCODE = '23514';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_guard_opportunity_revisions BEFORE UPDATE OR DELETE ON opportunity_revisions FOR EACH ROW EXECUTE FUNCTION fn_guard_opportunity_revisions();
+
+CREATE OR REPLACE FUNCTION fn_guard_log_revisions()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        RAISE EXCEPTION 'log_revisions yozuvini o''chirish taqiqlangan (INV-16)'
+            USING ERRCODE = '23514';
+    END IF;
+    IF OLD.status <> 'DRAFT' AND (
+        NEW.daily_log_id <> OLD.daily_log_id OR
+        NEW.revision <> OLD.revision OR
+        NEW.terms_id <> OLD.terms_id OR
+        NEW.author_id <> OLD.author_id OR
+        NEW.day_type <> OLD.day_type OR
+        NEW.total_minutes <> OLD.total_minutes
+    ) THEN
+        RAISE EXCEPTION 'Topshirilgan log_revisions tarkibini o''zgartirish taqiqlangan; yangi revision yarating (INV-16)'
+            USING ERRCODE = '23514';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_guard_log_revisions BEFORE UPDATE OR DELETE ON log_revisions FOR EACH ROW EXECUTE FUNCTION fn_guard_log_revisions();
+
+-- 4. DB-083 retention_policies Policy v1 canonical seed
+INSERT INTO retention_policies (id, data_class, policy_version, active_days, backup_expiry_days, legal_basis, status) VALUES
+    ('00000000-0000-4000-8000-000000000081', 'OTP_CHALLENGE_DIGEST', 1, 1, 7, 'Xavfsizlik va rate-limit tekshiruvi; OTP kodning o''zi 5 daqiqa amal qiladi, xeshi 24 soatdan so''ng o''chiriladi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000082', 'SECURITY_LOGIN_METADATA', 1, 90, 30, 'Brute-force va hisob xavfsizligi tahlili; 90 kundan keyin IP va device digest tozalanadi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000083', 'PRIVATE_EXPORT_FILE', 1, 1, 7, 'Foydalanuvchi yoki muassasa so''ragan PDF/ZIP eksport fayli 24 soatdan so''ng S3 va DB-018 dan o''chiriladi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000084', 'UNPUBLISHED_DRAFT', 1, 30, 14, 'Nofaol e''lon yoki kundalik qoralamasi 23-kuni ogohlantiriladi va 30-kuni tozalanadi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000085', 'VERIFICATION_EVIDENCE', 1, 90, 30, 'Tekshiruv (STIR, talabalik, tayinlov) hal bo''lgach, xom dalil fayli 90 kundan so''ng o''chiriladi; qaror va audit qoladi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000086', 'APPLICATION_AND_SNAPSHOT', 1, 365, 30, 'Yopilgan/rad etilgan ariza va uning snapshotlari nizo muddati uchun 1 yil saqlanadi, so''ngra PII anonimlashtiriladi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000087', 'INTERNSHIP_DIARY_ACADEMIC', 1, 1095, 30, 'Oliygoh va host kelishuvi bo''yicha akademik amaliyot kundaligi va yakuniy qarorlar o''quv davri uchun 3 yil saqlanadi.', 'ACTIVE'),
+    ('00000000-0000-4000-8000-000000000088', 'BILLING_AND_FISCAL_LEDGER', 1, 1825, 90, 'Soliq va buxgalteriya hisobi talablari bo''yicha orders, invoices, refunds va billing_ledger 5 yil saqlanadi.', 'ACTIVE')
+ON CONFLICT (data_class, policy_version) DO NOTHING;
+
+COMMIT;

@@ -1,0 +1,4175 @@
+{
+  "version": "1.3",
+  "roles": [
+    {
+      "code": "GUEST",
+      "scope": "SELF",
+      "name": "Mehmon",
+      "assignment": "Derived account/enrollment context"
+    },
+    {
+      "code": "CANDIDATE",
+      "scope": "SELF",
+      "name": "Ish izlovchi",
+      "assignment": "Derived account/enrollment context"
+    },
+    {
+      "code": "STUDENT",
+      "scope": "SELF",
+      "name": "Tasdiqlangan talaba",
+      "assignment": "Derived account/enrollment context"
+    },
+    {
+      "code": "OWNER",
+      "scope": "ORG",
+      "name": "Korxona egasi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "HR",
+      "scope": "ORG",
+      "name": "HR",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "HOST_COORDINATOR",
+      "scope": "ORG",
+      "name": "Amaliyot mas’uli",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "MENTOR",
+      "scope": "ORG",
+      "name": "Korxona ustozi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "BILLING",
+      "scope": "ORG",
+      "name": "Hisob-kitob xodimi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "COORDINATOR",
+      "scope": "INSTITUTION",
+      "name": "Muassasa mas’uli",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "TEACHER",
+      "scope": "INSTITUTION",
+      "name": "O‘qituvchi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "MODERATOR",
+      "scope": "PLATFORM",
+      "name": "Moderator",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "SUPPORT",
+      "scope": "PLATFORM",
+      "name": "Yordam xodimi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "FINANCE",
+      "scope": "PLATFORM",
+      "name": "Moliya nazoratchisi",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    },
+    {
+      "code": "ADMIN",
+      "scope": "PLATFORM",
+      "name": "Tizim operatori",
+      "assignment": "Verified scoped membership/grant with independent approval"
+    }
+  ],
+  "permissions": [
+    {
+      "code": "API-001",
+      "method": "GET",
+      "path": "/api/v1/opportunities",
+      "cap": "CAP-001",
+      "scope": "Faqat PUBLISHED, public fields",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-002",
+      "method": "GET",
+      "path": "/api/v1/onboarding/options",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-003",
+      "method": "POST",
+      "path": "/api/v1/matching/preview",
+      "cap": "CAP-005",
+      "scope": "O‘z vaqti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-004",
+      "method": "POST",
+      "path": "/api/v1/saved-opportunities",
+      "cap": "CAP-006",
+      "scope": "O‘z saved qatori",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-005",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}",
+      "cap": "CAP-001",
+      "scope": "Faqat PUBLISHED, public fields",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-006",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-007",
+      "method": "POST",
+      "path": "/api/v1/moderation-cases",
+      "cap": "CAP-032",
+      "scope": "Ko‘rilgan public yoki o‘z munosabat targeti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "TEACHER",
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-008",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/public",
+      "cap": "CAP-001",
+      "scope": "Faqat PUBLISHED, public fields",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-009",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/opportunities",
+      "cap": "CAP-001",
+      "scope": "Faqat PUBLISHED, public fields",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-010",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/rating-summary",
+      "cap": "CAP-040",
+      "scope": "Faqat ruxsatli public agregat",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-011",
+      "method": "GET",
+      "path": "/api/v1/services/public",
+      "cap": "CAP-039",
+      "scope": "Faqat public katalog va versiyali siyosat matni",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-012",
+      "method": "GET",
+      "path": "/api/v1/prices/public",
+      "cap": "CAP-039",
+      "scope": "Faqat public katalog va versiyali siyosat matni",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-013",
+      "method": "GET",
+      "path": "/api/v1/help/{document}",
+      "cap": "CAP-039",
+      "scope": "Faqat public katalog va versiyali siyosat matni",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-014",
+      "method": "GET",
+      "path": "/api/v1/policies/{document}",
+      "cap": "CAP-039",
+      "scope": "Faqat public katalog va versiyali siyosat matni",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-015",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-016",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-017",
+      "method": "GET",
+      "path": "/api/v1/institution-onboarding/options",
+      "cap": "CAP-019",
+      "scope": "O‘z rasmiy topshirig‘i",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-018",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-019",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/verify",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-020",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/consume",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-021",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/resend",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-022",
+      "method": "POST",
+      "path": "/api/v1/auth/recovery",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-023",
+      "method": "GET",
+      "path": "/api/v1/auth/recovery/{id}",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-024",
+      "method": "GET",
+      "path": "/api/v1/invitations/{token}",
+      "cap": "CAP-015",
+      "scope": "Kontaktga mos o‘z taklifi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-025",
+      "method": "POST",
+      "path": "/api/v1/invitations/{token}/accept",
+      "cap": "CAP-015",
+      "scope": "Kontaktga mos o‘z taklifi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-026",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate",
+      "cap": "CAP-003",
+      "scope": "O‘z candidate_profile",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-027",
+      "method": "POST",
+      "path": "/api/v1/me/enrollments",
+      "cap": "CAP-004",
+      "scope": "O‘z enrollmenti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-028",
+      "method": "PUT",
+      "path": "/api/v1/me/availability",
+      "cap": "CAP-005",
+      "scope": "O‘z vaqti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-029",
+      "method": "GET",
+      "path": "/api/v1/me/applications/summary",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-030",
+      "method": "GET",
+      "path": "/api/v1/me/placements",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-031",
+      "method": "GET",
+      "path": "/api/v1/me/notifications",
+      "cap": "CAP-031",
+      "scope": "O‘z inboxi/sozlamasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-032",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate/skills",
+      "cap": "CAP-003",
+      "scope": "O‘z candidate_profile",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-033",
+      "method": "POST",
+      "path": "/api/v1/me/candidate/cv",
+      "cap": "CAP-003",
+      "scope": "O‘z candidate_profile",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-034",
+      "method": "GET",
+      "path": "/api/v1/me/enrollments",
+      "cap": "CAP-004",
+      "scope": "O‘z enrollmenti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-035",
+      "method": "GET",
+      "path": "/api/v1/me/availability",
+      "cap": "CAP-005",
+      "scope": "O‘z vaqti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-036",
+      "method": "PUT",
+      "path": "/api/v1/me/availability/exceptions",
+      "cap": "CAP-005",
+      "scope": "O‘z vaqti",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-037",
+      "method": "GET",
+      "path": "/api/v1/me/saved-opportunities",
+      "cap": "CAP-006",
+      "scope": "O‘z saved qatori",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-038",
+      "method": "DELETE",
+      "path": "/api/v1/me/saved-opportunities/{id}",
+      "cap": "CAP-006",
+      "scope": "O‘z saved qatori",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-039",
+      "method": "GET",
+      "path": "/api/v1/me/applications",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-040",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/reapply",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-041",
+      "method": "GET",
+      "path": "/api/v1/me/applications/{id}",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-042",
+      "method": "POST",
+      "path": "/api/v1/interviews/{id}/responses",
+      "cap": "CAP-009",
+      "scope": "Ariza tomoni yoki ajratilgan HR",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR"
+      ]
+    },
+    {
+      "code": "API-043",
+      "method": "POST",
+      "path": "/api/v1/offers/{id}/respond",
+      "cap": "CAP-011",
+      "scope": "O‘z offeri",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-044",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/withdraw",
+      "cap": "CAP-007",
+      "scope": "O‘z arizasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-045",
+      "method": "GET",
+      "path": "/api/v1/me/engagements/{id}",
+      "cap": "CAP-012",
+      "scope": "O‘z ish munosabati yoki HR scope",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR"
+      ]
+    },
+    {
+      "code": "API-046",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/confirmations",
+      "cap": "CAP-012",
+      "scope": "O‘z ish munosabati yoki HR scope",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR"
+      ]
+    },
+    {
+      "code": "API-047",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/ratings",
+      "cap": "CAP-027",
+      "scope": "Completed relation ishtirokchisi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-048",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/accept",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-049",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/completion-requests",
+      "cap": "CAP-025",
+      "scope": "O‘z munosabatidagi tomon",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "TEACHER",
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-050",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/plan",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-051",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/assignments/{assignment}/accept",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-052",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/exports",
+      "cap": "CAP-026",
+      "scope": "O‘ziga ruxsatli placement va minimal data",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER",
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-053",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/logs",
+      "cap": "CAP-022",
+      "scope": "O‘z ACTIVE placementi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-054",
+      "method": "PUT",
+      "path": "/api/v1/placements/{id}/logs/{date}",
+      "cap": "CAP-022",
+      "scope": "O‘z ACTIVE placementi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-055",
+      "method": "POST",
+      "path": "/api/v1/log-entries/{id}/evidence",
+      "cap": "CAP-022",
+      "scope": "O‘z ACTIVE placementi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-056",
+      "method": "POST",
+      "path": "/api/v1/logs/{id}/submit",
+      "cap": "CAP-022",
+      "scope": "O‘z ACTIVE placementi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT"
+      ]
+    },
+    {
+      "code": "API-057",
+      "method": "GET",
+      "path": "/api/v1/me/ratings",
+      "cap": "CAP-027",
+      "scope": "Completed relation ishtirokchisi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-058",
+      "method": "POST",
+      "path": "/api/v1/ratings/{id}/appeals",
+      "cap": "CAP-028",
+      "scope": "Baho tomoni; independent reviewer",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "MENTOR",
+        "TEACHER",
+        "MODERATOR"
+      ]
+    },
+    {
+      "code": "API-059",
+      "method": "PUT",
+      "path": "/api/v1/me/notification-preferences",
+      "cap": "CAP-031",
+      "scope": "O‘z inboxi/sozlamasi",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-060",
+      "method": "PATCH",
+      "path": "/api/v1/me/security",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-061",
+      "method": "DELETE",
+      "path": "/api/v1/me/sessions/{id}",
+      "cap": "CAP-002",
+      "scope": "O‘z kontakt/sessiyasi",
+      "operation_roles": [
+        "GUEST",
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-062",
+      "method": "POST",
+      "path": "/api/v1/me/privacy-requests",
+      "cap": "CAP-035",
+      "scope": "O‘z data subject so‘rovi yoki maxsus vakolatli SUPPORT operator",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-063",
+      "method": "GET",
+      "path": "/api/v1/me/support-tickets",
+      "cap": "CAP-034",
+      "scope": "O‘z ticketi yoki ajratilgan SUPPORT operator",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-064",
+      "method": "POST",
+      "path": "/api/v1/support-tickets/{id}/messages",
+      "cap": "CAP-034",
+      "scope": "O‘z ticketi yoki ajratilgan SUPPORT operator",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "BILLING",
+        "COORDINATOR",
+        "TEACHER",
+        "MODERATOR",
+        "SUPPORT",
+        "FINANCE",
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-065",
+      "method": "POST",
+      "path": "/api/v1/organizations",
+      "cap": "CAP-013",
+      "scope": "O‘z organization so‘rovi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-066",
+      "method": "POST",
+      "path": "/api/v1/organizations/{id}/verification",
+      "cap": "CAP-013",
+      "scope": "O‘z organization so‘rovi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-067",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/verification",
+      "cap": "CAP-013",
+      "scope": "O‘z organization so‘rovi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-068",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/dashboard",
+      "cap": "CAP-008",
+      "scope": "Aynan e’longa berilgan HR/host scope",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-069",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/placements",
+      "cap": "CAP-017",
+      "scope": "O‘z host placementi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-070",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/entitlements",
+      "cap": "CAP-029",
+      "scope": "O‘z organizationi",
+      "operation_roles": [
+        "OWNER",
+        "BILLING"
+      ]
+    },
+    {
+      "code": "API-071",
+      "method": "PATCH",
+      "path": "/api/v1/organizations/{org}",
+      "cap": "CAP-013",
+      "scope": "O‘z organization so‘rovi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-072",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/capabilities",
+      "cap": "CAP-013",
+      "scope": "O‘z organization so‘rovi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-073",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/memberships",
+      "cap": "CAP-014",
+      "scope": "Aynan o‘z orgi",
+      "operation_roles": [
+        "OWNER"
+      ]
+    },
+    {
+      "code": "API-074",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/invitations",
+      "cap": "CAP-014",
+      "scope": "Aynan o‘z orgi",
+      "operation_roles": [
+        "OWNER"
+      ]
+    },
+    {
+      "code": "API-075",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/memberships/{id}/revoke",
+      "cap": "CAP-014",
+      "scope": "Aynan o‘z orgi",
+      "operation_roles": [
+        "OWNER"
+      ]
+    },
+    {
+      "code": "API-076",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/opportunities",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-077",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/transition",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-078",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-079",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/terms",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-080",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/schedule",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-081",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/publish",
+      "cap": "CAP-016",
+      "scope": "Ajratilgan org capabilitysi",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-082",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "cap": "CAP-008",
+      "scope": "Aynan e’longa berilgan HR/host scope",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-083",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/transition",
+      "cap": "CAP-008",
+      "scope": "Aynan e’longa berilgan HR/host scope",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-084",
+      "method": "GET",
+      "path": "/api/v1/applications/{id}/hr",
+      "cap": "CAP-008",
+      "scope": "Aynan e’longa berilgan HR/host scope",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-085",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/interviews",
+      "cap": "CAP-009",
+      "scope": "Ariza tomoni yoki ajratilgan HR",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "OWNER",
+        "HR"
+      ]
+    },
+    {
+      "code": "API-086",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/offers",
+      "cap": "CAP-010",
+      "scope": "Ajratilgan e’lon",
+      "operation_roles": [
+        "OWNER",
+        "HR",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-087",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/mentor-assignments",
+      "cap": "CAP-017",
+      "scope": "O‘z host placementi",
+      "operation_roles": [
+        "OWNER",
+        "HOST_COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-088",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/host-decisions",
+      "cap": "CAP-025",
+      "scope": "O‘z munosabatidagi tomon",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "HOST_COORDINATOR",
+        "MENTOR",
+        "TEACHER",
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-089",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-assignments",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-090",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-review-queue",
+      "cap": "CAP-023",
+      "scope": "Qabul qilingan faol mentor assignmenti",
+      "operation_roles": [
+        "MENTOR"
+      ]
+    },
+    {
+      "code": "API-091",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/workplace",
+      "cap": "CAP-023",
+      "scope": "Qabul qilingan faol mentor assignmenti",
+      "operation_roles": [
+        "MENTOR"
+      ]
+    },
+    {
+      "code": "API-092",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/workplace-reviews",
+      "cap": "CAP-023",
+      "scope": "Qabul qilingan faol mentor assignmenti",
+      "operation_roles": [
+        "MENTOR"
+      ]
+    },
+    {
+      "code": "API-093",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/billing",
+      "cap": "CAP-029",
+      "scope": "O‘z organizationi",
+      "operation_roles": [
+        "OWNER",
+        "BILLING"
+      ]
+    },
+    {
+      "code": "API-094",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/orders",
+      "cap": "CAP-029",
+      "scope": "O‘z organizationi",
+      "operation_roles": [
+        "OWNER",
+        "BILLING"
+      ]
+    },
+    {
+      "code": "API-095",
+      "method": "POST",
+      "path": "/api/v1/orders/{id}/refund-requests",
+      "cap": "CAP-030",
+      "scope": "O‘z buyurtmasi yoki navbatdagi moliya case",
+      "operation_roles": [
+        "OWNER",
+        "BILLING",
+        "FINANCE"
+      ]
+    },
+    {
+      "code": "API-096",
+      "method": "POST",
+      "path": "/api/v1/institution-appointments",
+      "cap": "CAP-019",
+      "scope": "O‘z rasmiy topshirig‘i",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-097",
+      "method": "GET",
+      "path": "/api/v1/institution-appointments/{id}",
+      "cap": "CAP-019",
+      "scope": "O‘z rasmiy topshirig‘i",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-098",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/supervisions",
+      "cap": "CAP-021",
+      "scope": "Koordinator purpose yoki qabul qilingan teacher assignment",
+      "operation_roles": [
+        "COORDINATOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-099",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/assignment-queue",
+      "cap": "CAP-020",
+      "scope": "O‘z muassasasidagi aniq enrollmentlar",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-100",
+      "method": "POST",
+      "path": "/api/v1/institutions/{inst}/exports",
+      "cap": "CAP-026",
+      "scope": "O‘ziga ruxsatli placement va minimal data",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER",
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-101",
+      "method": "POST",
+      "path": "/api/v1/student-supervisions",
+      "cap": "CAP-020",
+      "scope": "O‘z muassasasidagi aniq enrollmentlar",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-102",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-assignments",
+      "cap": "CAP-020",
+      "scope": "O‘z muassasasidagi aniq enrollmentlar",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-103",
+      "method": "POST",
+      "path": "/api/v1/academic-assignments/{id}/revoke",
+      "cap": "CAP-020",
+      "scope": "O‘z muassasasidagi aniq enrollmentlar",
+      "operation_roles": [
+        "COORDINATOR"
+      ]
+    },
+    {
+      "code": "API-104",
+      "method": "GET",
+      "path": "/api/v1/me/academic-assignments",
+      "cap": "CAP-018",
+      "scope": "Aniq placement/assignment",
+      "operation_roles": [
+        "CANDIDATE",
+        "STUDENT",
+        "MENTOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-105",
+      "method": "GET",
+      "path": "/api/v1/me/academic-review-queue",
+      "cap": "CAP-021",
+      "scope": "Koordinator purpose yoki qabul qilingan teacher assignment",
+      "operation_roles": [
+        "COORDINATOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-106",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/academic",
+      "cap": "CAP-021",
+      "scope": "Koordinator purpose yoki qabul qilingan teacher assignment",
+      "operation_roles": [
+        "COORDINATOR",
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-107",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/academic-reviews",
+      "cap": "CAP-024",
+      "scope": "Qabul qilingan academic assignment",
+      "operation_roles": [
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-108",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-decisions",
+      "cap": "CAP-024",
+      "scope": "Qabul qilingan academic assignment",
+      "operation_roles": [
+        "TEACHER"
+      ]
+    },
+    {
+      "code": "API-109",
+      "method": "GET",
+      "path": "/api/v1/operator/verification-cases",
+      "cap": "CAP-033",
+      "scope": "Biriktirilgan navbat, minimum evidence",
+      "operation_roles": [
+        "MODERATOR"
+      ]
+    },
+    {
+      "code": "API-110",
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/{id}/decide",
+      "cap": "CAP-033",
+      "scope": "Biriktirilgan navbat, minimum evidence",
+      "operation_roles": [
+        "MODERATOR"
+      ]
+    },
+    {
+      "code": "API-111",
+      "method": "POST",
+      "path": "/api/v1/operator/moderation-cases/{id}/actions",
+      "cap": "CAP-033",
+      "scope": "Biriktirilgan navbat, minimum evidence",
+      "operation_roles": [
+        "MODERATOR"
+      ]
+    },
+    {
+      "code": "API-112",
+      "method": "GET",
+      "path": "/api/v1/operator/support-tickets",
+      "cap": "CAP-034",
+      "scope": "O‘z ticketi yoki ajratilgan SUPPORT operator",
+      "operation_roles": [
+        "SUPPORT"
+      ]
+    },
+    {
+      "code": "API-113",
+      "method": "POST",
+      "path": "/api/v1/operator/support-tickets/{id}/messages",
+      "cap": "CAP-034",
+      "scope": "O‘z ticketi yoki ajratilgan SUPPORT operator",
+      "operation_roles": [
+        "SUPPORT"
+      ]
+    },
+    {
+      "code": "API-114",
+      "method": "POST",
+      "path": "/api/v1/operator/privacy-requests/{id}/resolve",
+      "cap": "CAP-035",
+      "scope": "O‘z data subject so‘rovi yoki maxsus vakolatli SUPPORT operator",
+      "operation_roles": [
+        "SUPPORT"
+      ]
+    },
+    {
+      "code": "API-115",
+      "method": "GET",
+      "path": "/api/v1/operator/reconciliation",
+      "cap": "CAP-030",
+      "scope": "O‘z buyurtmasi yoki navbatdagi moliya case",
+      "operation_roles": [
+        "FINANCE"
+      ]
+    },
+    {
+      "code": "API-116",
+      "method": "POST",
+      "path": "/api/v1/operator/refunds/{id}/approve",
+      "cap": "CAP-030",
+      "scope": "O‘z buyurtmasi yoki navbatdagi moliya case",
+      "operation_roles": [
+        "FINANCE"
+      ]
+    },
+    {
+      "code": "API-117",
+      "method": "GET",
+      "path": "/api/v1/operator/finance-summary",
+      "cap": "CAP-038",
+      "scope": "O‘z orgi yoki platforma moliya agregati",
+      "operation_roles": [
+        "FINANCE"
+      ]
+    },
+    {
+      "code": "API-118",
+      "method": "GET",
+      "path": "/api/v1/operator/audit-events",
+      "cap": "CAP-036",
+      "scope": "Vaqtli approved platform scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-119",
+      "method": "POST",
+      "path": "/api/v1/operator/access-requests",
+      "cap": "CAP-036",
+      "scope": "Vaqtli approved platform scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-120",
+      "method": "POST",
+      "path": "/api/v1/operator/users/{id}/revoke-sessions",
+      "cap": "CAP-036",
+      "scope": "Vaqtli approved platform scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-121",
+      "method": "PATCH",
+      "path": "/api/v1/operator/feature-flags/{code}",
+      "cap": "CAP-037",
+      "scope": "Vaqtli texnik operator scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-122",
+      "method": "POST",
+      "path": "/api/v1/operator/incidents",
+      "cap": "CAP-037",
+      "scope": "Vaqtli texnik operator scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-123",
+      "method": "GET",
+      "path": "/api/v1/operator/restore-runs",
+      "cap": "CAP-037",
+      "scope": "Vaqtli texnik operator scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "code": "API-124",
+      "method": "GET",
+      "path": "/api/v1/operator/analytics",
+      "cap": "CAP-037",
+      "scope": "Vaqtli texnik operator scope",
+      "operation_roles": [
+        "ADMIN"
+      ]
+    }
+  ],
+  "role_permissions": [
+    {
+      "role": "GUEST",
+      "permission": "API-001"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-001"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-001"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-001"
+    },
+    {
+      "role": "HR",
+      "permission": "API-001"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-001"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-001"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-001"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-001"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-001"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-001"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-001"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-001"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-001"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-002"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-002"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-002"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-002"
+    },
+    {
+      "role": "HR",
+      "permission": "API-002"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-002"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-002"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-002"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-002"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-002"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-002"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-002"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-002"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-002"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-003"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-003"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-004"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-004"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-005"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-005"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-005"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-005"
+    },
+    {
+      "role": "HR",
+      "permission": "API-005"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-005"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-005"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-005"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-005"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-005"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-005"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-005"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-005"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-005"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-006"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-006"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-007"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-007"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-007"
+    },
+    {
+      "role": "HR",
+      "permission": "API-007"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-007"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-007"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-007"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-007"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-008"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-008"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-008"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-008"
+    },
+    {
+      "role": "HR",
+      "permission": "API-008"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-008"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-008"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-008"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-008"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-008"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-008"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-008"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-008"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-008"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-009"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-009"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-009"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-009"
+    },
+    {
+      "role": "HR",
+      "permission": "API-009"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-009"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-009"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-009"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-009"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-009"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-009"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-009"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-009"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-009"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-010"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-010"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-010"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-010"
+    },
+    {
+      "role": "HR",
+      "permission": "API-010"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-010"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-011"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-011"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-011"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-011"
+    },
+    {
+      "role": "HR",
+      "permission": "API-011"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-011"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-011"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-011"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-011"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-011"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-011"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-011"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-011"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-011"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-012"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-012"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-012"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-012"
+    },
+    {
+      "role": "HR",
+      "permission": "API-012"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-012"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-012"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-012"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-012"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-012"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-012"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-012"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-012"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-012"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-013"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-013"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-013"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-013"
+    },
+    {
+      "role": "HR",
+      "permission": "API-013"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-013"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-013"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-013"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-013"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-013"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-013"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-013"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-013"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-013"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-014"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-014"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-014"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-014"
+    },
+    {
+      "role": "HR",
+      "permission": "API-014"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-014"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-014"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-014"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-014"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-014"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-014"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-014"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-014"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-014"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-015"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-015"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-015"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-015"
+    },
+    {
+      "role": "HR",
+      "permission": "API-015"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-015"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-015"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-015"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-015"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-015"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-015"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-015"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-015"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-015"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-016"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-016"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-016"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-016"
+    },
+    {
+      "role": "HR",
+      "permission": "API-016"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-016"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-016"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-016"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-016"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-016"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-016"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-016"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-016"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-016"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-017"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-018"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-018"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-018"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-018"
+    },
+    {
+      "role": "HR",
+      "permission": "API-018"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-018"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-018"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-018"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-018"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-018"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-018"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-018"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-018"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-018"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-019"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-019"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-019"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-019"
+    },
+    {
+      "role": "HR",
+      "permission": "API-019"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-019"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-019"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-019"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-019"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-019"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-019"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-019"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-019"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-019"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-020"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-020"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-020"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-020"
+    },
+    {
+      "role": "HR",
+      "permission": "API-020"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-020"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-020"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-020"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-020"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-020"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-020"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-020"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-020"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-020"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-021"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-021"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-021"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-021"
+    },
+    {
+      "role": "HR",
+      "permission": "API-021"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-021"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-021"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-021"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-021"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-021"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-021"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-021"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-021"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-021"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-022"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-022"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-022"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-022"
+    },
+    {
+      "role": "HR",
+      "permission": "API-022"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-022"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-022"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-022"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-022"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-022"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-022"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-022"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-022"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-022"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-023"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-023"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-023"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-023"
+    },
+    {
+      "role": "HR",
+      "permission": "API-023"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-023"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-023"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-023"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-023"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-023"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-023"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-023"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-023"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-023"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-024"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-024"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-024"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-024"
+    },
+    {
+      "role": "HR",
+      "permission": "API-024"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-024"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-024"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-024"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-024"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-024"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-024"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-024"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-024"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-024"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-025"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-025"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-025"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-025"
+    },
+    {
+      "role": "HR",
+      "permission": "API-025"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-025"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-025"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-025"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-025"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-025"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-025"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-025"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-025"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-025"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-026"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-026"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-027"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-027"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-028"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-028"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-029"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-029"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-030"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-030"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-030"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-030"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-031"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-031"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-031"
+    },
+    {
+      "role": "HR",
+      "permission": "API-031"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-031"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-031"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-031"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-031"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-031"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-031"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-031"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-031"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-031"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-032"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-032"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-033"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-033"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-034"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-034"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-035"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-035"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-036"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-036"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-037"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-037"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-038"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-038"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-039"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-039"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-040"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-040"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-041"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-041"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-042"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-042"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-042"
+    },
+    {
+      "role": "HR",
+      "permission": "API-042"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-043"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-043"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-044"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-044"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-045"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-045"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-045"
+    },
+    {
+      "role": "HR",
+      "permission": "API-045"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-046"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-046"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-046"
+    },
+    {
+      "role": "HR",
+      "permission": "API-046"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-047"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-047"
+    },
+    {
+      "role": "HR",
+      "permission": "API-047"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-047"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-047"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-047"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-048"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-048"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-048"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-048"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-049"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-049"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-049"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-049"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-049"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-049"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-050"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-050"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-050"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-050"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-051"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-051"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-051"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-051"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-052"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-052"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-052"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-052"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-052"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-053"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-053"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-054"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-054"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-055"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-055"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-056"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-056"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-057"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-057"
+    },
+    {
+      "role": "HR",
+      "permission": "API-057"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-057"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-057"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-057"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-058"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-058"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-058"
+    },
+    {
+      "role": "HR",
+      "permission": "API-058"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-058"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-058"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-058"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-059"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-059"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-059"
+    },
+    {
+      "role": "HR",
+      "permission": "API-059"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-059"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-059"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-059"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-059"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-059"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-059"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-059"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-059"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-059"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-060"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-060"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-060"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-060"
+    },
+    {
+      "role": "HR",
+      "permission": "API-060"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-060"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-060"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-060"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-060"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-060"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-060"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-060"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-060"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-060"
+    },
+    {
+      "role": "GUEST",
+      "permission": "API-061"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-061"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-061"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-061"
+    },
+    {
+      "role": "HR",
+      "permission": "API-061"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-061"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-061"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-061"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-061"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-061"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-061"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-061"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-061"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-061"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-062"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-062"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-062"
+    },
+    {
+      "role": "HR",
+      "permission": "API-062"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-062"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-062"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-062"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-062"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-062"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-062"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-062"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-062"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-062"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-063"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-063"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-063"
+    },
+    {
+      "role": "HR",
+      "permission": "API-063"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-063"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-063"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-063"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-063"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-063"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-063"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-063"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-063"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-063"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-064"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-064"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-064"
+    },
+    {
+      "role": "HR",
+      "permission": "API-064"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-064"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-064"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-064"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-064"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-064"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-064"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-064"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-064"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-064"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-065"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-065"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-066"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-066"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-067"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-067"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-068"
+    },
+    {
+      "role": "HR",
+      "permission": "API-068"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-068"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-069"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-069"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-070"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-070"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-071"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-071"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-072"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-072"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-073"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-074"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-075"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-076"
+    },
+    {
+      "role": "HR",
+      "permission": "API-076"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-076"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-077"
+    },
+    {
+      "role": "HR",
+      "permission": "API-077"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-077"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-078"
+    },
+    {
+      "role": "HR",
+      "permission": "API-078"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-078"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-079"
+    },
+    {
+      "role": "HR",
+      "permission": "API-079"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-079"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-080"
+    },
+    {
+      "role": "HR",
+      "permission": "API-080"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-080"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-081"
+    },
+    {
+      "role": "HR",
+      "permission": "API-081"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-081"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-082"
+    },
+    {
+      "role": "HR",
+      "permission": "API-082"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-082"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-083"
+    },
+    {
+      "role": "HR",
+      "permission": "API-083"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-083"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-084"
+    },
+    {
+      "role": "HR",
+      "permission": "API-084"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-084"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-085"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-085"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-085"
+    },
+    {
+      "role": "HR",
+      "permission": "API-085"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-086"
+    },
+    {
+      "role": "HR",
+      "permission": "API-086"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-086"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-087"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-087"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-088"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-088"
+    },
+    {
+      "role": "HOST_COORDINATOR",
+      "permission": "API-088"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-088"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-088"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-088"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-089"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-089"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-089"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-089"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-090"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-091"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-092"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-093"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-093"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-094"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-094"
+    },
+    {
+      "role": "OWNER",
+      "permission": "API-095"
+    },
+    {
+      "role": "BILLING",
+      "permission": "API-095"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-095"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-096"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-097"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-098"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-098"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-099"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-100"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-100"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-100"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-100"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-100"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-101"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-102"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-103"
+    },
+    {
+      "role": "CANDIDATE",
+      "permission": "API-104"
+    },
+    {
+      "role": "STUDENT",
+      "permission": "API-104"
+    },
+    {
+      "role": "MENTOR",
+      "permission": "API-104"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-104"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-105"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-105"
+    },
+    {
+      "role": "COORDINATOR",
+      "permission": "API-106"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-106"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-107"
+    },
+    {
+      "role": "TEACHER",
+      "permission": "API-108"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-109"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-110"
+    },
+    {
+      "role": "MODERATOR",
+      "permission": "API-111"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-112"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-113"
+    },
+    {
+      "role": "SUPPORT",
+      "permission": "API-114"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-115"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-116"
+    },
+    {
+      "role": "FINANCE",
+      "permission": "API-117"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-118"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-119"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-120"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-121"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-122"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-123"
+    },
+    {
+      "role": "ADMIN",
+      "permission": "API-124"
+    }
+  ],
+  "guard": "Role grant alone never permits access. Ownership/scope/active membership/assignment/purpose and method-specific guards are required. SELF contexts are derived, never self-granted authority."
+}

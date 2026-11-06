@@ -1,0 +1,51 @@
+{
+  "model": {
+    "tables": 94,
+    "fields": 923,
+    "foreign_keys": 205,
+    "roles": 14,
+    "capabilities": 40,
+    "pages": 48,
+    "sections": 131,
+    "api_contracts": 124,
+    "reference_errors": 0
+  },
+  "application_tests_executed": false,
+  "live_database_migration_executed": false,
+  "notes": [
+    "Only artifact reference, XML, CSV, PDF text, SQL grammar and render QA. AC criteria are not runtime test results."
+  ],
+  "FlexBridge_ishga_tayyorgarlik_va_texnik_topshiriq.pdf": {
+    "pages": 48,
+    "characters": 106855,
+    "replacement_characters": 0
+  },
+  "FlexBridge_baza_va_API_atlas.pdf": {
+    "pages": 80,
+    "characters": 114389,
+    "replacement_characters": 0
+  },
+  "svg": {
+    "valid_xml_files": 15,
+    "full_erd_entities": 94,
+    "full_erd_edges": 205
+  },
+  "page_csv_rows": 131,
+  "sql_grammar_statements": 508,
+  "sql_execution": "Not executed against PostgreSQL; cross-table INV implementation and integration tests remain.",
+  "rendered_main_pages": 48,
+  "rendered_atlas_pages": 80,
+  "local_html_browser_checks": {
+    "tables": 94,
+    "pages": 48,
+    "sections": 131,
+    "capabilities": 40,
+    "apis": 124,
+    "fullEdges": 205,
+    "domainNodes": 7,
+    "pageTab": "pages",
+    "searchVisible": 1,
+    "nodeLink": "data"
+  },
+  "local_html_browser_result": "PASS; actual generated local atlas only, not future FlexBridge application."
+}

@@ -90,3 +90,38 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: `D:\FlexBridge` ichida `FlexBridge_1_4_schema.sql` hali yaratilmagan va `1.3` artefaktlar (`D:\Codex\2026-10-26\sh\outputs\FlexBridge\`) ishchi katalogga ko'chirilmagan; bular `S1.2` doirasida va `T-007` taklifi asosida hal qilinadi.
 - Topshirilgan holat / keyingi qadam: `S1.1` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: Codex `S1.1` natijasini (`05_S1_1_TALABLAR_VA_MANBALAR_XARITASI.md` va `01..04` yangilanishlarini) tekshirib `Bajarildi` qiladi; so'ngra foydalanuvchi `T-007` va `T-008` bo'yicha qaror bergach `S1.2` va `S1.3` bajariladi.
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-003 — 2026-11-06T23:58:00+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-003` / `2026-11-06T23:58:00+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S1.2`, `S1.3`, `S1.4` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: Foydalanuvchi (`Q-010`: `"qarorlarni toliq ihtiyoringa qol;diraman qurishni davom etir"`) texnik va arxitektura qarorlarini (`T-007` Variant A va `T-008` Variant A) tasdiqladi hamda qurishni davom ettirishni topshirdi. Maqsad: GitHub Issue `#3` va `feature/s1-2-specs-and-v1-4-schema` tarmog'ida `1.3` spetsifikatsiyalarini `D:\FlexBridge\specs\v1_3\` ga ko'chirish, `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` dagi barcha o'zgarishlarni qo'llab `FlexBridge_1_4_schema.sql` va `FlexBridge_model_1_4.json` (94 jadval / 935 maydon / 214 FK) ni yaratish, real PostgreSQL (PGlite 0.5.15 / PostgreSQL 18.6 WASM + `btree_gist`) dvigatelida barcha invariantlarni (`INV-01..16`, `AC-039..042`) sinovdan o'tkazish hamda `S2.1` kichik ish paketlarini (`S2.1.1..S2.1.3`) tayyorlash.
+- Qilingan ish / o'zgargan fayllar:
+  - `specs/v1_3/` ichiga `D:\Codex\2026-10-26\sh\outputs\FlexBridge\` dagi 25 ta kanonik 1.3 artefakt (`schema_loyihasi.sql`, `FlexBridge_model_1_3.json`, CSV/MD lug'atlar, `checksums.json`, `audit_hisoboti.json`) nusxalandi va SHA-256 nazorat summasi 100% tasdiqlandi.
+  - `specs/v1_4/build_v1_4_specs.py` generator skripti yozildi va ishga tushirildi; natijada `specs/v1_4/FlexBridge_model_1_4.json`, `specs/v1_4/FlexBridge_1_4_schema.sql` va ildiz katalogdagi `FlexBridge_1_4_schema.sql` yaratildi.
+  - `specs/v1_4/verify_v1_4_schema.mjs` avtomatlashtirilgan PostgreSQL invariant sinov skripti yozildi va ishga tushirilib, natijasi `specs/v1_4/v1_4_schema_verification.json` fayliga saqlandi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md`, `02_TEXNIK_MODELLAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md` yangilandi (`Q-010`, `T-007`/`T-008` tanlovlari va `S2.1.1..S2.2.2` kichik vazifa paketlari kiritildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python D:\FlexBridge\specs\v1_4\build_v1_4_specs.py` → `tables: 94`, `fields: 935`, `foreign_keys: 214`, `roles: 14`, `capabilities: 40`, `pages: 48`, `sections: 131`, `api_contracts: 124`, `helper_apis: 8`, `acceptance_criteria: 42`, `reference_errors: 0`.
+  - `node D:\FlexBridge\specs\v1_4\verify_v1_4_schema.mjs` → PostgreSQL 18.6 (`@electric-sql/pglite` + `btree_gist` kengaytmasi) ichida `FlexBridge_1_4_schema.sql` to'liq bajarildi va **17/17 ta invariant sinovi muvaffaqiyatli o'tdi (`all_checks_passed: true`)**:
+    1. `94` base jadval va `935` non-generated ustun (`+4` stored generated `minute_range` = jami `939` ustun);
+    2. `btree_gist` va 4 ta `EXCLUDE USING gist (... WITH &&)` qoidasi (`INV-01..02`);
+    3. `availability_rules` ustma-ust tushuvchi intervalni `23P01` xatosi bilan rad etdi (`INV-01`);
+    4. `opportunity_shifts` ustma-ust tushuvchi bir xil `group_code` smenasini `23P01` bilan rad etdi (`INV-02`);
+    5. `opportunity_revisions` noto'g'ri maosh kombinatsiyasini (`hourly` + `stipend_amount > 0`) `23514` bilan rad etdi (`INV-03`, `AC-039`);
+    6. `opportunity_revisions` haqiqiy soatbay maoshni qabul qildi (`INV-03`);
+    7. Siklik FK (`opportunities ↔ opportunity_revisions`) bitta tranzaksiya ichida `SET CONSTRAINTS ALL IMMEDIATE` bilan muvaffaqiyatli o'tdi (`INV-06`);
+    8. `application_attempts` boshqa e'longa tegishli `application_id + opportunity_id` ni `23503` composite FK bilan rad etdi (`INV-08`);
+    9. `placements` noto'g'ri e'longa bog'langan taklifni `23503` composite FK bilan rad etdi (`INV-08`);
+    10. `workplace_log_reviews` va `academic_log_reviews` boshqa placement kundaligini `23503` bilan rad etdi (`INV-09`, `AC-040`);
+    11. `service_entitlements` kvota/ta'rif qoidasiga zid qiymatni `23514` bilan rad etdi (`INV-04`);
+    12. `payment_attempts` va `invoices` pul/valyuta nomutanosibligini `23503`/`23514` bilan rad etdi (`INV-05`, `INV-10`);
+    13. `organization_members` va `refunds` o'z-o'zini tasdiqlashni (`created_by = approved_by` yoki `requested_by = approved_by`) `23514` bilan rad etdi (`INV-11`);
+    14. `audit_events` (`UPDATE`/`DELETE`) o'zgarmaslik triggeri (`P0001: audit_events is append-only`) bilan bloklandi (`INV-13`);
+    15. `files` jadvalida `scan_status != 'clean'` bo'lgan faylni `visibility = 'private_ready'` qilish `23514` bilan rad etildi (`INV-14`, `AC-042`);
+    16. `retention_policies` jadvalida 8 ta v1 saqlash qoidasi (`30 kun` .. `75 yil`) mavjudligi tasdiqlandi (`DB-083`);
+    17. `moderation_actions` jadvalida `policy_code`, `reason_code`, `justification` majburiyligi tasdiqlandi (`AC-041`).
+- Muammo va cheklov: Yo'q; barcha 17/17 sxema invariantlari real PostgreSQL dvigatelida tasdiqlandi.
+- Topshirilgan holat / keyingi qadam: `S1.2`, `S1.3` va `S1.4` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.1.1` — `backend/` katalogida FastAPI ilova asosi, konfiguratsiya, `/api/v1/health/live`, `/api/v1/health/ready` (`API-X05`, `API-X06`) va 1.4 DB sxema/invariant `pytest` paketini yaratish.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`

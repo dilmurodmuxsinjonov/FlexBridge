@@ -1,0 +1,924 @@
+﻿DB,Jadval,Maydon,Type,NULL,PK,FK,Jadval maqsadi
+DB-001,users,id,uuid,NO,PK,,Bitta shaxsning asosiy hisobi
+DB-001,users,created_at,timestamptz,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,updated_at,timestamptz,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,display_name,text,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,status,text,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,password_hash,text,YES,,,Bitta shaxsning asosiy hisobi
+DB-001,users,locale,text,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,timezone,text,NO,,,Bitta shaxsning asosiy hisobi
+DB-001,users,adult_declared_at,timestamptz,YES,,,Bitta shaxsning asosiy hisobi
+DB-001,users,last_login_at,timestamptz,YES,,,Bitta shaxsning asosiy hisobi
+DB-002,user_contacts,id,uuid,NO,PK,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,created_at,timestamptz,NO,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,updated_at,timestamptz,NO,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,user_id,uuid,NO,,DB-001 users.id,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,channel,text,NO,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,normalized_value,text,NO,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,verified_at,timestamptz,YES,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,revoked_at,timestamptz,YES,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-002,user_contacts,is_primary,boolean,NO,,,Tasdiqlangan yoki kutilayotgan login kontaktlari
+DB-003,auth_challenges,id,uuid,NO,PK,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,created_at,timestamptz,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,updated_at,timestamptz,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,user_id,uuid,YES,,DB-001 users.id,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,contact_id,uuid,YES,,DB-002 user_contacts.id,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,destination_digest,text,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,channel,text,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,purpose,text,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,code_hmac,text,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,expires_at,timestamptz,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,attempts,integer,NO,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,consumed_at,timestamptz,YES,,,Maqsadga bog‘langan bir martalik kod
+DB-003,auth_challenges,superseded_at,timestamptz,YES,,,Maqsadga bog‘langan bir martalik kod
+DB-004,sessions,id,uuid,NO,PK,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,created_at,timestamptz,NO,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,updated_at,timestamptz,NO,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,user_id,uuid,NO,,DB-001 users.id,Qurilma va sessiyani bekor qilish
+DB-004,sessions,token_digest,text,NO,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,device_key_digest,text,YES,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,assurance,text,NO,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,expires_at,timestamptz,NO,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,revoked_at,timestamptz,YES,,,Qurilma va sessiyani bekor qilish
+DB-004,sessions,last_seen_at,timestamptz,NO,,,Qurilma va sessiyani bekor qilish
+DB-005,mfa_credentials,id,uuid,NO,PK,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,created_at,timestamptz,NO,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,updated_at,timestamptz,NO,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,user_id,uuid,NO,,DB-001 users.id,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,kind,text,NO,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,credential_key,text,NO,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,secret_encrypted,text,YES,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,public_key,text,YES,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,sign_count,integer,NO,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,verified_at,timestamptz,YES,,,TOTP/passkey va tiklash omili
+DB-005,mfa_credentials,revoked_at,timestamptz,YES,,,TOTP/passkey va tiklash omili
+DB-006,recovery_requests,id,uuid,NO,PK,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,created_at,timestamptz,NO,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,updated_at,timestamptz,NO,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,user_id,uuid,YES,,DB-001 users.id,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,kind,text,NO,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,status,text,NO,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,requester_contact_digest,text,NO,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,reviewer_id,uuid,YES,,DB-001 users.id,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,evidence_file_id,uuid,YES,,DB-018 files.id,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-006,recovery_requests,resolved_at,timestamptz,YES,,,"Kontakt, dublikat va oxirgi egani tiklash"
+DB-007,permission_catalog,id,uuid,NO,PK,,Atomar imkoniyat kodi
+DB-007,permission_catalog,created_at,timestamptz,NO,,,Atomar imkoniyat kodi
+DB-007,permission_catalog,updated_at,timestamptz,NO,,,Atomar imkoniyat kodi
+DB-007,permission_catalog,code,text,NO,,,Atomar imkoniyat kodi
+DB-007,permission_catalog,description,text,NO,,,Atomar imkoniyat kodi
+DB-008,role_catalog,id,uuid,NO,PK,,Rol va uning ruxsat doirasi
+DB-008,role_catalog,created_at,timestamptz,NO,,,Rol va uning ruxsat doirasi
+DB-008,role_catalog,updated_at,timestamptz,NO,,,Rol va uning ruxsat doirasi
+DB-008,role_catalog,code,text,NO,,,Rol va uning ruxsat doirasi
+DB-008,role_catalog,scope_kind,text,NO,,,Rol va uning ruxsat doirasi
+DB-008,role_catalog,description,text,NO,,,Rol va uning ruxsat doirasi
+DB-009,role_permissions,id,uuid,NO,PK,,Rol-imkoniyat bog‘lanishi
+DB-009,role_permissions,created_at,timestamptz,NO,,,Rol-imkoniyat bog‘lanishi
+DB-009,role_permissions,updated_at,timestamptz,NO,,,Rol-imkoniyat bog‘lanishi
+DB-009,role_permissions,role_id,uuid,NO,,DB-008 role_catalog.id,Rol-imkoniyat bog‘lanishi
+DB-009,role_permissions,permission_id,uuid,NO,,DB-007 permission_catalog.id,Rol-imkoniyat bog‘lanishi
+DB-010,platform_role_grants,id,uuid,NO,PK,,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,created_at,timestamptz,NO,,,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,updated_at,timestamptz,NO,,,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,user_id,uuid,NO,,DB-001 users.id,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,role_id,uuid,NO,,DB-008 role_catalog.id,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,granted_by_id,uuid,NO,,DB-001 users.id,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,expires_at,timestamptz,NO,,,Operatorning vaqtli vakolati
+DB-010,platform_role_grants,revoked_at,timestamptz,YES,,,Operatorning vaqtli vakolati
+DB-011,consent_events,id,uuid,NO,PK,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,created_at,timestamptz,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,updated_at,timestamptz,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,user_id,uuid,NO,,DB-001 users.id,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,purpose,text,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,policy_version,text,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,action,text,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,legal_basis,text,NO,,,Rozilik va huquqiy asos tarixi
+DB-011,consent_events,occurred_at,timestamptz,NO,,,Rozilik va huquqiy asos tarixi
+DB-012,candidate_profiles,id,uuid,NO,PK,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,created_at,timestamptz,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,updated_at,timestamptz,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,user_id,uuid,NO,,DB-001 users.id,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,headline,text,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,region,text,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,bio,text,YES,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,experience_months,integer,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,visibility,text,NO,,,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-012,candidate_profiles,cv_file_id,uuid,YES,,DB-018 files.id,Talaba bo‘lmagan va talaba nomzodning umumiy profili
+DB-013,skills,id,uuid,NO,PK,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,created_at,timestamptz,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,updated_at,timestamptz,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,code,text,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,name_uz,text,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,name_ru,text,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,aliases,jsonb,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-013,skills,active,boolean,NO,,,UZ/RU qidiruv uchun malaka katalogi
+DB-014,candidate_skills,id,uuid,NO,PK,,Malaka va tasdiq manbasi
+DB-014,candidate_skills,created_at,timestamptz,NO,,,Malaka va tasdiq manbasi
+DB-014,candidate_skills,updated_at,timestamptz,NO,,,Malaka va tasdiq manbasi
+DB-014,candidate_skills,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Malaka va tasdiq manbasi
+DB-014,candidate_skills,skill_id,uuid,NO,,DB-013 skills.id,Malaka va tasdiq manbasi
+DB-014,candidate_skills,level,text,NO,,,Malaka va tasdiq manbasi
+DB-014,candidate_skills,verification_case_id,uuid,YES,,DB-019 verification_cases.id,Malaka va tasdiq manbasi
+DB-015,enrollments,id,uuid,NO,PK,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,created_at,timestamptz,NO,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,updated_at,timestamptz,NO,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,institution_id,uuid,NO,,DB-028 institutions.id,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,program,text,NO,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,student_ref_digest,text,YES,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,start_date,date,NO,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,end_date,date,YES,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,status,text,NO,,,Muassasaga oid ta’lim tarixi
+DB-015,enrollments,verification_case_id,uuid,YES,,DB-019 verification_cases.id,Muassasaga oid ta’lim tarixi
+DB-016,availability_rules,id,uuid,NO,PK,,Haftalik mavjudlik
+DB-016,availability_rules,created_at,timestamptz,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,updated_at,timestamptz,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Haftalik mavjudlik
+DB-016,availability_rules,weekday,integer,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,start_minute,integer,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,end_minute,integer,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,valid_from,date,NO,,,Haftalik mavjudlik
+DB-016,availability_rules,valid_to,date,YES,,,Haftalik mavjudlik
+DB-016,availability_rules,timezone,text,NO,,,Haftalik mavjudlik
+DB-017,availability_exceptions,id,uuid,NO,PK,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,created_at,timestamptz,NO,,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,updated_at,timestamptz,NO,,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,local_date,date,NO,,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,kind,text,NO,,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,start_minute,integer,NO,,,Sana bo‘yicha dars/istisno
+DB-017,availability_exceptions,end_minute,integer,NO,,,Sana bo‘yicha dars/istisno
+DB-018,files,id,uuid,NO,PK,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,created_at,timestamptz,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,updated_at,timestamptz,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,owner_user_id,uuid,NO,,DB-001 users.id,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,storage_key,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,filename,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,mime_type,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,byte_size,integer,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,sha256,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,scan_status,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,retention_class,text,NO,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-018,files,deleted_at,timestamptz,YES,,,"Xususiy, skanerdan o‘tadigan fayl"
+DB-019,verification_cases,id,uuid,NO,PK,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,created_at,timestamptz,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,updated_at,timestamptz,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,requester_id,uuid,NO,,DB-001 users.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,candidate_id,uuid,YES,,DB-012 candidate_profiles.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,organization_id,uuid,YES,,DB-021 organizations.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,institution_id,uuid,YES,,DB-028 institutions.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,enrollment_id,uuid,YES,,DB-015 enrollments.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,appointment_id,uuid,YES,,DB-032 institution_appointments.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,kind,text,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,status,text,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,current_revision,integer,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,assigned_reviewer_id,uuid,YES,,DB-001 users.id,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,due_at,timestamptz,NO,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,decision_reason,text,YES,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-019,verification_cases,decided_at,timestamptz,YES,,,"Shaxs, tashkilot yoki ta’limni tekshirish navbati"
+DB-020,verification_evidence,id,uuid,NO,PK,,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,created_at,timestamptz,NO,,,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,updated_at,timestamptz,NO,,,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,case_id,uuid,NO,,DB-019 verification_cases.id,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,revision,integer,NO,,,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,file_id,uuid,YES,,DB-018 files.id,Tekshiruvga topshirilgan revision dalili
+DB-020,verification_evidence,note,text,YES,,,Tekshiruvga topshirilgan revision dalili
+DB-021,organizations,id,uuid,NO,PK,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,created_at,timestamptz,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,updated_at,timestamptz,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,tax_id,text,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,legal_name,text,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,public_name,text,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,region,text,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,description,text,YES,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,website,text,YES,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-021,organizations,status,text,NO,,,STIR bo‘yicha yagona ish beruvchi/host
+DB-022,organization_capabilities,id,uuid,NO,PK,,Ish e’loni va host huquqi
+DB-022,organization_capabilities,created_at,timestamptz,NO,,,Ish e’loni va host huquqi
+DB-022,organization_capabilities,updated_at,timestamptz,NO,,,Ish e’loni va host huquqi
+DB-022,organization_capabilities,organization_id,uuid,NO,,DB-021 organizations.id,Ish e’loni va host huquqi
+DB-022,organization_capabilities,capability,text,NO,,,Ish e’loni va host huquqi
+DB-022,organization_capabilities,status,text,NO,,,Ish e’loni va host huquqi
+DB-022,organization_capabilities,approved_case_id,uuid,YES,,DB-019 verification_cases.id,Ish e’loni va host huquqi
+DB-023,org_memberships,id,uuid,NO,PK,,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,created_at,timestamptz,NO,,,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,updated_at,timestamptz,NO,,,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,organization_id,uuid,NO,,DB-021 organizations.id,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,user_id,uuid,NO,,DB-001 users.id,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,status,text,NO,,,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,accepted_at,timestamptz,YES,,,Xodimning tashkilotga mansubligi
+DB-023,org_memberships,revoked_at,timestamptz,YES,,,Xodimning tashkilotga mansubligi
+DB-024,org_role_grants,id,uuid,NO,PK,,Tashkilot ichidagi rol
+DB-024,org_role_grants,created_at,timestamptz,NO,,,Tashkilot ichidagi rol
+DB-024,org_role_grants,updated_at,timestamptz,NO,,,Tashkilot ichidagi rol
+DB-024,org_role_grants,membership_id,uuid,NO,,DB-023 org_memberships.id,Tashkilot ichidagi rol
+DB-024,org_role_grants,role_id,uuid,NO,,DB-008 role_catalog.id,Tashkilot ichidagi rol
+DB-024,org_role_grants,granted_by_id,uuid,NO,,DB-001 users.id,Tashkilot ichidagi rol
+DB-024,org_role_grants,revoked_at,timestamptz,YES,,,Tashkilot ichidagi rol
+DB-025,org_invitations,id,uuid,NO,PK,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,created_at,timestamptz,NO,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,updated_at,timestamptz,NO,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,organization_id,uuid,NO,,DB-021 organizations.id,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,inviter_membership_id,uuid,NO,,DB-023 org_memberships.id,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,contact_digest,text,NO,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,token_digest,text,NO,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,expires_at,timestamptz,NO,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,accepted_by_id,uuid,YES,,DB-001 users.id,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,accepted_at,timestamptz,YES,,,Aniq kontaktga vaqtli taklif
+DB-025,org_invitations,revoked_at,timestamptz,YES,,,Aniq kontaktga vaqtli taklif
+DB-026,org_invitation_roles,id,uuid,NO,PK,,Taklifdagi ochiq ko‘rsatilgan rol
+DB-026,org_invitation_roles,created_at,timestamptz,NO,,,Taklifdagi ochiq ko‘rsatilgan rol
+DB-026,org_invitation_roles,updated_at,timestamptz,NO,,,Taklifdagi ochiq ko‘rsatilgan rol
+DB-026,org_invitation_roles,invitation_id,uuid,NO,,DB-025 org_invitations.id,Taklifdagi ochiq ko‘rsatilgan rol
+DB-026,org_invitation_roles,role_id,uuid,NO,,DB-008 role_catalog.id,Taklifdagi ochiq ko‘rsatilgan rol
+DB-027,org_ownership_events,id,uuid,NO,PK,,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,created_at,timestamptz,NO,,,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,updated_at,timestamptz,NO,,,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,organization_id,uuid,NO,,DB-021 organizations.id,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,new_membership_id,uuid,NO,,DB-023 org_memberships.id,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,previous_membership_id,uuid,YES,,DB-023 org_memberships.id,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,verification_case_id,uuid,NO,,DB-019 verification_cases.id,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,approved_by_id,uuid,NO,,DB-001 users.id,Birinchi va keyingi egani tayinlash dalili
+DB-027,org_ownership_events,effective_at,timestamptz,NO,,,Birinchi va keyingi egani tayinlash dalili
+DB-028,institutions,id,uuid,NO,PK,,Hamkor o‘quv muassasasi
+DB-028,institutions,created_at,timestamptz,NO,,,Hamkor o‘quv muassasasi
+DB-028,institutions,updated_at,timestamptz,NO,,,Hamkor o‘quv muassasasi
+DB-028,institutions,registry_code,text,NO,,,Hamkor o‘quv muassasasi
+DB-028,institutions,name,text,NO,,,Hamkor o‘quv muassasasi
+DB-028,institutions,region,text,NO,,,Hamkor o‘quv muassasasi
+DB-028,institutions,status,text,NO,,,Hamkor o‘quv muassasasi
+DB-029,institution_agreements,id,uuid,NO,PK,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,created_at,timestamptz,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,updated_at,timestamptz,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,institution_id,uuid,NO,,DB-028 institutions.id,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,version,integer,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,status,text,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,valid_from,date,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,valid_to,date,YES,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,purposes,jsonb,NO,,,Akademik xizmatning rasmiy chegarasi
+DB-029,institution_agreements,signed_file_id,uuid,YES,,DB-018 files.id,Akademik xizmatning rasmiy chegarasi
+DB-030,institution_memberships,id,uuid,NO,PK,,Rasmiy xodim mansubligi
+DB-030,institution_memberships,created_at,timestamptz,NO,,,Rasmiy xodim mansubligi
+DB-030,institution_memberships,updated_at,timestamptz,NO,,,Rasmiy xodim mansubligi
+DB-030,institution_memberships,institution_id,uuid,NO,,DB-028 institutions.id,Rasmiy xodim mansubligi
+DB-030,institution_memberships,user_id,uuid,NO,,DB-001 users.id,Rasmiy xodim mansubligi
+DB-030,institution_memberships,status,text,NO,,,Rasmiy xodim mansubligi
+DB-030,institution_memberships,accepted_at,timestamptz,YES,,,Rasmiy xodim mansubligi
+DB-030,institution_memberships,revoked_at,timestamptz,YES,,,Rasmiy xodim mansubligi
+DB-031,institution_role_grants,id,uuid,NO,PK,,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,created_at,timestamptz,NO,,,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,updated_at,timestamptz,NO,,,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,membership_id,uuid,NO,,DB-030 institution_memberships.id,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,role_id,uuid,NO,,DB-008 role_catalog.id,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,appointment_id,uuid,NO,,DB-032 institution_appointments.id,Koordinator/o‘qituvchi roli
+DB-031,institution_role_grants,revoked_at,timestamptz,YES,,,Koordinator/o‘qituvchi roli
+DB-032,institution_appointments,id,uuid,NO,PK,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,created_at,timestamptz,NO,,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,updated_at,timestamptz,NO,,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,institution_id,uuid,NO,,DB-028 institutions.id,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,user_id,uuid,NO,,DB-001 users.id,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,document_file_id,uuid,NO,,DB-018 files.id,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,status,text,NO,,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,verification_case_id,uuid,YES,,DB-019 verification_cases.id,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,valid_from,date,NO,,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,valid_to,date,YES,,,Muassasa topshirig‘i va dalili
+DB-032,institution_appointments,accepted_at,timestamptz,YES,,,Muassasa topshirig‘i va dalili
+DB-033,institution_invitations,id,uuid,NO,PK,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,created_at,timestamptz,NO,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,updated_at,timestamptz,NO,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,appointment_id,uuid,NO,,DB-032 institution_appointments.id,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,contact_digest,text,NO,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,token_digest,text,NO,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,expires_at,timestamptz,NO,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,accepted_by_id,uuid,YES,,DB-001 users.id,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,accepted_at,timestamptz,YES,,,Muassasa tayinlovi taklifi
+DB-033,institution_invitations,revoked_at,timestamptz,YES,,,Muassasa tayinlovi taklifi
+DB-034,student_supervisions,id,uuid,NO,PK,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,created_at,timestamptz,NO,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,updated_at,timestamptz,NO,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,enrollment_id,uuid,NO,,DB-015 enrollments.id,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,coordinator_membership_id,uuid,NO,,DB-030 institution_memberships.id,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,agreement_id,uuid,NO,,DB-029 institution_agreements.id,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,purpose,text,NO,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,status,text,NO,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,legal_basis,text,NO,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,accepted_at,timestamptz,YES,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-034,student_supervisions,revoked_at,timestamptz,YES,,,Koordinatorning aniq ta’lim yozuviga doirasi
+DB-035,opportunities,id,uuid,NO,PK,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,created_at,timestamptz,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,updated_at,timestamptz,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,organization_id,uuid,NO,,DB-021 organizations.id,E’lon identifikatori va band o‘rin
+DB-035,opportunities,kind,text,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,status,text,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,current_revision_id,uuid,YES,,DB-036 opportunity_revisions.id,E’lon identifikatori va band o‘rin
+DB-035,opportunities,capacity,integer,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,occupied_count,integer,NO,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,published_at,timestamptz,YES,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,expires_at,timestamptz,YES,,,E’lon identifikatori va band o‘rin
+DB-035,opportunities,closed_at,timestamptz,YES,,,E’lon identifikatori va band o‘rin
+DB-036,opportunity_revisions,id,uuid,NO,PK,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,created_at,timestamptz,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,updated_at,timestamptz,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,opportunity_id,uuid,NO,,DB-035 opportunities.id,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,revision,integer,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,author_id,uuid,NO,,DB-001 users.id,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,title,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,description,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,region,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,work_mode,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,eligibility,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,program_required,text,YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,salary_min,"numeric(18,2)",YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,salary_max,"numeric(18,2)",YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,currency,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,salary_period,text,YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,salary_basis,text,YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,is_paid,boolean,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,start_date,date,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,end_date,date,YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,schedule_policy,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,shift_match_mode,text,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,snapshot_schema,integer,NO,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-036,opportunity_revisions,published_at,timestamptz,YES,,,E’lon shartlarining o‘zgarmas nusxasi
+DB-037,opportunity_skills,id,uuid,NO,PK,,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,created_at,timestamptz,NO,,,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,updated_at,timestamptz,NO,,,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,revision_id,uuid,NO,,DB-036 opportunity_revisions.id,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,skill_id,uuid,NO,,DB-013 skills.id,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,required,boolean,NO,,,E’lon revisionining malaka talabi
+DB-037,opportunity_skills,minimum_level,text,YES,,,E’lon revisionining malaka talabi
+DB-038,opportunity_shifts,id,uuid,NO,PK,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,created_at,timestamptz,NO,,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,updated_at,timestamptz,NO,,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,revision_id,uuid,NO,,DB-036 opportunity_revisions.id,E’lon revisioni smenalari
+DB-038,opportunity_shifts,weekday,integer,NO,,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,start_minute,integer,NO,,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,end_minute,integer,NO,,,E’lon revisioni smenalari
+DB-038,opportunity_shifts,timezone,text,NO,,,E’lon revisioni smenalari
+DB-039,opportunity_hr_assignments,id,uuid,NO,PK,,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,created_at,timestamptz,NO,,,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,updated_at,timestamptz,NO,,,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,opportunity_id,uuid,NO,,DB-035 opportunities.id,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,membership_id,uuid,NO,,DB-023 org_memberships.id,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,assigned_by_id,uuid,NO,,DB-001 users.id,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,accepted_at,timestamptz,YES,,,HRning aynan e’longa doirasi
+DB-039,opportunity_hr_assignments,revoked_at,timestamptz,YES,,,HRning aynan e’longa doirasi
+DB-040,saved_opportunities,id,uuid,NO,PK,,Nomzod saqlagan e’lon
+DB-040,saved_opportunities,created_at,timestamptz,NO,,,Nomzod saqlagan e’lon
+DB-040,saved_opportunities,updated_at,timestamptz,NO,,,Nomzod saqlagan e’lon
+DB-040,saved_opportunities,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Nomzod saqlagan e’lon
+DB-040,saved_opportunities,opportunity_id,uuid,NO,,DB-035 opportunities.id,Nomzod saqlagan e’lon
+DB-041,applications,id,uuid,NO,PK,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,created_at,timestamptz,NO,,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,updated_at,timestamptz,NO,,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,opportunity_id,uuid,NO,,DB-035 opportunities.id,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,status,text,NO,,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,current_attempt_id,uuid,YES,,DB-042 application_attempts.id,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,version,integer,NO,,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,occupied_at,timestamptz,YES,,,Bitta nomzod va bitta e’lon munosabati
+DB-041,applications,released_at,timestamptz,YES,,,Bitta nomzod va bitta e’lon munosabati
+DB-042,application_attempts,id,uuid,NO,PK,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,created_at,timestamptz,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,updated_at,timestamptz,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,application_id,uuid,NO,,DB-041 applications.id,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,attempt_no,integer,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,revision_id,uuid,NO,,DB-036 opportunity_revisions.id,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,enrollment_id,uuid,YES,,DB-015 enrollments.id,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,profile_snapshot,jsonb,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,schedule_result,text,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,matching_version,text,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,proposed_slots,jsonb,YES,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,submitted_at,timestamptz,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-042,application_attempts,idempotency_key,text,NO,,,Qayta ariza va o‘sha paytdagi shartlar
+DB-043,application_events,id,uuid,NO,PK,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,created_at,timestamptz,NO,,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,updated_at,timestamptz,NO,,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,application_id,uuid,NO,,DB-041 applications.id,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,attempt_id,uuid,YES,,DB-042 application_attempts.id,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,actor_id,uuid,NO,,DB-001 users.id,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,from_status,text,YES,,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,to_status,text,NO,,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,reason,text,YES,,,Holat o‘zgarishi va qayta ochish
+DB-043,application_events,occurred_at,timestamptz,NO,,,Holat o‘zgarishi va qayta ochish
+DB-044,interviews,id,uuid,NO,PK,,Suhbat va uning jadvali
+DB-044,interviews,created_at,timestamptz,NO,,,Suhbat va uning jadvali
+DB-044,interviews,updated_at,timestamptz,NO,,,Suhbat va uning jadvali
+DB-044,interviews,application_id,uuid,NO,,DB-041 applications.id,Suhbat va uning jadvali
+DB-044,interviews,organizer_membership_id,uuid,NO,,DB-023 org_memberships.id,Suhbat va uning jadvali
+DB-044,interviews,starts_at,timestamptz,NO,,,Suhbat va uning jadvali
+DB-044,interviews,ends_at,timestamptz,NO,,,Suhbat va uning jadvali
+DB-044,interviews,timezone,text,NO,,,Suhbat va uning jadvali
+DB-044,interviews,mode,text,NO,,,Suhbat va uning jadvali
+DB-044,interviews,location_or_link,text,YES,,,Suhbat va uning jadvali
+DB-044,interviews,status,text,NO,,,Suhbat va uning jadvali
+DB-044,interviews,version,integer,NO,,,Suhbat va uning jadvali
+DB-045,interview_responses,id,uuid,NO,PK,,Suhbatga tomonlarning javobi
+DB-045,interview_responses,created_at,timestamptz,NO,,,Suhbatga tomonlarning javobi
+DB-045,interview_responses,updated_at,timestamptz,NO,,,Suhbatga tomonlarning javobi
+DB-045,interview_responses,interview_id,uuid,NO,,DB-044 interviews.id,Suhbatga tomonlarning javobi
+DB-045,interview_responses,user_id,uuid,NO,,DB-001 users.id,Suhbatga tomonlarning javobi
+DB-045,interview_responses,response,text,NO,,,Suhbatga tomonlarning javobi
+DB-045,interview_responses,responded_at,timestamptz,YES,,,Suhbatga tomonlarning javobi
+DB-046,offers,id,uuid,NO,PK,,Muddati va shartlari aniq taklif
+DB-046,offers,created_at,timestamptz,NO,,,Muddati va shartlari aniq taklif
+DB-046,offers,updated_at,timestamptz,NO,,,Muddati va shartlari aniq taklif
+DB-046,offers,application_id,uuid,NO,,DB-041 applications.id,Muddati va shartlari aniq taklif
+DB-046,offers,attempt_id,uuid,NO,,DB-042 application_attempts.id,Muddati va shartlari aniq taklif
+DB-046,offers,revision_id,uuid,NO,,DB-036 opportunity_revisions.id,Muddati va shartlari aniq taklif
+DB-046,offers,issuer_membership_id,uuid,NO,,DB-023 org_memberships.id,Muddati va shartlari aniq taklif
+DB-046,offers,terms_snapshot,jsonb,NO,,,Muddati va shartlari aniq taklif
+DB-046,offers,status,text,NO,,,Muddati va shartlari aniq taklif
+DB-046,offers,expires_at,timestamptz,NO,,,Muddati va shartlari aniq taklif
+DB-046,offers,accepted_at,timestamptz,YES,,,Muddati va shartlari aniq taklif
+DB-046,offers,idempotency_key,text,NO,,,Muddati va shartlari aniq taklif
+DB-047,job_engagements,id,uuid,NO,PK,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,created_at,timestamptz,NO,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,updated_at,timestamptz,NO,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,application_id,uuid,NO,,DB-041 applications.id,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,offer_id,uuid,NO,,DB-046 offers.id,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,status,text,NO,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,start_date,date,NO,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,end_date,date,YES,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,terms_snapshot,jsonb,NO,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-047,job_engagements,confirmed_started_at,timestamptz,YES,,,Oddiy maoshli ishning boshlanish/yakun holati
+DB-048,engagement_confirmations,id,uuid,NO,PK,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,created_at,timestamptz,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,updated_at,timestamptz,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,engagement_id,uuid,NO,,DB-047 job_engagements.id,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,user_id,uuid,NO,,DB-001 users.id,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,side,text,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,action,text,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,response,text,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-048,engagement_confirmations,occurred_at,timestamptz,NO,,,Ish munosabatining ikki tomon tasdig‘i
+DB-049,placements,id,uuid,NO,PK,,Qabul qilingan amaliyot munosabati
+DB-049,placements,created_at,timestamptz,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,updated_at,timestamptz,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,application_id,uuid,NO,,DB-041 applications.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,offer_id,uuid,NO,,DB-046 offers.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,candidate_id,uuid,NO,,DB-012 candidate_profiles.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,organization_id,uuid,NO,,DB-021 organizations.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,enrollment_id,uuid,YES,,DB-015 enrollments.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,academic_track,boolean,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,status,text,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,start_date,date,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,end_date,date,NO,,,Qabul qilingan amaliyot munosabati
+DB-049,placements,current_terms_id,uuid,YES,,DB-050 placement_terms.id,Qabul qilingan amaliyot munosabati
+DB-049,placements,version,integer,NO,,,Qabul qilingan amaliyot munosabati
+DB-050,placement_terms,id,uuid,NO,PK,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,created_at,timestamptz,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,updated_at,timestamptz,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,placement_id,uuid,NO,,DB-049 placements.id,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,version,integer,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,schema_version,integer,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,terms_snapshot,jsonb,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,daily_limit_minutes,integer,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,weekly_limit_minutes,integer,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,required_minutes,integer,NO,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,candidate_accepted_at,timestamptz,YES,,,Amaliyot rejasining immutable versiyasi
+DB-050,placement_terms,host_accepted_at,timestamptz,YES,,,Amaliyot rejasining immutable versiyasi
+DB-051,mentor_assignments,id,uuid,NO,PK,,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,created_at,timestamptz,NO,,,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,updated_at,timestamptz,NO,,,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,placement_id,uuid,NO,,DB-049 placements.id,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,membership_id,uuid,NO,,DB-023 org_memberships.id,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,assigned_by_id,uuid,NO,,DB-001 users.id,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,assigned_at,timestamptz,NO,,,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,accepted_at,timestamptz,YES,,,Korxona ustozi shaxsiy qabuli
+DB-051,mentor_assignments,revoked_at,timestamptz,YES,,,Korxona ustozi shaxsiy qabuli
+DB-052,academic_assignments,id,uuid,NO,PK,,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,created_at,timestamptz,NO,,,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,updated_at,timestamptz,NO,,,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,placement_id,uuid,NO,,DB-049 placements.id,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,teacher_membership_id,uuid,NO,,DB-030 institution_memberships.id,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,supervision_id,uuid,NO,,DB-034 student_supervisions.id,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,assigned_by_id,uuid,NO,,DB-001 users.id,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,assigned_at,timestamptz,NO,,,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,accepted_at,timestamptz,YES,,,O‘qituvchining ayni amaliyotga qabuli
+DB-052,academic_assignments,revoked_at,timestamptz,YES,,,O‘qituvchining ayni amaliyotga qabuli
+DB-053,plan_tasks,id,uuid,NO,PK,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,created_at,timestamptz,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,updated_at,timestamptz,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,terms_id,uuid,NO,,DB-050 placement_terms.id,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,code,text,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,title,text,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,expected_result,text,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,required,boolean,NO,,,Rejaga bog‘langan natija va topshiriq
+DB-053,plan_tasks,target_minutes,integer,YES,,,Rejaga bog‘langan natija va topshiriq
+DB-054,placement_decisions,id,uuid,NO,PK,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,created_at,timestamptz,NO,,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,updated_at,timestamptz,NO,,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,placement_id,uuid,NO,,DB-049 placements.id,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,actor_id,uuid,NO,,DB-001 users.id,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,side,text,NO,,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,decision,text,NO,,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,terms_id,uuid,NO,,DB-050 placement_terms.id,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,reason,text,YES,,,Faollashtirish/yakun/bekor qilish dalili
+DB-054,placement_decisions,decided_at,timestamptz,NO,,,Faollashtirish/yakun/bekor qilish dalili
+DB-055,daily_logs,id,uuid,NO,PK,,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,created_at,timestamptz,NO,,,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,updated_at,timestamptz,NO,,,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,placement_id,uuid,NO,,DB-049 placements.id,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,local_date,date,NO,,,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,current_revision_id,uuid,YES,,DB-056 log_revisions.id,Placement va mahalliy sana uchun bitta kun
+DB-055,daily_logs,version,integer,NO,,,Placement va mahalliy sana uchun bitta kun
+DB-056,log_revisions,id,uuid,NO,PK,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,created_at,timestamptz,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,updated_at,timestamptz,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,daily_log_id,uuid,NO,,DB-055 daily_logs.id,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,revision,integer,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,terms_id,uuid,NO,,DB-050 placement_terms.id,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,author_id,uuid,NO,,DB-001 users.id,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,day_type,text,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,summary,text,YES,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,total_minutes,integer,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,status,text,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,submitted_at,timestamptz,YES,,,Qoralama va topshirilgan kun versiyasi
+DB-056,log_revisions,idempotency_key,text,NO,,,Qoralama va topshirilgan kun versiyasi
+DB-057,log_task_entries,id,uuid,NO,PK,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,created_at,timestamptz,NO,,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,updated_at,timestamptz,NO,,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,revision_id,uuid,NO,,DB-056 log_revisions.id,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,plan_task_id,uuid,YES,,DB-053 plan_tasks.id,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,result_text,text,NO,,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,minutes,integer,NO,,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,start_minute,integer,YES,,,Kun ichidagi bajarilgan ishlar
+DB-057,log_task_entries,end_minute,integer,YES,,,Kun ichidagi bajarilgan ishlar
+DB-058,log_evidence,id,uuid,NO,PK,,Topshiriq dalili uchun private fayl
+DB-058,log_evidence,created_at,timestamptz,NO,,,Topshiriq dalili uchun private fayl
+DB-058,log_evidence,updated_at,timestamptz,NO,,,Topshiriq dalili uchun private fayl
+DB-058,log_evidence,entry_id,uuid,NO,,DB-057 log_task_entries.id,Topshiriq dalili uchun private fayl
+DB-058,log_evidence,file_id,uuid,NO,,DB-018 files.id,Topshiriq dalili uchun private fayl
+DB-058,log_evidence,visibility,text,NO,,,Topshiriq dalili uchun private fayl
+DB-059,workplace_log_reviews,id,uuid,NO,PK,,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,created_at,timestamptz,NO,,,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,updated_at,timestamptz,NO,,,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,revision_id,uuid,NO,,DB-056 log_revisions.id,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,mentor_assignment_id,uuid,NO,,DB-051 mentor_assignments.id,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,decision,text,NO,,,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,comment,text,YES,,,Mentorning aynan revisionga qarori
+DB-059,workplace_log_reviews,decided_at,timestamptz,NO,,,Mentorning aynan revisionga qarori
+DB-060,academic_log_reviews,id,uuid,NO,PK,,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,created_at,timestamptz,NO,,,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,updated_at,timestamptz,NO,,,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,revision_id,uuid,NO,,DB-056 log_revisions.id,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,academic_assignment_id,uuid,NO,,DB-052 academic_assignments.id,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,decision,text,NO,,,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,comment,text,YES,,,O‘qituvchining alohida fikri
+DB-060,academic_log_reviews,decided_at,timestamptz,NO,,,O‘qituvchining alohida fikri
+DB-061,log_amendment_requests,id,uuid,NO,PK,,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,created_at,timestamptz,NO,,,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,updated_at,timestamptz,NO,,,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,daily_log_id,uuid,NO,,DB-055 daily_logs.id,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,requester_id,uuid,NO,,DB-001 users.id,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,reason,text,NO,,,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,status,text,NO,,,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,reviewer_id,uuid,YES,,DB-001 users.id,Yopilgan/kech kundalikni o‘zgartirish
+DB-061,log_amendment_requests,resolved_at,timestamptz,YES,,,Yopilgan/kech kundalikni o‘zgartirish
+DB-062,rubric_versions,id,uuid,NO,PK,,Versiyali baholash mezonlari
+DB-062,rubric_versions,created_at,timestamptz,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,updated_at,timestamptz,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,family,text,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,version,integer,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,status,text,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,scale_min,integer,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,scale_max,integer,NO,,,Versiyali baholash mezonlari
+DB-062,rubric_versions,published_at,timestamptz,YES,,,Versiyali baholash mezonlari
+DB-063,rubric_criteria,id,uuid,NO,PK,,Mezon va vazn
+DB-063,rubric_criteria,created_at,timestamptz,NO,,,Mezon va vazn
+DB-063,rubric_criteria,updated_at,timestamptz,NO,,,Mezon va vazn
+DB-063,rubric_criteria,rubric_id,uuid,NO,,DB-062 rubric_versions.id,Mezon va vazn
+DB-063,rubric_criteria,code,text,NO,,,Mezon va vazn
+DB-063,rubric_criteria,title,text,NO,,,Mezon va vazn
+DB-063,rubric_criteria,weight,integer,NO,,,Mezon va vazn
+DB-063,rubric_criteria,required,boolean,NO,,,Mezon va vazn
+DB-064,rating_submissions,id,uuid,NO,PK,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,created_at,timestamptz,NO,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,updated_at,timestamptz,NO,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,placement_id,uuid,YES,,DB-049 placements.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,engagement_id,uuid,YES,,DB-047 job_engagements.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,rubric_id,uuid,NO,,DB-062 rubric_versions.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,rater_id,uuid,NO,,DB-001 users.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,target_user_id,uuid,YES,,DB-001 users.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,target_org_id,uuid,YES,,DB-021 organizations.id,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,version,integer,NO,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,status,text,NO,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,comment,text,YES,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,submitted_at,timestamptz,YES,,,Haqiqiy yakuniy munosabatdan baho
+DB-064,rating_submissions,publish_after,timestamptz,YES,,,Haqiqiy yakuniy munosabatdan baho
+DB-065,rating_revisions,id,uuid,NO,PK,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,created_at,timestamptz,NO,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,updated_at,timestamptz,NO,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,submission_id,uuid,NO,,DB-064 rating_submissions.id,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,version,integer,NO,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,comment,text,YES,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,submitted_at,timestamptz,NO,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-065,rating_revisions,rubric_snapshot,jsonb,NO,,,Bahoning o‘zgarmas matn va formula nusxasi
+DB-066,rating_scores,id,uuid,NO,PK,,Har mezonning dalilli bali
+DB-066,rating_scores,created_at,timestamptz,NO,,,Har mezonning dalilli bali
+DB-066,rating_scores,updated_at,timestamptz,NO,,,Har mezonning dalilli bali
+DB-066,rating_scores,rating_revision_id,uuid,NO,,DB-065 rating_revisions.id,Har mezonning dalilli bali
+DB-066,rating_scores,criterion_id,uuid,NO,,DB-063 rubric_criteria.id,Har mezonning dalilli bali
+DB-066,rating_scores,score,integer,NO,,,Har mezonning dalilli bali
+DB-066,rating_scores,evidence_revision_id,uuid,YES,,DB-056 log_revisions.id,Har mezonning dalilli bali
+DB-067,rating_appeals,id,uuid,NO,PK,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,created_at,timestamptz,NO,,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,updated_at,timestamptz,NO,,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,rating_revision_id,uuid,NO,,DB-065 rating_revisions.id,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,appellant_id,uuid,NO,,DB-001 users.id,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,reason,text,NO,,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,status,text,NO,,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,reviewer_id,uuid,YES,,DB-001 users.id,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,decision,text,YES,,,Reyting nizosi va mustaqil qaror
+DB-067,rating_appeals,resolved_at,timestamptz,YES,,,Reyting nizosi va mustaqil qaror
+DB-068,rating_aggregates,id,uuid,NO,PK,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,created_at,timestamptz,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,updated_at,timestamptz,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,target_user_id,uuid,YES,,DB-001 users.id,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,target_org_id,uuid,YES,,DB-021 organizations.id,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,rubric_id,uuid,NO,,DB-062 rubric_versions.id,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,sample_size,integer,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,score,"numeric(18,2)",YES,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,window_start,date,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,window_end,date,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-068,rating_aggregates,computed_at,timestamptz,NO,,,Qayta hisoblanadigan ommaviy kesh
+DB-069,products,id,uuid,NO,PK,,Sotiladigan xizmat turi
+DB-069,products,created_at,timestamptz,NO,,,Sotiladigan xizmat turi
+DB-069,products,updated_at,timestamptz,NO,,,Sotiladigan xizmat turi
+DB-069,products,code,text,NO,,,Sotiladigan xizmat turi
+DB-069,products,name,text,NO,,,Sotiladigan xizmat turi
+DB-069,products,service_kind,text,NO,,,Sotiladigan xizmat turi
+DB-069,products,active,boolean,NO,,,Sotiladigan xizmat turi
+DB-070,price_versions,id,uuid,NO,PK,,Tarif narxining immutable nusxasi
+DB-070,price_versions,created_at,timestamptz,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,updated_at,timestamptz,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,product_id,uuid,NO,,DB-069 products.id,Tarif narxining immutable nusxasi
+DB-070,price_versions,version,integer,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,amount,"numeric(18,2)",NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,currency,text,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,duration_days,integer,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,tax_included,boolean,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,valid_from,timestamptz,NO,,,Tarif narxining immutable nusxasi
+DB-070,price_versions,valid_to,timestamptz,YES,,,Tarif narxining immutable nusxasi
+DB-071,orders,id,uuid,NO,PK,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,created_at,timestamptz,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,updated_at,timestamptz,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,organization_id,uuid,NO,,DB-021 organizations.id,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,purchaser_id,uuid,NO,,DB-001 users.id,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,price_id,uuid,NO,,DB-070 price_versions.id,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,opportunity_id,uuid,YES,,DB-035 opportunities.id,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,amount,"numeric(18,2)",NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,currency,text,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,price_snapshot,jsonb,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,status,text,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-071,orders,idempotency_key,text,NO,,,Tashkilot buyurtmasi va narx snapshot
+DB-072,invoices,id,uuid,NO,PK,,Hisob va fiskal hujjat holati
+DB-072,invoices,created_at,timestamptz,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,updated_at,timestamptz,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,order_id,uuid,NO,,DB-071 orders.id,Hisob va fiskal hujjat holati
+DB-072,invoices,number,text,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,amount,"numeric(18,2)",NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,currency,text,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,fiscal_status,text,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,fiscal_reference,text,YES,,,Hisob va fiskal hujjat holati
+DB-072,invoices,issued_at,timestamptz,NO,,,Hisob va fiskal hujjat holati
+DB-072,invoices,paid_at,timestamptz,YES,,,Hisob va fiskal hujjat holati
+DB-073,payment_attempts,id,uuid,NO,PK,,Provayder tranzaksiyasi
+DB-073,payment_attempts,created_at,timestamptz,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,updated_at,timestamptz,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,order_id,uuid,NO,,DB-071 orders.id,Provayder tranzaksiyasi
+DB-073,payment_attempts,provider,text,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,provider_transaction_id,text,YES,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,amount,"numeric(18,2)",NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,currency,text,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,status,text,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,requested_at,timestamptz,NO,,,Provayder tranzaksiyasi
+DB-073,payment_attempts,confirmed_at,timestamptz,YES,,,Provayder tranzaksiyasi
+DB-074,payment_events,id,uuid,NO,PK,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,created_at,timestamptz,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,updated_at,timestamptz,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,attempt_id,uuid,NO,,DB-073 payment_attempts.id,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,provider,text,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,event_key,text,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,payload_digest,text,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,normalized_payload,jsonb,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,processed_at,timestamptz,YES,,,Takror keluvchi callback deduplikatsiyasi
+DB-074,payment_events,received_at,timestamptz,NO,,,Takror keluvchi callback deduplikatsiyasi
+DB-075,service_entitlements,id,uuid,NO,PK,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,created_at,timestamptz,NO,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,updated_at,timestamptz,NO,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,organization_id,uuid,NO,,DB-021 organizations.id,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,order_id,uuid,YES,,DB-071 orders.id,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,opportunity_id,uuid,YES,,DB-035 opportunities.id,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,service_kind,text,NO,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,status,text,NO,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,starts_at,timestamptz,YES,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,ends_at,timestamptz,YES,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,quota,integer,YES,,,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,granted_by_id,uuid,YES,,DB-001 users.id,"Amaldagi xizmat, muddat va kvota"
+DB-075,service_entitlements,grant_reason,text,YES,,,"Amaldagi xizmat, muddat va kvota"
+DB-076,refunds,id,uuid,NO,PK,,Qaytarish va ikkita tasdiq
+DB-076,refunds,created_at,timestamptz,NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,updated_at,timestamptz,NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,payment_attempt_id,uuid,NO,,DB-073 payment_attempts.id,Qaytarish va ikkita tasdiq
+DB-076,refunds,requester_id,uuid,NO,,DB-001 users.id,Qaytarish va ikkita tasdiq
+DB-076,refunds,approver_id,uuid,YES,,DB-001 users.id,Qaytarish va ikkita tasdiq
+DB-076,refunds,amount,"numeric(18,2)",NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,currency,text,NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,reason,text,NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,status,text,NO,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,provider_refund_id,text,YES,,,Qaytarish va ikkita tasdiq
+DB-076,refunds,resolved_at,timestamptz,YES,,,Qaytarish va ikkita tasdiq
+DB-077,billing_ledger,id,uuid,NO,PK,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,created_at,timestamptz,NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,updated_at,timestamptz,NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,organization_id,uuid,NO,,DB-021 organizations.id,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,order_id,uuid,YES,,DB-071 orders.id,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,payment_attempt_id,uuid,YES,,DB-073 payment_attempts.id,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,refund_id,uuid,YES,,DB-076 refunds.id,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,entry_kind,text,NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,amount,"numeric(18,2)",NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,currency,text,NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,occurred_at,timestamptz,NO,,,Pul va kreditning append-only jurnali
+DB-077,billing_ledger,dedupe_key,text,NO,,,Pul va kreditning append-only jurnali
+DB-078,moderation_cases,id,uuid,NO,PK,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,created_at,timestamptz,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,updated_at,timestamptz,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,reporter_id,uuid,NO,,DB-001 users.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,opportunity_id,uuid,YES,,DB-035 opportunities.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,organization_id,uuid,YES,,DB-021 organizations.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,rating_id,uuid,YES,,DB-064 rating_submissions.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,file_id,uuid,YES,,DB-018 files.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,category,text,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,status,text,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,severity,text,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,assigned_to_id,uuid,YES,,DB-001 users.id,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,due_at,timestamptz,NO,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,decision,text,YES,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-078,moderation_cases,decided_at,timestamptz,YES,,,"E’lon, tashkilot, fayl yoki bahoga shikoyat"
+DB-079,moderation_actions,id,uuid,NO,PK,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,created_at,timestamptz,NO,,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,updated_at,timestamptz,NO,,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,case_id,uuid,NO,,DB-078 moderation_cases.id,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,actor_id,uuid,NO,,DB-001 users.id,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,action,text,NO,,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,reason,text,NO,,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,expires_at,timestamptz,YES,,,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,appealed_action_id,uuid,YES,,DB-079 moderation_actions.id,Cheklash/ochish/apellyatsiya tarixi
+DB-079,moderation_actions,occurred_at,timestamptz,NO,,,Cheklash/ochish/apellyatsiya tarixi
+DB-080,support_tickets,id,uuid,NO,PK,,Foydalanuvchi yordami
+DB-080,support_tickets,created_at,timestamptz,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,updated_at,timestamptz,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,requester_id,uuid,NO,,DB-001 users.id,Foydalanuvchi yordami
+DB-080,support_tickets,category,text,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,priority,text,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,status,text,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,assignee_id,uuid,YES,,DB-001 users.id,Foydalanuvchi yordami
+DB-080,support_tickets,subject,text,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,first_response_due_at,timestamptz,NO,,,Foydalanuvchi yordami
+DB-080,support_tickets,resolved_at,timestamptz,YES,,,Foydalanuvchi yordami
+DB-081,support_messages,id,uuid,NO,PK,,Yordam yozishmasi va ilova
+DB-081,support_messages,created_at,timestamptz,NO,,,Yordam yozishmasi va ilova
+DB-081,support_messages,updated_at,timestamptz,NO,,,Yordam yozishmasi va ilova
+DB-081,support_messages,ticket_id,uuid,NO,,DB-080 support_tickets.id,Yordam yozishmasi va ilova
+DB-081,support_messages,author_id,uuid,NO,,DB-001 users.id,Yordam yozishmasi va ilova
+DB-081,support_messages,body,text,NO,,,Yordam yozishmasi va ilova
+DB-081,support_messages,file_id,uuid,YES,,DB-018 files.id,Yordam yozishmasi va ilova
+DB-081,support_messages,internal,boolean,NO,,,Yordam yozishmasi va ilova
+DB-082,privacy_requests,id,uuid,NO,PK,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,created_at,timestamptz,NO,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,updated_at,timestamptz,NO,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,user_id,uuid,NO,,DB-001 users.id,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,kind,text,NO,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,status,text,NO,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,verified_at,timestamptz,YES,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,due_at,timestamptz,NO,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,result_file_id,uuid,YES,,DB-018 files.id,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,resolved_at,timestamptz,YES,,,"Eksport, tuzatish va o‘chirish"
+DB-082,privacy_requests,reason,text,YES,,,"Eksport, tuzatish va o‘chirish"
+DB-083,retention_policies,id,uuid,NO,PK,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,created_at,timestamptz,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,updated_at,timestamptz,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,data_class,text,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,policy_version,integer,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,active_days,integer,YES,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,backup_expiry_days,integer,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,legal_basis,text,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-083,retention_policies,status,text,NO,,,Ma’lumot toifasi va saqlash rejasi
+DB-084,legal_holds,id,uuid,NO,PK,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,created_at,timestamptz,NO,,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,updated_at,timestamptz,NO,,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,user_id,uuid,YES,,DB-001 users.id,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,organization_id,uuid,YES,,DB-021 organizations.id,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,case_id,uuid,YES,,DB-078 moderation_cases.id,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,reason,text,NO,,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,authorized_by_id,uuid,NO,,DB-001 users.id,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,expires_at,timestamptz,NO,,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-084,legal_holds,released_at,timestamptz,YES,,,Nizo uchun minimal saqlash to‘xtatgichi
+DB-085,notification_preferences,id,uuid,NO,PK,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,created_at,timestamptz,NO,,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,updated_at,timestamptz,NO,,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,user_id,uuid,NO,,DB-001 users.id,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,channel,text,NO,,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,purpose,text,NO,,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,enabled,boolean,NO,,,Kanal va maqsad sozlamasi
+DB-085,notification_preferences,consent_event_id,uuid,YES,,DB-011 consent_events.id,Kanal va maqsad sozlamasi
+DB-086,outbox_events,id,uuid,NO,PK,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,created_at,timestamptz,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,updated_at,timestamptz,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,event_type,text,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,schema_version,integer,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,aggregate_key,text,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,payload,jsonb,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,dedupe_key,text,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,available_at,timestamptz,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,processed_at,timestamptz,YES,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-086,outbox_events,attempts,integer,NO,,,DB tranzaksiyasi bilan chiqadigan hodisa
+DB-087,notifications,id,uuid,NO,PK,,Foydalanuvchiga sayt xabari
+DB-087,notifications,created_at,timestamptz,NO,,,Foydalanuvchiga sayt xabari
+DB-087,notifications,updated_at,timestamptz,NO,,,Foydalanuvchiga sayt xabari
+DB-087,notifications,user_id,uuid,NO,,DB-001 users.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,event_id,uuid,NO,,DB-086 outbox_events.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,template_code,text,NO,,,Foydalanuvchiga sayt xabari
+DB-087,notifications,opportunity_id,uuid,YES,,DB-035 opportunities.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,application_id,uuid,YES,,DB-041 applications.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,placement_id,uuid,YES,,DB-049 placements.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,ticket_id,uuid,YES,,DB-080 support_tickets.id,Foydalanuvchiga sayt xabari
+DB-087,notifications,read_at,timestamptz,YES,,,Foydalanuvchiga sayt xabari
+DB-088,notification_deliveries,id,uuid,NO,PK,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,created_at,timestamptz,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,updated_at,timestamptz,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,notification_id,uuid,NO,,DB-087 notifications.id,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,channel,text,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,provider,text,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,provider_message_id,text,YES,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,status,text,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,attempt_no,integer,NO,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,next_retry_at,timestamptz,YES,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,delivered_at,timestamptz,YES,,,Kanalga yuborish urinishlari
+DB-088,notification_deliveries,error_code,text,YES,,,Kanalga yuborish urinishlari
+DB-089,audit_events,id,uuid,NO,PK,,Vakolatli amallarning append-only izi
+DB-089,audit_events,created_at,timestamptz,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,updated_at,timestamptz,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,actor_id,uuid,YES,,DB-001 users.id,Vakolatli amallarning append-only izi
+DB-089,audit_events,session_id,uuid,YES,,DB-004 sessions.id,Vakolatli amallarning append-only izi
+DB-089,audit_events,action,text,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,object_type,text,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,object_key,text,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,scope_snapshot,jsonb,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,before_digest,text,YES,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,after_digest,text,YES,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,reason,text,YES,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,request_id,text,NO,,,Vakolatli amallarning append-only izi
+DB-089,audit_events,occurred_at,timestamptz,NO,,,Vakolatli amallarning append-only izi
+DB-090,idempotency_keys,id,uuid,NO,PK,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,created_at,timestamptz,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,updated_at,timestamptz,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,user_id,uuid,NO,,DB-001 users.id,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,operation,text,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,key,text,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,request_digest,text,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,response_status,integer,YES,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,response_ref,text,YES,,,Sezgir HTTP amallarining bir marta natijasi
+DB-090,idempotency_keys,expires_at,timestamptz,NO,,,Sezgir HTTP amallarining bir marta natijasi
+DB-091,analytics_events,id,uuid,NO,PK,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,created_at,timestamptz,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,updated_at,timestamptz,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,event_key,text,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,event_name,text,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,actor_pseudonym,text,YES,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,cohort,text,YES,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,properties,jsonb,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,occurred_at,timestamptz,NO,,,"O‘lchov va segment, PII emas"
+DB-091,analytics_events,schema_version,integer,NO,,,"O‘lchov va segment, PII emas"
+DB-092,feature_flags,id,uuid,NO,PK,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,created_at,timestamptz,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,updated_at,timestamptz,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,code,text,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,enabled,boolean,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,rule_schema,jsonb,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,changed_by_id,uuid,NO,,DB-001 users.id,Xizmatni boshqariladigan ishga tushirish
+DB-092,feature_flags,reason,text,NO,,,Xizmatni boshqariladigan ishga tushirish
+DB-093,incidents,id,uuid,NO,PK,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,created_at,timestamptz,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,updated_at,timestamptz,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,severity,text,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,status,text,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,commander_id,uuid,NO,,DB-001 users.id,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,summary,text,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,started_at,timestamptz,NO,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,resolved_at,timestamptz,YES,,,"Uzilish, egalik va tiklash dalili"
+DB-093,incidents,postmortem_ref,text,YES,,,"Uzilish, egalik va tiklash dalili"
+DB-094,restore_runs,id,uuid,NO,PK,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,created_at,timestamptz,NO,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,updated_at,timestamptz,NO,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,started_at,timestamptz,NO,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,finished_at,timestamptz,YES,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,backup_ref,text,NO,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,status,text,NO,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,recovered_through,timestamptz,YES,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,measured_rpo_minutes,integer,YES,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,measured_rto_minutes,integer,YES,,,Backupni tiklash tekshiruvi
+DB-094,restore_runs,checked_by_id,uuid,NO,,DB-001 users.id,Backupni tiklash tekshiruvi
+DB-094,restore_runs,evidence_ref,text,YES,,,Backupni tiklash tekshiruvi
