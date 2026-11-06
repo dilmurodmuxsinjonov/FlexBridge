@@ -1,14 +1,17 @@
-"""FastAPI router for Authentication, Sessions, Immediate Revoke & Canonical `API-060`/`API-061` (FIX-01, FIX-03, FIX-04)."""
+"""FastAPI router for Authentication, Sessions, Immediate Revoke & Canonical `API-060`/`API-061` (FIX-01, FIX-03, FIX-04, REV-002)."""
 
 from __future__ import annotations
 
+import base64
+import hmac
+import secrets
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context
-from app.services.auth import AuthError, auth_service
+from app.services.auth import AuthError, auth_service, generate_totp_code, verify_password
 
 router = APIRouter(prefix="/api/v1", tags=["auth"])
 
@@ -32,7 +35,7 @@ class LoginRequest(BaseModel):
 
 
 class RevokeRequest(BaseModel):
-    actor_id: str
+    actor_id: str | None = None
     reason: str = "SECURITY_REVOKE"
 
 
@@ -41,6 +44,7 @@ class StepUpSecurityUpdateRequest(BaseModel):
 
     enable_totp: bool = True
     step_up_totp_code: str | None = None
+    current_password: str | None = None
 
 
 @router.post("/auth/register", status_code=201)
@@ -78,12 +82,27 @@ def login_endpoint(payload: LoginRequest) -> dict[str, Any]:
 
 
 @router.post("/auth/sessions/{session_id}/revoke")
-def revoke_session_endpoint(session_id: str, payload: RevokeRequest) -> dict[str, Any]:
+def revoke_session_endpoint(
+    session_id: str,
+    payload: RevokeRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Authenticated session revocation endpoint: requires owner session or privileged admin role."""
+    is_admin = actor.has_any_role(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "PLATFORM_ADMIN",
+        "MODERATOR",
+        "SUPPORT",
+        "SUPPORT_AGENT",
+        "INST_ADMIN",
+    )
     try:
         return auth_service.revoke_session(
             session_id=session_id,
-            actor_id=payload.actor_id,
+            actor_id=actor.user_id,
             reason=payload.reason,
+            require_owner_user_id=None if is_admin else actor.user_id,
         )
     except AuthError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
@@ -105,12 +124,40 @@ def api_060_update_me_security(
     payload: StepUpSecurityUpdateRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
-    """Canonical API-060 (`PATCH /api/v1/me/security`): Self account security & step-up MFA update."""
+    """Canonical API-060 (`PATCH /api/v1/me/security`): Self account security & step-up MFA update with real verification."""
+    user = auth_service._load_user(actor.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail={"code": "USER_NOT_FOUND", "message": "Foydalanuvchi topilmadi"})
+
+    step_up_ok = False
+    if payload.current_password and verify_password(payload.current_password, user["password_hash"]):
+        step_up_ok = True
+    elif payload.step_up_totp_code and user.get("totp_secret"):
+        expected = generate_totp_code(user["totp_secret"])
+        if payload.step_up_totp_code != "000000" and hmac.compare_digest(payload.step_up_totp_code, expected):
+            step_up_ok = True
+
+    if not step_up_ok:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "STEP_UP_VERIFICATION_FAILED",
+                "step_up_verified": False,
+                "message": "API-060: Step-up TOTP yoki joriy parol tasdig'i noto'g'ri",
+            },
+        )
+
+    if payload.enable_totp and not user.get("totp_secret"):
+        user["totp_secret"] = base64.b32encode(secrets.token_bytes(20)).decode("ascii").rstrip("=")
+    elif not payload.enable_totp:
+        user["totp_secret"] = None
+    auth_service._persist_user(user)
+
     return {
         "contract_id": "API-060",
         "user_id": actor.user_id,
         "session_id": actor.session_id,
-        "totp_enabled": payload.enable_totp,
+        "totp_enabled": bool(user.get("totp_secret")),
         "step_up_verified": True,
     }
 

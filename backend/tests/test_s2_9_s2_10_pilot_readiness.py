@@ -65,7 +65,9 @@ def test_s2_10_1_r1_pilot_readiness_report_and_q_011_freelance_guard():
     assert res.status_code == 200
     data = res.json()
 
-    assert data["pilot_ready"] is True
+    assert data["schema_and_invariants_ready"] is True
+    assert data["external_services_ready"] is False
+    assert data["pilot_ready"] is False
     assert data["release_stage"] == "R1_PILOT"
     assert data["q_011_r2_freelance_deferred"]["R2_FREELANCE_MARKETPLACE"] is False
     assert data["q_011_r2_freelance_deferred"]["R1_PART_TIME_JOBS"] is True

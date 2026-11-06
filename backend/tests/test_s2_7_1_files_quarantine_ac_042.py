@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.auth import auth_service
 
 client = TestClient(app)
 
@@ -63,7 +64,12 @@ def test_ac_042_pending_scan_and_quarantined_pdf_never_receive_signed_url() -> N
     assert scan_ok.json()["scan_status"] == "CLEAN"
     assert scan_ok.json()["visibility"] == "PRIVATE_READY"
 
-    dl_ok = client.get(f"/api/v1/files/{up_clean['id']}/download", params={"requester_id": "cand-1"})
+    cand_token = auth_service.seed_privileged_actor_session(user_id="cand-1", roles=["CANDIDATE"])
+    dl_ok = client.get(
+        f"/api/v1/files/{up_clean['id']}/download",
+        params={"requester_id": "cand-1"},
+        headers={"Authorization": f"Bearer {cand_token}"},
+    )
     assert dl_ok.status_code == 200
     assert dl_ok.json()["expires_in_seconds"] == 60
     assert "sig=" in dl_ok.json()["signed_url"]

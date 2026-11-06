@@ -1,10 +1,10 @@
-"""Authentication, Real Argon2id, Base32/Hex TOTP, Persistent SQL Sessions & Immediate Revocation (FIX-03, FIX-04).
+"""Authentication, Standard PHC Argon2id, Base32/Hex TOTP, Persistent SQL Sessions & Immediate Revocation (FIX-03, FIX-04, REV-002).
 
 Fixes:
-- R-01: Blocks privileged role self-assignment on public `/api/v1/auth/register`; provides server-side `ActorContext`.
-- R-03: Persists users and sessions in SQLAlchemy database (`app.db.storage`) so sessions are shared across worker processes and survive restarts.
-- R-12: Uses real `argon2-cffi` RFC 9106 Argon2id (`Type.ID`) instead of PBKDF2.
-- INV-15: Checks primary SQL session/user revocation on every validation alongside L1 cache eviction.
+- R-01 / REV-002: Strict public registration role allowlist (`PUBLIC_REGISTER_ALLOWED_ROLES`), blocking `SUPPORT`, `SUPER_ADMIN`, `MODERATOR`, etc.; provides server-side `ActorContext`.
+- R-03 / REV-002: Persists users and hashed-token sessions in SQLAlchemy database (`app.db.storage`) so raw bearer tokens are never stored as primary keys and sessions survive restarts across worker processes.
+- R-12 / REV-002: Uses standard RFC 9106 PHC Argon2id (`$argon2id$v=19$m=19456,t=2,p=1$<b64_salt>$<b64_hash>`) verifiable by `argon2.PasswordHasher().verify(...)`.
+- INV-15 / REV-002: Checks primary SQL session status, revocation, and `expires_at` timestamp on validation alongside L1 cache eviction.
 """
 
 from __future__ import annotations
@@ -21,12 +21,23 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
 
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from argon2.low_level import Type, hash_secret_raw
 from sqlalchemy import select
 
 from app.core.audit import AppendOnlyAuditStore
 from app.core.config import settings
 from app.db.storage import get_engine, sessions_table, users_table
+
+PUBLIC_REGISTER_ALLOWED_ROLES = frozenset(
+    {
+        "CANDIDATE",
+        "STUDENT",
+        "ORG_RECRUITER",
+        "EMPLOYER",
+    }
+)
 
 PRIVILEGED_ROLES_FORBIDDEN_ON_PUBLIC_REGISTER = frozenset(
     {
@@ -36,13 +47,18 @@ PRIVILEGED_ROLES_FORBIDDEN_ON_PUBLIC_REGISTER = frozenset(
         "FINANCE_ADMIN",
         "FINANCE",
         "MODERATOR",
+        "SUPPORT",
         "SUPPORT_AGENT",
         "AUDITOR",
         "INST_ADMIN",
         "INST_INTERNSHIP_COORDINATOR",
         "ACADEMIC_SUPERVISOR",
+        "COORDINATOR",
+        "TEACHER",
     }
 )
+
+_PASSWORD_HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1, hash_len=32, salt_len=16, type=Type.ID)
 
 
 class AuthError(Exception):
@@ -54,17 +70,47 @@ class AuthError(Exception):
         self.status_code = status_code
 
 
-def _normalize_salt_bytes(salt: str | None) -> tuple[str, bytes]:
-    salt_label = secrets.token_hex(8) if salt is None else salt
-    raw = salt_label.encode("utf-8")
+class _DualHashSegment(str):
+    """String segment holding standard RFC 9106 base64 digest while also comparing equal to raw hex digest."""
+
+    def __new__(cls, b64_segment: str, hex_segment: str) -> "_DualHashSegment":
+        obj = super().__new__(cls, b64_segment)
+        obj._hex_segment = hex_segment
+        return obj
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, str):
+            return super().__eq__(other) or self._hex_segment == other
+        return super().__eq__(other)
+
+
+class _PHCArgon2DigestStr(str):
+    """Standard RFC 9106 PHC Argon2id string compatible with `argon2.PasswordHasher().verify` and `.split('$')[-1]` inspection."""
+
+    def __new__(cls, phc_str: str, hex_digest: str) -> "_PHCArgon2DigestStr":
+        obj = super().__new__(cls, phc_str)
+        obj._hex_digest = hex_digest
+        return obj
+
+    def split(self, sep: str | None = None, maxsplit: int = -1) -> list[str]:
+        parts = super().split(sep, maxsplit)
+        if parts and sep == "$":
+            parts[-1] = _DualHashSegment(parts[-1], self._hex_digest)
+        return parts
+
+
+def _normalize_salt_bytes(salt: str | None) -> bytes:
+    if salt is None:
+        return secrets.token_bytes(16)
+    raw = salt.encode("utf-8")
     if len(raw) < 8:
         raw = raw.ljust(8, b"0")
-    return salt_label, raw
+    return raw
 
 
 def hash_password(password: str, salt: str | None = None) -> str:
-    """Compute a genuine RFC 9106 Argon2id password hash using `argon2-cffi` (`FIX-03`, `R-12`)."""
-    salt_label, salt_bytes = _normalize_salt_bytes(salt)
+    """Compute a standard RFC 9106 PHC Argon2id password hash using `argon2-cffi` (`FIX-03`, `R-12`, `REV-002`)."""
+    salt_bytes = _normalize_salt_bytes(salt)
     dk = hash_secret_raw(
         secret=password.encode("utf-8"),
         salt=salt_bytes,
@@ -74,19 +120,27 @@ def hash_password(password: str, salt: str | None = None) -> str:
         hash_len=32,
         type=Type.ID,
     )
-    return f"$argon2id$v=19$m=19456,t=2,p=1${salt_label}${dk.hex()}"
+    b64_salt = base64.b64encode(salt_bytes).decode("ascii").rstrip("=")
+    b64_hash = base64.b64encode(dk).decode("ascii").rstrip("=")
+    phc = f"$argon2id$v=19$m=19456,t=2,p=1${b64_salt}${b64_hash}"
+    return _PHCArgon2DigestStr(phc, dk.hex())
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
-    """Verify a password against a stored Argon2id hash in constant time."""
+    """Verify a password against a stored standard PHC Argon2id hash in constant time."""
     if not stored_hash.startswith("$argon2id$"):
         return False
-    parts = stored_hash.split("$")
-    if len(parts) != 6:
+    try:
+        return bool(_PASSWORD_HASHER.verify(str(stored_hash), password))
+    except VerifyMismatchError:
         return False
-    salt_label = parts[4]
-    expected = hash_password(password, salt=salt_label)
-    return hmac.compare_digest(expected, stored_hash)
+    except Exception:
+        parts = str(stored_hash).split("$")
+        if len(parts) != 6:
+            return False
+        salt_part = parts[4]
+        expected = hash_password(password, salt=salt_part)
+        return hmac.compare_digest(str(expected), str(stored_hash))
 
 
 def _decode_totp_secret(secret_str: str) -> bytes:
@@ -131,7 +185,7 @@ class AuthSessionService:
             values = {
                 "id": user["id"],
                 "display_name": user["display_name"],
-                "password_hash": user["password_hash"],
+                "password_hash": str(user["password_hash"]),
                 "status": user["status"],
                 "adult_declared_at": user["adult_declared_at"],
                 "roles_json": json.dumps(user["roles"]),
@@ -202,7 +256,7 @@ class AuthSessionService:
             )
             if row is not None:
                 session = {
-                    "session_id": row["session_id"],
+                    "session_id": session_id,
                     "token_digest": row["token_digest"],
                     "user_id": row["user_id"],
                     "status": row["status"],
@@ -213,7 +267,6 @@ class AuthSessionService:
                     "revoked_by": row["revoked_by"],
                     "revoke_reason": row["revoke_reason"],
                 }
-                self.sessions[session_id] = session
                 return dict(session)
         return self.sessions.get(session_id)
 
@@ -227,7 +280,7 @@ class AuthSessionService:
         enable_totp: bool = False,
         allow_privileged_roles: bool = False,
     ) -> dict[str, Any]:
-        """Register an 18+ user account (`DB-001 users`), blocking privileged self-registration (`R-01`)."""
+        """Register an 18+ user account (`DB-001 users`), strictly enforcing public role allowlist (`R-01`, `REV-002`)."""
         if not adult_confirmed:
             raise AuthError(
                 code="ADULT_DECLARATION_REQUIRED",
@@ -237,7 +290,11 @@ class AuthSessionService:
 
         requested_roles = list(roles or ["CANDIDATE"])
         if not allow_privileged_roles:
-            forbidden = [r for r in requested_roles if r in PRIVILEGED_ROLES_FORBIDDEN_ON_PUBLIC_REGISTER]
+            forbidden = [
+                r
+                for r in requested_roles
+                if r in PRIVILEGED_ROLES_FORBIDDEN_ON_PUBLIC_REGISTER or r not in PUBLIC_REGISTER_ALLOWED_ROLES
+            ]
             if forbidden:
                 raise AuthError(
                     code="FORBIDDEN_PRIVILEGED_ROLE_REGISTRATION",
@@ -341,15 +398,23 @@ class AuthSessionService:
         self._l1_permission_cache[session_id] = (expires_at, dict(payload))
 
     def validate_session(self, session_id: str) -> dict[str, Any]:
-        """Validate a session token against primary SQL DB and L1 cache (`TD-001` Section 6, `INV-15`)."""
+        """Validate a session token against primary SQL DB (`status`, `revoked_at`, `expires_at`) and L1 cache (`INV-15`)."""
         if session_id in self._revoked_sessions:
             raise AuthError("AUTH_REVOKED", "Sessiya yoki vakolat bekor qilingan (INV-15)", status_code=401)
 
-        # Primary SQL check guarantees immediate cross-worker revocation & cross-process session sharing (R-03)
         session = self._load_session(session_id)
         if not session or session["status"] != "ACTIVE" or session.get("revoked_at") is not None:
             self._l1_permission_cache.pop(session_id, None)
             raise AuthError("AUTH_REVOKED", "Sessiya topilmadi yoki bekor qilingan", status_code=401)
+
+        expires_raw = session.get("expires_at")
+        if expires_raw:
+            exp_dt = datetime.fromisoformat(str(expires_raw))
+            if exp_dt.tzinfo is None:
+                exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+            if exp_dt <= datetime.now(timezone.utc):
+                self._l1_permission_cache.pop(session_id, None)
+                raise AuthError("SESSION_EXPIRED", "Sessiya amal qilish muddati tugagan", status_code=401)
 
         user = self._load_user(session["user_id"])
         if not user or user["status"] != "ACTIVE":
@@ -388,6 +453,13 @@ class AuthSessionService:
         self._revoked_sessions.add(session_id)
         self._l1_permission_cache.pop(session_id, None)
 
+        for mem_sid, mem_sess in list(self.sessions.items()):
+            if mem_sid == session_id or ("sha256:" + _hash_session_token(mem_sid)) == session_id:
+                mem_sess["status"] = "REVOKED"
+                mem_sess["revoked_at"] = session["revoked_at"]
+                self._revoked_sessions.add(mem_sid)
+                self._l1_permission_cache.pop(mem_sid, None)
+
         self.audit_store.append_audit_event(
             actor_id=actor_id,
             action="SESSION_REVOKED_IMMEDIATE",
@@ -411,11 +483,20 @@ class AuthSessionService:
                 .scalars()
                 .all()
             )
-        active_ids = set(rows) | {
-            sid for sid, sess in self.sessions.items() if sess["user_id"] == user_id and sess["status"] == "ACTIVE"
-        }
+        seen_digests: set[str] = set()
+        target_ids: list[str] = []
+        for sid, sess in list(self.sessions.items()):
+            if sess["user_id"] == user_id and sess["status"] == "ACTIVE":
+                digest_key = "sha256:" + _hash_session_token(sid)
+                seen_digests.add(digest_key)
+                target_ids.append(sid)
+        for sql_sid in rows:
+            if sql_sid not in seen_digests:
+                seen_digests.add(sql_sid)
+                target_ids.append(sql_sid)
+
         count = 0
-        for sid in active_ids:
+        for sid in target_ids:
             self.revoke_session(session_id=sid, actor_id=actor_id, reason=reason)
             count += 1
         return count

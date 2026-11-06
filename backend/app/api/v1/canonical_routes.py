@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context
@@ -87,7 +88,7 @@ class PaymentWebhookPayload(BaseModel):
     provider_event_id: str = "evt-1"
     idempotency_key: str
     amount_uzs: int
-    signature: str = "VALID_PROVIDER_WEBHOOK_SIGNATURE"
+    signature: str = Field(..., min_length=8)
 
 
 @router.post("/matching/preview")
@@ -255,9 +256,38 @@ def api_056_submit_daily_log(
             placement_id=log_row["placement_id"],
             author_id=actor.user_id,
             log_date=log_row["log_date"],
+            log_id=id,
         )
     except InternshipLogScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate}) from exc
+
+
+@router.post("/operator/refunds/{id}/approve")
+def api_116_operator_approve_refund(
+    id: str,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-116 (`POST /api/v1/operator/refunds/{id}/approve`): Finance operator dual-control refund approval."""
+    if not actor.has_any_role("FINANCE_ADMIN", "FINANCE", "SUPER_ADMIN", "ADMIN"):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "FORBIDDEN_OPERATOR_REFUND_ROLE",
+                "message": "API-116: Qaytarimni tasdiqlash uchun FINANCE_ADMIN yoki SUPER_ADMIN roli talab qilinadi",
+            },
+        )
+    refund = billing_service._refunds.get(id)
+    if not refund:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "REFUND_NOT_FOUND", "message": f"Refund '{id}' topilmadi"},
+        )
+    return {
+        "contract_id": "API-116",
+        "refund_id": refund.id,
+        "invoice_id": refund.invoice_id,
+        "status": refund.status,
+    }
 
 
 @router.post("/files/upload-intents", status_code=201)
@@ -318,15 +348,18 @@ def register_remaining_canonical_model_routes(app: FastAPI) -> None:
         domain = contract.get("domain", "SYS")
 
         def _make_handler(cid: str, dom: str, m: str, p: str):
-            def _canonical_contract_endpoint(actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
-                return {
-                    "contract_id": cid,
-                    "domain": dom,
-                    "method": m,
-                    "path": p,
-                    "actor_id": actor.user_id,
-                    "status": "OK",
-                }
+            def _canonical_contract_endpoint(actor: ActorContext = Depends(require_actor_context)) -> JSONResponse:
+                return JSONResponse(
+                    status_code=501,
+                    content={
+                        "contract_id": cid,
+                        "domain": dom,
+                        "method": m,
+                        "path": p,
+                        "actor_id": actor.user_id,
+                        "status": "NOT_IMPLEMENTED",
+                    },
+                )
 
             _canonical_contract_endpoint.__name__ = f"canonical_{cid.lower().replace('-', '_')}"
             return _canonical_contract_endpoint

@@ -68,10 +68,11 @@ def test_login_with_totp_and_ac_017_immediate_session_revocation() -> None:
     assert me_ok.status_code == 200
     assert me_ok.json()["user_id"] == user_id
 
-    # Immediately revoke the session (`AC-017` / `INV-15`)
+    # Immediately revoke the session (`AC-017` / `INV-15`) with authenticated Bearer token
     rev_resp = client.post(
         f"/api/v1/auth/sessions/{session_id}/revoke",
         json={"actor_id": "security-admin-1", "reason": "ROLE_REVOKED_AC_017"},
+        headers={"Authorization": f"Bearer {session_id}"},
     )
     assert rev_resp.status_code == 200
     assert rev_resp.json()["status"] == "REVOKED"

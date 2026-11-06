@@ -43,17 +43,19 @@ async def finance_circuit_open_exception_handler(
     exc: FinanceCircuitOpenError,
 ) -> JSONResponse:
     """Return 503 Service Unavailable (`P1_FINANCE_CIRCUIT_OPEN`) when P1 finance circuit-breaker is OPEN (`FIX-13`, `R-09`)."""
-    return JSONResponse(
-        status_code=503,
-        content={
-            "detail": {
-                "code": exc.code,
-                "reason_code": exc.reason_code,
-                "incident_id": exc.incident_id,
-                "message": str(exc),
-            }
-        },
-    )
+    body: dict[str, Any] = {
+        "detail": {
+            "code": exc.code,
+            "reason_code": exc.reason_code,
+            "incident_id": exc.incident_id,
+            "message": str(exc),
+        }
+    }
+    if exc.invoice_id is not None:
+        body["invoice_id"] = exc.invoice_id
+    if exc.order_id is not None:
+        body["order_id"] = exc.order_id
+    return JSONResponse(status_code=503, content=body)
 
 
 app.include_router(auth_router)
