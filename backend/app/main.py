@@ -16,6 +16,7 @@ from fastapi import FastAPI, HTTPException
 from app.api.v1.auth import router as auth_router
 from app.api.v1.availability import router as availability_router
 from app.api.v1.governance import router as governance_router
+from app.api.v1.opportunities import router as opportunities_router
 from app.core.config import settings
 from app.db.schema import get_retention_policies_v1, get_schema_summary
 
@@ -27,6 +28,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(governance_router)
 app.include_router(availability_router)
+app.include_router(opportunities_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])

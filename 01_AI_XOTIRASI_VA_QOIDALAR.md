@@ -230,3 +230,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha 22 ta test xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.3.1` (`S2.3`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.4.1` — E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`).
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-010 — 2026-11-07T00:24:30+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-010` / `2026-11-07T00:24:30+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.4.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.3.1` yakunlanib PR `#16` (`47a6181`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#17` va `feature/s2-4-1-opportunities-and-matching-ac-039` tarmog'ida `opportunity_revisions` (`DB-026`) `contract_type` va maosh (`HOURLY`/`STIPEND`/`UNPAID_ACADEMIC`) matritsasi (`INV-03`, `AC-039`), `opportunity_shifts` (`DB-027`) `group_code` smena guruhi (`INV-02`) hamda `API-003` (`GET /api/v1/opportunities/feed`) `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` moslik dvigatelini (`app/services/opportunities.py`, `app/api/v1/opportunities.py`) yaratish va `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/opportunities.py` yaratildi (`OpportunityMatchingService`, `validate_compensation_contract_matrix`, `create_opportunity_revision`, `add_opportunity_shift`, `match_candidate_feed_api_003`).
+  - `backend/app/api/v1/opportunities.py` yaratildi va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_4_1_matching_ac_039.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi (`S2.4` `Tekshiruvda` holatiga o'tkazildi, `S2.5.1..S2.8.1` kichik paketlari jadvalga qo'shildi).
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`24 passed in 1.32s`** (`S2.1..S2.3` 22 ta + `S2.4.1` 2 ta test: `test_ac_039_contract_type_and_compensation_matrix_inv_03`, `test_ac_039_api_003_all_vs_any_shift_matching_and_exceptions`).
+- Muammo va cheklov: Yo'q; barcha 24 ta test xatosiz o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.4.1` (`S2.4`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.5.1` — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK.
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
