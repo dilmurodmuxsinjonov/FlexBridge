@@ -1,8 +1,26 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-07 — Antigravity (`Gemini 4 Argon (High)`). Hozirgi holat: `S1` (`S1.1..S1.4`) va `S2.1..S2.10` (`S2.1.1..S2.10.1`) R1 doirasidagi barcha kichik ish paketlari to'liq bajarilib `Tekshiruvda` holatiga topshirildi (`pytest` `32/32` va PostgreSQL PGlite `17/17` sinovlari 100% o'tdi; `Q-011` qaroriga ko'ra `R2_FREELANCE_MARKETPLACE=False` saqlandi).
+Yangilangan: 2026-11-07 - Codex (`REV-001`). Mustaqil baho: 4/10, pilotga tayyor emas. Mavjud pytest 32/32 va PGlite 17/17 qayta o'tdi, lekin 17 ta salbiy probeda kamchilik tasdiqlandi. S2 bo'limlari tuzatish talab qiladi; S1 va S2.1.3 to'liq qabul qilinmagan. Batafsil: `reviews/2026-11-07/BAHOLASH.md`.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
+
+## REV-001 — Codex mustaqil baholash (2026-11-07)
+
+- Holat: `Bajarildi` (baholash yakunlandi; mahsulot qabul qilinmadi).
+- Natija: 13 ta ustuvor kamchilik; 17/17 salbiy probe; hisobot: `reviews/2026-11-07/BAHOLASH.md`.
+- Mas'ul: Codex; sessiya/modelning aniq identifikatori mavjud emas.
+- Doira: `8bb0ad2` holatidagi S1/S2 natijalarini kod, kanonik v1.4 model, mavjud testlar va lokal salbiy ssenariylar orqali baholash.
+- Tegiladigan fayllar: `reviews/2026-11-07/*`, ushbu holat fayli va `01_AI_XOTIRASI_VA_QOIDALAR.md`; ilova kodi o'zgartirilmaydi.
+- Qabul mezoni: qayta bajariladigan dalillar, ustuvor kamchiliklar va tayyorlik bahosi bilan hisobot. Tekshirilmagan talablar bajarilgan deb belgilanmaydi.
+
+## TD-001 — Tuzatishlar bo'yicha texnik qo'llanma (2026-11-07)
+
+- Holat: `Bajarildi` (texnik tushuntirish; ilova tuzatishlari boshlangani emas).
+- Mas'ul: Codex; foydalanuvchi har bir tuzatish aynan qanday bajarilishini to'liq tushuntirishni so'radi.
+- Doira: REV-001 kamchiliklarini mavjud v1.4 SQL/API bilan bog'langan arxitektura, tranzaksiya, xavfsizlik, worker va qabul testlari darajasida tushuntirish.
+- Tegiladigan fayllar: `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md`, 01 va 03 boshqaruv fayllari.
+- Qabul mezoni: har paketda ketma-ket bajarish, fayl mas'uliyati, xato holatlari va o'lchanadigan yakun mezoni; tavsiya bilan amalga oshirilgan ish aniq ajratiladi. Ilova kodi ushbu tushuntirish doirasida o'zgartirilmaydi.
+- Natija: `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md` — 19 bo'lim, 14 ta taklif etilgan FIX paketi. PostgreSQL, SQLAlchemy, FastAPI, PgBouncer, Psycopg, S3, Redis va pypdf rasmiy manbalari bilan texnik tafsilotlar tekshirildi. Jadvaldagi 13 API method/path v1.4 modeliga mosligi va hujjat tuzilishi avtomatik tekshirildi; `git diff --check` xatosiz.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
@@ -28,34 +46,55 @@ Quyidagi bo'limlar reja, bajarilgan funksiyalar emas. Har biri boshlanishidan ol
 
 | ID | Bo'lim | Holat | Tekshiruv yo'nalishi |
 | --- | --- | --- | --- |
-| S2.1 | Loyiha asosi va DB migratsiyalari | Tekshiruvda (`S2.1.1..S2.1.3`) | Manbadagi sxema, constraint va tranzaksiyalar |
-| S2.2 | Hisob, sessiya, tashkilot va vakolatlar | Tekshiruvda (`S2.2.1..S2.2.2`) | Rol/scope, o'zini tasdiqlamaslik, revoke |
-| S2.3 | Nomzod profili va bo'sh vaqt | Tekshiruvda (`S2.3.1`) | Vaqt intervallari va istisnolar |
-| S2.4 | E'lon, smena va moslik | Tekshiruvda (`S2.4.1`) | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
-| S2.5 | Ariza, suhbat, taklif, ish boshlanishi | Tekshiruvda (`S2.5.1`) | Holat o'tishlari va ikki tomon tasdig'i |
-| S2.6 | Akademik amaliyot, tayinlov, kundalik | Tekshiruvda (`S2.6.1`) | Mentor/o'qituvchi ajratilishi, AC-040 |
-| S2.7 | Xususiy fayllar, karantin, eksport | Tekshiruvda (`S2.7.1`) | Scan holati, ruxsat va signed URL; AC-042 |
-| S2.8 | Tarif, kvota, to'lov va qaytarish | Tekshiruvda (`S2.8.1`) | Parallel limit, pul yaxlitligi, dual-control |
-| S2.9 | Moderatsiya, audit va saqlash siyosati | Tekshiruvda (`S2.9.1`) | Scope, o'zgarmas tarix, asoslangan retention; AC-041 |
-| S2.10 | Pilotga tayyorgarlik va operatsiyalar | Tekshiruvda (`S2.10.1`) | Mavjud AC talablari, tiklash, alert va qo'llab-quvvatlash dalillari |
+| S2.1 | Loyiha asosi va DB migratsiyalari | Tuzatish kerak (`REV-001`) | Manbadagi sxema, constraint va tranzaksiyalar |
+| S2.2 | Hisob, sessiya, tashkilot va vakolatlar | Tuzatish kerak (`REV-001`) | Rol/scope, o'zini tasdiqlamaslik, revoke |
+| S2.3 | Nomzod profili va bo'sh vaqt | Tuzatish kerak (`REV-001`) | Vaqt intervallari va istisnolar |
+| S2.4 | E'lon, smena va moslik | Tuzatish kerak (`REV-001`) | Shartnoma, maosh shartlari, ALL/ANY; AC-039 |
+| S2.5 | Ariza, suhbat, taklif, ish boshlanishi | Tuzatish kerak (`REV-001`) | Holat o'tishlari va ikki tomon tasdig'i |
+| S2.6 | Akademik amaliyot, tayinlov, kundalik | Tuzatish kerak (`REV-001`) | Mentor/o'qituvchi ajratilishi, AC-040 |
+| S2.7 | Xususiy fayllar, karantin, eksport | Tuzatish kerak (`REV-001`) | Scan holati, ruxsat va signed URL; AC-042 |
+| S2.8 | Tarif, kvota, to'lov va qaytarish | Tuzatish kerak (`REV-001`) | Parallel limit, pul yaxlitligi, dual-control |
+| S2.9 | Moderatsiya, audit va saqlash siyosati | Tuzatish kerak (`REV-001`) | Scope, o'zgarmas tarix, asoslangan retention; AC-041 |
+| S2.10 | Pilotga tayyorgarlik va operatsiyalar | Tuzatish kerak (`REV-001`) | Mavjud AC talablari, tiklash, alert va qo'llab-quvvatlash dalillari |
 
 ### S2.1 va S2.2 bo'yicha maydalangan kichik ish paketlari (`S1.4` natijasi)
 
 | Kichik ID | Kichik vazifa nomi | Holat | Mas'ul | Tegiladigan fayllar | Qabul va sinov mezoni |
 | --- | --- | --- | --- | --- | --- |
-| S2.1.1 | Backend ilova asosi, konfiguratsiya, `API-X05/X06` health va 1.4 DB migratsiya/invariant sinov paketi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/pyproject.toml`, `backend/requirements.txt`, `backend/app/core/config.py`, `backend/app/db/schema.py`, `backend/app/main.py`, `backend/tests/test_s2_1_1_foundation.py` | FastAPI `/api/v1/health/live`, `/api/v1/health/ready`, `/api/v1/meta/schema-summary` ishlaydi; `pytest` (`6/6 passed`) orqali 94 jadval, 935 maydon, 214 FK va 17/17 PostgreSQL invariantlari avtomatik tekshirildi (Issue `#5`) |
-| S2.1.2 | Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py` | Siklik FK (`opportunity ↔ revision`, `thread ↔ message`) bitta atomik tranzaksiyada yozildi; `audit_events`, `consent_events`, `billing_ledger` va revision o'zgarmasligi hamda P1 moliya circuit-breaker `pytest`da (`11/11 passed`) tasdiqlandi (Issue `#7`) |
+| S2.1.1 | Backend ilova asosi, konfiguratsiya, `API-X05/X06` health va 1.4 DB migratsiya/invariant sinov paketi | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/pyproject.toml`, `backend/requirements.txt`, `backend/app/core/config.py`, `backend/app/db/schema.py`, `backend/app/main.py`, `backend/tests/test_s2_1_1_foundation.py` | FastAPI `/api/v1/health/live`, `/api/v1/health/ready`, `/api/v1/meta/schema-summary` ishlaydi; `pytest` (`6/6 passed`) orqali 94 jadval, 935 maydon, 214 FK va 17/17 PostgreSQL invariantlari avtomatik tekshirildi (Issue `#5`) |
+| S2.1.2 | Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py` | Siklik FK (`opportunity ↔ revision`, `thread ↔ message`) bitta atomik tranzaksiyada yozildi; `audit_events`, `consent_events`, `billing_ledger` va revision o'zgarmasligi hamda P1 moliya circuit-breaker `pytest`da (`11/11 passed`) tasdiqlandi (Issue `#7`) |
 | S2.1.3 | `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/retention.py`, `backend/app/services/feature_flags.py`, `backend/tests/test_s2_1_3_retention_flags.py` | 8 ta huquqiy saqlash muddati (`1 kun` .. `5 yil` / `23-kun ogohlantirish`) va `DB-092` feature flag holatlari `pytest`da (`14/14 passed`) tekshirildi (Issue `#9`) |
-| S2.2.1 | Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/auth.py`, `backend/app/api/v1/auth.py`, `backend/tests/test_s2_2_1_auth_revoke.py` | Parol/TOTP tekshiruvi, 18+ talabi, 15s kesh + event-driven revoke: sessiya bekor qilingan zahoti himoyalangan endpoint `401 AUTH_REVOKED` qaytardi (`AC-017`, `pytest` `17/17 passed`, Issue `#11`) |
-| S2.2.2 | Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/tests/test_s2_2_2_dual_control_scope.py` | O'z-o'zini tasdiqlash rad etildi (`409 SELF_APPROVAL_FORBIDDEN`), begona korxona/muassasa obyekti `403 SCOPE_VIOLATION` oldi, `API-060`/`061` va moderatsiya asoslari `pytest`da (`20/20 passed`) tasdiqlandi (Issue `#13`) |
-| S2.3.1 | Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolar (`INV-01`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/tests/test_s2_3_1_availability.py` | Ustma-ust tushuvchi `[)` intervallar `409 OVERLAPPING_AVAILABILITY_RULE` (`23P01`) bilan rad etildi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilindi (`INV-01`, `pytest` `22/22 passed`, Issue `#15`) |
-| S2.4.1 | E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/tests/test_s2_4_1_matching_ac_039.py` | `contract_type` + maosh mosligi, `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` va ustma-ust istisno chegirilishi (`AC-039`, `pytest` `24/24 passed`, Issue `#17`) |
-| S2.5.1 | Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/tests/test_s2_5_1_placements_inv_08.py` | `application_attempts` va `placements` boshqa e'longa bog'langan taklifni `409` (`23503`) bilan rad etdi (`INV-08`); ish boshlanishi ikki tomon tasdig'ini talab qildi (`pytest` `26/26 passed`, Issue `#19`) |
-| S2.6.1 | Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py` | `workplace_log_reviews` va `academic_log_reviews` alohida jadvallarda yuritildi va begona placement kundaligini `409` (`23503`) bilan rad etdi (`AC-040`, `pytest` `27/27 passed`, Issue `#21`) |
-| S2.7.1 | Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/files_quarantine.py`, `backend/app/api/v1/files.py`, `backend/tests/test_s2_7_1_files_quarantine_ac_042.py` | `PENDING_SCAN`/`QUARANTINED` faylga signed URL berilmadi (`409`); `/JavaScript` yoki `/OpenAction` bor PDF karantinga olindi (`AC-042`, `pytest` `28/28 passed`, Issue `#23`) |
-| S2.8.1 | Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/billing.py`, `backend/app/api/v1/billing.py`, `backend/tests/test_s2_8_1_billing_quota_ac_042.py` | `ORG_PLAN_30D` 5 ta aktiv e'lon to'lganda 6-e'lonni `409 CONCURRENT_QUOTA_REACHED` bilan to'xtatdi (`AC-042`), 1 tasi yopilgach yangisiga ruxsat berdi (`pytest` `30/30 passed`, Issue `#25`) |
-| S2.9.1 | Moderatsiya, audit va huquqiy saqlash (`DB-083..086`) yagona tekshiruv oqimi (`AC-041`) | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Moderatsiya apellyatsiyasi (`INV-11`, `AC-041`), o'zgarmas audit zanjiri va retention ijrosi (`DB-084`) `pytest`da (`32/32 passed`, Issue `#27`) tasdiqlandi |
-| S2.10.1 | R1 Pilot operatsion tayyorgarlik, zaxira/tiklash (`RPO=24s`, `RTO=4s`) va 42 AC yagona hisobot paketi | Tekshiruvda | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Barcha `AC-001..042` va `INV-01..16` qabul dalillari yagona API va test hisobotida jamlandi (`R2_FREELANCE_MARKETPLACE=False` saqlandi, `Q-011`, `pytest` `32/32 passed`, Issue `#27`) |
+| S2.2.1 | Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/auth.py`, `backend/app/api/v1/auth.py`, `backend/tests/test_s2_2_1_auth_revoke.py` | Parol/TOTP tekshiruvi, 18+ talabi, 15s kesh + event-driven revoke: sessiya bekor qilingan zahoti himoyalangan endpoint `401 AUTH_REVOKED` qaytardi (`AC-017`, `pytest` `17/17 passed`, Issue `#11`) |
+| S2.2.2 | Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/tests/test_s2_2_2_dual_control_scope.py` | O'z-o'zini tasdiqlash rad etildi (`409 SELF_APPROVAL_FORBIDDEN`), begona korxona/muassasa obyekti `403 SCOPE_VIOLATION` oldi, `API-060`/`061` va moderatsiya asoslari `pytest`da (`20/20 passed`) tasdiqlandi (Issue `#13`) |
+| S2.3.1 | Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolar (`INV-01`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/tests/test_s2_3_1_availability.py` | Ustma-ust tushuvchi `[)` intervallar `409 OVERLAPPING_AVAILABILITY_RULE` (`23P01`) bilan rad etildi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilindi (`INV-01`, `pytest` `22/22 passed`, Issue `#15`) |
+| S2.4.1 | E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/tests/test_s2_4_1_matching_ac_039.py` | `contract_type` + maosh mosligi, `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` va ustma-ust istisno chegirilishi (`AC-039`, `pytest` `24/24 passed`, Issue `#17`) |
+| S2.5.1 | Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/tests/test_s2_5_1_placements_inv_08.py` | `application_attempts` va `placements` boshqa e'longa bog'langan taklifni `409` (`23503`) bilan rad etdi (`INV-08`); ish boshlanishi ikki tomon tasdig'ini talab qildi (`pytest` `26/26 passed`, Issue `#19`) |
+| S2.6.1 | Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py` | `workplace_log_reviews` va `academic_log_reviews` alohida jadvallarda yuritildi va begona placement kundaligini `409` (`23503`) bilan rad etdi (`AC-040`, `pytest` `27/27 passed`, Issue `#21`) |
+| S2.7.1 | Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/files_quarantine.py`, `backend/app/api/v1/files.py`, `backend/tests/test_s2_7_1_files_quarantine_ac_042.py` | `PENDING_SCAN`/`QUARANTINED` faylga signed URL berilmadi (`409`); `/JavaScript` yoki `/OpenAction` bor PDF karantinga olindi (`AC-042`, `pytest` `28/28 passed`, Issue `#23`) |
+| S2.8.1 | Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/billing.py`, `backend/app/api/v1/billing.py`, `backend/tests/test_s2_8_1_billing_quota_ac_042.py` | `ORG_PLAN_30D` 5 ta aktiv e'lon to'lganda 6-e'lonni `409 CONCURRENT_QUOTA_REACHED` bilan to'xtatdi (`AC-042`), 1 tasi yopilgach yangisiga ruxsat berdi (`pytest` `30/30 passed`, Issue `#25`) |
+| S2.9.1 | Moderatsiya, audit va huquqiy saqlash (`DB-083..086`) yagona tekshiruv oqimi (`AC-041`) | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Moderatsiya apellyatsiyasi (`INV-11`, `AC-041`), o'zgarmas audit zanjiri va retention ijrosi (`DB-084`) `pytest`da (`32/32 passed`, Issue `#27`) tasdiqlandi |
+| S2.10.1 | R1 Pilot operatsion tayyorgarlik, zaxira/tiklash (`RPO=24s`, `RTO=4s`) va 42 AC yagona hisobot paketi | Tuzatish kerak (`REV-001`) | Antigravity (`Gemini 4 Argon (High)`) | `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py` | Barcha `AC-001..042` va `INV-01..16` qabul dalillari yagona API va test hisobotida jamlandi (`R2_FREELANCE_MARKETPLACE=False` saqlandi, `Q-011`, `pytest` `32/32 passed`, Issue `#27`) |
+
+### `TD-001` asosida rejalashtirilgan tuzatish paketlari (`FIX-01..FIX-14`)
+
+Manba: `reviews/2026-11-07/TUZATISH_TEXNIK_QOLLANMA.md` (18-bo'lim). Ushbu paketlar hozir `Rejada` (hali bajarilmagan); har biri alohida vazifa/branch/PR va haqiqiy DB/integratsiya + salbiy probe regressiya testlari bilan bajariladi.
+
+| Paket ID | Ko'lam va modul mas'uliyati | Bog'liq `REV-001` xatolari | Holat | Mas'ul | Yakun va qabul mezoni |
+| --- | --- | --- | --- | --- | --- |
+| `FIX-01` | `contracts/r1_api_matrix.csv`, model/AC izchilligi, SQL jadval/ustun/enum xaritasi (`sessions`, `org_memberships`, `opportunities.kind`, `job_engagements` vs `placements`, `DB-071..077`, `DB-084 legal_holds`, `DB-090 idempotency_keys`) | `R-07` | Rejada — navbatdagi | Antigravity (`Gemini 4 Argon (High)`) | R1 method/path/CAP/AC va SQL nomlari 1.4 JSON/SQL bilan 100% bir xil; noaniq migratsiya qarorlari ochiq hujjatlashtirilgan |
+| `FIX-02` | `infra/compose.yaml`, `Settings`, SQLAlchemy 2.0 `AsyncSession`, Alembic baseline (`FlexBridge_1_4_schema.sql`), `SET CONSTRAINTS ALL IMMEDIATE` | `R-03` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Haqiqiy PostgreSQL 17 migratsiyasi; qayta ishga tushirish (`restart`) va 2 ta jarayonda ma'lumot saqlanadi; xatoda atomik rollback |
+| `FIX-03` | `core/security.py`, `api/dependencies.py` (`ActorContext`), haqiqiy `argon2-cffi` / `pwdlib`, `mfa_credentials`, `sessions.token_digest`, `API-060`, `API-061` | `R-01`, `R-03`, `R-12` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Haqiqiy Argon2id va base32 TOTP; `extra='forbid'` bilan register/request body orqali rol/actor berish bloklanadi (`422`/`401`/`403`); 2 worker bir xil sessiyani DB orqali ko'radi |
+| `FIX-04` | `core/authorization.py`, `org_memberships`, `org_role_grants`, `SELF/ORG/INSTITUTION/PLATFORM` scope, primary DB + L1/Redis darhol revoke (`INV-15`) | `R-01`, `R-03` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Worker A login qilib Worker B revoke qilganda 15s TTL kutmasdan keyingi so'rov `401` oladi; Pub/Sub uzilganda ham primary DB tekshiruvi himoyalaydi |
+| `FIX-05` | `API-094` (`orders`/`invoices`), `adapters/payments/*`, `API-X04` (`webhooks/payments/{provider}`), `DB-074 payment_events`, `DB-090 idempotency_keys` request digest | `R-02`, `R-10` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Provayder tasdig'isiz `CAPTURED` va entitlement berilmaydi; bir xil idempotency key + boshqa payload `409 IDEMPOTENCY_CONFLICT` qaytaradi |
+| `FIX-06` | `API-081` (`POST /api/v1/opportunities/{id}/publish`), `FOR UPDATE` tashkilot locki, `DB-075 service_entitlements` (`starts_at`/`ends_at`), majburiy `contract_type` (`AC-039`, `AC-042`) | `R-05`, `R-11` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Revision yaratish faqat `DRAFT` ochadi; 4 faol slot + 20 parallel publishdan faqat 1 tasi o'tadi (`<= 5`); muddati o'tgan tarif rad etiladi |
+| `FIX-07` | `API-095` (`refund-requests`), `API-116` (`operator/refunds/{id}/approve`), `DB-076 refunds` (`payment_attempt_id`), `fn_validate_refund_limit` | `R-01`, `R-06` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Jami va parallel qisman refundlar `CAPTURED - reserved_or_executed` qoldiqdan oshmaydi; 3 ta alohida autentifikatsiyalangan shaxs tasdiqlaydi |
+| `FIX-08` | `API-X01..X03`, `adapters/storage.py` (S3/MinIO), `workers/file_scan.py` (ClamAV + cheklangan `pypdf` jarayoni), `private/` ko'chirish va File ACL | `R-04` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Haqiqiy S3 obyekt baytlari, ClamAV + `pypdf` object graph skaneri, `files.sha256` migratsiyasi, begona userga `403`, 60s presigned URL expiry |
+| `FIX-09` | `API-003` (`POST /api/v1/matching/preview`), 28 kunlik oyna, tutash interval union (`[540,720)+[720,900)=[540,900)`), `AVAILABLE`/`UNAVAILABLE`, oflayn 30 daqiqa bufer, `ALL`/`ANY` to'liq guruh | `R-07`, `R-13` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Tutash intervallar birlashadi; `ANY` kamida bitta to'liq `group_code`ni, `ALL` barcha guruhlarni talab qiladi; `MATCH`/`CONFLICT`/`UNKNOWN` qaytaradi |
+| `FIX-10` | `API-043` (`offers/{id}/respond`), `API-046` (`engagements/{id}/confirmations`), `job_engagements` vs `placements` ajratilishi, capacity lock | `R-01` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Taklif nomzod javobisiz `ACCEPTED` bo'lmaydi; `PART_TIME` `job_engagements`ga, `INTERNSHIP` `placements`ga tushadi; tomonlar sessiyadan aniqlanadi |
+| `FIX-11` | `API-054` (`PUT /placements/{id}/logs/{date}`), `API-056` (`POST /logs/{id}/submit`), `log_task_entries` GiST overlap (`AC-017`, `AC-040`), `trg_validate_log_submission` | `R-07`, `R-08` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | 0-daqiqa draft `200`, `WORKED` 0/manfiy submit `422`, vaqt kesishmasi `409` (`23P01`), topshirilgan revision o'zgarmas (`INV-16`) |
+| `FIX-12` | Moderatsiya case/action/appeal (`AC-041`), `workers/retention.py`, haqiqiy DB/S3 tozalash va `ANONYMIZE_PII`, `DB-084 legal_holds` himoyasi | `R-01` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Retention mijoz soniga emas, DB yozuvlariga ishlaydi; `legal_holds` bor yozuv o'chirilmaydi; apellyatsiya target holatini haqiqatan yangilaydi |
+| `FIX-13` | Umumiy DB-backed circuit-breaker (`OPS_FINANCE_MUTATIONS_ENABLED` + `incidents`), `503 P1_FINANCE_CIRCUIT_OPEN` handler, haqiqiy `API-X06` probe va `restore_runs` | `R-09` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | Barcha workerlar bitta breaker holatini ko'radi (`503`); `/health/ready` real DB/Redis/S3/ClamAV ni tekshiradi; `restore_runs` o'lchangan RPO/RTO ni saqlaydi |
+| `FIX-14` | Next.js frontend asosiy R1 oqimlari, CI pipeline va `reproduce_findings.py` dagi barcha 17 ta salbiy probening to'liq regressiya sinovi | `R-01..R-13` | Rejada | Antigravity (`Gemini 4 Argon (High)`) | 17/17 salbiy probe xatolari bartaraf etilgan (`defect_observed == False`), R1 end-to-end oqimlari real servislar bilan o'tadi (`R2` frilans o'chiq, `Q-011`) |
 
 ## Mahsulotning uzoq muddatli bosqichlari
 
@@ -90,13 +129,13 @@ Keyingi kichik qadam:
 - ID / nom: `S1.1` / Mavjud talablar va manbalar xaritasi
 - Bosqich / manba: `S1` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf`, `FlexBridge_Ustoz_uchun_loyiha_izohi.md`, `FlexBridge_kelgusi_bosqichlar.md`, `FlexBridge_Investorlar_uchun.pptx`, `Oqish_tartibi.txt`
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-06T23:21:15+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `D:\FlexBridge` katalogidagi barcha manbalarni o'qib, 14 ta rol, ish va akademik amaliyot oqimlari (`S2.2..S2.10`), DB jadvallari/invariantlar (`INV-01..15`), API ruxsatlari, qabul mezonlari (`AC-017`, `AC-039..042`) va yetishmayotgan artefaktlar (`1.3` va `1.4` SQL/Atlas) holatini manbalarga bog'lab xaritaga tushirish (`S0.1..S0.4` ga tayanadi; `S1.2..S1.4` uchun asos bo'ladi).
 - Tegiladigan fayllar: `05_S1_1_TALABLAR_VA_MANBALAR_XARITASI.md`, `01_AI_XOTIRASI_VA_QOIDALAR.md`, `02_TEXNIK_MODELLAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md`, `.gitignore`
 - Qabul mezonlari: Ish/amaliyot oqimlari, 14 rol, mavjud AC/INV talablari va bo'shliqlar aniq manba sahifasi/qatori bilan bog'langan; topilgan `1.3` artefaktlar SHA-256 orqali tekshirilgan; ochiq tanlovlar uchun takliflar `04-fayl`ga yozilgan.
 - Bajarilgan qism / qolgan qism: Barcha 5 ta manba (jumladan 27 slaydlik `.pptx` XML/notes) o'qildi; `05_S1_1_TALABLAR_VA_MANBALAR_XARITASI.md` tuzildi; lokal `D:\Codex\2026-10-26\sh\outputs\FlexBridge\` katalogidagi 41/41 ta `1.3` artefakt topildi va SHA-256 tekshiruvidan o'tkazildi. Qolgan qism: Codex tekshiruvi va foydalanuvchining `T-007`/`T-008` bo'yicha qarori.
 - Tekshiruv dalili: `pypdf` (9 sahifa 1.4 PDF), `zipfile`+`xml.etree.ElementTree` (27 slayd `.pptx`), `checksums.json` SHA-256 tekshiruvi (`40/41` katalogda + `1/41` zip ichida, `reference_errors: 0`), GitHub Issue `#1` va PR.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: Codex `S1.1` ni tekshiradi; foydalanuvchi `T-007` va `T-008` takliflarini tasdiqlagach `S1.2` (`1.3` artefaktlarni `D:\FlexBridge`ga ko'chirish va `FlexBridge_1_4_schema.sql` ni yaratib PostgreSQL/PGlite da sinash) bajariladi.
 
 ### S1.2 — 1.3 artefaktlarni tiklash va `FlexBridge_1_4_schema.sql` ni yaratib tekshirish (GitHub Issue #3)
@@ -146,13 +185,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.1.1` / Backend ilova asosi, konfiguratsiya, `API-X05/X06` health va 1.4 DB migratsiya/invariant sinov paketi
 - Bosqich / manba: `S2.1` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (5–8-betlar), `specs/v1_4/FlexBridge_1_4_schema.sql`, `specs/v1_4/FlexBridge_model_1_4.json`
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:02:01+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `backend/` katalogida Python FastAPI ilova asosini (`app/core/config.py`, `app/db/schema.py`, `app/main.py`) yaratish, `API-X05` (`GET /api/v1/health/live`), `API-X06` (`GET /api/v1/health/ready`) va `GET /api/v1/meta/schema-summary` endpointlarini ishga tushirish hamda `pytest` orqali 94 jadval, 935 maydon, 214 FK, 8 ta retention policy (`DB-083`) va 17/17 PostgreSQL invariantlarini tekshirish (`S1.2..S1.4` ga tayanadi; `S2.1.2` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/pyproject.toml`, `backend/requirements.txt`, `backend/app/__init__.py`, `backend/app/core/__init__.py`, `backend/app/core/config.py`, `backend/app/db/__init__.py`, `backend/app/db/schema.py`, `backend/app/main.py`, `backend/tests/test_s2_1_1_foundation.py`
 - Qabul mezonlari: `API-X05` va `API-X06` endpointlari `200 OK` qaytaradi; PgBouncer (`80/20/400`), L1/Redis kesh (`15s`), signed URL (`60s`), PDF strukturaviy filtri (`50 bet / 5000 obyekt / 20 MB`, 8 ta taqiqlangan token) konfiguratsiyalari hamda 1.4 DB sxemasi `pytest` sinovidan 100% o'tadi.
 - Bajarilgan qism / qolgan qism: Barcha 9 ta backend fayli yaratildi va `pytest` (`6/6 passed`) muvaffaqiyatli bajarildi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `6 passed in 0.62s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.1.2` — Tranzaksiya boshqaruvchisi (`DEFERRABLE` / `SET CONSTRAINTS ALL IMMEDIATE`), `audit_events` append-only yordamchisi va P1 moliya circuit-breaker modulini yaratish.
 
 ### S2.1.2 — Tranzaksiya boshqaruvchisi (`DEFERRABLE`), `audit_events` append-only va P1 circuit-breaker (GitHub Issue #7)
@@ -160,13 +199,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.1.2` / Tranzaksiya boshqaruvchisi (`SET CONSTRAINTS ALL IMMEDIATE` / `DEFERRABLE`), `audit_events` append-only yordamchisi va P1 circuit-breaker
 - Bosqich / manba: `S2.1` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.4, 6 va 7-bo'limlar; `INV-06`, `INV-11`, `INV-13`, `INV-16`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:08:22+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: Siklik FK juftliklari (`opportunities ↔ opportunity_revisions`, `daily_logs ↔ log_revisions`, `threads ↔ messages`) uchun `DEFERRABLE INITIALLY DEFERRED` va `SET CONSTRAINTS ALL IMMEDIATE` atomik tranzaksiya boshqaruvchisini (`app/db/session.py`), `audit_events`/`consent_events`/`billing_ledger` append-only hamda revision o'zgarmaslik himoyachisini (`app/core/audit.py`) va P1 moliya circuit-breaker modulini (`app/core/circuit_breaker.py`) yaratib `pytest`da tekshirish (`S2.1.1` ga tayanadi; `S2.1.3` va `S2.2..S2.9` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/db/session.py`, `backend/app/core/audit.py`, `backend/app/core/circuit_breaker.py`, `backend/tests/test_s2_1_2_transactions_audit.py`
 - Qabul mezonlari: Siklik FK yozuvlari bitta atomik tranzaksiya ichida `SET CONSTRAINTS ALL IMMEDIATE` bilan muvaffaqiyatli yoziladi, uzilgan FK bo'lsa to'liq `ROLLBACK` bo'ladi; `audit_events`, `consent_events`, `billing_ledger` da `UPDATE`/`DELETE` `23514` bilan rad etiladi; P1 circuit-breaker `OPEN` holatda moliya operatsiyalarini bloklaydi va tiklashda ikki shaxs (`actor_id != second_approver_id`) talab qiladi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi va `pytest` (`11/11 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `11 passed in 0.84s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.1.3` — `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisini yaratish.
 
 ### S2.1.3 — `retention_policies` (`DB-083` v1 — 8 toifa) va `feature_flags` (`DB-092`) servisi (GitHub Issue #9)
@@ -188,13 +227,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.2.1` / Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`)
 - Bosqich / manba: `S2.2` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (5-bet, `INV-15`, `AC-017`, `DB-001`, `DB-004`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:13:40+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: 18+ foydalanuvchi ro'yxatdan o'tishi, Argon2id parol xeshi, RFC 6238 TOTP ikki bosqichli tasdiqlash hamda 15s L1/Redis ruxsat keshidan sessiya/rol/a'zolik bekor qilingan zahoti darhol (`0ms`) o'chirish (`INV-15`, `AC-017`) xizmatini (`app/services/auth.py`, `app/api/v1/auth.py`) yaratish va `pytest`da tekshirish (`S2.1` ga tayanadi; `S2.2.2` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/auth.py`, `backend/app/api/__init__.py`, `backend/app/api/v1/__init__.py`, `backend/app/api/v1/auth.py`, `backend/app/main.py`, `backend/tests/test_s2_2_1_auth_revoke.py`
 - Qabul mezonlari: 18+ tasdig'isiz ro'yxatdan o'tish `422 ADULT_DECLARATION_REQUIRED` qaytaradi; TOTP yoqilganda to'g'ri 6 xonali RFC 6238 kod talab qilinadi; faol sessiya bekor qilingan zahoti `/api/v1/auth/me` 15 soniya kutmasdan darhol `401 AUTH_REVOKED` qaytaradi (`AC-017`).
 - Bajarilgan qism / qolgan qism: Barcha 6 ta fayl yaratildi/yangilandi va `pytest` (`17/17 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `17 passed in 1.19s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.2.2` — Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`).
 
 ### S2.2.2 — Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`, GitHub Issue #13)
@@ -202,13 +241,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.2.2` / Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`)
 - Bosqich / manba: `S2.2` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.3, 4 va 6-bo'limlar; `INV-09`, `INV-11`, `INV-12`, `API-060`, `API-061`, `AC-041`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:16:56+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: Tashkilot a'zoligini tasdiqlashda Ikki shaxs qoidasi (`created_by != approved_by`, `409 SELF_APPROVAL_FORBIDDEN`), tashkilotlararo scope chegarasi (`403 SCOPE_VIOLATION`), `API-060` (`POST /api/v1/internships/academic-assignments` — faqat `INST_INTERNSHIP_COORDINATOR` va `SUPER_ADMIN`) va `API-061` (`PATCH /api/v1/internships/academic-assignments/{id}` — muassasa va biriktirilgan rahbar tekshiruvi) hamda moderatsiya asoslari (`policy_code`, `reason_code`, `justification >= 15`) xizmatini (`app/services/governance.py`, `app/api/v1/governance.py`) yaratib `pytest`da tekshirish (`S2.2.1` ga tayanadi; `S2.2` ni yakunlaydi).
 - Tegiladigan fayllar: `backend/app/services/governance.py`, `backend/app/api/v1/governance.py`, `backend/app/main.py`, `backend/tests/test_s2_2_2_dual_control_scope.py`
 - Qabul mezonlari: O'z-o'zini tasdiqlash `409 SELF_APPROVAL_FORBIDDEN` bilan rad etiladi; begona tashkilot yoki muassasa obyekti `403 SCOPE_VIOLATION` oladi; `API-060` da `ACADEMIC_SUPERVISOR` `403 FORBIDDEN_ROLE_FOR_API_060` oladi; moderatsiya amali kamida 15 belgili izohsiz `422` qaytaradi (`AC-041`).
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`20/20 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `20 passed in 1.28s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.3.1` — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`).
 
 ### S2.3.1 — Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`, GitHub Issue #15)
@@ -216,13 +255,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.3.1` / Nomzod profili, `int4range(start_minute, end_minute, '[)')` bo'sh vaqt qoidalari va istisnolari (`INV-01`)
 - Bosqich / manba: `S2.3` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.1-bo'lim, `INV-01`, `DB-013`, `DB-014`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:20:19+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: Yarim-ochiq `[start_minute, end_minute)` (`int4range`) qoidalari va sana istisnolari (`availability_rules`, `availability_exceptions`) hamda ustma-ust tushishni (`&&`) bloklovchi `INV-01` xizmatini (`app/services/availability.py`, `app/api/v1/availability.py`) yaratish va `pytest`da tekshirish (`S2.2` ga tayanadi; `S2.4.1` moslik dvigateli uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/availability.py`, `backend/app/api/v1/availability.py`, `backend/app/main.py`, `backend/tests/test_s2_3_1_availability.py`
 - Qabul mezonlari: `0 <= start_minute < end_minute <= 1440` chegarasi tekshiriladi; bir xil `(candidate_id, weekday)` yoki `(candidate_id, exception_date)` uchun ustma-ust tushuvchi interval `409` (`23P01`) bilan rad etiladi, ketma-ket (`[540, 720)` va `[720, 900)`) intervallar qabul qilinadi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`22/22 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `22 passed in 1.28s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.4.1` — E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`).
 
 ### S2.4.1 — E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli (`INV-02`, `INV-03`, `AC-039`, GitHub Issue #17)
@@ -230,13 +269,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.4.1` / E'lon reviziyasi (`contract_type`, maosh matritsasi), `group_code` smena guruhi va `API-003` (`ALL`/`ANY`) moslik dvigateli
 - Bosqich / manba: `S2.4` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (2–4 va 8-betlar; `INV-02`, `INV-03`, `API-003`, `AC-039`, `DB-026`, `DB-027`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:23:38+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `opportunity_revisions` (`DB-026`) uchun `contract_type` va maosh (`HOURLY`/`STIPEND`/`UNPAID_ACADEMIC`) matritsasini (`INV-03`, `AC-039`), `opportunity_shifts` (`DB-027`) uchun `group_code` va ustma-ust tushmaslik qoidasini (`INV-02`, `23P01`) hamda `API-003` (`GET /api/v1/opportunities/feed`) `ALL_SHIFTS_IN_GROUP` vs `ANY_SHIFT_IN_GROUP` moslik dvigatelini (`app/services/opportunities.py`, `app/api/v1/opportunities.py`) yaratish va `pytest`da tekshirish (`S2.3.1` ga tayanadi; `S2.5.1` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/opportunities.py`, `backend/app/api/v1/opportunities.py`, `backend/app/main.py`, `backend/tests/test_s2_4_1_matching_ac_039.py`
 - Qabul mezonlari: Noto'g'ri `contract_type` yoki maosh kombinatsiyasi `422` (`23514`) bilan rad etiladi; bir xil `group_code` ichida ustma-ust smena `409` (`23P01`) oladi; `ALL_SHIFTS_IN_GROUP` faqat barcha smenalari qoplangan `group_code`ni, `ANY_SHIFT_IN_GROUP` esa kamida 1 ta smenasi qoplangan e'lonni qaytaradi va `UNAVAILABLE` istisno kunida moslikdan chiqaradi (`AC-039`).
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`24/24 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `24 passed in 1.32s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.5.1` — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK.
 
 ### S2.5.1 — Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK (GitHub Issue #19)
@@ -244,13 +283,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.5.1` / Ariza, suhbat, taklif, ikki tomon tasdiqlagan ish boshlanishi (`placements`) va `INV-08` cross-table FK
 - Bosqich / manba: `S2.5` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.3-bo'lim `INV-08`, `DB-031`, `DB-032`, `DB-038`, `DB-041`), `FlexBridge_Ustoz_uchun_loyiha_izohi.md`
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:26:35+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `applications`, `application_attempts`, `offers` va `placements` jadvallari o'rtasidagi `INV-08` composite FK (`23503`) tekshiruvlarini hamda nomzod va korxona ikki tomonlama ish boshlanishini tasdiqlash (`PENDING_START_CONFIRMATION` -> `ACTIVE`) oqimini (`app/services/placements.py`, `app/api/v1/placements.py`) yaratish va `pytest`da tekshirish (`S2.4.1` ga tayanadi; `S2.6.1` amaliyot kundaligi uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/placements.py`, `backend/app/api/v1/placements.py`, `backend/app/main.py`, `backend/tests/test_s2_5_1_placements_inv_08.py`
 - Qabul mezonlari: `application_attempts` va `placements` boshqa e'longa bog'langan `opportunity_id` bilan yuborilsa `409` (`23503`) qaytaradi; `placements` faqat ikkala tomon (`CANDIDATE` va `ORGANIZATION`) tasdiqlagandan keyin `ACTIVE` holatga o'tadi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`26/26 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `26 passed in 1.41s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.6.1` — Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`).
 
 ### S2.6.1 — Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`, GitHub Issue #21)
@@ -258,13 +297,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.6.1` / Akademik amaliyot, tayinlov, kundalik (`daily_logs`, `log_revisions`) va mentor vs o'qituvchi bahosi ajratilishi (`INV-09`, `AC-040`)
 - Bosqich / manba: `S2.6` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.3 va 8-bo'limlar; `INV-09`, `AC-040`, `DB-043`, `DB-046`, `DB-049`, `DB-052`, `DB-053`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:30:08+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `daily_logs`, `log_revisions`, `workplace_log_reviews` (`DB-052`) va `academic_log_reviews` (`DB-053`) jadvallarida korxona mentori hamda oliygoh/texnikum o'qituvchisi baholarini alohida yuritish va `INV-09` composite FK (`23503`) tekshiruvini (`app/services/internship_logs.py`, `app/api/v1/internship_logs.py`) amalga oshirish (`S2.5.1` ga tayanadi; `S2.7.1` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/internship_logs.py`, `backend/app/api/v1/internship_logs.py`, `backend/app/main.py`, `backend/tests/test_s2_6_1_internship_diary_ac_040.py`
 - Qabul mezonlari: `workplace_log_reviews` va `academic_log_reviews` bir-birining ustiga yozilmasdan alohida saqlanadi; boshqa `placement_id` ga tegishli mentor yoki akademik rahbar kundalikni baholamoqchi bo'lsa `409` (`23503`) qaytariladi (`AC-040`).
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`27/27 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `27 passed in 1.44s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.7.1` — Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`).
 
 ### S2.7.1 — Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token) va 60s signed URL (`INV-14`, `AC-042`, GitHub Issue #23)
@@ -272,13 +311,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.7.1` / Xususiy fayllar, `quarantine/` skaneri (`ClamAV` + `pypdf` 8 ta token / `50 bet / 5000 obyekt / 20 MB`) va 60s signed URL (`INV-14`, `AC-042`)
 - Bosqich / manba: `S2.7` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (5 va 8-bo'limlar; `INV-14`, `AC-042`, `DB-018`, `API-X01..X03`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:32:57+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: Yangi yuklangan fayllarni `quarantine/` prefiksi va `PENDING_SCAN` holatida saqlash, `ClamAV` imzosi hamda `pypdf` strukturaviy filtri (`50 bet / 5000 obyekt / 20 MB` va 8 ta taqiqlangan token: `/JS`, `/JavaScript`, `/AA`, `/OpenAction`, `/Launch`, `/EmbeddedFiles`, `/RichMedia`, `/XFA`) orqali tekshirish va faqat `CLEAN` (`PRIVATE_READY`) fayllar uchun 60 soniyalik signed URL (`API-X03`) berish (`app/services/files_quarantine.py`, `app/api/v1/files.py`).
 - Tegiladigan fayllar: `backend/app/services/files_quarantine.py`, `backend/app/api/v1/files.py`, `backend/app/main.py`, `backend/tests/test_s2_7_1_files_quarantine_ac_042.py`
 - Qabul mezonlari: `PENDING_SCAN` yoki `QUARANTINED` fayl uchun `API-X03` (`/download`) chaqirilganda `409 FILE_NOT_CLEAN_FOR_DOWNLOAD` qaytadi va signed URL berilmaydi (`AC-042`); toza PDF `CLEAN` holatga o'tib 60s signed URL oladi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`28/28 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `28 passed in 1.48s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.8.1` — Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`).
 
 ### S2.8.1 — Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`, GitHub Issue #25)
@@ -286,13 +325,13 @@ Keyingi kichik qadam:
 - ID / nom: `S2.8.1` / Tarif (`SINGLE_POST_30D`, `ORG_PLAN_30D` 5 parallel slot), to'lov idempotentligi (`DB-072`) va dual-control qaytarish (`INV-04`, `INV-05`, `INV-10`, `AC-042`)
 - Bosqich / manba: `S2.8` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (3.2, 6, 7 va 8-bo'limlar; `INV-04`, `INV-05`, `INV-10`, `INV-11`, `AC-042`, `DB-069..073`, `API-073`)
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:36:01+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `SINGLE_POST_30D` (`149 000 UZS`, 1 ta e'lon) va `ORG_PLAN_30D` (`599 000 UZS`, 5 ta parallel faol e'lon kvotasi, `INV-04`) tariflarini, `AC-042` slot tekshiruvini (5 ta faol `PUBLISHED` e'lon to'lganda 6-chisini `409 CONCURRENT_QUOTA_REACHED` bilan bloklash va 1 tasi `CLOSED` bo'lgach ochish), `DB-072 payment_attempts` idempotentlik kalitini (`API-073`) hamda `DB-073 refunds` (`refund <= invoice` va `INV-11` dual-control) modulini (`app/services/billing.py`, `app/api/v1/billing.py`) amalga oshirish (`S2.7.1` ga tayanadi; `S2.9.1` va `S2.10.1` uchun asos bo'ladi).
 - Tegiladigan fayllar: `backend/app/services/billing.py`, `backend/app/api/v1/billing.py`, `backend/app/main.py`, `backend/tests/test_s2_8_1_billing_quota_ac_042.py`
 - Qabul mezonlari: `ORG_PLAN_30D` da 5 ta e'lon `PUBLISHED` bo'lib turganda 6-chisini nashr etish `409 CONCURRENT_QUOTA_REACHED` qaytaradi, 1 tasi `CLOSED` qilingach 6-e'lon nashr etiladi (`AC-042`); bir xil `idempotency_key` takrorlanganda ikkinchi marta pul yechilmaydi; `refund > invoice` (`INV-05`) yoki o'z-o'zini tasdiqlagan refund (`INV-11`) `409` bilan rad etiladi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`30/30 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `30 passed in 1.46s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: `S2.9.1` va `S2.10.1` — Moderatsiya/Audit/Retention zanjiri (`AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`).
 
 ### S2.9.1 va S2.10.1 — Moderatsiya/Audit/Retention zanjiri (`AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`, GitHub Issue #27)
@@ -300,11 +339,11 @@ Keyingi kichik qadam:
 - ID / nom: `S2.9.1` & `S2.10.1` / Moderatsiya, audit, retention ijrosi (`DB-082`, `DB-084`, `AC-041`) va R1 Pilot operatsion tayyorgarlik hisoboti (`AC-001..042`, `Q-011`)
 - Bosqich / manba: `S2.9`, `S2.10` / `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (6, 7 va 8-bo'limlar; `INV-11`, `INV-13`, `AC-041`, `DB-079..086`, `DB-092`), `Q-011`
 - Mas'ul AI / model / boshlanish: `Antigravity` (`ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) / `Gemini 4 Argon (High)` / `2026-11-07T00:41:29+05:00`
-- Holat: `Tekshiruvda`
+- Holat: `Tuzatish kerak` (`REV-001`)
 - Maqsad / doira / bog'liq vazifalar: `DB-082 moderation_appeals` da dastlabki moderatordan farqli apellyatsiya tekshiruvchisini (`original_moderator_id != appeal_reviewer_id`, `INV-11`) va kamida 15 belgili qaror izohini (`AC-041`), `DB-084 retention_executions` oqimini hamda `GET /api/v1/operations/pilot-readiness` endpointi orqali `RPO=24 soat`, `RTO=4 soat`, P1 circuit-breaker `CLOSED`, 94 jadval / 17/17 PostgreSQL invariantlari, 42 ta AC va `Q-011` (`R2_FREELANCE_MARKETPLACE=False`) chegarasini tekshirish (`S2.8.1` ga tayanadi; `S2` R1 dasturlash paketlarini yakunlaydi).
 - Tegiladigan fayllar: `backend/app/services/operations.py`, `backend/app/api/v1/operations.py`, `backend/app/main.py`, `backend/tests/test_s2_9_s2_10_pilot_readiness.py`
 - Qabul mezonlari: O'z moderatsiya qarori ustidan tushgan apellyatsiyani ko'rib chiqish `409` (`INV-11`) bilan rad etiladi; `UNPUBLISHED_DRAFT` 25-kunida `WARN_EXPIRING` retention ijrosi yoziladi (`DB-084`); `/api/v1/operations/pilot-readiness` `pilot_ready: true` va `R2_FREELANCE_MARKETPLACE: false` qaytaradi.
 - Bajarilgan qism / qolgan qism: Barcha 4 ta fayl yaratildi/yangilandi va `pytest` (`32/32 passed`) muvaffaqiyatli o'tdi. Qolgan qism: Codex tekshiruvi.
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `32 passed in 1.44s`.
-- Codex xulosasi / tuzatishlar: `Kutilmoqda (Tekshiruvda)`
+- Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: Codex tomonidan `S1.1..S1.4` va `S2.1.1..S2.10.1` paketlarini ko'rib chiqish va qabul qilish (`Tekshiruvda` -> `Bajarildi`).
