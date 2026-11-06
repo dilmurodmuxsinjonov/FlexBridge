@@ -1,10 +1,11 @@
-"""Candidate Profile and `int4range(start_minute, end_minute, '[)')` Availability Service (S2.3.1).
+"""Candidate Profile and `int4range(start_minute, end_minute, '[)')` Availability Service (S2.3.1, FIX-09).
 
-Enforces `INV-01` (`FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` section 3.1):
+Enforces `INV-01` (`FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` section 3.1) and `TD-001` (`FIX-09`):
 - Intervals use half-open `[start_minute, end_minute)` semantics (`0 <= start_minute < end_minute <= 1440`).
 - `availability_rules`: no two active rules for the same `(candidate_id, weekday)` may overlap (`&&`).
 - `availability_exceptions`: no two exceptions for the same `(candidate_id, exception_date)` may overlap (`&&`).
-- Adjacent intervals (e.g. `[540, 720)` and `[720, 900)`) do NOT overlap under `[)` semantics and are allowed.
+- Adjacent intervals (e.g. `[540, 720)` and `[720, 900)`) do NOT overlap under `[)` semantics, are allowed,
+  and are merged (`[540, 900)`) when evaluating candidate shift availability (`R-13`).
 """
 
 from __future__ import annotations
@@ -33,6 +34,35 @@ def ranges_overlap(start_a: int, end_a: int, start_b: int, end_b: int) -> bool:
 def range_contains(outer_start: int, outer_end: int, inner_start: int, inner_end: int) -> bool:
     """Return True iff `[outer_start, outer_end) @> [inner_start, inner_end)`."""
     return outer_start <= inner_start and inner_end <= outer_end
+
+
+def merge_adjacent_intervals(intervals: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Sort and merge adjacent (`a_end == b_start`) or overlapping (`a_end > b_start`) half-open intervals."""
+    if not intervals:
+        return []
+    ordered = sorted(intervals, key=lambda iv: (iv[0], iv[1]))
+    merged: list[tuple[int, int]] = [ordered[0]]
+    for start, end in ordered[1:]:
+        cur_start, cur_end = merged[-1]
+        if start <= cur_end:
+            merged[-1] = (cur_start, max(cur_end, end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
+def subtract_interval(intervals: list[tuple[int, int]], sub_start: int, sub_end: int) -> list[tuple[int, int]]:
+    """Subtract `[sub_start, sub_end)` from a list of half-open intervals."""
+    result: list[tuple[int, int]] = []
+    for iv_start, iv_end in intervals:
+        if sub_end <= iv_start or sub_start >= iv_end:
+            result.append((iv_start, iv_end))
+        else:
+            if iv_start < sub_start:
+                result.append((iv_start, sub_start))
+            if sub_end < iv_end:
+                result.append((sub_end, iv_end))
+    return result
 
 
 def validate_minute_bounds(start_minute: int, end_minute: int) -> None:
@@ -118,10 +148,10 @@ class CandidateAvailabilityService:
         kind: str = "UNAVAILABLE",
     ) -> dict[str, Any]:
         """Insert a date-specific availability exception enforcing `excl_availability_exceptions_no_overlap`."""
-        if kind not in ("UNAVAILABLE", "AVAILABLE_EXTRA"):
+        if kind not in ("UNAVAILABLE", "AVAILABLE", "AVAILABLE_EXTRA"):
             raise AvailabilityConstraintError(
                 code="INVALID_EXCEPTION_KIND",
-                message="kind faqat UNAVAILABLE yoki AVAILABLE_EXTRA bo'lishi mumkin",
+                message="kind faqat UNAVAILABLE, AVAILABLE yoki AVAILABLE_EXTRA bo'lishi mumkin",
                 status_code=422,
                 sqlstate="23514",
             )
@@ -171,29 +201,44 @@ class CandidateAvailabilityService:
         end_minute: int,
         check_date: str | None = None,
     ) -> bool:
-        """Return True iff the candidate's active rules cover `[start_minute, end_minute)` and no `UNAVAILABLE` exception overlaps."""
-        covered_by_rule = any(
-            r["candidate_id"] == candidate_id
-            and r["weekday"] == weekday
-            and r["is_active"]
-            and range_contains(r["start_minute"], r["end_minute"], start_minute, end_minute)
+        """Return True iff the candidate's merged rules + extra exceptions minus unavailable exceptions cover `[start_minute, end_minute)` (`FIX-09`, `R-13`)."""
+        base_intervals: list[tuple[int, int]] = [
+            (r["start_minute"], r["end_minute"])
             for r in self.rules.values()
-        )
-        if not covered_by_rule:
+            if r["candidate_id"] == candidate_id and r["weekday"] == weekday and r["is_active"]
+        ]
+
+        if check_date is not None:
+            for e in self.exceptions.values():
+                if (
+                    e["candidate_id"] == candidate_id
+                    and e["exception_date"] == check_date
+                    and e["kind"] in ("AVAILABLE", "AVAILABLE_EXTRA")
+                ):
+                    base_intervals.append((e["start_minute"], e["end_minute"]))
+
+        effective_intervals = merge_adjacent_intervals(base_intervals)
+        if not effective_intervals:
             return False
 
         if check_date is not None:
-            blocked_by_exception = any(
-                e["candidate_id"] == candidate_id
-                and e["exception_date"] == check_date
-                and e["kind"] == "UNAVAILABLE"
-                and ranges_overlap(start_minute, end_minute, e["start_minute"], e["end_minute"])
-                for e in self.exceptions.values()
-            )
-            if blocked_by_exception:
-                return False
+            for e in self.exceptions.values():
+                if (
+                    e["candidate_id"] == candidate_id
+                    and e["exception_date"] == check_date
+                    and e["kind"] == "UNAVAILABLE"
+                ):
+                    effective_intervals = subtract_interval(
+                        effective_intervals,
+                        e["start_minute"],
+                        e["end_minute"],
+                    )
+            effective_intervals = merge_adjacent_intervals(effective_intervals)
 
-        return True
+        return any(
+            range_contains(iv_start, iv_end, start_minute, end_minute)
+            for iv_start, iv_end in effective_intervals
+        )
 
 
 availability_service = CandidateAvailabilityService()

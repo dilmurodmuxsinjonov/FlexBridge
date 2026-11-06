@@ -1,10 +1,11 @@
-"""Automated test suite for S2.2.2: Dual-Control (`INV-11`), Scope Authorization (`INV-12`), `API-060`/`API-061`, and Moderation (`AC-041`)."""
+"""Automated test suite for S2.2.2 & FIX-03/04: Dual-Control (`INV-11`), Server-Side `ActorContext` Scope (`INV-12`, `R-01`), Canonical `API-060`/`API-061`, and Moderation (`AC-041`)."""
 
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.auth import auth_service
 from app.services.governance import governance_service
 
 client = TestClient(app)
@@ -50,19 +51,48 @@ def test_inv_11_dual_control_blocks_self_approval_and_cross_org_scope() -> None:
 
 
 def test_api_060_and_api_061_role_and_institution_scope_ac_041() -> None:
-    """Verify `API-060` rejects `ACADEMIC_SUPERVISOR` (`403`) and `API-061` enforces institution/supervisor scope (`AC-041`)."""
+    """Verify server-side `ActorContext` (`R-01`), institution/supervisor scope (`AC-041`), and canonical `API-060`/`API-061`."""
     sup = governance_service.register_student_supervision(
         institution_id="inst-tuit",
         student_id="student-1",
         supervisor_id="teacher-tuit-1",
     )
 
-    # API-060 called by ACADEMIC_SUPERVISOR must be rejected per 1.4 PDF section 4
-    forbidden_060 = client.post(
+    teacher_tuit_token = auth_service.seed_privileged_actor_session(
+        user_id="teacher-tuit-1",
+        roles=["ACADEMIC_SUPERVISOR"],
+        institution_id="inst-tuit",
+    )
+    coord_tuit_token = auth_service.seed_privileged_actor_session(
+        user_id="coord-tuit-1",
+        roles=["INST_INTERNSHIP_COORDINATOR"],
+        institution_id="inst-tuit",
+    )
+    teacher_inha_token = auth_service.seed_privileged_actor_session(
+        user_id="teacher-inha-1",
+        roles=["ACADEMIC_SUPERVISOR"],
+        institution_id="inst-inha",
+    )
+
+    # Unauthenticated call without Authorization header must fail with 401 AUTH_REQUIRED (R-01)
+    unauth_resp = client.post(
         "/api/v1/internships/academic-assignments",
         json={
-            "actor_id": "teacher-tuit-1",
-            "actor_role": "ACADEMIC_SUPERVISOR",
+            "actor_id": "invented-admin",
+            "actor_role": "SUPER_ADMIN",
+            "institution_id": "inst-tuit",
+            "placement_id": "placement-1",
+            "supervision_id": sup["id"],
+            "supervisor_id": "teacher-tuit-1",
+        },
+    )
+    assert unauth_resp.status_code == 401
+
+    # Called by authenticated ACADEMIC_SUPERVISOR must be rejected with 403
+    forbidden_060 = client.post(
+        "/api/v1/internships/academic-assignments",
+        headers={"Authorization": f"Bearer {teacher_tuit_token}"},
+        json={
             "actor_institution_id": "inst-tuit",
             "institution_id": "inst-tuit",
             "placement_id": "placement-1",
@@ -73,12 +103,11 @@ def test_api_060_and_api_061_role_and_institution_scope_ac_041() -> None:
     assert forbidden_060.status_code == 403
     assert forbidden_060.json()["detail"]["code"] == "FORBIDDEN_ROLE_FOR_API_060"
 
-    # API-060 called by INST_INTERNSHIP_COORDINATOR of the same institution succeeds
+    # Called by authenticated INST_INTERNSHIP_COORDINATOR of the same institution succeeds
     ok_060 = client.post(
         "/api/v1/internships/academic-assignments",
+        headers={"Authorization": f"Bearer {coord_tuit_token}"},
         json={
-            "actor_id": "coord-tuit-1",
-            "actor_role": "INST_INTERNSHIP_COORDINATOR",
             "actor_institution_id": "inst-tuit",
             "institution_id": "inst-tuit",
             "placement_id": "placement-1",
@@ -89,12 +118,11 @@ def test_api_060_and_api_061_role_and_institution_scope_ac_041() -> None:
     assert ok_060.status_code == 201
     assignment_id = ok_060.json()["id"]
 
-    # API-061 called by a supervisor from another institution (`inst-inha`) fails with 403 SCOPE_VIOLATION
+    # Called by a supervisor from another institution (`inst-inha`) fails with 403 SCOPE_VIOLATION
     cross_inst_061 = client.patch(
         f"/api/v1/internships/academic-assignments/{assignment_id}",
+        headers={"Authorization": f"Bearer {teacher_inha_token}"},
         json={
-            "actor_id": "teacher-inha-1",
-            "actor_role": "ACADEMIC_SUPERVISOR",
             "actor_institution_id": "inst-inha",
             "evaluation_note": "Begona oliygoh kirishi",
         },
@@ -102,12 +130,11 @@ def test_api_060_and_api_061_role_and_institution_scope_ac_041() -> None:
     assert cross_inst_061.status_code == 403
     assert cross_inst_061.json()["detail"]["code"] == "SCOPE_VIOLATION"
 
-    # API-061 called by the assigned supervisor (`teacher-tuit-1`) of `inst-tuit` succeeds
+    # Called by the assigned supervisor (`teacher-tuit-1`) of `inst-tuit` succeeds
     ok_061 = client.patch(
         f"/api/v1/internships/academic-assignments/{assignment_id}",
+        headers={"Authorization": f"Bearer {teacher_tuit_token}"},
         json={
-            "actor_id": "teacher-tuit-1",
-            "actor_role": "ACADEMIC_SUPERVISOR",
             "actor_institution_id": "inst-tuit",
             "status": "COMPLETED",
             "evaluation_note": "Talaba akademik amaliyot rejasini to'liq bajardi.",

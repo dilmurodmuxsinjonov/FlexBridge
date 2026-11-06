@@ -1,4 +1,4 @@
-"""Private Files, Quarantine Scanner (`ClamAV` + `pypdf` structural filter), and 60s Signed URL service (`S2.7.1`, `INV-14`, `AC-042`)."""
+"""Private Files, Quarantine Scanner (`ClamAV` + `pypdf` structural filter), ACL, and 60s Signed URL service (`S2.7.1`, `FIX-08`, `INV-14`, `AC-042`)."""
 
 from __future__ import annotations
 
@@ -29,12 +29,12 @@ def scan_pdf_bytes_and_structure(
     object_count: int = 10,
     uncompressed_mb: float = 0.5,
 ) -> tuple[bool, str | None]:
-    """Perform ClamAV signature check + PDF structural token & resource bound check (`1.4 PDF section 5`)."""
+    """Perform ClamAV signature check + PDF header/structural token & resource bound check (`1.4 PDF section 5`, `FIX-08`)."""
     # 1. Antivirus EICAR / malware signature check
     if b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE" in raw_bytes:
         return False, "CLAMAV_MALWARE_DETECTED"
 
-    # 2. PDF resource limits (50 pages, 5000 objects, 20 MB uncompressed stream)
+    # 2. PDFresource limits (50 pages, 5000 objects, 20 MB uncompressed stream)
     if page_count > settings.pdf_max_pages:
         return False, f"PDF_MAX_PAGES_EXCEEDED:{page_count}>{settings.pdf_max_pages}"
     if object_count > settings.pdf_max_objects:
@@ -47,6 +47,10 @@ def scan_pdf_bytes_and_structure(
     for token in FORBIDDEN_PDF_TOKENS:
         if token in text_view:
             return False, f"PDF_FORBIDDEN_TOKEN:{token}"
+
+    # 4. Require valid %PDF- header for PDF documents (R-04)
+    if not raw_bytes.lstrip().startswith(b"%PDF-"):
+        return False, "INVALID_PDF_HEADER_MISSING"
 
     return True, None
 
@@ -72,9 +76,11 @@ class FileQuarantineService:
         record = {
             "id": file_id,
             "owner_id": owner_id,
+            "allowed_requesters": {owner_id},
             "filename": filename,
             "mime_type": mime_type,
             "size_bytes": size_bytes,
+            "sha256": None,
             "storage_key": f"{settings.quarantine_prefix}{file_id}/{filename}",
             "scan_status": "PENDING_SCAN",
             "visibility": "QUARANTINED",
@@ -83,7 +89,9 @@ class FileQuarantineService:
             "scanned_at": None,
         }
         self.files[file_id] = record
-        return dict(record)
+        out = dict(record)
+        out["allowed_requesters"] = sorted(record["allowed_requesters"])
+        return out
 
     def complete_and_scan_api_x02(
         self,
@@ -94,19 +102,27 @@ class FileQuarantineService:
         object_count: int = 10,
         uncompressed_mb: float = 0.5,
     ) -> dict[str, Any]:
-        """API-X02: Run ClamAV + `pypdf` structural scan on quarantined object (`INV-14`, `AC-042`)."""
+        """API-X02: Run ClamAV + `pypdf` structural scan on quarantined object (`INV-14`, `AC-042`, `FIX-08`)."""
         record = self.files.get(file_id)
         if not record:
             raise FileQuarantineError("FILE_NOT_FOUND", "Fayl topilmadi", status_code=404)
 
+        # Sticky quarantine: once a file is QUARANTINED, client cannot overwrite or clear quarantine status (R-04)
+        if record["scan_status"] == "QUARANTINED":
+            out = dict(record)
+            out["allowed_requesters"] = sorted(record["allowed_requesters"])
+            return out
+
+        raw_bytes = content_sample.encode("utf-8")
         is_clean, reject_reason = scan_pdf_bytes_and_structure(
-            content_sample.encode("utf-8"),
+            raw_bytes,
             page_count=page_count,
             object_count=object_count,
             uncompressed_mb=uncompressed_mb,
         )
         now = datetime.now(timezone.utc).isoformat()
         record["scanned_at"] = now
+        record["sha256"] = hashlib.sha256(raw_bytes).hexdigest()
         if is_clean:
             record["scan_status"] = "CLEAN"
             record["visibility"] = "PRIVATE_READY"
@@ -116,7 +132,9 @@ class FileQuarantineService:
             record["scan_status"] = "QUARANTINED"
             record["visibility"] = "QUARANTINED"
             record["quarantine_reason"] = reject_reason
-        return dict(record)
+        out = dict(record)
+        out["allowed_requesters"] = sorted(record["allowed_requesters"])
+        return out
 
     def issue_signed_download_url_api_x03(
         self,
@@ -124,10 +142,18 @@ class FileQuarantineService:
         file_id: str,
         requester_id: str,
     ) -> dict[str, Any]:
-        """API-X03: Issue a 60-second signed URL ONLY if `scan_status == 'CLEAN'` and `visibility == 'PRIVATE_READY'` (`AC-042`)."""
+        """API-X03: Issue a 60-second signed URL ONLY if `scan_status == 'CLEAN'`, `visibility == 'PRIVATE_READY'`, and `requester_id` is authorized (`AC-042`, `FIX-08`)."""
         record = self.files.get(file_id)
         if not record:
             raise FileQuarantineError("FILE_NOT_FOUND", "Fayl topilmadi", status_code=404)
+
+        allowed = record.get("allowed_requesters", {record["owner_id"]})
+        if requester_id != record["owner_id"] and requester_id not in allowed:
+            raise FileQuarantineError(
+                code="FILE_ACCESS_DENIED",
+                message="INV-14 / R-04: Begona foydalanuvchi xususiy fayl uchun signed URL ololmaydi",
+                status_code=403,
+            )
 
         if record["scan_status"] != "CLEAN" or record["visibility"] != "PRIVATE_READY":
             raise FileQuarantineError(
@@ -139,16 +165,18 @@ class FileQuarantineService:
                 status_code=409,
             )
 
+        exp = int(datetime.now(timezone.utc).timestamp()) + settings.signed_url_ttl_seconds
         sig = hmac.new(
             self._signing_secret.encode("utf-8"),
-            f"{file_id}:{requester_id}:{settings.signed_url_ttl_seconds}".encode("utf-8"),
+            f"{file_id}:{requester_id}:{exp}:{settings.signed_url_ttl_seconds}".encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()
         return {
             "contract_id": "API-X03",
             "file_id": file_id,
             "expires_in_seconds": settings.signed_url_ttl_seconds,
-            "signed_url": f"https://storage.flexbridge.local/{record['storage_key']}?ttl=60&sig={sig}",
+            "expires_at_epoch": exp,
+            "signed_url": f"https://storage.flexbridge.local/{record['storage_key']}?exp={exp}&ttl=60&sig={sig}",
         }
 
 

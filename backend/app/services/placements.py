@@ -1,4 +1,4 @@
-"""Applications, Offers, Dual-Confirmed Placements, and `INV-08` Cross-Table Scope Service (S2.5.1)."""
+"""Applications, Offers, Dual-Confirmed Placements, and `INV-08` Cross-Table Scope Service (S2.5.1, FIX-10)."""
 
 from __future__ import annotations
 
@@ -111,6 +111,31 @@ class ApplicationPlacementService:
         self.offers[offer_id] = record
         return dict(record)
 
+    def respond_to_offer_api_043(
+        self,
+        *,
+        offer_id: str,
+        candidate_id: str,
+        decision: str,
+    ) -> dict[str, Any]:
+        """API-043: Candidate responds to offer (`ACCEPT` or `DECLINE`) enforcing candidate ownership (`FIX-10`)."""
+        offer = self.offers.get(offer_id)
+        if not offer:
+            raise PlacementScopeError("OFFER_NOT_FOUND", "Offer topilmadi", status_code=404)
+        if offer["candidate_id"] != candidate_id:
+            raise PlacementScopeError("OFFER_ACTOR_MISMATCH", "Faqat taklif etilgan nomzod javob berishi mumkin", status_code=403)
+        if decision not in ("ACCEPT", "ACCEPTED", "DECLINE", "DECLINED"):
+            raise PlacementScopeError("INVALID_OFFER_DECISION", "decision ACCEPT yoki DECLINE bo'lishi kerak", status_code=422)
+
+        now = datetime.now(timezone.utc).isoformat()
+        if decision in ("ACCEPT", "ACCEPTED"):
+            offer["status"] = "ACCEPTED"
+            offer["accepted_at"] = now
+        else:
+            offer["status"] = "DECLINED"
+            offer["accepted_at"] = None
+        return {"contract_id": "API-043", **dict(offer)}
+
     def create_placement(
         self,
         *,
@@ -136,6 +161,13 @@ class ApplicationPlacementService:
                 ),
                 status_code=409,
                 sqlstate="23503",
+            )
+        if offer.get("status") != "ACCEPTED":
+            raise PlacementScopeError(
+                code="OFFER_NOT_ACCEPTED",
+                message="Placement faqat ACCEPTED holatdagi offer asosida yaratilishi mumkin",
+                status_code=409,
+                sqlstate="23514",
             )
         placement_id = str(uuid4())
         record = {
@@ -175,6 +207,29 @@ class ApplicationPlacementService:
         if placement["candidate_confirmed_start_at"] and placement["org_confirmed_start_at"]:
             placement["status"] = "ACTIVE"
         return dict(placement)
+
+    def confirm_engagement_by_actor_api_046(
+        self,
+        *,
+        placement_id: str,
+        actor_user_id: str,
+        actor_roles: list[str],
+        party: str | None = None,
+    ) -> dict[str, Any]:
+        """API-046: Confirm engagement start deriving party from authenticated actor context (`FIX-10`)."""
+        placement = self.placements.get(placement_id)
+        if not placement:
+            raise PlacementScopeError("PLACEMENT_NOT_FOUND", "Placement topilmadi", status_code=404)
+
+        resolved_party = party
+        if resolved_party is None:
+            if actor_user_id == placement["candidate_id"] or "CANDIDATE" in actor_roles:
+                resolved_party = "CANDIDATE"
+            else:
+                resolved_party = "ORGANIZATION"
+
+        res = self.confirm_placement_start(placement_id=placement_id, party=resolved_party)
+        return {"contract_id": "API-046", **res}
 
 
 placement_service = ApplicationPlacementService()

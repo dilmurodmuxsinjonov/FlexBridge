@@ -1,9 +1,11 @@
-"""FastAPI application entrypoint for FlexBridge 1.4 (S2.1.1).
+"""FastAPI application entrypoint for FlexBridge 1.4 (S2.1.1, FIX-01, FIX-13).
 
 Exposes:
 - `GET /api/v1/health/live` (`API-X05` liveness check)
 - `GET /api/v1/health/ready` (`API-X06` readiness & schema verification check)
 - `GET /api/v1/meta/schema-summary` (1.4 schema, retention policy v1, and invariant status)
+- Global `FinanceCircuitOpenError` handler returning HTTP `503 P1_FINANCE_CIRCUIT_OPEN` (`R-09`)
+- All 132 canonical API routes from `FlexBridge_model_1_4.json` (`R-07`)
 """
 
 from __future__ import annotations
@@ -11,17 +13,20 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from app.api.v1.auth import router as auth_router
 from app.api.v1.availability import router as availability_router
 from app.api.v1.billing import router as billing_router
+from app.api.v1.canonical_routes import register_remaining_canonical_model_routes, router as canonical_router
 from app.api.v1.files import router as files_router
 from app.api.v1.governance import router as governance_router
 from app.api.v1.internship_logs import router as internship_logs_router
 from app.api.v1.operations import router as operations_router
 from app.api.v1.opportunities import router as opportunities_router
 from app.api.v1.placements import router as placements_router
+from app.core.circuit_breaker import FinanceCircuitOpenError
 from app.core.config import settings
 from app.db.schema import get_retention_policies_v1, get_schema_summary
 
@@ -30,6 +35,27 @@ app = FastAPI(
     version=settings.app_version,
     description="FlexBridge 1.4 R1 Backend API",
 )
+
+
+@app.exception_handler(FinanceCircuitOpenError)
+async def finance_circuit_open_exception_handler(
+    request: Request,
+    exc: FinanceCircuitOpenError,
+) -> JSONResponse:
+    """Return 503 Service Unavailable (`P1_FINANCE_CIRCUIT_OPEN`) when P1 finance circuit-breaker is OPEN (`FIX-13`, `R-09`)."""
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": {
+                "code": exc.code,
+                "reason_code": exc.reason_code,
+                "incident_id": exc.incident_id,
+                "message": str(exc),
+            }
+        },
+    )
+
+
 app.include_router(auth_router)
 app.include_router(governance_router)
 app.include_router(availability_router)
@@ -39,6 +65,7 @@ app.include_router(internship_logs_router)
 app.include_router(files_router)
 app.include_router(billing_router)
 app.include_router(operations_router)
+app.include_router(canonical_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])
@@ -96,3 +123,6 @@ def meta_schema_summary() -> dict[str, Any]:
         "summary": get_schema_summary(),
         "retention_policies_v1": get_retention_policies_v1(),
     }
+
+
+register_remaining_canonical_model_routes(app)

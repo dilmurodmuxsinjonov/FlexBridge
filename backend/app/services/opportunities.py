@@ -1,4 +1,4 @@
-"""Opportunities, Revisions (`contract_type` & compensation matrix `INV-03`), Shift Groups (`group_code` `INV-02`), and `API-003` Matching Engine (`AC-039`) (S2.4.1)."""
+"""Opportunities, Revisions (`contract_type` & compensation matrix `INV-03`), Shift Groups (`group_code` `INV-02`), Quota Enforcement (`INV-04`, `AC-042`, `FIX-06`), and `API-003` Matching Engine (`AC-039`) (S2.4.1)."""
 
 from __future__ import annotations
 
@@ -8,12 +8,14 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from app.api.v1.billing import billing_service
 from app.services.availability import (
     CandidateAvailabilityService,
     availability_service,
     ranges_overlap,
     validate_minute_bounds,
 )
+from app.services.billing import BillingInvariantError
 
 VALID_CONTRACT_TYPES: frozenset[str] = frozenset(
     {
@@ -25,7 +27,7 @@ VALID_CONTRACT_TYPES: frozenset[str] = frozenset(
 
 
 class OpportunityConstraintError(Exception):
-    """Raised when an opportunity revision or shift violates `INV-02`, `INV-03`, or `AC-039`."""
+    """Raised when an opportunity revision or shift violates `INV-02`, `INV-03`, `INV-04`, or `AC-039`."""
 
     def __init__(self, code: str, message: str, status_code: int = 422, sqlstate: str = "23514") -> None:
         super().__init__(message)
@@ -44,7 +46,7 @@ def validate_compensation_contract_matrix(
     fee_terms_note: str | None = None,
 ) -> None:
     """Enforce `chk_opp_rev_contract_type` and `chk_opp_rev_compensation_matrix` (`INV-03`, `AC-039`)."""
-    if contract_type not in VALID_CONTRACT_TYPES:
+    if not contract_type or contract_type not in VALID_CONTRACT_TYPES:
         raise OpportunityConstraintError(
             code="INVALID_CONTRACT_TYPE",
             message=f"Noto'g'ri contract_type: {contract_type} (chk_opp_rev_contract_type, AC-039)",
@@ -112,7 +114,7 @@ class OpportunityMatchingService:
         fee_terms_note: str | None = None,
         published: bool = True,
     ) -> dict[str, Any]:
-        """Create an `opportunities` + `opportunity_revisions` pair after validating `INV-03` (`AC-039`)."""
+        """Create an `opportunities` + `opportunity_revisions` pair after validating `INV-03` (`AC-039`) and `INV-04` quota (`FIX-06`)."""
         validate_compensation_contract_matrix(
             opportunity_kind=opportunity_kind,
             contract_type=contract_type,
@@ -124,6 +126,35 @@ class OpportunityMatchingService:
         opp_id = str(uuid4())
         rev_id = str(uuid4())
         now = datetime.now(timezone.utc).isoformat()
+
+        if published:
+            if organization_id in billing_service._org_active_entitlement:
+                try:
+                    billing_service.publish_opportunity_with_quota(
+                        organization_id=organization_id,
+                        opportunity_id=opp_id,
+                        actor_user_id="system",
+                    )
+                except BillingInvariantError as exc:
+                    raise OpportunityConstraintError(
+                        code="CONCURRENT_QUOTA_OR_ENTITLEMENT_ERROR",
+                        message=str(exc),
+                        status_code=409,
+                        sqlstate="23514",
+                    ) from exc
+            else:
+                active_for_org = sum(
+                    1
+                    for o in self.opportunities.values()
+                    if o["organization_id"] == organization_id and o["status"] == "PUBLISHED"
+                )
+                if active_for_org >= 5:
+                    raise OpportunityConstraintError(
+                        code="CONCURRENT_QUOTA_REACHED",
+                        message=f"INV-04 / AC-042: Organization '{organization_id}' cannot exceed 5 concurrent PUBLISHED opportunities.",
+                        status_code=409,
+                        sqlstate="23514",
+                    )
 
         opp = {
             "id": opp_id,
@@ -149,6 +180,43 @@ class OpportunityMatchingService:
         self.opportunities[opp_id] = opp
         self.revisions[rev_id] = rev
         return dict(rev)
+
+    def publish_opportunity_api_081(
+        self,
+        *,
+        opportunity_id: str,
+        actor_user_id: str = "system",
+    ) -> dict[str, Any]:
+        """API-081 (`POST /api/v1/org/opportunities/{id}/publish`): Enforce active entitlement & quota (`INV-04`, `AC-042`)."""
+        opp = self.opportunities.get(opportunity_id)
+        if not opp:
+            raise OpportunityConstraintError("OPPORTUNITY_NOT_FOUND", "Vakansiya topilmadi", status_code=404)
+
+        try:
+            quota_res = billing_service.publish_opportunity_with_quota(
+                organization_id=opp["organization_id"],
+                opportunity_id=opportunity_id,
+                actor_user_id=actor_user_id,
+            )
+        except BillingInvariantError as exc:
+            raise OpportunityConstraintError(
+                code="CONCURRENT_QUOTA_OR_ENTITLEMENT_ERROR",
+                message=str(exc),
+                status_code=409,
+                sqlstate="23514",
+            ) from exc
+
+        now = datetime.now(timezone.utc).isoformat()
+        opp["status"] = "PUBLISHED"
+        rev_id = opp["current_revision_id"]
+        if rev_id in self.revisions:
+            self.revisions[rev_id]["published_at"] = now
+        return {
+            "contract_id": "API-081",
+            "opportunity_id": opportunity_id,
+            "status": "PUBLISHED",
+            "quota": quota_res,
+        }
 
     def add_opportunity_shift(
         self,
@@ -212,7 +280,7 @@ class OpportunityMatchingService:
         schedule_match_mode: str = "ALL_SHIFTS_IN_GROUP",
         check_date: str | None = None,
     ) -> list[dict[str, Any]]:
-        """API-003 (`GET /api/v1/opportunities/feed`) deterministic schedule matching (`AC-039`)."""
+        """API-003 (`GET /api/v1/candidate/feed` & `/api/v1/opportunities/feed`) deterministic schedule matching (`AC-039`)."""
         if schedule_match_mode not in ("ALL_SHIFTS_IN_GROUP", "ANY_SHIFT_IN_GROUP"):
             raise OpportunityConstraintError(
                 code="INVALID_SCHEDULE_MATCH_MODE",

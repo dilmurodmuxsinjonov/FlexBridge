@@ -1,4 +1,4 @@
-"""S2.8.1 Tests: Tariffs, 5-Slot Concurrent Quota (ORG_PLAN_30D), Payment Idempotency & Dual-Control Refunds."""
+"""S2.8.1 Tests: Tariffs, 5-Slot Concurrent Quota (ORG_PLAN_30D), Provider Webhook Confirmation (API-X04), Payment Idempotency & Dual-Control Refunds."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ client = TestClient(app)
 
 
 def test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042():
-    """Verifies AC-042 & INV-04: ORG_PLAN_30D allows 5 concurrent PUBLISHED slots, blocks 6th, and frees slot on CLOSED."""
+    """Verifies AC-042 & INV-04: ORG_PLAN_30D allows 5 concurrent PUBLISHED slots after provider webhook confirmation, blocks 6th, and frees slot on CLOSED."""
     order_res = client.post(
         "/api/v1/billing/orders",
         json={
@@ -24,7 +24,7 @@ def test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042():
     invoice_id = order_res.json()["invoice_id"]
     assert order_res.json()["amount_uzs"] == 599_000
 
-    # Pay invoice idempotently (API-073 / DB-072)
+    # 1. Initiate payment attempt -> starts in PENDING_PROVIDER until provider webhook confirms (R-02)
     pay_res_1 = client.post(
         "/api/v1/billing/payments/attempts",
         json={
@@ -37,8 +37,9 @@ def test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042():
     )
     assert pay_res_1.status_code == 200
     attempt_1 = pay_res_1.json()
+    assert attempt_1["status"] == "PENDING_PROVIDER"
 
-    # Replay same idempotency_key -> returns identical attempt without error or double charge
+    # Replay same idempotency_key with identical payload -> returns identical attempt without error
     pay_res_2 = client.post(
         "/api/v1/billing/payments/attempts",
         json={
@@ -52,6 +53,19 @@ def test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042():
     assert pay_res_2.status_code == 200
     assert pay_res_2.json()["attempt_id"] == attempt_1["attempt_id"]
     assert pay_res_2.json()["entitlement_id"] == attempt_1["entitlement_id"]
+
+    # Confirm payment via provider webhook (API-X04)
+    wh_res = client.post(
+        "/api/v1/webhooks/payments/PAYME",
+        json={
+            "provider_event_id": "evt-payme-quota-1",
+            "idempotency_key": "idem-org-quota-1",
+            "amount_uzs": 599_000,
+            "signature": "VALID_PROVIDER_WEBHOOK_SIGNATURE",
+        },
+    )
+    assert wh_res.status_code == 200
+    assert wh_res.json()["status"] == "SUCCEEDED"
 
     # Publish 5 opportunities concurrently -> all 5 succeed
     for i in range(1, 6):
@@ -105,7 +119,7 @@ def test_org_plan_30d_concurrent_5_slot_quota_and_slot_release_ac_042():
 
 
 def test_refund_enforces_invoice_ceiling_inv_05_and_dual_control_inv_11():
-    """Verifies INV-05 (refund <= invoice) and INV-11 (distinct requested_by, approved_by, second_approver_id)."""
+    """Verifies INV-05/INV-12 (cumulative refund <= invoice) and INV-11 (distinct requested_by, approved_by, second_approver_id)."""
     order_res = client.post(
         "/api/v1/billing/orders",
         json={
@@ -125,6 +139,15 @@ def test_refund_enforces_invoice_ceiling_inv_05_and_dual_control_inv_11():
             "idempotency_key": "idem-single-post-1",
             "amount_uzs": 149_000,
             "actor_user_id": "emp-2",
+        },
+    )
+    client.post(
+        "/api/v1/webhooks/payments/CLICK",
+        json={
+            "provider_event_id": "evt-click-1",
+            "idempotency_key": "idem-single-post-1",
+            "amount_uzs": 149_000,
+            "signature": "VALID_PROVIDER_WEBHOOK_SIGNATURE",
         },
     )
 
@@ -172,3 +195,17 @@ def test_refund_enforces_invoice_ceiling_inv_05_and_dual_control_inv_11():
     )
     assert valid_refund.status_code == 201
     assert valid_refund.json()["status"] == "APPROVED"
+
+    # Second refund on already refunded invoice must fail with 409 (R-06 cumulative ceiling)
+    second_refund = client.post(
+        "/api/v1/billing/refunds",
+        json={
+            "invoice_id": invoice_id,
+            "amount_uzs": 149_000,
+            "reason": "Second duplicate refund attempt",
+            "requested_by": "fin-admin-1",
+            "approved_by": "fin-admin-2",
+            "second_approver_id": "super-admin-1",
+        },
+    )
+    assert second_refund.status_code == 409

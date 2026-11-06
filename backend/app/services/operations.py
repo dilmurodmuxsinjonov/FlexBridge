@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 import uuid
 
 from app.core.audit import AppendOnlyAuditStore
-from app.core.circuit_breaker import FinanceCircuitBreaker
+from app.core.circuit_breaker import FinanceCircuitBreaker, shared_circuit_breaker
 from app.db.schema import get_schema_summary
 from app.services.feature_flags import FeatureFlagService
 from app.services.retention import RetentionPolicyService
@@ -59,7 +59,7 @@ class PilotOperationsService:
     """Coordinates S2.9.1 moderation/audit/retention workflows and S2.10.1 R1 pilot readiness reporting."""
 
     audit_store: AppendOnlyAuditStore = field(default_factory=AppendOnlyAuditStore)
-    circuit_breaker: FinanceCircuitBreaker = field(default_factory=FinanceCircuitBreaker)
+    circuit_breaker: FinanceCircuitBreaker = field(default_factory=lambda: shared_circuit_breaker)
     retention_service: RetentionPolicyService = field(default_factory=RetentionPolicyService)
     feature_flag_service: FeatureFlagService = field(default_factory=FeatureFlagService)
     _appeals: Dict[str, ModerationAppealRecord] = field(default_factory=dict)
