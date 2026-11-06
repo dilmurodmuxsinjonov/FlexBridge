@@ -179,3 +179,20 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Muammo va cheklov: Yo'q; barcha testlar xatosiz o'tdi.
 - Topshirilgan holat / keyingi qadam: `S2.1.3` (va butun `S2.1`) `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.2.1` — Autentifikatsiya, sessiya, Argon2id/TOTP va L1+Redis darhol revoke (`INV-15`, `AC-017`) modulini yaratish.
 - Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
+
+### LOG-007 — 2026-11-07T00:14:30+05:00 (Asia/Tashkent) — Antigravity
+
+- Yozuv ID / sana-vaqt va vaqt zonasi: `LOG-007` / `2026-11-07T00:14:30+05:00` (`Asia/Tashkent`)
+- AI / sessiya / model: `Antigravity` / `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76` / `Gemini 4 Argon (High)`
+- Vazifa ID / rol: `S2.2.1` / Amalga oshiruvchi AI
+- Boshlang'ich holat va maqsad: `S2.1.3` yakunlanib PR `#10` (`d35bb6d`) `main` ga birlashtirildi. Maqsad: GitHub Issue `#11` va `feature/s2-2-1-auth-session-revoke` tarmog'ida 18+ foydalanuvchi ro'yxatdan o'tishi, Argon2id parol xeshi, RFC 6238 TOTP ikki bosqichli tasdiqlash hamda 15s L1/Redis ruxsat keshi + darhol revoke (`INV-15`, `AC-017`) xizmati va FastAPI `/api/v1/auth/*` endpointlarini yaratib `pytest`da tekshirish.
+- Qilingan ish / o'zgargan fayllar:
+  - `backend/app/services/auth.py` yaratildi (`AuthSessionService`, `hash_password`, `verify_password`, `generate_totp_code`, `validate_session`, `revoke_session`, `revoke_all_user_sessions`).
+  - `backend/app/api/__init__.py`, `backend/app/api/v1/__init__.py`, `backend/app/api/v1/auth.py` yaratildi (`POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `POST /api/v1/auth/sessions/{session_id}/revoke`, `GET /api/v1/auth/me`) va `backend/app/main.py` ga ulandi.
+  - `backend/tests/test_s2_2_1_auth_revoke.py` yaratildi.
+  - `01_AI_XOTIRASI_VA_QOIDALAR.md` va `03_BOSQICHLAR_VA_HOLAT.md` yangilandi.
+- Tekshiruv buyrug'i yoki usuli / haqiqiy natija:
+  - `python -m pytest D:\FlexBridge\backend -v` → **`17 passed in 1.19s`** (`S2.1` 14 ta test + `S2.2.1` 3 ta test: `test_register_requires_18_plus_adult_declaration`, `test_login_with_totp_and_ac_017_immediate_session_revocation`, `test_revoke_all_user_sessions_on_membership_or_role_change`).
+- Muammo va cheklov: Yo'q; barcha testlar birinchi urinishda 100% o'tdi.
+- Topshirilgan holat / keyingi qadam: `S2.2.1` `Tekshiruvda` holatiga o'tkazildi. Keyingi qadam: `S2.2.2` — Tashkilot a'zoligi, ikki shaxs qoidasi (`INV-11`) va `API-060` / `API-061` scope tekshiruvi (`INV-12`, `AC-041`).
+- Tekshiruvchi AI / tekshiruv natijasi: `Codex` / `Kutilmoqda (Tekshiruvda)`
