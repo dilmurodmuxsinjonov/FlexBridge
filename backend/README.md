@@ -17,10 +17,12 @@ Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
 Separate authenticated opportunity rejection
 appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
-The current head is `0009_owner_transfers`. Additional owners require an existing active staff
+The current head is `0010_owner_continuity`. Additional owners require an existing active staff
 membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](OWNER_ADDITIONS.md).
 Reviewed departure to an existing OWNER successor preserves other staff roles; see
 [OWNER_TRANSFERS.md](OWNER_TRANSFERS.md). Inaccessible-owner recovery remains open.
+Existing-staff continuity through two independent reviewers is described in
+[OWNER_CONTINUITY.md](OWNER_CONTINUITY.md); manual same-account/zero-owner recovery remains open.
 
 ```powershell
 python -m pip install -r backend/requirements.txt

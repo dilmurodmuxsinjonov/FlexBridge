@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="14.998" timestamp="2026-11-09T02:53:29.479084+05:00" hostname="Ditroid"><testcase classname="tests.security.test_owner_continuity" name="test_two_distinct_reviews_are_required_and_existing_owners_are_preserved" time="5.378"><failure message="KeyError: 'decision_reason'">backend\tests\security\test_owner_continuity.py:46: in test_two_distinct_reviews_are_required_and_existing_owners_are_preserved
+    flow=setup_continuity;response=submit(client,flow);assert response.status_code==202,response.text
+                                   ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_owner_continuity.py:21: in submit
+    return client.post('/api/v1/organizations/'+flow['org']+'/owner-continuity',headers={
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:555: in post
+    return super().post(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:454: in request
+    return super().request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:356: in handle_request
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:353: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\applications.py:90: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\app\core\iam_http.py:53: in __call__
+    await self.app(scope,replay,private_send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:80: in authentication_boundary
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\routing.py:660: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2692: in app
+    await route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1773: in handle
+    await self.original_router.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2747: in handle
+    await included_router._handle_selected(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1793: in _handle_selected
+    await original_route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1272: in handle
+    await app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:156: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:142: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:698: in app
+    raw_response = await run_endpoint_function(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:352: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:2641: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:1033: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\api\v1\owner_continuity.py:30: in submit
+    return service.submit(actor,str(org),contact_id=str(payload.contact_id),file_ids=payload.file_ids,
+backend\app\services\owner_continuity.py:187: in submit
+    return self._report(conn,case,request,idempotent_replay=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\services\owner_continuity.py:128: in _report
+    'decision_reason':case['decision_reason'],'decisions':decisions,**extra}
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'decision_reason'</failure></testcase><testcase classname="tests.security.test_owner_continuity" name="test_current_owner_objection_is_terminal_without_grant" time="1.954"><failure message="KeyError: 'decision_reason'">backend\tests\security\test_owner_continuity.py:70: in test_current_owner_objection_is_terminal_without_grant
+    flow=setup_continuity;case=ready(client,flow)
+                               ^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_owner_continuity.py:42: in ready
+    case=recommended(client,flow);response=claim(client,flow,case,'compliance');assert response.status_code==200,response.text
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_owner_continuity.py:35: in recommended
+    response=submit(client,flow);assert response.status_code==202,response.text
+             ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_owner_continuity.py:21: in submit
+    return client.post('/api/v1/organizations/'+flow['org']+'/owner-continuity',headers={
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:555: in post
+    return super().post(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:454: in request
+    return super().request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:356: in handle_request
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:353: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\applications.py:90: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\app\core\iam_http.py:53: in __call__
+    await self.app(scope,replay,private_send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:80: in authentication_boundary
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\routing.py:660: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2692: in app
+    await route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1773: in handle
+    await self.original_router.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2747: in handle
+    await included_router._handle_selected(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1793: in _handle_selected
+    await original_route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1272: in handle
+    await app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:156: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:142: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:698: in app
+    raw_response = await run_endpoint_function(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:352: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:2641: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:1033: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\api\v1\owner_continuity.py:30: in submit
+    return service.submit(actor,str(org),contact_id=str(payload.contact_id),file_ids=payload.file_ids,
+backend\app\services\owner_continuity.py:187: in submit
+    return self._report(conn,case,request,idempotent_replay=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\services\owner_continuity.py:128: in _report
+    'decision_reason':case['decision_reason'],'decisions':decisions,**extra}
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'decision_reason'</failure></testcase><testcase classname="tests.security.test_owner_continuity" name="test_needs_info_requires_new_request_and_generic_resubmission_is_rejected" time="1.906"><failure message="KeyError: 'decision_reason'">backend\tests\security\test_owner_continuity.py:81: in test_needs_info_requires_new_request_and_generic_resubmission_is_rejected
+    flow=setup_continuity;response=submit(client,flow);assert response.status_code==202,response.text
+                                   ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_owner_continuity.py:21: in submit
+    return client.post('/api/v1/organizations/'+flow['org']+'/owner-continuity',headers={
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:555: in post
+    return super().post(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:454: in request
+    return super().request(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:356: in handle_request
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\testclient.py:353: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\applications.py:90: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\app\core\iam_http.py:53: in __call__
+    await self.app(scope,replay,private_send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:80: in authentication_boundary
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\routing.py:660: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2692: in app
+    await route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1773: in handle
+    await self.original_router.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:2747: in handle
+    await included_router._handle_selected(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1793: in _handle_selected
+    await original_route.handle(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:1272: in handle
+    await app(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:156: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:142: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:698: in app
+    raw_response = await run_endpoint_function(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:352: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:2641: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py:1033: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\api\v1\owner_continuity.py:30: in submit
+    return service.submit(actor,str(org),contact_id=str(payload.contact_id),file_ids=payload.file_ids,
+backend\app\services\owner_continuity.py:187: in submit
+    return self._report(conn,case,request,idempotent_replay=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\services\owner_continuity.py:128: in _report
+    'decision_reason':case['decision_reason'],'decisions':decisions,**extra}
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'decision_reason'</failure></testcase><testcase classname="tests.security.test_regressions" name="test_actual_migration_and_constraints" time="2.014" /></testsuite></testsuites>
