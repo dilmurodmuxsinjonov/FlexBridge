@@ -16,6 +16,7 @@ from app.services.placements import get_row
 
 from app.api.dependencies import ActorContext, require_actor_context, require_org, require_institution, require_platform
 from app.services.governance import GovernanceError, governance_service
+from app.services.organizations import require_mfa
 
 router = APIRouter(prefix="/api/v1", tags=["governance"])
 
@@ -66,6 +67,7 @@ def api_073_list_org_memberships(org: str, actor: ActorContext = Depends(require
 
 @router.post("/organizations/{org_id}/members", status_code=201)
 def create_org_member_endpoint(org_id: str, payload: CreateOrgMemberRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
+    require_mfa(actor)
     require_org(actor,org_id,'OWNER')
     return governance_service.create_org_member_request(
         organization_id=org_id,
@@ -82,6 +84,7 @@ def approve_org_member_endpoint(
     payload: ApproveOrgMemberRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
+    require_mfa(actor)
     require_org(actor,org_id,'OWNER')
     try:
         return governance_service.approve_org_member(
