@@ -21,6 +21,14 @@ authority locks first, revocation waits for its commit or rollback. Expiry is ch
 at authorization; these locks do not stop wall-clock time. Nested calls share the same
 database transaction. Audit failures roll back the business effect as well.
 
+Invitation contact recycling uses a different IAM lock order: contact first, then
+security rotation for its previous owner. Invitations therefore use the same advisory
+key without waiting while holding user authority. Contended contacts, existing target
+users or another account's inviter authority produce409 INVITATION_BUSY_RETRY and
+whole-transaction rollback. Creation pins its existing target user before the contact
+lock and rechecks the contact identity before writing foreign keys. After a conflict,
+clients can retry with their current session and the then-current contact state.
+
 The member governance services accept the real ActorContext, including its session;
 they do not reconstruct authority from a caller-provided user ID. Bootstrap/pending
 representative and invitation flows retain their existing role rules. No historical

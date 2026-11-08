@@ -40,3 +40,37 @@ Actual read-only Copilot CLI scope review completed exit0 using view/glob/grep, 
 writes/shell/MCP/export disabled. It did not run tests; model identity was not independently
 reported. Initial moderation risk from that review was independently reproduced by
 Codex in2 tests and tracked separately in #48. Not included in this fix. Pilotfalse.
+
+104c436 source review also found an invitation acceptance/contact-recycling lock cycle.
+Codex independently reproduced the analogous invitation-create/public bind cycle:
+contact bind201 but invitation503,1 failed/38.04s (`contact_lock_initial_junit.xml`).
+The previous69 green cases did not cover it. Both full470 CI42536321623/42536326963
+passed on104,343.40s/352.70s; that does not accept this newly found race.
+
+17a0b66 fixes it in an isolated worktree while old affected tests keep running on104:
+contact advisory acquisition never waits while holding user authority; target user and
+inviter authority use NOWAIT where another account may be held; exact target identity
+is re-read before any invitation/FK write. A conflict yields409 INVITATION_BUSY_RETRY
+and rolls back the UOW. Current actor MFA/role checks remain. Default org_authority
+behavior is unchanged. No identity-service policy change.
+
+Patch native24 passed,127.96s (new4 plus old invitation20), and public-contact5 passed,
+40.02s. These5 use actual HTTP challenge/consume and register/contact-bind; only delivery
+gateway is replaced. Create/accept vs register/bind, existing target/inviter user locks,
+newly discovered contact target, fresh retry and no partial grant/invite were verified.
+29 patch cases are separate from104 native69/old affected baseline. Old affected8
+modules completed187 passed,642.05s on104; root source stayed unchanged during this run
+and only then fast-forwarded to17a0b66. Both full479 CI42536888052/42536892278 passed.
+
+Pinned follow-up review exit0 found no concrete production defect. It requested that
+race events signal after the try-lock attempt (making observed contention explicit)
+and that an existing contact changing before the target pin be tested as well as a
+previously absent contact appearing. Both test refinements passed native10,42.19s on
+7386da2; runtime guards remain unchanged from17a0b66. The new contact test uses public OTP proof/bind and verifies
+409/no invitation, then fresh retry targets and admits the new holder. Final7386da2
+full480-test CI42537111572/42537115610 passed,358.80s/311.51s. No failures/errors/skips.
+
+Actual final test-delta review exit0 confirms both recommendations addressed and no
+concrete remaining issue in the requested scope. It did not run tests/verify SHA;
+Codex checks the pinned source tree and full CI separately. Native test timing includes
+Windows database cleanup and is not an API performance measurement.

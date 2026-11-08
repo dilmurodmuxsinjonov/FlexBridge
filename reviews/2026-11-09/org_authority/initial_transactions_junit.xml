@@ -58,8 +58,8 @@ C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\psycopg
     raise ex.with_traceback(None)
 E   sqlalchemy.exc.DataError: (psycopg.errors.InvalidTextRepresentation) invalid input syntax for type uuid: ""
 E   CONTEXT:  unnamed portal parameter $1 = ''
-E   [SQL: SELECT flexbridge.sessions.id 
-E   FROM flexbridge.sessions 
+E   [SQL: SELECT flexbridge.sessions.id
+E   FROM flexbridge.sessions
 E   WHERE flexbridge.sessions.id = %(id_1)s::UUID AND flexbridge.sessions.user_id = %(user_id_1)s::UUID AND flexbridge.sessions.auth_version = %(auth_version_1)s::INTEGER AND flexbridge.sessions.assurance = %(assurance_1)s::VARCHAR AND flexbridge.sessions.revoked_at IS NULL AND flexbridge.sessions.expires_at &gt; %(expires_at_1)s::TIMESTAMP WITH TIME ZONE FOR SHARE]
 E   [SQL parameters hidden due to hide_parameters=True]
 E   (Background on this error at: https://sqlalche.me/e/20/9h9h)</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_governance_service_requires_actual_current_actor_session[other_user]" time="2.746" /><testcase classname="tests.security.test_org_authority_transactions" name="test_governance_service_requires_actual_current_actor_session[unknown]" time="15.457" /></testsuite></testsuites>
