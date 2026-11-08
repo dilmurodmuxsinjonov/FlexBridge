@@ -28,6 +28,30 @@ def accept(client,user,token):
     return client.post('/api/v1/invitations/'+token+'/accept',headers=user['headers'],json={})
 
 
+def test_fresh_invitation_creates_new_grant_and_preserves_revoked_history(client,identities,organization):
+    owner=identities('OWNER',organization);user=mfa_user(identities);contact(user)
+    response=invite(client,owner,organization);assert response.status_code==201,response.text
+    first=response.json();response=accept(client,user,first['token'])
+    assert response.status_code==200,response.text
+    member=response.json()['membership_id']
+    response=client.post('/api/v1/organizations/'+organization+'/memberships/'+member+'/revoke',headers=owner['headers'],
+        json={'reason':'Revoke the former staff relationship'})
+    assert response.status_code==200,response.text
+    with transaction() as conn:
+        old=dict(conn.execute(select(table('org_role_grants')).where(table('org_role_grants').c.membership_id==member)).mappings().one())
+    assert old['revoked_at'] is not None
+    response=invite(client,owner,organization);assert response.status_code==201,response.text
+    fresh=response.json();response=accept(client,user,fresh['token'])
+    assert response.status_code==200,response.text
+    with transaction() as conn:
+        grants=[dict(r) for r in conn.execute(select(table('org_role_grants')).where(table('org_role_grants').c.membership_id==member)).mappings()]
+        assert len(grants)==2
+        assert next(r for r in grants if r['id']==old['id'])==old
+        active=[r for r in grants if r['revoked_at'] is None]
+        assert len(active)==1 and active[0]['id']!=old['id']
+    response=accept(client,user,fresh['token']);assert response.status_code==200 and response.json()['idempotent_replay']
+
+
 def test_invitation_is_hashed_and_explicit_role_is_accepted_once(client,identities,organization):
     owner=identities('OWNER',organization);user=mfa_user(identities);contact(user)
     result=invite(client,owner,organization)

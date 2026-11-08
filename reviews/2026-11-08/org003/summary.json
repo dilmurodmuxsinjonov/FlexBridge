@@ -1,0 +1,15 @@
+{
+  "commit": "f118e23e2a0d2d48d08a6ad8fd500f5a43bca9d2",
+  "scope": "Six affected native PostgreSQL modules; full suite separately in GitHub CI.",
+  "tests": 120,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 282.714,
+  "ci_runs": [
+    42503498638
+  ],
+  "ci_tests": 297,
+  "ci_conclusion": "success",
+  "pilot_ready": false
+}

@@ -15,8 +15,10 @@ Explicit 24-hour contact-bound staff invitations
 and legacy-token handling are documented in [INVITATIONS.md](INVITATIONS.md).
 Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
-The current head is `0007_moderation_appeals`. Separate authenticated opportunity rejection
+Separate authenticated opportunity rejection
 appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
+The current head is `0008_owner_additions`. Additional owners require an existing active staff
+membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](OWNER_ADDITIONS.md).
 
 ```powershell
 python -m pip install -r backend/requirements.txt

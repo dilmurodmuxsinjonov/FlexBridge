@@ -9,11 +9,12 @@ from app.core.iam_security import rate_limit
 from app.db.storage import table, transaction, now, org_verification_submissions as submissions, save_domain_record, load_domain_record
 from app.services.governance import GovernanceError
 from app.services.placements import get_row, insert_row
+from app.services.authority import moderator_authority
 from app.services.schedule import TASHKENT
 
 audit = AppendOnlyAuditStore()
 CAPABILITIES = ('JOB_EMPLOYER', 'INTERNSHIP_HOST')
-REVIEW_KINDS = ('ORG_REPRESENTATIVE', 'ORG_PROFILE_CHANGE', *CAPABILITIES)
+REVIEW_KINDS = ('ORG_REPRESENTATIVE', 'ORG_PROFILE_CHANGE', 'ORG_OWNER_ADDITION', *CAPABILITIES)
 OPEN_STATES = ('PENDING', 'IN_REVIEW', 'NEEDS_INFO')
 
 
@@ -188,6 +189,8 @@ class OrganizationService:
             return {key: org[key] for key in ('id','public_name','region','description','website')} | {'capabilities': badges}
 
     def submit(self, actor, org_id, *, kind, file_ids, evidence_note, case_id=None, proposed_fields=None):
+        if kind=='ORG_OWNER_ADDITION':
+            raise GovernanceError('OWNER_USE_DEDICATED_FLOW',status_code=422)
         require_mfa(actor)
         rate_limit('org-submission', actor.user_id, 20, 3600)
         with transaction() as conn:
@@ -266,7 +269,11 @@ class OrganizationService:
             raise GovernanceError('UNSUPPORTED_VERIFICATION_CASE', status_code=422)
         org = get_row(conn, 'organizations', case['organization_id'], True)
         case = get_row(conn, 'verification_cases', case_id, True)
+        moderator_authority(conn,actor)
         self._independent(conn, actor, case)
+        if case['kind']=='ORG_OWNER_ADDITION':
+            from app.services.owner_additions import proposal
+            proposal(conn,case_id)
         return org, case
 
     def claim(self, actor, case_id):
@@ -289,6 +296,7 @@ class OrganizationService:
             cases.c.organization_id.is_not(None), cases.c.kind.in_(REVIEW_KINDS), cases.c.status.in_(OPEN_STATES))
         query = query.where(cases.c.assigned_reviewer_id.is_(None), cases.c.requester_id != actor.user_id) if unassigned else query.where(cases.c.assigned_reviewer_id == actor.user_id)
         with transaction() as conn:
+            moderator_authority(conn,actor)
             return [dict(r) for r in conn.execute(query.order_by(cases.c.due_at, cases.c.id).limit(limit)).mappings()]
 
     def case_detail(self, actor, case_id):
@@ -299,9 +307,13 @@ class OrganizationService:
             evidence = table('verification_evidence')
             rows = list(conn.execute(select(evidence).where(evidence.c.case_id == case_id).order_by(evidence.c.revision, evidence.c.created_at)).mappings())
             revisions = list(conn.execute(select(submissions).where(submissions.c.case_id == case_id).order_by(submissions.c.revision)).mappings())
-            return {'case': case, 'organization': {key: org[key] for key in
+            result={'case': case, 'organization': {key: org[key] for key in
                 ('id','tax_id','legal_name','public_name','region','description','website')},
                 'submissions': [dict(r) for r in revisions], 'evidence': [dict(r) for r in rows]}
+            if case['kind']=='ORG_OWNER_ADDITION':
+                from app.services.owner_additions import owner_addition_service
+                result['owner_request']=owner_addition_service.operator_detail(conn,actor,case)
+            return result
 
     def download_evidence(self, actor, case_id, file_id):
         from app.adapters import storage
@@ -318,6 +330,10 @@ class OrganizationService:
     def decide(self, actor, case_id, *, decision, expected_revision, reason):
         with transaction() as conn:
             org, case = self._operator_case(conn, actor, case_id)
+            if case['kind']=='ORG_OWNER_ADDITION':
+                from app.services.owner_additions import owner_addition_service
+                return owner_addition_service.decide_locked(conn,actor,org,case,decision=decision,
+                    expected_revision=expected_revision,reason=reason)
             if case['assigned_reviewer_id'] != actor.user_id:
                 raise GovernanceError('ASSIGNED_REVIEW_REQUIRED', status_code=403)
             if case['status'] != 'IN_REVIEW' or case['current_revision'] != expected_revision:

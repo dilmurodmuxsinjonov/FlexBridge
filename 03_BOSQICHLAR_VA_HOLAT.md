@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-08 - Codex. PR36 va PR38 merged. OPS-CODEX-002 / PR40: c46ff70 native250 passed,586.00s va ikkala GitHub CI250 passed; evidence-only commit/check va merge qolgan. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ORG-CODEX-003A, so'ng transfer/recovery va EDU.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40 merged. ORG-CODEX-003A / PR42: f118e23 native affected120 va complete297-test GitHub CI passed. Final review/evidence tekshirilmoqda. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: transfer/recovery va EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -21,7 +21,7 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## OPS-CODEX-002 — Alohida appellant va mustaqil review oqimi
 
-- Holat: `Tekshiruvda`; mas'ul Codex; actual read-only reviewer GitHub Copilot CLI, modeli mustaqil aniqlanmadi. Issue39 / PR40, branch feature/39-independent-moderation-appeals.
+- Holat: `Bajarildi` (qo'llangan backend scope); mas'ul Codex; actual read-only reviewer GitHub Copilot CLI, modeli mustaqil aniqlanmadi. Issue39 yopildi, PR40 merge6b28ac5. Final1616fbc ikkala CI successful; native source c46ff70 bilan bir xil.
 - Doira: latest opportunity REJECT uchun session-bound haqiqiy appellant, immutable request/revision/original-rationale snapshot, mustaqil assigned moderator; atomik UPHOLD/REOPEN. REOPEN faqat DRAFTga, oddiy moderation/payment/publish cheklovlari saqlanadi. Rating/scam/public-report workflow to'liq qabuli emas.
 - Fayllar: moderation_appeals service/API, 0007 migration/storage, canonical API111 integration, private HTTP boundary, security regressiyalar va backend/MODERATION_APPEALS.md; 01/02/03 va reviews/2026-11-08/ops002.
 - Qabul: current rol/MFA/session va revocation interleaving, PostgreSQL authority lock/commit serialization, independent assignment, concurrency/replay/conflict, immutable exact SQL evidence, size/decimal precision, stale decision/content, audit rollback, second-process read va existing relation preservation; populated upgrade va full CI.
@@ -131,14 +131,14 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003 — Mustaqil ownership boshqaruvi
 
-- Holat: `Rejada`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER, ORG-CODEX-003B transfer/recovery.
+- Holat: `Jarayonda`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER tekshiruvda, ORG-CODEX-003B transfer/recovery Rejada.
 - Doira: qo'shimcha OWNER, owner transfer/recovery uchun tashkilot topshirig'i va yangi vakilning mustaqil tekshiruv/roziligi, append-only ownership history va parallel last-owner himoyasi. Asl talab va qabul mezonlari ish boshlanishida aniqlanadi; keyin EDU.
 
 ## ORG-CODEX-003A — Existing staff uchun mustaqil qo'shimcha OWNER
 
-- Holat: `Rejada`; mas'ul Codex; GitHub Issue41. PR40 yakunlangach boshlanadi; implementatsiya hozir yozilmadi.
+- Holat: `Tekshiruvda`; mas'ul Codex; GitHub Issue41/PR42, branch feature/41-reviewed-owner-additions. Implementatsiya Codexda; actual Copilot CLI read-only review0953ebd va final f118e23 follow-up. bc6e1d6 full295-test CI o'tganidan keyin2 yangi lifecycle testi stale requester/target grantni topdi. Grant-ID binding tuzatildi: final f118e23 native120 passed,0 failure/error/skip,282.714s; complete297-test CI42503498638 successful. Final review, evidence-only checks va merge qolgan. Transfer/recovery doiraga kirmaydi.
 - Doira: current-MFA OWNER so'rovi, shu tashkilotdagi active staff membership targeti, named-target MFA/current verified-contact roziligi, revision-bound dalil va assigned independent MODERATOR approval. Bir tranzaksiyada OWNER grant + append-only ownership event + case + audit. Generic staff/invitation yo'li OWNER bermaydi.
-- Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, zarur shared authority helper, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi ko'rib chiqiladi.
+- Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, shared authority helper, invitation service/test regrant history, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi qo'llandi. Copilot topgan invitation reactivation shu paketda tuzatiladi. SQL guardlar relational integrity; bearer/MFA va contact HMAC API authority chegarasida tekshiriladi, direct DB writers trusted.
 - Qabul: REJA.md. Copilot CLI actual read-only planning reviewi bajarildi; bu implementatsiya yoki acceptance dalili emas. Transfer/recovery003Bga, so'ng EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
