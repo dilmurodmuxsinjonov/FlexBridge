@@ -19,7 +19,7 @@ Joriy dalil:
   current authority/contact/security/evidence, privacy, forged generic case/payload,
   parallel retries, opposite transfers va revoke race, immutable history/audit rollback.
 - History/security refresh/second-process6 yangi testi passed,1 warning,23.89s. Complete
-  collected suite337; hali full CI yoki final affected suite o'tdi deb ko'rsatilmaydi.
+  collected suite337. Final source bilan umumiy native/CI natija quyida.
 - Populated0008->0009:103->105 tables; old addition proof function matni, revoked grant
   va ownership event saqlandi; fresh grant distinct, duplicate active/event mutation
   rad etildi. Ikki initial fixture xatosi (missing MODERATOR catalog va self-granted
@@ -33,8 +33,17 @@ latest consent va independent reviewer metadata'ni tekshiradi. SQL relational in
 actual bearer/MFA/contact HMAC APIda, direct DB writers trusted.
 
 Copilot read-only planning review source/prompt asosida exit0 berdi; tashqi plan fayliga
-access denied bo'lgan. Full pinned code review hali kerak. Hech qaysi model identity
-mustaqil aniqlanmadi. Implementation Codexda, planning approval test dalili emas.
+access denied bo'lgan. Pinned284b297 code review ham exit0; confirmed HTTP kamchilik
+topilmadi. Second-process xizmat o'qishi HTTP bearer testi emasligi va har bir raw SQL
+predicate alohida fault-injection bilan tekshirilmagani assessmentda yozildi. Hech qaysi
+model identity mustaqil aniqlanmadi. Implementation Codexda, review test sertifikati emas.
+
+284b297 uchun complete337-test GitHub CI42525017488/42525078474 ikkovi ham successful:
+337 passed,1 warning,177.26s/152.69s. Shu source bilan final affected8 native modul
+**160 passed**,0 failures/errors/skips,1 warning,566.41s; `affected_junit.xml`.
+Native vaqtiga Windows disposable DB cleanup ham kiradi; bu API tezligi benchmarki emas.
+Source manifest Git blob SHA256 bilan; contracts inventory46 explicit/86 placeholder,
+missing0 va summary shu katalogda. Evidence-only commit uchun final checks/merge qolgan.
 
 TestClient, synthetic role/contact/CLEAN PDF metadata va dedicated disposable native
 PostgreSQL ishlatildi. Legal identity, registry, live contact delivery, browser yoki

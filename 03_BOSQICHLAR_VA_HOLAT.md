@@ -143,7 +143,7 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003B — Mavjud OWNER vorisga vakolatdan chiqish
 
-- Holat: `Jarayonda`; mas'ul Codex; Issue43, feature/43-reviewed-owner-departure. Doira va qabul: reviews/2026-11-09/org003b/REJA.md. Copilot source/prompt asosida read-only planning review berdi; tashqi plan fayliga access denied bo'lgan, uning to'liq matnini tekshirgan deb ko'rsatilmaydi.
+- Holat: `Tekshiruvda`; mas'ul Codex; Issue43/PR44, feature/43-reviewed-owner-departure. Source284b297 final native160 passed,0 failure/error/skip,1 warning,566.41s; ikkala full337-test CI42525017488/42525078474 successful. Actual pinned Copilot code review exit0, confirmed HTTP defect topilmadi; coverage chegaralari assessmentda. Evidence-only checks/merge qolgan. Doira va qabul: reviews/2026-11-09/org003b/REJA.md. Planning review tashqi plan faylini access denied sabab to'liq o'qimagan; source/prompt scope aniq yozilgan.
 - Current-MFA OWNER faqat o'z OWNER grantidan chiqishni so'raydi; shu tashkilotdagi boshqa mavjud OWNER MFA/contact bilan rozilik beradi; assigned independent MODERATOR current-MFA bilan tasdiqlaydi. Grant qo'shilmaydi; requesterning membership va boshqa rollari saqlanadi. Barcha tomonning original grantlari, revision/security/contact/evidence yangiligi tekshiriladi.
 - Fayllar: alohida service/API,0009 migration/storage, explicit operator dispatch/private HTTP, SQL regressiyalar/guide va01/02/03. Oldingi003A proof ma'nosi saqlanadi; transfer eventida previous membership va exact revoked grant bo'ladi. Concurrency/rollback/last-owner continuity, immutable history, populated upgrade, affected/full CI va pinned peer review talab qilinadi.003C recovery va pilot qabuli doiradan tashqari.
 
