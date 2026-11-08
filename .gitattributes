@@ -1,0 +1,4 @@
+# Preserve the exact prototype-test bytes covered by the historical SHA-256 manifest.
+reviews/2026-11-07/codex_fix/legacy_tests/*.py.txt -text whitespace=cr-at-eol
+# Preserve captured native log newlines as evidence rather than rewriting the transcript.
+reviews/**/access_log_redacted.txt -text -whitespace

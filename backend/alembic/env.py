@@ -1,18 +1,16 @@
-"""Alembic migration environment connected to FlexBridge canonical metadata."""
-
-from __future__ import annotations
-
+from alembic import context
 from app.db.storage import get_database_url, get_engine, metadata
 
-target_metadata = metadata
+def run_migrations_offline():
+    raise RuntimeError('This baseline requires an online PostgreSQL connection; offline generation is unsupported')
 
+def run_migrations_online():
+    with get_engine().connect() as connection:
+        context.configure(connection=connection, target_metadata=metadata, include_schemas=True)
+        with context.begin_transaction():
+            context.run_migrations()
 
-def run_migrations_offline() -> None:
-    """Provide canonical database URL and metadata for offline migration inspection."""
-    _ = get_database_url()
-
-
-def run_migrations_online() -> None:
-    """Ensure canonical schema is bound and created on the active engine."""
-    engine = get_engine()
-    target_metadata.create_all(engine)
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()

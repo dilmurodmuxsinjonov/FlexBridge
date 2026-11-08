@@ -1,144 +1,47 @@
-"""S2.8.1 & REV-002: FastAPI Endpoints for Tariffs, Payments, Concurrent Slot Quota (AC-042) & Refunds."""
+from dataclasses import asdict
+from uuid import UUID
+from fastapi import APIRouter,Depends
+from pydantic import BaseModel,ConfigDict,Field
+from app.api.dependencies import ActorContext,require_actor_context
+from app.services.billing import BillingQuotaService
 
-from __future__ import annotations
+billing_service=BillingQuotaService()
+router=APIRouter(prefix='/api/v1/billing',tags=['billing'])
+class Request(BaseModel): model_config=ConfigDict(extra='forbid')
+class CreateOrderRequest(Request):
+    organization_id:UUID
+    plan_code:str
+    idempotency_key:str=Field(min_length=8,max_length=128)
+class PaymentAttemptRequest(Request):
+    invoice_id:UUID
+    provider_code:str='HMAC'
+    idempotency_key:str=Field(min_length=8,max_length=128)
+    amount_uzs:int=Field(gt=0)
+    currency_code:str='UZS'
+class RefundRequest(Request):
+    invoice_id:UUID
+    amount_uzs:int=Field(gt=0)
+    reason:str=Field(min_length=15,max_length=2000)
+class PublishRequest(Request):
+    organization_id:UUID
+    opportunity_id:UUID
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, ConfigDict
+@router.post('/orders',status_code=201)
+def order(req:CreateOrderRequest,actor:ActorContext=Depends(require_actor_context)):
+    o,i=billing_service.create_order_and_invoice(organization_id=str(req.organization_id),plan_code=req.plan_code,
+        created_by=actor.user_id,idempotency_key=req.idempotency_key)
+    return {'order_id':o.id,'invoice_id':i.id,'amount_uzs':i.amount_uzs,'invoice_status':i.status}
 
-from app.services.billing import BillingInvariantError, BillingQuotaService
+@router.post('/payments/attempts')
+def payment(req:PaymentAttemptRequest,actor:ActorContext=Depends(require_actor_context)):
+    r=billing_service.process_payment_attempt(invoice_id=str(req.invoice_id),provider_code=req.provider_code,
+        idempotency_key=req.idempotency_key,amount_uzs=req.amount_uzs,currency_code=req.currency_code,actor_user_id=actor.user_id)
+    return {**asdict(r),'attempt_id':r.id}
 
-router = APIRouter(prefix="/api/v1/billing", tags=["billing-quota"])
-billing_service = BillingQuotaService()
+@router.post('/refunds',status_code=201)
+def refund(req:RefundRequest,actor:ActorContext=Depends(require_actor_context)):
+    return billing_service.request_refund(invoice_id=str(req.invoice_id),amount_uzs=req.amount_uzs,reason=req.reason,requested_by=actor.user_id)
 
-
-class CreateOrderRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    organization_id: str
-    plan_code: str
-    created_by: str = "system-actor"
-    currency_code: str = "UZS"
-
-
-class PaymentAttemptRequest(BaseModel):
-    invoice_id: str
-    provider_code: str = "PAYME"
-    idempotency_key: str
-    amount_uzs: int
-    actor_user_id: str
-    currency_code: str = "UZS"
-    provider_confirmed: bool = False
-
-
-class OpportunityQuotaPublishRequest(BaseModel):
-    organization_id: str
-    opportunity_id: str
-    actor_user_id: str
-
-
-class OpportunityStatusUpdateRequest(BaseModel):
-    organization_id: str
-    opportunity_id: str
-    new_status: str
-    actor_user_id: str
-
-
-class RefundRequest(BaseModel):
-    invoice_id: str
-    amount_uzs: int
-    reason: str
-    requested_by: str
-    approved_by: str
-    second_approver_id: str
-
-
-@router.post("/orders", status_code=201)
-def create_order_endpoint(req: CreateOrderRequest):
-    try:
-        order, invoice = billing_service.create_order_and_invoice(
-            organization_id=req.organization_id,
-            plan_code=req.plan_code,
-            created_by=req.created_by,
-            currency_code=req.currency_code,
-        )
-        return {
-            "order_id": order.id,
-            "invoice_id": invoice.id,
-            "plan_code": order.plan_code,
-            "amount_uzs": invoice.amount_uzs,
-            "currency_code": invoice.currency_code,
-            "invoice_status": invoice.status,
-        }
-    except BillingInvariantError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-
-@router.post("/payments/attempts")
-def process_payment_attempt_endpoint(req: PaymentAttemptRequest):
-    """Initiate a payment attempt. Client `provider_confirmed` flag is ignored; only signed provider webhook (`API-X04`) can transition to `SUCCEEDED`."""
-    try:
-        attempt = billing_service.process_payment_attempt(
-            invoice_id=req.invoice_id,
-            provider_code=req.provider_code,
-            idempotency_key=req.idempotency_key,
-            amount_uzs=req.amount_uzs,
-            actor_user_id=req.actor_user_id,
-            currency_code=req.currency_code,
-            provider_confirmed=False,
-        )
-        return {
-            "attempt_id": attempt.id,
-            "invoice_id": attempt.invoice_id,
-            "idempotency_key": attempt.idempotency_key,
-            "amount_uzs": attempt.amount_uzs,
-            "status": attempt.status,
-            "entitlement_id": attempt.entitlement_id,
-        }
-    except BillingInvariantError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-
-@router.post("/slots/publish")
-def publish_slot_endpoint(req: OpportunityQuotaPublishRequest):
-    try:
-        return billing_service.publish_opportunity_with_quota(
-            organization_id=req.organization_id,
-            opportunity_id=req.opportunity_id,
-            actor_user_id=req.actor_user_id,
-        )
-    except BillingInvariantError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-
-@router.patch("/slots/status")
-def update_slot_status_endpoint(req: OpportunityStatusUpdateRequest):
-    try:
-        return billing_service.update_opportunity_status(
-            organization_id=req.organization_id,
-            opportunity_id=req.opportunity_id,
-            new_status=req.new_status,
-            actor_user_id=req.actor_user_id,
-        )
-    except BillingInvariantError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-
-@router.post("/refunds", status_code=201)
-def create_refund_endpoint(req: RefundRequest):
-    try:
-        refund = billing_service.request_and_approve_refund(
-            invoice_id=req.invoice_id,
-            amount_uzs=req.amount_uzs,
-            reason=req.reason,
-            requested_by=req.requested_by,
-            approved_by=req.approved_by,
-            second_approver_id=req.second_approver_id,
-        )
-        return {
-            "refund_id": refund.id,
-            "invoice_id": refund.invoice_id,
-            "amount_uzs": refund.amount_uzs,
-            "status": refund.status,
-        }
-    except BillingInvariantError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
+@router.post('/slots/publish')
+def publish(req:PublishRequest,actor:ActorContext=Depends(require_actor_context)):
+    return billing_service.publish_opportunity_with_quota(organization_id=str(req.organization_id),opportunity_id=str(req.opportunity_id),actor_user_id=actor.user_id)

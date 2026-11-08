@@ -1,260 +1,123 @@
-"""Applications, Offers, Dual-Confirmed Placements, and `INV-08` Cross-Table Scope Service (S2.5.1, FIX-10)."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any
+"""Persistent applications and independent, organization-scoped confirmations."""
+from datetime import date, timedelta
 from uuid import uuid4
-
+from sqlalchemy import select
+from app.db.storage import table, transaction, now
+from app.api.dependencies import ActorContext, require_org, owns_candidate
 
 class PlacementScopeError(Exception):
-    """Raised when an application attempt, offer, or placement violates `INV-08` composite FK or state transition rules."""
+    def __init__(self, code, message='', status_code=409, sqlstate='23503'):
+        super().__init__(message or code)
+        self.code,self.status_code,self.sqlstate=code,status_code,sqlstate
 
-    def __init__(self, code: str, message: str, status_code: int = 409, sqlstate: str = "23503") -> None:
-        super().__init__(message)
-        self.code = code
-        self.status_code = status_code
-        self.sqlstate = sqlstate
+def actor(user): return ActorContext(user,'',())
 
+def get_row(conn,name,key,lock=False):
+    t=table(name); q=select(t).where(t.c.id==key)
+    row=conn.execute(q.with_for_update() if lock else q).mappings().first()
+    if not row: raise PlacementScopeError(name.upper()+'_NOT_FOUND',status_code=404)
+    return dict(row)
 
-@dataclass
+def insert_row(conn,name,**values):
+    record={'id':str(uuid4()),'created_at':now(),'updated_at':now(),**values}
+    conn.execute(table(name).insert().values(**record)); return record
+
 class ApplicationPlacementService:
-    """Manages `applications`, `application_attempts`, `offers`, and `placements` (`INV-08`)."""
+    def create_application(self,*,opportunity_id,candidate_id,actor_user_id):
+        with transaction() as conn:
+            if not owns_candidate(actor_user_id,candidate_id): raise PlacementScopeError('CANDIDATE_SCOPE_FORBIDDEN',status_code=403)
+            opp=get_row(conn,'opportunities',opportunity_id,True)
+            if opp['status']!='PUBLISHED' or (opp['expires_at'] and opp['expires_at']<=now()):
+                raise PlacementScopeError('OPPORTUNITY_NOT_OPEN')
+            return insert_row(conn,'applications',opportunity_id=opportunity_id,candidate_id=candidate_id,status='SUBMITTED',version=1)
 
-    applications: dict[str, dict[str, Any]] = field(default_factory=dict)
-    attempts: dict[str, dict[str, Any]] = field(default_factory=dict)
-    offers: dict[str, dict[str, Any]] = field(default_factory=dict)
-    placements: dict[str, dict[str, Any]] = field(default_factory=dict)
+    def create_application_attempt(self,*,application_id,opportunity_id,attempt_no=1,actor_user_id):
+        with transaction() as conn:
+            app=get_row(conn,'applications',application_id,True)
+            if not owns_candidate(actor_user_id,app['candidate_id']): raise PlacementScopeError('CANDIDATE_SCOPE_FORBIDDEN',status_code=403)
+            if app['opportunity_id']!=opportunity_id: raise PlacementScopeError('APPLICATION_SCOPE_MISMATCH')
+            opp=get_row(conn,'opportunities',opportunity_id)
+            return insert_row(conn,'application_attempts',application_id=application_id,opportunity_id=opportunity_id,attempt_no=attempt_no,
+                revision_id=opp['current_revision_id'],profile_snapshot={'candidate_id':app['candidate_id']},schedule_result='UNKNOWN',
+                matching_version='1.4.0',submitted_at=now(),idempotency_key=str(uuid4()))
 
-    def create_application(
-        self,
-        *,
-        opportunity_id: str,
-        candidate_id: str,
-    ) -> dict[str, Any]:
-        app_id = str(uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        record = {
-            "id": app_id,
-            "opportunity_id": opportunity_id,
-            "candidate_id": candidate_id,
-            "status": "SUBMITTED",
-            "created_at": now,
-        }
-        self.applications[app_id] = record
-        return dict(record)
+    def create_offer(self,*,application_id,opportunity_id,candidate_id,offered_by):
+        with transaction() as conn:
+            app=get_row(conn,'applications',application_id,True)
+            if app['opportunity_id']!=opportunity_id or app['candidate_id']!=candidate_id: raise PlacementScopeError('OFFER_SCOPE_MISMATCH')
+            opp=get_row(conn,'opportunities',opportunity_id)
+            require_org(actor(offered_by),opp['organization_id'],'OWNER','HR','HOST_COORDINATOR')
+            membership=conn.execute(select(table('org_memberships').c.id).where(table('org_memberships').c.organization_id==opp['organization_id'],
+                table('org_memberships').c.user_id==offered_by,table('org_memberships').c.status=='ACTIVE',table('org_memberships').c.revoked_at.is_(None))).scalar_one()
+            attempt=conn.execute(select(table('application_attempts')).where(table('application_attempts').c.application_id==application_id)
+                .order_by(table('application_attempts').c.attempt_no.desc()).limit(1)).mappings().first()
+            if not attempt: raise PlacementScopeError('APPLICATION_ATTEMPT_REQUIRED')
+            return insert_row(conn,'offers',application_id=application_id,attempt_id=attempt['id'],revision_id=attempt['revision_id'],
+                issuer_membership_id=membership,terms_snapshot={'opportunity_id':opportunity_id},status='PENDING',
+                expires_at=now()+timedelta(days=7),idempotency_key=str(uuid4()))
 
-    def create_application_attempt(
-        self,
-        *,
-        application_id: str,
-        opportunity_id: str,
-        attempt_no: int = 1,
-    ) -> dict[str, Any]:
-        """Enforce `fk_application_attempts_app_opp` (`(application_id, opportunity_id)` composite FK, `INV-08`)."""
-        app = self.applications.get(application_id)
-        if not app or app["opportunity_id"] != opportunity_id:
-            raise PlacementScopeError(
-                code="FK_APPLICATION_ATTEMPTS_APP_OPP_VIOLATION",
-                message=(
-                    f"fk_application_attempts_app_opp (INV-08): application_id={application_id} "
-                    f"va opportunity_id={opportunity_id} o'zaro mos emas"
-                ),
-                status_code=409,
-                sqlstate="23503",
-            )
-        attempt_id = str(uuid4())
-        record = {
-            "id": attempt_id,
-            "application_id": application_id,
-            "opportunity_id": opportunity_id,
-            "attempt_no": attempt_no,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }
-        self.attempts[attempt_id] = record
-        return dict(record)
+    def respond_to_offer_api_043(self,*,offer_id,candidate_id,decision):
+        with transaction() as conn:
+            offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',offer['application_id'])
+            if app['candidate_id']!=candidate_id: raise PlacementScopeError('OFFER_ACTOR_MISMATCH',status_code=403)
+            if decision not in ('ACCEPT','DECLINE'): raise PlacementScopeError('INVALID_DECISION',status_code=422)
+            if offer['status']!='PENDING' or offer['expires_at']<=now(): raise PlacementScopeError('OFFER_NOT_PENDING')
+            values={'status':'ACCEPTED' if decision=='ACCEPT' else 'DECLINED','accepted_at':now() if decision=='ACCEPT' else None,'updated_at':now()}
+            conn.execute(table('offers').update().where(table('offers').c.id==offer_id).values(**values))
+            return {'contract_id':'API-043',**offer,**values}
 
-    def create_offer(
-        self,
-        *,
-        application_id: str,
-        opportunity_id: str,
-        candidate_id: str,
-        offered_by: str,
-    ) -> dict[str, Any]:
-        """Create an offer enforcing composite scope match with `applications` (`INV-08`)."""
-        app = self.applications.get(application_id)
-        if (
-            not app
-            or app["opportunity_id"] != opportunity_id
-            or app["candidate_id"] != candidate_id
-        ):
-            raise PlacementScopeError(
-                code="FK_OFFERS_APPLICATION_SCOPE_VIOLATION",
-                message="Offer application_id, opportunity_id va candidate_id bilan mos kelishi shart (INV-08)",
-                status_code=409,
-                sqlstate="23503",
-            )
-        offer_id = str(uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        record = {
-            "id": offer_id,
-            "application_id": application_id,
-            "opportunity_id": opportunity_id,
-            "candidate_id": candidate_id,
-            "offered_by": offered_by,
-            "status": "ACCEPTED",
-            "accepted_at": now,
-            "created_at": now,
-        }
-        self.offers[offer_id] = record
-        return dict(record)
+    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor_user_id,start_date=None,end_date=None):
+        with transaction() as conn:
+            require_org(actor(actor_user_id),organization_id,'OWNER','HR','HOST_COORDINATOR')
+            offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',application_id); opp=get_row(conn,'opportunities',opportunity_id)
+            if (offer['application_id']!=application_id or app['opportunity_id']!=opportunity_id or app['candidate_id']!=candidate_id
+                or opp['organization_id']!=organization_id): raise PlacementScopeError('PLACEMENT_SCOPE_MISMATCH')
+            if offer['status']!='ACCEPTED': raise PlacementScopeError('OFFER_NOT_ACCEPTED')
+            start=start_date or date.today(); end=end_date or start+timedelta(days=90)
+            p=insert_row(conn,'placements',application_id=application_id,offer_id=offer_id,candidate_id=candidate_id,organization_id=organization_id,
+                academic_track=False,status='PENDING_START_CONFIRMATION',start_date=start,end_date=end,version=1)
+            terms=insert_row(conn,'placement_terms',placement_id=p['id'],version=1,schema_version=1,terms_snapshot=offer['terms_snapshot'],
+                daily_limit_minutes=480,weekly_limit_minutes=2400,required_minutes=0)
+            conn.execute(table('placements').update().where(table('placements').c.id==p['id']).values(current_terms_id=terms['id']))
+            return {**p,'current_terms_id':terms['id']}
 
-    def respond_to_offer_api_043(
-        self,
-        *,
-        offer_id: str,
-        candidate_id: str,
-        decision: str,
-    ) -> dict[str, Any]:
-        """API-043: Candidate responds to offer (`ACCEPT` or `DECLINE`) enforcing candidate ownership (`FIX-10`)."""
-        offer = self.offers.get(offer_id)
-        if not offer:
-            raise PlacementScopeError("OFFER_NOT_FOUND", "Offer topilmadi", status_code=404)
-        if offer["candidate_id"] != candidate_id:
-            raise PlacementScopeError("OFFER_ACTOR_MISMATCH", "Faqat taklif etilgan nomzod javob berishi mumkin", status_code=403)
-        if decision not in ("ACCEPT", "ACCEPTED", "DECLINE", "DECLINED"):
-            raise PlacementScopeError("INVALID_OFFER_DECISION", "decision ACCEPT yoki DECLINE bo'lishi kerak", status_code=422)
+    def _party(self,conn,candidate_id,org_id,user_id,party):
+        if owns_candidate(user_id,candidate_id):
+            if party not in (None,'CANDIDATE'): raise PlacementScopeError('ENGAGEMENT_ACTOR_FORBIDDEN',status_code=403)
+            return 'CANDIDATE'
+        require_org(actor(user_id),org_id,'OWNER','HR','HOST_COORDINATOR')
+        if party not in (None,'ORGANIZATION','EMPLOYER'): raise PlacementScopeError('ENGAGEMENT_ACTOR_FORBIDDEN',status_code=403)
+        return 'EMPLOYER'
 
-        now = datetime.now(timezone.utc).isoformat()
-        if decision in ("ACCEPT", "ACCEPTED"):
-            offer["status"] = "ACCEPTED"
-            offer["accepted_at"] = now
-        else:
-            offer["status"] = "DECLINED"
-            offer["accepted_at"] = None
-        return {"contract_id": "API-043", **dict(offer)}
+    def confirm_placement_start(self,*,placement_id,party=None,actor_user_id):
+        with transaction() as conn:
+            p=get_row(conn,'placements',placement_id,True)
+            side=self._party(conn,p['candidate_id'],p['organization_id'],actor_user_id,party)
+            if p['status'] not in ('PENDING_START_CONFIRMATION','ACTIVE'): raise PlacementScopeError('PLACEMENT_NOT_CONFIRMABLE')
+            terms=get_row(conn,'placement_terms',p['current_terms_id'],True)
+            column='candidate_accepted_at' if side=='CANDIDATE' else 'host_accepted_at'
+            if terms[column] is None:
+                conn.execute(table('placement_terms').update().where(table('placement_terms').c.id==terms['id']).values(**{column:now()}))
+                terms[column]=now()
+                insert_row(conn,'placement_decisions',placement_id=placement_id,actor_id=actor_user_id,side=side,decision='CONFIRM_START',terms_id=terms['id'],decided_at=now())
+            if terms['candidate_accepted_at'] and terms['host_accepted_at']:
+                conn.execute(table('placements').update().where(table('placements').c.id==placement_id).values(status='ACTIVE',updated_at=now()))
+            return get_row(conn,'placements',placement_id)
 
-    def create_placement(
-        self,
-        *,
-        application_id: str,
-        offer_id: str,
-        opportunity_id: str,
-        candidate_id: str,
-        organization_id: str,
-    ) -> dict[str, Any]:
-        """Enforce `fk_placements_offer_scope` (`(offer_id, application_id, opportunity_id, candidate_id)`, `INV-08`)."""
-        offer = self.offers.get(offer_id)
-        if (
-            not offer
-            or offer["application_id"] != application_id
-            or offer["opportunity_id"] != opportunity_id
-            or offer["candidate_id"] != candidate_id
-        ):
-            raise PlacementScopeError(
-                code="FK_PLACEMENTS_OFFER_SCOPE_VIOLATION",
-                message=(
-                    "fk_placements_offer_scope (INV-08): placement offer_id, application_id, "
-                    "opportunity_id va candidate_id to'rtligi bilan mos emas"
-                ),
-                status_code=409,
-                sqlstate="23503",
-            )
-        if offer.get("status") != "ACCEPTED":
-            raise PlacementScopeError(
-                code="OFFER_NOT_ACCEPTED",
-                message="Placement faqat ACCEPTED holatdagi offer asosida yaratilishi mumkin",
-                status_code=409,
-                sqlstate="23514",
-            )
-        placement_id = str(uuid4())
-        record = {
-            "id": placement_id,
-            "application_id": application_id,
-            "offer_id": offer_id,
-            "opportunity_id": opportunity_id,
-            "candidate_id": candidate_id,
-            "organization_id": organization_id,
-            "status": "PENDING_START_CONFIRMATION",
-            "candidate_confirmed_start_at": None,
-            "org_confirmed_start_at": None,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }
-        self.placements[placement_id] = record
-        return dict(record)
+    def confirm_engagement_by_actor_api_046(self,*,placement_id,actor_user_id,actor_roles=(),party=None,action='CONFIRM_START'):
+        # Canonical engagement IDs refer to job_engagements, never arbitrary placement IDs.
+        with transaction() as conn:
+            engagement=get_row(conn,'job_engagements',placement_id,True)
+            app=get_row(conn,'applications',engagement['application_id']); opp=get_row(conn,'opportunities',app['opportunity_id'])
+            side=self._party(conn,app['candidate_id'],opp['organization_id'],actor_user_id,party)
+            if engagement['status'] not in ('PENDING_START_CONFIRMATION','ACTIVE','DISPUTED'): raise PlacementScopeError('ENGAGEMENT_NOT_CONFIRMABLE')
+            if action not in ('CONFIRM_START','DISPUTE_START'): raise PlacementScopeError('INVALID_ACTION',status_code=422)
+            t=table('engagement_confirmations')
+            previous=conn.execute(select(t.c.id).where(t.c.engagement_id==placement_id,t.c.side==side,t.c.action==action)).first()
+            if not previous: insert_row(conn,'engagement_confirmations',engagement_id=placement_id,user_id=actor_user_id,side=side,action=action,response=action,occurred_at=now())
+            decisions=list(conn.execute(select(t).where(t.c.engagement_id==placement_id)).mappings())
+            status='DISPUTED' if any(d['action']=='DISPUTE_START' for d in decisions) else ('ACTIVE' if {d['side'] for d in decisions if d['action']=='CONFIRM_START'}=={'CANDIDATE','EMPLOYER'} else 'PENDING_START_CONFIRMATION')
+            conn.execute(table('job_engagements').update().where(table('job_engagements').c.id==placement_id).values(status=status,confirmed_started_at=now() if status=='ACTIVE' else None,updated_at=now()))
+            return {'contract_id':'API-046',**engagement,'status':status}
 
-    def confirm_placement_start(
-        self,
-        *,
-        placement_id: str,
-        party: str,
-    ) -> dict[str, Any]:
-        """Confirm start of work by `CANDIDATE` or `ORGANIZATION`; becomes `ACTIVE` only when both confirm."""
-        placement = self.placements.get(placement_id)
-        if not placement:
-            raise PlacementScopeError("PLACEMENT_NOT_FOUND", "Placement topilmadi", status_code=404)
-
-        now = datetime.now(timezone.utc).isoformat()
-        if party == "CANDIDATE":
-            placement["candidate_confirmed_start_at"] = now
-        elif party == "ORGANIZATION":
-            placement["org_confirmed_start_at"] = now
-        else:
-            raise PlacementScopeError("INVALID_CONFIRMATION_PARTY", "party CANDIDATE yoki ORGANIZATION bo'lishi kerak", status_code=422)
-
-        if placement["candidate_confirmed_start_at"] and placement["org_confirmed_start_at"]:
-            placement["status"] = "ACTIVE"
-        return dict(placement)
-
-    def confirm_engagement_by_actor_api_046(
-        self,
-        *,
-        placement_id: str,
-        actor_user_id: str,
-        actor_roles: list[str],
-        party: str | None = None,
-    ) -> dict[str, Any]:
-        """API-046: Confirm engagement start verifying placement ownership and actor role (`FIX-10`, `REV-002`)."""
-        placement = self.placements.get(placement_id)
-        if not placement:
-            raise PlacementScopeError("PLACEMENT_NOT_FOUND", "Placement topilmadi", status_code=404)
-
-        org_roles = {"ORG_RECRUITER", "EMPLOYER", "OWNER", "HR", "HOST_COORDINATOR", "SUPER_ADMIN", "ADMIN"}
-        is_placement_candidate = actor_user_id == placement["candidate_id"]
-        is_org_rep = any(r in org_roles for r in actor_roles)
-
-        if party == "CANDIDATE":
-            if not is_placement_candidate:
-                raise PlacementScopeError(
-                    "ENGAGEMENT_ACTOR_FORBIDDEN",
-                    "API-046: Faqat placementga biriktirilgan nomzod CANDIDATE tomonini tasdiqlay oladi",
-                    status_code=403,
-                )
-            resolved_party = "CANDIDATE"
-        elif party == "ORGANIZATION":
-            if not is_org_rep or is_placement_candidate:
-                raise PlacementScopeError(
-                    "ENGAGEMENT_ACTOR_FORBIDDEN",
-                    "API-046: Faqat tashkilot vakili ORGANIZATION tomonini tasdiqlay oladi",
-                    status_code=403,
-                )
-            resolved_party = "ORGANIZATION"
-        else:
-            if is_placement_candidate:
-                resolved_party = "CANDIDATE"
-            elif is_org_rep:
-                resolved_party = "ORGANIZATION"
-            else:
-                raise PlacementScopeError(
-                    "ENGAGEMENT_ACTOR_FORBIDDEN",
-                    "API-046: Foydalanuvchi ushbu placement ishtirokchisi emas",
-                    status_code=403,
-                )
-
-        res = self.confirm_placement_start(placement_id=placement_id, party=resolved_party)
-        return {"contract_id": "API-046", **res}
-
-
-placement_service = ApplicationPlacementService()
+placement_service=ApplicationPlacementService()

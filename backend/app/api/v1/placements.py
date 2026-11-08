@@ -4,48 +4,55 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, ConfigDict
+from uuid import UUID
+from datetime import date
 
+from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
 from app.services.placements import PlacementScopeError, placement_service
 
 router = APIRouter(prefix="/api/v1", tags=["placements"])
 
 
-class CreateApplicationRequest(BaseModel):
-    opportunity_id: str
-    candidate_id: str
+class StrictDTO(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
-class CreateApplicationAttemptRequest(BaseModel):
-    opportunity_id: str
+class CreateApplicationRequest(StrictDTO):
+    opportunity_id: UUID
+    candidate_id: UUID
+
+
+class CreateApplicationAttemptRequest(StrictDTO):
+    opportunity_id: UUID
     attempt_no: int = 1
 
 
-class CreateOfferRequest(BaseModel):
-    application_id: str
-    opportunity_id: str
-    candidate_id: str
-    offered_by: str
+class CreateOfferRequest(StrictDTO):
+    application_id: UUID
+    opportunity_id: UUID
+    candidate_id: UUID
 
 
-class CreatePlacementRequest(BaseModel):
-    application_id: str
-    offer_id: str
-    opportunity_id: str
-    candidate_id: str
-    organization_id: str
+class CreatePlacementRequest(StrictDTO):
+    application_id: UUID
+    offer_id: UUID
+    opportunity_id: UUID
+    candidate_id: UUID
+    organization_id: UUID
 
 
-class ConfirmPlacementStartRequest(BaseModel):
+class ConfirmPlacementStartRequest(StrictDTO):
     party: str  # CANDIDATE | ORGANIZATION
 
 
 @router.post("/applications", status_code=201)
-def create_application_endpoint(payload: CreateApplicationRequest) -> dict[str, Any]:
+def create_application_endpoint(payload: CreateApplicationRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return placement_service.create_application(
-        opportunity_id=payload.opportunity_id,
-        candidate_id=payload.candidate_id,
+        opportunity_id=str(payload.opportunity_id),
+        candidate_id=str(payload.candidate_id),
+        actor_user_id=actor.user_id,
     )
 
 
@@ -53,12 +60,14 @@ def create_application_endpoint(payload: CreateApplicationRequest) -> dict[str, 
 def create_application_attempt_endpoint(
     application_id: str,
     payload: CreateApplicationAttemptRequest,
+    actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     try:
         return placement_service.create_application_attempt(
             application_id=application_id,
-            opportunity_id=payload.opportunity_id,
+            opportunity_id=str(payload.opportunity_id),
             attempt_no=payload.attempt_no,
+            actor_user_id=actor.user_id,
         )
     except PlacementScopeError as exc:
         raise HTTPException(
@@ -68,13 +77,13 @@ def create_application_attempt_endpoint(
 
 
 @router.post("/offers", status_code=201)
-def create_offer_endpoint(payload: CreateOfferRequest) -> dict[str, Any]:
+def create_offer_endpoint(payload: CreateOfferRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     try:
         return placement_service.create_offer(
-            application_id=payload.application_id,
-            opportunity_id=payload.opportunity_id,
-            candidate_id=payload.candidate_id,
-            offered_by=payload.offered_by,
+            application_id=str(payload.application_id),
+            opportunity_id=str(payload.opportunity_id),
+            candidate_id=str(payload.candidate_id),
+            offered_by=actor.user_id,
         )
     except PlacementScopeError as exc:
         raise HTTPException(
@@ -84,14 +93,15 @@ def create_offer_endpoint(payload: CreateOfferRequest) -> dict[str, Any]:
 
 
 @router.post("/placements", status_code=201)
-def create_placement_endpoint(payload: CreatePlacementRequest) -> dict[str, Any]:
+def create_placement_endpoint(payload: CreatePlacementRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     try:
         return placement_service.create_placement(
-            application_id=payload.application_id,
-            offer_id=payload.offer_id,
-            opportunity_id=payload.opportunity_id,
-            candidate_id=payload.candidate_id,
-            organization_id=payload.organization_id,
+            application_id=str(payload.application_id),
+            offer_id=str(payload.offer_id),
+            opportunity_id=str(payload.opportunity_id),
+            candidate_id=str(payload.candidate_id),
+            organization_id=str(payload.organization_id),
+            actor_user_id=actor.user_id,
         )
     except PlacementScopeError as exc:
         raise HTTPException(
@@ -104,11 +114,13 @@ def create_placement_endpoint(payload: CreatePlacementRequest) -> dict[str, Any]
 def confirm_placement_start_endpoint(
     placement_id: str,
     payload: ConfirmPlacementStartRequest,
+    actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     try:
         return placement_service.confirm_placement_start(
             placement_id=placement_id,
             party=payload.party,
+            actor_user_id=actor.user_id,
         )
     except PlacementScopeError as exc:
         raise HTTPException(

@@ -1,0 +1,30 @@
+{
+  "transport": "native uvicorn + urllib HTTP",
+  "database_configured": false,
+  "checks": [
+    {
+      "check": "live_without_database",
+      "expected": 200,
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "check": "ready_without_database",
+      "expected": 503,
+      "observed": 503,
+      "passed": true
+    },
+    {
+      "check": "anonymous_finance",
+      "expected": 401,
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "check": "register_without_database",
+      "expected": 503,
+      "observed": 503,
+      "passed": true
+    }
+  ]
+}

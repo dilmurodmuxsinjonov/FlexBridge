@@ -1,0 +1,19 @@
+{
+  "backend/app/services/organizations.py": "7b880f163ba66b7bbcd3e84c75f04ff425fa882a241844318f22418bbea5c7be",
+  "backend/app/api/v1/organizations.py": "a27f2df600ad58cb7e906cdbdf488900532bb6f21d84f1e43badba1a3c7ad239",
+  "backend/alembic/versions/0004_org_onboarding.py": "2b317d3bdef66ba737a978baa57896c5a36780346a103ec7a7000affb1d26512",
+  "backend/app/db/storage.py": "7b3e1d671802fabf014c445ecea65eab6d309f533bcd7c37d4aa6ce46c3f0786",
+  "backend/app/services/billing.py": "d2b8a27fb673ecbb1c7f36329f94fc89843b919d6e7e82208dd84533de997afd",
+  "backend/app/services/governance.py": "e49b258ccaabfc41fe815c841dc683e58ce731a5cce370613c4f6a5c60b042b9",
+  "backend/app/api/v1/governance.py": "de232f4fc0585d546eb273879af0a272949851003d9ab338432d489284489c60",
+  "backend/app/main.py": "a49ef3dde6032ef5d5ae6e1ae8b72d25b9bcc0b06a75f82aee0051fc9a70b37a",
+  "backend/app/core/iam_http.py": "69a9efa9a8b88e758e52d7bf441ce8ae364def64c7ffdb6f91e8d031f75c6c45",
+  "backend/tests/conftest.py": "e956fb36423ed163137d9bd08be7f48c5e3a1435d448b4cd25813eede0dbc792",
+  "backend/tests/security/test_organizations.py": "6dbcd3ccf9f31f6b98525872c3761e9fb27fadf332d1bbcf4ec56ed9348f7cff",
+  "backend/tests/security/test_regressions.py": "5833358e480cd4993b6d51a089a6253269acd3c82426802e7b737d9f31d3ce54",
+  "backend/ORGANIZATIONS.md": "3abed43a295c69e18511422d44632978216f3fa83a19eec5fad940450b4f094c",
+  "backend/README.md": "9a0e746a51063cdaa54d8c0b87d264146d2f373bfd4496332a523307ab26ae1d",
+  "reviews/2026-11-07/org/run_validation.py": "91d45705b3f8177a9a242d4c9f99460ac0b65f18a39740c62721a84dc512e0bd",
+  "reviews/2026-11-07/org/native_smoke.py": "eb3297680129b426c3cf719f4cf15ca3ebd16b7a392f2e7245ffb06726e7be92",
+  "reviews/2026-11-07/org/check_upgrade.py": "4a9b43654a6baa96ed29240c034376feef06b6f9794bb06f9f92c5c0098a7c7c"
+}

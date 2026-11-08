@@ -1,657 +1,273 @@
-"""S2.8.1 & FIX-05..07 / REV-002: Tariffs, 5-Slot Concurrent Quota (ORG_PLAN_30D), Provider Webhook Confirmation, Cross-Process SQL Persistence, Payload-Bound Idempotency & Cumulative Dual-Control Refunds.
-
-Implements:
-- DB-069 service_entitlements (SINGLE_POST_30D = 149,000 UZS / 1 slot, ORG_PLAN_30D = 599,000 UZS / 5 concurrent active slots, INV-04, validity window check R-11)
-- AC-042 concurrent slot enforcement: when 5 opportunities are PUBLISHED on ORG_PLAN_30D, publishing a 6th fails with CONCURRENT_QUOTA_REACHED; closing/pausing 1 slot allows publishing the next
-- DB-070 orders, DB-071 invoices, DB-072 payment_attempts persisted across worker processes via SQL storage (`app.db.storage`)
-- DB-073 refunds (cumulative refund_amount_uzs <= invoice.amount_uzs INV-05 & INV-12 R-06, Dual-Control approvers INV-11)
-"""
-
+"""PostgreSQL transactions for orders, captures, quota and independently approved refunds."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
-from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass
+from datetime import timedelta
+from decimal import Decimal
 import hashlib
 import hmac
-from typing import Any, Dict, Optional, Tuple
-import uuid
-
+import json
+import os
+import time
+from uuid import uuid4, uuid5, NAMESPACE_URL
+from sqlalchemy import select, func
+from sqlalchemy.dialects.postgresql import insert
+from app.db.storage import table, transaction, now, enqueue
+from app.core.circuit_breaker import shared_circuit_breaker
 from app.core.audit import AppendOnlyAuditStore
-from app.core.circuit_breaker import FinanceCircuitBreaker, shared_circuit_breaker
-from app.db.storage import load_domain_record, save_domain_record
-
 
 class BillingInvariantError(ValueError):
-    """Raised when INV-04, INV-05, INV-10, INV-11, INV-12, or AC-042 billing rules are violated."""
+    pass
 
-
-TARIFF_CATALOG: Dict[str, Dict[str, Optional[int]]] = {
-    "SINGLE_POST_30D": {
-        "price_uzs": 149_000,
-        "total_post_credits": 1,
-        "concurrent_active_limit": 1,
-        "duration_days": 30,
-    },
-    "ORG_PLAN_30D": {
-        "price_uzs": 599_000,
-        "total_post_credits": None,
-        "concurrent_active_limit": 5,
-        "duration_days": 30,
-    },
-}
-
-
-@dataclass(frozen=True)
-class ServiceEntitlement:
-    """Represents a row in DB-069 service_entitlements."""
-
-    id: str
-    organization_id: str
-    plan_code: str
-    total_post_credits: Optional[int]
-    used_post_credits: int
-    concurrent_active_limit: int
-    status: str
-    valid_from: datetime
-    valid_until: datetime
-
+TARIFF_CATALOG={
+    'SINGLE_POST_30D':{'price_uzs':149000,'total_post_credits':1,'concurrent_active_limit':1,'duration_days':30},
+    'ORG_PLAN_30D':{'price_uzs':599000,'total_post_credits':None,'concurrent_active_limit':5,'duration_days':30}}
 
 @dataclass(frozen=True)
 class OrderRecord:
-    """Represents a row in DB-070 orders."""
-
-    id: str
-    organization_id: str
-    plan_code: str
-    amount_uzs: int
-    currency_code: str
-    status: str
-    created_by: str
-    created_at: datetime
-
-
+    id:str; organization_id:str; plan_code:str; amount_uzs:int; currency_code:str; status:str; created_by:str; created_at:object
 @dataclass(frozen=True)
 class InvoiceRecord:
-    """Represents a row in DB-071 invoices."""
-
-    id: str
-    order_id: str
-    organization_id: str
-    amount_uzs: int
-    currency_code: str
-    status: str
-    issued_at: datetime
-    paid_at: Optional[datetime] = None
-
-
+    id:str; order_id:str; organization_id:str; amount_uzs:int; currency_code:str; status:str; issued_at:object; paid_at:object=None
 @dataclass(frozen=True)
 class PaymentAttemptRecord:
-    """Represents a row in DB-072 payment_attempts."""
+    id:str; invoice_id:str; provider_code:str; idempotency_key:str; amount_uzs:int; currency_code:str; status:str; entitlement_id:str|None; created_at:object
 
-    id: str
-    invoice_id: str
-    provider_code: str
-    idempotency_key: str
-    amount_uzs: int
-    currency_code: str
-    status: str
-    entitlement_id: Optional[str]
-    created_at: datetime
+def _id(label): return str(uuid5(NAMESPACE_URL,'flexbridge:'+label))
+def _fingerprint(value): return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
-
-@dataclass(frozen=True)
-class RefundRecord:
-    """Represents a row in DB-073 refunds."""
-
-    id: str
-    invoice_id: str
-    amount_uzs: int
-    currency_code: str
-    reason: str
-    requested_by: str
-    approved_by: str
-    second_approver_id: str
-    status: str
-    created_at: datetime
-
-
-@dataclass
 class BillingQuotaService:
-    """Manages tariffs, payment idempotency, provider webhooks, concurrent opportunity slots (AC-042), and dual-control refunds."""
+    circuit_breaker=shared_circuit_breaker
+    audit_store=AppendOnlyAuditStore()
 
-    audit_store: AppendOnlyAuditStore = field(default_factory=AppendOnlyAuditStore)
-    circuit_breaker: FinanceCircuitBreaker = field(default_factory=lambda: shared_circuit_breaker)
-    _orders: Dict[str, OrderRecord] = field(default_factory=dict)
-    _invoices: Dict[str, InvoiceRecord] = field(default_factory=dict)
-    _payment_attempts_by_key: Dict[str, PaymentAttemptRecord] = field(default_factory=dict)
-    _idempotency_fingerprints: Dict[str, Tuple[str, int, str, str]] = field(default_factory=dict)
-    _entitlements: Dict[str, ServiceEntitlement] = field(default_factory=dict)
-    _org_active_entitlement: Dict[str, str] = field(default_factory=dict)
-    _org_opportunity_statuses: Dict[str, Dict[str, str]] = field(default_factory=dict)
-    _refunds: Dict[str, RefundRecord] = field(default_factory=dict)
-    _webhook_secret: str = "flexbridge-r1-webhook-hmac-secret"
-
-    def _save_order(self, order: OrderRecord) -> None:
-        self._orders[order.id] = order
-        save_domain_record(
-            "orders",
-            order.id,
-            {
-                "id": order.id,
-                "organization_id": order.organization_id,
-                "plan_code": order.plan_code,
-                "amount_uzs": order.amount_uzs,
-                "currency_code": order.currency_code,
-                "status": order.status,
-                "created_by": order.created_by,
-                "created_at": order.created_at.isoformat(),
-            },
-        )
-
-    def _get_order(self, order_id: str) -> OrderRecord | None:
-        if order_id in self._orders:
-            return self._orders[order_id]
-        raw = load_domain_record("orders", order_id)
-        if not raw:
-            return None
-        order = OrderRecord(
-            id=raw["id"],
-            organization_id=raw["organization_id"],
-            plan_code=raw["plan_code"],
-            amount_uzs=int(raw["amount_uzs"]),
-            currency_code=raw["currency_code"],
-            status=raw["status"],
-            created_by=raw["created_by"],
-            created_at=datetime.fromisoformat(raw["created_at"]),
-        )
-        self._orders[order.id] = order
-        return order
-
-    def _save_invoice(self, invoice: InvoiceRecord) -> None:
-        self._invoices[invoice.id] = invoice
-        save_domain_record(
-            "invoices",
-            invoice.id,
-            {
-                "id": invoice.id,
-                "order_id": invoice.order_id,
-                "organization_id": invoice.organization_id,
-                "amount_uzs": invoice.amount_uzs,
-                "currency_code": invoice.currency_code,
-                "status": invoice.status,
-                "issued_at": invoice.issued_at.isoformat(),
-                "paid_at": invoice.paid_at.isoformat() if invoice.paid_at else None,
-            },
-        )
-
-    def _get_invoice(self, invoice_id: str) -> InvoiceRecord | None:
-        if invoice_id in self._invoices:
-            return self._invoices[invoice_id]
-        raw = load_domain_record("invoices", invoice_id)
-        if not raw:
-            return None
-        invoice = InvoiceRecord(
-            id=raw["id"],
-            order_id=raw["order_id"],
-            organization_id=raw["organization_id"],
-            amount_uzs=int(raw["amount_uzs"]),
-            currency_code=raw["currency_code"],
-            status=raw["status"],
-            issued_at=datetime.fromisoformat(raw["issued_at"]),
-            paid_at=datetime.fromisoformat(raw["paid_at"]) if raw.get("paid_at") else None,
-        )
-        self._invoices[invoice.id] = invoice
-        return invoice
-
-    def sign_webhook_payload(self, *, provider: str, provider_event_id: str, idempotency_key: str, amount_uzs: int) -> str:
-        msg = f"{provider.upper()}:{provider_event_id}:{idempotency_key}:{amount_uzs}".encode("utf-8")
-        return hmac.new(self._webhook_secret.encode("utf-8"), msg, hashlib.sha256).hexdigest()
-
-    def create_order_and_invoice(
-        self,
-        *,
-        organization_id: str,
-        plan_code: str,
-        created_by: str,
-        currency_code: str = "UZS",
-    ) -> tuple[OrderRecord, InvoiceRecord]:
-        """Creates an order (DB-070) and invoice (DB-071) in UZS when P1 circuit breaker is CLOSED."""
-        if currency_code != "UZS":
-            raise BillingInvariantError("INV-05 violation: Only UZS currency is permitted in R1.")
-        if plan_code not in TARIFF_CATALOG:
-            raise BillingInvariantError(f"INV-04 violation: Unsupported plan_code '{plan_code}'.")
-
-        tariff = TARIFF_CATALOG[plan_code]
-        amount_uzs = int(tariff["price_uzs"] or 0)
-        if amount_uzs <= 0:
-            raise BillingInvariantError("INV-05 violation: Order amount_uzs must be positive.")
-
-        now = datetime.now(timezone.utc)
-        order = OrderRecord(
-            id=str(uuid.uuid4()),
-            organization_id=organization_id,
-            plan_code=plan_code,
-            amount_uzs=amount_uzs,
-            currency_code="UZS",
-            status="PENDING_PAYMENT",
-            created_by=created_by,
-            created_at=now,
-        )
-        invoice = InvoiceRecord(
-            id=str(uuid.uuid4()),
-            order_id=order.id,
-            organization_id=organization_id,
-            amount_uzs=amount_uzs,
-            currency_code="UZS",
-            status="ISSUED",
-            issued_at=now,
-        )
-        self._save_order(order)
-        self._save_invoice(invoice)
-        if (
-            organization_id in ("child-org", "org-child-proc", "org-fix-05", "org-quota-1")
-            or (organization_id == "review-org" and created_by == "invented-user")
-        ) and self.circuit_breaker.state != "CLOSED":
-            self.circuit_breaker.reset(
-                actor_id="review-fin-a",
-                second_approver_id="review-fin-b",
-                resolution_note="Auto-reset after cross-process breaker import verification",
-            )
-        self.circuit_breaker.require_closed(invoice_id=invoice.id, order_id=order.id)
-
-        self.audit_store.append_audit_event(
-            actor_id=created_by,
-            action="BILLING_ORDER_INVOICE_CREATED",
-            entity_type="invoices",
-            entity_id=invoice.id,
-            metadata={
-                "order_id": order.id,
-                "organization_id": organization_id,
-                "plan_code": plan_code,
-                "amount_uzs": amount_uzs,
-            },
-        )
-        return order, invoice
-
-    def process_payment_attempt(
-        self,
-        *,
-        invoice_id: str,
-        provider_code: str,
-        idempotency_key: str,
-        amount_uzs: int,
-        actor_user_id: str,
-        currency_code: str = "UZS",
-        provider_confirmed: bool = False,
-    ) -> PaymentAttemptRecord:
-        """Initiates a payment attempt (`PENDING_PROVIDER` until confirmed via `API-X04` webhook) with payload-bound idempotency (`FIX-05`)."""
-        self.circuit_breaker.require_closed(invoice_id=invoice_id)
-        if not idempotency_key or not idempotency_key.strip():
-            raise BillingInvariantError("DB-072 violation: idempotency_key is required.")
-
-        incoming_fingerprint = (invoice_id, amount_uzs, currency_code, actor_user_id)
-        if idempotency_key in self._payment_attempts_by_key:
-            stored_fingerprint = self._idempotency_fingerprints.get(idempotency_key)
-            if stored_fingerprint != incoming_fingerprint:
-                raise BillingInvariantError(
-                    "IDEMPOTENCY_CONFLICT: idempotency_key was already used with a different payment payload (R-10)."
-                )
-            return self._payment_attempts_by_key[idempotency_key]
-
-        if currency_code != "UZS":
-            raise BillingInvariantError("INV-05 violation: Payment currency_code must be 'UZS'.")
-        invoice = self._get_invoice(invoice_id)
-        if invoice is None:
-            raise BillingInvariantError(f"Invoice '{invoice_id}' not found.")
-
-        if invoice.status == "PAID":
-            raise BillingInvariantError("INV-10 violation: Invoice is already PAID.")
-        if amount_uzs != invoice.amount_uzs:
-            raise BillingInvariantError(
-                f"INV-10 violation: Payment amount ({amount_uzs} UZS) must match invoice amount ({invoice.amount_uzs} UZS)."
-            )
-
-        order = self._get_order(invoice.order_id)
-        if order is None:
-            raise BillingInvariantError(f"Order '{invoice.order_id}' not found.")
-        tariff = TARIFF_CATALOG[order.plan_code]
-        now = datetime.now(timezone.utc)
-
-        entitlement_status = "ACTIVE" if provider_confirmed else "PENDING_PROVIDER"
-        entitlement = ServiceEntitlement(
-            id=str(uuid.uuid4()),
-            organization_id=order.organization_id,
-            plan_code=order.plan_code,
-            total_post_credits=tariff["total_post_credits"],
-            used_post_credits=0,
-            concurrent_active_limit=int(tariff["concurrent_active_limit"] or 1),
-            status=entitlement_status,
-            valid_from=now,
-            valid_until=now + timedelta(days=int(tariff["duration_days"] or 30)),
-        )
-        self._entitlements[entitlement.id] = entitlement
-        self._org_active_entitlement[order.organization_id] = entitlement.id
-
-        attempt_status = "SUCCEEDED" if provider_confirmed else "PENDING_PROVIDER"
-        attempt = PaymentAttemptRecord(
-            id=str(uuid.uuid4()),
-            invoice_id=invoice.id,
-            provider_code=provider_code,
-            idempotency_key=idempotency_key,
-            amount_uzs=amount_uzs,
-            currency_code="UZS",
-            status=attempt_status,
-            entitlement_id=entitlement.id,
-            created_at=now,
-        )
-        self._payment_attempts_by_key[idempotency_key] = attempt
-        self._idempotency_fingerprints[idempotency_key] = incoming_fingerprint
-
-        if provider_confirmed:
-            self._finalize_confirmed_payment(attempt=attempt, actor_user_id=actor_user_id)
-        else:
-            self.audit_store.append_audit_event(
-                actor_id=actor_user_id,
-                action="PAYMENT_ATTEMPT_INITIATED_PENDING_PROVIDER",
-                entity_type="payment_attempts",
-                entity_id=attempt.id,
-                metadata={
-                    "invoice_id": invoice.id,
-                    "idempotency_key": idempotency_key,
-                    "entitlement_id": entitlement.id,
-                    "status": attempt.status,
-                },
-            )
-        return self._payment_attempts_by_key[idempotency_key]
-
-    def _finalize_confirmed_payment(self, *, attempt: PaymentAttemptRecord, actor_user_id: str) -> PaymentAttemptRecord:
-        now = datetime.now(timezone.utc)
-        invoice = self._get_invoice(attempt.invoice_id)
-        if invoice is None:
-            raise BillingInvariantError(f"Invoice '{attempt.invoice_id}' not found.")
-        order = self._get_order(invoice.order_id)
-        if order is None:
-            raise BillingInvariantError(f"Order '{invoice.order_id}' not found.")
-
-        if attempt.entitlement_id and attempt.entitlement_id in self._entitlements:
-            ent = self._entitlements[attempt.entitlement_id]
-            self._entitlements[ent.id] = replace(
-                ent,
-                status="ACTIVE",
-                valid_from=now,
-                valid_until=now + timedelta(days=int(TARIFF_CATALOG[order.plan_code]["duration_days"] or 30)),
-            )
-            self._org_active_entitlement[order.organization_id] = ent.id
-
-        paid_inv = replace(invoice, status="PAID", paid_at=now)
-        comp_ord = replace(order, status="COMPLETED")
-        self._save_invoice(paid_inv)
-        self._save_order(comp_ord)
-        confirmed_attempt = replace(attempt, status="SUCCEEDED")
-        self._payment_attempts_by_key[attempt.idempotency_key] = confirmed_attempt
-
-        self.audit_store.append_billing_ledger_entry(
-            organization_id=order.organization_id,
-            entry_type="PAYMENT_CAPTURED",
-            amount_uzs=attempt.amount_uzs,
-            reference_id=confirmed_attempt.id,
-        )
-        self.audit_store.append_audit_event(
-            actor_id=actor_user_id,
-            action="PAYMENT_SUCCEEDED_ENTITLEMENT_GRANTED",
-            entity_type="payment_attempts",
-            entity_id=confirmed_attempt.id,
-            metadata={
-                "invoice_id": invoice.id,
-                "idempotency_key": attempt.idempotency_key,
-                "entitlement_id": attempt.entitlement_id,
-                "plan_code": order.plan_code,
-            },
-        )
-        return confirmed_attempt
-
-    def confirm_payment_webhook_api_x04(
-        self,
-        *,
-        provider: str,
-        provider_event_id: str,
-        idempotency_key: str,
-        amount_uzs: int,
-        signature: str,
-    ) -> dict[str, Any]:
-        """API-X04: Verify provider webhook HMAC signature and transition payment attempt from PENDING_PROVIDER to SUCCEEDED."""
+    def _guard(self,conn,org):
         self.circuit_breaker.require_closed()
-        expected_sig = self.sign_webhook_payload(
-            provider=provider,
-            provider_event_id=provider_event_id,
-            idempotency_key=idempotency_key,
-            amount_uzs=amount_uzs,
-        )
-        if not hmac.compare_digest(signature, expected_sig) and signature != "VALID_PROVIDER_WEBHOOK_SIGNATURE":
-            raise BillingInvariantError("WEBHOOK_SIGNATURE_INVALID: Provider HMAC signature verification failed (API-X04).")
+        if not conn.execute(select(table('organizations').c.id).where(table('organizations').c.id==org).with_for_update()).first():
+            raise BillingInvariantError('ORGANIZATION_NOT_FOUND')
 
-        if idempotency_key not in self._payment_attempts_by_key:
-            raise BillingInvariantError(f"Payment attempt for idempotency_key '{idempotency_key}' not found.")
+    def _audit(self,actor,action,kind,key,meta=None):
+        self.audit_store.append_audit_event(actor_id=actor,action=action,entity_type=kind,entity_id=key,metadata=meta or {})
 
-        attempt = self._payment_attempts_by_key[idempotency_key]
-        if attempt.amount_uzs != amount_uzs:
-            raise BillingInvariantError("INV-10 violation: Webhook amount_uzs does not match payment attempt amount.")
+    def _seed_tariff(self,conn,code):
+        if code not in TARIFF_CATALOG: raise BillingInvariantError('UNKNOWN_TARIFF')
+        tariff=TARIFF_CATALOG[code]
+        # Versioned product seed is deterministic and never changes an existing price.
+        conn.execute(insert(table('products')).values(id=_id(code),created_at=now(),updated_at=now(),code=code,
+            name=code,service_kind=code,active=True).on_conflict_do_nothing(index_elements=['id']))
+        price_id=_id(code+':v1')
+        conn.execute(insert(table('price_versions')).values(id=price_id,created_at=now(),updated_at=now(),product_id=_id(code),version=1,
+            amount=tariff['price_uzs'],currency='UZS',duration_days=30,tax_included=True,valid_from=now()).on_conflict_do_nothing(index_elements=['id']))
+        return price_id,tariff
 
-        if attempt.status == "SUCCEEDED":
-            return {
-                "contract_id": "API-X04",
-                "attempt_id": attempt.id,
-                "invoice_id": attempt.invoice_id,
-                "status": attempt.status,
-                "entitlement_id": attempt.entitlement_id,
-                "idempotent_replay": True,
-            }
+    def create_order_and_invoice(self,*,organization_id,plan_code,created_by,currency_code='UZS',idempotency_key=None):
+        from app.api.dependencies import ActorContext,require_org
+        if currency_code!='UZS': raise BillingInvariantError('INVALID_CURRENCY')
+        key=idempotency_key or str(uuid4())
+        with transaction() as conn:
+            self._guard(conn,organization_id)
+            require_org(ActorContext(created_by,'',()),organization_id,'OWNER','BILLING')
+            price_id,tariff=self._seed_tariff(conn,plan_code)
+            # Same user and operation key cannot be reused for a different target or price.
+            digest=_fingerprint([organization_id,plan_code,currency_code])
+            replay=self._claim(conn,created_by,'CREATE_ORDER',key,digest)
+            if replay:
+                order=self._get_order(replay,conn)
+                invoice=self._invoice_for_order(replay,conn)
+                return order,invoice
+            order_id,invoice_id=str(uuid4()),str(uuid4())
+            conn.execute(table('orders').insert().values(id=order_id,created_at=now(),updated_at=now(),organization_id=organization_id,
+                purchaser_id=created_by,price_id=price_id,amount=tariff['price_uzs'],currency='UZS',price_snapshot={'plan_code':plan_code,**tariff},
+                status='PENDING_PAYMENT',idempotency_key=str(uuid4())))
+            conn.execute(table('invoices').insert().values(id=invoice_id,created_at=now(),updated_at=now(),order_id=order_id,
+                number='FB-'+invoice_id,amount=tariff['price_uzs'],currency='UZS',fiscal_status='PENDING',issued_at=now()))
+            self._finish(conn,created_by,'CREATE_ORDER',key,order_id)
+            self._audit(created_by,'ORDER_CREATED','order',order_id)
+            return self._get_order(order_id,conn),self._invoice_for_order(order_id,conn)
 
-        confirmed = self._finalize_confirmed_payment(attempt=attempt, actor_user_id=f"webhook:{provider.upper()}")
-        return {
-            "contract_id": "API-X04",
-            "attempt_id": confirmed.id,
-            "invoice_id": confirmed.invoice_id,
-            "status": confirmed.status,
-            "entitlement_id": confirmed.entitlement_id,
-            "idempotent_replay": False,
-        }
+    def _claim(self,conn,user,operation,key,digest):
+        idem=table('idempotency_keys')
+        conn.execute(insert(idem).values(id=str(uuid4()),created_at=now(),updated_at=now(),user_id=user,operation=operation,
+            key=key,request_digest=digest,expires_at=now()+timedelta(days=1)).on_conflict_do_nothing(index_elements=['user_id','operation','key']))
+        row=conn.execute(select(idem).where(idem.c.user_id==user,idem.c.operation==operation,idem.c.key==key).with_for_update()).mappings().one()
+        if row['request_digest']!=digest: raise BillingInvariantError('IDEMPOTENCY_CONFLICT')
+        return row['response_ref']
 
-    def publish_opportunity_with_quota(
-        self,
-        *,
-        organization_id: str,
-        opportunity_id: str,
-        actor_user_id: str,
-    ) -> Dict[str, object]:
-        """Publishes an opportunity while strictly enforcing INV-04, R-11 validity window & AC-042 concurrent slot limits."""
-        ent_id = self._org_active_entitlement.get(organization_id)
-        if not ent_id or ent_id not in self._entitlements:
-            raise BillingInvariantError("INV-04 violation: Organization has no active service entitlement.")
+    def _finish(self,conn,user,operation,key,ref):
+        t=table('idempotency_keys')
+        conn.execute(t.update().where(t.c.user_id==user,t.c.operation==operation,t.c.key==key)
+            .values(response_status=200,response_ref=ref,updated_at=now()))
 
-        ent = self._entitlements[ent_id]
-        now = datetime.now(timezone.utc)
-        if ent.valid_until <= now or ent.valid_from > now:
-            raise BillingInvariantError(
-                f"ENTITLEMENT_EXPIRED: Entitlement '{ent.id}' expired at {ent.valid_until.isoformat()} (R-11 / INV-04)."
-            )
-        if ent.status != "ACTIVE":
-            raise BillingInvariantError(
-                f"ENTITLEMENT_NOT_ACTIVE: Entitlement '{ent.id}' has status '{ent.status}' (requires ACTIVE after provider confirmation, R-02)."
-            )
+    def _get_order(self,id,conn=None):
+        with transaction() as c:
+            r=(conn or c).execute(select(table('orders')).where(table('orders').c.id==id)).mappings().first()
+            return OrderRecord(r['id'],r['organization_id'],r['price_snapshot']['plan_code'],int(r['amount']),r['currency'],r['status'],r['purchaser_id'],r['created_at']) if r else None
 
-        org_opps = self._org_opportunity_statuses.setdefault(organization_id, {})
+    def _invoice_for_order(self,id,conn):
+        r=conn.execute(select(table('invoices')).where(table('invoices').c.order_id==id)).mappings().one()
+        org=conn.execute(select(table('orders').c.organization_id).where(table('orders').c.id==id)).scalar_one()
+        return InvoiceRecord(r['id'],id,org,int(r['amount']),r['currency'],'PAID' if r['paid_at'] else 'ISSUED',r['issued_at'],r['paid_at'])
 
-        active_published_count = sum(
-            1 for opp_id, status in org_opps.items() if status == "PUBLISHED" and opp_id != opportunity_id
-        )
-        if active_published_count >= ent.concurrent_active_limit:
-            raise BillingInvariantError(
-                f"CONCURRENT_QUOTA_REACHED: Organization '{organization_id}' already has "
-                f"{active_published_count}/{ent.concurrent_active_limit} active PUBLISHED opportunities "
-                f"under '{ent.plan_code}' (INV-04 / AC-042)."
-            )
+    def _get_invoice(self,id):
+        with transaction() as conn:
+            oid=conn.execute(select(table('invoices').c.order_id).where(table('invoices').c.id==id)).scalar_one_or_none()
+            return self._invoice_for_order(oid,conn) if oid else None
 
-        if ent.total_post_credits is not None and opportunity_id not in org_opps:
-            if ent.used_post_credits >= ent.total_post_credits:
-                raise BillingInvariantError(
-                    f"POST_CREDITS_EXHAUSTED: '{ent.plan_code}' total credits ({ent.total_post_credits}) used."
-                )
-            self._entitlements[ent.id] = ServiceEntitlement(
-                id=ent.id,
-                organization_id=ent.organization_id,
-                plan_code=ent.plan_code,
-                total_post_credits=ent.total_post_credits,
-                used_post_credits=ent.used_post_credits + 1,
-                concurrent_active_limit=ent.concurrent_active_limit,
-                status=ent.status,
-                valid_from=ent.valid_from,
-                valid_until=ent.valid_until,
-            )
+    def _attempt(self,conn,id,key=''):
+        r=conn.execute(select(table('payment_attempts')).where(table('payment_attempts').c.id==id)).mappings().one()
+        invoice=self._invoice_for_order(r['order_id'],conn)
+        entitlement=conn.execute(select(table('service_entitlements').c.id).where(table('service_entitlements').c.order_id==r['order_id'])).scalar_one_or_none()
+        return PaymentAttemptRecord(r['id'],invoice.id,r['provider'],key,int(r['amount']),r['currency'],r['status'],entitlement,r['created_at'])
 
-        org_opps[opportunity_id] = "PUBLISHED"
-        new_active_count = sum(1 for status in org_opps.values() if status == "PUBLISHED")
+    def process_payment_attempt(self,*,invoice_id,provider_code,idempotency_key,amount_uzs,actor_user_id,currency_code='UZS',provider_confirmed=False):
+        from app.api.dependencies import ActorContext,require_org
+        if provider_confirmed: raise BillingInvariantError('PROVIDER_CONFIRMATION_MUST_USE_AUTHENTICATED_CALLBACK')
+        if provider_code!='HMAC': raise BillingInvariantError('PROVIDER_ADAPTER_NOT_CONFIGURED')
+        with transaction() as conn:
+            inv=self._get_invoice(invoice_id)
+            if not inv: raise BillingInvariantError('INVOICE_NOT_FOUND')
+            self._guard(conn,inv.organization_id)
+            require_org(ActorContext(actor_user_id,'',()),inv.organization_id,'OWNER','BILLING')
+            invoice=conn.execute(select(table('invoices')).where(table('invoices').c.id==invoice_id).with_for_update()).mappings().one()
+            replay=self._claim(conn,actor_user_id,'PAYMENT_ATTEMPT',idempotency_key,_fingerprint([invoice_id,provider_code,amount_uzs,currency_code]))
+            if replay: return self._attempt(conn,replay,idempotency_key)
+            if invoice['paid_at']: raise BillingInvariantError('INVOICE_ALREADY_PAID')
+            if Decimal(amount_uzs)!=invoice['amount'] or currency_code!=invoice['currency']: raise BillingInvariantError('PAYMENT_AMOUNT_MISMATCH')
+            attempt_id=str(uuid4())
+            conn.execute(table('payment_attempts').insert().values(id=attempt_id,created_at=now(),updated_at=now(),order_id=invoice['order_id'],
+                provider=provider_code,amount=invoice['amount'],currency=invoice['currency'],status='PENDING_PROVIDER',requested_at=now()))
+            self._finish(conn,actor_user_id,'PAYMENT_ATTEMPT',idempotency_key,attempt_id)
+            return self._attempt(conn,attempt_id,idempotency_key)
 
-        self.audit_store.append_audit_event(
-            actor_id=actor_user_id,
-            action="OPPORTUNITY_PUBLISHED_WITH_QUOTA",
-            entity_type="opportunities",
-            entity_id=opportunity_id,
-            metadata={
-                "organization_id": organization_id,
-                "plan_code": ent.plan_code,
-                "active_published_count": new_active_count,
-                "concurrent_active_limit": ent.concurrent_active_limit,
-            },
-        )
-        return {
-            "organization_id": organization_id,
-            "opportunity_id": opportunity_id,
-            "status": "PUBLISHED",
-            "active_published_count": new_active_count,
-            "concurrent_active_limit": ent.concurrent_active_limit,
-        }
+    def sign_webhook_payload(self,*,provider,provider_event_id,attempt_id,amount_uzs,currency='UZS',timestamp):
+        if provider!='HMAC': raise BillingInvariantError('PROVIDER_ADAPTER_NOT_CONFIGURED')
+        secret=os.environ.get('PAYMENT_WEBHOOK_SECRET','')
+        if len(secret)<32: raise BillingInvariantError('PAYMENT_WEBHOOK_NOT_CONFIGURED')
+        body=json.dumps([provider,provider_event_id,str(attempt_id),amount_uzs,currency,timestamp],separators=(',',':'))
+        return hmac.new(secret.encode(),body.encode(),hashlib.sha256).hexdigest()
 
-    def update_opportunity_status(
-        self,
-        *,
-        organization_id: str,
-        opportunity_id: str,
-        new_status: str,
-        actor_user_id: str,
-    ) -> Dict[str, object]:
-        """Updates opportunity status (e.g., CLOSED or PAUSED), freeing up a concurrent slot (AC-042)."""
-        if new_status not in {"PUBLISHED", "PAUSED", "CLOSED", "ARCHIVED"}:
-            raise BillingInvariantError(f"Unsupported opportunity status '{new_status}'.")
-        if new_status == "PUBLISHED":
-            return self.publish_opportunity_with_quota(
-                organization_id=organization_id,
-                opportunity_id=opportunity_id,
-                actor_user_id=actor_user_id,
-            )
+    def confirm_payment_webhook_api_x04(self,*,provider,provider_event_id,attempt_id,amount_uzs,signature,timestamp,currency='UZS'):
+        expected=self.sign_webhook_payload(provider=provider,provider_event_id=provider_event_id,attempt_id=attempt_id,
+            amount_uzs=amount_uzs,currency=currency,timestamp=timestamp)
+        if abs(time.time()-timestamp)>300 or not hmac.compare_digest(signature,expected): raise BillingInvariantError('WEBHOOK_SIGNATURE_INVALID')
+        with transaction() as conn:
+            pa,orders=table('payment_attempts'),table('orders')
+            original=conn.execute(select(pa).where(pa.c.id==attempt_id)).mappings().first()
+            if not original: raise BillingInvariantError('PAYMENT_ATTEMPT_NOT_FOUND')
+            order=conn.execute(select(orders).where(orders.c.id==original['order_id'])).mappings().one()
+            # Captured facts can arrive during an incident; no new checkout/refund is admitted.
+            conn.execute(select(table('organizations').c.id).where(table('organizations').c.id==order['organization_id']).with_for_update())
+            order=conn.execute(select(orders).where(orders.c.id==order['id']).with_for_update()).mappings().one()
+            attempt=conn.execute(select(pa).where(pa.c.id==attempt_id).with_for_update()).mappings().one()
+            if attempt['provider']!=provider or attempt['currency']!=currency or attempt['amount']!=Decimal(amount_uzs):
+                raise BillingInvariantError('PAYMENT_AMOUNT_MISMATCH')
+            events=table('payment_events')
+            digest=_fingerprint([str(attempt_id),amount_uzs,currency])
+            previous=conn.execute(select(events).where(events.c.provider==provider,events.c.event_key==provider_event_id)).mappings().first()
+            if previous:
+                if previous['payload_digest']!=digest: raise BillingInvariantError('PROVIDER_EVENT_CONFLICT')
+                return {'attempt_id':attempt_id,'status':'CAPTURED','idempotent_replay':True}
+            if attempt['status']=='CAPTURED':
+                return {'attempt_id':attempt_id,'status':'CAPTURED','idempotent_replay':True}
+            invoice=self._invoice_for_order(order['id'],conn)
+            if invoice.paid_at: raise BillingInvariantError('ORDER_ALREADY_CAPTURED')
+            conn.execute(events.insert().values(id=str(uuid4()),created_at=now(),updated_at=now(),attempt_id=attempt_id,provider=provider,
+                event_key=provider_event_id,payload_digest=digest,normalized_payload={'amount':amount_uzs,'currency':currency},received_at=now(),processed_at=now()))
+            conn.execute(pa.update().where(pa.c.id==attempt_id).values(status='CAPTURED',provider_transaction_id=provider_event_id,confirmed_at=now(),updated_at=now()))
+            conn.execute(table('invoices').update().where(table('invoices').c.id==invoice.id).values(paid_at=now(),updated_at=now()))
+            conn.execute(orders.update().where(orders.c.id==order['id']).values(status='COMPLETED',updated_at=now()))
+            tariff=order['price_snapshot']
+            conn.execute(table('service_entitlements').insert().values(id=str(uuid4()),created_at=now(),updated_at=now(),organization_id=order['organization_id'],
+                order_id=order['id'],service_kind=tariff['plan_code'],status='ACTIVE',starts_at=now(),ends_at=now()+timedelta(days=tariff['duration_days']),
+                quota=tariff['total_post_credits'],concurrent_active_limit=tariff['concurrent_active_limit']))
+            conn.execute(table('billing_ledger').insert().values(id=str(uuid4()),created_at=now(),updated_at=now(),organization_id=order['organization_id'],
+                order_id=order['id'],payment_attempt_id=attempt_id,entry_kind='PAYMENT_CAPTURED',amount=amount_uzs,currency=currency,occurred_at=now(),dedupe_key='capture:'+str(attempt_id)))
+            self._audit(None,'PAYMENT_CAPTURED','payment',str(attempt_id))
+            return {'attempt_id':attempt_id,'status':'CAPTURED','idempotent_replay':False}
 
-        org_opps = self._org_opportunity_statuses.setdefault(organization_id, {})
-        if opportunity_id not in org_opps:
-            raise BillingInvariantError(f"Opportunity '{opportunity_id}' not found for organization.")
+    def active_entitlement(self,organization_id,conn=None):
+        t=table('service_entitlements')
+        with transaction() as c:
+            return (conn or c).execute(select(t).where(t.c.organization_id==organization_id,t.c.status=='ACTIVE',t.c.starts_at<=now(),t.c.ends_at>now())
+                .order_by(t.c.ends_at.desc(),t.c.id).limit(1)).mappings().first()
 
-        org_opps[opportunity_id] = new_status
-        ent = self._entitlements[self._org_active_entitlement[organization_id]]
-        active_published_count = sum(1 for status in org_opps.values() if status == "PUBLISHED")
+    def publish_opportunity_with_quota(self,*,organization_id,opportunity_id,actor_user_id):
+        from app.api.dependencies import ActorContext,require_org
+        with transaction() as conn:
+            self._guard(conn,organization_id)
+            require_org(ActorContext(actor_user_id,'',()),organization_id,'OWNER','HR','HOST_COORDINATOR')
+            ent=self.active_entitlement(organization_id,conn)
+            if not ent: raise BillingInvariantError('ACTIVE_ENTITLEMENT_REQUIRED')
+            opps=table('opportunities')
+            opp=conn.execute(select(opps).where(opps.c.id==opportunity_id,opps.c.organization_id==organization_id).with_for_update()).mappings().first()
+            if not opp: raise BillingInvariantError('OPPORTUNITY_NOT_FOUND')
+            from app.services.organizations import require_capability
+            require_capability(conn, organization_id, 'JOB_EMPLOYER' if opp['kind']=='PART_TIME' else 'INTERNSHIP_HOST')
+            if opp['status']=='PUBLISHED': return {'status':'PUBLISHED','opportunity_id':opportunity_id}
+            if opp['status'] not in ('APPROVED','PAUSED'): raise BillingInvariantError('MODERATION_APPROVAL_REQUIRED')
+            count=conn.execute(select(func.count()).select_from(opps).where(opps.c.organization_id==organization_id,opps.c.status=='PUBLISHED',
+                (opps.c.expires_at.is_(None)) | (opps.c.expires_at>now()))).scalar_one()
+            if count>=ent['concurrent_active_limit']: raise BillingInvariantError('CONCURRENT_QUOTA_REACHED')
+            if ent['quota'] is not None and opp['published_at'] is None:
+                if ent['quota']<=0: raise BillingInvariantError('POST_CREDITS_EXHAUSTED')
+                conn.execute(table('service_entitlements').update().where(table('service_entitlements').c.id==ent['id']).values(quota=ent['quota']-1))
+            conn.execute(opps.update().where(opps.c.id==opportunity_id).values(status='PUBLISHED',published_at=opp['published_at'] or now(),expires_at=ent['ends_at'],updated_at=now()))
+            conn.execute(table('opportunity_revisions').update().where(table('opportunity_revisions').c.id==opp['current_revision_id'],
+                table('opportunity_revisions').c.published_at.is_(None)).values(published_at=now()))
+            self._audit(actor_user_id,'OPPORTUNITY_PUBLISHED','opportunity',opportunity_id)
+            return {'status':'PUBLISHED','opportunity_id':opportunity_id,'active_published_count':count+1}
 
-        self.audit_store.append_audit_event(
-            actor_id=actor_user_id,
-            action="OPPORTUNITY_SLOT_STATUS_CHANGED",
-            entity_type="opportunities",
-            entity_id=opportunity_id,
-            metadata={
-                "organization_id": organization_id,
-                "new_status": new_status,
-                "active_published_count": active_published_count,
-                "concurrent_active_limit": ent.concurrent_active_limit,
-            },
-        )
-        return {
-            "organization_id": organization_id,
-            "opportunity_id": opportunity_id,
-            "status": new_status,
-            "active_published_count": active_published_count,
-            "concurrent_active_limit": ent.concurrent_active_limit,
-        }
+    def update_opportunity_status(self,*,opportunity_id,new_status,actor_user_id):
+        from app.api.dependencies import ActorContext,require_org
+        with transaction() as conn:
+            t=table('opportunities')
+            row=conn.execute(select(t).where(t.c.id==opportunity_id)).mappings().first()
+            if not row: raise BillingInvariantError('OPPORTUNITY_NOT_FOUND')
+            conn.execute(select(table('organizations').c.id).where(table('organizations').c.id==row['organization_id']).with_for_update())
+            require_org(ActorContext(actor_user_id,'',()),row['organization_id'],'OWNER','HR','HOST_COORDINATOR')
+            row=conn.execute(select(t).where(t.c.id==opportunity_id).with_for_update()).mappings().one()
+            if new_status not in ('PAUSED','CLOSED') or row['status'] not in ('PUBLISHED','PAUSED'): raise BillingInvariantError('INVALID_OPPORTUNITY_TRANSITION')
+            conn.execute(t.update().where(t.c.id==opportunity_id).values(status=new_status,updated_at=now()))
+            self._audit(actor_user_id,'OPPORTUNITY_'+new_status,'opportunity',opportunity_id)
+            return {'opportunity_id':opportunity_id,'status':new_status}
 
-    def request_and_approve_refund(
-        self,
-        *,
-        invoice_id: str,
-        amount_uzs: int,
-        reason: str,
-        requested_by: str,
-        approved_by: str,
-        second_approver_id: str,
-    ) -> RefundRecord:
-        """Executes a Dual-Control refund (DB-073) enforcing cumulative INV-05/INV-12 ceiling (`R-06`) and INV-11."""
-        self.circuit_breaker.require_closed(invoice_id=invoice_id)
-        invoice = self._get_invoice(invoice_id)
-        if invoice is None:
-            raise BillingInvariantError(f"Invoice '{invoice_id}' not found.")
+    def request_refund(self,*,invoice_id,amount_uzs,reason,requested_by):
+        from app.api.dependencies import ActorContext,require_org
+        with transaction() as conn:
+            inv=self._get_invoice(invoice_id)
+            if not inv: raise BillingInvariantError('INVOICE_NOT_FOUND')
+            self._guard(conn,inv.organization_id)
+            require_org(ActorContext(requested_by,'',()),inv.organization_id,'OWNER','BILLING')
+            pa=table('payment_attempts')
+            captured=conn.execute(select(pa).where(pa.c.order_id==inv.order_id,pa.c.status=='CAPTURED').with_for_update()).mappings().first()
+            if not captured: raise BillingInvariantError('CAPTURED_PAYMENT_REQUIRED')
+            refunds=table('refunds')
+            reserved=conn.execute(select(func.coalesce(func.sum(refunds.c.amount),0)).where(refunds.c.payment_attempt_id==captured['id'],
+                refunds.c.status.not_in(['REJECTED','CANCELLED','FAILED']))).scalar_one()
+            if amount_uzs<=0 or Decimal(amount_uzs)+reserved>captured['amount']: raise BillingInvariantError('REFUND_LIMIT_EXCEEDED')
+            rid=str(uuid4())
+            conn.execute(refunds.insert().values(id=rid,created_at=now(),updated_at=now(),payment_attempt_id=captured['id'],requester_id=requested_by,
+                amount=amount_uzs,currency=captured['currency'],reason=reason,status='REQUESTED'))
+            self._audit(requested_by,'REFUND_REQUESTED','refund',rid)
+            return {'refund_id':rid,'status':'REQUESTED'}
 
-        has_payment_attempt = any(a.invoice_id == invoice_id for a in self._payment_attempts_by_key.values())
-        if invoice.status not in ("PAID", "PARTIALLY_REFUNDED") and not (
-            has_payment_attempt and invoice.status != "REFUNDED"
-        ):
-            raise BillingInvariantError("INV-05 violation: Refund is only allowed for PAID or attempted invoices.")
+    def approve_refund(self,refund_id,actor_id):
+        from app.api.dependencies import ActorContext,require_platform
+        with transaction() as conn:
+            self.circuit_breaker.require_closed()
+            require_platform(ActorContext(actor_id,'',()),'FINANCE')
+            t=table('refunds')
+            r=conn.execute(select(t).where(t.c.id==refund_id).with_for_update()).mappings().first()
+            if not r: raise BillingInvariantError('REFUND_NOT_FOUND')
+            if actor_id in (r['requester_id'],r['approver_id'],r['second_approver_id']): raise BillingInvariantError('SELF_APPROVAL_FORBIDDEN')
+            if r['status'] not in ('REQUESTED','PENDING_SECOND_APPROVAL'): raise BillingInvariantError('INVALID_REFUND_STATE')
+            values={'updated_at':now()}
+            if r['approver_id'] is None: values.update(approver_id=actor_id,status='PENDING_SECOND_APPROVAL')
+            else:
+                values.update(second_approver_id=actor_id,status='APPROVED')
+                enqueue(conn,'REFUND_EXECUTE',str(refund_id),{'refund_id':str(refund_id)},'refund:'+str(refund_id))
+            conn.execute(t.update().where(t.c.id==refund_id).values(**values))
+            self._audit(actor_id,'REFUND_APPROVED','refund',str(refund_id))
+            return {'refund_id':refund_id,'status':values['status']}
 
-        already_refunded = sum(
-            r.amount_uzs
-            for r in self._refunds.values()
-            if r.invoice_id == invoice_id and r.status == "APPROVED"
-        )
-        if amount_uzs <= 0 or (already_refunded + amount_uzs) > invoice.amount_uzs:
-            raise BillingInvariantError(
-                f"INV-05 / INV-12 violation: Cumulative refund amount ({already_refunded + amount_uzs} UZS) "
-                f"must be > 0 and <= invoice amount ({invoice.amount_uzs} UZS)."
-            )
-
-        if len({requested_by, approved_by, second_approver_id}) < 3:
-            raise BillingInvariantError(
-                "INV-11 violation: Dual-Control refund requires distinct requested_by, approved_by, and second_approver_id."
-            )
-
-        refund = RefundRecord(
-            id=str(uuid.uuid4()),
-            invoice_id=invoice_id,
-            amount_uzs=amount_uzs,
-            currency_code="UZS",
-            reason=reason,
-            requested_by=requested_by,
-            approved_by=approved_by,
-            second_approver_id=second_approver_id,
-            status="APPROVED",
-            created_at=datetime.now(timezone.utc),
-        )
-        self._refunds[refund.id] = refund
-
-        new_total_refunded = already_refunded + amount_uzs
-        new_inv_status = "REFUNDED" if new_total_refunded == invoice.amount_uzs else "PARTIALLY_REFUNDED"
-        self._save_invoice(replace(invoice, status=new_inv_status))
-
-        self.audit_store.append_billing_ledger_entry(
-            organization_id=invoice.organization_id,
-            entry_type="REFUND_EXECUTED",
-            amount_uzs=-amount_uzs,
-            reference_id=refund.id,
-        )
-        self.audit_store.append_audit_event(
-            actor_id=second_approver_id,
-            action="REFUND_DUAL_CONTROL_APPROVED",
-            entity_type="refunds",
-            entity_id=refund.id,
-            metadata={
-                "invoice_id": invoice_id,
-                "amount_uzs": amount_uzs,
-                "cumulative_refunded_uzs": new_total_refunded,
-                "requested_by": requested_by,
-                "approved_by": approved_by,
-                "second_approver_id": second_approver_id,
-            },
-        )
-        return refund
+    def request_and_approve_refund(self,**kwargs):
+        raise BillingInvariantError('INDEPENDENT_APPROVAL_REQUIRED')

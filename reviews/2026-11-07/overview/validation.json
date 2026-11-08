@@ -1,0 +1,10 @@
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Backend.ps1",
+  "exit_code": 0,
+  "passed": 107,
+  "warnings": 1,
+  "pytest_seconds": 127.28,
+  "python": "3.12.10",
+  "warning": "StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead.",
+  "test_server_stopped": true
+}

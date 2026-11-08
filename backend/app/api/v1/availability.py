@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
+from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
 from app.services.availability import AvailabilityConstraintError, availability_service
 
 router = APIRouter(prefix="/api/v1/candidates", tags=["availability"])
@@ -30,7 +31,10 @@ class CreateAvailabilityExceptionRequest(BaseModel):
 def create_availability_rule_endpoint(
     candidate_id: str,
     payload: CreateAvailabilityRuleRequest,
+    actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
+    if candidate_id != candidate_id_for(actor):
+        raise HTTPException(403,detail={"code":"CANDIDATE_SCOPE_FORBIDDEN"})
     try:
         return availability_service.add_availability_rule(
             candidate_id=candidate_id,
@@ -50,7 +54,10 @@ def create_availability_rule_endpoint(
 def create_availability_exception_endpoint(
     candidate_id: str,
     payload: CreateAvailabilityExceptionRequest,
+    actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
+    if candidate_id != candidate_id_for(actor):
+        raise HTTPException(403,detail={"code":"CANDIDATE_SCOPE_FORBIDDEN"})
     try:
         return availability_service.add_availability_exception(
             candidate_id=candidate_id,

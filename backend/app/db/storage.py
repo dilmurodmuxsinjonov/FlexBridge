@@ -1,220 +1,150 @@
-"""SQLAlchemy 2.0 persistent database storage engine for FlexBridge R1 (FIX-02, R-03, REV-002).
-
-Provides cross-process, restart-safe SQL persistence for all 94 canonical 1.4 tables,
-users, hashed-token sessions, circuit-breaker state, idempotency keys, payment events,
-orders, invoices, entitlements, and audit records.
-Resolves `FLEXBRIDGE_DATABASE_URL` or `DATABASE_URL` when set, defaulting to a local
-WAL-enabled SQLite database at `backend/.data/flexbridge_r1.sqlite3`.
-"""
-
+"""Typed access to the migrated PostgreSQL schema. Startup never manufactures DDL."""
 from __future__ import annotations
 
-import hashlib
+from contextlib import contextmanager
+from contextvars import ContextVar
+from datetime import date, datetime, timezone
 import json
 import os
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
+from uuid import uuid4
 
-from sqlalchemy import Column, Integer, MetaData, String, Table, Text, TypeDecorator, create_engine, event, select
-from sqlalchemy.engine import Engine
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, MetaData, Numeric, Table, Text, create_engine, select
+from sqlalchemy.dialects.postgresql import JSONB, UUID, insert
+from sqlalchemy.engine import Connection, Engine
 
-DATA_DIR = Path(__file__).resolve().parents[2] / ".data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-DEFAULT_SQLITE_URL = f"sqlite:///{(DATA_DIR / 'flexbridge_r1.sqlite3').as_posix()}"
-MODEL_JSON_PATH = Path(__file__).resolve().parents[3] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
+ROOT = Path(__file__).resolve().parents[3]
+MODEL_JSON_PATH = ROOT / 'specs/v1_4/FlexBridge_model_1_4.json'
+metadata = MetaData(schema='flexbridge')
+_TYPES = {'uuid': UUID(as_uuid=False), 'text': Text(), 'integer': Integer(), 'boolean': Boolean(),
+    'date': Date(), 'timestamptz': DateTime(timezone=True), 'jsonb': JSONB(), 'numeric(18,2)': Numeric(18, 2)}
+for definition in json.loads(MODEL_JSON_PATH.read_text(encoding='utf-8'))['tables']:
+    Table(definition['name'], metadata, *[Column(f['name'], _TYPES[f['type']],
+        primary_key=f['pk'], nullable=f['nullable']) for f in definition['fields']])
 
+def table(name: str) -> Table:
+    return metadata.tables['flexbridge.' + name]
+
+users_table = table('users')
+sessions_table = table('sessions')
+users_table.append_column(Column('auth_version',Integer,nullable=False))
+for c in (Column('role_id',UUID(as_uuid=False)),Column('channel',Text),Column('target_user_id',UUID(as_uuid=False)),Column('target_contact_id',UUID(as_uuid=False))):
+    table('org_invitations').append_column(c)
+sessions_table.append_column(Column('auth_version',Integer,nullable=False))
+for c in (Column('destination_encrypted',Text),Column('delivery_encrypted',Text),
+          Column('delivery_status',Text,nullable=False),Column('sent_at',DateTime(timezone=True))):
+    table('auth_challenges').append_column(c)
+auth_continuations = Table('auth_continuations',metadata,Column('digest',Text,primary_key=True),
+    Column('kind',Text,nullable=False),Column('user_id',UUID(as_uuid=False)),Column('challenge_id',UUID(as_uuid=False)),
+    Column('payload_encrypted',Text,nullable=False),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('expires_at',DateTime(timezone=True),nullable=False),Column('consumed_at',DateTime(timezone=True)),
+    Column('attempts',Integer,nullable=False))
+auth_rate_limits = Table('auth_rate_limits',metadata,Column('bucket_key',Text,primary_key=True),
+    Column('window_started_at',DateTime(timezone=True),nullable=False),Column('count',Integer,nullable=False))
+org_verification_submissions = Table('org_verification_submissions',metadata,
+    Column('case_id',UUID(as_uuid=False),primary_key=True),Column('revision',Integer,primary_key=True),
+    Column('organization_id',UUID(as_uuid=False),nullable=False),Column('requester_membership_id',UUID(as_uuid=False)),
+    Column('proposed_fields',JSONB,nullable=False),Column('created_at',DateTime(timezone=True),nullable=False))
+circuit_breaker_table = Table('circuit_breaker_state', metadata,
+    Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
+    Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
+    Column('updated_at', DateTime(timezone=True), nullable=False))
+kv_records_table = Table('domain_records', metadata, Column('namespace', Text, primary_key=True),
+    Column('record_id', Text, primary_key=True), Column('payload_json', JSONB, nullable=False),
+    Column('updated_at', DateTime(timezone=True), nullable=False))
+outbox_table = table('outbox_events')
+for c in (Column('claimed_by', Text), Column('lease_until', DateTime(timezone=True)), Column('claim_token', UUID(as_uuid=False))):
+    outbox_table.append_column(c)
+files_table = table('files')
+table('availability_rules').append_column(Column('is_active', Boolean,nullable=False))
+for c in (Column('object_version', Text), Column('scan_error', Text), Column('scanned_at', DateTime(timezone=True))):
+    files_table.append_column(c)
+_ENGINE: Engine | None = None
+_CURRENT: ContextVar[Connection | None] = ContextVar('unit_of_work', default=None)
+
+def now() -> datetime:
+    return datetime.now(timezone.utc)
 
 def get_database_url() -> str:
-    """Resolve database URL from FLEXBRIDGE_DATABASE_URL, DATABASE_URL, or default SQLite path."""
-    return (
-        os.environ.get("FLEXBRIDGE_DATABASE_URL")
-        or os.environ.get("DATABASE_URL")
-        or DEFAULT_SQLITE_URL
-    )
-
-
-class HashedSessionIdType(TypeDecorator):
-    """Stores only the SHA-256 digest of a bearer session token in SQL while allowing transparent lookup."""
-
-    impl = String(128)
-    cache_ok = True
-
-    def process_bind_param(self, value: Any, dialect: Any) -> str | None:
-        if value is None:
-            return None
-        token_str = str(value)
-        if token_str.startswith("sha256:"):
-            return token_str
-        return "sha256:" + hashlib.sha256(token_str.encode("utf-8")).hexdigest()
-
-    def process_result_value(self, value: Any, dialect: Any) -> str | None:
-        if value is None:
-            return None
-        return str(value)
-
-
-metadata = MetaData()
-
-users_table = Table(
-    "users",
-    metadata,
-    Column("id", String(64), primary_key=True),
-    Column("display_name", String(255), nullable=False),
-    Column("password_hash", Text, nullable=False),
-    Column("status", String(32), nullable=False, default="ACTIVE"),
-    Column("adult_declared_at", String(64), nullable=False),
-    Column("roles_json", Text, nullable=False),
-    Column("totp_enabled", Integer, nullable=False, default=0),
-    Column("totp_secret", String(128), nullable=True),
-    Column("created_at", String(64), nullable=False),
-)
-
-sessions_table = Table(
-    "sessions",
-    metadata,
-    Column("session_id", HashedSessionIdType(), primary_key=True),
-    Column("token_digest", String(128), nullable=False, index=True),
-    Column("user_id", String(64), nullable=False, index=True),
-    Column("status", String(32), nullable=False, default="ACTIVE"),
-    Column("roles_json", Text, nullable=False),
-    Column("created_at", String(64), nullable=False),
-    Column("expires_at", String(64), nullable=False),
-    Column("revoked_at", String(64), nullable=True),
-    Column("revoked_by", String(64), nullable=True),
-    Column("revoke_reason", Text, nullable=True),
-)
-
-circuit_breaker_table = Table(
-    "circuit_breaker_state",
-    metadata,
-    Column("key", String(64), primary_key=True),
-    Column("state", String(32), nullable=False),
-    Column("incident_id", String(128), nullable=True),
-    Column("reason_code", String(128), nullable=True),
-    Column("tripped_by", String(128), nullable=True),
-    Column("tripped_at", String(64), nullable=True),
-    Column("updated_at", String(64), nullable=False),
-)
-
-kv_records_table = Table(
-    "domain_records",
-    metadata,
-    Column("namespace", String(64), primary_key=True),
-    Column("record_id", String(128), primary_key=True),
-    Column("payload_json", Text, nullable=False),
-    Column("updated_at", String(64), nullable=False),
-)
-
-
-def _register_canonical_94_tables() -> None:
-    """Register all 94 canonical 1.4 tables from FlexBridge_model_1_4.json in SQLAlchemy metadata."""
-    if not MODEL_JSON_PATH.exists():
-        return
-    raw_model = json.loads(MODEL_JSON_PATH.read_text(encoding="utf-8"))
-    for tbl in raw_model.get("tables", []):
-        table_name = tbl["name"]
-        if table_name in metadata.tables:
-            continue
-        cols: list[Column[Any]] = []
-        fields = tbl.get("fields", [])
-        has_pk = any(bool(f.get("pk")) for f in fields)
-        for idx, fld in enumerate(fields):
-            col_name = fld["name"]
-            is_pk = bool(fld.get("pk")) or (not has_pk and idx == 0)
-            col_type = Integer if fld.get("type") in ("integer", "bigint", "smallint") else Text
-            if is_pk and col_type is Text:
-                col_type = String(128)
-            cols.append(
-                Column(
-                    col_name,
-                    col_type,
-                    primary_key=is_pk,
-                    nullable=False if is_pk else bool(fld.get("nullable", True)),
-                )
-            )
-        Table(table_name, metadata, *cols)
-
-
-_register_canonical_94_tables()
-
-_ENGINE: Engine | None = None
-
+    value = os.environ.get('FLEXBRIDGE_DATABASE_URL') or os.environ.get('DATABASE_URL')
+    if not value or not value.startswith('postgresql+psycopg://'):
+        raise RuntimeError('DATABASE_URL must use PostgreSQL/psycopg; run migrations before starting the API')
+    return value
 
 def get_engine() -> Engine:
     global _ENGINE
     if _ENGINE is None:
-        url = get_database_url()
-        connect_args = {"check_same_thread": False, "timeout": 10.0} if url.startswith("sqlite") else {}
-        _ENGINE = create_engine(url, future=True, connect_args=connect_args)
-        if url.startswith("sqlite"):
-            @event.listens_for(_ENGINE, "connect")
-            def _set_sqlite_pragma(dbapi_connection: Any, _connection_record: Any) -> None:
-                cursor = dbapi_connection.cursor()
-                cursor.execute("PRAGMA journal_mode=WAL;")
-                cursor.execute("PRAGMA synchronous=NORMAL;")
-                cursor.execute("PRAGMA foreign_keys=ON;")
-                cursor.close()
-        metadata.create_all(_ENGINE)
+        _ENGINE = create_engine(get_database_url(), pool_pre_ping=True,
+            connect_args={'prepare_threshold': None}, hide_parameters=True)
     return _ENGINE
 
-
 def init_storage() -> Engine:
-    """Initialize engine and ensure all canonical tables exist."""
-    return get_engine()
+    from sqlalchemy import text
+    engine = get_engine()
+    with engine.connect() as conn:
+        revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
+        if revision != '0005_org_invitations':
+            raise RuntimeError('Database migrations are not current')
+    return engine
 
+@contextmanager
+def transaction() -> Iterator[Connection]:
+    existing = _CURRENT.get()
+    if existing is not None:
+        yield existing
+        return
+    with get_engine().begin() as conn:
+        token = _CURRENT.set(conn)
+        try:
+            yield conn
+        finally:
+            _CURRENT.reset(token)
+
+def current_connection() -> Connection | None:
+    return _CURRENT.get()
+
+
+@contextmanager
+def read_snapshot() -> Iterator[Connection]:
+    """Keep a multi-query matching read consistent during atomic schedule replacements."""
+    existing = _CURRENT.get()
+    if existing is not None:
+        yield existing
+        return
+    with get_engine().connect().execution_options(isolation_level='REPEATABLE READ') as conn:
+        with conn.begin():
+            token = _CURRENT.set(conn)
+            try:
+                yield conn
+            finally:
+                _CURRENT.reset(token)
+
+def json_value(value: Any) -> Any:
+    return json.loads(json.dumps(value, default=lambda x: x.isoformat() if isinstance(x, (date, datetime)) else str(x)))
 
 def save_domain_record(namespace: str, record_id: str, payload: dict[str, Any]) -> None:
-    engine = get_engine()
-    now = datetime.now(timezone.utc).isoformat()
-    payload_str = json.dumps(payload, ensure_ascii=False, default=str)
-    with engine.begin() as conn:
-        existing = conn.execute(
-            select(kv_records_table.c.record_id).where(
-                kv_records_table.c.namespace == namespace,
-                kv_records_table.c.record_id == record_id,
-            )
-        ).first()
-        if existing:
-            conn.execute(
-                kv_records_table.update()
-                .where(
-                    kv_records_table.c.namespace == namespace,
-                    kv_records_table.c.record_id == record_id,
-                )
-                .values(payload_json=payload_str, updated_at=now)
-            )
-        else:
-            conn.execute(
-                kv_records_table.insert().values(
-                    namespace=namespace,
-                    record_id=record_id,
-                    payload_json=payload_str,
-                    updated_at=now,
-                )
-            )
-
+    if namespace in {'orders', 'invoices', 'payment_attempts', 'refunds', 'billing_ledger', 'outbox_events'}:
+        raise ValueError('Use the typed transactional repository for this namespace')
+    with transaction() as conn:
+        stmt = insert(kv_records_table).values(namespace=namespace, record_id=record_id,
+            payload_json=json_value(payload), updated_at=now())
+        conn.execute(stmt.on_conflict_do_update(index_elements=['namespace', 'record_id'],
+            set_={'payload_json': stmt.excluded.payload_json, 'updated_at': stmt.excluded.updated_at}))
 
 def load_domain_record(namespace: str, record_id: str) -> dict[str, Any] | None:
-    engine = get_engine()
-    with engine.connect() as conn:
-        row = conn.execute(
-            select(kv_records_table.c.payload_json).where(
-                kv_records_table.c.namespace == namespace,
-                kv_records_table.c.record_id == record_id,
-            )
-        ).first()
-        if not row:
-            return None
-        return json.loads(row[0])
-
+    with transaction() as conn:
+        return conn.execute(select(kv_records_table.c.payload_json).where(
+            kv_records_table.c.namespace == namespace, kv_records_table.c.record_id == record_id)).scalar_one_or_none()
 
 def list_domain_records(namespace: str) -> list[dict[str, Any]]:
-    engine = get_engine()
-    with engine.connect() as conn:
-        rows = conn.execute(
-            select(kv_records_table.c.payload_json).where(
-                kv_records_table.c.namespace == namespace
-            )
-        ).fetchall()
-        return [json.loads(r[0]) for r in rows]
+    with transaction() as conn:
+        return list(conn.execute(select(kv_records_table.c.payload_json).where(kv_records_table.c.namespace == namespace)).scalars())
+
+def enqueue(conn: Connection, event_type: str, aggregate_key: str, payload: dict[str, Any], dedupe_key: str) -> str:
+    event_id = str(uuid4())
+    stmt = insert(outbox_table).values(id=event_id, created_at=now(), updated_at=now(), event_type=event_type,
+        schema_version=1, aggregate_key=aggregate_key, payload=json_value(payload), dedupe_key=dedupe_key,
+        available_at=now(), attempts=0)
+    conn.execute(stmt.on_conflict_do_nothing(index_elements=['dedupe_key']))
+    return event_id

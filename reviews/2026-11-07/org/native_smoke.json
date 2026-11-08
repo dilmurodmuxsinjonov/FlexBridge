@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/0b3152c9-96df-4c29-8bfe-7b8ee91163a3/claim",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/0b3152c9-96df-4c29-8bfe-7b8ee91163a3/decide",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/9c70f35f-53dd-4dfa-8ffa-44f3ad14808d/memberships",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/9c70f35f-53dd-4dfa-8ffa-44f3ad14808d/public",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations/9c70f35f-53dd-4dfa-8ffa-44f3ad14808d/verification",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/119e84ee-ef1f-4b9a-b800-303db595d6fd/claim",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/119e84ee-ef1f-4b9a-b800-303db595d6fd/decide",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/9c70f35f-53dd-4dfa-8ffa-44f3ad14808d/public",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations/9c70f35f-53dd-4dfa-8ffa-44f3ad14808d/memberships/b785ae07-261d-47ab-aeba-16024a90068c/revoke",
+      "status": 409
+    }
+  ],
+  "passed": 10,
+  "scope": "Native HTTP, real disposable PostgreSQL; CLEAN file metadata fixture, no live document scanner/registry"
+}

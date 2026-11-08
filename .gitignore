@@ -13,6 +13,7 @@ ENV/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+*.egg-info/
 
 # Node / Frontend
 node_modules/
@@ -27,6 +28,8 @@ coverage/
 .DS_Store
 Thumbs.db
 backend/.data/
+reviews/**/agent_logs/
+reviews/**/copilot_raw.*
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm

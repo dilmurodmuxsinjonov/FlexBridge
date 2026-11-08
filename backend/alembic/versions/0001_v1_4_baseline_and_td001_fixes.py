@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from alembic import op
 
-revision = "0001_v1_4_baseline_and_td001_fixes"
+revision = "0001_v14_baseline"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,7 +33,10 @@ ALTER TABLE flexbridge.outbox_events ADD COLUMN IF NOT EXISTS attempt_count inte
 
 def upgrade() -> None:
     sql_text = SCHEMA_PATH.read_text(encoding="utf-8")
-    op.execute(sql_text)
+    import re
+    sql_text = re.sub(r'^BEGIN;\s*', '', sql_text, count=1, flags=re.MULTILINE)
+    sql_text = re.sub(r'COMMIT;\s*$', '', sql_text, count=1)
+    op.get_bind().connection.driver_connection.execute(sql_text, prepare=False)
     op.execute(TD001_REFINEMENTS_SQL)
 
 

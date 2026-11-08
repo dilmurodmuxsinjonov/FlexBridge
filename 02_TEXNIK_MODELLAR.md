@@ -33,3 +33,35 @@ Manba: `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf`, 2–7-sahifalar.
 | Mahsulot ichidagi AI model | Belgilanmagan | R1 da deterministik SQL/qoida asosidagi moslik (`API-003`); mahsulot ichida LLM ishlatilmaydi |
 
 Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foydalanuvchi qarori yoki tegishli manba IDsi bilan qayd etiladi.
+
+## IAM-CODEX-001 — amalda qo'llangan komponentlar (2026-11-07)
+
+- `webauthn==2.8.0`: passkey registration/authentication verifieri, RP/origin/UV/counter va haqiqiy imzo tekshiruvi. Haqiqiy browser/hardware staging hali bajarilmagan.
+- `cryptography==50.0.2`: Fernet shifrlash va verifier dependencylari; versiyalar `backend/requirements.txt`da yagona manba sifatida pinlangan.
+- Mavjud TOTP primitive stdlib HMAC-SHA1 asosida saqlandi; RFC 6238 test vektorlari, ASCII kod va 30s chegara/drift sinovlari qo'shildi. PyOTP oldingi reja satrida turadi, amalda ushbu paketda o'rnatilgan deb ko'rsatilmaydi.
+- OTP provayderining tijoriy brendi tanlanmadi: strict HTTPS SMS/email gateway shartnomasi, encrypted outbox va alohida identity worker implementatsiya qilindi. Tashqi real credentiallar testda ishlatilmaydi.
+- Rate-limit, OTP/proof, session auth_version va scoped grantlar PostgreSQLda authoritative. Login/verification yo'llari process xotirasidagi ruxsat keshiga tayanmaydi.
+
+## CAN-CODEX-001 — amalda qo'llangan yondashuvlar (2026-11-07)
+
+- Yangi dependency yoki migratsiya talab qilinmaydi; profil/skill/CV va availability mavjud PostgreSQL sxemasiga yoziladi.
+- Matching `1.4.1-can`: 28 kunlik real occurrences, inclusive qoida validitysi, date exceptionlar, ALL/ANY guruhlar va ko'rsatilgan 30min onsite/0min remote buferi. Yarim tun haqiqiy qo'shni sana bilan tekshiriladi.
+- R1 request zonasi `Asia/Tashkent` (UTC+05); boshqa zona jim talqin qilinmaydi. Bu mavjud topshiriqdagi mahalliy jadvalning implementatsiya chegarasi; yangi kutubxona qo'shilmadi.
+- SQLAlchemy `REPEATABLE READ` bilan request-local snapshot; profil row lock bilan atomik schedule replacement; e'lonlar UUID cursor orqali ko'pi bilan 100 tadan olinadi. Authoritative jadval keshi yo'q.
+- `availability_revision` tegishli SQL yozuv ID/updated_atlarining SHA-256 fingerprinti; client bu qiymat bilan tasdiq yoki vakolat olmaydi.
+- Private CV link mavjud scan/S3 pipeline ustida; HR sharing, CV-specific retention va haqiqiy purge bu paketdan tashqarida. Qo'llanma: `backend/CANDIDATE.md`.
+
+## ORG-CODEX-001 — amalda qo'llangan komponentlar (2026-11-07)
+
+- `0004_org_onboarding`: normalized tax-ID unique index, immutable `org_verification_submissions` va composite org/case/membership FKlar. Runtime 99 jadval; canonical model statistikasi qayta yozilmadi.
+- Faqat ORG rol katalogi migrationda seed qilinadi; foydalanuvchi/grant/operatorni avtomatik seed qilish yo'q. Mavjud role scope yoki normalized tax-ID to'qnashsa upgrade fail bo'ladi, yozuvlar jim birlashtirilmaydi.
+- STIR uchun 3–32 ASCII raqam, whitespace/hyphen normalization — cheklangan input implementatsiyasi; rasmiy registry validation yoki huquqiy format tasdig'i emas.
+- Organization row lock va revisionli immutable submissions: bootstrap, capability approval, profile change, membership revoke va publish bir org doirasida ketma-ket. Authoritative scoped grant va case-backed capability SQLdan tekshiriladi.
+- Moderator/current-MFA/assigned-case chegarasi, linked CLEAN evidencega 60s presign va no-store; ikki weekday due targetida holiday calendar qo'llanmagan. Yangi kutubxona talab qilinmaydi.
+
+## ORG-CODEX-002 — invitation implementatsiyasi (2026-11-08)
+
+- 0005 migration: explicit role/channel va target account/contact pinlar, inviter/org composite FK, pending contract CHECK va token/contact indexlar. Runtime99; yangi dependency yo'q.
+- Token `secrets.token_urlsafe(32)`; token va kontakt faqat purpose-bound HMAC bilan saqlanadi. 24h, current verified IAM kontakt va current scoped inviter authority; OWNER oddiy invitationga kirmaydi.
+- Canonical token URLi Uvicorn access logidan outer ASGI response/error chegarasida niqoblanadi. Native log tekshiruvi o'tdi; tashqi proxy loglari deployment konfiguratsiyasi bo'lib qoladi.
+- Legacy pending invitationlarda role/contact contract yo'q: migratsiya ularni revoke qilib tarixni saqlaydi. Accepted tarix va grantlar qayta talqin qilinmaydi. Qo'llanma backend/INVITATIONS.md.

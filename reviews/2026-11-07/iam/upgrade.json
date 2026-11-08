@@ -1,0 +1,10 @@
+{
+  "upgrade": "0002_security_runtime -> 0003_iam_flows",
+  "existing_users_preserved": 2,
+  "password_hashes_preserved": true,
+  "encrypted_totp_preserved": true,
+  "legacy_pre_mfa_session_revoked": true,
+  "existing_mfa_session_preserved": true,
+  "ordinary_password_session_preserved": true,
+  "synthetic_database_only": true
+}

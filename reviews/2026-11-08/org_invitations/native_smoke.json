@@ -1,0 +1,6 @@
+{
+  "checks": 6,
+  "passed": 6,
+  "native_access_log_token_redacted": true,
+  "scope": "Native uvicorn, disposable PostgreSQL; verified contact fixture, no real SMS/email delivery"
+}
