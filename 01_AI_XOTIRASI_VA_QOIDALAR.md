@@ -515,3 +515,11 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Dalil: 198 lokal baseline test, 6 targeted peer regression; final131c72b uchun GitHub 42468790607 va 42468787212 muvaffaqiyatli, 203 test o'tdi. Review/assessment/JUnit/Git-blob manifest reviews/2026-11-08/github_sync ichida. CI publication gate faqat artifact/credential hygiene, xavfsizlik sertifikati emas.
 - Chegara: pilot_ready false; 87 canonical501, real provider/UI/DR qabuli va exposed historical live key rotation tekshirilmagan. Production deploy qilinmadi. gh pr edit ortiqcha read:org scope talab qildi; token scope o'zgartirilmasdan mavjud repo huquqi bilan REST PATCH ishladi.
 - Davom: OPS-CODEX-001 PostgreSQL durable dry-run evaluation, so'ng haqiqiy alohida appeal workflow OPS-CODEX-002. Foydalanuvchi to'xtatishni so'ramagan, ish davom etadi.
+
+### LOG-030 ? 2026-11-08, Asia/Tashkent ? Codex va GitHub Copilot CLI
+
+- OPS-CODEX-001 / Issue37 / PR38. Codex service/API/migration0006/tests/qo'llanmani yozdi; read-only Copilot actual reviewi Boolean coercionni topdi. API strict integer va service exact-type guard bilan yopildi. Copilot modeli mustaqil aniqlanmadi, review approval/certification deb ko'rsatilmaydi.
+- PostgreSQL immutable dry-run evaluation + audit bitta UOW, actor/key idempotency va conflict, COMPLIANCE/current-MFA create; COMPLIANCE yoki ADMIN/current-MFA read. Ikkinchi process read, parallel retry, audit rollback va no deletion dalili bor. Actual scanned/actioned0; requestcount metadata; policy NOT_CERTIFIED. Legacy fabricated combined appeal410, custom legal policy install fail-closed.
+- Dalil: final native subset24 passed,1 framework warning,142.23s; GitHub52593cd snapshot224 passed, ikkala check successful. 0005->0006 populated upgrade userni saqladi, runtime99->100. Hisobot/manifest/JUnit/peer review: reviews/2026-11-08/ops001.
+- Chegara: eski lokal umumiy diagnostik yurish strict patchdan oldin boshlangan; uning natijasi final snapshot qabuli o'rniga qo'yilmaydi. Canonical45/87, pilotfalse, actualpurge/legalapproval/liveproviders/UI/DR qabuli yo'q. Aniq source uchun final GitHub CI dalili ishlatiladi.
+- Keyingi: PR38 evidence/check/merge tugagach OPS-CODEX-002 haqiqiy session-bound appellant va mustaqil assigned review. Reja reviews/2026-11-08/ops002/REJA.md; foydalanuvchi to'xtatishni so'ramagan.
