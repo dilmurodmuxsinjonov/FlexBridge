@@ -157,7 +157,11 @@ class OwnerContinuityService:
             old=conn.execute(select(requests).where(requests.c.applicant_id==actor.user_id,requests.c.idempotency_key==idempotency_key)).mappings().first()
             if old:
                 if old['request_fingerprint']!=fingerprint:raise GovernanceError('IDEMPOTENCY_PAYLOAD_CONFLICT')
-                return self._report(conn,get_row(conn,'verification_cases',old['case_id']),old,idempotent_replay=True)
+                previous_case=get_row(conn,'verification_cases',old['case_id'],True)
+                prelock_users(conn,actor,old)
+                closed=self._prune(conn,previous_case,old,actor)
+                if closed:return {**closed,'idempotent_replay':True}
+                return self._report(conn,previous_case,old,idempotent_replay=True)
             member=org_authority(conn,actor.user_id,org_id,*STAFF)
             if org['status']!='VERIFIED':raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             if owner_grant_exists(conn,member['id']):raise GovernanceError('CONTINUITY_APPLICANT_ALREADY_OWNER')
