@@ -54,6 +54,14 @@ retention_evaluations = Table('retention_evaluations',metadata,
     Column('policy_snapshot',JSONB,nullable=False),Column('evaluation',JSONB,nullable=False),
     Column('mode',Text,nullable=False),Column('status',Text,nullable=False),Column('records_scanned',Integer,nullable=False),
     Column('records_actioned',Integer,nullable=False),Column('finished_at',DateTime(timezone=True),nullable=False))
+moderation_appeal_requests = Table('moderation_appeal_requests',metadata,
+    Column('case_id',UUID(as_uuid=False),primary_key=True),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('original_action_id',UUID(as_uuid=False),nullable=False),Column('opportunity_id',UUID(as_uuid=False),nullable=False),
+    Column('revision_id',UUID(as_uuid=False),nullable=False),Column('appellant_id',UUID(as_uuid=False),nullable=False),
+    Column('reason',Text,nullable=False),Column('revision_snapshot',JSONB,nullable=False),
+    Column('original_decision',JSONB,nullable=False),Column('status',Text,nullable=False),
+    Column('reviewer_id',UUID(as_uuid=False)),Column('decision',Text),Column('decision_reason',Text),
+    Column('resolved_at',DateTime(timezone=True)))
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -92,7 +100,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0006_retention_evaluations':
+        if revision != '0007_moderation_appeals':
             raise RuntimeError('Database migrations are not current')
     return engine
 

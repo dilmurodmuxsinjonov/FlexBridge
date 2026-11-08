@@ -66,9 +66,16 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 - Canonical token URLi Uvicorn access logidan outer ASGI response/error chegarasida niqoblanadi. Native log tekshiruvi o'tdi; tashqi proxy loglari deployment konfiguratsiyasi bo'lib qoladi.
 - Legacy pending invitationlarda role/contact contract yo'q: migratsiya ularni revoke qilib tarixni saqlaydi. Accepted tarix va grantlar qayta talqin qilinmaydi. Qo'llanma backend/INVITATIONS.md.
 
-## OPS-CODEX-001 ? durable dry-run evaluation (2026-11-08)
+## OPS-CODEX-001 — durable dry-run evaluation (2026-11-08)
 
 - 0006_retention_evaluations qo'shimcha helper jadvali: runtime100, canonical94 o'zgarmadi. Composite actor/idempotency unique, immutable UPDATE/DELETE trigger, audit bilan bitta UOW. Yangi dependency talab qilinmadi.
 - COMPLIANCE/current-MFA write; COMPLIANCE yoki ADMIN/current-MFA read. Strict integer input; client count requested metadata, haqiqiy scanned/actioned0. Snapshot NOT_CERTIFIED, status EVALUATED_ONLY/NOT_EXECUTED.
 - Legal-reviewed custom policy installation va haqiqiy purge yo'q. Legacy fabricated combined appeal410; alohida appellant/reviewer workflow keyingi paket. 0005->0006 upgrade representative populated userni saqladi.
 - GitHub bilan ish gh CLI/REST va amalda ishlagan read-only Copilot CLI orqali. read:org kengaytirilmagan; repo-scope fallback ishladi. Qo'llanma: backend/OPERATIONS.md.
+
+## OPS-CODEX-002 — mustaqil apellyatsiya (2026-11-08)
+
+- Head0007_moderation_appeals: runtime101, canonical94. PostgreSQL revision/decision snapshot functions; salary_min/max decimal string, exact jsonb::text byte limit. INSERT/RESOLVED trigger latest/current REJECTED/revision/evidence check va immutable request/decision history.
+- Current user/session/platform grant rows FOR SHARE till commit; user-before-session lock order. Business org/opportunity/case lockdan keyin vakolat qayta tekshiriladi. Mid-request revocation va commit bilan serialization alohida regressiyada.
+- Canonical API111 faqat assigned opportunity REJECT appeal UPHOLD/REOPEN doirasida; REOPEN DRAFT. Actual counts46 explicit/86 placeholder, bu acceptance foizi emas. Original rejection reason snapshoti private assigned reviewerga ko'rsatiladi; queue minimal.
+- Qo'llanma backend/MODERATION_APPEALS.md. Yangi dependency yo'q; actual Copilot CLI read-only review ishladi, modeli mustaqil aniqlanmadi. Registry/live provider/UI/DR sertifikati yo'q.

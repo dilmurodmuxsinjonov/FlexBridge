@@ -13,8 +13,10 @@ in [ORGANIZATIONS.md](ORGANIZATIONS.md). Deployments now require migration
 `0004_org_onboarding` or later; conflicting normalized legacy tax IDs fail without merging data.
 Explicit 24-hour contact-bound staff invitations
 and legacy-token handling are documented in [INVITATIONS.md](INVITATIONS.md).
-The current head is `0006_retention_evaluations`. Durable, immutable retention dry-run
+Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
+The current head is `0007_moderation_appeals`. Separate authenticated opportunity rejection
+appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
 
 ```powershell
 python -m pip install -r backend/requirements.txt

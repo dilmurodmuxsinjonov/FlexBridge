@@ -1,0 +1,15 @@
+{
+  "commit": "c46ff70215b20101cbda457350c5af705cdeafa5",
+  "tests": 250,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 586.001,
+  "ci_runs": [
+    42497555184,
+    42497559426
+  ],
+  "ci_tests": 250,
+  "ci_conclusion": "success",
+  "pilot_ready": false
+}
