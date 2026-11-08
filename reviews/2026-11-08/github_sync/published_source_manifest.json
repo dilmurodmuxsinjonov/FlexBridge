@@ -1,7 +1,7 @@
 {
-  "base_commit": "1460ab8b55a4cd04b112d9db8912561331c6cebf",
+  "base_commit": "f844d533a7cea7f1bc705dd35b846ae4a231ac64",
   "issue": 35,
-  "note": "Hashes identify staged Git blob bytes. Historical Windows evidence hashes identify working-tree bytes before Git newline normalization; CI must validate this committed snapshot.",
+  "note": "Hashes identify staged Git blob bytes. Historical Windows evidence hashes identify working-tree bytes before Git newline normalization; CI validates the committed snapshot. Includes peer-review ownership remediation.",
   "files": [
     {
       "path": ".github/workflows/backend-tests.yml",
@@ -149,9 +149,9 @@
     },
     {
       "path": "backend/app/api/v1/governance.py",
-      "git_blob": "46201eba8c0602094f0bd772fbb4f00587028b0b",
-      "sha256": "67c6f997b241a77475141dd22fce4c1be2bfc8bad8ffa27121183bc9e86167de",
-      "bytes": 5576
+      "git_blob": "ac55be5d4325f77e5684a80e38860ca515b1306e",
+      "sha256": "c52f8c9bb2c8a522a40d0dcc4dd9c598f3715005b77020a409492b99dc634324",
+      "bytes": 5673
     },
     {
       "path": "backend/app/api/v1/iam.py",
@@ -311,9 +311,9 @@
     },
     {
       "path": "backend/app/services/governance.py",
-      "git_blob": "c3618441ec0a0f2879ef46c816c042757027f6af",
-      "sha256": "e49b258ccaabfc41fe815c841dc683e58ce731a5cce370613c4f6a5c60b042b9",
-      "bytes": 5019
+      "git_blob": "c151fa23e046db94fba362c261d40d388f529f3e",
+      "sha256": "67f73443ecf8d1299bce9db3cba51e69e135523844201ac4519ecd50c74f96eb",
+      "bytes": 5317
     },
     {
       "path": "backend/app/services/identity.py",
@@ -443,9 +443,9 @@
     },
     {
       "path": "backend/tests/security/test_contracts.py",
-      "git_blob": "7a659d04721d45656265914888c1364316642979",
-      "sha256": "7bd6d47e8a4d17af04da64aec7fd3a34b63dbc200c0be927ac44e918f04500a9",
-      "bytes": 11852
+      "git_blob": "961f9a698930c0af9f13fae5faa60e5f90cb5168",
+      "sha256": "ba3a35baa29e7f436d58c1725f4dd7c5be681480617a5f65615615ce3321653e",
+      "bytes": 12066
     },
     {
       "path": "backend/tests/security/test_iam.py",
@@ -470,6 +470,12 @@
       "git_blob": "94e75d9ab62df3648f61a8bff0f0cc5f4a8e8e4c",
       "sha256": "6dbcd3ccf9f31f6b98525872c3761e9fb27fadf332d1bbcf4ec56ed9348f7cff",
       "bytes": 19109
+    },
+    {
+      "path": "backend/tests/security/test_peer_review.py",
+      "git_blob": "e73725fc6fe64ab72eb1910c7c6b527f408953bb",
+      "sha256": "038c5c236e0464787ce9228f6a3b2f23a3e447a8f3972ea03925ca6a7d8593df",
+      "bytes": 3466
     },
     {
       "path": "backend/tests/security/test_regressions.py",

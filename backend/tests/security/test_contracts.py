@@ -81,7 +81,7 @@ def test_live_and_ready_are_distinct(client):
 
 def test_membership_two_people_and_scoped_grant(client,identities,organization):
     requester,approver,target=identities('OWNER',organization),identities('OWNER',organization),identities()
-    r=client.post('/api/v1/organizations/'+organization+'/members',json={'user_id':target['user_id'],'role_code':'OWNER'},headers=requester['headers'])
+    r=client.post('/api/v1/organizations/'+organization+'/members',json={'user_id':target['user_id'],'role_code':'BILLING'},headers=requester['headers'])
     assert r.status_code==201,r.text
     url='/api/v1/organizations/'+organization+'/members/'+r.json()['id']+'/approve'
     assert client.post(url,json={},headers=requester['headers']).status_code==409
@@ -94,7 +94,10 @@ def test_membership_two_people_and_scoped_grant(client,identities,organization):
     assert client.post('/api/v1/me/security/totp/confirm',headers=target['headers'],json={'code':code}).status_code==200
     signed_in=client.post('/api/v1/auth/login',json={'user_id':target['user_id'],'password':'correct-passphrase-2026','totp_code':code})
     assert signed_in.status_code==200,signed_in.text
-    assert client.get('/api/v1/organizations/'+organization+'/memberships',headers={'Authorization':'Bearer '+signed_in.json()['access_token']}).status_code==200
+    headers={'Authorization':'Bearer '+signed_in.json()['access_token']}
+    assert client.get('/api/v1/organizations/'+organization+'/memberships',headers=headers).status_code==403
+    assert client.post('/api/v1/organizations/'+organization+'/orders',headers=headers,json={
+        'plan_code':'ORG_PLAN_30D','idempotency_key':'delegated-billing-order'}).status_code==201
 
 def test_independent_moderation_is_durable(client,identities,organization):
     owner=identities('OWNER',organization);moderator=identities('MODERATOR');revision=draft(owner,organization)
