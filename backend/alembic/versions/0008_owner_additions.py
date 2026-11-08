@@ -23,6 +23,7 @@ def upgrade():
       organization_id uuid NOT NULL REFERENCES flexbridge.organizations(id),
       requester_user_id uuid NOT NULL REFERENCES flexbridge.users(id),
       requester_membership_id uuid NOT NULL,
+      requester_grant_id uuid NOT NULL REFERENCES flexbridge.org_role_grants(id),
       requester_auth_version integer NOT NULL,
       requester_session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),
       target_user_id uuid NOT NULL REFERENCES flexbridge.users(id),
@@ -41,12 +42,13 @@ def upgrade():
       actor_id uuid NOT NULL REFERENCES flexbridge.users(id), auth_version integer NOT NULL,
       session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),
       decision text NOT NULL CHECK(decision IN ('ACCEPT','DECLINE')),
+      target_staff_grant_id uuid REFERENCES flexbridge.org_role_grants(id),
       contact_id uuid REFERENCES flexbridge.user_contacts(id), contact_digest text,
       contact_verified_at timestamptz, expires_at timestamptz,
-      CHECK((decision='ACCEPT' AND contact_id IS NOT NULL AND contact_digest IS NOT NULL
+      CHECK((decision='ACCEPT' AND target_staff_grant_id IS NOT NULL AND contact_id IS NOT NULL AND contact_digest IS NOT NULL
         AND contact_verified_at IS NOT NULL AND expires_at IS NOT NULL AND expires_at>created_at
         AND expires_at<=created_at+interval '24 hours')
-        OR (decision='DECLINE' AND contact_id IS NULL AND contact_digest IS NULL
+        OR (decision='DECLINE' AND target_staff_grant_id IS NULL AND contact_id IS NULL AND contact_digest IS NULL
         AND contact_verified_at IS NULL AND expires_at IS NULL)),
       UNIQUE(case_id,event_no));
     CREATE TRIGGER immutable_owner_addition_requests BEFORE UPDATE OR DELETE ON flexbridge.owner_addition_requests
@@ -66,7 +68,7 @@ def upgrade():
           AND session.user_id=u.id AND session.auth_version=u.auth_version AND session.assurance='MFA'
           AND session.revoked_at IS NULL AND session.expires_at>clock_timestamp()
           AND EXISTS(SELECT 1 FROM org_role_grants g JOIN role_catalog rc ON rc.id=g.role_id
-            WHERE g.membership_id=r.id AND g.revoked_at IS NULL AND rc.code='OWNER' AND rc.scope_kind='ORG')
+            WHERE g.id=NEW.requester_grant_id AND g.membership_id=r.id AND g.revoked_at IS NULL AND rc.code='OWNER' AND rc.scope_kind='ORG')
           AND EXISTS(SELECT 1 FROM org_role_grants g JOIN role_catalog rc ON rc.id=g.role_id
             WHERE g.membership_id=t.id AND g.revoked_at IS NULL AND rc.code IN ('HR','HOST_COORDINATOR','MENTOR','BILLING')
               AND rc.scope_kind='ORG')) THEN
@@ -91,6 +93,12 @@ def upgrade():
       IF NEW.decision='ACCEPT' AND NOT EXISTS(SELECT 1 FROM user_contacts t WHERE t.id=NEW.contact_id
         AND t.user_id=NEW.actor_id AND t.verified_at=NEW.contact_verified_at AND t.revoked_at IS NULL) THEN
         RAISE EXCEPTION 'Owner consent contact mismatch' USING ERRCODE='23514';
+      END IF;
+      IF NEW.decision='ACCEPT' AND NOT EXISTS(SELECT 1 FROM owner_addition_requests p
+        JOIN org_role_grants g ON g.id=NEW.target_staff_grant_id AND g.membership_id=p.target_membership_id
+        JOIN role_catalog r ON r.id=g.role_id WHERE p.case_id=NEW.case_id AND g.revoked_at IS NULL
+          AND r.scope_kind='ORG' AND r.code IN ('HR','HOST_COORDINATOR','MENTOR','BILLING')) THEN
+        RAISE EXCEPTION 'Owner consent staff grant mismatch' USING ERRCODE='23514';
       END IF;
       RETURN NEW;
     END $$;
@@ -122,12 +130,16 @@ def upgrade():
                 AND requester.status='ACTIVE' AND requester.auth_version=p.requester_auth_version
                 AND target.status='ACTIVE' AND previous.status='ACTIVE' AND previous.revoked_at IS NULL
                 AND EXISTS(SELECT 1 FROM org_role_grants old_grant JOIN role_catalog old_role ON old_role.id=old_grant.role_id
-                  WHERE old_grant.membership_id=previous.id AND old_grant.revoked_at IS NULL
+                  WHERE old_grant.id=p.requester_grant_id AND old_grant.membership_id=previous.id AND old_grant.revoked_at IS NULL
                     AND old_role.code='OWNER' AND old_role.scope_kind='ORG')
                 AND EXISTS(SELECT 1 FROM owner_addition_consents consent JOIN user_contacts contact ON contact.id=consent.contact_id
+                  JOIN org_role_grants staff_grant ON staff_grant.id=consent.target_staff_grant_id
+                  JOIN role_catalog staff_role ON staff_role.id=staff_grant.role_id
                   WHERE consent.case_id=c.id AND consent.revision=c.current_revision AND consent.decision='ACCEPT'
                     AND consent.actor_id=target.id AND consent.auth_version=target.auth_version
                     AND consent.expires_at>clock_timestamp() AND contact.user_id=target.id AND contact.revoked_at IS NULL
+                    AND staff_grant.membership_id=p.target_membership_id AND staff_grant.revoked_at IS NULL
+                    AND staff_role.scope_kind='ORG' AND staff_role.code IN ('HR','HOST_COORDINATOR','MENTOR','BILLING')
                     AND contact.verified_at=consent.contact_verified_at
                     AND consent.event_no=(SELECT max(latest.event_no) FROM owner_addition_consents latest WHERE latest.case_id=c.id)))))) THEN
         RAISE EXCEPTION 'Owner event requires approved independent case and matching grant' USING ERRCODE='23514';

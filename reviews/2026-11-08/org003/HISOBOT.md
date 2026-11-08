@@ -39,7 +39,16 @@ SQL guardga active moderator metadata qo'shildi. Actual MFA va contact HMAC APId
 tekshiriladi; direct database writers trusted. Trigger opaque HTTP callerni autentifikatsiya
 qilmaydi va app HMAC keyni bilmaydi. `copilot_code_review.md`/assessment boundaryni ajratadi.
 
-295 test collect qilindi; hozircha bu full pass da'vosi emas. Current canonical46 explicit /
+bc6e1d6 uchun complete295 test GitHub CI42502191120da o'tdi. Keyin grantni revoke/regrant
+qilganda eski requester so'rovi va target roziligi qayta amal qilishi ikki yangi test bilan
+aniqlandi: initial_grant_boundaries_junit.xml,2 failed. Bu295-test yashil natija yangi
+ketma-ketliklarni qamramagan. So'rov immutable requester_grant_idga, rozilik exact
+target_staff_grant_idga bog'landi; SQL relational proof ham shu grantlarni tekshiradi.
+Eski OWNER granti bekor bo'lsa yangi so'rov, staff granti bekor bo'lsa yangi rozilik kerak.
+Yangi ruxsat bilan qonuniy qayta davom etish ham tekshirildi:2 passed,11.40s,
+grant_boundaries_junit.xml. Final source uchun120 affected va complete297-test CI hali kerak.
+
+Current canonical46 explicit /
 86 placeholder statistikasi o'zgarmaydi; yangi ownership helperlari bu132 ro'yxatdan tashqari.
 Canonical94 table modeli o'zgarmadi; runtime103. Guide: backend/OWNER_ADDITIONS.md.
 Transfer/recovery003B, frontend, providers, production DB provisioning, DR va barcha42 AC

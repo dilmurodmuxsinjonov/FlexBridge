@@ -16,6 +16,8 @@ The strict JSON body contains `target_membership_id`, 1–5 distinct owned CLEAN
 `file_ids`, and a 15–4000-character `evidence_note`. Actor, target account and requested
 OWNER role come from current authority and membership records. Clients cannot supply
 approval, actor or role flags. The response is202/WAITING_CONSENT and grants no authority.
+The proposal is bound to the exact requester OWNER grant. If that grant ends, a later
+OWNER regrant cannot authorize the old proposal: cancel it and create a new request.
 Same-request retries return the existing proposal; changed payloads conflict. Only one
 unresolved proposal per target is accepted by the service under the organization lock.
 
@@ -28,7 +30,9 @@ requester cannot accept for the target. Contact control is not legal identity pr
 
 `decision: DECLINE` has no contact field and closes the pending request, including
 withdrawal of earlier pending consent. It cannot revoke an already approved OWNER grant.
-Contact replacement/revocation, target security changes, expiry or new evidence require
+Consent is also bound to the exact active staff grant used by the target. Revoking that
+grant invalidates its consent even after a fresh staff invitation/regrant. The target can
+give fresh consent to the still-pending proposal. Contact replacement/revocation, target security changes, expiry or new evidence require
 fresh valid consent. A target may renew consent to the same pending revision. Contact
 values, bindings, session identifiers and security versions are not returned in the API.
 
@@ -51,7 +55,8 @@ NEEDS_INFO permits the original current OWNER to post new evidence to
 `/owner-requests/{id}/resubmit`, with `expected_revision`. Target and organization cannot
 change. The revision increments and returns WAITING_CONSENT; older consent/evidence remain
 in history. A requester security change invalidates the old proposal: cancel and create
-a new request using a new key. `/cancel` takes a 15–2000-character reason and requires
+a new request using a new key. A changed requester grant has the same effect. `/cancel`
+takes a 15–2000-character reason and requires
 the original current-MFA OWNER. Rejection, decline and cancellation never grant OWNER.
 
 Migration0008 adds immutable proposal/consent tables (runtime103, canonical94 unchanged),

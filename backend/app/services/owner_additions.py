@@ -60,6 +60,14 @@ def target_staff(conn,request):
     return member,get_row(conn,'users',request['target_user_id'])
 
 
+def consent_staff_grant_current(conn,request,consent):
+    grants,roles=table('org_role_grants'),table('role_catalog')
+    return conn.execute(select(grants.c.id).join(roles,roles.c.id==grants.c.role_id).where(
+        grants.c.id==consent['target_staff_grant_id'],grants.c.membership_id==request['target_membership_id'],
+        grants.c.revoked_at.is_(None),roles.c.scope_kind=='ORG',roles.c.code.in_(STAFF))
+        .with_for_update(read=True,of=(grants,roles))).first() is not None
+
+
 def current_contact(conn,user_id,contact_id):
     contacts=table('user_contacts')
     row=conn.execute(select(contacts).where(contacts.c.id==contact_id).with_for_update(read=True)).mappings().first()
@@ -74,7 +82,8 @@ def valid_consent(conn,case,request,target):
     consent=latest_consent(conn,case['id'])
     if not consent or consent['revision']!=case['current_revision'] or consent['decision']!='ACCEPT':
         raise GovernanceError('OWNER_TARGET_CONSENT_REQUIRED')
-    if consent['expires_at']<=now() or consent['auth_version']!=target['auth_version']:
+    if (consent['expires_at']<=now() or consent['auth_version']!=target['auth_version']
+        or not consent_staff_grant_current(conn,request,consent)):
         raise GovernanceError('OWNER_TARGET_CONSENT_STALE')
     contact,binding=current_contact(conn,target['id'],consent['contact_id'])
     if contact['verified_at']!=consent['contact_verified_at'] or not hmac.compare_digest(binding,consent['contact_digest']):
@@ -135,6 +144,7 @@ class OwnerAdditionService:
             organization_service._submission(conn,case,requester['id'],fields,file_ids,evidence_note)
             request={**request,'case_id':case['id'],'created_at':now(),'requester_user_id':actor.user_id,
                 'requester_membership_id':requester['id'],'requester_auth_version':user['auth_version'],
+                'requester_grant_id':requester['_authority_grant_id'],
                 'requester_session_id':actor.session_id,'idempotency_key':idempotency_key,'request_fingerprint':fingerprint}
             conn.execute(requests.insert().values(**request))
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='OWNER_ADDITION_REQUESTED',
@@ -151,7 +161,7 @@ class OwnerAdditionService:
         with transaction() as conn:
             org,case,request=locked_case(conn,case_id);mfa_authority(conn,actor)
             if actor.user_id!=request['target_user_id']:raise GovernanceError('OWNER_TARGET_ONLY',status_code=403)
-            target_staff(conn,request)
+            target_member,_=target_staff(conn,request)
             if case['current_revision']!=expected_revision:raise GovernanceError('CASE_STATE_OR_REVISION_CONFLICT')
             latest=latest_consent(conn,case_id)
             if case['status'] in FINAL:
@@ -162,15 +172,18 @@ class OwnerAdditionService:
             user=get_row(conn,'users',actor.user_id);created=now()
             values=dict(id=str(uuid4()),case_id=case_id,created_at=created,revision=expected_revision,
                 event_no=1 if not latest else latest['event_no']+1,actor_id=actor.user_id,auth_version=user['auth_version'],
-                session_id=actor.session_id,decision=decision,contact_id=None,contact_digest=None,contact_verified_at=None,expires_at=None)
+                session_id=actor.session_id,decision=decision,target_staff_grant_id=None,
+                contact_id=None,contact_digest=None,contact_verified_at=None,expires_at=None)
             if decision=='ACCEPT':
                 contact,binding=current_contact(conn,actor.user_id,contact_id)
                 if (latest and latest['revision']==expected_revision and latest['decision']=='ACCEPT'
                     and latest['auth_version']==user['auth_version'] and latest['expires_at']>created
                     and latest['contact_id']==contact_id and latest['contact_verified_at']==contact['verified_at']
+                    and consent_staff_grant_current(conn,request,latest)
                     and hmac.compare_digest(latest['contact_digest'],binding)):
                     return self._report(conn,case,request,idempotent_replay=True)
-                values.update(contact_id=contact_id,contact_digest=binding,contact_verified_at=contact['verified_at'],expires_at=created+timedelta(hours=24))
+                values.update(target_staff_grant_id=target_member['_authority_grant_id'],contact_id=contact_id,
+                    contact_digest=binding,contact_verified_at=contact['verified_at'],expires_at=created+timedelta(hours=24))
             conn.execute(table('owner_addition_consents').insert().values(**values))
             state='CANCELLED' if decision=='DECLINE' else ('IN_REVIEW' if case['assigned_reviewer_id'] else 'PENDING')
             conn.execute(table('verification_cases').update().where(table('verification_cases').c.id==case_id)
@@ -203,11 +216,13 @@ class OwnerAdditionService:
             rows=[dict(r) for r in conn.execute(query.order_by(requests.c.case_id).limit(limit+1)).mappings()]
             return {'items':rows[:limit],'next_cursor':rows[limit-1]['case_id'] if len(rows)>limit else None}
 
-    def _requester(self,conn,actor,request):
+    def _requester(self,conn,actor,request,require_original_grant=True):
         mfa_authority(conn,actor)
         if actor.user_id!=request['requester_user_id']:raise GovernanceError('OWNER_REQUESTER_ONLY',status_code=403)
         member=org_authority(conn,actor.user_id,request['organization_id'],'OWNER')
-        if member['id']!=request['requester_membership_id']:raise GovernanceError('REQUESTER_NO_LONGER_AUTHORIZED')
+        if (member['id']!=request['requester_membership_id'] or (require_original_grant
+            and member['_authority_grant_id']!=request['requester_grant_id'])):
+            raise GovernanceError('REQUESTER_NO_LONGER_AUTHORIZED')
         return get_row(conn,'users',actor.user_id)
 
     def resubmit(self,actor,case_id,*,expected_revision,file_ids,evidence_note):
@@ -233,7 +248,7 @@ class OwnerAdditionService:
     def cancel(self,actor,case_id,reason):
         require_mfa(actor);reason=note(reason,2000)
         with transaction() as conn:
-            org,case,request=locked_case(conn,case_id);self._requester(conn,actor,request)
+            org,case,request=locked_case(conn,case_id);self._requester(conn,actor,request,require_original_grant=False)
             if case['status'] in FINAL:
                 audits=table('audit_events')
                 prior=conn.execute(select(audits.c.id).where(audits.c.object_key==case_id,
@@ -272,7 +287,8 @@ class OwnerAdditionService:
             if org['status']!='VERIFIED':raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             requester=org_authority(conn,request['requester_user_id'],org['id'],'OWNER')
             requester_user=get_row(conn,'users',request['requester_user_id'])
-            if requester['id']!=request['requester_membership_id'] or requester_user['auth_version']!=request['requester_auth_version']:
+            if (requester['id']!=request['requester_membership_id'] or requester['_authority_grant_id']!=request['requester_grant_id']
+                or requester_user['auth_version']!=request['requester_auth_version']):
                 raise GovernanceError('REQUESTER_NO_LONGER_AUTHORIZED')
             target_member,target_user=target_staff(conn,request)
             if owner_grant_exists(conn,target_member['id']):raise GovernanceError('TARGET_ALREADY_OWNER')
