@@ -65,3 +65,10 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 - Token `secrets.token_urlsafe(32)`; token va kontakt faqat purpose-bound HMAC bilan saqlanadi. 24h, current verified IAM kontakt va current scoped inviter authority; OWNER oddiy invitationga kirmaydi.
 - Canonical token URLi Uvicorn access logidan outer ASGI response/error chegarasida niqoblanadi. Native log tekshiruvi o'tdi; tashqi proxy loglari deployment konfiguratsiyasi bo'lib qoladi.
 - Legacy pending invitationlarda role/contact contract yo'q: migratsiya ularni revoke qilib tarixni saqlaydi. Accepted tarix va grantlar qayta talqin qilinmaydi. Qo'llanma backend/INVITATIONS.md.
+
+## OPS-CODEX-001 ? durable dry-run evaluation (2026-11-08)
+
+- 0006_retention_evaluations qo'shimcha helper jadvali: runtime100, canonical94 o'zgarmadi. Composite actor/idempotency unique, immutable UPDATE/DELETE trigger, audit bilan bitta UOW. Yangi dependency talab qilinmadi.
+- COMPLIANCE/current-MFA write; COMPLIANCE yoki ADMIN/current-MFA read. Strict integer input; client count requested metadata, haqiqiy scanned/actioned0. Snapshot NOT_CERTIFIED, status EVALUATED_ONLY/NOT_EXECUTED.
+- Legal-reviewed custom policy installation va haqiqiy purge yo'q. Legacy fabricated combined appeal410; alohida appellant/reviewer workflow keyingi paket. 0005->0006 upgrade representative populated userni saqladi.
+- GitHub bilan ish gh CLI/REST va amalda ishlagan read-only Copilot CLI orqali. read:org kengaytirilmagan; repo-scope fallback ishladi. Qo'llanma: backend/OPERATIONS.md.

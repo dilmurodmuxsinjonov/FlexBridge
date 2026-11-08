@@ -118,7 +118,8 @@ def test_current_role_is_required_to_read_a_record(client,identities):
 
 @pytest.mark.parametrize('changes',[
     {'age_days':-1},{'records_scanned':-1},{'data_category':'UNKNOWN'},
-    {'actor_id':str(uuid4())},{'mode':'PURGE'},{'records_actioned':100}])
+    {'actor_id':str(uuid4())},{'mode':'PURGE'},{'records_actioned':100},
+    {'age_days':True},{'age_days':'30'},{'records_scanned':1.2},{'records_scanned':False}])
 def test_untrusted_inputs_cannot_claim_execution(client,identities,changes):
     assert evaluate(client,identities('COMPLIANCE'),**changes).status_code==422
 
@@ -126,6 +127,17 @@ def test_untrusted_inputs_cannot_claim_execution(client,identities,changes):
 def test_missing_idempotency_key_is_rejected(client,identities):
     assert client.post(BASE,headers=identities('COMPLIANCE')['headers'],json={
         'data_category':'UNPUBLISHED_DRAFT','age_days':30}).status_code==422
+
+
+def test_internal_evaluation_rejects_boolean_numbers(identities):
+    from app.api.dependencies import ActorContext
+    user=identities('COMPLIANCE');actor=ActorContext(user['user_id'],user['session_id'],())
+    service=PilotOperationsService()
+    for age,count in ((True,0),(30,False)):
+        with pytest.raises(OperationsInvariantError) as exc:
+            service.record_retention_evaluation(actor,data_category='UNPUBLISHED_DRAFT',age_days=age,
+                records_scanned=count,idempotency_key='internal-validation-key')
+        assert exc.value.status_code==422
 
 
 def test_legacy_nonpersistent_execution_and_combined_appeal_are_closed(client,identities):

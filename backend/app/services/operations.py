@@ -35,7 +35,8 @@ class PilotOperationsService:
 
     def record_retention_evaluation(self,actor,*,data_category,age_days,records_scanned,idempotency_key):
         require_platform(actor,'COMPLIANCE');require_mfa(actor)
-        if (not isinstance(idempotency_key,str) or not 8<=len(idempotency_key)<=128 or
+        if (type(age_days) is not int or type(records_scanned) is not int or
+            not isinstance(idempotency_key,str) or not 8<=len(idempotency_key)<=128 or
             not 0<=age_days<=365000 or not 0<=records_scanned<=1000000000):
             raise OperationsInvariantError('INVALID_EVALUATION_INPUT',422)
         try:

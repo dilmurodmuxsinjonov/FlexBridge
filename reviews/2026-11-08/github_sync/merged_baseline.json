@@ -1,0 +1,13 @@
+{
+  "issue": 35,
+  "pr": 36,
+  "head": "131c72b3d6dfb8b10feec9e81ee0de3da71926d0",
+  "merge": "1ac0d99807509363a8438164c0c0496cebcc6501",
+  "ci_runs": [
+    42468790607,
+    42468787212
+  ],
+  "ci_tests": 203,
+  "pilot_ready": false,
+  "external_reviewer": "GitHub Copilot CLI, read-only; model not independently reported"
+}

@@ -6,11 +6,11 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## GH-CODEX-001 — Lokal tuzatishlarni GitHub bilan sinxronlash
 
-- Holat: `Jarayonda`; mas'ul: Codex. Q-013 asosida uzluksiz ketma-ket ish boshlandi.
+- Holat: `Bajarildi` (GitHub baseline sinxronlash, pilot qabuli emas); mas'ul: Codex; read-only reviewer Copilot CLI. Q-013 asosida uzluksiz ketma-ket ish davom etadi.
 - Doira: current tested baseline, public secret/artifact gate, GitHub Issue -> commit/branch -> draft PR -> CI -> review. Oldingi modified/untracked fayllar bir-biriga bog'liq snapshot sifatida saqlanadi; mavjud ish yo'qotilmaydi.
 - Fayllar: tekshirilgan backend/migration/test/infra/review snapshoti, publication gate, 01/03/04 jurnallar. Boshqa paketlar PR/CI dalili olingach alohida branchlarda.
 - Qabul: raw credentials/state fayllari public repoga tushmaydi; legacy test arxivi manifesti mos; current runtime test-magic literal yo'q; branch/commit/PR/checklar bilan natija qayta bajariladi. Keyingi: OPS-CODEX-001 retention/appeal persistence, so'ng ORG-003/EDU.
-- Oraliq: Issue35 / draft PR36 / commit f844d53; ikkala PostgreSQL GitHub CI run successful. Copilot pinned detached snapshotda read-only review qilmoqda. Main merge hali bajarilmadi.
+- Natija: Issue35 yopildi; PR36 merged, merge1ac0d99. Copilot topgan OWNER bypassi131c72bda yopildi; final snapshot203 test, ikkala PostgreSQL GitHub CI successful. Review/assessment/manifest: reviews/2026-11-08/github_sync; LOG-029. Keyingi Issue37 jarayonda.
 
 ## OPS-CODEX-001 — Durable retention evaluations va yolg'on executionni to'xtatish
 

@@ -12,9 +12,9 @@ operations_service=PilotOperationsService()
 class RetentionEvaluationRequest(BaseModel):
     model_config=ConfigDict(extra='forbid')
     data_category:str=Field(min_length=1,max_length=80)
-    age_days:int=Field(ge=0,le=365000)
+    age_days:int=Field(strict=True,ge=0,le=365000)
     # Compatibility input; actual counters stay zero.
-    records_scanned:int=Field(default=0,ge=0,le=1000000000)
+    records_scanned:int=Field(default=0,strict=True,ge=0,le=1000000000)
 
 @router.post('/moderation-appeals',status_code=410)
 def retired_combined_appeal(actor:ActorContext=Depends(require_actor_context)):
