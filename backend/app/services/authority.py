@@ -28,13 +28,13 @@ def moderator_authority(conn,actor):
     platform_authority(conn,actor,'MODERATOR')
 
 
-def org_authority(conn,user_id,org_id,*allowed):
+def org_authority(conn,user_id,org_id,*allowed,nowait=False):
     users,members,grants,roles=(table(n) for n in ('users','org_memberships','org_role_grants','role_catalog'))
     row=conn.execute(select(members,grants.c.id.label('_authority_grant_id')).join(users,users.c.id==members.c.user_id)
         .join(grants,grants.c.membership_id==members.c.id).join(roles,roles.c.id==grants.c.role_id).where(
             users.c.status=='ACTIVE',members.c.user_id==user_id,members.c.organization_id==org_id,
             members.c.status=='ACTIVE',members.c.revoked_at.is_(None),grants.c.revoked_at.is_(None),
             roles.c.scope_kind=='ORG',roles.c.code.in_(allowed))
-        .with_for_update(read=True,of=(users,members,grants,roles))).mappings().first()
+        .with_for_update(read=True,of=(users,members,grants,roles),nowait=nowait)).mappings().first()
     if not row:raise GovernanceError('ORG_SCOPE_FORBIDDEN',status_code=403)
     return dict(row)
