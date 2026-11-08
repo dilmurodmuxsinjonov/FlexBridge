@@ -94,6 +94,23 @@ owner_transfer_consents = Table('owner_transfer_consents',metadata,
     Column('decision',Text,nullable=False),Column('target_owner_grant_id',UUID(as_uuid=False)),
     Column('contact_id',UUID(as_uuid=False)),Column('contact_digest',Text),
     Column('contact_verified_at',DateTime(timezone=True)),Column('expires_at',DateTime(timezone=True)))
+owner_continuity_requests = Table('owner_continuity_requests',metadata,
+    Column('case_id',UUID(as_uuid=False),primary_key=True),Column('recovery_id',UUID(as_uuid=False),nullable=False),
+    Column('organization_id',UUID(as_uuid=False),nullable=False),Column('applicant_id',UUID(as_uuid=False),nullable=False),
+    Column('membership_id',UUID(as_uuid=False),nullable=False),Column('staff_grant_id',UUID(as_uuid=False),nullable=False),
+    Column('auth_version',Integer,nullable=False),Column('session_id',UUID(as_uuid=False),nullable=False),
+    Column('contact_id',UUID(as_uuid=False),nullable=False),Column('contact_digest',Text,nullable=False),
+    Column('contact_verified_at',DateTime(timezone=True),nullable=False),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('expires_at',DateTime(timezone=True),nullable=False),Column('owner_roster',JSONB,nullable=False),
+    Column('evidence_file_ids',JSONB,nullable=False),Column('evidence_note',Text,nullable=False),
+    Column('idempotency_key',Text,nullable=False),Column('request_fingerprint',Text,nullable=False))
+owner_continuity_events = Table('owner_continuity_events',metadata,
+    Column('id',UUID(as_uuid=False),primary_key=True),Column('case_id',UUID(as_uuid=False),nullable=False),
+    Column('stage',Text,nullable=False),Column('action',Text,nullable=False),Column('actor_id',UUID(as_uuid=False),nullable=False),
+    Column('authority_grant_id',UUID(as_uuid=False),nullable=False),Column('auth_version',Integer,nullable=False),
+    Column('session_id',UUID(as_uuid=False),nullable=False),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('claim_id',UUID(as_uuid=False)),Column('reason',Text),Column('result_owner_grant_id',UUID(as_uuid=False)),
+    Column('ownership_event_id',UUID(as_uuid=False)))
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -132,7 +149,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0009_owner_transfers':
+        if revision != '0010_owner_continuity':
             raise RuntimeError('Database migrations are not current')
     return engine
 

@@ -231,6 +231,7 @@ class IdentityService:
             proof=continuation(conn,recovery_token,'RECOVERY_STATUS')
             if proof['payload']['request_id']!=request_id:raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
             row=conn.execute(select(table('recovery_requests')).where(table('recovery_requests').c.id==request_id)).mappings().one()
+            if row['kind']!='ACCOUNT_ACCESS':raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
             return {'recovery_id':request_id,'status':row['status']}
 
     def complete_recovery(self,*,request_id,reset_token,new_password,ip):
@@ -244,7 +245,7 @@ class IdentityService:
             if not user or user['status']!='ACTIVE' or user['auth_version']!=p['auth_version'] or not contact:raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
             t=table('recovery_requests')
             request=conn.execute(select(t).where(t.c.id==request_id).with_for_update()).mappings().one()
-            if request['status']!='READY_TO_RESET':raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
+            if request['kind']!='ACCOUNT_ACCESS' or request['status']!='READY_TO_RESET':raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
             conn.execute(table('users').update().where(table('users').c.id==user['id']).values(password_hash=hash_password(new_password),updated_at=now()))
             auth_service.rotate_security(conn,user['id'])
             # Recovery can replace a lost authenticator. Old factors and backup codes cannot survive it.

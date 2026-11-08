@@ -189,7 +189,7 @@ class OrganizationService:
             return {key: org[key] for key in ('id','public_name','region','description','website')} | {'capabilities': badges}
 
     def submit(self, actor, org_id, *, kind, file_ids, evidence_note, case_id=None, proposed_fields=None):
-        if kind in ('ORG_OWNER_ADDITION','ORG_OWNER_TRANSFER'):
+        if kind in ('ORG_OWNER_ADDITION','ORG_OWNER_TRANSFER','ORG_OWNER_CONTINUITY'):
             raise GovernanceError('OWNER_USE_DEDICATED_FLOW',status_code=422)
         require_mfa(actor)
         rate_limit('org-submission', actor.user_id, 20, 3600)
@@ -200,6 +200,8 @@ class OrganizationService:
             cases = table('verification_cases')
             if case_id:
                 case = get_row(conn, 'verification_cases', case_id, True)
+                if case['kind']=='ORG_OWNER_CONTINUITY':
+                    raise GovernanceError('OWNER_USE_DEDICATED_FLOW',status_code=422)
                 if case['organization_id'] != org_id or case['requester_id'] != actor.user_id or case['kind'] != kind:
                     raise GovernanceError('CASE_SCOPE_FORBIDDEN', status_code=403)
                 if case['status'] != 'NEEDS_INFO':

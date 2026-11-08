@@ -1,0 +1,6 @@
+{
+  "revision": "0010_owner_continuity",
+  "runtime_tables": 107,
+  "empty_organization_roster": [],
+  "scope": "Fresh DDL smoke only; no application startup, live identity, quorum or grant acceptance"
+}

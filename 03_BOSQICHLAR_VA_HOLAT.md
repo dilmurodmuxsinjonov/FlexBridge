@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42 merged. ORG-CODEX-003B / Issue43: mavjud OWNER vorisga topshirish boshlandi;003C recovery Rejada. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ownership va EDU.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44 merged. ORG-CODEX-003C1 / Issue45: ikki mustaqil reviewer bilan existing-staff continuity boshlandi. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ownership va EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -143,9 +143,15 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003B — Mavjud OWNER vorisga vakolatdan chiqish
 
-- Holat: `Tekshiruvda`; mas'ul Codex; Issue43/PR44, feature/43-reviewed-owner-departure. Source284b297 final native160 passed,0 failure/error/skip,1 warning,566.41s; ikkala full337-test CI42525017488/42525078474 successful. Actual pinned Copilot code review exit0, confirmed HTTP defect topilmadi; coverage chegaralari assessmentda. Evidence-only checks/merge qolgan. Doira va qabul: reviews/2026-11-09/org003b/REJA.md. Planning review tashqi plan faylini access denied sabab to'liq o'qimagan; source/prompt scope aniq yozilgan.
+- Holat: `Bajarildi` (chegaralangan backend paketi); mas'ul Codex; Issue43 yopildi, PR44 mergee2dd6a1. Source284b297 final native160 passed,0 failure/error/skip,1 warning,566.41s; ikkala full337-test CI42525017488/42525078474 successful. Evidence-only910d6cf uchun final CI42525960850/42525965774 ham337 passed (231.43s/209.11s). Actual pinned Copilot code review exit0, confirmed HTTP defect topilmadi; coverage chegaralari assessmentda. Doira va qabul: reviews/2026-11-09/org003b/REJA.md. Planning review tashqi plan faylini access denied sabab to'liq o'qimagan; source/prompt scope aniq yozilgan.
 - Current-MFA OWNER faqat o'z OWNER grantidan chiqishni so'raydi; shu tashkilotdagi boshqa mavjud OWNER MFA/contact bilan rozilik beradi; assigned independent MODERATOR current-MFA bilan tasdiqlaydi. Grant qo'shilmaydi; requesterning membership va boshqa rollari saqlanadi. Barcha tomonning original grantlari, revision/security/contact/evidence yangiligi tekshiriladi.
 - Fayllar: alohida service/API,0009 migration/storage, explicit operator dispatch/private HTTP, SQL regressiyalar/guide va01/02/03. Oldingi003A proof ma'nosi saqlanadi; transfer eventida previous membership va exact revoked grant bo'ladi. Concurrency/rollback/last-owner continuity, immutable history, populated upgrade, affected/full CI va pinned peer review talab qilinadi.003C recovery va pilot qabuli doiradan tashqari.
+
+## ORG-CODEX-003C1 — Fixed-revision existing-staff OWNER continuity
+
+- Holat: `Tekshiruvda`; mas'ul Codex; Issue45, feature/45-owner-continuity. Doira/qabul: reviews/2026-11-09/org003c/REJA.md va addendum. Runtime0010/107 jadval; native yangiC56 holati passed, initial response KeyError tuzatilib failure dalili saqlandi. Populated upgrade105->107 va old proof/history preservation o'tdi. Final old IAM/ownership/appeal, complete393-test CI va pinned code review qolgan. Actual Copilot CLI ikki read-only planning review berdi; initial/revised reviewlar saqlandi.
+- Existing active staff MFA bilan faqat o'ziga murojaat qiladi; contact/consent/evidence/original grant/OWNER roster immutable. Fixed revision1; MODERATOR tavsiyasi va boshqa COMPLIANCE yakuniy tasdig'i kerak. Eski OWNER grantlari saqlanadi. Generic verification yo'llari bu case'ni approve/resubmit qila olmaydi; account recovery kind alohida.
+- Fayllar: dedicated continuity service/API,0010 migration/storage, IAM kind filter, private HTTP, SQL regressiyalar/guide va01/02/03. Expired/revoked claim closure, owner objection, quorum/roster/replay/race/rollback va old proof regression majburiy. Real identity/legal authority, zero-active-owner/no-staff recovery, live provider/UI/DR va pilot qabuli doiradan tashqarida.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 

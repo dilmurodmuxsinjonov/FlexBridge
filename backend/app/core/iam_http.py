@@ -12,7 +12,8 @@ class IAMHTTPMiddleware:
             '/api/v1/organizations', '/api/v1/operator/verification-cases', '/api/v1/invitations/',
             '/api/v1/operations/', '/api/v1/moderation/', '/api/v1/moderation-appeals/',
             '/api/v1/operator/moderation-', '/api/v1/owner-requests/', '/api/v1/me/owner-requests',
-            '/api/v1/owner-transfers/', '/api/v1/me/owner-transfers')):
+            '/api/v1/owner-transfers/', '/api/v1/me/owner-transfers',
+            '/api/v1/owner-continuity/', '/api/v1/operator/owner-continuity/')):
             return await self.app(scope,receive,send)
         def redact_invitation():
             if scope.get('path','').startswith('/api/v1/invitations/'):
