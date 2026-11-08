@@ -19,7 +19,8 @@ def test_contact_rebind_and_invitation_do_not_form_a_database_deadlock(client,id
     def hold_contact(conn,value):
         original_bind(conn,value);bound.set();assert release.wait(30)
     def watch_contact(conn,value):
-        inviting.set();return original_invite(conn,value)
+        try:return original_invite(conn,value)
+        finally:inviting.set()
     monkeypatch.setattr(identity,'lock_contact',hold_contact)
     monkeypatch.setattr(invitations,'lock_contact',watch_contact)
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -50,7 +51,8 @@ def test_contact_rebind_and_acceptance_do_not_form_a_database_deadlock(client,id
     def hold_contact(conn,value):
         original_bind(conn,value);bound.set();assert release.wait(30)
     def watch_contact(conn,value):
-        accepting.set();return original_accept(conn,value)
+        try:return original_accept(conn,value)
+        finally:accepting.set()
     monkeypatch.setattr(identity,'lock_contact',hold_contact)
     monkeypatch.setattr(invitations,'lock_contact',watch_contact)
     with ThreadPoolExecutor(max_workers=2) as pool:

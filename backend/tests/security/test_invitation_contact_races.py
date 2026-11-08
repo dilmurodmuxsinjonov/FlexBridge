@@ -29,7 +29,8 @@ def test_public_contact_recycling_returns_retry_without_deadlock_or_partial_gran
     def hold(conn,value):
         original_bind(conn,value);bound.set();assert release.wait(30)
     def observe(conn,value):
-        waiting.set();return original_invite(conn,value)
+        try:return original_invite(conn,value)
+        finally:waiting.set()
     monkeypatch.setattr(identity,'lock_contact',hold)
     monkeypatch.setattr(invitations,'lock_contact',observe)
     def recycle():
@@ -85,3 +86,33 @@ def test_contact_discovered_after_initial_lookup_is_not_used_as_an_unlocked_fk_t
     with transaction() as conn:assert not conn.execute(select(table('org_invitations').c.id)).first()
     response=invite(client,owner,organization);assert response.status_code==201,response.text
     response=accept(client,recipient,response.json()['token']);assert response.status_code==200,response.text
+
+
+def test_existing_contact_recycled_before_target_pin_is_rechecked_before_fk_write(client,identities,organization,monkeypatch,delivery):
+    from app.services import invitations
+    owner=identities('OWNER',organization);old_holder=mfa_user(identities);new_holder=mfa_user(identities)
+    contact(old_holder)
+    verification=proof(client,delivery,purpose='CONTACT',destination=DEST,headers=new_holder['headers'])
+    checked,release=Event(),Event();original=invitations.lock_target_user
+    def pause(conn,user_id):
+        checked.set();assert release.wait(30)
+        return original(conn,user_id)
+    monkeypatch.setattr(invitations,'lock_target_user',pause)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        pending=pool.submit(invite,client,owner,organization)
+        try:
+            assert checked.wait(30)
+            changed=client.post('/api/v1/me/contacts',headers=new_holder['headers'],json={
+                'verification_token':verification,'current_password':'correct-passphrase-2026'})
+            assert changed.status_code==201,changed.text
+        finally:release.set()
+        result=pending.result(timeout=30)
+    assert result.status_code==409 and result.json()['detail']['code']=='INVITATION_BUSY_RETRY',result.text
+    assert client.get('/api/v1/auth/me',headers=old_holder['headers']).status_code==401
+    with transaction() as conn:assert not conn.execute(select(table('org_invitations').c.id)).first()
+    response=invite(client,owner,organization);assert response.status_code==201,response.text
+    with transaction() as conn:
+        target=conn.execute(select(table('org_invitations').c.target_user_id).where(
+            table('org_invitations').c.id==response.json()['id'])).scalar_one()
+        assert target==new_holder['user_id']
+    response=accept(client,new_holder,response.json()['token']);assert response.status_code==200,response.text
