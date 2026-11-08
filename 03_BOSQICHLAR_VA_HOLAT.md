@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-08 - Codex. GitHub baseline PR36 merged (203-test CI). OPS-CODEX-001 PR38: 224-test committed CI va24-test native subset passed; evidence/check yakunlanmoqda. 45 canonical handler,87 ta501; pilot tayyor emas. Keyingi: OPS-CODEX-002, so'ng ORG-003/EDU.
+Yangilangan: 2026-11-08 - Codex. PR36 va PR38 merged. OPS-CODEX-002 / PR40: c46ff70 native250 passed,586.00s va ikkala GitHub CI250 passed; evidence-only commit/check va merge qolgan. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ORG-CODEX-003A, so'ng transfer/recovery va EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -18,6 +18,15 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 - Doira: SQLda atomik auditlangan, idempotent dry-run baholash yozuvlari va cross-process read; client sanog'i haqiqiy scanned/deleted counterga aylanmaydi. Nonpersistent combined appeal resolution fail-closed qilinadi; alohida durable appeal workflow OPS-CODEX-002ga.
 - Fayllar: operations/retention service/API, 0006 migration/storage, SQL regressiyalar, qo'llanma va reviews/2026-11-08/ops001; 01/02/03. Hech qanday actual purge yoki legal approval da'vosi yo'q.
 - Qabul: PostgreSQL persist/restart, two-process read, role/MFA/revocation, idempotent concurrency/payload-conflict, immutable evaluation va audit atomicity; GitHub CI. Keyin OPS-CODEX-002, ORG-003 va EDU.
+
+## OPS-CODEX-002 — Alohida appellant va mustaqil review oqimi
+
+- Holat: `Tekshiruvda`; mas'ul Codex; actual read-only reviewer GitHub Copilot CLI, modeli mustaqil aniqlanmadi. Issue39 / PR40, branch feature/39-independent-moderation-appeals.
+- Doira: latest opportunity REJECT uchun session-bound haqiqiy appellant, immutable request/revision/original-rationale snapshot, mustaqil assigned moderator; atomik UPHOLD/REOPEN. REOPEN faqat DRAFTga, oddiy moderation/payment/publish cheklovlari saqlanadi. Rating/scam/public-report workflow to'liq qabuli emas.
+- Fayllar: moderation_appeals service/API, 0007 migration/storage, canonical API111 integration, private HTTP boundary, security regressiyalar va backend/MODERATION_APPEALS.md; 01/02/03 va reviews/2026-11-08/ops002.
+- Qabul: current rol/MFA/session va revocation interleaving, PostgreSQL authority lock/commit serialization, independent assignment, concurrency/replay/conflict, immutable exact SQL evidence, size/decimal precision, stale decision/content, audit rollback, second-process read va existing relation preservation; populated upgrade va full CI.
+- Dalil: post-review selected25 passed; authority-lock2 passed; c46ff70 native250 passed,0 failure/error/skip,1 framework warning,586.00s va complete250 test ikkala GitHub CI successful. HISOBOT.md/source_manifest/full_junit/summary shu review katalogida. Evidence-only commit/check va merge yakuni qolgan. Dastlabki fixture lookup va 401/403 test expectation xatolari alohida dalillarda saqlandi; runtime ularni o'tkazish uchun yumshatilmadi.
+- Jurnal tuzatishi: oldingi marker bo'yicha avtomatik qo'shish PowerShell ASCII pipe sabab ishlamagan; vazifa bo'limi hozir tiklandi. REJA.md, GitHub Issue39 va source/evidence tarixi saqlangan.
 
 ## REV-004 — Joriy ishchi katalogni umumiy ko'rib chiqish (2026-11-07)
 
@@ -122,8 +131,15 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003 — Mustaqil ownership boshqaruvi
 
-- Holat: `Rejada`; bu paketda yozilmadi.
+- Holat: `Rejada`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER, ORG-CODEX-003B transfer/recovery.
 - Doira: qo'shimcha OWNER, owner transfer/recovery uchun tashkilot topshirig'i va yangi vakilning mustaqil tekshiruv/roziligi, append-only ownership history va parallel last-owner himoyasi. Asl talab va qabul mezonlari ish boshlanishida aniqlanadi; keyin EDU.
+
+## ORG-CODEX-003A — Existing staff uchun mustaqil qo'shimcha OWNER
+
+- Holat: `Rejada`; mas'ul Codex; GitHub Issue41. PR40 yakunlangach boshlanadi; implementatsiya hozir yozilmadi.
+- Doira: current-MFA OWNER so'rovi, shu tashkilotdagi active staff membership targeti, named-target MFA/current verified-contact roziligi, revision-bound dalil va assigned independent MODERATOR approval. Bir tranzaksiyada OWNER grant + append-only ownership event + case + audit. Generic staff/invitation yo'li OWNER bermaydi.
+- Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, zarur shared authority helper, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi ko'rib chiqiladi.
+- Qabul: REJA.md. Copilot CLI actual read-only planning reviewi bajarildi; bu implementatsiya yoki acceptance dalili emas. Transfer/recovery003Bga, so'ng EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
