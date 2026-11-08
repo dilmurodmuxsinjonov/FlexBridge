@@ -1,0 +1,50 @@
+{
+  "commit": "ef4a94b61e5fbd67f0b370fe816a20bb858d630a",
+  "native_baseline": {
+    "commit": "fa40e54749dd6300e866f1ecc9a9833497bd4585",
+    "tests": 263,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 857.152
+  },
+  "native_post_review": {
+    "commit": "ef4a94b61e5fbd67f0b370fe816a20bb858d630a",
+    "scope": "Matching replay, negative reviewer outcomes, reset isolation and existing parallel full flow",
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 43.741
+  },
+  "initial_new_replay_regression": {
+    "runtime_commit": "fa40e54749dd6300e866f1ecc9a9833497bd4585",
+    "tests": 4,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 127.469
+  },
+  "ci_runs": [
+    42534534532,
+    42534538671
+  ],
+  "ci_tests": 401,
+  "ci_conclusion": "success",
+  "ci_elapsed_seconds": [
+    219.4,
+    257.95
+  ],
+  "prior_ci": {
+    "commit": "fa40e54749dd6300e866f1ecc9a9833497bd4585",
+    "runs": [
+      42528552035,
+      42528625943
+    ],
+    "tests": 393,
+    "conclusion": "success"
+  },
+  "residual_security_issue": 47,
+  "pilot_ready": false,
+  "note": "Native263 predates the six-line replay fix; post-review native9 plus final complete CI are separate evidence, not a claim of rerunning all263 natively."
+}

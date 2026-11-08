@@ -29,8 +29,20 @@ Joriy native PostgreSQL dalili:
   duplicate-active rejection va history immutability o'tdi. Bu trusted SQL index/upgrade
   probe, HTTP grant/legal identity dalili emas.
 
-Hali final committed old IAM/ownership/appeal regressiyasi, complete GitHub CI va pinned
-code review kerak. Ikki Copilot read-only planning review actual exit0, initial e'tirozlar
+fa40e54 bilan old IAM/ownership/appeal/C birlashgan native263 passed,0 failure/error/skip,
+1 warning,857.152s. GitHub393-test CI42528552035/42528625943 ikkovi ham successful.
+Keyin Copilot actual pinned source review matching POST stale closure'ni chetlab o'tganini
+topdi: yangi4 testdan3 failed/1 passed (`initial_replay_junit.xml`). Old yashil testlar
+bu holatlarni qamramagan. Approval freshness guardi oldindan bor edi.
+
+ef4a94b matching receiptni case lock/prelock/prune bilan tuzatdi. Izolyatsiyalangan worktree
+sinovi keyin aynan shu commitga saqlandi; root branch fast-forward qilindi. Post-review
+native9 passed,43.74s: replay4, negative outcomes3, account reset isolation1, parallel
+full-flow1. Native263 fa40e54 baseline natijasidir, ef4da yana263 passed deb aytilmaydi.
+Final ef4a94b uchun full401-test CI42534534532/42534538671 successful,
+219.40s/257.95s. Follow-up Copilot read-only review exit0: replay/outcome bo'yicha
+concrete defect topilmadi; u testlarni ishlatmagan yoki SHAni tekshirmagan. Codex
+Git tree/SHA va CI natijalarini tekshirdi. Ikki planning review actual exit0, initial e'tirozlar
 asosida fixed-revision scope toraytirildi. Model identity mustaqil aniqlanmadi; planning
 review implementatsiya/test approval emas. Source implementation Codexda.
 
@@ -40,3 +52,8 @@ baholaydi; kod legal identity, document truth yoki owner inaccessibilityni isbot
 TestClient/synthetic role/contact/CLEAN-file metadata ishlatildi. Zero-active-owner/no-staff
 va manual same-account recovery, live providers/browser/UI/DR va42 AC umumiy qabuli ochiq.
 Canonical inventory46 explicit/86 placeholder bo'lib qoladi. **pilot_ready false**.
+
+Alohida confirmed qoldiq: API075 old organization membership revoke transient MFA
+preflightdan keyin actual HTTP session revocation tugasa ham200 va REVOKED beradi.
+Bu oldindan authenticated in-flight request; anonim bypass emas. Izolyatsiyalangan
+probe1 failed dalili bilan Issue47ga ajratildi; ORG003C1 qabuli uni yopmaydi.
