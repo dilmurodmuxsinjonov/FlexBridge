@@ -234,7 +234,9 @@ def test_authority_lock_serializes_revocation_with_commit(client,identities,orga
         finally:resume.set()
         assert future.result(timeout=20).status_code==200
     with transaction() as conn:conn.execute(target.update().where(condition).values(revoked_at=now()))
-    assert decide(client,reviewer,case_id).status_code==403
+    response=decide(client,reviewer,case_id)
+    assert response.status_code==(401 if revoked=='session' else 403)
+    assert response.json()['detail']['code']==('AUTH_REVOKED' if revoked=='session' else 'FORBIDDEN_ROLE')
 
 
 @pytest.mark.parametrize('description,expected',[('é'*260000,201),('é'*263000,422),('é\\\n'*100000,422)],

@@ -1,0 +1,9 @@
+{
+  "commit": "8b1632c7ebfaaa6d6ea1edca0041e51562af9d77",
+  "tests": 250,
+  "passed": 249,
+  "failed": 1,
+  "elapsed_seconds": 487.758,
+  "reason": "Test expected403 after revoked session; actual401 AUTH_REVOKED is the correct authentication boundary. Ephemeral fixture secret fields redacted in preserved JUnit.",
+  "acceptance_evidence": false
+}
