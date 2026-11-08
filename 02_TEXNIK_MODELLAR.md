@@ -88,3 +88,10 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 - SQL guard relational proof va active moderator metadata tekshiradi; actual bearer/MFA/contact HMAC API chegarasida, direct DB writers trusted. Bu opaque caller authentication yoki human legal identityni SQLda mustaqil isbotlash degani emas. Yangi dependency yo'q.
 - Guide backend/OWNER_ADDITIONS.md. Native affected118 + history/migration follow-up2 passed; full committed CI keyingi qabul bosqichi. Transfer/recovery hali doiradan tashqarida.
 - Requester delegatsiyasi exact OWNER grant FKga; target roziligi exact staff grant FKga bog'langan. Revoke/regrant oldingi intentni jonlantirmaydi; yangi requester so'rovi yoki fresh target consent kerak. Bu ichki grant identifikatorlari API response'da ochilmaydi. Table soni103 bo'lib qoladi.
+
+## ORG-CODEX-003B — existing OWNER successor va departure (2026-11-09)
+
+- Head0009_owner_transfers; ikkita alohida immutable helper table, runtime105/canonical94. Immutable proposal source va successor original OWNER grantlarini pin qiladi. Consent exact revision, current contact/security version va24h bilan. Yangi OWNER grant yaratilmaydi.
+- Organization -> case lockdan keyin current authority/contact/evidence commitgacha qulflanadi. Faqat original requester OWNER grant revoked_at yoziladi, membership va boshqa rollar saqlanadi. Canonical event previous/new membership va exact effective_at bilan, case/audit shu UOWda.
+- Previous membership bo'lmagan event existing0008 guarddan o'tadi; previous bo'lgani dedicated transfer guarddan. Oldingi proof function ma'nosi o'zgarmaydi. Canonical operator explicit dispatch; generic submit rad etadi. Historical receipt current MFA bilan, boshqa tashkilot huquqi berilmaydi.
+- Guide backend/OWNER_TRANSFERS.md. Migration smoke1 passed; keyingi HTTP/race/rollback testlari ketmoqda.003C recovery va pilot qabuli doiradan tashqarida. Yangi dependency yo'q; trusted DB/API authentication chegarasi avvalgidek.

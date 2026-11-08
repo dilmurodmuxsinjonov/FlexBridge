@@ -1,0 +1,8 @@
+{
+  "status": "fixture_error",
+  "phase": "populating legacy0008 database before upgrade0009",
+  "causes": ["MODERATOR catalog entry was assumed seeded, but is provisioned explicitly by tests", "Second fixture attempt used a self-granted platform role, correctly rejected by chk_platform_grant_not_self"],
+  "runtime_change": false,
+  "counted_as_success": false,
+  "cleanup": "disposable database dropped by finally"
+}

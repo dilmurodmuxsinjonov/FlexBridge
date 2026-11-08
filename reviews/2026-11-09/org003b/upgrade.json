@@ -1,0 +1,13 @@
+{
+  "from_revision": "0008_owner_additions",
+  "to_revision": "0009_owner_transfers",
+  "tables_before": 103,
+  "tables_after": 105,
+  "prior_addition_proof_function_preserved": true,
+  "revoked_grant_preserved": true,
+  "ownership_event_preserved": true,
+  "fresh_active_grant_id_differs": true,
+  "duplicate_active_grant_blocked": true,
+  "ownership_event_mutation_blocked": true,
+  "scope": "Synthetic populated legacy history and privileged SQL index probe, not an HTTP grant or legal identity proof"
+}
