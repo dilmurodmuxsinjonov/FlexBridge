@@ -1,0 +1,8 @@
+{
+  "tests": 219,
+  "failures": 0,
+  "errors": 0,
+  "elapsed_seconds": 482.061,
+  "acceptance_evidence": false,
+  "reason": "Collected219 tests before strict-input peer fix; source changed during execution. Use committed224-test CI and final24-test native subset for acceptance."
+}

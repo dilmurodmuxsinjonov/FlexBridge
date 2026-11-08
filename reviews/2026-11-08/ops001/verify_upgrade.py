@@ -32,7 +32,7 @@ try:
         uid=uuid4()
         db.execute("INSERT INTO flexbridge.users(id,created_at,updated_at,display_name,status,locale,timezone) VALUES(%s,now(),now(),'Upgrade fixture','ACTIVE','uz','Asia/Tashkent')",(uid,))
         before=db.execute('SELECT row_to_json(u)::text FROM flexbridge.users u WHERE id=%s',(uid,)).fetchone()[0]
-        upgrade('head')
+        upgrade('0006_retention_evaluations')
         after=db.execute('SELECT row_to_json(u)::text FROM flexbridge.users u WHERE id=%s',(uid,)).fetchone()[0]
         revision=db.execute('SELECT version_num FROM alembic_version').fetchone()[0]
         after_count=db.execute("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'").fetchone()[0]

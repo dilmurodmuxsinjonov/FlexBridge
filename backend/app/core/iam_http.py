@@ -10,7 +10,8 @@ class IAMHTTPMiddleware:
             '/api/v1/me/candidate', '/api/v1/me/availability', '/api/v1/candidates/',
             '/api/v1/matching/', '/api/v1/opportunities/feed', '/api/v1/files/',
             '/api/v1/organizations', '/api/v1/operator/verification-cases', '/api/v1/invitations/',
-            '/api/v1/operations/')):
+            '/api/v1/operations/', '/api/v1/moderation/', '/api/v1/moderation-appeals/',
+            '/api/v1/operator/moderation-')):
             return await self.app(scope,receive,send)
         def redact_invitation():
             if scope.get('path','').startswith('/api/v1/invitations/'):

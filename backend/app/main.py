@@ -33,6 +33,7 @@ from app.api.v1.files import router as files_router
 from app.api.v1.governance import router as governance_router
 from app.api.v1.internship_logs import router as internship_logs_router
 from app.api.v1.operations import router as operations_router
+from app.api.v1.moderation_appeals import router as moderation_appeals_router
 from app.api.v1.opportunities import router as opportunities_router
 from app.api.v1.placements import router as placements_router
 from app.services.placements import PlacementScopeError
@@ -148,6 +149,7 @@ app.include_router(internship_logs_router)
 app.include_router(files_router)
 app.include_router(billing_router)
 app.include_router(operations_router)
+app.include_router(moderation_appeals_router)
 app.include_router(canonical_router)
 
 

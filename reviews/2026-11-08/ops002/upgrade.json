@@ -1,0 +1,9 @@
+{
+  "from_revision": "0006_retention_evaluations",
+  "to_revision": "0007_moderation_appeals",
+  "tables_before": 100,
+  "tables_after": 101,
+  "original_action_preserved": true,
+  "original_action_mutation_blocked": true,
+  "scope": "Dedicated native PostgreSQL with explicit synthetic populated rejection"
+}
