@@ -1,0 +1,7 @@
+An organization request could pass an early MFA check, wait for its business lock and then mutate data or expose private evidence after its session had been revoked. Reproductions retained here show the stale membership revoke, related onboarding/invitation/member paths and actual MFA-disable while waiting on a PostgreSQL organization row lock.
+
+Recheck and hold the current active user, MFA session and required organization membership/grant inside each affected business transaction. Pass the actual ActorContext into member governance services. Preserve bootstrap/join/invitation recipient role rules, last-owner protection, historical grants and existing MFA policy. A completed security revocation now denies the request; an operation that holds authority first commits or rolls back before revocation proceeds.
+
+Validation so far:69 new native PostgreSQL tests passed (43 changed-state HTTP cases,26 serialization/scoped-grant/rollback/service-boundary cases). Failed original probes and initial test-harness errors are retained and explained. Old affected suites, complete470-test CI and pinned read-only source review are pending. No schema/dependency change; canonical registration remains46 explicit/86 placeholders, pilotfalse. Live storage/providers/browser/DR are outside this evidence. Initial moderation has a separately confirmed race in #48 and is not fixed by this change.
+
+Closes #47

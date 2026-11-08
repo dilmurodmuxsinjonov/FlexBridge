@@ -1,0 +1,28 @@
+"""Local changed-state probe: revoked bearer must be checked after transient MFA preflight."""
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
+from sqlalchemy import select
+from app.db.storage import table,transaction
+from test_owner_additions import member_id
+
+def test_membership_revoke_rechecks_session_before_business_mutation(client,identities,organization,monkeypatch):
+    from app.services import organizations as module
+    owner=identities('OWNER',organization);staff=identities('HR',organization)
+    target=member_id(staff,organization);checked=Event();release=Event();original=module.require_mfa
+    def pause(actor):
+        original(actor)
+        checked.set()
+        assert release.wait(20),'Probe release timed out'
+    monkeypatch.setattr(module,'require_mfa',pause)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        pending=pool.submit(client.post,'/api/v1/organizations/'+organization+'/memberships/'+target+'/revoke',
+            headers=owner['headers'],json={'reason':'Revoke this staff membership after authorization'})
+        try:
+            assert checked.wait(20),'MFA preflight did not finish'
+            revoked=client.delete('/api/v1/me/sessions/'+owner['session_id'],headers=owner['headers'])
+            assert revoked.status_code==200,revoked.text
+        finally:release.set()
+        response=pending.result(timeout=20)
+    with transaction() as conn:
+        status=conn.execute(select(table('org_memberships').c.status).where(table('org_memberships').c.id==target)).scalar_one()
+    assert response.status_code in (401,403) and status=='ACTIVE',(response.status_code,status,response.text)

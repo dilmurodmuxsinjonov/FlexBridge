@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="11.752" timestamp="2026-11-09T04:19:56.682261+05:00" hostname="Ditroid"><testcase classname="tests.security.test_org_authority_probe" name="test_membership_revoke_rechecks_session_before_business_mutation" time="7.162"><failure message="AssertionError: (200, 'REVOKED', '{&quot;contract_id&quot;:&quot;API-075&quot;,&quot;membership_id&quot;:&quot;024c1348-8441-4f17-8085-53adb661142f&quot;,&quot;status&quot;:&quot;REVOKED&quot;}')&#10;assert (200 in (401, 403))&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_org_authority_probe.py:28: in test_membership_revoke_rechecks_session_before_business_mutation
+    assert response.status_code in (401,403) and status=='ACTIVE',(response.status_code,status,response.text)
+E   AssertionError: (200, 'REVOKED', '{"contract_id":"API-075","membership_id":"024c1348-8441-4f17-8085-53adb661142f","status":"REVOKED"}')
+E   assert (200 in (401, 403))
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>

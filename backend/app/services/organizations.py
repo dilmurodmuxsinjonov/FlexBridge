@@ -9,7 +9,7 @@ from app.core.iam_security import rate_limit
 from app.db.storage import table, transaction, now, org_verification_submissions as submissions, save_domain_record, load_domain_record
 from app.services.governance import GovernanceError
 from app.services.placements import get_row, insert_row
-from app.services.authority import moderator_authority
+from app.services.authority import moderator_authority, mfa_authority, org_authority
 from app.services.schedule import TASHKENT
 
 audit = AppendOnlyAuditStore()
@@ -121,6 +121,7 @@ class OrganizationService:
             orgs = table('organizations')
             row = conn.execute(select(orgs).where(func.regexp_replace(orgs.c.tax_id, '[[:space:]-]', '', 'g') == tax_id)
                 .with_for_update()).mappings().first()
+            mfa_authority(conn, actor)
             created = row is None
             org = insert_row(conn, 'organizations', tax_id=tax_id, legal_name=legal_name,
                 public_name=public_name, region=region, description=description, website=website, status='PENDING_VERIFICATION') if created else dict(row)
@@ -195,6 +196,7 @@ class OrganizationService:
         rate_limit('org-submission', actor.user_id, 20, 3600)
         with transaction() as conn:
             org = get_row(conn, 'organizations', org_id, True)
+            mfa_authority(conn, actor)
             member = self._read_access(conn, actor, org_id)
             fields = proposed_fields or {}
             cases = table('verification_cases')
@@ -217,7 +219,7 @@ class OrganizationService:
             else:
                 if kind not in CAPABILITIES and kind != 'ORG_PROFILE_CHANGE':
                     raise GovernanceError('CASE_ID_REQUIRED', status_code=422)
-                require_org(actor, org_id, 'OWNER', 'HOST_COORDINATOR')
+                org_authority(conn, actor.user_id, org_id, 'OWNER', 'HOST_COORDINATOR')
                 if org['status'] != 'VERIFIED':
                     raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
                 pending = conn.execute(select(cases.c.id).where(cases.c.organization_id == org_id,
@@ -238,7 +240,7 @@ class OrganizationService:
                 if member['status'] != 'PENDING_VERIFICATION' or owner_ids(conn, org_id):
                     raise GovernanceError('INITIAL_OWNER_REVIEW_CLOSED')
             else:
-                require_org(actor, org_id, 'OWNER', 'HOST_COORDINATOR')
+                org_authority(conn, actor.user_id, org_id, 'OWNER', 'HOST_COORDINATOR')
             self._submission(conn, case, member['id'], fields, file_ids, evidence_note)
             audit.append_audit_event(actor_id=actor.user_id, action='ORG_VERIFICATION_RESUBMITTED',
                 entity_type='verification_case', entity_id=case['id'], metadata={'revision': case['current_revision']})
@@ -248,7 +250,8 @@ class OrganizationService:
         require_mfa(actor)
         with transaction() as conn:
             org = get_row(conn, 'organizations', org_id, True)
-            require_org(actor, org_id, 'OWNER')
+            mfa_authority(conn, actor)
+            org_authority(conn, actor.user_id, org_id, 'OWNER')
             if org['status'] != 'VERIFIED':
                 raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             changes = {key: value for key, value in changes.items() if org[key] != value}
@@ -400,8 +403,9 @@ class OrganizationService:
         require_mfa(actor)
         with transaction() as conn:
             get_row(conn, 'organizations', org_id, True)
-            require_org(actor, org_id, 'OWNER')
             member = get_row(conn, 'org_memberships', membership_id, True)
+            mfa_authority(conn, actor)
+            org_authority(conn, actor.user_id, org_id, 'OWNER')
             if member['organization_id'] != org_id:
                 raise GovernanceError('ORG_SCOPE_FORBIDDEN', status_code=403)
             owners = owner_ids(conn, org_id)
@@ -422,8 +426,9 @@ class OrganizationService:
         require_mfa(actor)
         with transaction() as conn:
             get_row(conn, 'organizations', org_id, True)
-            require_org(actor, org_id, 'OWNER')
             member = get_row(conn, 'org_memberships', membership_id, True)
+            mfa_authority(conn, actor)
+            org_authority(conn, actor.user_id, org_id, 'OWNER')
             request = load_domain_record('membership_requests', membership_id)
             if (member['organization_id'] != org_id or member['status'] != 'PENDING_APPROVAL' or
                 not request or request.get('origin') != 'SELF_JOIN'):

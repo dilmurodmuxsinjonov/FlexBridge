@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="10.732" timestamp="2026-11-09T04:32:38.091651+05:00" hostname="Ditroid"><testcase classname="tests.security.test_org_authority" name="test_security_change_while_waiting_for_organization_lock[revoke_session-membership_revoke]" time="5.679"><failure message="AssertionError: ('membership_revoke', 'revoke_session', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_org_authority.py:168: in test_security_change_while_waiting_for_organization_lock
+    assert response.status_code in (401,403),(kind,change,response.status_code)
+E   AssertionError: ('membership_revoke', 'revoke_session', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_org_authority" name="test_security_change_while_waiting_for_organization_lock[disable_mfa-membership_revoke]" time="2.757"><failure message="AssertionError: ('membership_revoke', 'disable_mfa', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_org_authority.py:168: in test_security_change_while_waiting_for_organization_lock
+    assert response.status_code in (401,403),(kind,change,response.status_code)
+E   AssertionError: ('membership_revoke', 'disable_mfa', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>

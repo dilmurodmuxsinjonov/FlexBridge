@@ -13,29 +13,33 @@ class GovernanceError(Exception):
 class GovernanceScopeService:
     audit_store=AppendOnlyAuditStore()
 
-    def create_org_member_request(self,*,organization_id,user_id,role_code,created_by):
+    def create_org_member_request(self,*,actor,organization_id,user_id,role_code):
+        from app.services.authority import mfa_authority,org_authority
         if role_code not in ('HR','HOST_COORDINATOR','MENTOR','BILLING'):
             raise GovernanceError('OWNERSHIP_REQUIRES_INDEPENDENT_VERIFICATION',status_code=422)
         with transaction() as conn:
             get_row(conn,'organizations',organization_id,True)
-            require_org(ActorContext(created_by,'',()),organization_id,'OWNER')
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,organization_id,'OWNER')
             role=conn.execute(select(table('role_catalog')).where(table('role_catalog').c.code==role_code,
                 table('role_catalog').c.scope_kind=='ORG')).mappings().first()
             if not role: raise GovernanceError('INVALID_ORG_ROLE',status_code=422)
             row=insert_row(conn,'org_memberships',organization_id=organization_id,user_id=user_id,status='PENDING_APPROVAL')
-            save_domain_record('membership_requests',row['id'],{'created_by':created_by,'role_id':role['id']})
+            save_domain_record('membership_requests',row['id'],{'created_by':actor.user_id,'role_id':role['id']})
             return row
 
-    def approve_org_member(self,*,organization_id,member_id,approved_by,approver_org_id):
+    def approve_org_member(self,*,actor,organization_id,member_id,approver_org_id):
+        from app.services.authority import mfa_authority,org_authority
         with transaction() as conn:
             org=get_row(conn,'organizations',organization_id,True)
-            require_org(ActorContext(approved_by,'',()),organization_id,'OWNER')
-            if org['status']!='VERIFIED': raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             row=get_row(conn,'org_memberships',member_id,True)
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,organization_id,'OWNER')
+            if org['status']!='VERIFIED': raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             request=load_domain_record('membership_requests',member_id)
             if row['organization_id']!=organization_id or approver_org_id!=organization_id: raise GovernanceError('SCOPE_VIOLATION',status_code=403)
             if not request or row['status']!='PENDING_APPROVAL': raise GovernanceError('MEMBERSHIP_NOT_PENDING')
-            if approved_by in (request['created_by'],row['user_id']): raise GovernanceError('SELF_APPROVAL_FORBIDDEN')
+            if actor.user_id in (request['created_by'],row['user_id']): raise GovernanceError('SELF_APPROVAL_FORBIDDEN')
             if request.get('origin')=='SELF_JOIN':
                 from app.services.organizations import evidence_files
                 evidence_files(conn,row['user_id'],request['evidence_file_ids'])
@@ -43,8 +47,8 @@ class GovernanceScopeService:
             if role['scope_kind']!='ORG' or role['code'] not in ('HR','HOST_COORDINATOR','MENTOR','BILLING'):
                 raise GovernanceError('OWNERSHIP_REQUIRES_INDEPENDENT_VERIFICATION',status_code=422)
             conn.execute(table('org_memberships').update().where(table('org_memberships').c.id==member_id).values(status='ACTIVE',accepted_at=now(),updated_at=now()))
-            insert_row(conn,'org_role_grants',membership_id=member_id,role_id=request['role_id'],granted_by_id=approved_by)
-            self.audit_store.append_audit_event(actor_id=approved_by,action='ORG_MEMBER_APPROVED_DUAL_CONTROL',entity_type='membership',entity_id=member_id)
+            insert_row(conn,'org_role_grants',membership_id=member_id,role_id=request['role_id'],granted_by_id=actor.user_id)
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='ORG_MEMBER_APPROVED_DUAL_CONTROL',entity_type='membership',entity_id=member_id)
             return {**row,'status':'ACTIVE'}
 
     def record_moderation_action(self,*,actor_id,target_entity_type,target_entity_id,action_type,policy_code,reason_code,justification):
