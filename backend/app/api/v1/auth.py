@@ -1,185 +1,89 @@
-"""FastAPI router for Authentication, Sessions, Immediate Revoke & Canonical `API-060`/`API-061` (FIX-01, FIX-03, FIX-04, REV-002)."""
-
-from __future__ import annotations
-
-import base64
-import hmac
-import secrets
 from typing import Any
-
-from fastapi import APIRouter, Depends, Header, HTTPException
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException, Request as HTTPRequest
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ConfigDict, Field
-
 from app.api.dependencies import ActorContext, require_actor_context
-from app.services.auth import AuthError, auth_service, generate_totp_code, verify_password
+from app.services.auth import AuthError, auth_service, verify_password, generate_totp_code
+from app.db.storage import table, transaction, now
+import hmac
 
-router = APIRouter(prefix="/api/v1", tags=["auth"])
+router=APIRouter(prefix='/api/v1',tags=['auth'])
+class Request(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+class RegisterRequest(Request):
+    display_name:str=Field(min_length=2,max_length=200)
+    password:str=Field(min_length=12,max_length=1024)
+    adult_confirmed:bool
+    roles:list[str]=Field(default_factory=lambda:['CANDIDATE'])
+    enable_totp:bool=False
+    verification_token:str|None=Field(default=None,max_length=128)
+    terms_version:str|None=Field(default=None,max_length=64)
+    privacy_version:str|None=Field(default=None,max_length=64)
+class LoginRequest(Request):
+    user_id:UUID|None=None
+    channel:str|None=None
+    destination:str|None=Field(default=None,max_length=254)
+    password:str=Field(min_length=1,max_length=1024)
+    totp_code:str|None=Field(default=None,pattern=r'^[0-9]{6}$')
+    verification_token:str|None=Field(default=None,max_length=128)
+class SecurityRequest(Request):
+    enable_totp:bool=True
+    current_password:str|None=None
+    step_up_totp_code:str|None=None
+class ConfirmMFA(Request):
+    code:str=Field(pattern=r'^[0-9]{6}$')
+class RevokeRequest(Request):
+    reason:str='USER_LOGOUT'
 
+@router.post('/auth/register',status_code=201)
+def register(payload:RegisterRequest):
+    from app.services.identity import identity_service
+    return identity_service.register(**payload.model_dump())
 
-class RegisterRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+@router.post('/auth/login')
+def login(payload:LoginRequest,request:HTTPRequest):
+    from app.services.identity import identity_service
+    result=identity_service.begin_login(**payload.model_dump(),ip=request.client.host if request.client else 'unknown')
+    return JSONResponse(status_code=202 if result.get('mfa_required') else 200,content=jsonable_encoder(result))
 
-    display_name: str = Field(..., min_length=2)
-    password: str = Field(..., min_length=8)
-    adult_confirmed: bool
-    roles: list[str] = Field(default_factory=lambda: ["CANDIDATE"])
-    enable_totp: bool = False
+@router.get('/auth/me')
+def me(actor:ActorContext=Depends(require_actor_context)):
+    return {'user_id':actor.user_id,'session_id':actor.session_id,'roles':actor.roles}
 
+@router.delete('/me/sessions/{id}')
+def revoke(id:UUID,actor:ActorContext=Depends(require_actor_context)):
+    return auth_service.revoke_session(session_id=str(id),actor_id=actor.user_id,require_owner_user_id=actor.user_id)
 
-class LoginRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+@router.post('/auth/sessions/{session_id}/revoke')
+def revoke_legacy(session_id:UUID,payload:RevokeRequest,actor:ActorContext=Depends(require_actor_context)):
+    return auth_service.revoke_session(session_id=str(session_id),actor_id=actor.user_id,reason=payload.reason,require_owner_user_id=actor.user_id)
 
-    user_id: str
-    password: str
-    totp_code: str | None = None
+@router.patch('/me/security')
+def security(payload:SecurityRequest,actor:ActorContext=Depends(require_actor_context)):
+    from app.core.iam_security import rate_limit
+    rate_limit('security-management',actor.user_id,10,600)
+    if payload.enable_totp:
+        if not payload.current_password:
+            raise AuthError('STEP_UP_VERIFICATION_FAILED','Current password required')
+        secret=auth_service.enroll_totp(actor.user_id,payload.current_password,payload.step_up_totp_code,actor.session_id)
+        return {'totp_enabled':False,'enrollment_pending':True,'secret':secret}
+    if not payload.current_password:
+        raise AuthError('STEP_UP_VERIFICATION_FAILED','Current password required')
+    with transaction() as conn:
+        from app.services.identity import require_factor
+        require_factor(conn,actor.user_id,payload.current_password,payload.step_up_totp_code,actor.session_id)
+        conn.execute(table('mfa_credentials').update().where(table('mfa_credentials').c.user_id==actor.user_id,
+            table('mfa_credentials').c.kind=='TOTP').values(revoked_at=now(),updated_at=now()))
+        auth_service.rotate_security(conn,actor.user_id)
+        from app.core.audit import AppendOnlyAuditStore
+        AppendOnlyAuditStore().append_audit_event(actor_id=actor.user_id,action='MFA_TOTP_DISABLED',entity_type='user',entity_id=actor.user_id)
+    return {'totp_enabled':False,'step_up_verified':True,'reauthentication_required':True}
 
-
-class RevokeRequest(BaseModel):
-    actor_id: str | None = None
-    reason: str = "SECURITY_REVOKE"
-
-
-class StepUpSecurityUpdateRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    enable_totp: bool = True
-    step_up_totp_code: str | None = None
-    current_password: str | None = None
-
-
-@router.post("/auth/register", status_code=201)
-def register_endpoint(payload: RegisterRequest) -> dict[str, Any]:
-    try:
-        user = auth_service.register_user(
-            display_name=payload.display_name,
-            password=payload.password,
-            adult_confirmed=payload.adult_confirmed,
-            roles=payload.roles,
-            enable_totp=payload.enable_totp,
-            allow_privileged_roles=False,
-        )
-        return {
-            "id": user["id"],
-            "display_name": user["display_name"],
-            "roles": user["roles"],
-            "totp_secret": user["totp_secret"],
-            "adult_declared_at": user["adult_declared_at"],
-        }
-    except AuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
-
-
-@router.post("/auth/login")
-def login_endpoint(payload: LoginRequest) -> dict[str, Any]:
-    try:
-        return auth_service.login(
-            user_id=payload.user_id,
-            password=payload.password,
-            totp_code=payload.totp_code,
-        )
-    except AuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
-
-
-@router.post("/auth/sessions/{session_id}/revoke")
-def revoke_session_endpoint(
-    session_id: str,
-    payload: RevokeRequest,
-    actor: ActorContext = Depends(require_actor_context),
-) -> dict[str, Any]:
-    """Authenticated session revocation endpoint: requires owner session or privileged admin role."""
-    is_admin = actor.has_any_role(
-        "SUPER_ADMIN",
-        "ADMIN",
-        "PLATFORM_ADMIN",
-        "MODERATOR",
-        "SUPPORT",
-        "SUPPORT_AGENT",
-        "INST_ADMIN",
-    )
-    try:
-        return auth_service.revoke_session(
-            session_id=session_id,
-            actor_id=actor.user_id,
-            reason=payload.reason,
-            require_owner_user_id=None if is_admin else actor.user_id,
-        )
-    except AuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
-
-
-@router.get("/auth/me")
-def me_endpoint(authorization: str | None = Header(default=None)) -> dict[str, Any]:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail={"code": "MISSING_BEARER_TOKEN", "message": "Token talab qilinadi"})
-    session_id = authorization.removeprefix("Bearer ").strip()
-    try:
-        return auth_service.validate_session(session_id)
-    except AuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
-
-
-@router.patch("/me/security")
-def api_060_update_me_security(
-    payload: StepUpSecurityUpdateRequest,
-    actor: ActorContext = Depends(require_actor_context),
-) -> dict[str, Any]:
-    """Canonical API-060 (`PATCH /api/v1/me/security`): Self account security & step-up MFA update with real verification."""
-    user = auth_service._load_user(actor.user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail={"code": "USER_NOT_FOUND", "message": "Foydalanuvchi topilmadi"})
-
-    step_up_ok = False
-    if payload.current_password and verify_password(payload.current_password, user["password_hash"]):
-        step_up_ok = True
-    elif payload.step_up_totp_code and user.get("totp_secret"):
-        expected = generate_totp_code(user["totp_secret"])
-        if payload.step_up_totp_code != "000000" and hmac.compare_digest(payload.step_up_totp_code, expected):
-            step_up_ok = True
-
-    if not step_up_ok:
-        raise HTTPException(
-            status_code=401,
-            detail={
-                "code": "STEP_UP_VERIFICATION_FAILED",
-                "step_up_verified": False,
-                "message": "API-060: Step-up TOTP yoki joriy parol tasdig'i noto'g'ri",
-            },
-        )
-
-    if payload.enable_totp and not user.get("totp_secret"):
-        user["totp_secret"] = base64.b32encode(secrets.token_bytes(20)).decode("ascii").rstrip("=")
-    elif not payload.enable_totp:
-        user["totp_secret"] = None
-    auth_service._persist_user(user)
-
-    return {
-        "contract_id": "API-060",
-        "user_id": actor.user_id,
-        "session_id": actor.session_id,
-        "totp_enabled": bool(user.get("totp_secret")),
-        "step_up_verified": True,
-    }
-
-
-@router.delete("/me/sessions/{id}")
-def api_061_delete_own_session(
-    id: str,
-    actor: ActorContext = Depends(require_actor_context),
-) -> dict[str, Any]:
-    """Canonical API-061 (`DELETE /api/v1/me/sessions/{id}`): Revoke only the caller's own session."""
-    try:
-        revoked = auth_service.revoke_session(
-            session_id=id,
-            actor_id=actor.user_id,
-            reason="SELF_SESSION_REVOKE_API_061",
-            require_owner_user_id=actor.user_id,
-        )
-        return {
-            "contract_id": "API-061",
-            "session_id": revoked["session_id"],
-            "status": revoked["status"],
-            "revoked_at": revoked["revoked_at"],
-        }
-    except AuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
+@router.post('/me/security/totp/confirm')
+def confirm(payload:ConfirmMFA,actor:ActorContext=Depends(require_actor_context)):
+    from app.core.iam_security import rate_limit
+    rate_limit('totp-confirm',actor.user_id,10,600)
+    auth_service.confirm_totp(actor.user_id,payload.code)
+    return {'totp_enabled':True,'reauthentication_required':True}

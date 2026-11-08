@@ -51,7 +51,7 @@ def test_retention_policy_legal_basis_validation() -> None:
         )
 
 
-def test_feature_flags_r1_vs_r2_defaults_and_org_overrides() -> None:
+def test_feature_flags_r1_vs_r2_defaults_and_org_overrides(identities, organization) -> None:
     """Verify R1 flows are enabled, R2 freelance is disabled by default, and org overrides + audit work."""
     ff = FeatureFlagService()
     assert ff.is_enabled("R1_PART_TIME_JOBS") is True
@@ -63,10 +63,10 @@ def test_feature_flags_r1_vs_r2_defaults_and_org_overrides() -> None:
     # Pilot override for a specific organization
     ff.set_organization_override(
         key="R2_FREELANCE_MARKETPLACE",
-        organization_id="org-pilot-1",
+        organization_id=organization,
         enabled=True,
-        actor_id="super-admin-1",
+        actor_id=identities("ADMIN")["user_id"],
     )
-    assert ff.is_enabled("R2_FREELANCE_MARKETPLACE", organization_id="org-pilot-1") is True
+    assert ff.is_enabled("R2_FREELANCE_MARKETPLACE", organization_id=organization) is True
     assert ff.is_enabled("R2_FREELANCE_MARKETPLACE", organization_id="org-other") is False
-    assert len(ff.audit_store.list_audit_events()) == 1
+    assert sum(event['action']=='FEATURE_FLAG_ORG_OVERRIDE_SET' for event in ff.audit_store.list_audit_events()) == 1

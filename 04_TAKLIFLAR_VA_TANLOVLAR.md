@@ -19,6 +19,7 @@ Manba: ushbu suhbatdagi 2026-11-06 topshirig'i va loyiha uchun berilgan AGENTS.m
 | Q-009 | Amalga oshiruvchi AI sifatida `Antigravity` (`Gemini 4 Argon (High)`, sessiya `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) ishni boshlaydi | Tasdiqlangan (2026-11-06); `O-001` hal qilindi |
 | Q-010 | Foydalanuvchi (`2026-11-06`) texnik va me'moriy qarorlarni AI ixtiyoriga topshirdi va qurishni davom ettirishni tasdiqladi | Tasdiqlangan; `T-007` (Variant A) va `T-008` (Variant A) qabul qilindi |
 | Q-011 | Frilanserlik keyinchalik (`R2` bosqichida) qo'shiladi; hozir (`R1` doirasida) frilanserlik qo'shilmaydi (`"eslab qol keyinchalik firlanserlik qoshiladi lekin hozir uni qoshmaymiz"`, 2026-11-07) | Tasdiqlangan (2026-11-07); arxitektura va `DB-092 feature_flags` (`R2_FREELANCE_MARKETPLACE=False`) keyinchalik kengaytirishga tayyor holda saqlanadi, R1 kodida frilans oqimlari yozilmaydi |
+| Q-013 | “github bilan bikga ishla va tohtashni aytmagnimcha nabatma nabat ishlashni davom etir” — GitHub Issue/branch/commit/PR/CI bilan paketlarni ketma-ket davom ettirish, foydalanuvchi to'xtatmaguncha har paketdan keyin keyingisiga o'tish | Tasdiqlangan (2026-11-08); production deployment yoki jonli maxfiy kalit rotatsiyasi bajarildi deb talqin qilinmaydi |
 
 ## Mavjud hujjatlardagi takliflar
 
@@ -34,6 +35,12 @@ Quyidagilar avvalgi materiallarda ishchi taklif deb berilgan. Ushbu suhbatda foy
 | T-006 | Pilot maqsadi: 10 korxona, 30 e'lon, 200 profil; 2 muassasa bilan muhokama | Ustoz uchun loyiha izohi, pilot taklifi | Kelajak maqsadi; mavjud natija emas |
 
 ## Ochiq tanlovlar
+
+### Q-012 — bo'limlarni ketma-ket tayyorlash (2026-11-07)
+
+- Foydalanuvchi: “birinmakatin tayorlashni davom rtir”. Codex ro'yxat tartibida IAMdan davom etadi.
+- Birinchi tekshiriladigan paket: `IAM-CODEX-001` — OTP, contact isolation/recovery, MFA va passkey backend.
+- SMS/emailning aniq tijoriy provayderi ushbu xabarda tanlanmagan. HTTPS adapter shartnomasi implementatsiya qarori sifatida yozildi; jonli yuborish yoki barcha modullar tayyorligi deb talqin qilinmaydi.
 
 | ID | Aniqlanadigan masala | Hozirgi holat |
 | --- | --- | --- |

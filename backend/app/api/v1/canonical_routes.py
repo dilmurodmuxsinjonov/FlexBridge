@@ -25,14 +25,16 @@ from __future__ import annotations
 import json
 import re
 from datetime import date, timedelta
+from uuid import UUID
 from pathlib import Path
 from typing import Any
+from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.api.dependencies import ActorContext, require_actor_context
+from app.api.dependencies import ActorContext, require_actor_context, require_org, require_platform, candidate_id_for
 from app.api.v1.billing import billing_service
 from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError, file_quarantine_service
@@ -46,11 +48,14 @@ router = APIRouter(prefix="/api/v1", tags=["canonical-v1.4"])
 class MatchingPreviewRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    candidate_id: str
-    opportunity_id: str | None = None
-    revision_id: str | None = None
-    schedule_match_mode: str = "ALL_SHIFTS_IN_GROUP"
-    check_date: str | None = None
+    candidate_id: UUID
+    opportunity_id: UUID | None = None
+    revision_id: UUID | None = None
+    schedule_match_mode: str = Field(default='ALL_SHIFTS_IN_GROUP', pattern='^(ALL_SHIFTS_IN_GROUP|ANY_SHIFT_IN_GROUP)$')
+    check_date: date | None = None
+    commute_buffer_minutes: int = Field(default=30, ge=0, le=180)
+    limit: int = Field(default=100, ge=1, le=100)
+    after_id: UUID | None = None
 
 
 class OfferRespondRequest(BaseModel):
@@ -85,83 +90,87 @@ class PutDraftLogRequest(BaseModel):
 
 
 class PaymentWebhookPayload(BaseModel):
-    provider_event_id: str = "evt-1"
-    idempotency_key: str
-    amount_uzs: int
-    signature: str = Field(..., min_length=8)
+    model_config = ConfigDict(extra="forbid")
+    provider_event_id: str = Field(min_length=8,max_length=128)
+    attempt_id: UUID
+    amount_uzs: int = Field(gt=0)
+    currency: str = "UZS"
+    timestamp: int
+    signature: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+class CanonicalOrderRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    plan_code: str
+    idempotency_key: str = Field(min_length=8,max_length=128)
+
+class CanonicalRefundRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    amount_uzs: int = Field(gt=0)
+    reason: str = Field(min_length=15,max_length=2000)
+
+class TransitionRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    status: str = Field(pattern='^(PAUSED|CLOSED)$')
+
+@router.post('/organizations/{org}/orders',status_code=201)
+def canonical_order(org: UUID,payload: CanonicalOrderRequest,actor: ActorContext=Depends(require_actor_context)):
+    order,invoice=billing_service.create_order_and_invoice(organization_id=str(org),plan_code=payload.plan_code,created_by=actor.user_id,idempotency_key=payload.idempotency_key)
+    return {'contract_id':'API-094','order':asdict(order),'invoice':asdict(invoice)}
+
+@router.post('/orders/{id}/refund-requests',status_code=201)
+def canonical_refund(id: UUID,payload: CanonicalRefundRequest,actor: ActorContext=Depends(require_actor_context)):
+    from app.db.storage import transaction
+    with transaction() as conn:
+        order=billing_service._get_order(str(id),conn)
+        if not order: raise BillingInvariantError('ORDER_NOT_FOUND')
+        require_org(actor,order.organization_id,'OWNER','BILLING')
+        invoice=billing_service._invoice_for_order(str(id),conn)
+        return {'contract_id':'API-095',**billing_service.request_refund(invoice_id=invoice.id,amount_uzs=payload.amount_uzs,reason=payload.reason,requested_by=actor.user_id)}
+
+@router.post('/opportunities/{id}/transition')
+def transition(id: UUID,payload: TransitionRequest,actor: ActorContext=Depends(require_actor_context)):
+    return billing_service.update_opportunity_status(opportunity_id=str(id),new_status=payload.status,actor_user_id=actor.user_id)
 
 
 @router.post("/matching/preview")
-def api_003_matching_preview(payload: MatchingPreviewRequest) -> dict[str, Any]:
+def api_003_matching_preview(payload: MatchingPreviewRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     """Canonical API-003 (`POST /api/v1/matching/preview`): Return MATCH / CONFLICT / UNKNOWN preview."""
-    start_d = date.fromisoformat(payload.check_date) if payload.check_date else date.today()
-    end_d = start_d + timedelta(days=28)
-
-    feed = opportunity_service.match_candidate_feed_api_003(
-        candidate_id=payload.candidate_id,
-        schedule_match_mode=payload.schedule_match_mode,
-        check_date=payload.check_date,
-    )
-    target_rev_id = payload.revision_id
-    if not target_rev_id and payload.opportunity_id:
-        opp = opportunity_service.opportunities.get(payload.opportunity_id)
-        if opp:
-            target_rev_id = opp.get("current_revision_id")
-
-    if target_rev_id:
-        shifts = [s for s in opportunity_service.shifts.values() if s["revision_id"] == target_rev_id]
-        if not shifts:
-            return {
-                "contract_id": "API-003",
-                "result": "UNKNOWN",
-                "reason_codes": ["NO_SHIFTS_DEFINED"],
-                "checked_from": start_d.isoformat(),
-                "checked_to": end_d.isoformat(),
-                "algorithm_version": "1.4.0",
-                "matched_group_codes": [],
-            }
-        matched_item = next((item for item in feed if item["revision_id"] == target_rev_id), None)
-        if matched_item:
-            return {
-                "contract_id": "API-003",
-                "result": "MATCH",
-                "reason_codes": ["SCHEDULE_GROUP_COVERED"],
-                "checked_from": start_d.isoformat(),
-                "checked_to": end_d.isoformat(),
-                "algorithm_version": "1.4.0",
-                "matched_group_codes": matched_item["matched_group_codes"],
-            }
-        return {
-            "contract_id": "API-003",
-            "result": "CONFLICT",
-            "reason_codes": ["SHIFT_GROUP_NOT_COVERED"],
-            "checked_from": start_d.isoformat(),
-            "checked_to": end_d.isoformat(),
-            "algorithm_version": "1.4.0",
-            "matched_group_codes": [],
-        }
-
-    return {
-        "contract_id": "API-003",
-        "result": "MATCH" if feed else "CONFLICT",
-        "reason_codes": ["FEED_MATCHED"] if feed else ["NO_MATCHING_OPPORTUNITIES"],
-        "checked_from": start_d.isoformat(),
-        "checked_to": end_d.isoformat(),
-        "algorithm_version": "1.4.0",
-        "matched_group_codes": feed[0]["matched_group_codes"] if feed else [],
-        "items": feed,
-    }
+    if str(payload.candidate_id) != candidate_id_for(actor):
+        raise HTTPException(403, detail={'code': 'CANDIDATE_SCOPE_FORBIDDEN'})
+    page = opportunity_service.match_feed_page(candidate_id=str(payload.candidate_id),
+        schedule_match_mode=payload.schedule_match_mode, check_date=payload.check_date,
+        commute_buffer_minutes=payload.commute_buffer_minutes, limit=payload.limit,
+        after_id=str(payload.after_id) if payload.after_id else None,
+        opportunity_id=str(payload.opportunity_id) if payload.opportunity_id else None,
+        revision_id=str(payload.revision_id) if payload.revision_id else None)
+    if payload.opportunity_id or payload.revision_id:
+        if not page['evaluations']:
+            raise HTTPException(404, detail={'code': 'PUBLISHED_REVISION_NOT_FOUND'})
+        return page['evaluations'][0]
+    from app.services.schedule import local_today
+    from app.services.schedule_matching import ALGORITHM_VERSION
+    evaluations = page['evaluations']
+    status = 'MATCH' if page['items'] else ('UNKNOWN' if not evaluations or any(
+        item['result'] == 'UNKNOWN' for item in evaluations) else 'CONFLICT')
+    start = max(payload.check_date or local_today(), local_today())
+    return {'contract_id': 'API-003', 'result': status,
+        'reason_codes': ['PAGE_MATCHED' if page['items'] else 'NO_MATCH_ON_PAGE'],
+        'checked_from': min((item['checked_from'] for item in evaluations), default=start.isoformat()),
+        'checked_to': max((item['checked_to'] for item in evaluations), default=(start + timedelta(days=28)).isoformat()),
+        'algorithm_version': ALGORITHM_VERSION,
+        'availability_revision': evaluations[0]['availability_revision'] if evaluations else None,
+        'matched_group_codes': page['items'][0]['matched_group_codes'] if page['items'] else [], **page}
 
 
 @router.post("/opportunities/{id}/publish")
 def api_081_publish_opportunity(
-    id: str,
+    id: UUID,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Canonical API-081 (`POST /api/v1/opportunities/{id}/publish`): Publish draft opportunity with quota check."""
     try:
         return opportunity_service.publish_opportunity_api_081(
-            opportunity_id=id,
+            opportunity_id=str(id),
             actor_user_id=actor.user_id,
         )
     except (OpportunityConstraintError, BillingInvariantError) as exc:
@@ -174,28 +183,26 @@ def api_081_publish_opportunity(
 def api_x04_payment_webhook(provider: str, payload: PaymentWebhookPayload) -> dict[str, Any]:
     """Canonical API-X04 (`POST /api/v1/webhooks/payments/{provider}`): Provider payment confirmation webhook."""
     try:
-        return billing_service.confirm_payment_webhook_api_x04(
-            provider=provider.upper(),
-            provider_event_id=payload.provider_event_id,
-            idempotency_key=payload.idempotency_key,
-            amount_uzs=payload.amount_uzs,
-            signature=payload.signature,
-        )
+        from uuid import UUID
+        return billing_service.confirm_payment_webhook_api_x04(provider=provider.upper(),
+            provider_event_id=payload.provider_event_id,attempt_id=str(payload.attempt_id),
+            amount_uzs=payload.amount_uzs,currency=payload.currency,signature=payload.signature,timestamp=payload.timestamp)
+
     except BillingInvariantError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.post("/offers/{id}/respond")
 def api_043_respond_to_offer(
-    id: str,
+    id: UUID,
     payload: OfferRespondRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Canonical API-043 (`POST /api/v1/offers/{id}/respond`): Candidate responds to a pending offer."""
     try:
         return placement_service.respond_to_offer_api_043(
-            offer_id=id,
-            candidate_id=actor.user_id,
+            offer_id=str(id),
+            candidate_id=candidate_id_for(actor),
             decision=payload.decision,
         )
     except PlacementScopeError as exc:
@@ -204,17 +211,18 @@ def api_043_respond_to_offer(
 
 @router.post("/engagements/{id}/confirmations")
 def api_046_confirm_job_engagement(
-    id: str,
+    id: UUID,
     payload: EngagementConfirmRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Canonical API-046 (`POST /api/v1/engagements/{id}/confirmations`): Independent party start confirmation."""
     try:
         return placement_service.confirm_engagement_by_actor_api_046(
-            placement_id=id,
+            placement_id=str(id),
             actor_user_id=actor.user_id,
             actor_roles=list(actor.roles),
             party=payload.party,
+            action=payload.action,
         )
     except PlacementScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
@@ -222,7 +230,7 @@ def api_046_confirm_job_engagement(
 
 @router.put("/placements/{id}/logs/{date}")
 def api_054_put_draft_daily_log(
-    id: str,
+    id: UUID,
     date: str,
     payload: PutDraftLogRequest,
     actor: ActorContext = Depends(require_actor_context),
@@ -231,12 +239,13 @@ def api_054_put_draft_daily_log(
     try:
         total_mins = sum(t.minutes for t in payload.tasks) if payload.tasks else payload.total_minutes
         return internship_log_service.save_draft_daily_log_api_054(
-            placement_id=id,
+            placement_id=str(id),
             author_id=actor.user_id,
             log_date=date,
             day_type=payload.day_type,
             summary_text=payload.summary_text,
             total_minutes=total_mins,
+            tasks=[t.model_dump() for t in payload.tasks],
         )
     except InternshipLogScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate}) from exc
@@ -244,82 +253,28 @@ def api_054_put_draft_daily_log(
 
 @router.post("/logs/{id}/submit")
 def api_056_submit_daily_log(
-    id: str,
+    id: UUID,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Canonical API-056 (`POST /api/v1/logs/{id}/submit`): Submit a draft daily log (`AC-040`)."""
     try:
-        log_row = internship_log_service.daily_logs.get(id)
+        log_row = internship_log_service.get_log(str(id))
         if not log_row:
             raise InternshipLogScopeError("DAILY_LOG_NOT_FOUND", "Kunlik log topilmadi", status_code=404, sqlstate="02000")
         return internship_log_service.submit_daily_log_api_056(
             placement_id=log_row["placement_id"],
             author_id=actor.user_id,
             log_date=log_row["log_date"],
-            log_id=id,
+            log_id=str(id),
         )
     except InternshipLogScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate}) from exc
 
 
 @router.post("/operator/refunds/{id}/approve")
-def api_116_operator_approve_refund(
-    id: str,
-    actor: ActorContext = Depends(require_actor_context),
-) -> dict[str, Any]:
-    """Canonical API-116 (`POST /api/v1/operator/refunds/{id}/approve`): Finance operator dual-control refund approval."""
-    if not actor.has_any_role("FINANCE_ADMIN", "FINANCE", "SUPER_ADMIN", "ADMIN"):
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "code": "FORBIDDEN_OPERATOR_REFUND_ROLE",
-                "message": "API-116: Qaytarimni tasdiqlash uchun FINANCE_ADMIN yoki SUPER_ADMIN roli talab qilinadi",
-            },
-        )
-    refund = billing_service._refunds.get(id)
-    if not refund:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "REFUND_NOT_FOUND", "message": f"Refund '{id}' topilmadi"},
-        )
-    return {
-        "contract_id": "API-116",
-        "refund_id": refund.id,
-        "invoice_id": refund.invoice_id,
-        "status": refund.status,
-    }
-
-
-@router.post("/files/upload-intents", status_code=201)
-def api_x01_upload_intents(
-    owner_id: str,
-    filename: str,
-    mime_type: str = "application/pdf",
-) -> dict[str, Any]:
-    """Canonical API-X01 (`POST /api/v1/files/upload-intents`)."""
-    try:
-        return file_quarantine_service.initiate_upload_api_x01(
-            owner_id=owner_id,
-            filename=filename,
-            mime_type=mime_type,
-        )
-    except FileQuarantineError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
-
-
-@router.post("/files/{id}/complete-upload")
-def api_x02_complete_upload(
-    id: str,
-    content_sample: str = "%PDF-1.7\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
-) -> dict[str, Any]:
-    """Canonical API-X02 (`POST /api/v1/files/{id}/complete-upload`)."""
-    try:
-        return file_quarantine_service.complete_and_scan_api_x02(
-            file_id=id,
-            content_sample=content_sample,
-        )
-    except FileQuarantineError as exc:
-        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
+def approve_refund(id: UUID, actor: ActorContext = Depends(require_actor_context)):
+    from uuid import UUID
+    return billing_service.approve_refund(str(id),actor.user_id)
 
 
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
@@ -330,12 +285,8 @@ def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     model = json.loads(model_path.read_text(encoding="utf-8"))
     normalize = lambda p: re.sub(r"\{[^}]+\}", "{}", p)
 
-    existing_routes = {
-        (method.upper(), normalize(route.path))
-        for route in app.routes
-        if hasattr(route, "methods") and hasattr(route, "path")
-        for method in route.methods
-    }
+    existing_routes = {(method.upper(),normalize(path)) for path,methods in app.openapi()['paths'].items() for method in methods}
+    app.openapi_schema = None
 
     for contract in model.get("apis", []) + model.get("helper_apis", []):
         method = contract["method"].upper()

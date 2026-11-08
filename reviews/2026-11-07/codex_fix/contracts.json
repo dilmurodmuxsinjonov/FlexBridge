@@ -1,0 +1,801 @@
+{
+  "contracts": 132,
+  "explicit_handlers": 21,
+  "unimplemented_501": 111,
+  "compose_yaml_valid": true,
+  "docker_executed": false,
+  "contracts_detail": [
+    {
+      "contract_id": "API-001",
+      "method": "GET",
+      "path": "/api/v1/opportunities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-002",
+      "method": "GET",
+      "path": "/api/v1/onboarding/options",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-003",
+      "method": "POST",
+      "path": "/api/v1/matching/preview",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-004",
+      "method": "POST",
+      "path": "/api/v1/saved-opportunities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-005",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-006",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-007",
+      "method": "POST",
+      "path": "/api/v1/moderation-cases",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-008",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/public",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-009",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/opportunities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-010",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/rating-summary",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-011",
+      "method": "GET",
+      "path": "/api/v1/services/public",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-012",
+      "method": "GET",
+      "path": "/api/v1/prices/public",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-013",
+      "method": "GET",
+      "path": "/api/v1/help/{document}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-014",
+      "method": "GET",
+      "path": "/api/v1/policies/{document}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-015",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-016",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-017",
+      "method": "GET",
+      "path": "/api/v1/institution-onboarding/options",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-018",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-019",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/verify",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-020",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/consume",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-021",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/resend",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-022",
+      "method": "POST",
+      "path": "/api/v1/auth/recovery",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-023",
+      "method": "GET",
+      "path": "/api/v1/auth/recovery/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-024",
+      "method": "GET",
+      "path": "/api/v1/invitations/{token}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-025",
+      "method": "POST",
+      "path": "/api/v1/invitations/{token}/accept",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-026",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-027",
+      "method": "POST",
+      "path": "/api/v1/me/enrollments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-028",
+      "method": "PUT",
+      "path": "/api/v1/me/availability",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-029",
+      "method": "GET",
+      "path": "/api/v1/me/applications/summary",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-030",
+      "method": "GET",
+      "path": "/api/v1/me/placements",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-031",
+      "method": "GET",
+      "path": "/api/v1/me/notifications",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-032",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate/skills",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-033",
+      "method": "POST",
+      "path": "/api/v1/me/candidate/cv",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-034",
+      "method": "GET",
+      "path": "/api/v1/me/enrollments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-035",
+      "method": "GET",
+      "path": "/api/v1/me/availability",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-036",
+      "method": "PUT",
+      "path": "/api/v1/me/availability/exceptions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-037",
+      "method": "GET",
+      "path": "/api/v1/me/saved-opportunities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-038",
+      "method": "DELETE",
+      "path": "/api/v1/me/saved-opportunities/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-039",
+      "method": "GET",
+      "path": "/api/v1/me/applications",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-040",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/reapply",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-041",
+      "method": "GET",
+      "path": "/api/v1/me/applications/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-042",
+      "method": "POST",
+      "path": "/api/v1/interviews/{id}/responses",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-043",
+      "method": "POST",
+      "path": "/api/v1/offers/{id}/respond",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-044",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/withdraw",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-045",
+      "method": "GET",
+      "path": "/api/v1/me/engagements/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-046",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/confirmations",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-047",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/ratings",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-048",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/accept",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-049",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/completion-requests",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-050",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/plan",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-051",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/assignments/{assignment}/accept",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-052",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/exports",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-053",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/logs",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-054",
+      "method": "PUT",
+      "path": "/api/v1/placements/{id}/logs/{date}",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-055",
+      "method": "POST",
+      "path": "/api/v1/log-entries/{id}/evidence",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-056",
+      "method": "POST",
+      "path": "/api/v1/logs/{id}/submit",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-057",
+      "method": "GET",
+      "path": "/api/v1/me/ratings",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-058",
+      "method": "POST",
+      "path": "/api/v1/ratings/{id}/appeals",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-059",
+      "method": "PUT",
+      "path": "/api/v1/me/notification-preferences",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-060",
+      "method": "PATCH",
+      "path": "/api/v1/me/security",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-061",
+      "method": "DELETE",
+      "path": "/api/v1/me/sessions/{id}",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-062",
+      "method": "POST",
+      "path": "/api/v1/me/privacy-requests",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-063",
+      "method": "GET",
+      "path": "/api/v1/me/support-tickets",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-064",
+      "method": "POST",
+      "path": "/api/v1/support-tickets/{id}/messages",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-065",
+      "method": "POST",
+      "path": "/api/v1/organizations",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-066",
+      "method": "POST",
+      "path": "/api/v1/organizations/{id}/verification",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-067",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/verification",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-068",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/dashboard",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-069",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/placements",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-070",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/entitlements",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-071",
+      "method": "PATCH",
+      "path": "/api/v1/organizations/{org}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-072",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/capabilities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-073",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/memberships",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-074",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/invitations",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-075",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/memberships/{id}/revoke",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-076",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/opportunities",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-077",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/transition",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-078",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-079",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/terms",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-080",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/schedule",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-081",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/publish",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-082",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-083",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/transition",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-084",
+      "method": "GET",
+      "path": "/api/v1/applications/{id}/hr",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-085",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/interviews",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-086",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/offers",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-087",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/mentor-assignments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-088",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/host-decisions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-089",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-assignments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-090",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-review-queue",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-091",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/workplace",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-092",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/workplace-reviews",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-093",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/billing",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-094",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/orders",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-095",
+      "method": "POST",
+      "path": "/api/v1/orders/{id}/refund-requests",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-096",
+      "method": "POST",
+      "path": "/api/v1/institution-appointments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-097",
+      "method": "GET",
+      "path": "/api/v1/institution-appointments/{id}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-098",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/supervisions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-099",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/assignment-queue",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-100",
+      "method": "POST",
+      "path": "/api/v1/institutions/{inst}/exports",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-101",
+      "method": "POST",
+      "path": "/api/v1/student-supervisions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-102",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-assignments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-103",
+      "method": "POST",
+      "path": "/api/v1/academic-assignments/{id}/revoke",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-104",
+      "method": "GET",
+      "path": "/api/v1/me/academic-assignments",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-105",
+      "method": "GET",
+      "path": "/api/v1/me/academic-review-queue",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-106",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/academic",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-107",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/academic-reviews",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-108",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-decisions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-109",
+      "method": "GET",
+      "path": "/api/v1/operator/verification-cases",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-110",
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/{id}/decide",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-111",
+      "method": "POST",
+      "path": "/api/v1/operator/moderation-cases/{id}/actions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-112",
+      "method": "GET",
+      "path": "/api/v1/operator/support-tickets",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-113",
+      "method": "POST",
+      "path": "/api/v1/operator/support-tickets/{id}/messages",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-114",
+      "method": "POST",
+      "path": "/api/v1/operator/privacy-requests/{id}/resolve",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-115",
+      "method": "GET",
+      "path": "/api/v1/operator/reconciliation",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-116",
+      "method": "POST",
+      "path": "/api/v1/operator/refunds/{id}/approve",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-117",
+      "method": "GET",
+      "path": "/api/v1/operator/finance-summary",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-118",
+      "method": "GET",
+      "path": "/api/v1/operator/audit-events",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-119",
+      "method": "POST",
+      "path": "/api/v1/operator/access-requests",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-120",
+      "method": "POST",
+      "path": "/api/v1/operator/users/{id}/revoke-sessions",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-121",
+      "method": "PATCH",
+      "path": "/api/v1/operator/feature-flags/{code}",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-122",
+      "method": "POST",
+      "path": "/api/v1/operator/incidents",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-123",
+      "method": "GET",
+      "path": "/api/v1/operator/restore-runs",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-124",
+      "method": "GET",
+      "path": "/api/v1/operator/analytics",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-X01",
+      "method": "POST",
+      "path": "/api/v1/files/upload-intents",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X02",
+      "method": "POST",
+      "path": "/api/v1/files/{id}/complete-upload",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X03",
+      "method": "GET",
+      "path": "/api/v1/files/{id}/download",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X04",
+      "method": "POST",
+      "path": "/api/v1/webhooks/payments/{provider}",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X05",
+      "method": "GET",
+      "path": "/api/v1/health/live",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X06",
+      "method": "GET",
+      "path": "/api/v1/health/ready",
+      "handler_kind": "EXPLICIT_HANDLER"
+    },
+    {
+      "contract_id": "API-X07",
+      "method": "POST",
+      "path": "/api/v1/internal/workers/scan-result",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    },
+    {
+      "contract_id": "API-X08",
+      "method": "POST",
+      "path": "/api/v1/internal/workers/retention-sweep",
+      "handler_kind": "NOT_IMPLEMENTED_501"
+    }
+  ]
+}

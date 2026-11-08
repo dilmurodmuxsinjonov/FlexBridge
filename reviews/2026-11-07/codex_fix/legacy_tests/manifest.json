@@ -1,0 +1,62 @@
+[
+  {
+    "original": "backend\\tests\\test_fix_01_to_14_remediation.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_fix_01_to_14_remediation.py.txt",
+    "sha256": "6eefa9aaf19843c6785f9b7944ea7e729e15cb7f1842b796e62c4facb9e75d62"
+  },
+  {
+    "original": "backend\\tests\\test_s2_1_1_foundation.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_1_1_foundation.py.txt",
+    "sha256": "ec4246a223c804b6d7ef10c0455c708106060f45d2571e0facf7bbb18ac86bc9"
+  },
+  {
+    "original": "backend\\tests\\test_s2_1_2_transactions_audit.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_1_2_transactions_audit.py.txt",
+    "sha256": "1404fcc7615d0037add2f1590882d59f842395a9d5a2a804aa197b73db0cc77c"
+  },
+  {
+    "original": "backend\\tests\\test_s2_2_1_auth_revoke.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_2_1_auth_revoke.py.txt",
+    "sha256": "5abe71212ebe65a2142f2e92833119ef5835115ddeb4e97b94bdf11e05edbabe"
+  },
+  {
+    "original": "backend\\tests\\test_s2_2_2_dual_control_scope.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_2_2_dual_control_scope.py.txt",
+    "sha256": "80f0f46931c996e468f1574d2e0e33ff3fd694a0c606b1d787f827c457b46db2"
+  },
+  {
+    "original": "backend\\tests\\test_s2_3_1_availability.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_3_1_availability.py.txt",
+    "sha256": "c758a20c6ba66fe96aaa9c0be4173ce8de5df5d6dd159b7cfdc60c2ad2403071"
+  },
+  {
+    "original": "backend\\tests\\test_s2_4_1_matching_ac_039.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_4_1_matching_ac_039.py.txt",
+    "sha256": "c9045a75029e79420812982bbeb707b454d939c4b14ac5e94d67164f808210ba"
+  },
+  {
+    "original": "backend\\tests\\test_s2_5_1_placements_inv_08.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_5_1_placements_inv_08.py.txt",
+    "sha256": "fd3e5d20e7ab909f4139e547f2940811ac3a5885ce4265dba93270d480349577"
+  },
+  {
+    "original": "backend\\tests\\test_s2_6_1_internship_diary_ac_040.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_6_1_internship_diary_ac_040.py.txt",
+    "sha256": "3e1fdc4fcdd99f060fc46208f02134391d979ce3bfa21e89087bdb48b263cede"
+  },
+  {
+    "original": "backend\\tests\\test_s2_7_1_files_quarantine_ac_042.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_7_1_files_quarantine_ac_042.py.txt",
+    "sha256": "a77de2cd05071c241e1dd7bc9dd1a2327180173abbf860e78bab4165128e65bb"
+  },
+  {
+    "original": "backend\\tests\\test_s2_8_1_billing_quota_ac_042.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_8_1_billing_quota_ac_042.py.txt",
+    "sha256": "db82aa944f303818aa43fa5de78f0542c904b9d1bad7a3c2cd18bdeffaa02137"
+  },
+  {
+    "original": "backend\\tests\\test_s2_9_s2_10_pilot_readiness.py",
+    "archive": "reviews\\2026-11-07\\codex_fix\\legacy_tests\\test_s2_9_s2_10_pilot_readiness.py.txt",
+    "sha256": "052cd3da703593045c5588085b481efa27c0f1f9600a42338a300dce591bddff"
+  }
+]

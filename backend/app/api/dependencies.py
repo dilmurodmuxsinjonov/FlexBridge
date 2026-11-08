@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from fastapi import Header, HTTPException
+from sqlalchemy import select
+from app.db.storage import table, transaction, now
 
 from app.services.auth import AuthError, auth_service
 
@@ -34,14 +36,6 @@ def require_actor_context(authorization: str | None = Header(default=None)) -> A
     try:
         sess = auth_service.validate_session(token)
     except AuthError as exc:
-        if exc.code == "SESSION_EXPIRED" and token in auth_service.sessions:
-            mem_sess = auth_service.sessions[token]
-            if mem_sess.get("status") == "ACTIVE" and mem_sess.get("revoked_at") is None:
-                return ActorContext(
-                    user_id=str(mem_sess["user_id"]),
-                    session_id=str(mem_sess["session_id"]),
-                    roles=tuple(mem_sess.get("roles", [])),
-                )
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc)},
@@ -52,3 +46,43 @@ def require_actor_context(authorization: str | None = Header(default=None)) -> A
         session_id=str(sess["session_id"]),
         roles=tuple(sess.get("roles", [])),
     )
+
+def require_platform(actor: ActorContext, *allowed: str) -> None:
+    grants,catalog=table('platform_role_grants'),table('role_catalog')
+    with transaction() as conn:
+        found=conn.execute(select(grants.c.id).select_from(grants.join(catalog,grants.c.role_id==catalog.c.id)).where(
+            grants.c.user_id==actor.user_id,grants.c.revoked_at.is_(None),grants.c.expires_at>now(),
+            catalog.c.scope_kind=='PLATFORM',catalog.c.code.in_(allowed))).first()
+    if not found:
+        raise HTTPException(403,detail={'code':'FORBIDDEN_ROLE'})
+
+def require_org(actor: ActorContext, organization_id: str, *allowed: str) -> None:
+    membership,grants,catalog=table('org_memberships'),table('org_role_grants'),table('role_catalog')
+    with transaction() as conn:
+        found=conn.execute(select(membership.c.id).select_from(membership.join(grants,grants.c.membership_id==membership.c.id)
+            .join(catalog,grants.c.role_id==catalog.c.id)).where(membership.c.user_id==actor.user_id,
+            membership.c.organization_id==organization_id,membership.c.status=='ACTIVE',membership.c.revoked_at.is_(None),
+            grants.c.revoked_at.is_(None),catalog.c.scope_kind=='ORG',catalog.c.code.in_(allowed))).first()
+    if not found:
+        raise HTTPException(403,detail={'code':'ORG_SCOPE_FORBIDDEN'})
+
+def candidate_id_for(actor: ActorContext) -> str:
+    with transaction() as conn:
+        result=conn.execute(select(table('candidate_profiles').c.id).where(table('candidate_profiles').c.user_id==actor.user_id)).scalar_one_or_none()
+    if not result:
+        raise HTTPException(403,detail={'code':'CANDIDATE_PROFILE_REQUIRED'})
+    return str(result)
+
+def owns_candidate(user_id: str,candidate_id: str) -> bool:
+    with transaction() as conn:
+        return conn.execute(select(table('candidate_profiles').c.id).where(table('candidate_profiles').c.id==candidate_id,
+            table('candidate_profiles').c.user_id==user_id)).first() is not None
+
+def require_institution(actor: ActorContext, institution_id: str, *allowed: str) -> None:
+    membership,grants,catalog=table('institution_memberships'),table('institution_role_grants'),table('role_catalog')
+    with transaction() as conn:
+        found=conn.execute(select(membership.c.id).select_from(membership.join(grants,grants.c.membership_id==membership.c.id)
+            .join(catalog,grants.c.role_id==catalog.c.id)).where(membership.c.user_id==actor.user_id,
+            membership.c.institution_id==institution_id,membership.c.status=='ACTIVE',membership.c.revoked_at.is_(None),
+            grants.c.revoked_at.is_(None),catalog.c.scope_kind=='INSTITUTION',catalog.c.code.in_(allowed))).first()
+    if not found: raise HTTPException(403,detail={'code':'INSTITUTION_SCOPE_FORBIDDEN'})

@@ -17,7 +17,7 @@ from typing import Any
 from sqlalchemy import select, update
 
 from app.core.audit import AppendOnlyAuditStore
-from app.db.storage import circuit_breaker_table, get_engine
+from app.db.storage import circuit_breaker_table, get_engine, transaction, now
 
 
 class FinanceCircuitOpenError(Exception):
@@ -42,8 +42,8 @@ class FinanceCircuitOpenError(Exception):
 
 def _ensure_breaker_row_initialized() -> None:
     """Insert default CLOSED row only if no row exists yet; never overwrite an existing OPEN state on import."""
-    now_iso = datetime.now(timezone.utc).isoformat()
-    with get_engine().begin() as conn:
+    now_iso = now()
+    with transaction() as conn:
         existing = conn.execute(
             select(circuit_breaker_table.c.key).where(circuit_breaker_table.c.key == "P1_FINANCE")
         ).first()
@@ -62,19 +62,10 @@ def _ensure_breaker_row_initialized() -> None:
 
 
 def _read_breaker_row() -> dict[str, Any]:
-    _ensure_breaker_row_initialized()
-    with get_engine().begin() as conn:
-        row = conn.execute(
-            select(circuit_breaker_table).where(circuit_breaker_table.c.key == "P1_FINANCE")
-        ).mappings().first()
+    with transaction() as conn:
+        row = conn.execute(select(circuit_breaker_table).where(circuit_breaker_table.c.key == 'P1_FINANCE').with_for_update(read=True)).mappings().first()
         if row is None:
-            return {
-                "state": "CLOSED",
-                "incident_id": None,
-                "reason_code": None,
-                "tripped_by": None,
-                "tripped_at": None,
-            }
+            raise RuntimeError('Circuit breaker state is missing; apply migrations')
         return dict(row)
 
 
@@ -84,10 +75,10 @@ def _write_breaker_row(
     incident_id: str | None,
     reason_code: str | None,
     tripped_by: str | None,
-    tripped_at: str | None,
+    tripped_at: datetime | None,
 ) -> None:
-    now_iso = datetime.now(timezone.utc).isoformat()
-    with get_engine().begin() as conn:
+    now_iso = now()
+    with transaction() as conn:
         existing = conn.execute(
             select(circuit_breaker_table.c.key).where(circuit_breaker_table.c.key == "P1_FINANCE")
         ).first()
@@ -118,7 +109,6 @@ def _write_breaker_row(
             )
 
 
-_ensure_breaker_row_initialized()
 
 
 @dataclass
@@ -167,7 +157,7 @@ class FinanceCircuitBreaker:
         details: str,
     ) -> dict[str, Any]:
         """Trip the P1 finance circuit-breaker and record an immutable audit event."""
-        now_iso = datetime.now(timezone.utc).isoformat()
+        now_iso = now()
         _write_breaker_row(
             state="OPEN",
             incident_id=incident_id,

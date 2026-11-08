@@ -167,63 +167,15 @@ class PilotOperationsService:
 
     def get_pilot_readiness_report(self) -> Dict[str, Any]:
         """Generates the S2.10.1 R1 Pilot Readiness Report across schema, DR targets, AC-001..042, and Q-011."""
-        summary = get_schema_summary()
-        counts = summary["counts"]
-        pg_ver = summary["postgres_verification"]
-
-        r2_freelance_enabled = self.feature_flag_service.is_enabled("R2_FREELANCE_MARKETPLACE")
-        r1_jobs_enabled = self.feature_flag_service.is_enabled("R1_PART_TIME_JOBS")
-        r1_general_intern_enabled = self.feature_flag_service.is_enabled("R1_GENERAL_INTERNSHIPS")
-        r1_academic_intern_enabled = self.feature_flag_service.is_enabled("R1_ACADEMIC_INTERNSHIPS")
-
-        schema_and_invariants_ready = (
-            summary["schema_sql_exists"] is True
-            and counts.get("tables") == 94
-            and counts.get("fields") == 935
-            and counts.get("foreign_keys") == 214
-            and counts.get("acceptance_criteria") == 42
-            and counts.get("reference_errors") == 0
-            and pg_ver.get("all_checks_passed") is True
-            and self.circuit_breaker.state == "CLOSED"
-            and r2_freelance_enabled is False
-            and r1_jobs_enabled is True
-            and r1_general_intern_enabled is True
-            and r1_academic_intern_enabled is True
-        )
-        external_services_ready = (
-            get_database_url().startswith("postgresql")
-            and os.environ.get("FLEXBRIDGE_EXTERNAL_SERVICES_VERIFIED") == "1"
-        )
-        pilot_ready = schema_and_invariants_ready and external_services_ready
-
+        from app.core.readiness import dependency_readiness
+        report=dependency_readiness()
         return {
-            "pilot_ready": pilot_ready,
-            "schema_and_invariants_ready": schema_and_invariants_ready,
-            "external_services_ready": external_services_ready,
-            "release_stage": "R1_PILOT",
-            "q_011_r2_freelance_deferred": {
-                "R2_FREELANCE_MARKETPLACE": r2_freelance_enabled,
-                "R1_PART_TIME_JOBS": r1_jobs_enabled,
-                "R1_GENERAL_INTERNSHIPS": r1_general_intern_enabled,
-                "R1_ACADEMIC_INTERNSHIPS": r1_academic_intern_enabled,
-            },
-            "disaster_recovery_and_safety": {
-                "rpo_hours_target": 24,
-                "rto_hours_target": 4,
-                "p1_finance_circuit_breaker_state": self.circuit_breaker.state,
-                "pgbouncer_pool_mode": "transaction",
-            },
-            "schema_and_invariants": {
-                "tables": counts.get("tables"),
-                "fields": counts.get("fields"),
-                "foreign_keys": counts.get("foreign_keys"),
-                "acceptance_criteria": counts.get("acceptance_criteria"),
-                "reference_errors": counts.get("reference_errors"),
-                "postgres_17_of_17_passed": pg_ver.get("all_checks_passed"),
-            },
-            "audit_and_retention_stats": {
-                "audit_events_count": len(self.audit_store.list_audit_events()),
-                "appeals_resolved_count": len(self._appeals),
-                "retention_executions_count": len(self._retention_executions),
-            },
+            'pilot_ready':False,
+            'acceptance_status':'REQUIRES_E2E_AND_DR_EVIDENCE',
+            'infrastructure':report,
+            'schema_migrated':report['checks']['database'],
+            'finance_circuit_state':self.circuit_breaker.state,
+            'release_stage':'R1_IMPLEMENTATION',
+            'disaster_recovery_targets':{'rpo_hours':24,'rto_hours':4,'restore_drill_verified':False},
+            'r2_freelance_enabled':self.feature_flag_service.is_enabled('R2_FREELANCE_MARKETPLACE'),
         }

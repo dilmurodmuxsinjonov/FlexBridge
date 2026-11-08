@@ -1,0 +1,10 @@
+# Codex assessment of the read-only Copilot review
+
+Copilot CLI successfully reviewed the detached f844d53 snapshot with only view/glob/grep tools, no writes or shell execution. The configured model was not reported independently. Its output is preserved in copilot_review.md; it is not an automatic approval.
+
+1. **Confirmed: generic OWNER grant bypass.** Two existing owners could create/approve another OWNER through generic membership approval, without the evidence-backed ownership case. The fix allowlists only HR/HOST_COORDINATOR/MENTOR/BILLING at both creation and approval, including legacy pending requests. OWNER changes must use independent verification. The old positive test that requested OWNER now exercises explicit BILLING delegation; new negative regressions require OWNER creation and legacy approval to fail without a grant.
+2. **Not reproduced at the HTTP boundary: password-only financial access.** The original report overlooked the global authentication middleware and SENSITIVE_ROLES. Changed-input HTTP tests for FINANCE, OWNER and BILLING use genuine PASSWORD sessions with subsequently granted roles and two randomized target UUIDs each. All return 403 MFA_ENROLLMENT_REQUIRED before finance handlers. This does not claim that direct internal service calls authenticate bearer tokens themselves.
+3. **Confirmed: fabricated/nonpersistent combined appeals.** Tracked in #37. The following OPS package closes the legacy combined endpoint and introduces durable operational records; a separate appellant-submission/assigned-review workflow follows.
+4. **Confirmed boundary: retention is not executed.** The existing HTTP endpoint says dry-run/NOT_EXECUTED, while the old internal helper overstates counts in memory. #37 persists dry-run evaluations with both actual counters fixed at zero. No purge or legal-policy approval is claimed.
+
+Local targeted validation for findings 1/2: **6 passed, 15 deselected, 1 framework warning, 21.47s**. PostgreSQL evidence: peer_regressions_junit.xml. GitHub CI must also validate the resulting commit before merge.

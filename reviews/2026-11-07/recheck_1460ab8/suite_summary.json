@@ -1,0 +1,11 @@
+{
+  "commit": "1460ab8",
+  "pytest_exit": 0,
+  "pytest_summary": [
+    "39 passed, 1 warning in 10.88s"
+  ],
+  "previous_diagnostic_checks": 30,
+  "previous_diagnostic_defects_observed": 0,
+  "previous_diagnostic_improvements_confirmed": 8,
+  "note": "Existing suite includes REV-002 diagnostic; original assertions unchanged. Generated historical report restored to committed content using Git checkout filters."
+}

@@ -1,0 +1,116 @@
+"""Automated test suite for S2.2.1: Authentication, 18+ check, TOTP, and immediate session/role revocation (`INV-15`, `AC-017`)."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.services.auth import auth_service, generate_totp_code
+
+client = TestClient(app)
+
+
+def test_register_requires_18_plus_adult_declaration() -> None:
+    """Verify under-18 registration is rejected with 422 ADULT_DECLARATION_REQUIRED."""
+    resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "display_name": "Yosh Nomzod",
+            "password": "StrongPassword123!",
+            "adult_confirmed": False,
+        },
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"]["code"] == "ADULT_DECLARATION_REQUIRED"
+
+
+def test_login_with_totp_and_ac_017_immediate_session_revocation() -> None:
+    """Verify TOTP login and `AC-017` / `INV-15`: revoking a cached session immediately returns 401 AUTH_REVOKED."""
+    reg_resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "display_name": "Dilmurod Student",
+            "password": "StrongPassword123!",
+            "adult_confirmed": True,
+            "roles": ["CANDIDATE", "STUDENT"],
+            "enable_totp": True,
+        },
+    )
+    assert reg_resp.status_code == 201
+    user_data = reg_resp.json()
+    user_id = user_data["id"]
+    totp_secret = user_data["totp_secret"]
+    assert totp_secret is not None
+
+    # Login without TOTP when TOTP is enabled must fail with 401
+    bad_login = client.post(
+        "/api/v1/auth/login",
+        json={"user_id": user_id, "password": "StrongPassword123!"},
+    )
+    assert bad_login.status_code == 401
+    assert bad_login.json()["detail"]["code"] == "TOTP_REQUIRED_OR_INVALID"
+
+    # Login with valid RFC 6238 TOTP code succeeds
+    valid_totp = generate_totp_code(totp_secret)
+    login_resp = client.post(
+        "/api/v1/auth/login",
+        json={
+            "user_id": user_id,
+            "password": "StrongPassword123!",
+            "totp_code": valid_totp,
+        },
+    )
+    assert login_resp.status_code == 200
+    session_id = login_resp.json()["session_id"]
+
+    # Protected endpoint works while session is active and cached in L1 (15s TTL)
+    me_ok = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {session_id}"})
+    assert me_ok.status_code == 200
+    assert me_ok.json()["user_id"] == user_id
+
+    # Immediately revoke the session (`AC-017` / `INV-15`) with authenticated Bearer token
+    rev_resp = client.post(
+        f"/api/v1/auth/sessions/{session_id}/revoke",
+        json={"actor_id": "security-admin-1", "reason": "ROLE_REVOKED_AC_017"},
+        headers={"Authorization": f"Bearer {session_id}"},
+    )
+    assert rev_resp.status_code == 200
+    assert rev_resp.json()["status"] == "REVOKED"
+
+    # Without waiting 15 seconds, the very next call to `/api/v1/auth/me` must return 401 AUTH_REVOKED
+    me_revoked = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {session_id}"})
+    assert me_revoked.status_code == 401
+    assert me_revoked.json()["detail"]["code"] == "AUTH_REVOKED"
+
+
+def test_revoke_all_user_sessions_on_membership_or_role_change() -> None:
+    """Verify `revoke_all_user_sessions` immediately invalidates all active sessions of a user (`INV-15`)."""
+    reg = client.post(
+        "/api/v1/auth/register",
+        json={
+            "display_name": "Recruiter User",
+            "password": "RecruiterPassword123!",
+            "adult_confirmed": True,
+            "roles": ["ORG_RECRUITER"],
+        },
+    ).json()
+    s1 = client.post(
+        "/api/v1/auth/login",
+        json={"user_id": reg["id"], "password": "RecruiterPassword123!"},
+    ).json()["session_id"]
+    s2 = client.post(
+        "/api/v1/auth/login",
+        json={"user_id": reg["id"], "password": "RecruiterPassword123!"},
+    ).json()["session_id"]
+
+    revoked_count = auth_service.revoke_all_user_sessions(
+        user_id=reg["id"],
+        actor_id="org-admin-1",
+        reason="ORG_MEMBERSHIP_REVOKED",
+    )
+    assert revoked_count == 2
+
+    for sid in (s1, s2):
+        res = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {sid}"})
+        assert res.status_code == 401
+        assert res.json()["detail"]["code"] == "AUTH_REVOKED"

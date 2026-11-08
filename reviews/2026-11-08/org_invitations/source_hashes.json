@@ -1,0 +1,17 @@
+{
+  "backend/app/services/invitations.py": "4c8e81c0d7e05890da66302def8db138ad6e1d8d3fff955506d7284184de5671",
+  "backend/app/api/v1/invitations.py": "4aa96d1e2f5a25d58b028eb03c28eebe1370723fd542021755bedd02d7a29f98",
+  "backend/alembic/versions/0005_org_invitations.py": "dc2fb7353f47694873a606a4e3e92708c2744312d4e71a455fe639c347ba96b9",
+  "backend/app/services/organizations.py": "befe2e1448e3e0a9a90ba6d56d32d7f5802fac8ccb9a3a6ea41436607419cf35",
+  "backend/app/db/storage.py": "660dc608ad399b50c68ea555c8d7c601fb402a9bf3594fe42abec30a2e551245",
+  "backend/app/main.py": "72695149800082a4903bd45a5f3c7ed60d296fbfc749faab89b56a72b9512925",
+  "backend/app/core/iam_http.py": "107e78cfa2c149284bfec5ada4135f2f43394dcfafa9634fb21ddda44cbe40b8",
+  "backend/tests/security/test_invitations.py": "870645f29d83c2e0dfd97b6f575041ecba78d7bed1f3b7d8a949ed791d522071",
+  "backend/tests/security/test_regressions.py": "0ef8596782099a83502ec6acd481bd813ec4292e80b52cc0341f483a59f572d7",
+  "backend/INVITATIONS.md": "8d7b8d69606553341630df7630687616e6c779e5cf8ae2c565cba5d907f0a154",
+  "backend/ORGANIZATIONS.md": "3df77c9f2836b23adba2cff85be80afadf56b09acdfbd469f72de5ae068ed9c5",
+  "backend/README.md": "2bc62edbe6431d1158740d60089b7737d6bd9a4d06c2323b36a5c926fc6eb206",
+  "reviews\\2026-11-08\\org_invitations\\run_validation.py": "9f430897a721b6833b969648b21981924a887228f22e315d6ca0a67d8f9bf6c5",
+  "reviews\\2026-11-08\\org_invitations\\native_smoke.py": "c76a5628a9eb12f3d8b9b241541d2c967069ec78c9769aaa962cf8f0cfe12381",
+  "reviews\\2026-11-08\\org_invitations\\check_upgrade.py": "5a0a911ee32be00d3c66f709922378e4f22c98d0810c8a9bdda436f74f79402e"
+}

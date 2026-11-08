@@ -1,0 +1,18 @@
+{
+  "backend/app/api/v1/candidates.py": "20c60bd0d3be12d3616362b48845bceb5f5ed259339759c21f21ba9c35532474",
+  "backend/app/services/candidates.py": "8091a966b2560b47dc0c9d1e6c62f45fc9878f068204dcab35b6a5258977058e",
+  "backend/app/services/availability.py": "c99483454f745d246d52b9ed5cb82632565a850a4f939f79f195128f2068c39e",
+  "backend/app/services/schedule.py": "58c3a2931043a8ed840f52e9f81429538eebeca65dd4408f7f8f231374f37dba",
+  "backend/app/services/schedule_matching.py": "86174279eedec1d2d71c9ab458f661bbb50f4706d911f998dfa24ef512af5790",
+  "backend/app/services/opportunities.py": "269441b9726719b0f8c8c88a0aeb7c1f94d8a306be314bf3dac93be0cc6c24c4",
+  "backend/app/api/v1/canonical_routes.py": "b61764e1e7966d6c7ea5d2d94fcc7950ea2b01cbfdf104ac6e18a1c03b34aeb7",
+  "backend/app/api/v1/opportunities.py": "7801008243b08dc40ae64aeba19be2492e3afc023deb00441e3a8e01a834e43d",
+  "backend/app/main.py": "900709fee6249e48d5c5d4792d7d23afd43bf496531feb4fcdae3f6d2324cefe",
+  "backend/app/db/storage.py": "a773f0694355d180899d9c45b9ef6cca3ff89b2b8c0677cdff5cdf2630ee7cc5",
+  "backend/app/core/iam_http.py": "4b885ed02070ce9e644514c0b89b0e539869c91eaf7ec5d215bb15f9f977a15b",
+  "backend/tests/security/test_candidate.py": "c50dbebf2d676b4c5cf89d12ff0b49ab7824328d37b77d5b5fe22ffbf1ddec58",
+  "backend/tests/security/test_contracts.py": "7bd6d47e8a4d17af04da64aec7fd3a34b63dbc200c0be927ac44e918f04500a9",
+  "backend/CANDIDATE.md": "47ac2a2b178aab6f01f1e2c8edca3c6332ea0020846570de92fb4418c4f31e38",
+  "backend/README.md": "82f1d775f5d3c31fee2cb63bccbc0db830649384d8a61a8768a2b709c97b3345",
+  "reviews\\2026-11-07\\can\\run_validation.py": "990ee73a60be2082914fd4c532316c1db07020fc86fe9403e375140b90d7f959"
+}

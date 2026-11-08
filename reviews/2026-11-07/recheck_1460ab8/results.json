@@ -1,0 +1,227 @@
+{
+  "review": "REV-003",
+  "commit": "1460ab8",
+  "generated_at": "2026-11-06T21:43:27.404228+00:00",
+  "environment": "new isolated SQLite, TestClient, child processes; no external integrations",
+  "checks": 22,
+  "improvements_confirmed": 7,
+  "defect_scenarios_observed": 15,
+  "results": [
+    {
+      "name": "support_public_registration_blocked",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 403
+      }
+    },
+    {
+      "name": "standard_phc_verification",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {}
+    },
+    {
+      "name": "client_confirmation_flag_ignored",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": "PENDING_PROVIDER"
+      }
+    },
+    {
+      "name": "missing_signature_rejected",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 422
+      }
+    },
+    {
+      "name": "public_literal_signature_still_confirms_payment",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "status": 200,
+        "payment_status": "SUCCEEDED",
+        "authorization_header": false,
+        "real_provider_called": false
+      }
+    },
+    {
+      "name": "unpaid_pending_invoice_refunded",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "payment_status": "PENDING_PROVIDER",
+        "refund_http_status": 201,
+        "refund_status": "APPROVED",
+        "authorization_header": false
+      }
+    },
+    {
+      "name": "stored_digest_accepted_as_bearer",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "status": 200,
+        "stored_value_is_digest": true
+      }
+    },
+    {
+      "name": "renamed_invalid_pdf_still_clean",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "scan_status": "CLEAN",
+        "object_uploaded": false
+      }
+    },
+    {
+      "name": "download_now_requires_auth",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 401
+      }
+    },
+    {
+      "name": "public_employer_confirms_unrelated_company",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "register_status": 201,
+        "confirm_status": 200,
+        "org_membership_created": false
+      }
+    },
+    {
+      "name": "unrelated_user_creates_and_submits_victim_placement_log",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "draft_status": 200,
+        "submit_status": 200,
+        "result": "SUBMITTED",
+        "actor_is_placement_candidate": false
+      }
+    },
+    {
+      "name": "legacy_confirm_start_bypasses_auth",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "statuses": [
+          200,
+          200
+        ],
+        "result": "ACTIVE"
+      }
+    },
+    {
+      "name": "auth_me_checks_expiry",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "status": 401
+      }
+    },
+    {
+      "name": "dependency_accepts_same_expired_session",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "me_status": 401,
+        "protected_write_status": 200,
+        "step_up_verified": true
+      }
+    },
+    {
+      "name": "new_process_preserves_open_breaker",
+      "kind": "improvement",
+      "observed": true,
+      "evidence": {
+        "child_state": "OPEN"
+      }
+    },
+    {
+      "name": "blocked_order_still_writes_before_503",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "http_status": 503,
+        "order_count_delta": 1,
+        "invoice_id_leaked_in_error": true
+      }
+    },
+    {
+      "name": "special_org_id_resets_finance_breaker",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "status": 201,
+        "after_state": "CLOSED",
+        "authorization_header": false,
+        "special_input": "child-org"
+      }
+    },
+    {
+      "name": "canonical_named_table_has_no_invariants",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "runtime_table_count": 96,
+        "foreign_keys": 0,
+        "check_constraints": 0,
+        "negative_orphan_payment_inserted": true,
+        "amount_column_type": "TEXT"
+      }
+    },
+    {
+      "name": "payment_attempt_not_shared_across_workers",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "child_status": 409,
+        "response": {
+          "detail": "Payment attempt for idempotency_key 'cross-process-payment-key' not found."
+        },
+        "same_database": true
+      }
+    },
+    {
+      "name": "outbox_starves_pending_after_first_batch",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "relay_counts": [
+          0,
+          0
+        ],
+        "pending_tail_status": "PENDING",
+        "fixture": "first 50 records already RELAYED; record 51 PENDING"
+      }
+    },
+    {
+      "name": "alembic_success_without_applying_migrations",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "exit_code": 0,
+        "database_created": false,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "container_driver_and_specs_not_packaged",
+      "kind": "defect",
+      "observed": true,
+      "evidence": {
+        "dockerfile_installs_psycopg": false,
+        "backend_build_context_contains_specs": false,
+        "note": "Static build-context/dependency check, not an actual Docker build."
+      }
+    }
+  ]
+}

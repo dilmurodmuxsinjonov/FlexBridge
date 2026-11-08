@@ -1,0 +1,14 @@
+{
+  "preserve": {
+    "exit_code": 0,
+    "revision": "0004_org_onboarding",
+    "user_hash_preserved": true,
+    "organizations_preserved": 1
+  },
+  "conflict": {
+    "upgrade_rejected": true,
+    "revision_unchanged": "0003_iam_flows",
+    "organizations_preserved": 2
+  },
+  "disposable_databases_removed": true
+}
