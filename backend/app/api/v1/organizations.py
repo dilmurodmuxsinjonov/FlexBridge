@@ -43,7 +43,7 @@ class OrganizationPatch(EvidenceInput):
 
 class DecisionInput(Input):
     decision: Literal['APPROVE','REJECT','NEEDS_INFO']
-    expected_revision: int = Field(ge=1)
+    expected_revision: int = Field(strict=True,ge=1)
     reason: str = Field(min_length=15, max_length=2000)
 
 class RevokeInput(Input):

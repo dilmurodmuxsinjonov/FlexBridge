@@ -10,6 +10,7 @@ from app.db.storage import table,transaction,now
 from app.services.governance import GovernanceError
 from app.services.organizations import require_mfa
 from app.services.placements import get_row,insert_row
+from app.services.authority import mfa_authority,moderator_authority
 
 
 def justification(value):
@@ -53,28 +54,6 @@ def revision_evidence(conn,revision_id):
 
 def decision_evidence(conn,action_id):
     return conn.execute(text('SELECT flexbridge.moderation_decision_snapshot(CAST(:id AS uuid))'),{'id':action_id}).scalar_one()
-
-
-def mfa_authority(conn,actor):
-    """Hold user/session authority until commit, in the password-change lock order."""
-    users,sessions=(table(n) for n in ('users','sessions'))
-    # Password/recovery changes lock user before sessions; use the same order.
-    user=conn.execute(select(users.c.auth_version).where(users.c.id==actor.user_id,users.c.status=='ACTIVE')
-        .with_for_update(read=True)).first()
-    session=None if not user else conn.execute(select(sessions.c.id).where(sessions.c.id==actor.session_id,
-        sessions.c.user_id==actor.user_id,sessions.c.auth_version==user.auth_version,sessions.c.assurance=='MFA',
-        sessions.c.revoked_at.is_(None),sessions.c.expires_at>now()).with_for_update(read=True)).first()
-    if not session:raise GovernanceError('MFA_REQUIRED',status_code=403)
-
-
-def moderator_authority(conn,actor):
-    """Hold authority until commit; concurrent revocation commits after this operation."""
-    mfa_authority(conn,actor)
-    grants,roles=(table(n) for n in ('platform_role_grants','role_catalog'))
-    grant=conn.execute(select(grants.c.id).join(roles,roles.c.id==grants.c.role_id).where(
-        grants.c.user_id==actor.user_id,grants.c.revoked_at.is_(None),grants.c.expires_at>now(),
-        roles.c.code=='MODERATOR',roles.c.scope_kind=='PLATFORM').with_for_update(read=True,of=(grants,roles))).first()
-    if not grant:raise GovernanceError('FORBIDDEN_ROLE',status_code=403)
 
 
 @dataclass
