@@ -20,7 +20,7 @@ class RetentionPolicyValidationError(ValueError):
 
 @dataclass
 class RetentionPolicyService:
-    """Service managing `DB-083 retention_policies` and `DB-084 retention_executions`."""
+    """Read-only reference-policy evaluator; no legal approval or deletion is performed."""
 
     _policies: dict[str, dict[str, Any]] = field(
         default_factory=lambda: {item["data_class"]: dict(item) for item in RETENTION_POLICIES_V1}
@@ -43,26 +43,19 @@ class RetentionPolicyService:
         backup_expiry_days: int,
         legal_basis: str,
     ) -> dict[str, Any]:
-        """Validate and register a retention policy per `chk_retention_legal_basis`."""
+        """Validate inputs, then fail closed until a legal-review workflow exists."""
         if active_days <= 0 or backup_expiry_days < 0:
             raise RetentionPolicyValidationError("active_days must be > 0 and backup_expiry_days >= 0")
         if len(legal_basis.strip()) < 10:
             raise RetentionPolicyValidationError(
                 "legal_basis must be at least 10 characters (`chk_retention_legal_basis`)"
             )
-        record = {
-            "data_class": data_class,
-            "policy_version": policy_version,
-            "active_days": active_days,
-            "backup_expiry_days": backup_expiry_days,
-            "legal_basis": legal_basis.strip(),
-            "status": "ACTIVE",
-        }
-        self._policies[data_class] = record
-        return dict(record)
+        raise RetentionPolicyValidationError('Custom policies require a separately authorized legal-review workflow')
 
     def evaluate_age_days(self, data_class: str, age_days: int) -> dict[str, Any]:
         """Evaluate whether a record of `data_class` is `RETAIN`, `WARN_EXPIRING`, or `PURGE_DUE`."""
+        if age_days < 0:
+            raise RetentionPolicyValidationError('age_days must be nonnegative')
         policy = self.get_policy(data_class)
         active_days = int(policy["active_days"])
 

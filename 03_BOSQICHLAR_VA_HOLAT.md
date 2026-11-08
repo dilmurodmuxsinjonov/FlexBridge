@@ -10,6 +10,14 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 - Doira: current tested baseline, public secret/artifact gate, GitHub Issue -> commit/branch -> draft PR -> CI -> review. Oldingi modified/untracked fayllar bir-biriga bog'liq snapshot sifatida saqlanadi; mavjud ish yo'qotilmaydi.
 - Fayllar: tekshirilgan backend/migration/test/infra/review snapshoti, publication gate, 01/03/04 jurnallar. Boshqa paketlar PR/CI dalili olingach alohida branchlarda.
 - Qabul: raw credentials/state fayllari public repoga tushmaydi; legacy test arxivi manifesti mos; current runtime test-magic literal yo'q; branch/commit/PR/checklar bilan natija qayta bajariladi. Keyingi: OPS-CODEX-001 retention/appeal persistence, so'ng ORG-003/EDU.
+- Oraliq: Issue35 / draft PR36 / commit f844d53; ikkala PostgreSQL GitHub CI run successful. Copilot pinned detached snapshotda read-only review qilmoqda. Main merge hali bajarilmadi.
+
+## OPS-CODEX-001 — Durable retention evaluations va yolg'on executionni to'xtatish
+
+- Holat: `Jarayonda`; mas'ul: Codex; GitHub Issue37, branch fix/37-durable-ops-records.
+- Doira: SQLda atomik auditlangan, idempotent dry-run baholash yozuvlari va cross-process read; client sanog'i haqiqiy scanned/deleted counterga aylanmaydi. Nonpersistent combined appeal resolution fail-closed qilinadi; alohida durable appeal workflow OPS-CODEX-002ga.
+- Fayllar: operations/retention service/API, 0006 migration/storage, SQL regressiyalar, qo'llanma va reviews/2026-11-08/ops001; 01/02/03. Hech qanday actual purge yoki legal approval da'vosi yo'q.
+- Qabul: PostgreSQL persist/restart, two-process read, role/MFA/revocation, idempotent concurrency/payload-conflict, immutable evaluation va audit atomicity; GitHub CI. Keyin OPS-CODEX-002, ORG-003 va EDU.
 
 ## REV-004 — Joriy ishchi katalogni umumiy ko'rib chiqish (2026-11-07)
 
