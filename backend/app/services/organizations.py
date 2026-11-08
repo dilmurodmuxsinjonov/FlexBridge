@@ -14,7 +14,7 @@ from app.services.schedule import TASHKENT
 
 audit = AppendOnlyAuditStore()
 CAPABILITIES = ('JOB_EMPLOYER', 'INTERNSHIP_HOST')
-REVIEW_KINDS = ('ORG_REPRESENTATIVE', 'ORG_PROFILE_CHANGE', 'ORG_OWNER_ADDITION', *CAPABILITIES)
+REVIEW_KINDS = ('ORG_REPRESENTATIVE', 'ORG_PROFILE_CHANGE', 'ORG_OWNER_ADDITION', 'ORG_OWNER_TRANSFER', *CAPABILITIES)
 OPEN_STATES = ('PENDING', 'IN_REVIEW', 'NEEDS_INFO')
 
 
@@ -189,7 +189,7 @@ class OrganizationService:
             return {key: org[key] for key in ('id','public_name','region','description','website')} | {'capabilities': badges}
 
     def submit(self, actor, org_id, *, kind, file_ids, evidence_note, case_id=None, proposed_fields=None):
-        if kind=='ORG_OWNER_ADDITION':
+        if kind in ('ORG_OWNER_ADDITION','ORG_OWNER_TRANSFER'):
             raise GovernanceError('OWNER_USE_DEDICATED_FLOW',status_code=422)
         require_mfa(actor)
         rate_limit('org-submission', actor.user_id, 20, 3600)
@@ -274,6 +274,9 @@ class OrganizationService:
         if case['kind']=='ORG_OWNER_ADDITION':
             from app.services.owner_additions import proposal
             proposal(conn,case_id)
+        elif case['kind']=='ORG_OWNER_TRANSFER':
+            from app.services.owner_transfers import proposal
+            proposal(conn,case_id)
         return org, case
 
     def claim(self, actor, case_id):
@@ -313,6 +316,9 @@ class OrganizationService:
             if case['kind']=='ORG_OWNER_ADDITION':
                 from app.services.owner_additions import owner_addition_service
                 result['owner_request']=owner_addition_service.operator_detail(conn,actor,case)
+            elif case['kind']=='ORG_OWNER_TRANSFER':
+                from app.services.owner_transfers import owner_transfer_service
+                result['owner_transfer']=owner_transfer_service.operator_detail(conn,actor,case)
             return result
 
     def download_evidence(self, actor, case_id, file_id):
@@ -333,6 +339,10 @@ class OrganizationService:
             if case['kind']=='ORG_OWNER_ADDITION':
                 from app.services.owner_additions import owner_addition_service
                 return owner_addition_service.decide_locked(conn,actor,org,case,decision=decision,
+                    expected_revision=expected_revision,reason=reason)
+            if case['kind']=='ORG_OWNER_TRANSFER':
+                from app.services.owner_transfers import owner_transfer_service
+                return owner_transfer_service.decide_locked(conn,actor,org,case,decision=decision,
                     expected_revision=expected_revision,reason=reason)
             if case['assigned_reviewer_id'] != actor.user_id:
                 raise GovernanceError('ASSIGNED_REVIEW_REQUIRED', status_code=403)

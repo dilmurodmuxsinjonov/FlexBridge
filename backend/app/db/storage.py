@@ -78,6 +78,22 @@ owner_addition_consents = Table('owner_addition_consents',metadata,
     Column('decision',Text,nullable=False),Column('target_staff_grant_id',UUID(as_uuid=False)),
     Column('contact_id',UUID(as_uuid=False)),Column('contact_digest',Text),
     Column('contact_verified_at',DateTime(timezone=True)),Column('expires_at',DateTime(timezone=True)))
+owner_transfer_requests = Table('owner_transfer_requests',metadata,
+    Column('case_id',UUID(as_uuid=False),primary_key=True),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('organization_id',UUID(as_uuid=False),nullable=False),Column('requester_user_id',UUID(as_uuid=False),nullable=False),
+    Column('requester_membership_id',UUID(as_uuid=False),nullable=False),Column('requester_grant_id',UUID(as_uuid=False),nullable=False),
+    Column('requester_auth_version',Integer,nullable=False),
+    Column('requester_session_id',UUID(as_uuid=False),nullable=False),Column('target_user_id',UUID(as_uuid=False),nullable=False),
+    Column('target_membership_id',UUID(as_uuid=False),nullable=False),Column('target_grant_id',UUID(as_uuid=False),nullable=False),Column('idempotency_key',Text,nullable=False),
+    Column('request_fingerprint',Text,nullable=False))
+owner_transfer_consents = Table('owner_transfer_consents',metadata,
+    Column('id',UUID(as_uuid=False),primary_key=True),Column('case_id',UUID(as_uuid=False),nullable=False),
+    Column('created_at',DateTime(timezone=True),nullable=False),Column('revision',Integer,nullable=False),
+    Column('event_no',Integer,nullable=False),Column('actor_id',UUID(as_uuid=False),nullable=False),
+    Column('auth_version',Integer,nullable=False),Column('session_id',UUID(as_uuid=False),nullable=False),
+    Column('decision',Text,nullable=False),Column('target_owner_grant_id',UUID(as_uuid=False)),
+    Column('contact_id',UUID(as_uuid=False)),Column('contact_digest',Text),
+    Column('contact_verified_at',DateTime(timezone=True)),Column('expires_at',DateTime(timezone=True)))
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -116,7 +132,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0008_owner_additions':
+        if revision != '0009_owner_transfers':
             raise RuntimeError('Database migrations are not current')
     return engine
 

@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40 merged. ORG-CODEX-003A / PR42: f118e23 native affected120 va complete297-test GitHub CI passed. Final review/evidence tekshirilmoqda. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: transfer/recovery va EDU.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42 merged. ORG-CODEX-003B / Issue43: mavjud OWNER vorisga topshirish boshlandi;003C recovery Rejada. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ownership va EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -131,15 +131,21 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003 — Mustaqil ownership boshqaruvi
 
-- Holat: `Jarayonda`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER tekshiruvda, ORG-CODEX-003B transfer/recovery Rejada.
+- Holat: `Jarayonda`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER backend paketi merged;003B existing-OWNER vorisga departure Jarayonda;003C inaccessible-owner recovery Rejada.
 - Doira: qo'shimcha OWNER, owner transfer/recovery uchun tashkilot topshirig'i va yangi vakilning mustaqil tekshiruv/roziligi, append-only ownership history va parallel last-owner himoyasi. Asl talab va qabul mezonlari ish boshlanishida aniqlanadi; keyin EDU.
 
 ## ORG-CODEX-003A — Existing staff uchun mustaqil qo'shimcha OWNER
 
-- Holat: `Tekshiruvda`; mas'ul Codex; GitHub Issue41/PR42, branch feature/41-reviewed-owner-additions. Implementatsiya Codexda; actual Copilot CLI read-only review0953ebd va final f118e23 follow-up. bc6e1d6 full295-test CI o'tganidan keyin2 yangi lifecycle testi stale requester/target grantni topdi. Grant-ID binding tuzatildi: final f118e23 native120 passed,0 failure/error/skip,282.714s; complete297-test CI42503498638 successful. Final review, evidence-only checks va merge qolgan. Transfer/recovery doiraga kirmaydi.
+- Holat: `Bajarildi` (chegaralangan backend paketi); mas'ul Codex; Issue41 yopildi, PR42 merge9c20547. Actual Copilot CLI read-only review0953ebd va final f118e23 follow-up. bc6e1d6 full295-test CI o'tganidan keyin2 yangi lifecycle testi stale requester/target grantni topdi. Grant-ID binding tuzatildi: final f118e23 native120 passed,0 failure/error/skip,282.714s; complete297-test CI42503498638 successful. Evidence-only final fcf4bed uchun ikkala CI42524063221/42524065800 successful. Transfer/recovery doiraga kirmaydi.
 - Doira: current-MFA OWNER so'rovi, shu tashkilotdagi active staff membership targeti, named-target MFA/current verified-contact roziligi, revision-bound dalil va assigned independent MODERATOR approval. Bir tranzaksiyada OWNER grant + append-only ownership event + case + audit. Generic staff/invitation yo'li OWNER bermaydi.
 - Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, shared authority helper, invitation service/test regrant history, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi qo'llandi. Copilot topgan invitation reactivation shu paketda tuzatiladi. SQL guardlar relational integrity; bearer/MFA va contact HMAC API authority chegarasida tekshiriladi, direct DB writers trusted.
 - Qabul: REJA.md. Copilot CLI actual read-only planning reviewi bajarildi; bu implementatsiya yoki acceptance dalili emas. Transfer/recovery003Bga, so'ng EDU.
+
+## ORG-CODEX-003B — Mavjud OWNER vorisga vakolatdan chiqish
+
+- Holat: `Tekshiruvda`; mas'ul Codex; Issue43/PR44, feature/43-reviewed-owner-departure. Source284b297 final native160 passed,0 failure/error/skip,1 warning,566.41s; ikkala full337-test CI42525017488/42525078474 successful. Actual pinned Copilot code review exit0, confirmed HTTP defect topilmadi; coverage chegaralari assessmentda. Evidence-only checks/merge qolgan. Doira va qabul: reviews/2026-11-09/org003b/REJA.md. Planning review tashqi plan faylini access denied sabab to'liq o'qimagan; source/prompt scope aniq yozilgan.
+- Current-MFA OWNER faqat o'z OWNER grantidan chiqishni so'raydi; shu tashkilotdagi boshqa mavjud OWNER MFA/contact bilan rozilik beradi; assigned independent MODERATOR current-MFA bilan tasdiqlaydi. Grant qo'shilmaydi; requesterning membership va boshqa rollari saqlanadi. Barcha tomonning original grantlari, revision/security/contact/evidence yangiligi tekshiriladi.
+- Fayllar: alohida service/API,0009 migration/storage, explicit operator dispatch/private HTTP, SQL regressiyalar/guide va01/02/03. Oldingi003A proof ma'nosi saqlanadi; transfer eventida previous membership va exact revoked grant bo'ladi. Concurrency/rollback/last-owner continuity, immutable history, populated upgrade, affected/full CI va pinned peer review talab qilinadi.003C recovery va pilot qabuli doiradan tashqari.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
