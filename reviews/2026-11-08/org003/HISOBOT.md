@@ -46,7 +46,15 @@ ketma-ketliklarni qamramagan. So'rov immutable requester_grant_idga, rozilik exa
 target_staff_grant_idga bog'landi; SQL relational proof ham shu grantlarni tekshiradi.
 Eski OWNER granti bekor bo'lsa yangi so'rov, staff granti bekor bo'lsa yangi rozilik kerak.
 Yangi ruxsat bilan qonuniy qayta davom etish ham tekshirildi:2 passed,11.40s,
-grant_boundaries_junit.xml. Final source uchun120 affected va complete297-test CI hali kerak.
+grant_boundaries_junit.xml. Final f118e23e2a0d2d48d08a6ad8fd500f5a43bca9d2 uchun
+**120 affected passed**,0 failure/error/skip,282.714s (`final_affected_junit.xml`).
+Complete GitHub PostgreSQL CI42503498638: **297 passed**,1 warning,190.18s.
+PR42 ochildi. Final read-only Copilot delta review f118e23da exit0; tasdiqlangan HTTP
+kamchilik topilmadi, invitation replay attribution concern assessmentda saqlandi.
+0007->0008 populated upgrade final source bilan yana o'tdi. Birinchi urinish lokal
+test server ishlamagani sabab to'xtatildi va muvaffaqiyat deb sanalmadi; dedicated server
+tiklangach replay o'tdi. Source manifest Git blob bytes bilan, summary va contracts
+inventari shu katalogda. Evidence-only final checks va merge keyingi GitHub dalili.
 
 Current canonical46 explicit /
 86 placeholder statistikasi o'zgarmaydi; yangi ownership helperlari bu132 ro'yxatdan tashqari.
