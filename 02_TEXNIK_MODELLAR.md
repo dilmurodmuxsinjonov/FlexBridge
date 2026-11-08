@@ -79,3 +79,11 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 - Current user/session/platform grant rows FOR SHARE till commit; user-before-session lock order. Business org/opportunity/case lockdan keyin vakolat qayta tekshiriladi. Mid-request revocation va commit bilan serialization alohida regressiyada.
 - Canonical API111 faqat assigned opportunity REJECT appeal UPHOLD/REOPEN doirasida; REOPEN DRAFT. Actual counts46 explicit/86 placeholder, bu acceptance foizi emas. Original rejection reason snapshoti private assigned reviewerga ko'rsatiladi; queue minimal.
 - Qo'llanma backend/MODERATION_APPEALS.md. Yangi dependency yo'q; actual Copilot CLI read-only review ishladi, modeli mustaqil aniqlanmadi. Registry/live provider/UI/DR sertifikati yo'q.
+
+## ORG-CODEX-003A — qo'shimcha OWNER va grant tarixi (2026-11-08)
+
+- Head0008_owner_additions: owner_addition_requests va append-only owner_addition_consents; runtime103, canonical94. Requester/target account va membership immutable, consent exact revision/current contact/security versionga bog'langan,24h.
+- Canonical verification queue/assignment/API110 explicit owner branch bilan qayta ishlatiladi. Transaction-bound user/session/platform/scoped authority helper services/authority.pyga ajratildi; oldingi apellyatsiya shu helperni ishlatadi. Strict integer expected_revision; no-store/body bounds owner helperlariga qo'llandi.
+- Role uniqueness faqat active grantlar uchun; revoked qator saqlanadi, regrant yangi qator. Invitation acceptance active grant va latest revocationni ajratadi, tarixga mos partial index bor. Ownership event/verification evidence UPDATE/DELETE guard, bir casega bitta ownership event.
+- SQL guard relational proof va active moderator metadata tekshiradi; actual bearer/MFA/contact HMAC API chegarasida, direct DB writers trusted. Bu opaque caller authentication yoki human legal identityni SQLda mustaqil isbotlash degani emas. Yangi dependency yo'q.
+- Guide backend/OWNER_ADDITIONS.md. Native affected118 + history/migration follow-up2 passed; full committed CI keyingi qabul bosqichi. Transfer/recovery hali doiradan tashqarida.

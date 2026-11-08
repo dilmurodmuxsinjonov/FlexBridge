@@ -11,6 +11,7 @@ def upgrade():
     -- Preserve revoked grants. A future grant gets a new row and proof, not reactivation.
     ALTER TABLE flexbridge.org_role_grants DROP CONSTRAINT org_role_grants_membership_id_role_id_key;
     CREATE UNIQUE INDEX uq_org_active_role ON flexbridge.org_role_grants(membership_id,role_id) WHERE revoked_at IS NULL;
+    CREATE INDEX ix_org_role_revocations ON flexbridge.org_role_grants(membership_id,role_id,revoked_at DESC) WHERE revoked_at IS NOT NULL;
     CREATE UNIQUE INDEX uq_ownership_case_event ON flexbridge.org_ownership_events(verification_case_id);
     CREATE TRIGGER immutable_org_ownership_events BEFORE UPDATE OR DELETE ON flexbridge.org_ownership_events
       FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
@@ -105,6 +106,11 @@ def upgrade():
           AND m.organization_id=NEW.organization_id AND m.status='ACTIVE' AND m.revoked_at IS NULL
           AND o.status='VERIFIED' AND r.code='OWNER' AND r.scope_kind='ORG' AND g.revoked_at IS NULL
           AND g.granted_by_id=NEW.approved_by_id
+          AND EXISTS(SELECT 1 FROM users reviewer JOIN platform_role_grants authority ON authority.user_id=reviewer.id
+            JOIN role_catalog platform_role ON platform_role.id=authority.role_id
+            WHERE reviewer.id=NEW.approved_by_id AND reviewer.status='ACTIVE'
+              AND authority.revoked_at IS NULL AND authority.expires_at>clock_timestamp()
+              AND platform_role.code='MODERATOR' AND platform_role.scope_kind='PLATFORM')
           AND NOT EXISTS(SELECT 1 FROM org_memberships reviewer WHERE reviewer.organization_id=NEW.organization_id
             AND reviewer.user_id=NEW.approved_by_id)
           AND ((c.kind='ORG_REPRESENTATIVE' AND m.user_id=c.requester_id)

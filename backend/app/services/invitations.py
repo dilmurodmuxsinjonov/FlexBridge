@@ -3,7 +3,7 @@ from datetime import timedelta
 import hmac
 import secrets
 from fastapi import HTTPException
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func
 
 from app.api.dependencies import ActorContext, require_org
 from app.core.iam_security import digest, normalize_contact, rate_limit
@@ -133,9 +133,12 @@ class InvitationService:
             if member and member['status'] == 'REVOKED' and not member['revoked_at']: raise unavailable()
             if member and member['revoked_at'] and invite['created_at'] <= member['revoked_at']:
                 raise unavailable()
+            last_revoked = conn.execute(select(func.max(grants.c.revoked_at)).where(
+                grants.c.membership_id == member['id'],grants.c.role_id == invite['role_id'],
+                grants.c.revoked_at.is_not(None))).scalar_one() if member else None
+            if last_revoked and invite['created_at'] <= last_revoked: raise unavailable()
             grant = conn.execute(select(grants).where(grants.c.membership_id == member['id'],
-                grants.c.role_id == invite['role_id']).with_for_update()).mappings().first() if member else None
-            if grant and grant['revoked_at'] and invite['created_at'] <= grant['revoked_at']: raise unavailable()
+                grants.c.role_id == invite['role_id'],grants.c.revoked_at.is_(None)).with_for_update()).mappings().first() if member else None
             if not member:
                 member = insert_row(conn,'org_memberships',organization_id=org['id'],user_id=actor.user_id,
                     status='ACTIVE',accepted_at=now())
@@ -146,11 +149,7 @@ class InvitationService:
                         .values(revoked_at=now(),updated_at=now()))
                 conn.execute(memberships.update().where(memberships.c.id == member['id']).values(
                     status='ACTIVE',accepted_at=now(),revoked_at=None,updated_at=now()))
-            if grant:
-                if grant['revoked_at']:
-                    conn.execute(grants.update().where(grants.c.id == grant['id']).values(revoked_at=None,
-                        granted_by_id=inviter['user_id'],updated_at=now()))
-            else:
+            if not grant:
                 insert_row(conn,'org_role_grants',membership_id=member['id'],role_id=role['id'],granted_by_id=inviter['user_id'])
             conn.execute(table('org_invitations').update().where(table('org_invitations').c.id == invite['id'])
                 .values(accepted_by_id=actor.user_id,accepted_at=now(),updated_at=now()))

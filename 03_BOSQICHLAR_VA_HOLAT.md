@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-08 - Codex. PR36/38/40 merged; OPS002 final250 native va CI passed, merge6b28ac5. ORG-CODEX-003A / Issue41 boshlandi. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: transfer/recovery va EDU.
+Yangilangan: 2026-11-08 - Codex. PR36/38/40 merged. ORG-CODEX-003A / Issue41: native affected118 va follow-up2 passed, populated upgrade101->103 preserved; full295-test GitHub CIga tayyorlanmoqda. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: transfer/recovery va EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -131,14 +131,14 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003 — Mustaqil ownership boshqaruvi
 
-- Holat: `Rejada`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER, ORG-CODEX-003B transfer/recovery.
+- Holat: `Jarayonda`; kichik paketlarga ajratildi: ORG-CODEX-003A qo'shimcha OWNER tekshiruvda, ORG-CODEX-003B transfer/recovery Rejada.
 - Doira: qo'shimcha OWNER, owner transfer/recovery uchun tashkilot topshirig'i va yangi vakilning mustaqil tekshiruv/roziligi, append-only ownership history va parallel last-owner himoyasi. Asl talab va qabul mezonlari ish boshlanishida aniqlanadi; keyin EDU.
 
 ## ORG-CODEX-003A — Existing staff uchun mustaqil qo'shimcha OWNER
 
-- Holat: `Jarayonda`; mas'ul Codex; GitHub Issue41, branch feature/41-reviewed-owner-additions. PR40 merged. Implementatsiya faqat Codexda; Copilot read-only review. Transfer/recovery doiraga kirmaydi.
+- Holat: `Tekshiruvda`; mas'ul Codex; GitHub Issue41, branch feature/41-reviewed-owner-additions. Implementatsiya Codexda; actual Copilot CLI read-only review0953ebd. Native affected118 passed,1 warning,259.37s; final history-index/migration follow-up2 passed. Populated0007->0008 history preserved, runtime103; full295-test CI va PR qolgan. Transfer/recovery doiraga kirmaydi.
 - Doira: current-MFA OWNER so'rovi, shu tashkilotdagi active staff membership targeti, named-target MFA/current verified-contact roziligi, revision-bound dalil va assigned independent MODERATOR approval. Bir tranzaksiyada OWNER grant + append-only ownership event + case + audit. Generic staff/invitation yo'li OWNER bermaydi.
-- Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, zarur shared authority helper, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi ko'rib chiqiladi.
+- Fayllar: yangi ownership service/API/migration/tests/guide, organization operator dispatch, shared authority helper, invitation service/test regrant history, 01/02/03 va reviews/2026-11-08/org003. Oldingi revoked grantlar jim reactivation bilan qayta yozilmaydi; faol-grant uniqueness migratsiyasi qo'llandi. Copilot topgan invitation reactivation shu paketda tuzatiladi. SQL guardlar relational integrity; bearer/MFA va contact HMAC API authority chegarasida tekshiriladi, direct DB writers trusted.
 - Qabul: REJA.md. Copilot CLI actual read-only planning reviewi bajarildi; bu implementatsiya yoki acceptance dalili emas. Transfer/recovery003Bga, so'ng EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
