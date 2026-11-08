@@ -1,0 +1,8 @@
+{
+  "from_revision": "0005_org_invitations",
+  "to_revision": "0006_retention_evaluations",
+  "tables_before": 99,
+  "tables_after": 100,
+  "populated_user_preserved": true,
+  "scope": "Dedicated native PostgreSQL; representative row, no production data"
+}

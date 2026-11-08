@@ -46,6 +46,14 @@ org_verification_submissions = Table('org_verification_submissions',metadata,
     Column('case_id',UUID(as_uuid=False),primary_key=True),Column('revision',Integer,primary_key=True),
     Column('organization_id',UUID(as_uuid=False),nullable=False),Column('requester_membership_id',UUID(as_uuid=False)),
     Column('proposed_fields',JSONB,nullable=False),Column('created_at',DateTime(timezone=True),nullable=False))
+retention_evaluations = Table('retention_evaluations',metadata,
+    Column('id',UUID(as_uuid=False),primary_key=True),Column('created_at',DateTime(timezone=True),nullable=False),
+    Column('actor_id',UUID(as_uuid=False),nullable=False),Column('idempotency_key',Text,nullable=False),
+    Column('request_fingerprint',Text,nullable=False),Column('data_category',Text,nullable=False),
+    Column('requested_age_days',Integer,nullable=False),Column('requested_records_scanned',Integer,nullable=False),
+    Column('policy_snapshot',JSONB,nullable=False),Column('evaluation',JSONB,nullable=False),
+    Column('mode',Text,nullable=False),Column('status',Text,nullable=False),Column('records_scanned',Integer,nullable=False),
+    Column('records_actioned',Integer,nullable=False),Column('finished_at',DateTime(timezone=True),nullable=False))
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -84,7 +92,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0005_org_invitations':
+        if revision != '0006_retention_evaluations':
             raise RuntimeError('Database migrations are not current')
     return engine
 

@@ -1,74 +1,37 @@
-"""S2.9.1 & S2.10.1: FastAPI Endpoints for Moderation Appeals, Retention Execution & R1 Pilot Readiness."""
+"""Durable dry-run evaluation records and truthful operations readiness."""
+from uuid import UUID
+from fastapi import APIRouter,Depends,Header,HTTPException
+from pydantic import BaseModel,ConfigDict,Field
+from app.api.dependencies import ActorContext,require_actor_context,require_platform
+from app.services.organizations import require_mfa
+from app.services.operations import PilotOperationsService
 
-from __future__ import annotations
+router=APIRouter(prefix='/api/v1/operations',tags=['operations-pilot'])
+operations_service=PilotOperationsService()
 
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel,ConfigDict
-from app.db.storage import transaction
-from app.services.placements import get_row
-
-from app.api.dependencies import ActorContext, require_actor_context, require_platform
-from app.services.operations import OperationsInvariantError, PilotOperationsService
-
-router = APIRouter(prefix="/api/v1/operations", tags=["operations-pilot"])
-operations_service = PilotOperationsService()
-
-
-class ModerationAppealRequest(BaseModel):
+class RetentionEvaluationRequest(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    moderation_action_id: str
-    appellant_user_id: str
-    appeal_reason: str
-    decision: str
-    resolution_note: str
+    data_category:str=Field(min_length=1,max_length=80)
+    age_days:int=Field(strict=True,ge=0,le=365000)
+    # Compatibility input; actual counters stay zero.
+    records_scanned:int=Field(default=0,strict=True,ge=0,le=1000000000)
 
+@router.post('/moderation-appeals',status_code=410)
+def retired_combined_appeal(actor:ActorContext=Depends(require_actor_context)):
+    require_platform(actor,'MODERATOR');require_mfa(actor)
+    raise HTTPException(410,detail={'code':'COMBINED_APPEAL_REMOVED_SEPARATE_DURABLE_REVIEW_REQUIRED'})
 
-class RetentionJobRequest(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    data_category: str
-    age_days: int
-    records_scanned: int
+@router.post('/retention-executions')
+def record_retention_evaluation(payload:RetentionEvaluationRequest,
+    idempotency_key:str=Header(alias='Idempotency-Key',min_length=8,max_length=128),
+    actor:ActorContext=Depends(require_actor_context)):
+    return operations_service.record_retention_evaluation(actor,idempotency_key=idempotency_key,**payload.model_dump())
 
+@router.get('/retention-executions/{id}')
+def read_retention_evaluation(id:UUID,actor:ActorContext=Depends(require_actor_context)):
+    return operations_service.get_retention_evaluation(actor,str(id))
 
-@router.post("/moderation-appeals", status_code=201)
-def resolve_moderation_appeal_endpoint(req: ModerationAppealRequest, actor: ActorContext = Depends(require_actor_context)):
-    require_platform(actor,'MODERATOR')
-    with transaction() as conn:
-        original=get_row(conn,'moderation_actions',req.moderation_action_id)
-    try:
-        rec = operations_service.submit_and_resolve_moderation_appeal(
-            moderation_action_id=req.moderation_action_id,
-            appellant_user_id=req.appellant_user_id,
-            original_moderator_id=original['actor_id'],
-            appeal_reviewer_id=actor.user_id,
-            appeal_reason=req.appeal_reason,
-            decision=req.decision,
-            resolution_note=req.resolution_note,
-        )
-        return {
-            "appeal_id": rec.id,
-            "moderation_action_id": rec.moderation_action_id,
-            "decision": rec.decision,
-            "appeal_reviewer_id": rec.appeal_reviewer_id,
-            "resolution_note": rec.resolution_note,
-        }
-    except OperationsInvariantError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-
-@router.post("/retention-executions")
-def execute_retention_job_endpoint(req: RetentionJobRequest, actor: ActorContext = Depends(require_actor_context)):
-    require_platform(actor,'COMPLIANCE')
-    try:
-        evaluation=operations_service.retention_service.evaluate_age_days(req.data_category,req.age_days)
-        return {
-            'dry_run':True,'execution_status':'NOT_EXECUTED','records_actioned':0,'evaluation':evaluation,
-        }
-    except (OperationsInvariantError, ValueError, KeyError) as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-
-@router.get("/pilot-readiness")
-def get_pilot_readiness_endpoint(actor: ActorContext = Depends(require_actor_context)):
+@router.get('/pilot-readiness')
+def get_pilot_readiness_endpoint(actor:ActorContext=Depends(require_actor_context)):
     require_platform(actor,'ADMIN','COMPLIANCE')
     return operations_service.get_pilot_readiness_report()

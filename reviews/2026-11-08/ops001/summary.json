@@ -1,0 +1,15 @@
+{
+  "scope": "Final strict-input local subset",
+  "tests": 24,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 142.227,
+  "source_commit": "52593cddd4acab9d0de47f979e6c1de59e0cee78",
+  "ci_observed": {
+    "run": 42469134812,
+    "tests": 224,
+    "conclusion": "success"
+  },
+  "pilot_ready": false
+}

@@ -11,8 +11,10 @@ schema; no additional migration is required.
 Organization onboarding and independent first-owner/capability verification are documented
 in [ORGANIZATIONS.md](ORGANIZATIONS.md). Deployments now require migration
 `0004_org_onboarding` or later; conflicting normalized legacy tax IDs fail without merging data.
-The current head is `0005_org_invitations`. Explicit 24-hour contact-bound staff invitations
+Explicit 24-hour contact-bound staff invitations
 and legacy-token handling are documented in [INVITATIONS.md](INVITATIONS.md).
+The current head is `0006_retention_evaluations`. Durable, immutable retention dry-run
+records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
 
 ```powershell
 python -m pip install -r backend/requirements.txt

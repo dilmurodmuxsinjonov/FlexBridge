@@ -1,15 +1,23 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-08 - Codex (ORG-CODEX-001/002). Organization onboarding va contact-bound invitation backend paketlari bajarildi. Yakuniy suite 198 passed, 1 warning, 217.28s. 45 canonical handler, 87 ta501. Pilot tayyor emas. Dalil: reviews/2026-11-08/org_invitations/HISOBOT.md. Keyingi: ORG-CODEX-003 (Rejada).
+Yangilangan: 2026-11-08 - Codex. GitHub baseline PR36 merged (203-test CI). OPS-CODEX-001 PR38: 224-test committed CI va24-test native subset passed; evidence/check yakunlanmoqda. 45 canonical handler,87 ta501; pilot tayyor emas. Keyingi: OPS-CODEX-002, so'ng ORG-003/EDU.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
 ## GH-CODEX-001 — Lokal tuzatishlarni GitHub bilan sinxronlash
 
-- Holat: `Jarayonda`; mas'ul: Codex. Q-013 asosida uzluksiz ketma-ket ish boshlandi.
+- Holat: `Bajarildi` (GitHub baseline sinxronlash, pilot qabuli emas); mas'ul: Codex; read-only reviewer Copilot CLI. Q-013 asosida uzluksiz ketma-ket ish davom etadi.
 - Doira: current tested baseline, public secret/artifact gate, GitHub Issue -> commit/branch -> draft PR -> CI -> review. Oldingi modified/untracked fayllar bir-biriga bog'liq snapshot sifatida saqlanadi; mavjud ish yo'qotilmaydi.
 - Fayllar: tekshirilgan backend/migration/test/infra/review snapshoti, publication gate, 01/03/04 jurnallar. Boshqa paketlar PR/CI dalili olingach alohida branchlarda.
 - Qabul: raw credentials/state fayllari public repoga tushmaydi; legacy test arxivi manifesti mos; current runtime test-magic literal yo'q; branch/commit/PR/checklar bilan natija qayta bajariladi. Keyingi: OPS-CODEX-001 retention/appeal persistence, so'ng ORG-003/EDU.
+- Natija: Issue35 yopildi; PR36 merged, merge1ac0d99. Copilot topgan OWNER bypassi131c72bda yopildi; final snapshot203 test, ikkala PostgreSQL GitHub CI successful. Review/assessment/manifest: reviews/2026-11-08/github_sync; LOG-029. Keyingi Issue37 jarayonda.
+
+## OPS-CODEX-001 — Durable retention evaluations va yolg'on executionni to'xtatish
+
+- Holat: `Tekshiruvda`; mas'ul: Codex; GitHub Issue37/PR38, branch fix/37-durable-ops-records. Code52593cd: complete224-test CI ikkala check successful; native final subset24 passed. Evidence-only commit/check va merge yakuni qolgan.
+- Doira: SQLda atomik auditlangan, idempotent dry-run baholash yozuvlari va cross-process read; client sanog'i haqiqiy scanned/deleted counterga aylanmaydi. Nonpersistent combined appeal resolution fail-closed qilinadi; alohida durable appeal workflow OPS-CODEX-002ga.
+- Fayllar: operations/retention service/API, 0006 migration/storage, SQL regressiyalar, qo'llanma va reviews/2026-11-08/ops001; 01/02/03. Hech qanday actual purge yoki legal approval da'vosi yo'q.
+- Qabul: PostgreSQL persist/restart, two-process read, role/MFA/revocation, idempotent concurrency/payload-conflict, immutable evaluation va audit atomicity; GitHub CI. Keyin OPS-CODEX-002, ORG-003 va EDU.
 
 ## REV-004 — Joriy ishchi katalogni umumiy ko'rib chiqish (2026-11-07)
 

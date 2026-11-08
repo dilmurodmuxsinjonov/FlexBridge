@@ -40,6 +40,7 @@ from app.services.internship_logs import InternshipLogScopeError
 from app.services.governance import GovernanceError
 from app.services.opportunities import OpportunityConstraintError
 from app.services.availability import AvailabilityConstraintError
+from app.services.operations import OperationsInvariantError
 from app.core.circuit_breaker import FinanceCircuitOpenError
 from app.core.config import settings
 from app.db.schema import get_retention_policies_v1, get_schema_summary
@@ -82,6 +83,7 @@ app.add_middleware(IAMHTTPMiddleware)
 @app.exception_handler(GovernanceError)
 @app.exception_handler(OpportunityConstraintError)
 @app.exception_handler(AvailabilityConstraintError)
+@app.exception_handler(OperationsInvariantError)
 async def scope_error(request,exc):
     return JSONResponse(status_code=exc.status_code,content={'detail':{'code':exc.code}})
 
