@@ -1,0 +1,20 @@
+[
+  {
+    "conclusion": "success",
+    "databaseId": 42620428502,
+    "event": "push",
+    "headSha": "2c3f2e1017a75ce5d7e151b0e2da8ba5dce92b82",
+    "status": "completed",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42620428502",
+    "workflowName": "PostgreSQL backend regressions"
+  },
+  {
+    "conclusion": "success",
+    "databaseId": 42620435667,
+    "event": "pull_request",
+    "headSha": "2c3f2e1017a75ce5d7e151b0e2da8ba5dce92b82",
+    "status": "completed",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42620435667",
+    "workflowName": "PostgreSQL backend regressions"
+  }
+]

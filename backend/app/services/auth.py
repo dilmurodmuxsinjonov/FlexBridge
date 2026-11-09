@@ -61,12 +61,14 @@ def roles_for(conn, user_id: str) -> list[str]:
     roles = {'CANDIDATE'}
     grants, catalog = table('platform_role_grants'), table('role_catalog')
     roles.update(conn.execute(select(catalog.c.code).select_from(grants.join(catalog, grants.c.role_id==catalog.c.id)).where(
-        grants.c.user_id==user_id, grants.c.revoked_at.is_(None), grants.c.expires_at>now())).scalars())
-    for membership_name, grant_name in [('org_memberships','org_role_grants'), ('institution_memberships','institution_role_grants')]:
+        grants.c.user_id==user_id, grants.c.revoked_at.is_(None), grants.c.expires_at>now(),catalog.c.scope_kind=='PLATFORM')).scalars())
+    for membership_name, grant_name in [('org_memberships','org_role_grants')]:
         membership, scoped = table(membership_name), table(grant_name)
         roles.update(conn.execute(select(catalog.c.code).select_from(membership.join(scoped, scoped.c.membership_id==membership.c.id)
             .join(catalog, catalog.c.id==scoped.c.role_id)).where(membership.c.user_id==user_id,
-            membership.c.status=='ACTIVE', membership.c.revoked_at.is_(None), scoped.c.revoked_at.is_(None))).scalars())
+            membership.c.status=='ACTIVE', membership.c.revoked_at.is_(None), scoped.c.revoked_at.is_(None),catalog.c.scope_kind=='ORG')).scalars())
+    from app.db.institution_scope import institution_scope_query
+    roles.update(conn.execute(institution_scope_query(user_id).with_only_columns(catalog.c.code)).scalars())
     return sorted(roles)
 
 class AuthSessionService:

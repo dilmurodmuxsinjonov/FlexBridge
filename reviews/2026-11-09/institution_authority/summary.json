@@ -1,0 +1,145 @@
+{
+  "commit": "2c3f2e1017a75ce5d7e151b0e2da8ba5dce92b82",
+  "native_final": {
+    "tests": 93,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 273.952
+  },
+  "native_affected": {
+    "tests": 128,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 362.137
+  },
+  "native_results": {
+    "scope_harness_error_junit.xml": {
+      "tests": 9,
+      "failures": 9,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 18.349
+    },
+    "scope_initial_junit.xml": {
+      "tests": 9,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 17.77
+    },
+    "scope_fix_junit.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 17.277
+    },
+    "academic_initial_junit.xml": {
+      "tests": 55,
+      "failures": 46,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 184.525
+    },
+    "fixture_diagnostic_junit.xml": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 27.277
+    },
+    "fixture_control_junit.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 18.057
+    },
+    "gate_native_junit.xml": {
+      "tests": 32,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 83.326
+    },
+    "academic_native_junit.xml": {
+      "tests": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 267.266
+    },
+    "affected_native_junit.xml": {
+      "tests": 128,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 362.137
+    },
+    "review_red_junit.xml": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 51.042
+    },
+    "review_fix_junit.xml": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 38.589
+    },
+    "final_native_junit.xml": {
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 273.952
+    }
+  },
+  "ci_status": "success",
+  "ci_runs": [
+    42620428502,
+    42620435667
+  ],
+  "prior_ci": {
+    "commit": "4c11b958926942fea0f652a73f89879e88aa8a13",
+    "tests": 672,
+    "runs": [
+      42619604930,
+      42619656654
+    ],
+    "conclusion": "success",
+    "elapsed_seconds": [
+      367.75,
+      503.25
+    ]
+  },
+  "review": {
+    "code_exit": 0,
+    "followup_exit": 0,
+    "remaining_concrete_findings": 0,
+    "note": "Read-only source analysis; agent did not execute tests or independently attest SHA/model/pilot."
+  },
+  "canonical_handler_inventory": {
+    "total": 132,
+    "explicit": 46,
+    "placeholder_501": 86,
+    "missing": 0,
+    "acceptance_coverage": false
+  },
+  "runtime_head": "0010_owner_continuity",
+  "runtime_tables": 107,
+  "canonical_tables": 94,
+  "pilot_ready": false,
+  "note": "Final93 includes the previous59 academic cases and the review delta; all intermediate native counts overlap and must not be summed. Existing128 passed on prior source with shared session/MFA primitives unchanged by followup. Only final source CI can establish full regression status.",
+  "ci_tests": 675,
+  "ci_elapsed_seconds": [
+    418.26,
+    346.12
+  ],
+  "evidence_head_status": "pending"
+}

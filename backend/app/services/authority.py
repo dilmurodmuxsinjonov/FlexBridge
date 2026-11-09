@@ -4,15 +4,22 @@ from app.db.storage import table,now
 from app.services.governance import GovernanceError
 
 
-def mfa_authority(conn,actor):
+def session_authority(conn,actor,*,require_mfa=False):
     users,sessions=(table(n) for n in ('users','sessions'))
     # Match password/recovery mutations: user before sessions.
     user=conn.execute(select(users.c.auth_version).where(users.c.id==actor.user_id,users.c.status=='ACTIVE')
         .with_for_update(read=True)).first()
-    session=None if not user else conn.execute(select(sessions.c.id).where(sessions.c.id==actor.session_id,
-        sessions.c.user_id==actor.user_id,sessions.c.auth_version==user.auth_version,sessions.c.assurance=='MFA',
-        sessions.c.revoked_at.is_(None),sessions.c.expires_at>now()).with_for_update(read=True)).first()
-    if not session:raise GovernanceError('MFA_REQUIRED',status_code=403)
+    if not user:raise GovernanceError('MFA_REQUIRED' if require_mfa else 'AUTH_REVOKED',status_code=403 if require_mfa else 401)
+    query=select(sessions.c.id).where(sessions.c.id==actor.session_id,
+        sessions.c.user_id==actor.user_id,sessions.c.auth_version==user.auth_version,
+        sessions.c.revoked_at.is_(None),sessions.c.expires_at>now())
+    if require_mfa:query=query.where(sessions.c.assurance=='MFA')
+    session=conn.execute(query.with_for_update(read=True)).first()
+    if not session:raise GovernanceError('MFA_REQUIRED' if require_mfa else 'AUTH_REVOKED',status_code=403 if require_mfa else 401)
+
+
+def mfa_authority(conn,actor):
+    session_authority(conn,actor,require_mfa=True)
 
 
 def platform_authority(conn,actor,*allowed):
@@ -38,3 +45,27 @@ def org_authority(conn,user_id,org_id,*allowed,nowait=False):
         .with_for_update(read=True,of=(users,members,grants,roles),nowait=nowait)).mappings().first()
     if not row:raise GovernanceError('ORG_SCOPE_FORBIDDEN',status_code=403)
     return dict(row)
+
+
+def institution_role_authority(conn,user_id,institution_id,*allowed,nowait=False):
+    from app.db.institution_scope import institution_scope_query
+    from sqlalchemy.exc import OperationalError
+    try:row=conn.execute(institution_scope_query(user_id,institution_id,allowed,lock=True,nowait=nowait)).mappings().first()
+    except OperationalError as exc:
+        if nowait and getattr(exc.orig,'sqlstate',None)=='55P03':
+            raise GovernanceError('INSTITUTION_AUTHORITY_BUSY_RETRY',status_code=409) from exc
+        raise
+    if not row:raise GovernanceError('INSTITUTION_SCOPE_FORBIDDEN',status_code=403)
+    return dict(row)
+
+
+def institution_authority(conn,actor,institution_id,*allowed,require_mfa=False):
+    session_authority(conn,actor,require_mfa=require_mfa)
+    row=institution_role_authority(conn,actor.user_id,institution_id,*allowed)
+    if not require_mfa:
+        from app.services.auth import roles_for
+        from app.core.iam_security import SENSITIVE_ROLES
+        # Match the global account policy after business waits, even when this
+        # operation selects only the user's TEACHER grant or claims are cached.
+        if SENSITIVE_ROLES.intersection(roles_for(conn,actor.user_id)):mfa_authority(conn,actor)
+    return row

@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="46" skipped="0" tests="55" time="184.525" timestamp="2026-11-09T17:40:31.142471+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[expired]" time="4.522" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[future]" time="1.069" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[revoked]" time="1.943" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[unaccepted]" time="1.239" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[membership_unaccepted]" time="1.054" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_user]" time="1.325" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_institution]" time="1.179" /><testcase classname="tests.security.test_institution_authority" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_role_scope]" time="1.094" /><testcase classname="tests.security.test_institution_authority" name="test_current_accepted_linked_appointment_is_a_valid_control" time="1.083" /><testcase classname="tests.security.test_academic_authority" name="test_create_real_coordinator_and_teacher_then_revoke_idempotently[/api/v1/internships/academic-assignments]" time="1.248"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:78: in test_create_real_coordinator_and_teacher_then_revoke_idempotently
+    f=academic_fixture(identities,organization)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_real_coordinator_and_teacher_then_revoke_idempotently[/api/v1/internship-logs/academic-assignments]" time="1.216"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:78: in test_create_real_coordinator_and_teacher_then_revoke_idempotently
+    f=academic_fixture(identities,organization)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[coord_expired-/api/v1/internships/academic-assignments]" time="1.910"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[coord_expired-/api/v1/internship-logs/academic-assignments]" time="3.472"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_expired-/api/v1/internships/academic-assignments]" time="3.851"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_expired-/api/v1/internship-logs/academic-assignments]" time="3.570"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_unaccepted-/api/v1/internships/academic-assignments]" time="3.528"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_unaccepted-/api/v1/internship-logs/academic-assignments]" time="3.173"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_role_revoked-/api/v1/internships/academic-assignments]" time="3.454"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_role_revoked-/api/v1/internship-logs/academic-assignments]" time="3.893"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[self_assignment-/api/v1/internships/academic-assignments]" time="4.537"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[self_assignment-/api/v1/internship-logs/academic-assignments]" time="4.469"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[other_coordinator-/api/v1/internships/academic-assignments]" time="5.081"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[other_coordinator-/api/v1/internship-logs/academic-assignments]" time="3.153"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:96: in test_create_denies_invalid_current_people_without_effect
+    f=academic_fixture(identities,organization);body=assignment_body(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_teacher_password_session_can_review_current_assignment" time="3.028"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:113: in test_teacher_password_session_can_review_current_assignment
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[teacher_expired]" time="3.287"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_revoked]" time="3.609"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_unaccepted]" time="3.678"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_future_acceptance]" time="3.335"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_revoked]" time="2.989"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_unaccepted]" time="3.329"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_future_acceptance]" time="3.791"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[agreement_expired]" time="4.233"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[agreement_inactive]" time="3.293"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[purpose_disabled]" time="3.069"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[basis_empty]" time="3.112"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[enrollment_expired]" time="3.107"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[enrollment_unverified]" time="3.103"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[ordinary_track]" time="3.430"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[inactive_placement]" time="3.683"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[self_review]" time="3.211"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:124: in test_review_current_parent_chain_required_without_effect
+    def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_grade_is_rejected_in_diary_review_without_effect" time="3.279"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:154: in test_grade_is_rejected_in_diary_review_without_effect
+    def test_grade_is_rejected_in_diary_review_without_effect(client,identities,organization):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-create]" time="2.961"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-revoke]" time="2.616"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-review]" time="2.885"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-create]" time="3.077"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-revoke]" time="5.794"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-review]" time="3.326"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-create]" time="2.896"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-revoke]" time="2.869"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-review]" time="3.106"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-create]" time="2.998"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-revoke]" time="2.763"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-review]" time="2.807"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:162: in test_committed_security_change_after_real_business_wait_denies_write
+    def test_committed_security_change_after_real_business_wait_denies_write(client,identities,organization,kind,change):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_target_user_busy_returns_retry_and_rolls_back" time="2.784"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:193: in test_target_user_busy_returns_retry_and_rolls_back
+    def test_target_user_busy_returns_retry_and_rolls_back(client,identities,organization):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_audit_failure_rolls_back_created_assignment" time="17.257"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:204: in test_audit_failure_rolls_back_created_assignment
+    def test_audit_failure_rolls_back_created_assignment(client,identities,organization,monkeypatch):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,1 @@
+﻿backend	Run python -m pytest backend -q --junitxml=backend/.data/junit.xml	2026-11-09T12:57:19.8292366Z 675 passed, 1 warning in 346.12s (0:05:46)

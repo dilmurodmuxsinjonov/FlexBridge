@@ -1,0 +1,21 @@
+Read-only source review of D:/Codex/FlexBridge-review/institution-authority pinned
+commit 4c11b95. Do not edit files, run commands, use network or inspect secrets.
+Tools view/glob/grep only. You are not alone in the codebase; do not revert changes.
+Ownership: source analysis only, no implementation or test execution.
+
+Review backend/app/db/institution_scope.py, services/authority.py, services/auth.py,
+api/dependencies.py, services/internship_logs.py and academic wrappers in
+api/v1/governance.py and api/v1/internship_logs.py. Read the two new security test
+modules test_institution_authority.py/test_academic_authority.py and
+backend/INSTITUTION_AUTHORITY.md. Compare relevant existing session/security code
+and source requirements if needed. This worktree contains tracked public source.
+
+Identify concrete security/correctness regressions, potential deadlocks and material
+acceptance evidence gaps. Focus on current session/grant/appointment after real row
+waits, reverse serialization, exact teacher/candidate/institution/parent scope,
+MFA preservation versus ordinary teacher sessions, NOWAIT rollback and historical
+access. Distinguish observed code defects from untested hypotheses. Tests are
+currently running; do not claim they passed, certify a SHA or assert pilot readiness.
+No new onboarding/acceptance/grade/admission APIs are implemented in this gate.
+Return actionable findings with file references and reasoning, or explicitly say
+no concrete implementation defect found and list only material residual gaps.

@@ -2,6 +2,11 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## EDU-CODEX-001A — current institution authority (2026-11-09)
+
+- Issue53: bitta SQL predicate sessiya rol yorliqlari, institution scope va akademik transaction guardlarida ishlatiladi. Exact user/institution appointment, accepted membership/appointment, active status, nonrevoked grant va Tashkent inclusive dates talab qilinadi. Invalid legacy tarix o‘chirilmaydi. Yangi intake/grant API hali yo‘q.
+- Existing academic create/revoke/review actual ActorContext va current session/role locks bilan; coordinator MFA, ordinary teacher PASSWORD saqlanadi. Target teacher NOWAIT contention409 va rollback. Parent enrollment/agreement/purpose, self-assignment/self-review ham tekshiriladi; audit same UOW. Migration/dependency yo‘q, runtime0010/107 va canonical94. Qabul dalili03 va paket hisobotida; pilotfalse.
+
 ## AUTH-CODEX-004 — human money authority (2026-11-09)
 
 - Existing authority.py guards create_order_and_invoice/process_payment_attempt/request_refund/approve_refundga qo'llandi; actual ActorContext oladi. Breaker SHARE ->org ->invoice/captured-payment target yoki breaker SHARE ->refund target, keyin current user/MFA/OWNER-BILLING yoki FINANCE role locks. Expiry post-lock boundaryda tekshiriladi, time freeze emas.
