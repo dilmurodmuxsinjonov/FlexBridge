@@ -26,6 +26,7 @@ def database():
     test_url=admin.set(database=name).render_as_string(hide_password=False)
     previous=os.environ.get('DATABASE_URL'); previous_fb=os.environ.pop('FLEXBRIDGE_DATABASE_URL',None)
     os.environ['DATABASE_URL']=test_url
+    os.environ['S3_BUCKET']='test-private-bucket'
     os.environ['PAYMENT_WEBHOOK_SECRET']=secrets.token_urlsafe(48)
     os.environ['AUTH_HMAC_KEY']=secrets.token_urlsafe(48)
     os.environ['TERMS_POLICY_VERSION']='test-terms-v1'

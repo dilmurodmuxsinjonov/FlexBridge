@@ -25,7 +25,7 @@ def test_changed_pending_proof_cannot_activate_first_coordinator(client,identiti
     assert claim(client,moderator,case).status_code==200
     with transaction() as conn:
         if change in ('file_hash','file_version'):
-            t=table('files');values={'sha256':'b'*64} if change=='file_hash' else {'object_version':'different-object-version'}
+            t=table('files');values={'sha256':'b'*64} if change=='file_hash' else {'object_version':'different-object-version','storage_version_id':'different-object-version'}
             conn.execute(t.update().where(t.c.id==f['document']['id']).values(**values))
         elif change=='agreement_purpose':
             t=table('institution_agreements');conn.execute(t.update().values(purposes={'ACADEMIC_VIEW':False}))

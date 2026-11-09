@@ -125,7 +125,8 @@ for c in (Column('claimed_by', Text), Column('lease_until', DateTime(timezone=Tr
     outbox_table.append_column(c)
 files_table = table('files')
 table('availability_rules').append_column(Column('is_active', Boolean,nullable=False))
-for c in (Column('object_version', Text), Column('scan_error', Text), Column('scanned_at', DateTime(timezone=True))):
+for c in (Column('object_version', Text), Column('scan_error', Text), Column('scanned_at', DateTime(timezone=True)),
+          Column('storage_bucket', Text), Column('storage_version_id', Text), Column('storage_etag', Text)):
     files_table.append_column(c)
 _ENGINE: Engine | None = None
 _CURRENT: ContextVar[Connection | None] = ContextVar('unit_of_work', default=None)
@@ -151,7 +152,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0011_institution_onboarding':
+        if revision != '0012_file_storage_versions':
             raise RuntimeError('Database migrations are not current')
     return engine
 

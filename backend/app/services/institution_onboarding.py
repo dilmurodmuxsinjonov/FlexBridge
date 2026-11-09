@@ -1,5 +1,6 @@
 """Named, independently reviewed institutional claims; intake never grants a role."""
 from datetime import date,datetime,timedelta,timezone
+from app.adapters.storage import file_snapshot
 import hashlib
 import hmac
 import json
@@ -266,7 +267,7 @@ class InstitutionOnboardingService:
                 target_auth_version=target_user['auth_version'],document_file_id=str(document_file_id),agreement_id=agreement['id'],legal_basis=legal_basis.strip(),
                 valid_from=valid_from,valid_to=valid_to,payload=safe_json({'evidence_file_ids':ids,'evidence_note':evidence_note.strip(),
                     'institution_fields':{'name':inst['name'],'region':inst['region']},'agreement_snapshot':agreement_snapshot(agreement),
-                    'file_snapshots':{fid:{key:material_map[fid][key] for key in ('sha256','object_version','storage_key','byte_size')} for fid in material_ids}}))
+                    'file_snapshots':{fid:file_snapshot(material_map[fid]) for fid in material_ids}}))
             for file_id in ids:insert_row(conn,'verification_evidence',case_id=case['id'],revision=1,file_id=file_id)
             insert_row(conn,'verification_evidence',case_id=case['id'],revision=1,note=evidence_note.strip())
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_REQUESTED',entity_type='institution_appointment',entity_id=appointment['id'],metadata={'case_id':case['id'],'revision':1,'mode':mode})
@@ -313,7 +314,7 @@ class InstitutionOnboardingService:
                 raise GovernanceError('INSTITUTION_EVIDENCE_NOT_CURRENT',status_code=409)
             if file_id in revision['payload']['evidence_file_ids'] and file['owner_user_id']!=request['requester_user_id']:
                 raise GovernanceError('INSTITUTION_EVIDENCE_SCOPE_MISMATCH',status_code=403)
-            if {key:file[key] for key in ('sha256','object_version','storage_key','byte_size')}!=revision['payload']['file_snapshots'].get(file_id):
+            if file_snapshot(file)!=revision['payload']['file_snapshots'].get(file_id):
                 raise GovernanceError('INSTITUTION_EVIDENCE_CHANGED',status_code=409)
         requester=pin_user(conn,request['requester_user_id']);target=pin_user(conn,request['target_user_id'])
         if requester['auth_version']!=revision['auth_version'] or target['auth_version']!=revision['target_auth_version']:
@@ -420,10 +421,10 @@ class InstitutionOnboardingService:
                     raise GovernanceError('INSTITUTION_CONTACT_CHANGED',status_code=403)
             if not file:raise GovernanceError('EVIDENCE_ACCESS_DENIED',status_code=403)
             if file['scan_status']!='CLEAN' or file['deleted_at']:raise GovernanceError('INSTITUTION_EVIDENCE_NOT_CURRENT',status_code=409)
-            if {key:file[key] for key in ('sha256','object_version','storage_key','byte_size')}!=revision['payload']['file_snapshots'].get(file_id):
+            if file_snapshot(file)!=revision['payload']['file_snapshots'].get(file_id):
                 raise GovernanceError('INSTITUTION_EVIDENCE_CHANGED',status_code=409)
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_FILE_AUTHORIZED',entity_type='institution_appointment',entity_id=appointment_id,metadata={'file_id':file_id,'revision':case['current_revision']})
-            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'])}
+            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'],reference=storage.file_reference(file))}
 
     def revoke(self,actor,appointment_id,*,reason):
         if not isinstance(reason,str) or not 15<=len(reason.strip())<=4000:raise GovernanceError('INSTITUTION_REVOCATION_REASON_REQUIRED',status_code=422)
@@ -526,7 +527,7 @@ class InstitutionOnboardingService:
                 document_file_id=document_id,agreement_id=agreement['id'],legal_basis=legal_basis,valid_from=valid_from,valid_to=valid_to,
                 payload=safe_json({'evidence_file_ids':ids,'evidence_note':note,'institution_fields':{'name':inst['name'],'region':inst['region']},
                     'agreement_snapshot':agreement_snapshot(agreement),'resubmission_fingerprint':fp,
-                    'file_snapshots':{fid:{key:material_map[fid][key] for key in ('sha256','object_version','storage_key','byte_size')} for fid in material_ids}}))
+                    'file_snapshots':{fid:file_snapshot(material_map[fid]) for fid in material_ids}}))
             for file_id in ids:insert_row(conn,'verification_evidence',case_id=case['id'],revision=new_revision,file_id=file_id)
             insert_row(conn,'verification_evidence',case_id=case['id'],revision=new_revision,note=note)
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_RESUBMITTED',entity_type='institution_appointment',entity_id=appointment_id,metadata={'case_id':case['id'],'revision':new_revision})
@@ -592,10 +593,10 @@ class InstitutionOnboardingService:
             if case['assigned_reviewer_id']!=actor.user_id or case['status']!='IN_REVIEW':raise GovernanceError('ASSIGNED_REVIEW_REQUIRED',status_code=403)
             if not linked:raise GovernanceError('EVIDENCE_ACCESS_DENIED',status_code=403)
             if file['scan_status']!='CLEAN' or file['deleted_at']:raise GovernanceError('INSTITUTION_EVIDENCE_NOT_CURRENT',status_code=409)
-            current={key:file[key] for key in ('sha256','object_version','storage_key','byte_size')}
+            current=file_snapshot(file)
             if not any(row['file_snapshots'].get(file_id)==current for row in snapshots):raise GovernanceError('INSTITUTION_EVIDENCE_CHANGED',status_code=409)
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_REVIEW_FILE_AUTHORIZED',entity_type='verification_case',entity_id=case_id,metadata={'file_id':file_id})
-            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'])}
+            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'],reference=storage.file_reference(file))}
 
     def decide(self,actor,case_id,*,expected_revision,decision,reason):
         if decision not in ('APPROVE','REJECT','NEEDS_INFO') or not 15<=len(reason.strip())<=4000:

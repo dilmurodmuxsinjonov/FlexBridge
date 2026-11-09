@@ -34,8 +34,10 @@ class FileQuarantineService:
             if record['scan_status']!='PENDING_SCAN': raise FileQuarantineError('INVALID_FILE_STATE')
             head=storage.head(record['storage_key'])
             if head['ContentLength']!=record['byte_size']: raise FileQuarantineError('FILE_SIZE_MISMATCH')
-            conn.execute(files_table.update().where(files_table.c.id==file_id).values(object_version=head['ETag'],scan_status='SCANNING',updated_at=now()))
-            enqueue(conn,'FILE_SCAN_REQUESTED',str(file_id),{'file_id':str(file_id)},'scan:'+str(file_id))
+            reference=storage.response_reference(head)
+            conn.execute(files_table.update().where(files_table.c.id==file_id).values(**reference.values(),object_version=reference.etag,scan_status='SCANNING',updated_at=now()))
+            source={'storage_key':record['storage_key'],'byte_size':record['byte_size'],**reference.values()}
+            enqueue(conn,'FILE_SCAN_REQUESTED',str(file_id),{'file_id':str(file_id),'source':source},'scan:'+str(file_id))
         return {'id':file_id,'scan_status':'SCANNING'}
 
     def issue_signed_download_url_api_x03(self,*,file_id,requester_id):
@@ -43,28 +45,42 @@ class FileQuarantineService:
             record=conn.execute(select(files_table).where(files_table.c.id==file_id)).mappings().first()
             if not record or record['owner_user_id']!=requester_id: raise FileQuarantineError('FILE_ACCESS_DENIED',status_code=403)
             if record['deleted_at'] or record['scan_status']!='CLEAN': raise FileQuarantineError('FILE_NOT_CLEAN_FOR_DOWNLOAD')
-        return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(record['storage_key'])}
+            reference=storage.file_reference(record)
+            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(record['storage_key'],reference=reference)}
 
 def run_scan(event):
     file_id=event['payload']['file_id']
     with transaction() as conn:
         record=conn.execute(select(files_table).where(files_table.c.id==file_id)).mappings().one()
     if record['scan_status']!='SCANNING': return {'state':'UNCHANGED'}
-    raw=storage.read(record['storage_key'],record['object_version'],20*1024*1024)
+    reference=storage.file_reference(record)
+    source={key:record[key] for key in ('storage_key','byte_size','storage_bucket','storage_version_id','storage_etag')}
+    if event['payload'].get('source')!=source:raise FileQuarantineError('FILE_SCAN_SOURCE_CHANGED')
+    raw=storage.read(record['storage_key'],reference,20*1024*1024)
+    if len(raw)!=record['byte_size']:raise FileQuarantineError('FILE_SIZE_MISMATCH')
     try:
         antivirus.scan(raw)
         validate_pdf(raw)
     except ValueError:
-        return {'state':'QUARANTINED'}
+        return {'state':'QUARANTINED','source':source}
     digest=hashlib.sha256(raw).hexdigest()
     key='private/'+str(file_id)+'/'+digest+'.pdf'
-    version=storage.write_private(key,raw)
-    return {'state':'CLEAN','sha256':digest,'key':key,'version':version}
+    private_reference=storage.write_private(key,raw)
+    if private_reference.bucket!=reference.bucket:
+        raise storage.StorageReferenceError('FILE_STORAGE_BUCKET_MISMATCH',503)
+    return {'state':'CLEAN','sha256':digest,'key':key,'reference':private_reference,'source':source}
 
 def apply_scan(conn,event,result):
     if result['state']=='UNCHANGED': return
+    current=conn.execute(select(files_table).where(files_table.c.id==event['payload']['file_id']).with_for_update()).mappings().one()
+    if current['scan_status']!='SCANNING':return
+    storage.file_reference(current)
+    if {key:current[key] for key in result['source']}!=result['source']:
+        raise FileQuarantineError('FILE_SCAN_SOURCE_CHANGED')
     values={'scan_status':result['state'],'scanned_at':now(),'updated_at':now()}
-    if result['state']=='CLEAN': values.update(sha256=result['sha256'],storage_key=result['key'],object_version=result['version'])
+    if result['state']=='CLEAN':
+        reference=result['reference'];reference.check_bucket()
+        values.update(sha256=result['sha256'],storage_key=result['key'],object_version=reference.version_id,**reference.values())
     conn.execute(files_table.update().where(files_table.c.id==event['payload']['file_id'],files_table.c.scan_status=='SCANNING').values(**values))
 
 file_quarantine_service=FileQuarantineService()

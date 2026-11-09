@@ -142,11 +142,15 @@ def test_skill_input_validation_and_catalog(client,identities):
 
 def cv_fixture(user, status='CLEAN', deleted=False):
     from app.db.storage import now
+    version=str(uuid4());etag='"'+uuid4().hex+'"'
     with transaction() as conn:
         return insert_row(conn,'files',owner_user_id=user['user_id'],filename='cv.pdf',mime_type='application/pdf',
             storage_key='private/test/'+str(uuid4()),byte_size=100,sha256='a'*64,scan_status=status,
             retention_class='VERIFICATION_EVIDENCE',deleted_at=now() if deleted else None,
-            object_version='test-object-version' if status=='CLEAN' else None,
+            object_version=version if status=='CLEAN' else None,
+            storage_bucket='test-private-bucket' if status=='CLEAN' else None,
+            storage_version_id=version if status=='CLEAN' else None,
+            storage_etag=etag if status=='CLEAN' else None,
             scanned_at=now() if status=='CLEAN' else None)
 
 

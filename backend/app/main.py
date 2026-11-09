@@ -20,6 +20,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError, DataError, Programm
 from app.services.auth import AuthError, auth_service
 from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError
+from app.adapters.storage import StorageReferenceError
+from botocore.exceptions import BotoCoreError,ClientError
 
 from app.api.v1.auth import router as auth_router
 from app.api.v1.iam import router as iam_router
@@ -101,6 +103,7 @@ async def billing_error(request,exc):
     return JSONResponse(status_code=409,content={'detail':{'code':str(exc)}})
 
 @app.exception_handler(FileQuarantineError)
+@app.exception_handler(StorageReferenceError)
 async def file_error(request,exc):
     return JSONResponse(status_code=exc.status_code,content={'detail':{'code':exc.code}})
 
@@ -113,6 +116,8 @@ async def data_error(request,exc):
     return JSONResponse(status_code=422,content={'detail':{'code':'INVALID_IDENTIFIER_OR_VALUE'}})
 
 @app.exception_handler(RuntimeError)
+@app.exception_handler(BotoCoreError)
+@app.exception_handler(ClientError)
 @app.exception_handler(OperationalError)
 @app.exception_handler(ProgrammingError)
 async def service_error(request,exc):

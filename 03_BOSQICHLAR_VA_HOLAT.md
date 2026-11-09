@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-10 - Codex. PR56 ham merged12cd307, Issue55 closed; final4ffbe96 ikkala732-test CI passed383.64s/463.87s. Issue57 private storage version binding reja/red proof bosqichida, runtime hali0011/111. Windows Docker/WSL administrator bosqichi tugamagan (native UAC launch canceled); loyiha .venv tayyor. Antigravity uchun ANTIGRAVITY_HANDOFF.md ni o'qi.49 explicit/83 placeholder acceptance foizi emas; pilot tayyor emas.
+Yangilangan: 2026-11-10 - Codex. PR56 ham merged12cd307, Issue55 closed; final4ffbe96 ikkala732-test CI passed383.64s/463.87s. Issue57/PR58 explicit storage binding implementatsiyasi yozildi, draft0012/111 validatsiyasi yurmoqda. Windows Docker/WSL administrator bosqichi tugamagan (native UAC launch canceled); loyiha .venv tayyor. Antigravity uchun ANTIGRAVITY_HANDOFF.md ni o'qi.49 explicit/83 placeholder acceptance foizi emas; pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -508,6 +508,8 @@ Keyingi kichik qadam:
 
 ## STORAGE-CODEX-001 - Private object version binding (Issue57)
 
-- Holat: `Jarayonda` (planning/actual red provider evidence); Codex, fix/57-storage-versioning. Runtime0012 hali yozilmagan. Reja/qarorlar/read-only Copilot exit0 va localhost MinIO proof reviews/2026-11-10/storage_versioning. Trusted provider-admin overwrite old key-only URL baytlarini almashtiradi; explicit VersionId URL originalni qaytaradi. Public overwrite exploit/live/AV claim emas.
-- Keyingi: explicit bucket/version/ETag provenance va no-inference legacy policy; exact source scan/private GET; existing outbox fence/source compare; all6 signer callers/EDU snapshots; Enabled readiness; populated upgrade/native/real provider integration/current CI/review. Accepted role/proof history saqlanadi; unknown provenance yangi approval/download uchun fail closed. Tafsilot ANTIGRAVITY_HANDOFF.md va DECISIONS.md.
+- Holat: `Tekshiruvda` (draft implementatsiya, hali qabul yo'q); Codex, fix/57-storage-versioning/PR58.0012 va current storage pipeline yozildi. Reja/qarorlar/read-only Copilot exit0 va localhost MinIO proof reviews/2026-11-10/storage_versioning. Trusted provider-admin overwrite old key-only URL baytlarini almashtiradi; explicit VersionId URL originalni qaytaradi. Public overwrite exploit/live/AV claim emas.
+- Implementatsiya: explicit bucket/version/ETag provenance va no-inference legacy policy; exact source scan/private GET; existing outbox fence/source compare; all6 signer callers/EDU snapshots; Enabled readiness; populated upgrade/native/real provider integration/current CI/review. Accepted role/proof history saqlanadi; unknown provenance yangi approval/download uchun fail closed. Tafsilot ANTIGRAVITY_HANDOFF.md va DECISIONS.md.
 - Muhit: project .venv installed/pip check0, native smoke3 passed8.51s. Docker/WSL installers D: da hash/publisher verified, ammo Docker actual exit1 (VMP disabled), WSL MSIX0x80073D28 (admin required); installed/engine-ready emas. Native feature elevation launch canceled (OS: operation was canceled by the user), script ishga tushmagan; automatic reboot yo'q. scripts/setup_windows_dependencies.ps1 syntax valid; elevated branch hali execution proofga ega emas. Q-014 va handoff ayni holatni saqlaydi; codingni native PG/MinIO bilan davom ettirish mumkin.
+
+- LOG-055: new25 storage+old2 private-view27 native passed44.51s; old initial/harness/diagnostic stages alohida artifacts. Actual MinIO integration7 shu27 ichida, AV double/PDF+S3+PG actual. Old affected suites, pinned source review va latest complete CI keyingi qabul gate; draft pilotfalse.

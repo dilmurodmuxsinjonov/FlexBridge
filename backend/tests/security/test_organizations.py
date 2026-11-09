@@ -184,7 +184,13 @@ def test_evidence_is_assigned_private_and_rechecked_on_approval(client,identitie
     assert detail.headers['cache-control']=='no-store' and 'storage_key' not in detail.text
     file_id=next(e['file_id'] for e in detail.json()['evidence'] if e['file_id'])
     from app.adapters import storage
-    monkeypatch.setattr(storage,'presign_get',lambda key:'https://private.test/signed')
+    def presign(key,*,reference):
+        with transaction() as conn:
+            row=conn.execute(select(table('files')).where(table('files').c.id==file_id)).mappings().one()
+        assert key==row['storage_key']
+        assert (reference.bucket,reference.version_id,reference.etag)==(row['storage_bucket'],row['storage_version_id'],row['storage_etag'])
+        return 'https://private.test/signed'
+    monkeypatch.setattr(storage,'presign_get',presign)
     url=base+'/files/'+file_id+'/download'
     assert client.get(url,headers=other['headers']).status_code==403
     assert client.get(url,headers=mod['headers']).json()['expires_in_seconds']==60
@@ -220,7 +226,13 @@ def test_existing_org_join_never_grants_owner_and_ignores_replacement_fields(cli
     response=client.get(base,headers=owner['headers']);assert response.status_code==200,response.text
     file_id=response.json()['file_ids'][0]
     from app.adapters import storage
-    monkeypatch.setattr(storage,'presign_get',lambda key:'https://private.test/signed')
+    def presign(key,*,reference):
+        with transaction() as conn:
+            row=conn.execute(select(table('files')).where(table('files').c.id==file_id)).mappings().one()
+        assert key==row['storage_key']
+        assert (reference.bucket,reference.version_id,reference.etag)==(row['storage_bucket'],row['storage_version_id'],row['storage_etag'])
+        return 'https://private.test/signed'
+    monkeypatch.setattr(storage,'presign_get',presign)
     assert client.get(base+'/files/'+file_id+'/download',headers=owner['headers']).status_code==200
     approve='/api/v1/organizations/'+org+'/members/'+result['membership_id']+'/approve'
     assert client.post(approve,headers=owner['headers'],json={}).status_code==200

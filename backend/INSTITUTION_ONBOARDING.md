@@ -84,9 +84,10 @@ requesters can also view their own submitted evidence. Assigned independent
 reviewers can view linked revision evidence. All downloads require current scope,
 eligible CLEAN/nondeleted metadata matching recorded hashes/versions, an audit
 record and a60-second URL. The application pipeline uses content-addressed private
-keys. Current URLs address the key, not a provider-specific version identifier;
-live provider immutability/version-pinned retrieval remains a separate integration
-gate and is not attested by these metadata or mocked-storage tests.
+keys. PR56 URLs addressed only the key. Draft0012/PR58 now requires explicit
+bucket/version/ETag and pins actual GET to VersionId, with new revision snapshots
+and legacy fail-closed behavior; see STORAGE_VERSIONS.md. Full source/CI review
+is still pending. Live provider retention/IAM acceptance remains separate.
 General file downloads retain their owner-only policy. These APIs use the shared
 128KB body limit, no-store/no-cache and no-referrer response headers.
 

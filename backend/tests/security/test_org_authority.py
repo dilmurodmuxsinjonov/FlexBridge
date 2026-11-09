@@ -112,7 +112,7 @@ def test_completed_session_revocation_blocks_inflight_request(client,identities,
     signed=[]
     if kind=='join_download':
         from app.adapters import storage
-        def presign(key):
+        def presign(key,*,reference):
             signed.append(key)
             return 'https://storage.invalid/synthetic-authority-probe'
         monkeypatch.setattr(storage,'presign_get',presign)
@@ -142,7 +142,7 @@ def test_security_change_while_waiting_for_organization_lock(client,identities,o
     module,user,request=operation(kind,client,identities,organization)
     if kind=='join_download':
         from app.adapters import storage
-        def forbidden_sign(key):raise AssertionError('Stale request reached private URL signing')
+        def forbidden_sign(key,*,reference):raise AssertionError('Stale request reached private URL signing')
         monkeypatch.setattr(storage,'presign_get',forbidden_sign)
     checked=Event();original=module.require_mfa
     def observed(actor):

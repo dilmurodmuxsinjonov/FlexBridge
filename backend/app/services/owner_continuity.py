@@ -295,7 +295,7 @@ class OwnerContinuityService:
             evidence_files(conn,request['applicant_id'],[file_id]);file=get_row(conn,'files',file_id)
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='OWNER_CONTINUITY_EVIDENCE_AUTHORIZED',
                 entity_type='verification_case',entity_id=case_id,metadata={'stage':stage,'file_id':file_id})
-            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'])}
+            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'],reference=storage.file_reference(file))}
 
     def decide(self,actor,case_id,stage,*,decision,expected_revision,reason):
         require_platform(actor,stage);require_mfa(actor);reason=note(reason,2000)

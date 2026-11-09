@@ -22,7 +22,8 @@ document view, stale identity/contact/security/original grant, consent expiry,
 real session/lock-race va legacy migration tekshirilgan. Teacher-only PASSWORD
 assurance saqlanadi; sensitive actorlar current MFA talab qiladi.
 
-Haqiqiy runtime: Alembic0011_institution_onboarding,111 jadval. Canonical tarixiy
+Merged PR56 runtime0011/111 edi. Joriy draft branch kodi0012_file_storage_versions/111;
+uning qabul tekshiruvlari hali tugamagan. Canonical tarixiy
 baseline94 o'zgarmagan.132 canonical route:49 explicit handler/83 placeholder501.
 Bu funksional yoki xavfsizlik qabuli foizi emas. Pilot hali tayyor emas.
 
@@ -92,19 +93,23 @@ https://learn.microsoft.com/windows/wsl/install
 ## Eng yaqin kod vazifasi: Issue57
 
 https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/57
-Branch: fix/57-storage-versioning. Hozir planning va red storage observation bor;
-0012/app tuzatishlari hali yozilmagan. Runtime0011 qolmoqda.
+Branch: fix/57-storage-versioning, draft PR58.0012/app tuzatishlari yozildi, ammo
+qabul hali yo'q. Explicit bucket/version/ETag, source-pinned scan/GET, source event
+fence, snapshots/CV/evidence gates va Enabled readiness implementatsiya qilindi.
+Yangi25 storage holati va existing2 private-view testi27 passed44.51s; old affected
+modullar, source-pinned peer review va full latest-head CI hali keyingi gate.
+backend/STORAGE_VERSIONS.md va LOG-055 ni o'qi. Eski red/fixture failures saqlangan.
 
 1. reviews/2026-11-10/storage_versioning/PLAN.md va DECISIONS.md ni o'qi. Baseline
    actual localhost MinIO'da trusted provider-admin same-key overwrite qilib,
    old application URL replacement baytlarni, explicit VersionId URL originalni
    qaytarishini ko'rsatdi. Bu public overwrite/auth exploit yoki AV/live proof emas.
-2. Forward0012 orqali storage_bucket/storage_version_id/storage_etag ni aniq ajrat.
+2. Yozilgan forward0012 storage_bucket/storage_version_id/storage_etag chegaralarini tekshir.
    Legacy object_version ETag yoki version bo'lishi mumkin: taxminiy backfill yo'q.
    Old proof/history/grants saqlansin. Noma'lum provenance download/yangi approval
    uchun fail closed; yangi upload va explicit revision talab qilinsin.
-3. Quarantine HEAD->exact-version+ETag read->scanned private PUT->exact-version GET
-   zanjirini bog'la. Missing/empty/literal null version, bucket mismatch, provider
+3. Bog'langan quarantine HEAD->exact-version+ETag read->scanned private PUT->exact-version GET
+   zanjirini tekshir. Missing/empty/literal null version, bucket mismatch, provider
    failure hech qachon CLEAN yoki key-only fallback bermasin. Barcha6 signer caller
    va yangi EDU snapshots/reference checks yangilansin. Existing authorization/
    audit/teacher assurance yumshamasin.
@@ -112,7 +117,7 @@ Branch: fix/57-storage-versioning. Hozir planning va red storage observation bor
    counter bilan almashtirma. Real stale FILE_SCAN token/result va source reference
    o'zgargan holatlarni sinab, eski worker CLEAN nashr qila olmasligini isbotla.
    External PUT retry orphan versions qoldirishi mumkin; exactly-once PUT/purge da'vosi yo'q.
-5. Readiness actual bucket versioning Enabled ni o'qisin. Suspended/absent/outage
+5. Implementatsiyadagi readiness actual bucket versioning Enabled ni o'qishini tekshir. Suspended/absent/outage
    false. Actual MinIO integrationda old/new bytes, version tampering/deletion,
    unversioned/suspended outputs, scan/retry/rollback va scope denialni tekshir.
    Credentials/presigned URLs log/evidencega chiqmasin. CI'da actual testni skip qilma.
@@ -121,10 +126,10 @@ Branch: fix/57-storage-versioning. Hozir planning va red storage observation bor
    matching-head merge bilan paketni yakunla. Keyin manba talablaridan keyingi EDU
    admission/enrollment paketini rejalashtir. Hali student/grades/frontend qurildi dema.
 
-Yangi test vositasi drafti tashqarida:
-D:\Codex\FlexBridge-plans\storage_versioning\prepare_test_minio.py.
-Windows verified binary qayta ishlatish tekshirildi; Linux hash publisher checksumdan
-olingan, Linux execution hali bo'lmagan. Repo CI'ga ko'chirish/review/test keyingi ish.
+scripts/prepare_test_minio.py repo ichida va CI stepga ulangan. Windows verified
+binary bilan actual7 integration holat expanded paketda o'tdi. Linux hash publisher
+checksumdan olingan; joriy app o'zgarishlari uchun Linux CI hali bajarilmagan.
+Yangi lokal testlarda MINIO_TEST_BINARY muhit qiymati majburiy; yo'qligi skip emas failure.
 
 ## Ishlash qoidalari
 

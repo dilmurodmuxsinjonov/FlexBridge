@@ -1,5 +1,6 @@
 """Organization authority is granted only after scoped, independent review."""
 from datetime import timedelta
+from app.adapters.storage import file_reference
 import re
 from sqlalchemy import select, text, func
 
@@ -73,6 +74,7 @@ def evidence_files(conn, user_id, ids):
         raise GovernanceError('EVIDENCE_ACCESS_DENIED', status_code=403)
     if any(r['scan_status'] != 'CLEAN' or r['deleted_at'] or r['mime_type'] != 'application/pdf' for r in rows):
         raise GovernanceError('EVIDENCE_NOT_CLEAN', status_code=409)
+    for record in rows: file_reference(record)
     return ids
 
 
@@ -336,7 +338,7 @@ class OrganizationService:
             evidence_files(conn, case['requester_id'], [file_id])
             file = get_row(conn, 'files', file_id)
             audit.append_audit_event(actor_id=actor.user_id, action='ORG_EVIDENCE_DOWNLOAD_AUTHORIZED', entity_type='verification_case', entity_id=case_id)
-            return {'file_id': file_id, 'expires_in_seconds': 60, 'signed_url': storage.presign_get(file['storage_key'])}
+            return {'file_id': file_id, 'expires_in_seconds': 60, 'signed_url': storage.presign_get(file['storage_key'],reference=storage.file_reference(file))}
 
     def decide(self, actor, case_id, *, decision, expected_revision, reason):
         with transaction() as conn:
@@ -446,7 +448,7 @@ class OrganizationService:
             file = get_row(conn, 'files', file_id)
             audit.append_audit_event(actor_id=actor.user_id, action='ORG_JOIN_EVIDENCE_DOWNLOAD_AUTHORIZED',
                 entity_type='membership', entity_id=membership_id)
-            return {'file_id': file_id, 'expires_in_seconds': 60, 'signed_url': storage.presign_get(file['storage_key'])}
+            return {'file_id': file_id, 'expires_in_seconds': 60, 'signed_url': storage.presign_get(file['storage_key'],reference=storage.file_reference(file))}
 
 
 organization_service = OrganizationService()
