@@ -1,0 +1,39 @@
+{
+  "snapshot_date": "2026-11-10 Asia/Tashkent",
+  "project_venv": {
+    "path": "D:/FlexBridge/.venv",
+    "installed": true,
+    "pip_check_exit": 0,
+    "smoke": "3 passed8.51s; separate venv_smoke_junit.xml"
+  },
+  "docker": {
+    "version": "4.99.0",
+    "downloaded": true,
+    "sha256": "a5e299131c9c53d60f3f752b162078945eb5faf6eedcf0be20a214c6e6cea444",
+    "authenticode": "Valid, Docker Inc",
+    "install_exit": 1,
+    "installed": false,
+    "reason": "VirtualMachinePlatform disabled",
+    "engine_verified": false
+  },
+  "wsl": {
+    "version": "2.7.14",
+    "msix_sha256": "7ba80e0846c4e82ac3d33165c21a52d95278bab422ef005461b5e6acc37ce66b",
+    "msi_sha256": "db084e536279a59e90a26ec598d8aa8a4dff8309f41d078fd06242953ac1ebcd",
+    "msi_authenticode": "Valid, Microsoft Corporation",
+    "msix_install_result": "0x80073D28: administrator privileges required for packaged service",
+    "msi_executed": false,
+    "features": {
+      "VirtualMachinePlatform": "Disabled",
+      "Microsoft-Windows-Subsystem-Linux": "Disabled"
+    },
+    "native_elevation": "Start-Process RunAs did not launch: operation was canceled by the user",
+    "setup_complete": false
+  },
+  "agy": {
+    "existing_cli_version": "1.5.3",
+    "project_agent_execution": false
+  },
+  "automatic_reboot": false,
+  "setup_script": "scripts/setup_windows_dependencies.ps1 parsed; system/install branches not successfully executed"
+}

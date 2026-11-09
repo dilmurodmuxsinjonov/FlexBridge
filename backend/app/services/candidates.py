@@ -85,6 +85,8 @@ class CandidateService:
                     raise AuthError('FILE_ACCESS_DENIED', 'Use your own CV file', 403)
                 if file['deleted_at'] or file['scan_status'] != 'CLEAN' or file['mime_type'] != 'application/pdf':
                     raise AuthError('CV_NOT_CLEAN', 'Complete upload and scanning first', 409)
+                from app.adapters.storage import file_reference
+                file_reference(file)
             conn.execute(table('candidate_profiles').update().where(table('candidate_profiles').c.id == profile['id'])
                 .values(cv_file_id=str(file_id) if file_id else None, updated_at=now()))
             audit.append_audit_event(actor_id=user_id, action='CANDIDATE_CV_LINKED' if file_id else 'CANDIDATE_CV_UNLINKED',

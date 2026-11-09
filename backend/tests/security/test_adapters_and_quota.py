@@ -98,14 +98,14 @@ def pdf():
 def object_store(monkeypatch,pdf):
     objects={};writes=[]
     monkeypatch.setattr(storage,'presign_put',lambda key,size:'https://test.invalid/upload')
-    monkeypatch.setattr(storage,'head',lambda key:{'ContentLength':len(objects[key]),'ETag':'pinned-etag'})
-    def read(key,identity,limit):
-        assert identity=='pinned-etag';assert len(objects[key])<=limit
+    monkeypatch.setattr(storage,'head',lambda key:{'ContentLength':len(objects[key]),'ETag':'pinned-etag','VersionId':'quarantine-version'})
+    def read(key,reference,limit):
+        assert reference==storage.ObjectReference('test-private-bucket','quarantine-version','pinned-etag');assert len(objects[key])<=limit
         return objects[key]
     monkeypatch.setattr(storage,'read',read)
-    def write(key,raw):objects[key]=raw;writes.append(key);return 'private-version'
+    def write(key,raw):objects[key]=raw;writes.append(key);return storage.ObjectReference('test-private-bucket','private-version','private-etag')
     monkeypatch.setattr(storage,'write_private',write)
-    monkeypatch.setattr(storage,'presign_get',lambda key:'https://test.invalid/download/'+key)
+    monkeypatch.setattr(storage,'presign_get',lambda key,*,reference:'https://test.invalid/download/'+key)
     return objects,writes
 
 def upload(client,user,pdf,objects):
@@ -181,9 +181,10 @@ def test_s3_adapter_signature_and_bounded_read(monkeypatch):
     monkeypatch.delenv('S3_PUBLIC_ENDPOINT_URL',raising=False)
     assert 'X-Amz-Signature=' in storage.presign_put('quarantine/uuid.pdf',10)
     c=storage.client();stub=Stubber(c);raw=io.BytesIO(b'a'*11)
-    stub.add_response('get_object',{'Body':StreamingBody(raw,11)},{'Bucket':'private-test','Key':'key','IfMatch':'etag'})
+    stub.add_response('get_object',{'Body':StreamingBody(raw,11),'VersionId':'version-1','ETag':'etag'},
+        {'Bucket':'private-test','Key':'key','VersionId':'version-1','IfMatch':'etag'})
     monkeypatch.setattr(storage,'client',lambda **unused:c)
-    with stub,pytest.raises(ValueError,match='TOO_LARGE'):storage.read('key','etag',10)
+    with stub,pytest.raises(ValueError,match='TOO_LARGE'):storage.read('key',storage.ObjectReference('private-test','version-1','etag'),10)
 
 def test_runtime_without_database_config_never_creates_sqlite(monkeypatch):
     from app.db.storage import get_database_url

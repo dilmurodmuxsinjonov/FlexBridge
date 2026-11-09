@@ -25,4 +25,5 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: python -m pip install -r backend/requirements.txt
       - run: python scripts/check_publish.py
+      - run: python scripts/prepare_test_minio.py --directory "${{ runner.temp }}/minio-test" --github-env
       - run: python -m pytest backend -q --junitxml=backend/.data/junit.xml

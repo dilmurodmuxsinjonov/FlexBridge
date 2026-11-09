@@ -230,7 +230,12 @@ def test_named_teacher_can_view_only_current_appointment_and_agreement_files(cli
     f=active_coordinator(client,identities);teacher=identities();extra=cv_fixture(f['user'])
     request,verified,body=staff_claim(client,f,teacher,extra_file_ids=[extra['id']])
     calls=[]
-    def presign(key):calls.append(key);return 'https://storage.example.test/temporary-object'
+    def presign(key,*,reference):
+        with transaction() as conn:
+            row=conn.execute(select(table('files')).where(table('files').c.storage_key==key)).mappings().one()
+        assert (reference.bucket,reference.version_id,reference.etag)==(row['storage_bucket'],row['storage_version_id'],row['storage_etag'])
+        calls.append(key)
+        return 'https://storage.example.test/temporary-object'
     monkeypatch.setattr(storage,'presign_get',presign)
     status=client.get('/api/v1/institution-appointments/'+request['id'],headers=teacher['headers']);assert status.status_code==200,status.text
     proposal=status.json()['proposal'];assert proposal['legal_basis']==body['legal_basis']

@@ -1,0 +1,65 @@
+{
+  "affected_collection_error_junit.xml": {
+    "tests": 0,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 0.004
+  },
+  "affected_native_junit.xml": {
+    "tests": 240,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 350.06
+  },
+  "candidate_fixture_fix_junit.xml": {
+    "tests": 44,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 43.393
+  },
+  "expanded_version_package_junit.xml": {
+    "tests": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 44.511
+  },
+  "initial_runtime_junit.xml": {
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 44.766
+  },
+  "integration_initial_junit.xml": {
+    "tests": 6,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 15.392
+  },
+  "package_followup_junit.xml": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 17.676
+  },
+  "venv_smoke_junit.xml": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 8.514
+  },
+  "version_package_initial_junit.xml": {
+    "tests": 22,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 36.371
+  }
+}

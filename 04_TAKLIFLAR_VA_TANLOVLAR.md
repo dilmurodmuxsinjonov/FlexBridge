@@ -21,6 +21,11 @@ Manba: ushbu suhbatdagi 2026-11-06 topshirig'i va loyiha uchun berilgan AGENTS.m
 | Q-011 | Frilanserlik keyinchalik (`R2` bosqichida) qo'shiladi; hozir (`R1` doirasida) frilanserlik qo'shilmaydi (`"eslab qol keyinchalik firlanserlik qoshiladi lekin hozir uni qoshmaymiz"`, 2026-11-07) | Tasdiqlangan (2026-11-07); arxitektura va `DB-092 feature_flags` (`R2_FREELANCE_MARKETPLACE=False`) keyinchalik kengaytirishga tayyor holda saqlanadi, R1 kodida frilans oqimlari yozilmaydi |
 | Q-013 | “github bilan bikga ishla va tohtashni aytmagnimcha nabatma nabat ishlashni davom etir” — GitHub Issue/branch/commit/PR/CI bilan paketlarni ketma-ket davom ettirish, foydalanuvchi to'xtatmaguncha har paketdan keyin keyingisiga o'tish | Tasdiqlangan (2026-11-08); production deployment yoki jonli maxfiy kalit rotatsiyasi bajarildi deb talqin qilinmaydi |
 
+### Q-014 - Kerakli vositalarni o'rnatish va Antigravity eslatmasi (2026-11-10)
+
+- Foydalanuvchi kerak bo'ladigan vositalarni, jumladan Docker'ni, o'rnatishni va joriy ish tugagach eslatmalarni yangilab Antigravity uchun keyingi vazifalarni aniq yozishni topshirdi.
+- Natija: ANTIGRAVITY_HANDOFF.md, project .venv va reviewable Windows setup script tayyorlandi. Installerlar D: da verified; Windows system features/admin tasdig'i/reboot va haqiqiy Docker engine checks hali yakunlanmagan. Ruxsat production deployment/live money/credential rotation yoki avtomatik reboot bajarildi degan ma'noni bermaydi. Q-013 ketma-ket GitHub ish tartibi saqlanadi.
+
 ## Mavjud hujjatlardagi takliflar
 
 Quyidagilar avvalgi materiallarda ishchi taklif deb berilgan. Ushbu suhbatda foydalanuvchi ularni alohida tasdiqlamagan.

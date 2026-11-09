@@ -79,7 +79,13 @@ def test_participants_with_real_operator_roles_cannot_review(client,setup_contin
 def test_unassigned_private_evidence_and_generic_review_are_rejected(client,setup_continuity,identities,monkeypatch):
     from app.adapters import storage
     flow=setup_continuity;case=ready(client,flow);other=identities('MODERATOR');calls=[]
-    monkeypatch.setattr(storage,'presign_get',lambda key:calls.append(key) or 'https://fixture.invalid/private')
+    def presign(key,*,reference):
+        expected=flow['file']
+        assert key==expected['storage_key']
+        assert (reference.bucket,reference.version_id,reference.etag)==(expected['storage_bucket'],expected['storage_version_id'],expected['storage_etag'])
+        calls.append(key)
+        return 'https://fixture.invalid/private'
+    monkeypatch.setattr(storage,'presign_get',presign)
     for suffix in ('','/evidence/'+flow['file']['id']+'/download'):
         response=client.get(path(case,'moderator')+suffix,headers=other['headers']);assert response.status_code==403,response.text
     response=decide(client,flow,case,'compliance',actor=other);assert response.status_code==403,response.text

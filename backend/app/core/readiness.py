@@ -15,9 +15,13 @@ def dependency_readiness():
     except Exception: checks['database']=False
     try:
         from app.adapters.storage import client
-        client().head_bucket(Bucket=os.environ['S3_BUCKET'])
+        object_client=client()
+        object_client.head_bucket(Bucket=os.environ['S3_BUCKET'])
         checks['object_storage']=True
-    except Exception: checks['object_storage']=False
+        checks['object_storage_versioning']=object_client.get_bucket_versioning(Bucket=os.environ['S3_BUCKET']).get('Status')=='Enabled'
+    except Exception:
+        checks.setdefault('object_storage',False)
+        checks['object_storage_versioning']=False
     try:
         with socket.create_connection((os.environ['CLAMAV_HOST'],int(os.environ.get('CLAMAV_PORT','3310'))),timeout=2) as conn:
             conn.settimeout(2);conn.sendall(b'zPING\0')

@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-10 - Codex. PR36/38/40/42/44/46/49/50/52/54 merged. Issue55/PR56 institution onboarding source review va ikkala732-test CI o'tdi; evidence-head checks/merge keyin. Keyingi Issue57 private storage version binding.49 explicit handler,83 ta501; bu acceptance foizi emas. Pilot tayyor emas.
+Yangilangan: 2026-11-10 - Codex. PR56 ham merged12cd307, Issue55 closed; final4ffbe96 ikkala732-test CI passed383.64s/463.87s. Issue57/PR58 explicit storage binding implementatsiyasi yozildi, draft0012/111 validatsiyasi yurmoqda. Windows Docker/WSL administrator bosqichi tugamagan (native UAC launch canceled); loyiha .venv tayyor. Antigravity uchun ANTIGRAVITY_HANDOFF.md ni o'qi.49 explicit/83 placeholder acceptance foizi emas; pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -176,7 +176,7 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## EDU-CODEX-001B — Reviewed institution onboarding
 
-- Holat: `Tekshiruvda`; Codex; Issue55/PR56, source eadac1149ba66d8e34f77190c21f1c6211183a65. API017/096/097, firstCOORD/currentCOORD requestedTEACHER, independent review+exact-revision named consent, explicit revisions/revoke/private files va forward0011 bajarildi. Runtime111/canonical94,49 explicit/83 placeholder. Evidence-only head checks va matching-head merge qolgan.
+- Holat: `Bajarildi` (chegaralangan backend paketi); Codex; Issue55 closed/PR56 merge12cd30746a2412afba326adc3025782638029900, source eadac1149ba66d8e34f77190c21f1c6211183a65. API017/096/097, firstCOORD/currentCOORD requestedTEACHER, independent review+exact-revision named consent, explicit revisions/revoke/private files va forward0011 bajarildi. Runtime111/canonical94,49 explicit/83 placeholder. Final4ffbe96 head ikkala732 CI42679916814/42679929206 passed383.64s/463.87s; matching-head merge bajarildi.
 - Native52 passed236.823s va old affected303 passed891.982s40e source bosqichida; post-review55 passed165.333s old contact fixdan avval; privacy/followup/Tashkent36 passed86.459s final source bilan. Overlap total emas. Final complete732 CI42672853806/42672846232 attempt2 passed450.27s/508.64s. Old prototype/privacy/SQL-MFA/retry probes va fixes, startup-server errors, real wait graph dalillari HISOBOT.md ichida. Actual read-only Copilot follow-up exit0 findings closed; agent test/SHA/pilot certify qilmagan.
 - Keyingi Issue57: actual private GET provider version binding; hozir metadata snapshots/content-addressed keys actual provider immutability proof emas. Additional coordinator/recovery/student admission/export/grade/frontend/live identity/legal/provider certification alohida; pilotfalse.
 
@@ -505,3 +505,20 @@ Keyingi kichik qadam:
 - Tekshiruv dalili: `python -m pytest D:\FlexBridge\backend -v` → `32 passed in 1.44s`.
 - Codex xulosasi / tuzatishlar: `REV-001` - qabul qilinmadi; sabablar va qayta tekshirish mezonlari `reviews/2026-11-07/BAHOLASH.md` ichida. Mavjud testlar o'tishi to'liq integratsiyani tasdiqlamaydi.
 - Keyingi kichik qadam: Codex tomonidan `S1.1..S1.4` va `S2.1.1..S2.10.1` paketlarini ko'rib chiqish va qabul qilish (`Tekshiruvda` -> `Bajarildi`).
+
+## STORAGE-CODEX-001 - Private object version binding (Issue57)
+
+- Holat: `Tekshiruvda` (draft implementatsiya, hali qabul yo'q); Codex, fix/57-storage-versioning/PR58.0012 va current storage pipeline yozildi. Reja/qarorlar/read-only Copilot exit0 va localhost MinIO proof reviews/2026-11-10/storage_versioning. Trusted provider-admin overwrite old key-only URL baytlarini almashtiradi; explicit VersionId URL originalni qaytaradi. Public overwrite exploit/live/AV claim emas.
+- Implementatsiya: explicit bucket/version/ETag provenance va no-inference legacy policy; exact source scan/private GET; existing outbox fence/source compare; all6 signer callers/EDU snapshots; Enabled readiness; populated upgrade/native/real provider integration/current CI/review. Accepted role/proof history saqlanadi; unknown provenance yangi approval/download uchun fail closed. Tafsilot ANTIGRAVITY_HANDOFF.md va DECISIONS.md.
+- Muhit: project .venv installed/pip check0, native smoke3 passed8.51s. Docker/WSL installers D: da hash/publisher verified, ammo Docker actual exit1 (VMP disabled), WSL MSIX0x80073D28 (admin required); installed/engine-ready emas. Native feature elevation launch canceled (OS: operation was canceled by the user), script ishga tushmagan; automatic reboot yo'q. scripts/setup_windows_dependencies.ps1 syntax valid; elevated branch hali execution proofga ega emas. Q-014 va handoff ayni holatni saqlaydi; codingni native PG/MinIO bilan davom ettirish mumkin.
+
+- LOG-055: new25 storage+old2 private-view27 native passed44.51s; old initial/harness/diagnostic stages alohida artifacts. Actual MinIO integration7 shu27 ichida, AV double/PDF+S3+PG actual. Old affected suites, pinned source review va latest complete CI keyingi qabul gate; draft pilotfalse.
+
+- LOG-055 sourceafd code review exit0 found no concrete version-binding defect (actual root cwd/source cleanliness qualified in REVIEW_CONTEXT.md). Native240:239 passed/1 SCANNING fixture failure350.06s; actual new schema guard retained, fixture corrected and candidate44 passed43.39s. Full current CI remains required. Issue59 separate actual authority probe failed1;57 does not close it.
+
+## AUTH-CODEX-005 - Owner file current-session authority (Issue59)
+
+- Holat: `Rejada`, confirmed residual; Codex;57/PR58 mergedan keyin yangi branch. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
+- Doira: upload intent/complete/owner download actual ActorContext, current account/session/existing sensitive MFA after business locks and thru commit, no sessionless fallback; version/source/outbox/ownership guarantees preserved. Ordinary PASSWORD unchanged. Candidate/CV sibling scope alohida audit qilinadi. Planning peer review, both authority orderings/security/expiry/rollback/provider integration/full CI kerak; pilotfalse.
+
+- LOG-056: exact b251644 full757 Linux PG/actual MinIO CI42687285321/42687299361 passed530.01s/513.04s. Source/fixture reviews exit0; scoped findings none. Native counts/failures/limits separated in HISOBOT.md. Evidence-only checks/merge remain;59 next, pilotfalse.

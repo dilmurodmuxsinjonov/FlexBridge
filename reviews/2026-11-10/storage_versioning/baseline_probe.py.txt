@@ -1,0 +1,116 @@
+"""Observe the current adapter's key-only GET on disposable localhost MinIO.
+
+The replacement is a trusted provider-admin test action, not a public app exploit.
+Never log presigned URLs, request credentials or environment values.
+"""
+from pathlib import Path
+import hashlib
+import io
+import json
+import os
+import secrets
+import socket
+import subprocess
+import sys
+import time
+from urllib.request import urlopen
+
+BASE = Path(__file__).resolve().parent
+sys.path.insert(0, 'D:/FlexBridge/backend')
+from app.adapters import storage
+from pypdf import PdfWriter
+
+
+def port():
+    with socket.socket() as listener:
+        listener.bind(('127.0.0.1', 0))
+        return listener.getsockname()[1]
+
+
+def pdf(size):
+    writer = PdfWriter()
+    writer.add_blank_page(width=size, height=size)
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    return buffer.getvalue()
+
+
+def main():
+    api_port, console_port = port(), port()
+    while console_port == api_port:
+        console_port = port()
+    endpoint = f'http://127.0.0.1:{api_port}'
+    access, secret = secrets.token_hex(12), secrets.token_urlsafe(36)
+    data = BASE / '.data' / secrets.token_hex(8)
+    data.mkdir(parents=True)
+    env = {**os.environ, 'MINIO_ROOT_USER': access, 'MINIO_ROOT_PASSWORD': secret,
+           'MINIO_BROWSER': 'off', 'MINIO_UPDATE': 'off'}
+    executable = 'D:/Codex/.tools/minio-2025-02-18/minio.exe'
+    process = subprocess.Popen([executable, 'server', str(data), '--address',
+        f'127.0.0.1:{api_port}', '--console-address', f'127.0.0.1:{console_port}'],
+        env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=subprocess.CREATE_NO_WINDOW)
+    try:
+        deadline = time.monotonic() + 30
+        while True:
+            try:
+                with urlopen(endpoint + '/minio/health/live', timeout=1) as r:
+                    assert r.status == 200
+                break
+            except OSError:
+                if process.poll() is not None or time.monotonic() >= deadline:
+                    raise RuntimeError('Disposable MinIO did not become healthy') from None
+                time.sleep(.2)
+        bucket = 'flexbridge-proof-' + secrets.token_hex(6)
+        os.environ.update(S3_ENDPOINT_URL=endpoint, S3_PUBLIC_ENDPOINT_URL=endpoint,
+            S3_ACCESS_KEY=access, S3_SECRET_KEY=secret, S3_BUCKET=bucket)
+        client = storage.client()
+        client.create_bucket(Bucket=bucket)
+        client.put_bucket_versioning(Bucket=bucket, VersioningConfiguration={'Status': 'Enabled'})
+        original, replacement = pdf(100), pdf(200)
+        digest = hashlib.sha256(original).hexdigest()
+        key = 'private/' + secrets.token_hex(16) + '/' + digest + '.pdf'
+        recorded = storage.write_private(key, original)
+        first_head = client.head_object(Bucket=bucket, Key=key)
+        issued_before_replacement = storage.presign_get(key)
+        client.put_object(Bucket=bucket, Key=key, Body=replacement, ContentType='application/pdf')
+        with urlopen(issued_before_replacement, timeout=5) as response:
+            actual = response.read()
+        pinned = client.generate_presigned_url('get_object', Params={
+            'Bucket': bucket, 'Key': key, 'VersionId': first_head['VersionId']}, ExpiresIn=60)
+        with urlopen(pinned, timeout=5) as response:
+            pinned_bytes = response.read()
+        # A suspended bucket's "null" response is not an immutable version.
+        client.put_bucket_versioning(Bucket=bucket, VersioningConfiguration={'Status': 'Suspended'})
+        suspended = client.put_object(Bucket=bucket, Key='suspended.pdf', Body=original)
+        report = {
+            'source': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd='D:/FlexBridge').decode().strip(),
+            'runtime_note': 'Current adapter unchanged from eadac11; evidence-only4ffbe96 head',
+            'provider': subprocess.check_output([executable, '--version']).decode().splitlines()[0],
+            'binary_provenance': json.loads(Path('D:/Codex/.tools/minio-2025-02-18/download.json').read_text()),
+            'fixture': 'Disposable localhost server/bucket, generated credentials, trusted provider-admin overwrite; no public exploit/live deployment/AV claim',
+            'recorded_reference_was_version_id': recorded == first_head['VersionId'],
+            'recorded_reference_was_etag': recorded == first_head['ETag'],
+            'original_sha256': digest,
+            'replacement_sha256': hashlib.sha256(replacement).hexdigest(),
+            'key_only_url_read_replacement': actual == replacement,
+            'explicit_version_url_read_original': pinned_bytes == original,
+            'suspended_put_version_is_null': suspended.get('VersionId') == 'null',
+            'suspended_put_version_is_absent': suspended.get('VersionId') is None,
+            'all_urls_and_credentials_omitted': True,
+        }
+        (BASE / 'baseline_result.json').write_text(json.dumps(report, indent=2) + '\n')
+        print(json.dumps(report, indent=2))
+        assert pinned_bytes == original
+        assert actual == original, 'Current application key-only GET served replacement instead of recorded original'
+    finally:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+
+
+if __name__ == '__main__':
+    main()
