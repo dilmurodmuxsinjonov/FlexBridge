@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="27.277" timestamp="2026-11-09T17:41:05.706119+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_authority" name="test_teacher_password_session_can_review_current_assignment" time="24.964"><failure message="sqlalchemy.exc.NoResultFound: No row was found when one was required">backend\tests\security\test_academic_authority.py:113: in test_teacher_password_session_can_review_current_assignment
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:35: in academic_fixture
+    roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:1518: in scalar_one
+    return self._only_one_row(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\result.py:799: in _only_one_row
+    raise exc.NoResultFound(
+E   sqlalchemy.exc.NoResultFound: No row was found when one was required</failure></testcase></testsuite></testsuites>

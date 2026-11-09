@@ -1,0 +1,86 @@
+{
+  "scope_harness_error_junit.xml": {
+    "tests": 9,
+    "failures": 9,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 18.349
+  },
+  "scope_initial_junit.xml": {
+    "tests": 9,
+    "failures": 8,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 17.77
+  },
+  "scope_fix_junit.xml": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 17.277
+  },
+  "academic_initial_junit.xml": {
+    "tests": 55,
+    "failures": 46,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 184.525
+  },
+  "fixture_diagnostic_junit.xml": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 27.277
+  },
+  "fixture_control_junit.xml": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 18.057
+  },
+  "gate_native_junit.xml": {
+    "tests": 32,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 83.326
+  },
+  "academic_native_junit.xml": {
+    "tests": 59,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 267.266
+  },
+  "affected_native_junit.xml": {
+    "tests": 128,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 362.137
+  },
+  "review_red_junit.xml": {
+    "tests": 3,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 51.042
+  },
+  "review_fix_junit.xml": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 38.589
+  },
+  "final_native_junit.xml": {
+    "tests": 93,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 273.952
+  }
+}
