@@ -52,7 +52,9 @@ Dalil:
  PASSWORD/current MFA, forged session va provider rollback. Bu full785 yoki final
  source/CI qabuli emas. Affected old EDU/storage72 native passed102.01s;
  actual S3 logout->worker-CLEAN/old-token401 testi ham o'tdi.
- Source-pinned review va complete latest-head CI hali keyingi gate.
+ Source370d9c3 read-only review exit0 no scoped findings; complete785 CI
+ push42697954266/PR42697965001 passed534.16s/458.37s. Evidence-only head
+ checks/merge hali qolgan, PR60 draft. HISOBOT.md current source dalilni bog'laydi.
 
 Keyingi aniq qadamlar:
 
@@ -64,9 +66,13 @@ Keyingi aniq qadamlar:
 3. Topilgan concrete nuqson bo'lsa mustaqil red probe/fix; latest actual full native/
    CI, manifest/hisobot/01/02/03 va shu handoffni yangila. Evidence-only latest head
    checks passed bo'lgandan keyin --match-head-commit merge.
-4. Candidate/CV va boshqa self-service actor-id-only siblinglar alohida ochiq audit
-   scope.59 ularni yopdi deb yozma; keyingi bounded security audit, keyin original
-   1.3/1.4 manba talablaridan EDU admission/enrollmentni qur. R2 freelance qo'shma.
+4. Issue61 keyingi: same370d9c3 combined9 candidate probes failed17.20s.5 canonical
+   write+2 private GET+2 legacy availability POST actual logoutdan keyin200/201.
+   Legacy siblings included; nine-path plan/review/source evidence candidate_authority
+   folderda.59 ularni yopmaydi.61 implementation faqat PR60 merge
+   ortidan. READ COMMITTED profile SHARE/current account guard, CV material locks,
+   internal matching read_snapshot unchanged, write response same transaction.
+   So'ng original1.3/1.4 talablaridan EDU admission/enrollmentni qur. R2 freelance qo'shma.
 
 ## Ish muhiti va tugamagan system install
 

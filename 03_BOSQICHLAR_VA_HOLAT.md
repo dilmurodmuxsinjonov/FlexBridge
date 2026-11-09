@@ -526,3 +526,10 @@ Keyingi kichik qadam:
 - LOG-057:59 actualActorContext/shared account guard implementation initial27 passed36.60s; affected native running, source review/full CI remain. Freshclam exit0 and actual local clamd benign431-byte PDF adapter smoke passed; daemon stopped, no service/detection/live/pilot claim.
 
 - LOG-057 follow-up: current affected72 passed102.01s incl actual8 MinIO cases,0fail/error/skip; current full CI/source review not yet accepted.
+
+- LOG-058:59 exact370d9c3 complete785 CI42697954266/42697965001 passed534.16s/458.37s,1 framework warning. Isolated source review exit0 no scoped findings. Source manifests/HISOBOT/native stages separate; evidence-only checks/merge remain. Same-source candidate9 red cases do not disappear because current full785 is green.
+
+## AUTH-CODEX-006 - Candidate self-service authority (Issue61)
+
+- Holat: `Rejada`, confirmed9-path residual; Codex; PR60 merge ortidan yangi branch. Pinned370d9c3 actual HTTP/PG combined9 failed17.20s:5 canonical writes+2 private GET+2 legacy availability adds after observed waits/logout200 still200/201, actual business changes/private own-candidate result. Not anonymous/foreign exploitation. Earlier5/5/2/2 overlap; evidence reviews/2026-11-10/candidate_authority.
+- Plan initial7 then explicit legacy2 scope review both actual read-only Copilot exit0; no test/SHA/model/pilot certification. RealActorContext, profile/file before current account guards, READ COMMITTED profile SHARE private reads, write response beforecommit; matching internal read_snapshot preserved. All9 human callers covered without actorless fallback, interval/EXCLUDE/AVAILABLE_EXTRA and skill/CV verification unchanged. No61 code yet; current source785 covers59 only. Next61 then EDU; pilotfalse.

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="9" time="17.195" timestamp="2026-11-10T02:04:34.303076+05:00" hostname="Ditroid"><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[profile]" time="4.549"><failure message="AssertionError: ('profile', 200, ['candidate_profiles', 'candidate_audit'], False)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('profile', 200, ['candidate_profiles', 'candidate_audit'], False)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[skills]" time="1.211"><failure message="AssertionError: ('skills', 200, ['candidate_skills', 'candidate_audit'], False)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('skills', 200, ['candidate_skills', 'candidate_audit'], False)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[cv]" time="1.384"><failure message="AssertionError: ('cv', 200, ['candidate_profiles', 'candidate_audit'], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('cv', 200, ['candidate_profiles', 'candidate_audit'], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[rules]" time="1.355"><failure message="AssertionError: ('rules', 200, ['candidate_profiles', 'availability_rules', 'candidate_audit'], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('rules', 200, ['candidate_profiles', 'availability_rules', 'candidate_audit'], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[exceptions]" time="1.383"><failure message="AssertionError: ('exceptions', 200, ['candidate_profiles', 'availability_exceptions', 'candidate_audit'], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('exceptions', 200, ['candidate_profiles', 'availability_exceptions', 'candidate_audit'], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[profile_read]" time="1.348"><failure message="AssertionError: ('profile_read', 200, [], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('profile_read', 200, [], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[schedule_read]" time="1.358"><failure message="AssertionError: ('schedule_read', 200, [], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('schedule_read', 200, [], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[legacy_rule]" time="1.333"><failure message="AssertionError: ('legacy_rule', 201, ['availability_rules'], True)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('legacy_rule', 201, ['availability_rules'], True)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[legacy_exception]" time="1.885"><failure message="AssertionError: ('legacy_exception', 201, ['availability_exceptions'], True)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('legacy_exception', 201, ['availability_exceptions'], True)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase></testsuite></testsuites>

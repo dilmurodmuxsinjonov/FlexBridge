@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="7.352" timestamp="2026-11-10T02:02:51.520216+05:00" hostname="Ditroid"><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[legacy_rule]" time="4.419"><failure message="AssertionError: ('legacy_rule', 201, ['availability_rules'], True)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('legacy_rule', 201, ['availability_rules'], True)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[legacy_exception]" time="1.500"><failure message="AssertionError: ('legacy_exception', 201, ['availability_exceptions'], True)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:58: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('legacy_exception', 201, ['availability_exceptions'], True)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase></testsuite></testsuites>

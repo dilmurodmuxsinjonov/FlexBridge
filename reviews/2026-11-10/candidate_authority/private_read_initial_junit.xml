@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="7.453" timestamp="2026-11-10T02:00:56.917596+05:00" hostname="Ditroid"><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[profile_read]" time="4.457"><failure message="AssertionError: ('profile_read', 200, [], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:54: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('profile_read', 200, [], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[schedule_read]" time="1.566"><failure message="AssertionError: ('schedule_read', 200, [], True)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:54: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401,403),(kind,response.status_code,changed,private_response)
+E   AssertionError: ('schedule_read', 200, [], True)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>
