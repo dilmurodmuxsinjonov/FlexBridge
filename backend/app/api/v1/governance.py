@@ -9,12 +9,9 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
-from uuid import UUID
 from app.services.internship_logs import internship_log_service
-from app.db.storage import transaction,table,now
-from app.services.placements import get_row
 
-from app.api.dependencies import ActorContext, require_actor_context, require_org, require_institution, require_platform
+from app.api.dependencies import ActorContext, require_actor_context, require_org, require_platform
 from app.services.governance import GovernanceError, governance_service
 from app.services.organizations import require_mfa
 
@@ -104,7 +101,7 @@ def create_academic_assignment_endpoint(
 ) -> dict[str, Any]:
     """Create academic assignment requiring server-authenticated `ActorContext` (`R-01`, `AC-041`)."""
     return internship_log_service.create_academic_assignment(placement_id=payload.placement_id,institution_id=payload.institution_id,
-        supervisor_id=payload.supervisor_id,supervision_id=payload.supervision_id,actor_user_id=actor.user_id)
+        supervisor_id=payload.supervisor_id,supervision_id=payload.supervision_id,actor=actor)
 
 
 @router.patch("/internships/academic-assignments/{assignment_id}")
@@ -114,13 +111,9 @@ def update_academic_assignment_endpoint(
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Update academic assignment requiring server-authenticated `ActorContext` (`R-01`, `AC-041`)."""
-    with transaction() as conn:
-        assignment=get_row(conn,'academic_assignments',assignment_id,True)
-        require_institution(actor,assignment['institution_id'],'COORDINATOR')
-        if payload.status!='REVOKED' or payload.evaluation_note is not None:
-            raise HTTPException(422,detail={'code':'ONLY_REVOCATION_SUPPORTED_USE_SEPARATE_REVIEWS'})
-        conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment_id).values(revoked_at=now(),updated_at=now()))
-        return {**assignment,'revoked_at':now()}
+    if payload.status!='REVOKED' or payload.evaluation_note is not None:
+        raise HTTPException(422,detail={'code':'ONLY_REVOCATION_SUPPORTED_USE_SEPARATE_REVIEWS'})
+    return internship_log_service.revoke_academic_assignment(actor,assignment_id)
 
 
 @router.post("/moderation/actions", status_code=201)

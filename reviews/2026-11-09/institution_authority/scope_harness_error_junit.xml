@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="9" time="18.349" timestamp="2026-11-09T10:13:38.300240+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[expired]" time="4.978"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[future]" time="1.210"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[revoked]" time="1.445"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[unaccepted]" time="1.272"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[membership_unaccepted]" time="1.285"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_user]" time="1.304"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_institution]" time="1.255"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_invalid_linked_appointment_cannot_supply_role_label_or_scope[wrong_role_scope]" time="1.243"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:31: in test_invalid_linked_appointment_cannot_supply_role_label_or_scope
+    user,other,inst,foreign,member,appointment,grant=setup_scope(identities)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_institution_scope_probe" name="test_current_accepted_linked_appointment_is_a_valid_control" time="2.321"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_institution_scope_probe.py:58: in test_current_accepted_linked_appointment_is_a_valid_control
+    user,_,inst,_,_,_,_=setup_scope(identities)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_scope_probe.py:17: in setup_scope
+    inst=insert_row(conn,'institutions',registry_code=str(uuid4()),name='Scope Test Institution',region='Tashkent',status='VERIFIED')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase></testsuite></testsuites>

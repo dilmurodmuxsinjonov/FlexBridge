@@ -79,10 +79,7 @@ def owns_candidate(user_id: str,candidate_id: str) -> bool:
             table('candidate_profiles').c.user_id==user_id)).first() is not None
 
 def require_institution(actor: ActorContext, institution_id: str, *allowed: str) -> None:
-    membership,grants,catalog=table('institution_memberships'),table('institution_role_grants'),table('role_catalog')
+    from app.db.institution_scope import institution_scope_query
     with transaction() as conn:
-        found=conn.execute(select(membership.c.id).select_from(membership.join(grants,grants.c.membership_id==membership.c.id)
-            .join(catalog,grants.c.role_id==catalog.c.id)).where(membership.c.user_id==actor.user_id,
-            membership.c.institution_id==institution_id,membership.c.status=='ACTIVE',membership.c.revoked_at.is_(None),
-            grants.c.revoked_at.is_(None),catalog.c.scope_kind=='INSTITUTION',catalog.c.code.in_(allowed))).first()
+        found=conn.execute(institution_scope_query(actor.user_id,institution_id,allowed)).first()
     if not found: raise HTTPException(403,detail={'code':'INSTITUTION_SCOPE_FORBIDDEN'})

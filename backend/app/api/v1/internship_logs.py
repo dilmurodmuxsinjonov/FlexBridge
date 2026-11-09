@@ -7,7 +7,6 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
-from uuid import UUID
 
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
@@ -74,7 +73,7 @@ def create_academic_assignment_log_scope_endpoint(
         institution_id=payload.institution_id,
         supervisor_id=payload.supervisor_id,
         supervision_id=payload.supervision_id,
-        actor_user_id=actor.user_id,
+        actor=actor,
     )
 
 
@@ -129,14 +128,14 @@ def submit_academic_review_endpoint(
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     try:
-        return internship_log_service.review(
+        if payload.academic_grade is not None:
+            raise HTTPException(422,detail={'code':'OFFICIAL_GRADE_USE_SEPARATE_WORKFLOW'})
+        return internship_log_service.review_academic(
             daily_log_id=daily_log_id,
             placement_id=payload.placement_id,
             assignment_id=payload.academic_assignment_id,
-            actor_user_id=actor.user_id,
-            academic=True,
+            actor=actor,
             decision=payload.decision,
-
             comment=payload.comment,
         )
     except InternshipLogScopeError as exc:

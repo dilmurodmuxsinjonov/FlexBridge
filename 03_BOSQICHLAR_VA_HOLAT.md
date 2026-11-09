@@ -166,8 +166,13 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## AUTH-CODEX-004 — Human money transaction authority
 
-- Holat: `Tekshiruvda`; Codex; Issue51/PR52, fix/51-billing-authority. Reja/dalil reviews/2026-11-09/billing_authority. Old5856 refund3/org-wait5/target-repeat3 failures saqlandi. d88ebaf native75/old137 va ikkala full579 CI passed. Code review production defect topmadi;895fb8c replay-role+fresh MFA3 cases passed9.03s.1368ee5 actual wait graphs bilan test proofni kuchaytirdi; final78 native passed104.23s, wait review gap closed. Runtime d88 bilan aynan bir xil; full582 CI42564327339/42564331479 ham passed437.43s/441.90s. Evidence-only checks/merge qolgan. Overlapping native runs distinct total emas. No sessionless fallback/schema/provider change, pilotfalse.
+- Holat: `Bajarildi` (chegaralangan backend paketi); Codex; Issue51 closed, PR52 merged d480012. Reja/dalil reviews/2026-11-09/billing_authority. Old5856 refund3/org-wait5/target-repeat3 failures saqlandi. d88ebaf native75/old137 va ikkala full579 CI passed. Code review production defect topmadi;895fb8c replay-role+fresh MFA3 cases passed9.03s.1368ee5 actual wait graphs bilan test proofni kuchaytirdi; final78 native passed104.23s, wait review gap closed. Runtime d88 bilan aynan bir xil; full582 CI42564327339/42564331479 ham passed437.43s/441.90s. Final evidence ee72769 full582 CI42565434404/42565439840 passed427.47s/444.08s va matching-head merge bajarildi. Overlapping native runs distinct total emas. No sessionless fallback/schema/provider change, pilotfalse.
 - Funds/idempotency/price/dual control/audit/outbox saqlanadi; signed callback logoutdan keyin ishlashi positive control. Quota publish/transitiondagi boshqa assurance o'zgarmadi. Synthetic HMAC/admin grant fixtures actual merchant/provider/secret rotation/browser/DR/pilot emas. Scope va expiry boundary guideda; keyin EDU.
+
+## EDU-CODEX-001A — Institutional authority prerequisite
+
+- Holat: `Tekshiruvda`; Codex; Issue53, fix/53-institution-authority. Reja va saqlangan probe dalillari reviews/2026-11-09/institution_authority. Eski1368 source corrected probe8 failed/1 valid control passed17.77s: appointment validity/identity/acceptance cheklovlari ishlamagan. Dastlabki9 fixture TypeError alohida, security finding emas. Initial predicate fix9 passed17.28s; bu keyingi butun paketning final qabuli emas.
+- Shared effective role query va actual session/role locks existing academic create/revoke/reviewga qo‘llanmoqda. Native academic/current-date/concurrency/rollback tekshiruvi, source review va to‘liq PostgreSQL CI qolgan. Fixture scope/document metadata trusted import, yangi public intake/acceptance/admission API yoki legal certification emas. API017/096/097 hali501. Keyingi paket EDU-CODEX-001B; pilotfalse.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
