@@ -97,11 +97,13 @@ class InternshipLogService:
             if placement['id']!=placement_id or log['placement_id']!=placement_id:
                 raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
             self._academic_binding(conn,placement,supervision,assignment['institution_id'])
+            revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
+            if not owns_candidate(revision['author_id'],placement['candidate_id']):
+                raise InternshipLogScopeError('REVISION_AUTHOR_FORBIDDEN',status_code=403)
             authority=institution_authority(conn,actor,assignment['institution_id'],'TEACHER')
             if (authority['id']!=assignment['teacher_membership_id'] or assignment['revoked_at'] or not assignment['accepted_at']
                 or assignment['accepted_at']>now()):
                 raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
-            revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
             if revision['author_id']==actor.user_id:raise InternshipLogScopeError('SELF_REVIEW_FORBIDDEN',status_code=403)
             if revision['status']!='SUBMITTED':raise InternshipLogScopeError('SUBMITTED_REVISION_REQUIRED')
             if decision not in ('APPROVED','REJECTED','CHANGES_REQUESTED'):

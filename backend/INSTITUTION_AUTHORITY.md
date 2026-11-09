@@ -17,8 +17,11 @@ nullable verification-case link is not fabricated legal verification.
 Academic create, revoke and diary review require the real ActorContext. The
 service acquires institution and business-row locks before checking the current
 active user/session, auth version and effective role under FOR SHARE locks.
-Coordinators require MFA; an ordinary teacher PASSWORD session can review its
-accepted assignment. Cached role labels and a caller user UUID alone grant no
+Accounts with any current globally sensitive role require MFA even when this
+operation uses their TEACHER grant. An ordinary teacher-only PASSWORD session can
+review its accepted assignment. The current role set is read again at the guarded
+boundary, so a sensitive grant arriving after HTTP preflight cannot evade MFA.
+Cached role labels and a caller user UUID alone grant no
 write authority. Shared MFA behavior remains in force for finance and ownership.
 
 Creation locks institution -> placement -> supervision -> enrollment/agreement,
@@ -33,7 +36,8 @@ then locks the log and enrollment/agreement before actor authority. Institution
 locking serializes these existing academic mutations. Review checks the exact
 placement/log/assignment, current verified candidate enrollment, active agreement
 and enabled supervision purpose/legal basis, accepted nonrevoked supervision and
-assignment, and a submitted revision. Only an active academic placement qualifies.
+assignment, and a submitted revision authored by the placement candidate's user.
+The revision is locked before actor authority. Only an active academic placement qualifies.
 Self-assignment and self-review are forbidden. Diary review does not accept an
 official grade; that requires its separate future workflow. Workplace reviews
 retain their existing service path. Revocation can remove access after the target

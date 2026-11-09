@@ -263,3 +263,47 @@ def test_direct_service_cannot_use_cached_claims_with_invalid_session(identities
     with pytest.raises(GovernanceError):
         service.create_academic_assignment(actor=ActorContext(uid,sid,('COORDINATOR','TEACHER')),**assignment_body(f))
     assert count('academic_assignments')==0
+
+
+def add_teacher_coordinator_role(f):
+    with transaction() as conn:
+        roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='COORDINATOR',roles.c.scope_kind=='INSTITUTION')).scalar_one()
+        insert_row(conn,'institution_role_grants',membership_id=f['teacher_member']['id'],role_id=rid,appointment_id=f['teacher_appointment']['id'])
+
+
+def test_teacher_who_also_coordinates_cannot_bypass_mfa_in_service(client,identities,organization):
+    from app.services.governance import GovernanceError
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
+    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=date.today().isoformat(),summary_text='Research',total_minutes=60)
+    add_teacher_coordinator_role(f)
+    with pytest.raises(GovernanceError,match='MFA_REQUIRED'):
+        service.review_academic(actor=actor(f['teacher']),daily_log_id=log['id'],placement_id=f['placement']['id'],assignment_id=assignment['id'],decision='APPROVED',comment='Reviewed')
+    assert count('academic_log_reviews')==0
+
+
+def test_sensitive_role_granted_after_http_preflight_requires_mfa_at_write(client,identities,organization):
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f);request=review_request(client,f,assignment)
+    before=count('audit_events')
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with get_engine().begin() as blocker:
+            blocker.execute(select(table('institutions')).where(table('institutions').c.id==f['inst']['id']).with_for_update())
+            pid=blocker.execute(text('SELECT pg_backend_pid()')).scalar_one()
+            pending=pool.submit(request);wait_for_blocker(pid)
+            add_teacher_coordinator_role(f)
+        r=pending.result(timeout=30)
+    assert r.status_code==403,r.text
+    assert r.json()['detail']['code']=='MFA_REQUIRED'
+    assert count('academic_log_reviews')==0 and count('audit_events')==before
+
+
+def test_imported_revision_author_must_own_placement_candidate(client,identities,organization):
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
+    draft=service.save_draft_daily_log_api_054(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=date.today().isoformat(),summary_text='Research',total_minutes=60)
+    with transaction() as conn:
+        # Trusted legacy/import corruption, not a demonstrated public draft exploit.
+        t=table('log_revisions');conn.execute(t.update().where(t.c.id==draft['current_revision_id']).values(author_id=f['coord']['user_id'],status='SUBMITTED',submitted_at=now()))
+    before=count('audit_events')
+    r=client.post('/api/v1/internship-logs/daily-logs/'+draft['id']+'/academic-reviews',headers=f['teacher']['headers'],json={
+        'placement_id':f['placement']['id'],'academic_assignment_id':assignment['id'],'decision':'APPROVED'})
+    assert r.status_code==403,r.text
+    assert count('academic_log_reviews')==0 and count('audit_events')==before

@@ -172,7 +172,7 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 ## EDU-CODEX-001A — Institutional authority prerequisite
 
 - Holat: `Tekshiruvda`; Codex; Issue53, fix/53-institution-authority. Reja va saqlangan probe dalillari reviews/2026-11-09/institution_authority. Eski1368 source corrected probe8 failed/1 valid control passed17.77s: appointment validity/identity/acceptance cheklovlari ishlamagan. Dastlabki9 fixture TypeError alohida, security finding emas. Initial predicate fix9 passed17.28s; bu keyingi butun paketning final qabuli emas.
-- Shared effective role query va actual session/role locks existing academic create/revoke/reviewga qo‘llanmoqda. Native academic/current-date/concurrency/rollback tekshiruvi, source review va to‘liq PostgreSQL CI qolgan. Fixture scope/document metadata trusted import, yangi public intake/acceptance/admission API yoki legal certification emas. API017/096/097 hali501. Keyingi paket EDU-CODEX-001B; pilotfalse.
+- Shared effective role query va actual session/role locks existing academic create/revoke/reviewga qo‘llandi. Initial academic59 native passed267.27s. Actual Copilot exit0 review dual-role MFA service gapini topdi; middleware static dual role uchun ishlaydi, lekin post-preflight grant actual HTTP201 bilan tasdiqlandi. Imported revision-author binding ham qo‘shildi; old runtime3 new regressions failed51.04s. Fixda current sensitive roles MFA va author/candidate tekshiruvi bor. Final native/source review/to‘liq PostgreSQL CI qolgan. Fixture scope/document metadata trusted import, yangi public intake/acceptance/admission API yoki legal certification emas. API017/096/097 hali501. Keyingi paket EDU-CODEX-001B; pilotfalse.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 

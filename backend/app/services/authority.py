@@ -62,5 +62,10 @@ def institution_role_authority(conn,user_id,institution_id,*allowed,nowait=False
 def institution_authority(conn,actor,institution_id,*allowed,require_mfa=False):
     session_authority(conn,actor,require_mfa=require_mfa)
     row=institution_role_authority(conn,actor.user_id,institution_id,*allowed)
-    if row['_authority_role']=='COORDINATOR' and not require_mfa:mfa_authority(conn,actor)
+    if not require_mfa:
+        from app.services.auth import roles_for
+        from app.core.iam_security import SENSITIVE_ROLES
+        # Match the global account policy after business waits, even when this
+        # operation selects only the user's TEACHER grant or claims are cached.
+        if SENSITIVE_ROLES.intersection(roles_for(conn,actor.user_id)):mfa_authority(conn,actor)
     return row
