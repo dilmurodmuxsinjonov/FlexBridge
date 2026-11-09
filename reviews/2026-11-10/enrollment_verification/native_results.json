@@ -1,0 +1,93 @@
+{
+  "academic_fixture_fix_junit.xml": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 13.425
+  },
+  "academic_initial_junit.xml": {
+    "tests": 63,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 237.931
+  },
+  "legacy_http_initial_junit.xml": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 35.093
+  },
+  "lifecycle_initial_junit.xml": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 24.754
+  },
+  "replay_wait_ordinary_junit.xml": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 13.837
+  },
+  "review_fix_junit.xml": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 31.8
+  },
+  "review_initial_junit.xml": {
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 11.121
+  },
+  "schema_fixture_fix_junit.xml": {
+    "tests": 5,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 26.411
+  },
+  "schema_head_fix_junit.xml": {
+    "tests": 5,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 20.422
+  },
+  "schema_initial_junit.xml": {
+    "tests": 5,
+    "failures": 0,
+    "errors": 5,
+    "skipped": 0,
+    "elapsed_seconds": 4.048
+  },
+  "schema_proof_junit.xml": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 17.449
+  },
+  "transactions_initial_junit.xml": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 36.222
+  },
+  "upgrade_rollback_junit.xml": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 12.929
+  }
+}

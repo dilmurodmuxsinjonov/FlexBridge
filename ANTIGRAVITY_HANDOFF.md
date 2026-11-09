@@ -61,7 +61,8 @@ journals. Native processes above are terminal; inspect actual new process/CI sta
 before acting. Do not substitute only own handlers for independent review/end.
 PR64 draft https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/64 source
 d36059bdb6eb50003f579709921e762aeb992b6f. CI42710013191(push)/42710023813(PR)
-actual in progress; no pass claimed. Actual read-only Copilot complete-source
+initial full922 passed547.75s/516.38s; exact d360 metadata in pr64_initial_ci.json.
+This green source still had reproduced P2, so no later fix acceptance. Read-only Copilot complete-source
 review runs in clean detached d360 worktree D:/Codex/FlexBridge-review/candidate-authority.
 Initial full source review completed actual exit0: P2 stale revision replay202 and
 missing self-review coverage. Exact-source new reproduction1 failed/1 passed11.12s
@@ -74,6 +75,15 @@ complete latest-head CI; older d360 runs do not validate the fix. New legacy HTT
 0012 populated real-session imports ->0013 ->own end/withdraw/replay, preserves
 history/profile and never invents review proof. Test-only80d expansion preceded the
 later runtime replay fix; record current actual commit/head before next action.
+Current complete source/test manifest pin a92e380b97fda3b6dc20d9c20ac0b2bc1a83ab0f;
+runtime still revieweddbc5033a9572cfa10e508b81bfbcd2defaabdabe,
+contracts inventory51 explicit/81 placeholders/0 missing, not acceptance percent.
+Native stages/HISOBOT/source manifests collected. A narrow actual read-only follow-up
+completed from clean detacheddbc5033 actual exit0: P2 appears closed/no concrete
+delta regression or file/authority inversion. Populated upgrade failure rollback1
+passed12.93s (test-onlya92): failed capture rolls back, old version/rows/table survive. Latest
+evidence-head two complete CI checks/closed findings still required before merge;
+preserve app/tests/migrations against pinned source on evidence-only changes.
 Broader eligibility/supervision/export/frontend/live/DR remain open. All source
 ownership is Codex; no agent edits same files. pg_live not started or migrated.
 

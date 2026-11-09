@@ -25,6 +25,15 @@ ordinary application history/service-access2 passed13.84s. A pinned narrow
 follow-up review of that runtime delta remains required.
 
 DraftPR64 https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/64 head d36059b.
-Full workflows42710013191(push)/42710023813(pull_request) are currently in progress;
-no complete current-source CI pass or package acceptance is claimed. Source/CI,
-review and later test-delta scope must be qualified separately.
+Full workflows42710013191(push)/42710023813(pull_request) completed actual922
+passed547.75s/516.38s,1 framework warning each, exactd360 head/logs confirmed.
+They do not validate the later replay fix. A narrow actual follow-up was launched
+from the same isolated worktree now detached and checked clean atdbc5033; output/
+terminal exit are copilot_followup_review.md/copilot_followup_exit.txt. It completed
+with observed exit0: P2 appears closed in source, no concrete regression/material
+remaining gap or file/authority inversion in the delta found. Added self-review
+and legacy tests were read; actual execution/SHA/model/provider/pilot not certified.
+The subsequent a92e380 populated-upgrade rollback test is test-only,1 passed12.93s,
+with no runtime change from revieweddbc5033. Final source/test manifest pinsa92e380.
+Latest complete matching-head CI remains before ready/merge; source/CI and later
+test/evidence delta scopes must be qualified separately.

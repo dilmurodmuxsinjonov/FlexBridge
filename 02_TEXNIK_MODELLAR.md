@@ -11,6 +11,8 @@ Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 0
 
 - LOG-062:0013 actual fresh/populated PG loaded114 tables. Typed proof metadata and service/API lifecycle, academic predicate, operator dispatch and private middleware are now implemented as a prototype. No new dependency. SQL/HTTP/transactions/affected stages and fixture failures documented separately; current full CI/source review pending. Canonical027/034 handlers connected, not an acceptance percentage. roles_for unchanged; no fabricated legacy proof or manual pg_live mutation.
 
+- LOG-064:0013 capture is transactionally rolled back on real namespace collision (native1 passed12.93s); preexisting data/version retained. Current source/test pina92, runtime replay fixdbc: pin current file material -> current account authority -> full snapshot compare ->same receipt or409. Actual full source/follow-up reviews exited0, finding closed within delta. Initial d360922 full CI twice green predates fix; latest matching-head CI gate remains. Inventory51 explicit/81 placeholders is registration only; pilotfalse.
+
 ## STORAGE-CODEX-001 / AUTH-CODEX-005 - current2026-11-10
 
 - Merged PR58 forward0012 adds files.storage_bucket/storage_version_id/storage_etag and new-write guards; legacy object_version is not guessed. Explicit source VersionId+IfMatch, private PUT reference, all6 GET callers, queued source/token fences and live Enabled readiness. Existing accepted authority/proof preserved; no new tables: runtime111/canonical94. Actual MinIO/PG tests and full757 CI passed twice; provider IAM/retention/live and pilot separate.
