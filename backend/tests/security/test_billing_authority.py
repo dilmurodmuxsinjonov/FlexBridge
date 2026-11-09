@@ -99,10 +99,12 @@ def test_completed_security_change_blocks_after_actual_money_lock(client,identit
     with ThreadPoolExecutor(max_workers=1) as pool:
         with engine.begin() as conn:
             target=table(name);conn.execute(select(target.c.id).where(target.c.id==row_id).with_for_update())
+            blocker=conn.execute(text('SELECT pg_backend_pid()')).scalar_one()
             event.listen(engine,'before_cursor_execute',observed)
             try:
                 pending=pool.submit(request)
                 assert checked.wait(30) and not pending.done()
+                wait_for_blocker(blocker)
                 change_authority(client,user,organization,kind,change);before=money_snapshot()
             finally:event.remove(engine,'before_cursor_execute',observed)
         response=pending.result(timeout=30)
@@ -123,10 +125,12 @@ def test_admin_state_changes_are_rechecked_after_target_wait(client,identities,o
     with ThreadPoolExecutor(max_workers=1) as pool:
         with engine.begin() as conn:
             target=table(name);conn.execute(select(target.c.id).where(target.c.id==row_id).with_for_update())
+            blocker=conn.execute(text('SELECT pg_backend_pid()')).scalar_one()
             event.listen(engine,'before_cursor_execute',observed)
             try:
                 pending=pool.submit(request)
                 assert checked.wait(30) and not pending.done()
+                wait_for_blocker(blocker)
                 change_authority(client,user,organization,kind,change);before=money_snapshot()
             finally:event.remove(engine,'before_cursor_execute',observed)
         response=pending.result(timeout=30)
