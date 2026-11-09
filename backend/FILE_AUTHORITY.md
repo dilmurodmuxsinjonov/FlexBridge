@@ -1,7 +1,8 @@
 # Current-session authority for owner file operations
 
-Issue59 follows merged storage-version PR58. This backend package is under review;
-it is not pilot, public identity, legal evidence or live-provider acceptance.
+Issue59/PR60 merged73d3565 after final935742d full785 CI passed525.26s/469.37s.
+This backend acceptance follows merged storage-version PR58 and is bounded to
+the owner file methods. It is not pilot, public identity, legal or live-provider acceptance.
 
 Upload initiation, upload completion and owner download now receive the actual
 ActorContext. A user ID alone cannot authorize these methods. The existing server

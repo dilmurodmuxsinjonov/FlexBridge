@@ -9,6 +9,11 @@ from app.services.availability import availability_service
 from app.services.opportunities import opportunity_service
 from app.services.schedule import local_today
 from app.services.placements import insert_row
+from app.api.dependencies import ActorContext
+
+
+def candidate_actor(user):
+    return ActorContext(user['user_id'],user['session_id'],())
 
 
 def published_fixture(owner, organization, *, stipend=False, weekday=None,
@@ -35,7 +40,7 @@ def published_fixture(owner, organization, *, stipend=False, weekday=None,
 @pytest.mark.parametrize('start_offset,end_offset,available', [(-14,-1,False),(1,14,False),(0,0,True),(-14,0,True)])
 def test_availability_validity_boundaries(identities,start_offset,end_offset,available):
     candidate=identities();today=local_today()
-    rule=availability_service.add_availability_rule(candidate_id=candidate['candidate_id'],
+    rule=availability_service.add_availability_rule(actor=candidate_actor(candidate),candidate_id=candidate['candidate_id'],
         weekday=today.isoweekday(),start_minute=540,end_minute=600)
     with transaction() as conn:
         conn.execute(table('availability_rules').update().where(table('availability_rules').c.id==rule['id'])
@@ -46,9 +51,9 @@ def test_availability_validity_boundaries(identities,start_offset,end_offset,ava
 
 def test_stipend_feed_and_scoped_batch_queries(identities,organization):
     owner=identities('OWNER',organization);candidate=identities();other=identities()
-    availability_service.add_availability_rule(candidate_id=candidate['candidate_id'],
+    availability_service.add_availability_rule(actor=candidate_actor(candidate),candidate_id=candidate['candidate_id'],
         weekday=local_today().isoweekday(),start_minute=510,end_minute=630)
-    availability_service.add_availability_rule(candidate_id=other['candidate_id'],
+    availability_service.add_availability_rule(actor=candidate_actor(other),candidate_id=other['candidate_id'],
         weekday=local_today().isoweekday(),start_minute=0,end_minute=1440)
     for _ in range(3): published_fixture(owner,organization,stipend=True)
     statements=[]
@@ -306,7 +311,7 @@ def test_repeatable_matching_snapshot_during_schedule_edit(client,identities):
         with ThreadPoolExecutor(max_workers=1) as pool:
             rules=[{'weekday':today.isoweekday(),'start_minute':700,'end_minute':800,
                 'valid_from':today,'valid_to':None,'timezone':'Asia/Tashkent'}]
-            pool.submit(availability_service.replace_rules,user['user_id'],rules).result(timeout=10)
+            pool.submit(availability_service.replace_rules,candidate_actor(user),rules).result(timeout=10)
         during=load_snapshot(user['candidate_id'],today,today+timedelta(days=1))
         assert before.revision==during.revision
         assert during.covers(today,540,600)
@@ -331,7 +336,7 @@ def test_concurrent_weekly_replacements_are_whole_schedules(client,identities):
 
 def test_exception_replacement_does_not_delete_outside_window(client,identities):
     user=identities();today=local_today();tomorrow=today+timedelta(days=1)
-    availability_service.add_availability_exception(candidate_id=user['candidate_id'],exception_date=tomorrow.isoformat(),
+    availability_service.add_availability_exception(actor=candidate_actor(user),candidate_id=user['candidate_id'],exception_date=tomorrow.isoformat(),
         start_minute=600,end_minute=660)
     response=client.put('/api/v1/me/availability/exceptions',headers=user['headers'],json={
         'from_date':today.isoformat(),'to_date':today.isoformat(),'exceptions':[]})

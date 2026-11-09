@@ -2,6 +2,11 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## AUTH-CODEX-006 - candidate current-session boundary2026-11-10
+
+-9 human API paths take actualActorContext. candidate_transaction requires actual READ COMMITTED (frozen outerRR fail closed). Own profile FOR SHARE read or FOR UPDATE write, CV material then current shared account_authority; policy unchanged, no UID-only human fallback. Legacy availability2 actor-owned ID binding and atomic audits. Same-transaction profile/schedule responses preserve guards tocommit.
+- Internal get_schedule/read_snapshot/load_snapshot/matching unchanged. No new migration/dependency/contract; runtime0012/111,canonical94. Initial109 native running; final code/source/CI validation next, pilotfalse. PR60/59 final935742d785 CI525.26s/469.37s merged73d3565.
+
 ## STORAGE-CODEX-001 / AUTH-CODEX-005 - current2026-11-10
 
 - Merged PR58 forward0012 adds files.storage_bucket/storage_version_id/storage_etag and new-write guards; legacy object_version is not guessed. Explicit source VersionId+IfMatch, private PUT reference, all6 GET callers, queued source/token fences and live Enabled readiness. Existing accepted authority/proof preserved; no new tables: runtime111/canonical94. Actual MinIO/PG tests and full757 CI passed twice; provider IAM/retention/live and pilot separate.

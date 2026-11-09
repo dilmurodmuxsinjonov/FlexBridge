@@ -1,7 +1,7 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
 Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
-Codex fix/59-file-session-authority branchida ishlamoqda. Bir xil fayllarni parallel
+Codex fix/61-candidate-session-authority branchida ishlamoqda. Bir xil fayllarni parallel
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
@@ -28,58 +28,66 @@ Canonical94 va49 explicit/83 placeholder registrations acceptance foizi emas.
 Pilot hali tayyor emas; live IAM/retention/credential rotation/legal identity/DR,
 frontend va umumiy R1 AC ochiq. Owner file session authority PR58 doirasiga kirmagan.
 
-## Joriy paket: Issue59 - owner file current-session authority
+## Qabul qilingan file authority va joriy Issue61
 
-https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/59
-Branch fix/59-file-session-authority merged04ffd42 bazasida. Codex kodni yozdi:
-3 owner file method/caller actual ActorContext oladi, business file locks -> current
-user/session/auth_version/expiry -> existing sensitive-role MFA -> HEAD/sign/write ->
-commit. Initiation guard presign/insert oldidan. Download endi owned file row lock.
-Onboarding account_authority helperi o'zgarmagan policy bilan authority.py ga olindi.
-Ordinary PASSWORD va current sensitive MFA saqlanadi; user-id-only fallback yo'q.
-Worker recorded uploadni keyingi logoutdan mustaqil scan qiladi; fake user session yo'q.
+PR60/Issue59 merged73d3565968d26c8d1f31c420febd36a3549649d5, Issue59 closed.
+Source370d9c3; final935742d8dd621c786f2d49026cfe9633525c4647 complete785
+CI42699964118/42699973773 passed525.26s/469.37s.3 owner file methods real actor/
+current account/session/assurance, business->user/session->provider->commit,
+ordinary PASSWORD/MFA and recorded async scan preserved. Native27/affected72 and
+source review limits are in files_authority/HISOBOT.md; counts overlap.
+Final metadata: candidate_authority/pr60_final_ci.json.
 
-Dalil:
+Issue61: https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/61
+Branch fix/61-candidate-session-authority from merged73d3565. Kod yozildi,
+Initial109 native107 passed/2 failed318.07s: ikkala failure existing
+AvailabilityConstraintError403 ni test boshqa exception kutgani edi. Production guard
+yumshamadi; class expectation corrected. Corrected2+new formal teacher PASSWORD
+control3 passed12.18s. New suite110 cases endi source/CI gate kutadi;110 native
+allpassed deb yozma. Old candidate/contracts/regressions suite hozir yurmoqda.
+9 API path: profile GET/PATCH, skills PATCH, CV link/unlink, rules/exceptions
+replacement, private schedule GET va2 legacy availability-add POST. CV unlink
+shu HTTP yo'lning alohida holati,10 operation variants; yangi endpoint emas.
 
-- Oldafd actual row wait+HTTP logout200dan keyin complete202/SCANNING/event1;
-  initial1 failed33.57s. Expanded b25115 corrected denial probes all failed19.27s:
- 3 method x logout/expiry/auth_version/suspended/late-sensitive-role. First15 run
- 12 actual assertion+3 invalid self-grant fixture failure edi; check constraint
- retained, distinct trusted grantor bilan fixture corrected. Public/foreign exploit emas.
-- Complete real file-row wait, old download actual table-lock wait; initiation
- service-entry barrier after real HTTP auth, SQL wait da'vosi emas. Storage doubled.
-- New27 native passed36.60s: stale denial, reverse actual logout waits, ordinary
- PASSWORD/current MFA, forged session va provider rollback. Bu full785 yoki final
- source/CI qabuli emas. Affected old EDU/storage72 native passed102.01s;
- actual S3 logout->worker-CLEAN/old-token401 testi ham o'tdi.
- Source370d9c3 read-only review exit0 no scoped findings; complete785 CI
- push42697954266/PR42697965001 passed534.16s/458.37s. Evidence-only head
- checks/merge hali qolgan, PR60 draft. HISOBOT.md current source dalilni bog'laydi.
+ActualActorContext har human service'ga beriladi. candidate_transaction actual
+READ COMMITTED talab qiladi, frozen outer RRni fail closed qiladi. Private reads
+own profile FOR SHARE -> current account_authority -> same-transaction render;
+writes profile UPDATE -> CV material file if needed -> current account guard ->
+write/audit/render ->commit. account_authority existing policy, current roles/MFA;
+ordinary PASSWORD/teacher-only saqlanadi. Internal matching get_schedule/read_snapshot/
+load_snapshot o'zgarmadi. Legacy calls actor's own profile/candidate_idni tekshiradi,
+new atomic audit bilan inserts; AVAILABLE_EXTRA alias preserved. No UID-only human
+fallback. Tests' old direct fixtures now carry actual sessions.
+
+Dalil: old same370 source combined9 red17.20s after actual logout/waits still200/201,
+actual business changes/private own-data. Earlier5/5/2/2 overlap. Initial7-path review
+then explicit legacy2 follow-up actual Copilot exit0, no SHA/test/model/pilot certify.
+Reja/qarorlar/raw red/probes: reviews/2026-11-10/candidate_authority. No anonymous/
+foreign/live exploitation claim. CV/skill metadata trusted fixtures.
 
 Keyingi aniq qadamlar:
 
-1. reviews/2026-11-10/files_authority/DECISIONS.md, backend/FILE_AUTHORITY.md va
-   joriy test process/JUnitni tekshir. Kodning qolgan regressiyalarini tugat.
-2. Source commit/draft PR ochib current full CI chiqar. Izolyatsiyalangan pinned
-   source'ni read-only Copilot review'iga ber; hech bir agentga ignored secrets/state
-   yoki boshqa agent fayllarini edit qilish vakolati berilmasin.
-3. Topilgan concrete nuqson bo'lsa mustaqil red probe/fix; latest actual full native/
-   CI, manifest/hisobot/01/02/03 va shu handoffni yangila. Evidence-only latest head
-   checks passed bo'lgandan keyin --match-head-commit merge.
-4. Issue61 keyingi: same370d9c3 combined9 candidate probes failed17.20s.5 canonical
-   write+2 private GET+2 legacy availability POST actual logoutdan keyin200/201.
-   Legacy siblings included; nine-path plan/review/source evidence candidate_authority
-   folderda.59 ularni yopmaydi.61 implementation faqat PR60 merge
-   ortidan. READ COMMITTED profile SHARE/current account guard, CV material locks,
-   internal matching read_snapshot unchanged, write response same transaction.
-   So'ng original1.3/1.4 talablaridan EDU admission/enrollmentni qur. R2 freelance qo'shma.
+1. Old affected test process/JUnit holatini tekshir. Nativeinitial109 va follow-up3
+   scope'ini ajrat. Ishlab turgan app source'ni test o'rtasida o'zgartirma.
+2. Corrected new security suite, old candidate/contracts/availability snapshot and
+   query-count regressions, file/EDU positives pass; ordinary teacher-only PASSWORD
+   positive control formal public appointment flow bilan kerak bo'lsa qo'shiladi.
+3. Source commit/draft PR/current full CI, isolated pinned read-only peer review,
+   concrete regressions/fixes bo'lsa dalili, manifest/HISOBOT/jurnallar/handoff.
+4. Latest evidence-head checks passed -> matching-head merge. No migration/handler
+   yoki dependency qo'shilmadi; runtime0012/111/49 explicit83 placeholder.
+5. Generic catalog/matching/job application va boshqa domains alohida audit scope;
+   bu9-path61 paketi hammasini yopdi dema. Keyin original1.3/1.4 EDU admission/
+   enrollment talablaridan navbatdagi bounded feature paketini qur. R2 freelance yo'q.
 
 ## Ish muhiti va tugamagan system install
 
 - D:\FlexBridge\.venv: backend/requirements.txt installed, pip check0. IDE interpreter
   .vscode/settings.json da. Global boshqa loyihalar dependencylarini almashtirma.
 - PostgreSQL17.11 binaries D:\Codex\.tools\postgresql-17.11\pgsql\bin,
-  test server127.0.0.1:55440. Faqat random flexbridge_test_* disposable bazalar.
+  test server127.0.0.1:55440 (actual accepting02:14). Faqat random flexbridge_test_*
+  disposable bazalar. IDE'dagi backend/.data/pg_live uchun pg_ctl status02:14
+  no server running; bu katalogga live migration/deploy bajarildi deb yozma.
 - MinIO_TEST_BINARY D:\Codex\.tools\minio-2025-02-18\minio.exe. Publisher SHA256
   scripts/prepare_test_minio.py da. Current compose reliziga mos, production release
   support/security sertifikati emas. CI Linux binary ham haqiqiy sinovda ishladi.

@@ -37,6 +37,7 @@ def create_availability_rule_endpoint(
         raise HTTPException(403,detail={"code":"CANDIDATE_SCOPE_FORBIDDEN"})
     try:
         return availability_service.add_availability_rule(
+            actor=actor,
             candidate_id=candidate_id,
             weekday=payload.weekday,
             start_minute=payload.start_minute,
@@ -60,6 +61,7 @@ def create_availability_exception_endpoint(
         raise HTTPException(403,detail={"code":"CANDIDATE_SCOPE_FORBIDDEN"})
     try:
         return availability_service.add_availability_exception(
+            actor=actor,
             candidate_id=candidate_id,
             exception_date=payload.exception_date,
             start_minute=payload.start_minute,

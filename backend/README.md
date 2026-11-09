@@ -24,8 +24,9 @@ revision/consent/revocation behavior and bounded validation are documented in
 732-test CI twice; final evidence-head732 CI also passed twice and PR56 merged12cd307.
 Private retrieval version binding merged in PR58/Issue57, final757 CI passed twice.
 Migration/legacy policy and real S3 tests are documented in [STORAGE_VERSIONS.md](STORAGE_VERSIONS.md).
-Current owner file session authority is under validation for Issue59; see
-[FILE_AUTHORITY.md](FILE_AUTHORITY.md). Pilot is not ready.
+Owner file session authority merged PR60/Issue59 after final785 CI passed twice;
+see [FILE_AUTHORITY.md](FILE_AUTHORITY.md). Candidate self-service authority is under
+validation for Issue61; see [CANDIDATE_AUTHORITY.md](CANDIDATE_AUTHORITY.md). Pilot is not ready.
 For the current Windows tool installation status and exact continuation steps, read
 [ANTIGRAVITY_HANDOFF.md](../ANTIGRAVITY_HANDOFF.md). Use the project `.venv` interpreter.
 Additional owners require an existing active staff

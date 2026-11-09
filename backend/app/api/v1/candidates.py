@@ -93,23 +93,23 @@ class ExceptionsInput(Input):
 
 @router.get('/me/candidate')
 def get_profile(actor: ActorContext = Depends(require_actor_context)):
-    return candidate_service.get_profile(actor.user_id)
+    return candidate_service.get_profile(actor)
 
 
 @router.patch('/me/candidate')
 def patch_profile(payload: ProfilePatch, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-026', **candidate_service.update_profile(actor.user_id, payload.model_dump(exclude_unset=True))}
+    return {'contract_id': 'API-026', **candidate_service.update_profile(actor, payload.model_dump(exclude_unset=True))}
 
 
 @router.patch('/me/candidate/skills')
 def patch_skills(payload: SkillsPatch, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-032', **candidate_service.update_skills(actor.user_id,
+    return {'contract_id': 'API-032', **candidate_service.update_skills(actor,
         [item.model_dump() for item in payload.skills], payload.remove_skill_ids)}
 
 
 @router.post('/me/candidate/cv')
 def link_cv(payload: CVInput, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-033', **candidate_service.link_cv(actor.user_id, payload.file_id)}
+    return {'contract_id': 'API-033', **candidate_service.link_cv(actor, payload.file_id)}
 
 
 @router.get('/skills')
@@ -120,17 +120,17 @@ def skill_catalog(q: str = Query(default='', max_length=100), limit: int = Query
 
 @router.put('/me/availability')
 def put_availability(payload: AvailabilityInput, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-028', **availability_service.replace_rules(actor.user_id,
+    return {'contract_id': 'API-028', **availability_service.replace_rules(actor,
         [item.model_dump() for item in payload.rules])}
 
 
 @router.get('/me/availability')
 def get_availability(from_date: date | None = None, days: int = Query(default=28, ge=1, le=366),
                      actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-035', **availability_service.get_schedule(candidate_id_for(actor), from_date, days)}
+    return {'contract_id': 'API-035', **availability_service.get_my_schedule(actor, from_date, days)}
 
 
 @router.put('/me/availability/exceptions')
 def put_exceptions(payload: ExceptionsInput, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id': 'API-036', **availability_service.replace_exceptions(actor.user_id,
+    return {'contract_id': 'API-036', **availability_service.replace_exceptions(actor,
         payload.from_date, payload.to_date, [item.model_dump() for item in payload.exceptions])}

@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan2026-11-10 - Codex. PR58 merged04ffd42, Issue57 closed; final408b3cd full757 CI375.77s/507.07s. Issue59 file-session authority kodi yozildi, native27 passed36.60s; affected72 passed102.01s; pinned review/fullCI gates qolgan. Runtime0012/111,49 explicit83 placeholder, pilot tayyor emas. Antigravity uchun ANTIGRAVITY_HANDOFF.md; Docker/WSL admin install incomplete, ClamAV local benign smoke passed.
+Yangilangan2026-11-10 - Codex. PR60 merged73d3565/Issue59 closed, final935742d full785 CI525.26s/469.37s. Issue61 candidate9-path authority kodi yozildi, native tests yurmoqda; no source/CI acceptance yet. Runtime0012/111,49 explicit83 placeholder/pilotfalse. Antigravity handoff current; pg_live stopped02:14, isolated testPG55440 active; Docker/WSL admin install incomplete.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -518,7 +518,7 @@ Keyingi kichik qadam:
 
 ## AUTH-CODEX-005 - Owner file current-session authority (Issue59)
 
-- Holat: `Tekshiruvda`, implementatsiya yozildi; Codex, fix/59-file-session-authority merged04ffd42 bazasida. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
+- Holat: `Bajarildi` (bounded owner-file backend scope); Codex, PR60 merged73d3565968d26c8d1f31c420febd36a3549649d5/Issue59 closed; final935742d785 CI525.26s/469.37s. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
 - Doira: upload intent/complete/owner download actual ActorContext, current account/session/existing sensitive MFA after business locks and thru commit, no sessionless fallback; version/source/outbox/ownership guarantees preserved. Ordinary PASSWORD unchanged. Candidate/CV sibling scope alohida audit qilinadi. Planning peer review, both authority orderings/security/expiry/rollback/provider integration/full CI kerak; pilotfalse.
 
 - LOG-056: exact b251644 full757 Linux PG/actual MinIO CI42687285321/42687299361 passed530.01s/513.04s. Source/fixture reviews exit0; scoped findings none. Native counts/failures/limits separated in HISOBOT.md. Evidence-only checks/merge remain;59 next, pilotfalse.
@@ -531,5 +531,9 @@ Keyingi kichik qadam:
 
 ## AUTH-CODEX-006 - Candidate self-service authority (Issue61)
 
-- Holat: `Rejada`, confirmed9-path residual; Codex; PR60 merge ortidan yangi branch. Pinned370d9c3 actual HTTP/PG combined9 failed17.20s:5 canonical writes+2 private GET+2 legacy availability adds after observed waits/logout200 still200/201, actual business changes/private own-candidate result. Not anonymous/foreign exploitation. Earlier5/5/2/2 overlap; evidence reviews/2026-11-10/candidate_authority.
+- Holat: `Tekshiruvda` (initial native tests); Codex, fix/61-candidate-session-authority merged73d3565 bazasida.9-path code yozildi, no UID-only fallback; final source/CI acceptance hali yo'q. Pinned370d9c3 actual HTTP/PG combined9 failed17.20s:5 canonical writes+2 private GET+2 legacy availability adds after observed waits/logout200 still200/201, actual business changes/private own-candidate result. Not anonymous/foreign exploitation. Earlier5/5/2/2 overlap; evidence reviews/2026-11-10/candidate_authority.
 - Plan initial7 then explicit legacy2 scope review both actual read-only Copilot exit0; no test/SHA/model/pilot certification. RealActorContext, profile/file before current account guards, READ COMMITTED profile SHARE private reads, write response beforecommit; matching internal read_snapshot preserved. All9 human callers covered without actorless fallback, interval/EXCLUDE/AVAILABLE_EXTRA and skill/CV verification unchanged. No61 code yet; current source785 covers59 only. Next61 then EDU; pilotfalse.
+
+- LOG-059:61 READ COMMITTED human boundary, profile SHARE read guards/material write guards, same-transaction responses, actual actors and atomic legacy audits implemented. Existing internal matching snapshot unchanged; new109 initial native running, old direct fixtures real sessions, ordinary policy unchanged.
+
+- LOG-059 follow-up: initial109 new native107 passed/2 exception-class harness failures318.07s; actual legacy403 scope guards correct. Test expectation corrected, no runtime change; fixed2+formal TeacherPASSWORD case3 passed12.18s. Suite now110, not yet full native110/CI acceptance. Old affected candidate/contracts/regressions running.

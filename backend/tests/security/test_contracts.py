@@ -7,6 +7,7 @@ from app.db.storage import transaction,table
 from app.services.opportunities import opportunity_service,OpportunityConstraintError,validate_compensation_contract_matrix
 from app.services.availability import availability_service
 from test_adapters_and_quota import draft,approve_for_test
+from test_candidate import candidate_actor
 from test_regressions import checkout,capture,billing,count,placement_fixture,billing_actor
 
 @pytest.mark.parametrize('contract,compensation,hourly,stipend',[
@@ -22,7 +23,7 @@ def test_matching_complete_groups_and_db_shift_exclusion(identities,organization
     o,i,a=checkout(owner,organization);capture(a)
     rev=draft(owner,organization)
     # Onsite matching now includes the specified 30-minute travel buffer at both ends.
-    for weekday in (1,3):availability_service.add_availability_rule(candidate_id=candidate['candidate_id'],weekday=weekday,start_minute=510,end_minute=750)
+    for weekday in (1,3):availability_service.add_availability_rule(actor=candidate_actor(candidate),candidate_id=candidate['candidate_id'],weekday=weekday,start_minute=510,end_minute=750)
     for group,days in [('GROUP_A',(1,3,5)),('GROUP_B',(1,3))]:
         for weekday in days:opportunity_service.add_opportunity_shift(revision_id=rev['id'],group_code=group,weekday=weekday,
             start_minute=540,end_minute=720,actor_user_id=owner['user_id'])
