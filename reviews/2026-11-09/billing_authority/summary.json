@@ -1,0 +1,91 @@
+{
+  "commit": "1368ee528236bce8e9e7b52fd0fe799e2ecbac30",
+  "native_baseline": {
+    "commit": "d88ebafb902aec7cfb1caf1afbc096d3fdd96b45",
+    "new_cases": {
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 101.215
+    },
+    "old_affected": {
+      "tests": 137,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 149.621
+    }
+  },
+  "native_replay_delta": {
+    "commit": "895fb8c180bd35b8e8699ff023aea1342bae7a3d",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 9.032
+  },
+  "native_final": {
+    "commit": "1368ee528236bce8e9e7b52fd0fe799e2ecbac30",
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 104.227
+  },
+  "initial_regressions": {
+    "runtime_commit": "5856dc6b6f73ac2f42f5e98e5993d4604a17c336",
+    "refund": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 8.769
+    },
+    "checkout_org_wait": {
+      "tests": 5,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 12.061
+    },
+    "target_wait_repeat": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 9.683
+    }
+  },
+  "ci_runs": [
+    42564327339,
+    42564331479
+  ],
+  "ci_tests": 582,
+  "ci_conclusion": "success",
+  "ci_elapsed_seconds": [
+    437.43,
+    441.9
+  ],
+  "prior_ci": {
+    "commit": "d88ebafb902aec7cfb1caf1afbc096d3fdd96b45",
+    "runs": [
+      42563376429,
+      42563380627
+    ],
+    "tests": 579,
+    "conclusion": "success",
+    "elapsed_seconds": [
+      429.74,
+      381.18
+    ]
+  },
+  "excluded_scope": [
+    "Quota publish/transition assurance",
+    "Trusted provider callback/worker policy changes",
+    "Live merchant/provider integration and secret rotation",
+    "Browser/hardware/DR/pilot acceptance"
+  ],
+  "pilot_ready": false,
+  "note": "Final runtime matches d88ebaf. Native final78 reruns prior75 plus added3; old137 and intermediate3 are separate overlapping evidence, not added as distinct coverage or a native full-suite claim. Repeated initial target subset is not distinct vulnerabilities."
+}

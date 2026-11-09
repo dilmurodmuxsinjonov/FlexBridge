@@ -166,7 +166,7 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## AUTH-CODEX-004 — Human money transaction authority
 
-- Holat: `Tekshiruvda`; Codex; Issue51, fix/51-billing-authority. Reja/dalil reviews/2026-11-09/billing_authority. Old5856 native refund3/org-wait5/repeated target3 failures saqlandi. Four services/six routes actual actor bilan business targetlardan keyin current MFA/scoped authorityni commitgacha ushlaydi. No sessionless fallback/schema/provider change. Native75 passed101.21s, old7 affected modul yurmoqda, full579 CI/pinned review hali qabul uchun kerak.
+- Holat: `Tekshiruvda`; Codex; Issue51/PR52, fix/51-billing-authority. Reja/dalil reviews/2026-11-09/billing_authority. Old5856 refund3/org-wait5/target-repeat3 failures saqlandi. d88ebaf native75/old137 va ikkala full579 CI passed. Code review production defect topmadi;895fb8c replay-role+fresh MFA3 cases passed9.03s.1368ee5 actual wait graphs bilan test proofni kuchaytirdi; final78 native passed104.23s, wait review gap closed. Runtime d88 bilan aynan bir xil; full582 CI42564327339/42564331479 ham passed437.43s/441.90s. Evidence-only checks/merge qolgan. Overlapping native runs distinct total emas. No sessionless fallback/schema/provider change, pilotfalse.
 - Funds/idempotency/price/dual control/audit/outbox saqlanadi; signed callback logoutdan keyin ishlashi positive control. Quota publish/transitiondagi boshqa assurance o'zgarmadi. Synthetic HMAC/admin grant fixtures actual merchant/provider/secret rotation/browser/DR/pilot emas. Scope va expiry boundary guideda; keyin EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash

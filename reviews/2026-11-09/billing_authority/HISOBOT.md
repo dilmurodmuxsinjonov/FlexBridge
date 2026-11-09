@@ -26,8 +26,25 @@ business waits, public session/MFA management, trusted account/auth_version/role
 changes, opposite commit serialization, valid controls/receipts, rollback, service
 session/cache boundaries, parallel reservation/approval and requester separation pass.
 Signed capture still works after human logout. Native timings include Windows cleanup,
-not API performance. Old affected modules, complete579 CI and pinned source review
-are pending; no package or pilot acceptance is claimed yet.
+not API performance. Old7 affected modules137 passed,149.62s,0 failure/error/skip,
+1 framework warning on the same d88ebaf source. Both full579 CI42563376429/42563380627
+passed429.74s/381.18s. Pinned source review found no concrete implementation defect but
+requested role revoke on matching order/payment replays.895fb8c adds those2 and a fresh
+actual HTTP MFA login receipt control; native3 passed9.03s. No runtime source changed.
+
+Follow-up test review requested explicit PostgreSQL wait proof beyond before-cursor/
+unfinished-future observation.1368ee5 adds4 test lines: capture independent blocker PID
+and wait for pg_blocking_pids to report a blocked backend BEFORE authority changes.
+Both pre-authority wait paths (36 variants) and reverse-order tests now observe actual
+wait graphs. Final native78 passed104.23s,0 failure/error/skip,1 framework warning.
+These78 rerun earlier75+3; do not sum them as distinct coverage. Old137 belong to the
+same unchanged runtime on d88. Final wait-graph review exit0 confirms the requested gap
+closed. The helper observes any backend blocked by the unique holder, not an explicit
+HTTP-request backend PID; the reviewer considers the isolated target/one pending request
+a reasonable proof. Strict request-PID correlation is not claimed.
+
+Final full582 CI42564327339/42564331479 passed437.43s/441.90s on1368ee5.
+Evidence-only head checks/merge remain; no overall pilot acceptance is claimed.
 
 Actual read-only Copilot planning review exit0 is saved (copilot_exit.txt): four-method/
 six-caller scope, breaker/org/target-before-authority ordering, receipt/idempotency
