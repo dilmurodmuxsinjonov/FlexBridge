@@ -5,8 +5,19 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.organizations import organization_service as service
+from app.services.institution_onboarding import institution_onboarding_service
+from app.api.dependencies import require_platform
+from app.services.organizations import require_mfa
+from app.db.storage import transaction
+from app.services.placements import get_row
 
 router = APIRouter(prefix='/api/v1', tags=['organizations'])
+
+
+def reviewer_service(actor,case_id):
+    require_platform(actor,'MODERATOR');require_mfa(actor)
+    with transaction() as conn:case=get_row(conn,'verification_cases',case_id)
+    return institution_onboarding_service if case['kind']=='INSTITUTION_APPOINTMENT' else service
 
 class Input(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
@@ -85,23 +96,24 @@ def revoke(org: UUID, id: UUID, payload: RevokeInput, actor: ActorContext = Depe
 
 @router.get('/operator/verification-cases')
 def queue(unassigned: bool = False, limit: int = Query(default=50, ge=1, le=100), actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id':'API-109', 'items':service.queue(actor, unassigned, limit)}
+    items=service.queue(actor,unassigned,limit)+institution_onboarding_service.queue(actor,unassigned,limit)
+    return {'contract_id':'API-109','items':sorted(items,key=lambda item:(item['due_at'],item['id']))[:limit]}
 
 @router.post('/operator/verification-cases/{id}/claim')
 def claim(id: UUID, actor: ActorContext = Depends(require_actor_context)):
-    return service.claim(actor, str(id))
+    return reviewer_service(actor,str(id)).claim(actor,str(id))
 
 @router.get('/operator/verification-cases/{id}')
 def detail(id: UUID, actor: ActorContext = Depends(require_actor_context)):
-    return service.case_detail(actor, str(id))
+    return reviewer_service(actor,str(id)).case_detail(actor,str(id))
 
 @router.get('/operator/verification-cases/{id}/files/{file_id}/download')
 def download(id: UUID, file_id: UUID, actor: ActorContext = Depends(require_actor_context)):
-    return service.download_evidence(actor, str(id), str(file_id))
+    return reviewer_service(actor,str(id)).download_evidence(actor,str(id),str(file_id))
 
 @router.post('/operator/verification-cases/{id}/decide')
 def decide(id: UUID, payload: DecisionInput, actor: ActorContext = Depends(require_actor_context)):
-    return {'contract_id':'API-110', **service.decide(actor, str(id), **payload.model_dump())}
+    return {'contract_id':'API-110',**reviewer_service(actor,str(id)).decide(actor,str(id),**payload.model_dump())}
 
 @router.get('/organizations/{org}/membership-requests/{id}')
 def join_detail(org: UUID, id: UUID, actor: ActorContext = Depends(require_actor_context)):

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="52.781" timestamp="2026-11-09T22:56:15.169644+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_followup_regressions" name="test_matching_reviewer_claim_is_a_receipt_without_duplicate_audit_or_timestamp" time="7.823"><failure message="AssertionError: assert ({'id': '9fc6c...'revision': 1} == {'id': '9fc6c...'revision': 1}&#10;  &#10;  Omitting 3 identical items, use -vv to show&#10;  Use -v to get more diff and 7 == 6)&#10; +  where 7 = count('audit_events')">backend\tests\security\test_institution_followup_regressions.py:16: in test_matching_reviewer_claim_is_a_receipt_without_duplicate_audit_or_timestamp
+    assert again.json()==first.json() and count('audit_events')==before
+E   AssertionError: assert ({'id': '9fc6c...'revision': 1} == {'id': '9fc6c...'revision': 1}
+E     
+E     Omitting 3 identical items, use -vv to show
+E     Use -v to get more diff and 7 == 6)
+E    +  where 7 = count('audit_events')</failure></testcase><testcase classname="tests.security.test_institution_followup_regressions" name="test_omitted_revision_end_dates_preserve_existing_limits" time="41.235"><failure message="AssertionError: assert None == '2027-11-09'">backend\tests\security\test_institution_followup_regressions.py:28: in test_omitted_revision_end_dates_preserve_existing_limits
+    assert response.json()['valid_to']==f['body']['valid_to']
+E   AssertionError: assert None == '2027-11-09'</failure></testcase></testsuite></testsuites>

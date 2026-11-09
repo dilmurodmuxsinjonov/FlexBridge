@@ -13,6 +13,7 @@ class IAMHTTPMiddleware:
             '/api/v1/operations/', '/api/v1/moderation/', '/api/v1/moderation-appeals/',
             '/api/v1/operator/moderation-', '/api/v1/owner-requests/', '/api/v1/me/owner-requests',
             '/api/v1/owner-transfers/', '/api/v1/me/owner-transfers',
+            '/api/v1/institution-onboarding', '/api/v1/institution-appointments', '/api/v1/me/institution-appointments',
             '/api/v1/owner-continuity/', '/api/v1/operator/owner-continuity/')):
             return await self.app(scope,receive,send)
         def redact_invitation():

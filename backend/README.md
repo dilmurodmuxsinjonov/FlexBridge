@@ -17,7 +17,13 @@ Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
 Separate authenticated opportunity rejection
 appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
-The current head is `0010_owner_continuity`. Additional owners require an existing active staff
+The current branch head is `0011_institution_onboarding` (runtime111 tables;
+canonical v1.4 remains94). Reviewed first-coordinator and named teacher onboarding,
+revision/consent/revocation behavior and bounded validation are documented in
+[INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md). Source eadac11 passed full
+732-test CI twice; evidence-head checks and PR56 merge are tracked separately.
+Provider version-pinned private retrieval remains open in Issue57; pilot is not ready.
+Additional owners require an existing active staff
 membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](OWNER_ADDITIONS.md).
 Reviewed departure to an existing OWNER successor preserves other staff roles; see
 [OWNER_TRANSFERS.md](OWNER_TRANSFERS.md). Inaccessible-owner recovery remains open.

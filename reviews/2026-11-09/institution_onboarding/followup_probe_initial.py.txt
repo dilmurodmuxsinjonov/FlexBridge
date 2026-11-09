@@ -1,0 +1,29 @@
+"""Review follow-up: claim replay and conservative omitted-term semantics."""
+from sqlalchemy import select
+from app.db.storage import table,transaction
+from test_institution_onboarding import first_claim,submit,claim,decide
+from test_regressions import count
+
+
+def test_matching_reviewer_claim_is_a_receipt_without_duplicate_audit_or_timestamp(client,identities):
+    f=first_claim(identities);created=submit(client,f);assert created.status_code==202,created.text
+    case=created.json()['case_id'];moderator=identities('MODERATOR')
+    first=claim(client,moderator,case);assert first.status_code==200,first.text
+    before=count('audit_events')
+    with transaction() as conn:
+        cases=table('verification_cases');updated=conn.execute(select(cases.c.updated_at).where(cases.c.id==case)).scalar_one()
+    again=claim(client,moderator,case);assert again.status_code==200,again.text
+    assert again.json()==first.json() and count('audit_events')==before
+    with transaction() as conn:assert conn.execute(select(cases.c.updated_at).where(cases.c.id==case)).scalar_one()==updated
+
+
+def test_omitted_revision_end_dates_preserve_existing_limits(client,identities):
+    f=first_claim(identities);created=submit(client,f);assert created.status_code==202,created.text
+    appointment,case=created.json()['id'],created.json()['case_id'];moderator=identities('MODERATOR')
+    assert claim(client,moderator,case).status_code==200
+    assert decide(client,moderator,case,'NEEDS_INFO').status_code==200
+    payload={**f['body'],'expected_revision':1};payload.pop('valid_to');payload.pop('agreement_valid_to')
+    response=client.post('/api/v1/institution-appointments/'+appointment+'/revisions',headers=f['user']['headers'],json=payload)
+    assert response.status_code==202,response.text
+    assert response.json()['valid_to']==f['body']['valid_to']
+    assert response.json()['proposal']['agreement']['valid_to']==f['body']['agreement_valid_to']

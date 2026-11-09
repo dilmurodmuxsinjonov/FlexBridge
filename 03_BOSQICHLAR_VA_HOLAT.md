@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49/50 merged. Issue51 human-money authority tuzatilmoqda, so'ng EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
+Yangilangan: 2026-11-10 - Codex. PR36/38/40/42/44/46/49/50/52/54 merged. Issue55/PR56 institution onboarding source review va ikkala732-test CI o'tdi; evidence-head checks/merge keyin. Keyingi Issue57 private storage version binding.49 explicit handler,83 ta501; bu acceptance foizi emas. Pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -171,8 +171,14 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## EDU-CODEX-001A — Institutional authority prerequisite
 
-- Holat: `Tekshiruvda`; Codex; Issue53, fix/53-institution-authority. Reja va saqlangan probe dalillari reviews/2026-11-09/institution_authority. Eski1368 source corrected probe8 failed/1 valid control passed17.77s: appointment validity/identity/acceptance cheklovlari ishlamagan. Dastlabki9 fixture TypeError alohida, security finding emas. Initial predicate fix9 passed17.28s; bu keyingi butun paketning final qabuli emas.
+- Holat: `Bajarildi` (chegaralangan backend paketi); Codex; Issue53 closed, PR54 merge85dbb0e. Reja va saqlangan probe dalillari reviews/2026-11-09/institution_authority. Eski1368 source corrected probe8 failed/1 valid control passed17.77s: appointment validity/identity/acceptance cheklovlari ishlamagan. Dastlabki9 fixture TypeError alohida, security finding emas. Initial predicate fix9 passed17.28s; bu keyingi butun paketning final qabuli emas.
 - Shared effective role query va actual session/role locks existing academic create/revoke/reviewga qo‘llandi. Initial academic59 native passed267.27s, old affected128 passed362.14s. Actual Copilot exit0 review dual-role MFA service gapini topdi; middleware static dual role uchun ishlaydi, lekin post-preflight grant actual HTTP201 bilan tasdiqlandi. Imported revision-author binding ham qo‘shildi; old runtime3 new regressions failed51.04s. Fix2c3f2e1da current sensitive roles MFA va author/candidate tekshiruvi bor; delta4 passed38.59s, exact-source final93 passed273.95s. Read-only follow-up exit0 findings resolved/no concrete remaining defect. Both complete675 CI42620428502/42620435667 passed418.26s/346.12s. Evidence-only checks/matching-head merge qolgan; overlapping runs unique count sifatida qo‘shilmaydi. Fixture scope/document metadata trusted import, yangi public intake/acceptance/admission API yoki legal certification emas. API017/096/097 hali501. Keyingi paket EDU-CODEX-001B; pilotfalse.
+
+## EDU-CODEX-001B — Reviewed institution onboarding
+
+- Holat: `Tekshiruvda`; Codex; Issue55/PR56, source eadac1149ba66d8e34f77190c21f1c6211183a65. API017/096/097, firstCOORD/currentCOORD requestedTEACHER, independent review+exact-revision named consent, explicit revisions/revoke/private files va forward0011 bajarildi. Runtime111/canonical94,49 explicit/83 placeholder. Evidence-only head checks va matching-head merge qolgan.
+- Native52 passed236.823s va old affected303 passed891.982s40e source bosqichida; post-review55 passed165.333s old contact fixdan avval; privacy/followup/Tashkent36 passed86.459s final source bilan. Overlap total emas. Final complete732 CI42672853806/42672846232 attempt2 passed450.27s/508.64s. Old prototype/privacy/SQL-MFA/retry probes va fixes, startup-server errors, real wait graph dalillari HISOBOT.md ichida. Actual read-only Copilot follow-up exit0 findings closed; agent test/SHA/pilot certify qilmagan.
+- Keyingi Issue57: actual private GET provider version binding; hozir metadata snapshots/content-addressed keys actual provider immutability proof emas. Additional coordinator/recovery/student admission/export/grade/frontend/live identity/legal/provider certification alohida; pilotfalse.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 

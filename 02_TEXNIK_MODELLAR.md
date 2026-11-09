@@ -2,6 +2,11 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## EDU-CODEX-001B — reviewed appointment workflow (2026-11-09, in progress)
+
+- Dedicated institution_onboarding service/router, explicit reviewer case dispatch va forward0011 typed proof metadata: requests/submissions/consents/decisions append-only; runtime111, historical canonical94. Registry upper(btrim) uniqueness/collision preflight; malformed legacy grant closure audit; current active membership partial uniqueness revoked tarixni saqlaydi.
+- Current-session/MFA, current original COORD grant, exact named user/contact/revision, file SHA/object version snapshots va independent reviewer bir UOWda tekshiriladi. Foreign user NOWAIT + exact identity contact try-advisory lock, sorted file locks; busy409 full rollback. Teacher-only PASSWORD saqlanadi, sensitive-role SQL/Python MFA siyosati moslandi.3-weekday response target va24-hour pending consent alohida. Final native/source review/CI hali davom etadi; pilotfalse.
+
 ## EDU-CODEX-001A — current institution authority (2026-11-09)
 
 - Issue53: bitta SQL predicate sessiya rol yorliqlari, institution scope va akademik transaction guardlarida ishlatiladi. Exact user/institution appointment, accepted membership/appointment, active status, nonrevoked grant va Tashkent inclusive dates talab qilinadi. Invalid legacy tarix o‘chirilmaydi. Yangi intake/grant API hali yo‘q.

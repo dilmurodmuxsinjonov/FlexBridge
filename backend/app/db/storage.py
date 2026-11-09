@@ -111,6 +111,8 @@ owner_continuity_events = Table('owner_continuity_events',metadata,
     Column('session_id',UUID(as_uuid=False),nullable=False),Column('created_at',DateTime(timezone=True),nullable=False),
     Column('claim_id',UUID(as_uuid=False)),Column('reason',Text),Column('result_owner_grant_id',UUID(as_uuid=False)),
     Column('ownership_event_id',UUID(as_uuid=False)))
+from app.db.institution_onboarding import register_tables as register_institution_tables
+register_institution_tables(metadata,_TYPES)
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -149,7 +151,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0010_owner_continuity':
+        if revision != '0011_institution_onboarding':
             raise RuntimeError('Database migrations are not current')
     return engine
 

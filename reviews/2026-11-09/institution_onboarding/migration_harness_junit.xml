@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="15.766" timestamp="2026-11-09T18:16:24.847738+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_migration" name="test_populated_upgrade_closes_invalid_grant_preserves_history_and_valid_authority" time="12.864"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;files&quot; violates check constraint &quot;chk_clean_stored_object&quot;&#10;DETAIL:  Failing row contains (82dfb2b7-b68f-414f-af6f-fc17b7907ff2, 2026-11-09 18:16:36.837517+05, 2026-11-09 18:16:36.837517+05, 7978a4b1-4129-4e39-8de5-e4aba84af35e, legacy/a729292e-d36c-4387-8a3c-2c7721a5e286, appointment.pdf, application/pdf, 100, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, CLEAN, VERIFICATION_EVIDENCE, null, trusted-legacy-version, null, 2026-11-09 18:16:36.837517+05).&#10;[SQL: INSERT INTO flexbridge.files (id, created_at, updated_at, owner_user_id, storage_key, filename, mime_type, byte_size, sha256, scan_status, retention_class, object_version, scanned_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(owner_user_id)s::UUID, %(storage_key)s::VARCHAR, %(filename)s::VARCHAR, %(mime_type)s::VARCHAR, %(byte_size)s::INTEGER, %(sha256)s::VARCHAR, %(scan_status)s::VARCHAR, %(retention_class)s::VARCHAR, %(object_version)s::VARCHAR, %(scanned_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "files" violates check constraint "chk_clean_stored_object"
+E   DETAIL:  Failing row contains (82dfb2b7-b68f-414f-af6f-fc17b7907ff2, 2026-11-09 18:16:36.837517+05, 2026-11-09 18:16:36.837517+05, 7978a4b1-4129-4e39-8de5-e4aba84af35e, legacy/a729292e-d36c-4387-8a3c-2c7721a5e286, appointment.pdf, application/pdf, 100, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, CLEAN, VERIFICATION_EVIDENCE, null, trusted-legacy-version, null, 2026-11-09 18:16:36.837517+05).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_institution_migration.py:63: in test_populated_upgrade_closes_invalid_grant_preserves_history_and_valid_authority
+    bad=seed_old_scope(conn,mismatch=True);good=seed_old_scope(conn)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_migration.py:48: in seed_old_scope
+    file=insert_row(conn,'files',owner_user_id=user['id'],filename='appointment.pdf',mime_type='application/pdf',storage_key='legacy/'+str(uuid4()),
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "files" violates check constraint "chk_clean_stored_object"
+E   DETAIL:  Failing row contains (82dfb2b7-b68f-414f-af6f-fc17b7907ff2, 2026-11-09 18:16:36.837517+05, 2026-11-09 18:16:36.837517+05, 7978a4b1-4129-4e39-8de5-e4aba84af35e, legacy/a729292e-d36c-4387-8a3c-2c7721a5e286, appointment.pdf, application/pdf, 100, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, CLEAN, VERIFICATION_EVIDENCE, null, trusted-legacy-version, null, 2026-11-09 18:16:36.837517+05).
+E   [SQL: INSERT INTO flexbridge.files (id, created_at, updated_at, owner_user_id, storage_key, filename, mime_type, byte_size, sha256, scan_status, retention_class, object_version, scanned_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(owner_user_id)s::UUID, %(storage_key)s::VARCHAR, %(filename)s::VARCHAR, %(mime_type)s::VARCHAR, %(byte_size)s::INTEGER, %(sha256)s::VARCHAR, %(scan_status)s::VARCHAR, %(retention_class)s::VARCHAR, %(object_version)s::VARCHAR, %(scanned_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="16.298" timestamp="2026-11-09T22:33:48.069410+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_review_regressions" name="test_onboarding_families_use_private_headers_and_bound_request_bodies[cache_headers]" time="6.963"><failure message="AssertionError: ('/api/v1/institution-onboarding/options', {'content-length': '348', 'content-type': 'application/json'})&#10;assert None == 'no-store'&#10; +  where None = get('cache-control')&#10; +    where get = Headers({'content-length': '348', 'content-type': 'application/json'}).get&#10; +      where Headers({'content-length': '348', 'content-type': 'application/json'}) = &lt;Response [200 OK]&gt;.headers">backend\tests\security\test_institution_review_regressions.py:20: in test_onboarding_families_use_private_headers_and_bound_request_bodies
+    assert response.headers.get('cache-control')=='no-store',(path,dict(response.headers))
+E   AssertionError: ('/api/v1/institution-onboarding/options', {'content-length': '348', 'content-type': 'application/json'})
+E   assert None == 'no-store'
+E    +  where None = get('cache-control')
+E    +    where get = Headers({'content-length': '348', 'content-type': 'application/json'}).get
+E    +      where Headers({'content-length': '348', 'content-type': 'application/json'}) = &lt;Response [200 OK]&gt;.headers</failure></testcase><testcase classname="tests.security.test_institution_review_regressions" name="test_onboarding_families_use_private_headers_and_bound_request_bodies[body_limit]" time="1.904"><failure message="AssertionError: ('/api/v1/institution-onboarding/options', 200)&#10;assert 200 == 413&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_institution_review_regressions.py:25: in test_onboarding_families_use_private_headers_and_bound_request_bodies
+    assert response.status_code==413,(path,response.status_code)
+E   AssertionError: ('/api/v1/institution-onboarding/options', 200)
+E   assert 200 == 413
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_institution_review_regressions" name="test_db_consent_guard_matches_global_sensitive_role_mfa_policy" time="4.292"><failure message="Failed: DID NOT RAISE IntegrityError">backend\tests\security\test_institution_review_regressions.py:38: in test_db_consent_guard_matches_global_sensitive_role_mfa_policy
+    with pytest.raises(IntegrityError) as exc,transaction() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IntegrityError</failure></testcase></testsuite></testsuites>
