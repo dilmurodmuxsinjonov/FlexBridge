@@ -17,7 +17,10 @@ Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
 Separate authenticated opportunity rejection
 appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
-The current head is `0010_owner_continuity`. Additional owners require an existing active staff
+The current branch head is `0011_institution_onboarding` (runtime111 tables;
+canonical v1.4 remains94). Institution onboarding is under development and still
+requires full source review, migration/race regressions and CI before acceptance.
+Additional owners require an existing active staff
 membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](OWNER_ADDITIONS.md).
 Reviewed departure to an existing OWNER successor preserves other staff roles; see
 [OWNER_TRANSFERS.md](OWNER_TRANSFERS.md). Inaccessible-owner recovery remains open.

@@ -141,9 +141,13 @@ def test_review_current_parent_chain_required_without_effect(client,identities,o
             vals={'revoked_at':now()} if state=='assignment_revoked' else {'accepted_at':None if state=='assignment_unaccepted' else now()+timedelta(days=1)}
             conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
         elif state=='self_review':
-            # Trusted corrupted assignment to the student's own teacher identity.
-            conn.execute(table('institution_memberships').update().where(table('institution_memberships').c.id==f['teacher_member']['id']).values(user_id=f['candidate']['user_id']))
-            conn.execute(table('institution_appointments').update().where(table('institution_appointments').c.id==f['teacher_appointment']['id']).values(user_id=f['candidate']['user_id']))
+            # A student can also be a teacher, but may never review their own log.
+            # Create a properly linked identity rather than retargeting a grant.
+            tm=insert_row(conn,'institution_memberships',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],status='ACTIVE',accepted_at=now())
+            ta=insert_row(conn,'institution_appointments',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],
+                document_file_id=f['teacher_appointment']['document_file_id'],status='ACTIVE',valid_from=date.today(),accepted_at=now())
+            insert_row(conn,'institution_role_grants',membership_id=tm['id'],role_id=f['teacher_grant']['role_id'],appointment_id=ta['id'])
+            conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(teacher_membership_id=tm['id']))
             f['teacher']['headers']=f['candidate']['headers']
         else:
             name,key,values=targets[state];t=table(name);conn.execute(t.update().where(t.c.id==f[key]['id']).values(**values))
