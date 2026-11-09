@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app.api.dependencies import require_institution,ActorContext
 from app.db.storage import table,transaction,now
 from app.services.placements import insert_row
+from app.db.institution_scope import TASHKENT
 from test_candidate import cv_fixture
 from test_organizations import mfa_user
 
@@ -22,7 +23,7 @@ def setup_scope(identities,role='COORDINATOR'):
         inst=institution('Scope Test Institution');foreign=institution('Other Scope Institution')
         member=insert_row(conn,'institution_memberships',institution_id=inst['id'],user_id=user['user_id'],status='ACTIVE',accepted_at=now())
         appointment=insert_row(conn,'institution_appointments',institution_id=inst['id'],user_id=user['user_id'],document_file_id=file['id'],
-            status='ACTIVE',valid_from=date.today()-timedelta(days=30),valid_to=date.today()+timedelta(days=30),accepted_at=now())
+            status='ACTIVE',valid_from=now().astimezone(TASHKENT).date()-timedelta(days=30),valid_to=now().astimezone(TASHKENT).date()+timedelta(days=30),accepted_at=now())
         roles=table('role_catalog')
         rid=conn.execute(select(roles.c.id).where(roles.c.code==role,roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
         if not rid:rid=insert_row(conn,'role_catalog',code=role,scope_kind='INSTITUTION',description='Trusted institution staff fixture')['id']
@@ -39,8 +40,8 @@ def test_invalid_linked_appointment_cannot_supply_role_label_or_scope(client,ide
     with transaction() as conn:
         appts,members=table('institution_appointments'),table('institution_memberships')
         changes={
-            'expired':{'valid_to':date.today()-timedelta(days=1)},
-            'future':{'valid_from':date.today()+timedelta(days=1)},
+            'expired':{'valid_to':now().astimezone(TASHKENT).date()-timedelta(days=1)},
+            'future':{'valid_from':now().astimezone(TASHKENT).date()+timedelta(days=1)},
             'revoked':{'status':'REVOKED'},'unaccepted':{'accepted_at':None},
             'future_acceptance':{'accepted_at':now()+timedelta(days=1)}}
         if state in changes:conn.execute(appts.update().where(appts.c.id==appointment['id']).values(**changes[state]))

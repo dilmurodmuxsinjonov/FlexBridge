@@ -17,3 +17,15 @@ def test_pending_first_claimant_cannot_distinguish_registered_staff_contacts(cli
         replies.append(response.json()['detail']['code'])
     assert replies==['INSTITUTION_SCOPE_FORBIDDEN','INSTITUTION_SCOPE_FORBIDDEN'],replies
     assert count('institution_onboarding_requests')==count('institutions')==1 and count('institution_role_grants')==0
+
+
+def test_nonrequester_revision_does_not_reveal_or_lock_foreign_agreements(client,identities):
+    f=first_claim(identities);created=submit(client,f);assert created.status_code==202,created.text
+    other=first_claim(identities);foreign=submit(client,other);assert foreign.status_code==202,foreign.text
+    appointment=created.json()['id'];foreign_id=foreign.json()['proposal']['agreement']['id']
+    for agreement_id in (foreign_id,str(uuid4())):
+        response=client.post('/api/v1/institution-appointments/'+appointment+'/revisions',headers=other['user']['headers'],json={
+            **f['body'],'expected_revision':1,'agreement_id':agreement_id})
+        assert response.status_code==403,response.text
+        assert response.json()['detail']['code']=='INSTITUTION_REQUESTER_REQUIRED'
+    assert count('institution_onboarding_submissions')==count('institutions')==2

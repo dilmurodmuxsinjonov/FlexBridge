@@ -458,14 +458,18 @@ class InstitutionOnboardingService:
             if registry_identity(fields['registry_code'])!=registry_identity(inst['registry_code']):raise GovernanceError('INSTITUTION_IDENTITY_IMMUTABLE',status_code=422)
             # Acquire existing material locks before actor authority; new agreement
             # versions below are proposals and roll back if any guard rejects.
-            agreement=get_row(conn,'institution_agreements',str(fields['agreement_id']) if fields.get('agreement_id') else old['agreement_id'],True)
-            signed_id=str(fields['agreement_file_id']) if fields.get('agreement_file_id') else agreement['signed_file_id']
+            agreements=table('institution_agreements')
+            selected_id=str(fields['agreement_id']) if fields.get('agreement_id') else old['agreement_id']
+            selected=conn.execute(select(agreements).where(agreements.c.id==selected_id,agreements.c.institution_id==inst['id']).with_for_update()).mappings().first()
+            agreement=dict(selected) if selected else None
+            signed_id=str(fields['agreement_file_id']) if fields.get('agreement_file_id') else (agreement['signed_file_id'] if agreement else None)
             material_ids=set(ids)
             if signed_id:material_ids.add(signed_id)
             files=table('files');material_map={row['id']:dict(row) for row in conn.execute(select(files).where(files.c.id.in_(sorted(material_ids))).order_by(files.c.id).with_for_update()).mappings()}
             account_authority(conn,actor,require_mfa=True)
             if actor.user_id!=request['requester_user_id']:raise GovernanceError('INSTITUTION_REQUESTER_REQUIRED',status_code=403)
             authority=None if first else institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
+            if agreement is None:raise GovernanceError('INSTITUTION_AGREEMENT_NOT_FOUND',status_code=404)
             if expected_revision+1==case['current_revision'] and old['payload'].get('resubmission_fingerprint')==fp:
                 return self._report(conn,inst,case,appointment,request)
             if expected_revision!=case['current_revision'] or case['status'] not in ('NEEDS_INFO','REJECTED','CANCELLED','APPROVED'):
