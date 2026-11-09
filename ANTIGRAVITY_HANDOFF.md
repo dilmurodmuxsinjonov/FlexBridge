@@ -100,7 +100,9 @@ Yangi25 storage holati va existing2 private-view testi27 passed44.51s. Sourceafd
 read-only Copilot review exit0 no concrete version-binding defect; actual CLI context
 REVIEW_CONTEXT.md ichida. Old affected240 run239 passed/1 invalid SCANNING fixture
 350.06s; fixture actual quarantine reference bilan tuzatildi, candidate44 passed43.39s.
-Runtime guard yumshatilmagan. Full latest-head CI hali qabul gate.
+Runtime guard yumshatilmagan. Exact b251644 source complete757 CI push42687285321/PR42687299361
+530.01s/513.04s passed. Evidence-only head checks/merge hali keyingi gate.
+Yakuniy manba hisobot: reviews/2026-11-10/storage_versioning/HISOBOT.md.
 backend/STORAGE_VERSIONS.md va LOG-055 ni o'qi. Eski red/fixture failures saqlangan.
 
 1. reviews/2026-11-10/storage_versioning/PLAN.md va DECISIONS.md ni o'qi. Baseline

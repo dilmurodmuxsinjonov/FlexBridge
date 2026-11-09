@@ -1,0 +1,248 @@
+[
+  {
+    "run": 42685698762,
+    "attempt": 1,
+    "conclusion": "failure",
+    "headSha": "afd343ab749a1a2131172e662769ff8fb2369d2c",
+    "jobs": [
+      {
+        "completedAt": "2026-11-09T19:49:20Z",
+        "conclusion": "failure",
+        "databaseId": 129391800942,
+        "name": "backend",
+        "startedAt": "2026-11-09T19:41:08Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-09T19:41:10Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-09T19:41:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:21Z",
+            "conclusion": "success",
+            "name": "Initialize containers",
+            "number": 2,
+            "startedAt": "2026-11-09T19:41:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:22Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 3,
+            "startedAt": "2026-11-09T19:41:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:24Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v5",
+            "number": 4,
+            "startedAt": "2026-11-09T19:41:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:33Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install -r backend/requirements.txt",
+            "number": 5,
+            "startedAt": "2026-11-09T19:41:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:33Z",
+            "conclusion": "success",
+            "name": "Run python scripts/check_publish.py",
+            "number": 6,
+            "startedAt": "2026-11-09T19:41:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:35Z",
+            "conclusion": "success",
+            "name": "Run python scripts/prepare_test_minio.py --directory \"/home/runner/work/_temp/minio-test\" --github-env",
+            "number": 7,
+            "startedAt": "2026-11-09T19:41:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:49:17Z",
+            "conclusion": "failure",
+            "name": "Run python -m pytest backend -q --junitxml=backend/.data/junit.xml",
+            "number": 8,
+            "startedAt": "2026-11-09T19:41:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:49:17Z",
+            "conclusion": "skipped",
+            "name": "Post Run actions/setup-python@v5",
+            "number": 14,
+            "startedAt": "2026-11-09T19:49:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:49:17Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 15,
+            "startedAt": "2026-11-09T19:49:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:49:18Z",
+            "conclusion": "success",
+            "name": "Stop containers",
+            "number": 16,
+            "startedAt": "2026-11-09T19:49:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:49:18Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-11-09T19:49:18Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42685698762/job/129391800942"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42685698762",
+    "pytest_failure_summary": [
+      "backend\tRun python -m pytest backend -q --junitxml=backend/.data/junit.xml\t2026-11-09T19:49:17.2422615Z 1 failed, 756 passed, 1 warning in 460.99s (0:07:40)"
+    ],
+    "failed_tests": [
+      "backend/tests/security/test_candidate.py::test_cv_requires_clean_owned_file[SCANNING]"
+    ]
+  },
+  {
+    "run": 42685710584,
+    "attempt": 1,
+    "conclusion": "failure",
+    "headSha": "afd343ab749a1a2131172e662769ff8fb2369d2c",
+    "jobs": [
+      {
+        "completedAt": "2026-11-09T19:49:02Z",
+        "conclusion": "failure",
+        "databaseId": 129391836846,
+        "name": "backend",
+        "startedAt": "2026-11-09T19:41:12Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-09T19:41:14Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-09T19:41:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:27Z",
+            "conclusion": "success",
+            "name": "Initialize containers",
+            "number": 2,
+            "startedAt": "2026-11-09T19:41:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:28Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 3,
+            "startedAt": "2026-11-09T19:41:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:32Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v5",
+            "number": 4,
+            "startedAt": "2026-11-09T19:41:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:41Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install -r backend/requirements.txt",
+            "number": 5,
+            "startedAt": "2026-11-09T19:41:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:41Z",
+            "conclusion": "success",
+            "name": "Run python scripts/check_publish.py",
+            "number": 6,
+            "startedAt": "2026-11-09T19:41:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:41:45Z",
+            "conclusion": "success",
+            "name": "Run python scripts/prepare_test_minio.py --directory \"/home/runner/work/_temp/minio-test\" --github-env",
+            "number": 7,
+            "startedAt": "2026-11-09T19:41:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:48:59Z",
+            "conclusion": "failure",
+            "name": "Run python -m pytest backend -q --junitxml=backend/.data/junit.xml",
+            "number": 8,
+            "startedAt": "2026-11-09T19:41:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:48:59Z",
+            "conclusion": "skipped",
+            "name": "Post Run actions/setup-python@v5",
+            "number": 14,
+            "startedAt": "2026-11-09T19:48:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:48:59Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 15,
+            "startedAt": "2026-11-09T19:48:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:48:59Z",
+            "conclusion": "success",
+            "name": "Stop containers",
+            "number": 16,
+            "startedAt": "2026-11-09T19:48:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-09T19:48:59Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-11-09T19:48:59Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42685710584/job/129391836846"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42685710584",
+    "pytest_failure_summary": [
+      "backend\tRun python -m pytest backend -q --junitxml=backend/.data/junit.xml\t2026-11-09T19:48:58.4763496Z 1 failed, 756 passed, 1 warning in 431.52s (0:07:11)"
+    ],
+    "failed_tests": [
+      "backend/tests/security/test_candidate.py::test_cv_requires_clean_owned_file[SCANNING]"
+    ]
+  }
+]

@@ -520,3 +520,5 @@ Keyingi kichik qadam:
 
 - Holat: `Rejada`, confirmed residual; Codex;57/PR58 mergedan keyin yangi branch. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
 - Doira: upload intent/complete/owner download actual ActorContext, current account/session/existing sensitive MFA after business locks and thru commit, no sessionless fallback; version/source/outbox/ownership guarantees preserved. Ordinary PASSWORD unchanged. Candidate/CV sibling scope alohida audit qilinadi. Planning peer review, both authority orderings/security/expiry/rollback/provider integration/full CI kerak; pilotfalse.
+
+- LOG-056: exact b251644 full757 Linux PG/actual MinIO CI42687285321/42687299361 passed530.01s/513.04s. Source/fixture reviews exit0; scoped findings none. Native counts/failures/limits separated in HISOBOT.md. Evidence-only checks/merge remain;59 next, pilotfalse.

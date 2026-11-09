@@ -1,40 +1,35 @@
-Private download authorization previously compared stored metadata but signed GET
-by key. A disposable localhost MinIO probe demonstrated that a trusted provider-admin
-replacement changed bytes returned by an issued URL. This draft pins quarantine
-scan reads and private downloads to explicit bucket/VersionId/ETag references.
+Private download authorization previously signed GET by key after checking DB metadata.
+This change binds quarantine scans and private downloads to explicit bucket,
+VersionId and ETag references, so provider-admin same-key replacement cannot retarget
+a recorded file. No ETag inference or key-only legacy fallback is allowed.
 
-Forward0012 preserves ambiguous legacy values without guessed backfill, requires
-provenance on new SCANNING/CLEAN writes and preserves existing accepted authority.
-Completion pins the exact source in the queue; workers check source and existing
-lease fencing before publishing results. Private PUT must return an actual non-null
-VersionId. All6 signing callers and new CV/evidence/EDU snapshots require explicit
-provenance. Missing or changed references fail closed. New pending revisions need
-fresh independent review and acceptance; immutable history is not rewritten.
+Forward0012 preserves ambiguous legacy files and accepted authority/history while
+requiring complete provenance on new SCANNING/CLEAN writes. New CV/evidence and
+EDU revision snapshots require explicit references. Old pending evidence needs an
+explicit new reviewed/accepted revision; migration does not fabricate provenance.
+Source/event/result comparisons complement existing outbox claim_token fencing.
+Readiness requires live Enabled versioning. Failed provider calls map generic503;
+scoped signing failure rolls audit back. External retries can leave orphan versions.
 
-Actual S3 integration exercises source/private-key replacement, signature tampering,
-version deletion, suspended writes, source generations, stale FILE_SCAN/apply
-rollback/retry and live bucket-versioning readiness. AV is an explicit test double;
-PDF parsing, S3 and PostgreSQL are actual. CI prepares the publisher-hash-pinned
-MinIO binary and missing local setup fails rather than skips integration. This
-matches existing compose, not a production release support/security certification.
+Validated source b251644fa2c00439cde495ae52ebc3c85b629d40 passed complete757-test
+Linux PostgreSQL+actual localhost MinIO CI twice: push42687285321 in530.01s and
+PR42687299361 in513.04s. All25 new storage cases are included. Native expanded27
+passed44.51s; old affected240 had239 passed/1 invalid SCANNING fixture, then corrected
+candidate44 passed43.39s. Both prior afd343a CI failures were exactly that fixture;
+production guards were retained. Source review and fixture-delta review exited0
+with no concrete scoped defect. Overlapping counts are not summed. All red/harness/
+unexplained provider failure stages, exact source manifest and limits are retained
+in reviews/2026-11-10/storage_versioning/HISOBOT.md. Evidence-head checks follow.
 
-Expanded native27 passed44.51s: new25 storage cases plus existing2 private views.
-Earlier harness failures and one uncaptured retry ClientError remain separately
-recorded; it produced no CLEAN/ack, diagnostic follow-up4 and later expanded run
-passed, and no cause or runtime fix is invented. Old affected modules are running;
-pinned source review and complete latest-head CI remain required before merge.
-Overlapping counts are not summed. Guide: backend/STORAGE_VERSIONS.md.
+Actual S3 cases cover replacement/tampering/deletion, suspended writes, source changes,
+stale FILE_SCAN/apply rollback/retry and live versioning readiness. AV is explicitly
+doubled; PDF/S3/PG are actual. Pinned MinIO matches compose for reproducibility, not
+production support/security certification. Live IAM/retention remain separate.
 
-User-requested Antigravity handoff/environment notes are included. Project .venv
-installed (pip check0, smoke3 passed8.51s). Verified Docker/WSL installers are on D:,
-but VMP/WSL features are disabled and native administrator launch was canceled.
-The reviewable setup script parses; no system setup/engine readiness or automatic
-reboot is claimed. ANTIGRAVITY_HANDOFF.md has exact current steps and limits.
-
-PR56 was merged12cd307 after final732 CI passed twice. Current draft runtime0012
-still has111 tables; canonical94 and registration49 explicit/83 placeholders remain.
-This is not a public overwrite exploit demonstration, live-provider/identity/legal
-certification or pilot acceptance. Not ready to merge until source review and full
-current regression evidence finish.
+Issue #59 is a confirmed separate authenticated file-session revocation race, the
+next package; this storage fix does not close it. Antigravity handoff/setup notes
+also record that Docker/WSL installation is incomplete after native administrator
+launch was canceled. Runtime0012/111 tables, canonical94,49 explicit/83 placeholders.
+No live provider/identity/legal/DR or pilot acceptance claim.
 
 Closes #57
