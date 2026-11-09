@@ -188,3 +188,25 @@ def test_review_rejects_changed_file_material_without_writing_approval(identitie
     with transaction() as conn:
         assert conn.execute(select(table('enrollment_events').c.id).where(table('enrollment_events').c.action=='APPROVE')).first() is None
         assert conn.execute(select(table('enrollments').c.status).where(table('enrollments').c.id==enrollment['id'])).scalar_one()=='PENDING'
+
+
+def test_failed_populated_upgrade_rolls_back_captured_origins_without_losing_existing_data():
+    with populated_database() as (engine,migrate):
+        migrate('0012_file_storage_versions')
+        with engine.begin() as conn:
+            user=insert_row(conn,'users',display_name='Rollback import',status='ACTIVE',locale='uz',timezone='Asia/Tashkent',auth_version=1)
+            profile=insert_row(conn,'candidate_profiles',user_id=user['id'],headline='Ordinary history',region='Tashkent',experience_months=0,visibility='PRIVATE')
+            institution=new_institution(conn)
+            enrollment=insert_row(conn,'enrollments',candidate_id=profile['id'],institution_id=institution['id'],
+                                  program='Existing imported program',start_date=date.today(),status='VERIFIED')
+            before=dict(conn.execute(select(table('enrollments')).where(table('enrollments').c.id==enrollment['id'])).mappings().one())
+            # A real namespace collision fails after origins have been created and populated.
+            conn.execute(text('CREATE TABLE flexbridge.enrollment_submissions (sentinel text NOT NULL)'))
+            conn.execute(text("INSERT INTO flexbridge.enrollment_submissions VALUES ('Existing table data')"))
+        failed=migrate('0013_enrollment_verification',False)
+        assert failed.returncode!=0 and 'enrollment_submissions' in failed.stderr and 'already exists' in failed.stderr
+        with engine.begin() as conn:
+            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0012_file_storage_versions'
+            assert conn.execute(text("SELECT to_regclass('flexbridge.enrollment_origins')")).scalar_one() is None
+            assert conn.execute(text('SELECT sentinel FROM flexbridge.enrollment_submissions')).scalar_one()=='Existing table data'
+            assert dict(conn.execute(select(table('enrollments')).where(table('enrollments').c.id==enrollment['id'])).mappings().one())==before
