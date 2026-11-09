@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.904" timestamp="2026-11-09T23:05:28.953243+05:00" hostname="Ditroid"><testcase classname="tests.security.test_institution_contact_privacy" name="test_pending_first_claimant_cannot_distinguish_registered_staff_contacts" time="6.497"><failure message="AssertionError: ['INSTITUTION_SCOPE_FORBIDDEN', 'INSTITUTION_TARGET_UNAVAILABLE']&#10;assert ['INSTITUTION..._UNAVAILABLE'] == ['INSTITUTION...PE_FORBIDDEN']&#10;  &#10;  At index 1 diff: 'INSTITUTION_TARGET_UNAVAILABLE' != 'INSTITUTION_SCOPE_FORBIDDEN'&#10;  Use -v to get more diff">backend\tests\security\test_institution_contact_privacy.py:18: in test_pending_first_claimant_cannot_distinguish_registered_staff_contacts
+    assert replies==['INSTITUTION_SCOPE_FORBIDDEN','INSTITUTION_SCOPE_FORBIDDEN'],replies
+E   AssertionError: ['INSTITUTION_SCOPE_FORBIDDEN', 'INSTITUTION_TARGET_UNAVAILABLE']
+E   assert ['INSTITUTION..._UNAVAILABLE'] == ['INSTITUTION...PE_FORBIDDEN']
+E     
+E     At index 1 diff: 'INSTITUTION_TARGET_UNAVAILABLE' != 'INSTITUTION_SCOPE_FORBIDDEN'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

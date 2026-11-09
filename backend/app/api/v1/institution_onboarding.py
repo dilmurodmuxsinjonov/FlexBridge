@@ -76,7 +76,7 @@ def consent(id:UUID,payload:ConsentInput,actor:ActorContext=Depends(require_acto
 
 @router.post('/institution-appointments/{id}/revisions',status_code=202)
 def resubmit(id:UUID,payload:RevisionInput,actor:ActorContext=Depends(require_actor_context)):
-    return service.resubmit(actor,str(id),**payload.model_dump())
+    return service.resubmit(actor,str(id),**payload.model_dump(exclude_unset=True))
 
 
 @router.post('/institution-appointments/{id}/revoke')

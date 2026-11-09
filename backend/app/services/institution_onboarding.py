@@ -224,24 +224,32 @@ class InstitutionOnboardingService:
             else:
                 if not agreement_id or not target_value or name is not None or region is not None or agreement_file_id is not None:
                     raise GovernanceError('EXISTING_INSTITUTION_REQUIRES_STAFF_REQUEST',status_code=422)
-                agreement=get_row(conn,'institution_agreements',str(agreement_id),True)
-                target=contact_row(conn,target_channel,target_value)
-                if not target:raise GovernanceError('INSTITUTION_TARGET_UNAVAILABLE',status_code=403)
-                target_id=target['user_id'];mode='STAFF_TEACHER'
-                if target_id==actor.user_id:raise GovernanceError('SELF_APPOINTMENT_FORBIDDEN',status_code=403)
+                agreements=table('institution_agreements')
+                scoped=conn.execute(select(agreements).where(agreements.c.id==str(agreement_id),agreements.c.institution_id==inst['id']).with_for_update()).mappings().first()
+                agreement=dict(scoped) if scoped else None
+                target_id=None;mode='STAFF_TEACHER'
             files=table('files');material_ids=set(ids)
-            if agreement.get('signed_file_id'):material_ids.add(agreement['signed_file_id'])
+            if agreement and agreement.get('signed_file_id'):material_ids.add(agreement['signed_file_id'])
             material_rows=list(conn.execute(select(files).where(files.c.id.in_(sorted(material_ids))).order_by(files.c.id).with_for_update()).mappings())
             account_authority(conn,actor,require_mfa=True)
             authority=None if new else institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
             evidence_files(conn,actor.user_id,ids)
+            if agreement is None:raise GovernanceError('INSTITUTION_AGREEMENT_NOT_FOUND',status_code=404)
             self._agreement_current(agreement,inst['id'],allow_pending=new)
             material_map={row['id']:row for row in material_rows}
             signed=material_map.get(agreement['signed_file_id'])
             if not signed or signed['scan_status']!='CLEAN' or signed['deleted_at'] or signed['mime_type']!='application/pdf':
                 raise GovernanceError('INSTITUTION_AGREEMENT_FILE_NOT_CURRENT',status_code=409)
             own,own_binding=pin_contact(conn,actor.user_id,str(contact_id))
-            recipient,recipient_binding=(own,own_binding) if new else pin_contact(conn,target_id,target['id'])
+            if new:recipient,recipient_binding=own,own_binding
+            else:
+                # Contact existence is private. Resolve a named recipient only
+                # after current coordinator, material and own-contact eligibility.
+                target=contact_row(conn,target_channel,target_value)
+                if not target:raise GovernanceError('INSTITUTION_TARGET_UNAVAILABLE',status_code=403)
+                target_id=target['user_id']
+                if target_id==actor.user_id:raise GovernanceError('SELF_APPOINTMENT_FORBIDDEN',status_code=403)
+                recipient,recipient_binding=pin_contact(conn,target_id,target['id'])
             target_user=pin_user(conn,target_id);requester=get_row(conn,'users',actor.user_id)
             role=conn.execute(select(table('role_catalog')).where(table('role_catalog').c.scope_kind=='INSTITUTION',
                 table('role_catalog').c.code==('COORDINATOR' if new else 'TEACHER'))).mappings().one()
@@ -465,7 +473,7 @@ class InstitutionOnboardingService:
             if activated_grant(conn,appointment_id):raise GovernanceError('ACTIVATED_APPOINTMENT_REQUIRES_NEW_REQUEST',status_code=409)
             if (first and inst['status']!='PENDING_VERIFICATION') or (not first and inst['status']!='VERIFIED'):
                 raise GovernanceError('INSTITUTION_STATE_CONFLICT',status_code=409)
-            valid_from,valid_to=fields['valid_from'],fields.get('valid_to')
+            valid_from=fields['valid_from'];valid_to=fields['valid_to'] if 'valid_to' in fields else old['valid_to']
             if (not isinstance(valid_from,date) or (valid_to is not None and valid_to<max(today,valid_from)) or (first and valid_from>today)):
                 raise GovernanceError('INVALID_APPOINTMENT_DATES',status_code=422)
             legal_basis=fields['legal_basis'].strip();note=fields['evidence_note'].strip()
@@ -475,7 +483,8 @@ class InstitutionOnboardingService:
             if first:
                 if fields.get('target_channel') or fields.get('target_destination') or fields.get('agreement_id') or signed_id not in ids:
                     raise GovernanceError('FIRST_INSTITUTION_AGREEMENT_REQUIRED',status_code=422)
-                start=fields.get('agreement_valid_from') or agreement['valid_from'];end=fields.get('agreement_valid_to')
+                start=fields.get('agreement_valid_from') or agreement['valid_from']
+                end=fields['agreement_valid_to'] if 'agreement_valid_to' in fields else agreement.get('valid_to')
                 purposes=fields.get('purposes') or agreement['purposes']
                 if start>today or (end is not None and end<max(today,start)) or not isinstance(purposes,list) or not purposes or set(purposes)-{'ACADEMIC_VIEW'}:
                     raise GovernanceError('INVALID_INSTITUTION_AGREEMENT',status_code=422)
@@ -534,6 +543,8 @@ class InstitutionOnboardingService:
         with transaction() as conn:
             inst,case,appointment,request=self._operator_request(conn,case_id)
             moderator_authority(conn,actor);self._independent(conn,actor,request)
+            if case['assigned_reviewer_id']==actor.user_id:
+                return {'id':case_id,'status':case['status'],'revision':case['current_revision']}
             if case['status'] not in ('PENDING','IN_REVIEW','NEEDS_INFO'):raise GovernanceError('CASE_ALREADY_DECIDED',status_code=409)
             if case['assigned_reviewer_id'] not in (None,actor.user_id):raise GovernanceError('CASE_ASSIGNED_TO_OTHER',status_code=403)
             status='NEEDS_INFO' if case['status']=='NEEDS_INFO' else 'IN_REVIEW'

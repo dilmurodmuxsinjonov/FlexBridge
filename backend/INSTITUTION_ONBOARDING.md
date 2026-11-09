@@ -17,6 +17,9 @@ providers are separate work.
   current institutional COORDINATOR authority to request a named registered TEACHER.
   Client role flags and email domains grant no authority. A verified institution
   with no current coordinator does not reopen bootstrap.
+  Registered-recipient lookup happens only after current institutional authority,
+  review material and the requester's own verified contact are checked; ungranted
+  first claimants cannot use staff intake to enumerate registered contacts.
 - API097 returns the requester's or named appointee's case/appointment metadata and
   an intelligible current proposal, including document hashes and narrowly scoped
   download links. It excludes reviewer evidence and internal storage keys. The
@@ -51,7 +54,10 @@ POST `/institution-appointments/{id}/revisions` is an explicit new intent under
 current requester MFA/authority. It can revise never-activated NEEDS_INFO, REJECTED,
 CANCELLED or approved-pending proposals while preserving the immutable requester,
 named user, institution and role. Each new revision requires new review and named
-acceptance; earlier outcomes, evidence and consent remain stored. Activated cases
+acceptance; earlier outcomes, evidence and consent remain stored. Omitted appointment
+or agreement end dates preserve the prior limit; an explicit null proposes an
+unbounded end and still requires fresh independent approval and named acceptance.
+Activated cases
 cannot use this route to recreate a revoked grant. A new formal appointment is
 required. Registered contact recycling cannot silently change the named user.
 
@@ -76,7 +82,11 @@ accepted nonrevoked academic assignments still require every current academic gu
 Named appointees can download only the current appointment/agreement files;
 requesters can also view their own submitted evidence. Assigned independent
 reviewers can view linked revision evidence. All downloads require current scope,
-eligible CLEAN/nondeleted unchanged content, an audit record and a60-second URL.
+eligible CLEAN/nondeleted metadata matching recorded hashes/versions, an audit
+record and a60-second URL. The application pipeline uses content-addressed private
+keys. Current URLs address the key, not a provider-specific version identifier;
+live provider immutability/version-pinned retrieval remains a separate integration
+gate and is not attested by these metadata or mocked-storage tests.
 General file downloads retain their owner-only policy. These APIs use the shared
 128KB body limit, no-store/no-cache and no-referrer response headers.
 
