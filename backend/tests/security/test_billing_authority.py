@@ -110,8 +110,11 @@ def test_completed_security_change_blocks_after_actual_money_lock(client,identit
     assert money_snapshot()==before
 
 
-@pytest.mark.parametrize('kind',['order','payment','refund','approve_second'])
-@pytest.mark.parametrize('change',['account','auth_version','role','expiry'])
+ADMIN_CASES=tuple((kind,change) for kind in ('order','payment','refund','approve_second')
+    for change in ('account','auth_version','role','expiry'))+(('order_replay','role'),('payment_replay','role'))
+
+
+@pytest.mark.parametrize('kind,change',ADMIN_CASES)
 def test_admin_state_changes_are_rechecked_after_target_wait(client,identities,organization,kind,change):
     user,(name,row_id),request,_=operation(kind,client,identities,organization)
     checked=Event();engine=get_engine()
@@ -210,6 +213,24 @@ def test_signed_capture_still_works_after_human_payer_logout(client,identities,o
     with transaction() as conn:
         assert conn.execute(select(table('payment_attempts').c.status).where(table('payment_attempts').c.id==attempt.id)).scalar_one()=='CAPTURED'
         assert len(list(conn.execute(select(table('billing_ledger').c.id))))==1
+
+
+def test_new_mfa_session_replays_existing_receipts_without_new_money_rows(client,identities,organization):
+    from app.services.auth import generate_totp_code
+    owner=identities('OWNER',organization);order,invoice,attempt=checkout(owner,organization);capture(attempt)
+    response=client.delete('/api/v1/me/sessions/'+owner['session_id'],headers=owner['headers']);assert response.status_code==200,response.text
+    response=client.post('/api/v1/auth/login',json={'user_id':owner['user_id'],'password':'correct-passphrase-2026',
+        'totp_code':generate_totp_code(owner['totp_secret'])})
+    assert response.status_code==200,response.text
+    assert response.json()['session_id']!=owner['session_id']
+    headers={'Authorization':'Bearer '+response.json()['access_token']};before=money_snapshot()
+    response=client.post('/api/v1/billing/orders',headers=headers,json={
+        'organization_id':organization,'plan_code':'ORG_PLAN_30D','idempotency_key':'order-key-1234'})
+    assert response.status_code==201 and response.json()['order_id']==order.id,response.text
+    response=client.post('/api/v1/billing/payments/attempts',headers=headers,json={
+        'invoice_id':invoice.id,'amount_uzs':invoice.amount_uzs,'provider_code':'HMAC','idempotency_key':'payment-key-1234'})
+    assert response.status_code==200 and response.json()['attempt_id']==attempt.id and response.json()['status']=='CAPTURED',response.text
+    assert money_snapshot()==before
 
 
 def direct_call(kind,context,data):
