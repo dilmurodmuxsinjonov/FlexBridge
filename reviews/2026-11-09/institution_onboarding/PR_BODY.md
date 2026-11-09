@@ -1,32 +1,32 @@
-Institution appointments currently fall through to501. This draft implements
-authenticated options, current-MFA claim intake and private status, with independent
-assigned moderator review and named revision-bound consent before role activation.
-New identities claim a first COORDINATOR role; existing current coordinators can
-request a TEACHER. Client role flags and email domains do not grant authority.
+Institution appointment APIs previously returned501. This change implements signed-in
+requirements, current-MFA first-institution/first-COORDINATOR claims and existing
+coordinator requests for a named TEACHER. Independent assigned moderator approval
+and exact-revision personal acceptance are both required before any grant.
 
-Forward0011 adds immutable request/revision/consent/decision records, normalized
-registry uniqueness and structural/history guards, preserving malformed legacy rows
-while closing their invalid effective grants. Canonical baseline94 is historical;
-runtime111 includes the forward extensions. Evidence snapshots bind file hashes and
-object versions. Teacher-only PASSWORD behavior remains; privileged actors use MFA.
+Explicit revisions, private named/reviewer document views, consent expiry and
+revocation preserve history. Current session/contact/security, original coordinator
+grant, evidence and dates are rechecked after business locks. Nonblocking foreign
+authority/contact locks return atomic409/retry. Retry receipts do not create extra
+grants/audits. Recipient lookup follows scope checks to prevent contact enumeration.
 
-Explicit same-case resubmission, revocation and scoped file views preserve history
-and require fresh consent/review after a new revision. Revoked membership history
-coexists with a new active membership. Original grant replacement, recycled contacts,
-changed identity/documents and stale caller sessions cannot activate the old intent.
-Busy contact/foreign-user cases return atomic409/retry.
+Forward0011 adds four append-only proof tables and structural/history guards, closes
+invalid legacy grants with audit provenance, and aborts normalized registry
+collisions for reconciliation. Runtime111 tables; historical canonical94 unchanged.
+Ordinary teacher-only PASSWORD sessions retain their existing assurance policy.
 
-The full new native PostgreSQL package passed52 tests in236.82s, including populated
-upgrade/collision rollback, both approval/consent orders, replay, private data,
-concurrent registry claims, real session lock waits in both orders and audit rollback.
-Prototype691 CI passed twice, but subsequent pinned source review identified private
-middleware omissions and a separate DB consent MFA policy gap. Three independent
-probes failed on that runtime; the fixes and expanded platform/ORG/institution
-sensitive-role regressions are included in the52. Public HTTP consent was already
-MFA-protected; direct DB setup is trusted and is not claimed as a public exploit.
+Validated source eadac1149ba66d8e34f77190c21f1c6211183a65 passed complete PostgreSQL
+732-test CI twice: PR42672853806 in450.27s and push42672846232 attempt2 in508.64s.
+Earlier startup failures occurred before jobs/tests with GitHub Internal server
+error annotations and are recorded separately. Native upgrade/race/security and
+affected-module evidence, independent red probes and actual read-only Copilot
+reviews are in reviews/2026-11-09/institution_onboarding/HISOBOT.md. Native run
+counts overlap; source review is not execution certification. Evidence-only head
+checks follow independently before matching-head merge.
 
-Affected old modules, full current source review and complete CI are still running.
-Overlapping validation counts are not added as unique coverage. This draft is not
-ready to merge, pilot-ready or a legal identity/document/signature/provider certification.
+Current URLs still presign by key; actual provider version-pinned retrieval remains
+open in #57. Content-addressed keys and DB snapshots are not provider immutability
+proof. Additional coordinators, recovery, student admission/enrollment, frontend,
+live identity/legal/provider certification and pilot acceptance are outside this
+bounded package. Canonical registration49 explicit/83 placeholders is not acceptance.
 
 Closes #55
