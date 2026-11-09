@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49 merged. Issue48/AUTH-CODEX-003: initial moderation authority race tuzatilmoqda; keyin EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49 merged. Issue48/PR50 initial moderation final tekshiruvda; keyin confirmed human-money authority51, so'ng EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -161,8 +161,8 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## AUTH-CODEX-003 — Initial opportunity moderation authority
 
-- Holat: `Jarayonda`; Codex; Issue48, fix/48-moderation-authority. Reja/dalil reviews/2026-11-09/moderation_authority. Initial2 va expanded8 regression failed; actual PostgreSQL row-lock kuzatuvi bilan takror2 ham failed. Bu eski valid in-flight requestning revocationdan keyin yozishi, anonymous bypass emas. Trusted SQL administrator o'zgarishlari public provisioning deb ko'rsatilmaydi.
-- API actual ActorContextni beradi; service opportunity rowni bloklagach existing current-MFA moderator_authorityni oladi. Existing role/MFA siyosati, self-author/DRAFT/revision, case/action/audit atomikligi saqlanadi; synthetic actor olib tashlandi. Native22 va old moderation/appeal/IAM/full CI/pinned review qabul uchun kerak. Expiry boundary va time/row-lock farqi guideda. Boshqa domain, live/browser/DR va umumiy pilot qabuli yo'q; keyin EDU.
+- Holat: `Tekshiruvda`; Codex; Issue48/PR50, fix/48-moderation-authority. Reja/dalil reviews/2026-11-09/moderation_authority. Initial2/expanded8 va actual row-lock repeat2 failures saqlandi.5856dc6 native22/old93 va ikkala full502 CI passed; source review concrete production defect topmadi, real row-lockda grant revoke/expiry gapini tavsiya qildi.08626bf test-only delta native24 passed37.93s, final read-only review exit0 gap yopilganini tasdiqladi; full504 CI42561301163/42561304587 ham passed383.65s/391.71s. Native24 eski22ni takrorlaydi. Evidence-only head checks/merge qolgan. Bu authenticated in-flight authority, anonymous bypass emas; trusted SQL provisioning claim emas. Pilotfalse.
+- API actual ActorContextni beradi; service opportunity rowni bloklagach existing current-MFA moderator_authorityni oladi. Existing role/MFA siyosati, self-author/DRAFT/revision, case/action/audit atomikligi saqlanadi; synthetic actor olib tashlandi. Expiry boundary va time/row-lock farqi guideda. Boshqa domain, live/browser/DR va umumiy pilot qabuli yo'q. Yangi confirmed refund authority race Issue51 (3 failed, approval/outbox navbati; real transfer emas) EDUdan oldin tuzatiladi.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
