@@ -2,6 +2,11 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## AUTH-CODEX-004 — human money authority (2026-11-09)
+
+- Existing authority.py guards create_order_and_invoice/process_payment_attempt/request_refund/approve_refundga qo'llandi; actual ActorContext oladi. Breaker SHARE ->org ->invoice/captured-payment target yoki breaker SHARE ->refund target, keyin current user/MFA/OWNER-BILLING yoki FINANCE role locks. Expiry post-lock boundaryda tekshiriladi, time freeze emas.
+- Caller userID va idempotency identity actual actor.user_id bo'lib qoladi. No dependency/migration: runtime0010/107, canonical94. Price snapshots, captured funds/dual control, audit/outbox va HMAC callback/worker siyosati saqlanadi. Direct-service fixtures real MFA sessiya bilan; quota HR/host assurance o'zgarmadi. Final native/CI/review dalillari03/paket hisobotida; pilotfalse.
+
 ## AUTH-CODEX-003 — initial moderation authority (2026-11-09)
 
 - Mavjud moderator_authority initial opportunity qaroriga qo'llandi: opportunity FOR UPDATE -> current active user/MFA session/platform MODERATOR grant/catalog FOR SHARE -> revision/self-author/DRAFT -> case/action/status/audit bir transaction. API actual ActorContextni beradi; role cache yoki sessionsiz user ID authority o'rniga ishlatilmaydi.

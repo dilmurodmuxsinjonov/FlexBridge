@@ -29,18 +29,18 @@ class PublishRequest(Request):
 @router.post('/orders',status_code=201)
 def order(req:CreateOrderRequest,actor:ActorContext=Depends(require_actor_context)):
     o,i=billing_service.create_order_and_invoice(organization_id=str(req.organization_id),plan_code=req.plan_code,
-        created_by=actor.user_id,idempotency_key=req.idempotency_key)
+        actor=actor,idempotency_key=req.idempotency_key)
     return {'order_id':o.id,'invoice_id':i.id,'amount_uzs':i.amount_uzs,'invoice_status':i.status}
 
 @router.post('/payments/attempts')
 def payment(req:PaymentAttemptRequest,actor:ActorContext=Depends(require_actor_context)):
     r=billing_service.process_payment_attempt(invoice_id=str(req.invoice_id),provider_code=req.provider_code,
-        idempotency_key=req.idempotency_key,amount_uzs=req.amount_uzs,currency_code=req.currency_code,actor_user_id=actor.user_id)
+        idempotency_key=req.idempotency_key,amount_uzs=req.amount_uzs,currency_code=req.currency_code,actor=actor)
     return {**asdict(r),'attempt_id':r.id}
 
 @router.post('/refunds',status_code=201)
 def refund(req:RefundRequest,actor:ActorContext=Depends(require_actor_context)):
-    return billing_service.request_refund(invoice_id=str(req.invoice_id),amount_uzs=req.amount_uzs,reason=req.reason,requested_by=actor.user_id)
+    return billing_service.request_refund(invoice_id=str(req.invoice_id),amount_uzs=req.amount_uzs,reason=req.reason,actor=actor)
 
 @router.post('/slots/publish')
 def publish(req:PublishRequest,actor:ActorContext=Depends(require_actor_context)):

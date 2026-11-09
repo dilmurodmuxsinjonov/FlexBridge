@@ -1,0 +1,7 @@
+Previously authenticated human money requests could wait for business rows, survive completed logout/security/role changes, and still create orders, payment intents or refund reservations/approvals. Three refund probes and five checkout-route variants reproduced the gap; second approval could queue REFUND_EXECUTE after finance authority was revoked. No real transfer was executed.
+
+Require actual ActorContext in the four human money services and all six API callers. After breaker/business/target locks, hold current user/MFA and OWNER/BILLING or FINANCE authority through the UOW. Preserve price snapshots, user-scoped idempotency/digests, captured-payment refund limits, independent approval stages and audit/outbox atomicity. Existing direct-service tests pass their real fixture MFA contexts. No sessionless compatibility bypass, migration or provider policy change.
+
+Native75 new tests passed (101.21s): actual target-lock waits and changed state, opposite revocation serialization, valid controls/receipts, write/audit rollback, invalid internal sessions/cached roles, concurrent reservation/approval limits and requester separation. Signed capture after payer logout still succeeds. Old affected modules, complete579-test CI and pinned source review are pending. Quota publish/transition and live merchant/provider/browser/DR remain outside this bounded evidence. Canonical46 explicit/86 placeholders, pilotfalse.
+
+Closes #51

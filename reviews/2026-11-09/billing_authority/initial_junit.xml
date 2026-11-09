@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="8.769" timestamp="2026-11-09T09:20:11.207412+05:00" hostname="Ditroid"><testcase classname="tests.security.test_refund_authority_probe" name="test_refund_approval_rechecks_authority_after_actual_row_lock[1-session]" time="5.140"><failure message="AssertionError: (1, 'session', 200, 'PENDING_SECOND_APPROVAL', 0)&#10;assert (200 in (401, 403))&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_refund_authority_probe.py:46: in test_refund_approval_rechecks_authority_after_actual_row_lock
+    assert response.status_code in (401,403) and stored['status']==('REQUESTED' if stage==1 else 'PENDING_SECOND_APPROVAL') and queued==0,(
+E   AssertionError: (1, 'session', 200, 'PENDING_SECOND_APPROVAL', 0)
+E   assert (200 in (401, 403))
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_refund_authority_probe" name="test_refund_approval_rechecks_authority_after_actual_row_lock[2-session]" time="1.353"><failure message="AssertionError: (2, 'session', 200, 'APPROVED', 1)&#10;assert (200 in (401, 403))&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_refund_authority_probe.py:46: in test_refund_approval_rechecks_authority_after_actual_row_lock
+    assert response.status_code in (401,403) and stored['status']==('REQUESTED' if stage==1 else 'PENDING_SECOND_APPROVAL') and queued==0,(
+E   AssertionError: (2, 'session', 200, 'APPROVED', 1)
+E   assert (200 in (401, 403))
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_refund_authority_probe" name="test_refund_approval_rechecks_authority_after_actual_row_lock[2-role]" time="1.726"><failure message="AssertionError: (2, 'role', 200, 'APPROVED', 1)&#10;assert (200 in (401, 403))&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_refund_authority_probe.py:46: in test_refund_approval_rechecks_authority_after_actual_row_lock
+    assert response.status_code in (401,403) and stored['status']==('REQUESTED' if stage==1 else 'PENDING_SECOND_APPROVAL') and queued==0,(
+E   AssertionError: (2, 'role', 200, 'APPROVED', 1)
+E   assert (200 in (401, 403))
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>
