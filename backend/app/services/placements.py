@@ -1,8 +1,8 @@
 """Persistent applications and independent, organization-scoped confirmations."""
 from datetime import date, timedelta
 from uuid import uuid4
-from sqlalchemy import select
-from app.db.storage import table, transaction, now
+from sqlalchemy import select, text
+from app.db.storage import table, transaction, now, json_value
 from app.api.dependencies import ActorContext, require_org, owns_candidate
 
 class PlacementScopeError(Exception):
@@ -87,7 +87,7 @@ class ApplicationPlacementService:
             offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',application_id); opp=get_row(conn,'opportunities',opportunity_id)
             revision=get_row(conn,'opportunity_revisions',offer['revision_id'])
             account_authority(conn,actor)
-            org_authority(conn,actor.user_id,organization_id,'OWNER','HOST_COORDINATOR')
+            authority=org_authority(conn,actor.user_id,organization_id,'OWNER','HOST_COORDINATOR')
             if (offer['application_id']!=application_id or app['opportunity_id']!=opportunity_id or app['candidate_id']!=candidate_id
                 or opp['organization_id']!=organization_id or revision['opportunity_id']!=opportunity_id):
                 raise PlacementScopeError('PLACEMENT_SCOPE_MISMATCH')
@@ -95,13 +95,31 @@ class ApplicationPlacementService:
                 raise PlacementScopeError('INTERNSHIP_PLACEMENT_REQUIRED',status_code=409)
             require_capability(conn,organization_id,'INTERNSHIP_HOST')
             if offer['status']!='ACCEPTED': raise PlacementScopeError('OFFER_NOT_ACCEPTED')
-            start=start_date or date.today(); end=end_date or start+timedelta(days=90)
+            from app.db.institution_scope import TASHKENT
+            start=start_date or now().astimezone(TASHKENT).date(); end=end_date or start+timedelta(days=90)
             p=insert_row(conn,'placements',application_id=application_id,offer_id=offer_id,candidate_id=candidate_id,organization_id=organization_id,
-                academic_track=False,status='PENDING_START_CONFIRMATION',start_date=start,end_date=end,version=1)
-            terms=insert_row(conn,'placement_terms',placement_id=p['id'],version=1,schema_version=1,terms_snapshot=offer['terms_snapshot'],
+                academic_track=False,status='PLANNED',start_date=start,end_date=end,version=1)
+            terms=insert_row(conn,'placement_terms',placement_id=p['id'],version=1,schema_version=1,
+                terms_snapshot={'source_revision_id':revision['id'],'title':revision['title'],
+                    'objectives':revision['description'],'work_mode':revision['work_mode'],'contract_type':revision['contract_type']},
                 daily_limit_minutes=480,weekly_limit_minutes=2400,required_minutes=0)
             conn.execute(table('placements').update().where(table('placements').c.id==p['id']).values(current_terms_id=terms['id']))
-            return {**p,'current_terms_id':terms['id']}
+            p=get_row(conn,'placements',p['id'])
+            initial_snapshot,source_snapshot=conn.execute(text("""SELECT to_jsonb(p),jsonb_build_object('offer',to_jsonb(o),
+                'application',to_jsonb(a),'attempt',to_jsonb(t),'revision',to_jsonb(r))
+                FROM flexbridge.placements p JOIN flexbridge.offers o ON o.id=p.offer_id
+                JOIN flexbridge.applications a ON a.id=o.application_id
+                JOIN flexbridge.application_attempts t ON t.id=o.attempt_id
+                JOIN flexbridge.opportunity_revisions r ON r.id=o.revision_id WHERE p.id=:placement"""),{'placement':p['id']}).one()
+            version=get_row(conn,'users',actor.user_id)['auth_version']
+            conn.execute(table('placement_intakes').insert().values(placement_id=p['id'],created_at=now(),origin='PUBLIC',
+                offer_id=offer_id,attempt_id=offer['attempt_id'],revision_id=offer['revision_id'],
+                academic_required=revision['contract_type']=='ACADEMIC_TRIPARTITE',actor_id=actor.user_id,
+                session_id=actor.session_id,auth_version=version,host_grant_id=authority['_authority_grant_id'],
+                initial_snapshot=initial_snapshot,source_snapshot=source_snapshot))
+            from app.core.audit import AppendOnlyAuditStore
+            AppendOnlyAuditStore().append_audit_event(actor_id=actor.user_id,action='PLACEMENT_PLANNED',entity_type='placement',entity_id=p['id'])
+            return p
 
     def _party(self,conn,candidate_id,org_id,user_id,party):
         if owns_candidate(user_id,candidate_id):
@@ -111,20 +129,12 @@ class ApplicationPlacementService:
         if party not in (None,'ORGANIZATION','EMPLOYER'): raise PlacementScopeError('ENGAGEMENT_ACTOR_FORBIDDEN',status_code=403)
         return 'EMPLOYER'
 
-    def confirm_placement_start(self,*,placement_id,party=None,actor_user_id):
-        with transaction() as conn:
-            p=get_row(conn,'placements',placement_id,True)
-            side=self._party(conn,p['candidate_id'],p['organization_id'],actor_user_id,party)
-            if p['status'] not in ('PENDING_START_CONFIRMATION','ACTIVE'): raise PlacementScopeError('PLACEMENT_NOT_CONFIRMABLE')
-            terms=get_row(conn,'placement_terms',p['current_terms_id'],True)
-            column='candidate_accepted_at' if side=='CANDIDATE' else 'host_accepted_at'
-            if terms[column] is None:
-                conn.execute(table('placement_terms').update().where(table('placement_terms').c.id==terms['id']).values(**{column:now()}))
-                terms[column]=now()
-                insert_row(conn,'placement_decisions',placement_id=placement_id,actor_id=actor_user_id,side=side,decision='CONFIRM_START',terms_id=terms['id'],decided_at=now())
-            if terms['candidate_accepted_at'] and terms['host_accepted_at']:
-                conn.execute(table('placements').update().where(table('placements').c.id==placement_id).values(status='ACTIVE',updated_at=now()))
-            return get_row(conn,'placements',placement_id)
+    def confirm_placement_start(self,*,placement_id,party,actor,terms_id,version,idempotency_key):
+        from app.services.placement_admission import admission_service
+        args=dict(actor=actor,placement_id=placement_id,terms_id=terms_id,version=version,idempotency_key=idempotency_key)
+        if party=='CANDIDATE':return admission_service.accept_candidate(**args)
+        if party=='ORGANIZATION':return admission_service.host_decision(action='ACTIVATE',**args)
+        raise PlacementScopeError('INVALID_PARTY',status_code=422)
 
     def confirm_engagement_by_actor_api_046(self,*,placement_id,actor_user_id,actor_roles=(),party=None,action='CONFIRM_START'):
         # Canonical engagement IDs refer to job_engagements, never arbitrary placement IDs.

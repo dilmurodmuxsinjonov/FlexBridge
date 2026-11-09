@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="12" time="40.645" timestamp="2026-11-10T04:14:48.046759+05:00" hostname="Ditroid"><testcase classname="tests.security.test_internship_admission" name="test_actual_part_time_offer_cannot_create_an_internship_placement" time="5.999" /><testcase classname="tests.security.test_internship_admission" name="test_actual_internship_cannot_activate_without_personally_accepted_mentor" time="2.029" /><testcase classname="tests.security.test_internship_admission" name="test_actual_active_staff_without_mentor_role_cannot_be_nominated_as_mentor" time="2.187" /><testcase classname="tests.security.test_admission_lifecycle" name="test_reachable_versioned_host_flow_records_personal_consents_and_single_historical_start" time="2.635"><failure message="AttributeError: 'Table' object has no attribute 'candidate_id'">backend\tests\security\test_admission_lifecycle.py:65: in test_reachable_versioned_host_flow_records_personal_consents_and_single_historical_start
+    assert client.get('/api/v1/me/placements',headers=candidate['headers']).json()['items'][0]['id']==p['id']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:1053: in get
+    return self.request(
+.venv\Lib\site-packages\starlette\testclient.py:518: in request
+    return super().request(
+.venv\Lib\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:928: in send
+    raise exc
+.venv\Lib\site-packages\httpx\_client.py:922: in send
+    response.read()
+.venv\Lib\site-packages\httpx\_models.py:881: in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_models.py:897: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_models.py:951: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:153: in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:384: in iter_body
+    exit_stack.close()
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:618: in close
+    self.__exit__(None, None, None)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:610: in __exit__
+    raise exc_details[1]
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:595: in __exit__
+    if cb(*exc_details):
+       ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:399: in close_app
+    raise exception
+.venv\Lib\site-packages\anyio\from_thread.py:272: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:366: in run_app
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\app\core\iam_http.py:55: in __call__
+    await self.app(scope,replay,private_send)
+.venv\Lib\site-packages\starlette\middleware\base.py:203: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:85: in authentication_boundary
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\middleware\base.py:179: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+.venv\Lib\site-packages\starlette\middleware\base.py:149: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:683: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:2692: in app
+    await route.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1773: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:2747: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1793: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1272: in handle
+    await app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:156: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\routing.py:142: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\routing.py:698: in app
+    raw_response = await run_endpoint_function(
+.venv\Lib\site-packages\fastapi\routing.py:352: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:2779: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:1124: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\api\v1\placement_admission.py:55: in own_placements
+    return service.own_placements(actor)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\services\placement_admission.py:304: in own_placements
+    p.c.start_date, p.c.end_date, p.c.current_terms_id).join(c, c.c.id == p.candidate_id)
+                                                                          ^^^^^^^^^^^^^^
+E   AttributeError: 'Table' object has no attribute 'candidate_id'</failure></testcase><testcase classname="tests.security.test_admission_lifecycle" name="test_new_plan_invalidates_old_candidate_and_mentor_acceptance_without_erasing_history" time="3.454"><failure message="AssertionError: ('/api/v1/placements', 409, {'detail': {'code': 'CONSTRAINT_VIOLATION'}})&#10;assert 409 == 201&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">backend\tests\security\test_admission_lifecycle.py:71: in test_new_plan_invalidates_old_candidate_and_mentor_acceptance_without_erasing_history
+    candidate,host,mentor,p,assignment=planned(client,identities,organization)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_admission_lifecycle.py:19: in planned
+    p=post(client,'/api/v1/placements',host,body,201)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_internship_admission.py:10: in post
+    assert response.status_code==status,(path,response.status_code,response.json())
+E   AssertionError: ('/api/v1/placements', 409, {'detail': {'code': 'CONSTRAINT_VIOLATION'}})
+E   assert 409 == 201
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_admission_lifecycle" name="test_foreign_actor_cannot_acquire_plan_or_accept_another_party[candidate]" time="2.909"><failure message="AssertionError: ('/api/v1/placements', 409, {'detail': {'code': 'CONSTRAINT_VIOLATION'}})&#10;assert 409 == 201&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">backend\tests\security\test_admission_lifecycle.py:89: in test_foreign_actor_cannot_acquire_plan_or_accept_another_party
+    _,host,_,p,assignment=planned(client,identities,organization)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_admission_lifecycle.py:19: in planned
+    p=post(client,'/api/v1/placements',host,body,201)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_internship_admission.py:10: in post
+    assert response.status_code==status,(path,response.status_code,response.json())
+E   AssertionError: ('/api/v1/placements', 409, {'detail': {'code': 'CONSTRAINT_VIOLATION'}})
+E   assert 409 == 201
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_admission_lifecycle" name="test_foreign_actor_cannot_acquire_plan_or_accept_another_party[mentor]" time="3.845" /><testcase classname="tests.security.test_admission_lifecycle" name="test_foreign_actor_cannot_acquire_plan_or_accept_another_party[plan]" time="2.354" /><testcase classname="tests.security.test_admission_lifecycle" name="test_foreign_actor_cannot_acquire_plan_or_accept_another_party[inbox]" time="2.288" /><testcase classname="tests.security.test_admission_lifecycle" name="test_raw_acceptance_active_and_plan_rewrite_cannot_replace_personal_proof" time="2.536" /><testcase classname="tests.security.test_admission_current_actor" name="test_completed_logout_after_real_business_wait_denies_admission_write[create]" time="2.322" /><testcase classname="tests.security.test_admission_current_actor" name="test_completed_logout_after_real_business_wait_denies_admission_write[nominate]" time="4.682" /></testsuite></testsuites>

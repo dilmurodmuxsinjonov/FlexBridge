@@ -5,7 +5,51 @@ Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni pa
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## CURRENT LOG-065 - host internship admission
+## CURRENT LOG-067 - versioned host admission draft
+
+Issue65/PR66 remain OPEN/DRAFT on feature/65-internship-admission. Accepted main
+is still1b2bbbf /0013/114. Current code has0014, executed118 tables in disposable
+PostgreSQL; pg_live remains untouched/stopped. Canonical model124+8 contracts now
+59 explicit73 placeholders, registration only;051 TEACHER and088 completion/dispute
+are still unfinished. No Docker/WSL/admin/reboot or pilot change.
+
+New host path: accepted internship ->PLANNED -> exact current plan and personal
+candidate/mentor consent ->host ACTIVATE; original current MENTOR grant, current
+actual actors after business waits, independent current host capability. Immutable
+source/nomination/consent/event proofs, preserved closed legacy set, plan versions/
+tasks and audited projection guards. Actual-session old aliases are strict-version;
+workplace review also uses current original mentor scope. Ordinary PASSWORD mentor
+and HOST_COORDINATOR controls pass; no blanket new MFA rule.
+
+Broad host current native37 passed156.15s; task-history/plan-audit rollback2 passed
+19.83s overlap. Earlier26 passed85.25s, concurrency7 passed37.97s and upgrade2 passed
+20.54s are overlapping stages. Preserve failures: initial lifecycle3 failed/9 passed,
+invalid salary upgrade fixtures2 failed; corrected stages saved. Actual superseded
+task append SQL probe1 failed34.67s -> guard/publish-order fix -> correction passed.
+Copilot read-only initial/follow-up exit0; launch source hashes stayed unchanged
+during each review. Review is source opinion, no independent model/SHA/test certificate.
+
+CRITICAL continuation: affected old integration47 passed/1 failed148.70s at
+academic_fixture's old UID-only confirm call. Do not restore fallback, fabricate
+post-upgrade legacy rows or remove that positive control. Build actual pending
+placement -> verified enrollment/coordinator/supervision/agreement/purpose -> named
+teacher personal accept ->host start and reconcile existing academic lock order.
+Before closing host acceptance finish intake/nomination retry receipts, pagination
+and candidate viewer/scope notification. Exact ordered work and source API IDs:
+reviews/2026-11-10/internship_admission/NEXT_ACADEMIC_UNIT.md.
+
+All native/Copilot jobs above are terminal. At resume inspect actual git/PR/CI for
+the published head; do not restart jobs from stale journal text. Last earlier head
+b918679 CI42717366787/42717373976 completed failure:1 failed935 passed647.54s/528.43s;
+that exact red missing-mentor stage is pr66_initial_ci.json, not current final CI.
+Need current complete CI/review/manifest acceptance before merging/closing65.
+Additional real mentor review positive/regrant denial2 passed13.19s, separate from
+37 selection. Verify SQL diary fn_validate_log_submission CURRENT_DATE under UTC
+against new explicit Asia/Tashkent dates; Windows local-time positives do not
+prove Linux/UTC correctness. Source inference only so far, not a reproduced UTC
+failure. Include this before accepting the cross-platform diary/start integration.
+
+## Historical LOG-065 - initial host internship admission
 
 PR64 final08b4129 full930 CI42712465345/42712470234 passed541.51s/651.09s,
 actual head/base/clean/CLEAN/no feedback checked, merged1b2bbbfed70dc9a68b6de52cdd91fb0f9c41351f;

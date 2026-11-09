@@ -1,0 +1,133 @@
+{
+  "scope": "overlapping preserved stages, not an additive suite total; see HISOBOT for source/failure context",
+  "stages": [
+    {
+      "file": "actor_teacher_initial_junit.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 12.786
+    },
+    {
+      "file": "affected_guard_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.752
+    },
+    {
+      "file": "affected_integration_initial_junit.xml",
+      "tests": 48,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 148.688
+    },
+    {
+      "file": "concurrency_initial_junit.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 37.975
+    },
+    {
+      "file": "host_current_junit.xml",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 156.148
+    },
+    {
+      "file": "initial_guard_junit.xml",
+      "tests": 3,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 11.206
+    },
+    {
+      "file": "initial_junit.xml",
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 13.638
+    },
+    {
+      "file": "lifecycle_authority_junit.xml",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 85.246
+    },
+    {
+      "file": "lifecycle_corrected_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 46.359
+    },
+    {
+      "file": "lifecycle_initial_junit.xml",
+      "tests": 12,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 40.645
+    },
+    {
+      "file": "pr64_teacher_final_junit.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.142
+    },
+    {
+      "file": "tasks_history_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 19.826
+    },
+    {
+      "file": "tasks_history_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 34.663
+    },
+    {
+      "file": "upgrade_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 20.537
+    },
+    {
+      "file": "upgrade_initial_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 21.686
+    },
+    {
+      "file": "workplace_mentor_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 13.194
+    }
+  ]
+}

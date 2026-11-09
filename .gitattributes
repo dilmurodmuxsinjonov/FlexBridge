@@ -8,3 +8,6 @@ reviews/2026-11-10/files_authority/*junit.xml -text -whitespace
 reviews/2026-11-10/candidate_authority/*junit.xml -text -whitespace
 reviews/2026-11-10/enrollment_verification/*junit.xml -text -whitespace
 reviews/2026-11-10/internship_admission/*junit.xml -text -whitespace
+# Preserve captured CLI review output, including its final newline bytes.
+reviews/2026-11-10/internship_admission/copilot_lifecycle_review.md -text -whitespace
+reviews/2026-11-10/internship_admission/copilot_tasks_followup_review.md -text -whitespace

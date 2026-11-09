@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="34.663" timestamp="2026-11-10T04:27:24.940336+05:00" hostname="Ditroid"><testcase classname="tests.security.test_admission_lifecycle" name="test_published_and_superseded_plan_tasks_cannot_be_extended_with_new_rows" time="33.407"><failure message="Failed: DID NOT RAISE IntegrityError">backend\tests\security\test_admission_lifecycle.py:124: in test_published_and_superseded_plan_tasks_cannot_be_extended_with_new_rows
+    with pytest.raises(IntegrityError),transaction() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IntegrityError</failure></testcase></testsuite></testsuites>

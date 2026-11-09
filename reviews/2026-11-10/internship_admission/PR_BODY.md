@@ -1,26 +1,33 @@
-Work in progress: internship admission currently accepts ordinary-job placements,
-allows general ACTIVE without a mentor, and nominates non-MENTOR staff. Initial
-actual HTTP/SQL probes3 failed13.64s; exact evidence is retained.
+Work in progress: bind internship admission to immutable exact-version personal
+candidate/mentor consent and current host activation. Accepted main remains PR64
+on0013/114; this draft's0014 executed118 tables in isolated PostgreSQL.
 
-This first change binds placement intake and mentor nomination to actual current
-host account/session/scoped authority after business locks, requires current host
-capability and internship kind/contract, and requires a current same-host MENTOR
-grant for nomination. Ordinary-job diary creation is also rejected. Valid existing
-fixtures now use real internships and actual-session actors.
+New accepted internship offers open PLANNED. The original current mentor grant is
+pinned; revoked/regranted authority cannot revive an old assignment. Plan versions,
+task history, consents and start/revoke/cancel evidence are immutable; audited
+canonical projections share their transaction. Old aliases use actual sessions
+and explicit terms/version. Private candidate/host/named views and workplace
+review preserve scoped access; ordinary PASSWORD mentor/host coordinator controls
+remain valid. Historical start replay cannot resurrect a cancelled placement.
 
-Initial guards2 passed/1 failed11.21s: kind and role denials are fixed; personally
-accepted mentor/activation remains an open failing regression. Actual logout waits
-and formal Teacher PASSWORD control3 passed12.79s; selected diary/academic2 passed
-10.75s. Counts overlap. This draft does not claim complete CI or admission acceptance.
+Actual current host selection37 passed156.15s; plan-history/atomic rollback2 passed
+19.83s partly overlap. Populated upgrade and failed-upgrade rollback, public authority
+revocation/real PostgreSQL wait, concurrent duplicate acceptance/start, role regrant
+and session waits are exercised. Initial failures and corrections are preserved,
+including the demonstrated privileged-SQL superseded-task history gap and its fix.
+Read-only Copilot source review/follow-up exited0; source-only opinion, no SHA/model/
+runtime/security certification.
 
-Still required in this package: forward proof/history migration; versioned terms,
-candidate and named mentor acceptance, private own/host/named views, canonical
-admission routes and safe activation/cancel/revoke; regrant/replay/concurrency/
-rollback/upgrade and full affected/current CI/source review. Academic teacher and
-completion follow-on scopes stay explicit in DECISIONS.md. No live pg_live work,
-frontend/legal identity/providers/DR or pilot acceptance.
+This draft remains incomplete: affected old integration47 passed1 failed148.70s
+at academic_fixture's old UID-only confirmation. Build actual pending school/
+teacher admission and restore positive flows through real services; no proof waiver
+or fake new legacy import. Intake/nomination retry receipts, pagination and candidate
+viewer notification, complete current CI and final acceptance also remain required.
+API051 TEACHER and API088 completion/dispute are explicit unfinished branches.
+OpenAPI59 explicit73 placeholders of132 is registration, not functional coverage.
 
-Enrollment PR64/Issue63 merged1b2bbbf after final08b full930 twice541.51s/651.09s.
-Final receipts and extra unchanged-source Teacher control are preserved here.
+Full evidence and exact continuation: reviews/2026-11-10/internship_admission/
+HISOBOT.md and NEXT_ACADEMIC_UNIT.md; backend/PLACEMENT_ADMISSION.md. No live pg_live
+migration/start, Docker completion, frontend/provider/legal/DR or pilot claim.
 
-Closes #65
+Closes #65 only after all current requirements/checks are actually accepted.

@@ -110,7 +110,7 @@ def submit_workplace_review_endpoint(
             daily_log_id=daily_log_id,
             placement_id=payload.placement_id,
             assignment_id=payload.mentor_assignment_id,
-            actor_user_id=actor.user_id,
+            actor=actor,
             decision=payload.decision,
             comment=payload.comment,
         )

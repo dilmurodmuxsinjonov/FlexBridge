@@ -11,6 +11,7 @@ from datetime import date
 
 from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for,require_org
 from app.services.placements import PlacementScopeError, placement_service
+from app.api.v1.placement_admission import TermsRequest
 
 router = APIRouter(prefix="/api/v1", tags=["placements"])
 
@@ -43,7 +44,7 @@ class CreatePlacementRequest(StrictDTO):
     organization_id: UUID
 
 
-class ConfirmPlacementStartRequest(StrictDTO):
+class ConfirmPlacementStartRequest(TermsRequest):
     party: str  # CANDIDATE | ORGANIZATION
 
 
@@ -120,8 +121,8 @@ def confirm_placement_start_endpoint(
     try:
         return placement_service.confirm_placement_start(
             placement_id=placement_id,
-            party=payload.party,
-            actor_user_id=actor.user_id,
+            actor=actor,
+            **payload.arguments(),
         )
     except PlacementScopeError as exc:
         raise HTTPException(

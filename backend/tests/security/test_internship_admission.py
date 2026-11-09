@@ -2,6 +2,7 @@
 from sqlalchemy import select
 from app.db.storage import table,transaction
 from app.services.opportunities import opportunity_service
+from uuid import uuid4
 
 
 def post(client,path,who,body,status):
@@ -40,8 +41,10 @@ def test_actual_part_time_offer_cannot_create_an_internship_placement(client,ide
 def test_actual_internship_cannot_activate_without_personally_accepted_mentor(client,identities,organization):
     candidate,host,body=accepted_offer(client,identities,organization,'INTERNSHIP')
     placement=post(client,'/api/v1/placements',host,body,201)
-    post(client,'/api/v1/placements/'+placement['id']+'/confirm-start',candidate,{'party':'CANDIDATE'},200)
-    response=client.post('/api/v1/placements/'+placement['id']+'/confirm-start',json={'party':'ORGANIZATION'},headers=host['headers'])
+    terms={'terms_id':placement['current_terms_id'],'version':1,'idempotency_key':str(uuid4())}
+    post(client,'/api/v1/placements/'+placement['id']+'/confirm-start',candidate,{'party':'CANDIDATE',**terms},200)
+    response=client.post('/api/v1/placements/'+placement['id']+'/confirm-start',
+        json={'party':'ORGANIZATION',**terms,'idempotency_key':str(uuid4())},headers=host['headers'])
     with transaction() as conn:
         saved=dict(conn.execute(select(table('placements')).where(table('placements').c.id==placement['id'])).mappings().one())
         mentors=conn.execute(select(table('mentor_assignments').c.id)).scalars().all()

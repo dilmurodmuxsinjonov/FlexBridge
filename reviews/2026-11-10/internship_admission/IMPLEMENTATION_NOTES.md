@@ -1,4 +1,37 @@
-# Initial admission guards — implementation still in progress
+# Admission implementation — current draft and preserved stages
+
+LOG-067 current: forward0014 executed118 runtime tables, preserving imported
+canonical history without inventing consent. New PUBLIC intake binds the exact
+accepted internship/attempt/revision/source and actual host session/grant. New
+PLANNED starts require current-version personal candidate and named original-grant
+MENTOR consent plus independent host ACTIVATE. Plan publication, cancellation,
+nomination revoke, current minimal projections and strict actual-session aliases
+are implemented. Workplace review checks current original mentor grant/consent.
+Initial terms expose only a minimal original revision plan projection, no payroll.
+
+Current broad native37 passed156.15s; corrected history/rollback2 passed19.83s
+partly overlap. Old affected integration47 passed/1 academic fixture failed148.70s.
+That old fixture still uses UID-only confirmation and raw academic admission fields;
+replace it with genuine pending school/teacher admission, without waiving guards.
+See backend/PLACEMENT_ADMISSION.md and NEXT_ACADEMIC_UNIT.md for exact remaining
+retry-receipt/pagination/viewer-notification/academic/full CI acceptance work.
+
+Initial native lifecycle3 failed/9 passed40.65s: a list column typo and Python vs
+PostgreSQL JSON timestamp formatting caused failures. Corrected list access and
+server-produced exact snapshots ->15 passed46.36s. Populated upgrade fixtures
+initial2 failed21.69s due missing required paid salary metadata; corrected2 passed
+20.54s. Additional source-based SQL history probe1 failed34.67s revealed appending
+tasks to superseded unconsented initial terms; guard now requires current pending
+terms and publication switches the pointer before task inserts in the same UOW.
+Corrected2 includes actual audit-failure rollback of pointer/terms/tasks/event.
+
+Read-only Copilot source review and corrective follow-up both exit0; each launch
+scope was unchanged during its run. No concrete reviewed P1/P2 delta reported;
+source reasoning is not runtime/SHA/model/security/pilot certification. The initial
+review's role/retry concurrency gaps received actual public revocation and duplicate
+HTTP tests. Historical stages below are preserved, not current acceptance claims.
+
+## Historical initial guard stage
 
 Baseline PR64 merged1b2bbbf after actual final930 CI twice. Extra unchanged-source
 formal Teacher PASSWORD own enrollment1 passed10.14s, preserved separately and now

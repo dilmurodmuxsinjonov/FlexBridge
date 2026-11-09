@@ -9,6 +9,7 @@ class IAMHTTPMiddleware:
             '/api/v1/auth/', '/api/v1/me/security', '/api/v1/me/contacts',
             '/api/v1/me/candidate', '/api/v1/me/availability', '/api/v1/me/enrollments', '/api/v1/candidates/',
             '/api/v1/matching/', '/api/v1/opportunities/feed', '/api/v1/files/',
+            '/api/v1/placements', '/api/v1/me/placements', '/api/v1/me/mentor-assignments', '/api/v1/internship-logs',
             '/api/v1/organizations', '/api/v1/operator/verification-cases', '/api/v1/invitations/',
             '/api/v1/operations/', '/api/v1/moderation/', '/api/v1/moderation-appeals/',
             '/api/v1/operator/moderation-', '/api/v1/owner-requests/', '/api/v1/me/owner-requests',

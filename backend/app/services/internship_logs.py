@@ -16,28 +16,13 @@ class InternshipLogScopeError(Exception):
 class InternshipLogService:
     audit_store=AppendOnlyAuditStore()
     def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor):
-        from app.services.authority import account_authority,org_authority
-        from app.services.organizations import require_capability
-        with transaction() as conn:
-            get_row(conn,'organizations',organization_id,True)
-            p=get_row(conn,'placements',placement_id,True)
-            if p['organization_id']!=organization_id: raise InternshipLogScopeError('MENTOR_ORG_MISMATCH')
-            require_internship_placement(conn,p)
-            account_authority(conn,actor)
-            org_authority(conn,actor.user_id,organization_id,'OWNER','HOST_COORDINATOR')
-            require_capability(conn,organization_id,'INTERNSHIP_HOST')
-            try:membership=org_authority(conn,mentor_id,organization_id,'MENTOR',nowait=True)
-            except OperationalError as exc:
-                if getattr(exc.orig,'sqlstate',None)=='55P03':
-                    raise InternshipLogScopeError('MENTOR_BUSY_RETRY') from exc
-                raise
-            row=insert_row(conn,'mentor_assignments',placement_id=placement_id,organization_id=organization_id,membership_id=membership['id'],
-                assigned_by_id=actor.user_id,assigned_at=now())
-            self.audit_store.append_audit_event(actor_id=actor.user_id,action='MENTOR_ASSIGNMENT_NOMINATED',entity_type='mentor_assignment',entity_id=row['id'])
-            return row
+        from app.services.placement_admission import admission_service
+        return admission_service.nominate_mentor(actor=actor,placement_id=placement_id,
+            organization_id=organization_id,mentor_id=mentor_id)
 
     def _academic_binding(self,conn,placement,supervision,institution_id):
         from app.db.institution_scope import TASHKENT
+        require_internship_placement(conn,placement)
         if (not placement['academic_track'] or placement['status']!='ACTIVE' or
             supervision['institution_id']!=institution_id or supervision['enrollment_id']!=placement['enrollment_id']
             or supervision['status']!='ACTIVE' or supervision['revoked_at'] or not supervision['accepted_at']
@@ -125,20 +110,29 @@ class InternshipLogService:
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ACADEMIC_LOG_REVIEWED',entity_type='academic_log_review',entity_id=review['id'])
             return review
 
-    def review(self,*,daily_log_id,placement_id,assignment_id,actor_user_id,decision,comment,academic=False):
+    def review(self,*,daily_log_id,placement_id,assignment_id,actor,decision,comment,academic=False):
         if academic:raise InternshipLogScopeError('ACADEMIC_USE_SCOPED_SERVICE',status_code=422)
+        from app.services.placement_admission import admission_service
         with transaction() as conn:
+            placement,_=admission_service._locked(conn,placement_id)
             log=get_row(conn,'daily_logs',daily_log_id,True)
-            revision=get_row(conn,'log_revisions',log['current_revision_id'])
-            assignment=get_row(conn,'mentor_assignments',assignment_id)
-            member=get_row(conn,'org_memberships',assignment['membership_id'])
-            if (log['placement_id']!=placement_id or assignment['placement_id']!=placement_id or member['user_id']!=actor_user_id
-                or member['status']!='ACTIVE' or member['revoked_at'] or assignment['revoked_at'] or not assignment['accepted_at']):
+            revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
+            assignment=get_row(conn,'mentor_assignments',assignment_id,True)
+            if (placement['status']!='ACTIVE' or log['placement_id']!=placement_id or assignment['placement_id']!=placement_id
+                or assignment['revoked_at'] or not assignment['accepted_at'] or revision['author_id']==actor.user_id):
                 raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
+            admission_service._mentor(conn,actor,placement,assignment)
+            proof=table('mentor_assignment_proofs');consent=table('placement_consents')
+            origin=conn.execute(select(proof.c.origin).where(proof.c.assignment_id==assignment_id)).scalar_one()
+            if origin=='PUBLIC' and not conn.execute(select(consent.c.id).where(consent.c.assignment_id==assignment_id,
+                consent.c.terms_id==revision['terms_id'],consent.c.side=='MENTOR')).first():
+                raise InternshipLogScopeError('MENTOR_PLAN_ACCEPTANCE_REQUIRED',status_code=403)
             if revision['status']!='SUBMITTED': raise InternshipLogScopeError('SUBMITTED_REVISION_REQUIRED')
             if decision not in ('APPROVED','REJECTED','CHANGES_REQUESTED'): raise InternshipLogScopeError('INVALID_REVIEW_DECISION',status_code=422)
-            return insert_row(conn,'workplace_log_reviews',revision_id=revision['id'],placement_id=placement_id,
+            review=insert_row(conn,'workplace_log_reviews',revision_id=revision['id'],placement_id=placement_id,
                 mentor_assignment_id=assignment_id,decision=decision,comment=comment,decided_at=now())
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='WORKPLACE_LOG_REVIEWED',entity_type='workplace_log_review',entity_id=review['id'])
+            return review
 
     def _owned(self,conn,placement_id,author_id):
         try: p=get_row(conn,'placements',placement_id,True)
@@ -161,7 +155,8 @@ class InternshipLogService:
             p=self._owned(conn,placement_id,author_id)
             terms=get_row(conn,'placement_terms',p['current_terms_id'])
             local_date=date.fromisoformat(str(log_date))
-            if not p['start_date']<=local_date<=min(p['end_date'],date.today()): raise InternshipLogScopeError('INVALID_LOG_DATE',status_code=422)
+            from app.db.institution_scope import TASHKENT
+            if not p['start_date']<=local_date<=min(p['end_date'],now().astimezone(TASHKENT).date()): raise InternshipLogScopeError('INVALID_LOG_DATE',status_code=422)
             if day_type not in ('WORKED','ABSENT') or not 0<=total_minutes<=min(480,terms['daily_limit_minutes']) or (day_type=='ABSENT' and total_minutes):
                 raise InternshipLogScopeError('INVALID_DAILY_LOG_MINUTES',status_code=422)
             t=table('daily_logs')

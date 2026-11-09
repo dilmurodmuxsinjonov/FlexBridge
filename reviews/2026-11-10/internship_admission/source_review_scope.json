@@ -1,0 +1,17 @@
+{
+  "base_commit": "b9186795f05e26efe05f4210416a8d0ed85379e1",
+  "scope": "uncommitted source at read-only review launch; tests are separate evidence",
+  "sha256": {
+    "backend/alembic/versions/0014_placement_admission.py": "e4878f2dc02b6268a34db9807dc4d8fc747e289267025203802f2b520ae93d1f",
+    "backend/app/db/placement_admission.py": "3d6be487236fcf74959a0fdc5559b9bbd28c7c324cc54801703aafc1a4f7798a",
+    "backend/app/db/storage.py": "40a3b3213aa84cefcdc01da38ef08caa19e12a6217714ccb7483608af19ecc06",
+    "backend/app/services/placement_admission.py": "fa46488ea9c6dd0660cc7f1d763c8bbde896484bfb51baf0e34321637b9721a9",
+    "backend/app/services/placements.py": "3f6f771db3aec612ea89202bd92f8af95896e194a476cba95ef6ca0a78b59c55",
+    "backend/app/services/internship_logs.py": "d3b91eca0bb1c6e2095a8d635618531e15d17e75708077e7af395fe5156dc1b0",
+    "backend/app/api/v1/placement_admission.py": "75a06ecc6a3604047f64d15d4ed6b866abff8111a43ba0b0b3e487b289f3d586",
+    "backend/app/api/v1/placements.py": "38b665c2d2a5b0ace3ee7657dbd371d3fda1a5b29db27c71d8c8f753e4c35c08",
+    "backend/app/api/v1/internship_logs.py": "6b50ce61ed4319953212abafdc1592d89e62c50690f28fae37f4da938f0a14fb",
+    "backend/app/core/iam_http.py": "87f97cdf628e4a8dad6bad93d29b2302d751cbe95d5779b235aeae57792509a4",
+    "backend/app/main.py": "c8f9685e2dd6bbd9cecec37d4f8701bdca8921fc5e9c9c297e06fac69680b6f8"
+  }
+}
