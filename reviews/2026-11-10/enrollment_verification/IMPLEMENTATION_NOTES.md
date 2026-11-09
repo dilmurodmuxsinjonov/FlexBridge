@@ -49,6 +49,20 @@ frozen outer RR read refusal. Holder PID is observed via pg_blocking_pids in an
 isolated pending request, not a separately traced HTTP backend PID. Counts/stages
 overlap and are not a full current native-suite or complete CI pass claim.
 
+legacy_http_initial_junit.xml:3 passed35.10s,1 framework warning. A separate
+disposable database is populated at0012 with real-password/session fixture users
+and trusted pre-upgrade enrollments, then upgraded to0013. Actual HTTP shows
+current VERIFIED, future VERIFIED and PENDING imports as LEGACY_IMPORT/unreviewed,
+with correct current-student flags. End/withdraw/replay preserves profile, original
+program/start and marker history, adds exactly one terminal event without inventing
+a verification case/submission or invalid future dates. The global engine is
+restored in finally; no pg_live changes. This is a test-only delta afterd36059b.
+
+DraftPR64/source d36059b full CI42710013191/42710023813 and isolated pinned source
+review are running. Read-only agent output/exit must be checked when terminal;
+pending state is not a source acceptance certificate. No new runtime change
+after the prototype commit is implied by the legacy HTTP test expansion.
+
 Remaining: complete affected outcome, legitimate fixture changes if needed,
 actual session/security/business waits, concurrency/replay/rollback/provider/error
 edges and source-pinned review/full current CI/manifests/HISOBOT/journals/handoff.

@@ -59,6 +59,14 @@ current source commit/draft PR/full CI and isolated pinned read-only code review
 remaining security/lifecycle/provider/error/legacy-end edges, source evidence and
 journals. Native processes above are terminal; inspect actual new process/CI state
 before acting. Do not substitute only own handlers for independent review/end.
+PR64 draft https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/64 source
+d36059bdb6eb50003f579709921e762aeb992b6f. CI42710013191(push)/42710023813(PR)
+actual in progress; no pass claimed. Actual read-only Copilot complete-source
+review runs in clean detached d360 worktree D:/Codex/FlexBridge-review/candidate-authority.
+Prompt/output/terminal exit file in enrollment_verification; inspect actual state,
+do not restart on observation timeout. New later test-only legacy HTTP3 passed35.10s:
+0012 populated real-session imports ->0013 ->own end/withdraw/replay, preserves
+history/profile and never invents review proof. Current source unchanged afterd360.
 Broader eligibility/supervision/export/frontend/live/DR remain open. All source
 ownership is Codex; no agent edits same files. pg_live not started or migrated.
 
