@@ -1,0 +1,65 @@
+{
+  "affected_native_junit.xml": {
+    "tests": 88,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 215.625
+  },
+  "authority_initial_junit.xml": {
+    "tests": 109,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 318.06
+  },
+  "combined_initial_junit.xml": {
+    "tests": 9,
+    "failures": 9,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 17.195
+  },
+  "expanded_observation_junit.xml": {
+    "tests": 5,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 9.35
+  },
+  "fixture_fix_teacher_junit.xml": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 12.176
+  },
+  "initial_junit.xml": {
+    "tests": 5,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 10.007
+  },
+  "legacy_initial_junit.xml": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 7.352
+  },
+  "private_read_initial_junit.xml": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 7.453
+  },
+  "teacher_scope_fix_junit.xml": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 8.451
+  }
+}

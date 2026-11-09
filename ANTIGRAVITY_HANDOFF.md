@@ -43,8 +43,15 @@ Branch fix/61-candidate-session-authority from merged73d3565. Kod yozildi,
 Initial109 native107 passed/2 failed318.07s: ikkala failure existing
 AvailabilityConstraintError403 ni test boshqa exception kutgani edi. Production guard
 yumshamadi; class expectation corrected. Corrected2+new formal teacher PASSWORD
-control3 passed12.18s. New suite110 cases endi source/CI gate kutadi;110 native
-allpassed deb yozma. Old candidate/contracts/regressions suite hozir yurmoqda.
+control3 passed12.18s. Old candidate/contracts/regressions88 passed215.63s.
+Copilot bc4 source review exit0 implementation defect topmadi, teacher PASSWORD
+positive faqat4 pathni qamraganini ko'rsatdi. Same formal teacher test barcha10
+variantga kengaydi,1 passed8.45s; a31 isolated follow-up exit0 finding closed.
+Runtime bc4f95e7e2021dfd1911645f4487d747aeaf30d9, final source/test manifest
+a31b08413f8546761bbd22129785cc9194f09811. New suite110 cases;110 native allpassed
+deb yozma. Draft PR62: https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/62
+Source CI42703218978/42703231479 report snapshotda in progress; success deb yozma.
+HISOBOT/native_results/manifest/contracts review katalogida, runs overlap.
 9 API path: profile GET/PATCH, skills PATCH, CV link/unlink, rules/exceptions
 replacement, private schedule GET va2 legacy availability-add POST. CV unlink
 shu HTTP yo'lning alohida holati,10 operation variants; yangi endpoint emas.
@@ -67,15 +74,17 @@ foreign/live exploitation claim. CV/skill metadata trusted fixtures.
 
 Keyingi aniq qadamlar:
 
-1. Old affected test process/JUnit holatini tekshir. Nativeinitial109 va follow-up3
-   scope'ini ajrat. Ishlab turgan app source'ni test o'rtasida o'zgartirma.
-2. Corrected new security suite, old candidate/contracts/availability snapshot and
-   query-count regressions, file/EDU positives pass; ordinary teacher-only PASSWORD
-   positive control formal public appointment flow bilan kerak bo'lsa qo'shiladi.
-3. Source commit/draft PR/current full CI, isolated pinned read-only peer review,
-   concrete regressions/fixes bo'lsa dalili, manifest/HISOBOT/jurnallar/handoff.
-4. Latest evidence-head checks passed -> matching-head merge. No migration/handler
-   yoki dependency qo'shilmadi; runtime0012/111/49 explicit83 placeholder.
+1. git status/current head/remote PR62 va actual CI holatini tekshir. Native109,
+   corrected3, affected88 va expanded teacher1 scope'ini ajrat; sonlarni qo'shma.
+   Native jarayonlar tugagan. Runtime/test a31 dan keyin evidence-only bo'lishi kerak.
+2. Final evidence-head push/PR uchun ikkala full PostgreSQL CI tugashini tekshir;
+   actual head/count/log/timesni yoz. Old bc4 run latest-head acceptance emas.
+   Faqat dalil paydo bo'lgach green de. Concrete failure bo'lsa sababini tuzat.
+3. Source/follow-up peer review tugagan, exit0, coverage finding closed. Agent
+   actual tests/SHA/model/provider/pilotni attest qilmagan. Manifest/HISOBOT/current
+   PR body/jurnallar mavjud; final run receiptni PR/next package artifactga yoz.
+4. Latest evidence-head checks passed -> ready va --match-head-commit merge.
+   No migration/handler/dependency qo'shildi; runtime0012/111/49 explicit83 placeholder.
 5. Generic catalog/matching/job application va boshqa domains alohida audit scope;
    bu9-path61 paketi hammasini yopdi dema. Keyin original1.3/1.4 EDU admission/
    enrollment talablaridan navbatdagi bounded feature paketini qur. R2 freelance yo'q.
@@ -85,8 +94,8 @@ Keyingi aniq qadamlar:
 - D:\FlexBridge\.venv: backend/requirements.txt installed, pip check0. IDE interpreter
   .vscode/settings.json da. Global boshqa loyihalar dependencylarini almashtirma.
 - PostgreSQL17.11 binaries D:\Codex\.tools\postgresql-17.11\pgsql\bin,
-  test server127.0.0.1:55440 (actual accepting02:14). Faqat random flexbridge_test_*
-  disposable bazalar. IDE'dagi backend/.data/pg_live uchun pg_ctl status02:14
+  test server127.0.0.1:55440 (actual accepting02:38). Faqat random flexbridge_test_*
+  disposable bazalar. IDE'dagi backend/.data/pg_live uchun pg_ctl status02:38
   no server running; bu katalogga live migration/deploy bajarildi deb yozma.
 - MinIO_TEST_BINARY D:\Codex\.tools\minio-2025-02-18\minio.exe. Publisher SHA256
   scripts/prepare_test_minio.py da. Current compose reliziga mos, production release
