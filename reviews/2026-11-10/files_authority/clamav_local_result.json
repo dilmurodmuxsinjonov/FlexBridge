@@ -1,0 +1,8 @@
+{
+  "scope": "Temporary localhost daemon, actual INSTREAM adapter with benign generated PDF; not malware-detection/pilot/production acceptance",
+  "freshclam_exit": 0,
+  "service_installed": false,
+  "actual_adapter_scan": true,
+  "generated_pdf_bytes": 431,
+  "owned_daemon_stopped": true
+}

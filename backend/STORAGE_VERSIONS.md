@@ -1,7 +1,8 @@
 # Explicit versions for scanned private objects
 
-Issue57 / draft PR58 introduces forward0012_file_storage_versions. This package is
-under validation. It does not certify live infrastructure, provider retention,
+Issue57 / merged PR58 introduces forward0012_file_storage_versions. Final evidence
+408b3cd passed complete757 CI twice375.77s/507.07s; merge04ffd42 closed57. This
+acceptance is limited to the storage-version backend scope. It does not certify live infrastructure, provider retention,
 antivirus updates, identity/legal evidence or pilot readiness.
 
 Files record storage_bucket, storage_version_id and storage_etag separately.

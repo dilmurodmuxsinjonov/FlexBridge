@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="10.007" timestamp="2026-11-10T01:59:27.994928+05:00" hostname="Ditroid"><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[profile]" time="4.113"><failure message="AssertionError: ('profile', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:46: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401, 403), (kind, response.status_code)
+E   AssertionError: ('profile', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[skills]" time="0.899"><failure message="AssertionError: ('skills', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:46: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401, 403), (kind, response.status_code)
+E   AssertionError: ('skills', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[cv]" time="0.895"><failure message="AssertionError: ('cv', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:46: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401, 403), (kind, response.status_code)
+E   AssertionError: ('cv', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[rules]" time="0.915"><failure message="AssertionError: ('rules', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:46: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401, 403), (kind, response.status_code)
+E   AssertionError: ('rules', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_candidate_authority_probe" name="test_completed_logout_before_profile_wait_release_denies_candidate_write[exceptions]" time="1.277"><failure message="AssertionError: ('exceptions', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_candidate_authority_probe.py:46: in test_completed_logout_before_profile_wait_release_denies_candidate_write
+    assert response.status_code in (401, 403), (kind, response.status_code)
+E   AssertionError: ('exceptions', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>

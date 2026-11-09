@@ -1,160 +1,128 @@
-# Antigravity uchun aniq davom ettirish eslatmasi
+# Antigravity uchun joriy ish va davom ettirish tartibi
 
-Yangilangan: 2026-11-10, Asia/Tashkent. Mas'ul: Codex. Ish papkasi D:\FlexBridge.
-Bu joriy holat surati; ish boshlashda git status, GitHub va jarayonlarni qayta tekshir.
-Codex fix/57-storage-versioning branchida ishlamoqda; bir xil fayllarni parallel
-tahrir qilma. Bu fayl Antigravity agenti allaqachon ishlagan degani emas.
+Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
+Codex fix/59-file-session-authority branchida ishlamoqda. Bir xil fayllarni parallel
+tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
+Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## Bajarilgan paket va dalil
+## Qabul qilingan paketlar
 
-PR56 / Issue55: institution onboarding backend paketi birlashtirildi.
-Merge: 12cd30746a2412afba326adc3025782638029900. Issue55 yopiq.
-Tekshirilgan source: eadac1149ba66d8e34f77190c21f1c6211183a65;
-evidence-only final head: 4ffbe96ff4d1463735303844920a253fbcb5500d.
-Final head push42679916814: 732 passed /383.64s;
-PR42679929206: 732 passed /463.87s. Har birida bitta framework warning.
-Old source CI va native subsetlar bilan test sonlarini qo'shib jami deb yozma.
+- PR56/Issue55 institution onboarding merge12cd30746a2412afba326adc3025782638029900.
+  Sourceeadac11, evidence4ffbe96, final732 CI42679916814/42679929206
+  383.64s/463.87s passed. API017/096/097, firstCOORD/currentCOORD requestedTEACHER,
+  independent assigned review+exact named revision consent, revisions/revoke/private
+  evidence, legacy/history va actual actor/lock guards. Additional coordinator,
+  recovery/student admission/export/official grade/frontend alohida qolgan.
+- PR58/Issue57 private storage versions merge04ffd42e40ac3a475728c203f5da1583023629e4.
+  Sourceb251644, final evidence408b3cd4bd5fa14e52221b42a2f49fae5610441e.
+  Final757 CI42695810684/42695820221 passed375.77s/507.07s. Actual Linux MinIO+PG
+  integration included; AV in those S3 cases explicitly doubled. Runtime0012/111.
+  Explicit bucket/VersionId/ETag, no ETag inference, source-pinned scan/GET, outbox
+  source/token fences, legacy fail-closed/new revision and Enabled readiness accepted
+  within this bounded backend scope. Existing accepted history/grants preserved.
 
-API017/096/097 endi signed-in options, firstCOORD va currentCOORD so'ragan named
-TEACHER oqimlarini beradi. Mustaqil assigned moderator qarori va aynan shu revision
-uchun shaxsiy rozilik ikkalasi bo'lmasdan grant berilmaydi. Revisions/revoke/private
-document view, stale identity/contact/security/original grant, consent expiry,
-real session/lock-race va legacy migration tekshirilgan. Teacher-only PASSWORD
-assurance saqlanadi; sensitive actorlar current MFA talab qiladi.
+Source/native/CI/red/harness/review dalillari reviews/2026-11-09/institution_onboarding
+va reviews/2026-11-10/storage_versioning ichida. PR58 final metadata files_authority/
+pr58_final_ci.json da. Native overlapping test sonlarini qo'shib jami deb yozma.
+Canonical94 va49 explicit/83 placeholder registrations acceptance foizi emas.
+Pilot hali tayyor emas; live IAM/retention/credential rotation/legal identity/DR,
+frontend va umumiy R1 AC ochiq. Owner file session authority PR58 doirasiga kirmagan.
 
-Merged PR56 runtime0011/111 edi. Joriy draft branch kodi0012_file_storage_versions/111;
-uning qabul tekshiruvlari hali tugamagan. Canonical tarixiy
-baseline94 o'zgarmagan.132 canonical route:49 explicit handler/83 placeholder501.
-Bu funksional yoki xavfsizlik qabuli foizi emas. Pilot hali tayyor emas.
+## Joriy paket: Issue59 - owner file current-session authority
 
-Dalillar: reviews/2026-11-09/institution_onboarding/HISOBOT.md, source_manifest.json,
-native_results.json, red/fix XML va actual read-only Copilot reviewlar.
-PR56 yakuniy head CI metadata: reviews/2026-11-10/storage_versioning/pr56_final_ci.json.
-Copilot source review qildi; SHA/test/pilot yoki modelni mustaqil sertifikatlamadi.
+https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/59
+Branch fix/59-file-session-authority merged04ffd42 bazasida. Codex kodni yozdi:
+3 owner file method/caller actual ActorContext oladi, business file locks -> current
+user/session/auth_version/expiry -> existing sensitive-role MFA -> HEAD/sign/write ->
+commit. Initiation guard presign/insert oldidan. Download endi owned file row lock.
+Onboarding account_authority helperi o'zgarmagan policy bilan authority.py ga olindi.
+Ordinary PASSWORD va current sensitive MFA saqlanadi; user-id-only fallback yo'q.
+Worker recorded uploadni keyingi logoutdan mustaqil scan qiladi; fake user session yo'q.
 
-## Muhit va hali tugamagan o'rnatish
+Dalil:
 
-- Antigravity agy CLI avvaldan bor; actual executable --version:1.5.3. Bu CLI
-  mavjudlik dalili, Gemini/model yoki loyiha review'i dalili emas.
-- Python3.12, Git, gh, Node/npm mavjud. PostgreSQL17.11 test serveri
-  localhost55440 da tekshirildi; faqat disposable flexbridge_test_* bazalarini ishlat.
-- D:\FlexBridge\.venv yaratildi, backend/requirements.txt o'rnatildi, pip check:
-  No broken requirements found. Global boshqa loyiha paketlarini almashtirma.
-  Shu interpreter bilan existing migration/password/S3 adapter smoke3 passed8.51s;
-  bu yangi lokal full732 rerun deb ko'rsatilmaydi.
-- MinIO compose'dagi pinned2025-02-18 relizi D:\Codex\.tools\minio-2025-02-18\minio.exe
-  orqali haqiqiy disposable localhost sinovda ishlatildi. Publisher hash tekshirildi.
-  ClamAV/PDF/PostgreSQL vositalari D:\Codex\.tools ichida bor; mavjudlik full-stack
-  ishga tushdi yoki actual AV signatures yangilandi degani emas.
-- Docker4.99.0 va WSL2.7.14 installerlar D:\Codex\Installers\FlexBridge ga yuklandi.
-  Docker EXE va WSL MSI SHA256 hamda Authenticode publisher signatures valid.
-  MSI yonidagi JSONlarda rasmiy URL/hash manbalari bor. Binarlarni Gitga qo'shma.
-- Docker hali o'rnatilmadi: actual installer exit1, prerequisite
-  VirtualMachinePlatform disabled. WSL MSIX ham0x80073D28 bilan administrator
-  huquqi talab qildi. Bu muvaffaqiyatli install deb belgilanmasin.
-- Windows WSL/VirtualMachinePlatform/HypervisorPlatform dastlab Disabled edi.
-  D:\Codex\Setup\Enable-FlexBridge-WSL.ps1 uchun native UAC tasdiqlash oynasi
-  ochildi, ammo native launch error: The operation was canceled by the user.
-  Feature script ishga tushmadi; keyingi CIM tekshiruvida ikkalasi ham Disabled.
-  Bu chatdagi davom ettirish topshirig'ini bekor qilish emas; native administrator
-  bosqichi tugamagan. Bir xil UAC oynalarini takroran ochma. Launch error:
-  D:\Codex\Setup\flexbridge-wsl-launch-error.txt. Reboot berilmagan.
+- Oldafd actual row wait+HTTP logout200dan keyin complete202/SCANNING/event1;
+  initial1 failed33.57s. Expanded b25115 corrected denial probes all failed19.27s:
+ 3 method x logout/expiry/auth_version/suspended/late-sensitive-role. First15 run
+ 12 actual assertion+3 invalid self-grant fixture failure edi; check constraint
+ retained, distinct trusted grantor bilan fixture corrected. Public/foreign exploit emas.
+- Complete real file-row wait, old download actual table-lock wait; initiation
+ service-entry barrier after real HTTP auth, SQL wait da'vosi emas. Storage doubled.
+- New27 native passed36.60s: stale denial, reverse actual logout waits, ordinary
+ PASSWORD/current MFA, forged session va provider rollback. Bu full785 yoki final
+ source/CI qabuli emas. Affected old EDU/storage72 native passed102.01s;
+ actual S3 logout->worker-CLEAN/old-token401 testi ham o'tdi.
+ Source370d9c3 read-only review exit0 no scoped findings; complete785 CI
+ push42697954266/PR42697965001 passed534.16s/458.37s. Evidence-only head
+ checks/merge hali qolgan, PR60 draft. HISOBOT.md current source dalilni bog'laydi.
 
-O'rnatishni yakunlash uchun reviewable scripts/setup_windows_dependencies.ps1 bor.
-PowerShell parser syntax tekshirildi; elevated system branch hali bajarilmadi.
-Avval native administrator oynasini foydalanuvchi tasdiqlashi kerak. So'ng actual
-feature natijasiga qarab quyidagini administrator PowerShell'da bajar:
+Keyingi aniq qadamlar:
+
+1. reviews/2026-11-10/files_authority/DECISIONS.md, backend/FILE_AUTHORITY.md va
+   joriy test process/JUnitni tekshir. Kodning qolgan regressiyalarini tugat.
+2. Source commit/draft PR ochib current full CI chiqar. Izolyatsiyalangan pinned
+   source'ni read-only Copilot review'iga ber; hech bir agentga ignored secrets/state
+   yoki boshqa agent fayllarini edit qilish vakolati berilmasin.
+3. Topilgan concrete nuqson bo'lsa mustaqil red probe/fix; latest actual full native/
+   CI, manifest/hisobot/01/02/03 va shu handoffni yangila. Evidence-only latest head
+   checks passed bo'lgandan keyin --match-head-commit merge.
+4. Issue61 keyingi: same370d9c3 combined9 candidate probes failed17.20s.5 canonical
+   write+2 private GET+2 legacy availability POST actual logoutdan keyin200/201.
+   Legacy siblings included; nine-path plan/review/source evidence candidate_authority
+   folderda.59 ularni yopmaydi.61 implementation faqat PR60 merge
+   ortidan. READ COMMITTED profile SHARE/current account guard, CV material locks,
+   internal matching read_snapshot unchanged, write response same transaction.
+   So'ng original1.3/1.4 talablaridan EDU admission/enrollmentni qur. R2 freelance qo'shma.
+
+## Ish muhiti va tugamagan system install
+
+- D:\FlexBridge\.venv: backend/requirements.txt installed, pip check0. IDE interpreter
+  .vscode/settings.json da. Global boshqa loyihalar dependencylarini almashtirma.
+- PostgreSQL17.11 binaries D:\Codex\.tools\postgresql-17.11\pgsql\bin,
+  test server127.0.0.1:55440. Faqat random flexbridge_test_* disposable bazalar.
+- MinIO_TEST_BINARY D:\Codex\.tools\minio-2025-02-18\minio.exe. Publisher SHA256
+  scripts/prepare_test_minio.py da. Current compose reliziga mos, production release
+  support/security sertifikati emas. CI Linux binary ham haqiqiy sinovda ishladi.
+- ClamAV1.4.6 oldindan bor edi; freshclam official updater exit0 main/daily/bytecode
+  bazalarni D:\Codex\ClamAV\database ga yukladi. Temporary localhost clamd bilan
+  actual app INSTREAM adapter benign431-byte PDFni accepted qildi, daemon to'xtadi.
+  Bu malware detection coverage/full pipeline yoki ongoing AV service emas.
+  Dalil files_authority/CLAMAV_SETUP.md va clamav_local_result.json. System service
+  o'rnatilmadi; PR58 mocked-AV tests scope'i tarixda o'zgartirilmaydi.
+- agy actual CLI --version1.5.3. Bu Gemini/model/loyiha review'i dalili emas.
+- Docker4.99.0 va WSL2.7.14 installerlar D:\Codex\Installers\FlexBridge da, rasmiy
+  hashlar va Docker EXE/WSL MSI Authenticode valid. Docker installed emas: actual
+  exit1, VirtualMachinePlatform disabled. WSL MSIX0x80073D28 admin required. Native
+  UAC launch canceled: feature script ishga tushmadi. Windows featurelar Disabled,
+  Docker engine/compose/hello-world hali bajarilmadi, automatic reboot berilmadi.
+
+Administrator bosqichini foydalanuvchi yakunlashi kerak. Bir xil UAC oynasini qayta
+qayta ishga tushirma; result/loglarni D:\Codex\Setup dan tekshir. Zarur bo'lsa
+administrator PowerShell'da tayyor reviewable skript:
 
 ```powershell
 powershell -NoProfile -File D:\FlexBridge\scripts\setup_windows_dependencies.ps1 -SystemPrerequisites
 ```
 
-Bu VMP/WSL featurelarini NoRestart bilan yoqadi va verified WSL MSI o'rnatadi.
-Result exit3010 yoki restartNeeded bo'lsa, foydalanuvchi ishlarini saqlab, Windowsni
-qo'lda qayta yuklashi kerak. Rebootni o'zboshimchalik bilan boshlama.
+NoRestart ishlatiladi; exit3010/restartNeeded bo'lsa foydalanuvchi qo'lda reboot qiladi.
 Keyin intended oddiy foydalanuvchi PowerShell'ida:
 
 ```powershell
 powershell -NoProfile -File D:\FlexBridge\scripts\setup_windows_dependencies.ps1 -InstallDocker
 ```
 
-Bu per-user Docker Desktop'ni D:\Codex\Apps\DockerDesktop ga, WSL data'ni
-D:\Codex\Docker\wsl ga so'raydi. Actual joylashuv/CLI tekshiriladi. Windows tizim
-WSL qismlarining joyini MSI boshqaradi. Docker Desktop'ni ishga tushirgach haqiqiy
-docker info, docker compose version va docker run --rm hello-world ni tekshir.
-Engine ishlamasa uni installed/ready deb ko'rsatma. Nested virtualization ehtimolini
-actual error asosida tekshir; HypervisorPresent=true bo'lganda CPU CIM false
-qiymatidan BIOS virtualization o'chiq degan xulosa chiqarma.
-
-Rasmiy install yo'riqnomalar:
-https://docs.docker.com/desktop/setup/install/windows-install/
+So'ralgan Docker path D:\Codex\Apps\DockerDesktop, data D:\Codex\Docker\wsl.
+Actual CLI joyi/setup exit tekshiriladi, so'ng Docker Desktop, docker info,
+docker compose version va docker run --rm hello-world. Engine ishlamasa tayyor dema.
+CIM HypervisorPresent=true bo'lsa CPU virtualizationfalse'dan BIOS xulosasi chiqarma.
+Rasmiy: https://docs.docker.com/desktop/setup/install/windows-install/
 https://learn.microsoft.com/windows/wsl/install
 
-## Eng yaqin kod vazifasi: Issue57
+## Ishni yuritish
 
-https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/57
-Branch: fix/57-storage-versioning, draft PR58.0012/app tuzatishlari yozildi, ammo
-qabul hali yo'q. Explicit bucket/version/ETag, source-pinned scan/GET, source event
-fence, snapshots/CV/evidence gates va Enabled readiness implementatsiya qilindi.
-Yangi25 storage holati va existing2 private-view testi27 passed44.51s. Sourceafd343a
-read-only Copilot review exit0 no concrete version-binding defect; actual CLI context
-REVIEW_CONTEXT.md ichida. Old affected240 run239 passed/1 invalid SCANNING fixture
-350.06s; fixture actual quarantine reference bilan tuzatildi, candidate44 passed43.39s.
-Runtime guard yumshatilmagan. Exact b251644 source complete757 CI push42687285321/PR42687299361
-530.01s/513.04s passed. Evidence-only head checks/merge hali keyingi gate.
-Yakuniy manba hisobot: reviews/2026-11-10/storage_versioning/HISOBOT.md.
-backend/STORAGE_VERSIONS.md va LOG-055 ni o'qi. Eski red/fixture failures saqlangan.
-
-1. reviews/2026-11-10/storage_versioning/PLAN.md va DECISIONS.md ni o'qi. Baseline
-   actual localhost MinIO'da trusted provider-admin same-key overwrite qilib,
-   old application URL replacement baytlarni, explicit VersionId URL originalni
-   qaytarishini ko'rsatdi. Bu public overwrite/auth exploit yoki AV/live proof emas.
-2. Yozilgan forward0012 storage_bucket/storage_version_id/storage_etag chegaralarini tekshir.
-   Legacy object_version ETag yoki version bo'lishi mumkin: taxminiy backfill yo'q.
-   Old proof/history/grants saqlansin. Noma'lum provenance download/yangi approval
-   uchun fail closed; yangi upload va explicit revision talab qilinsin.
-3. Bog'langan quarantine HEAD->exact-version+ETag read->scanned private PUT->exact-version GET
-   zanjirini tekshir. Missing/empty/literal null version, bucket mismatch, provider
-   failure hech qachon CLEAN yoki key-only fallback bermasin. Barcha6 signer caller
-   va yangi EDU snapshots/reference checks yangilansin. Existing authorization/
-   audit/teacher assurance yumshamasin.
-4. Outbox claim_token fence avvaldan bor. Reviewdagi taxminni ko'r-ko'rona yangi
-   counter bilan almashtirma. Real stale FILE_SCAN token/result va source reference
-   o'zgargan holatlarni sinab, eski worker CLEAN nashr qila olmasligini isbotla.
-   External PUT retry orphan versions qoldirishi mumkin; exactly-once PUT/purge da'vosi yo'q.
-5. Implementatsiyadagi readiness actual bucket versioning Enabled ni o'qishini tekshir. Suspended/absent/outage
-   false. Actual MinIO integrationda old/new bytes, version tampering/deletion,
-   unversioned/suspended outputs, scan/retry/rollback va scope denialni tekshir.
-   Credentials/presigned URLs log/evidencega chiqmasin. CI'da actual testni skip qilma.
-6. Native PG va provider integration, populated upgrade, affected old suites,
-   pinned read-only peer review, full matching-head CI, dalil/jurnallar, PR va
-   matching-head merge bilan paketni yakunla. Keyin Issue59 file-session authority
-   paketini bajar; shundan keyin manba talablaridan EDU admission/enrollmentni rejalashtir. Hali student/grades/frontend qurildi dema.
-
-scripts/prepare_test_minio.py repo ichida va CI stepga ulangan. Windows verified
-binary bilan actual7 integration holat expanded paketda o'tdi. Linux hash publisher
-checksumdan olingan; joriy app o'zgarishlari uchun Linux CI hali bajarilmagan.
-Yangi lokal testlarda MINIO_TEST_BINARY muhit qiymati majburiy; yo'qligi skip emas failure.
-
-## Keyingi tasdiqlangan xavfsizlik residuali: Issue59
-
-https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/59
-Sourceafd343a pinned review worktree, actual HTTP/native PG probe1 failed33.57s:
-completion actual file-row lockni kutdi, logout200 tugadi, lock ochilgach so'rov202,
-SCANNING va scan-event1 yozdi. S3 HEAD/presign test double; anonymous/foreign/live/AV
-claim emas. Methodga user_id beriladi, actual ActorContext/session final guard yo'q.
-Dalil reviews/2026-11-10/files_authority. PR58 bu masalani yopmaydi; uning storage
-versiya review/CI natijasi session-authority to'liq ishlaydi degani emas.
-PR58 mergedan keyin yangi branch/review bilan3 owner file method/callerni tuzat.
-Candidate/CV boshqa self-service actor-id-only yo'llari alohida ochiq audit scope.
-
-## Ishlash qoidalari
-
-01/02/03/04 boshqaruv fayllari va original1.3/1.4 talablar xaritasini o'qi.
-Foydalanuvchi Q-013 bo'yicha to'xtatmaguncha kichik paketlarda GitHub bilan davom
-ettirishni, Q-014 bo'yicha kerakli vositalarni o'rnatish va eslatma qoldirishni so'ragan.
-R2 freelance hozir qo'shilmaydi. Production deployment, haqiqiy to'lov yoki jonli
-credential rotation bo'ldi dema. Test uchun magic strings/role flags ishlatma.
-Green CI'dan kengroq pilot xulosasini chiqarma;83 placeholder va umumiy AC/live/
-frontend/DR ochiq. Yangi paket boshlashdan oldin o'zgargan actual holatni shu eslatma
-va jurnallarga yangila; parallel ishlayotgan agent fayllarini qaytarib yuborma.
+01/02/03/04 jurnallar va manba talablar xaritasini o'qi. Q-013 bo'yicha foydalanuvchi
+stop demaguncha GitHub bilan kichik tekshiriladigan paketlar; Q-014 vositalar va aniq
+Antigravity handoff talab qiladi. Actual chaqirilgan agentlarni ko'rsat, modelni taxmin
+qilma. Test/probe magic literals, cached role flag, soxta session yoki yashirilgan
+failure bilan yashil natija yasama. Production/live money/credential rotation bo'ldi
+va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangila.

@@ -2,6 +2,12 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## STORAGE-CODEX-001 / AUTH-CODEX-005 - current2026-11-10
+
+- Merged PR58 forward0012 adds files.storage_bucket/storage_version_id/storage_etag and new-write guards; legacy object_version is not guessed. Explicit source VersionId+IfMatch, private PUT reference, all6 GET callers, queued source/token fences and live Enabled readiness. Existing accepted authority/proof preserved; no new tables: runtime111/canonical94. Actual MinIO/PG tests and full757 CI passed twice; provider IAM/retention/live and pilot separate.
+- Issue59 code in progress: actual ActorContext through3 owner-file methods/callers, file->current user/session->current sensitive MFA->provider/write->commit. Existing onboarding account_authority logic moved into authority.py without policy change. Ordinary PASSWORD and system recorded-intent scan remain. No migration/dependency/canonical endpoint change; native27 passed, affected/source/CI gates remain.
+- Local project .venv is installed/pip check0. Official freshclam databases on D: and actual temporary clamd benign-PDF INSTREAM smoke passed; service/detection/full-pipeline claim yo'q. Docker/WSL verified installers downloaded, native admin launch canceled, installation/engine incomplete; details ANTIGRAVITY_HANDOFF.md.
+
 ## EDU-CODEX-001B — reviewed appointment workflow (2026-11-09, in progress)
 
 - Dedicated institution_onboarding service/router, explicit reviewer case dispatch va forward0011 typed proof metadata: requests/submissions/consents/decisions append-only; runtime111, historical canonical94. Registry upper(btrim) uniqueness/collision preflight; malformed legacy grant closure audit; current active membership partial uniqueness revoked tarixni saqlaydi.

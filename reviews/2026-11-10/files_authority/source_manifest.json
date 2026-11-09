@@ -1,0 +1,726 @@
+{
+  "commit": "370d9c32229f023537ff1cdacc77bc53f8bb3c30",
+  "note": "SHA256 of pinned Git blob bytes, including tests and configuration.",
+  "files": [
+    {
+      "path": ".github/workflows/backend-tests.yml",
+      "sha256": "2893e01fa6b99cca861ce844d5b9523463663d512166edd2903c431fad8b2eee",
+      "bytes": 1107
+    },
+    {
+      "path": "FlexBridge_1_4_schema.sql",
+      "sha256": "993932adabb909bb3ba55247fdfa7f336467b06a305e437184c6e37f455c6967",
+      "bytes": 111792
+    },
+    {
+      "path": "backend/Dockerfile",
+      "sha256": "659744db0bfcbfd0a7bf08a147be57f2a06a471e6c91846c9d2e63cdf1048b80",
+      "bytes": 517
+    },
+    {
+      "path": "backend/FILE_AUTHORITY.md",
+      "sha256": "f945e7a426ce795537f48f0d5a86dfefd2e9915e958ecd799f0290fe3a1f8089",
+      "bytes": 3713
+    },
+    {
+      "path": "backend/INSTITUTION_ONBOARDING.md",
+      "sha256": "7f9c2562a7a01e960b98192f556342029b5d67a05fe9575dd81106323dbeb030",
+      "bytes": 7952
+    },
+    {
+      "path": "backend/STORAGE_VERSIONS.md",
+      "sha256": "b59ee6f2609433497dea4bbc29a2083d5237d07cea71957eeb7fb972dd0a8b6a",
+      "bytes": 5731
+    },
+    {
+      "path": "backend/alembic.ini",
+      "sha256": "7c2e6167d4c90829f09025c85cbc32780bec1c3eeb33089e11cac516696efa85",
+      "bytes": 628
+    },
+    {
+      "path": "backend/alembic/env.py",
+      "sha256": "c056ea9e55262e8c52544bf9e1447e9c3c2c15728768ae7fe2950c8a6aff2b3d",
+      "bytes": 588
+    },
+    {
+      "path": "backend/alembic/versions/0001_v1_4_baseline_and_td001_fixes.py",
+      "sha256": "9336f8ef543071da8ad8473b793b1d08733531fdbf94edcf76f21bb7e681fea1",
+      "bytes": 1678
+    },
+    {
+      "path": "backend/alembic/versions/0002_security_runtime.py",
+      "sha256": "5dfb052b14d0d75c4d92059c8c390ab85a82a26152e13a7135c9e7a9b8a82bbf",
+      "bytes": 3639
+    },
+    {
+      "path": "backend/alembic/versions/0003_iam_flows.py",
+      "sha256": "fc245bf80f7b54716b4117d2145ddca383b7eeb6c49461481724e92fd1adeb9d",
+      "bytes": 2464
+    },
+    {
+      "path": "backend/alembic/versions/0004_org_onboarding.py",
+      "sha256": "2b317d3bdef66ba737a978baa57896c5a36780346a103ec7a7000affb1d26512",
+      "bytes": 2326
+    },
+    {
+      "path": "backend/alembic/versions/0005_org_invitations.py",
+      "sha256": "dc2fb7353f47694873a606a4e3e92708c2744312d4e71a455fe639c347ba96b9",
+      "bytes": 1539
+    },
+    {
+      "path": "backend/alembic/versions/0006_retention_evaluations.py",
+      "sha256": "7dfa861925d89beba7f5d4121084ab8c096db86a988abafce9d19d2f161dd438",
+      "bytes": 1790
+    },
+    {
+      "path": "backend/alembic/versions/0007_moderation_appeals.py",
+      "sha256": "fc474759115d4d0156529aaf954d49785e2d053b316b925b3d3945283c665dfe",
+      "bytes": 6834
+    },
+    {
+      "path": "backend/alembic/versions/0008_owner_additions.py",
+      "sha256": "d553fda8b8e572f7c55f9a3b2cf917fdaef7ff8ac910850edcd9cab93abab47a",
+      "bytes": 12071
+    },
+    {
+      "path": "backend/alembic/versions/0009_owner_transfers.py",
+      "sha256": "0072c5e8d5fbc091ca11deda37bda8af16ec3b2e8c5dbcfb65ebbac3d9e7dc7e",
+      "bytes": 11707
+    },
+    {
+      "path": "backend/alembic/versions/0010_owner_continuity.py",
+      "sha256": "de97c8e988bd7b98369cf6be0955846a95e80068b89730cd02d6dac2043ddcce",
+      "bytes": 26977
+    },
+    {
+      "path": "backend/alembic/versions/0011_institution_onboarding.py",
+      "sha256": "bc12e9469896c24e392ff2f8d70cfa4d82d3b9c7253a2da22e3512946ecb184e",
+      "bytes": 19905
+    },
+    {
+      "path": "backend/alembic/versions/0012_file_storage_versions.py",
+      "sha256": "ebd88570a6f7cc55ac1760a2a0638f5102dc249a87449e040f504b334e31c240",
+      "bytes": 2395
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "sha256": "e5c9db775100df65490027623820defe984bfa4c2ec2acf741ce83b602d77f74",
+      "bytes": 76
+    },
+    {
+      "path": "backend/app/adapters/__init__.py",
+      "sha256": "3ae96e237591c14ccba1bdbeb2884b980c88e15f244ba3520d3ff801f8c3fabf",
+      "bytes": 64
+    },
+    {
+      "path": "backend/app/adapters/antivirus.py",
+      "sha256": "19a4f697ff6a0a0ab53553755198911364a0e371812a38a5336379477addd398",
+      "bytes": 913
+    },
+    {
+      "path": "backend/app/adapters/identity_delivery.py",
+      "sha256": "402c28314fd7532b32b04fda6e7178548fbcdc115daf6ba4c50ccd8bb3b691eb",
+      "bytes": 1030
+    },
+    {
+      "path": "backend/app/adapters/storage.py",
+      "sha256": "e0557475e335276272b8ff202111e5b0e4788a738613499e52122d59aedfa896",
+      "bytes": 3758
+    },
+    {
+      "path": "backend/app/api/__init__.py",
+      "sha256": "64ea72285feb141d41a75889ab0cd2a65e6c0678f4cb319d5e71e6574ba770b4",
+      "bytes": 38
+    },
+    {
+      "path": "backend/app/api/dependencies.py",
+      "sha256": "75de4813319a734ef2e2119d26087869282d681edd8d9dcf6cf5c01e24205b10",
+      "bytes": 4016
+    },
+    {
+      "path": "backend/app/api/v1/__init__.py",
+      "sha256": "a7d08507b26b7fff447f573ee467ea2f3891c72bcc3ffe0a5c95d03fa536a7f8",
+      "bytes": 41
+    },
+    {
+      "path": "backend/app/api/v1/auth.py",
+      "sha256": "2990e675fbfc3bc0eb7912a25db3d25838b057b827f81cdc67fc4c4f93e7d768",
+      "bytes": 4730
+    },
+    {
+      "path": "backend/app/api/v1/availability.py",
+      "sha256": "9ad9768fc0d15c98c7a640148a94246fd6c95a017699917e6c9de7e545c3e75a",
+      "bytes": 2570
+    },
+    {
+      "path": "backend/app/api/v1/billing.py",
+      "sha256": "6659d0b548c70444ca8339dd86a2e6ceb305383288bd45fe5b30669c72aba2de",
+      "bytes": 2306
+    },
+    {
+      "path": "backend/app/api/v1/candidates.py",
+      "sha256": "20c60bd0d3be12d3616362b48845bceb5f5ed259339759c21f21ba9c35532474",
+      "bytes": 5285
+    },
+    {
+      "path": "backend/app/api/v1/canonical_routes.py",
+      "sha256": "dc262ff2bee3225613a0626573a9acd34b31079ebb8cb0844e20d0d1265d705b",
+      "bytes": 14629
+    },
+    {
+      "path": "backend/app/api/v1/files.py",
+      "sha256": "0738eb9685ed223436bcc0704e3ca23ec509c2ce4421c3ee214ef7daec5b9f23",
+      "bytes": 1538
+    },
+    {
+      "path": "backend/app/api/v1/governance.py",
+      "sha256": "cd8719176a9f57b01d54ea08ea6da49bf1347d9e8b313873c78e6f7c2a781620",
+      "bytes": 5163
+    },
+    {
+      "path": "backend/app/api/v1/iam.py",
+      "sha256": "8ecab973523605ebb7a8be3eebb8873adea8143d2b39886cd7ba27c335c31d8f",
+      "bytes": 5715
+    },
+    {
+      "path": "backend/app/api/v1/institution_onboarding.py",
+      "sha256": "8f97ed8483b8e66f073a34f8a1e92af043d575e0dae88a4733f2470a79c4af8d",
+      "bytes": 3783
+    },
+    {
+      "path": "backend/app/api/v1/internship_logs.py",
+      "sha256": "1f46831c6bb828114acdb9bb6f2fe9b9ca5592993bebd2e1ba50bcc0e21fec08",
+      "bytes": 4945
+    },
+    {
+      "path": "backend/app/api/v1/invitations.py",
+      "sha256": "4aa96d1e2f5a25d58b028eb03c28eebe1370723fd542021755bedd02d7a29f98",
+      "bytes": 1658
+    },
+    {
+      "path": "backend/app/api/v1/moderation_appeals.py",
+      "sha256": "4a02048187b721abcf783ec048f27cf2f6459c5ce1e8e158e29a1138d2462b16",
+      "bytes": 1831
+    },
+    {
+      "path": "backend/app/api/v1/operations.py",
+      "sha256": "76f0f8f7992776be1261ea4250327a665474226762260b9658348a0d7850d515",
+      "bytes": 1933
+    },
+    {
+      "path": "backend/app/api/v1/opportunities.py",
+      "sha256": "f746eca8192542482946102dc91c6c871c31b0b169b860c38322ac7059c0d224",
+      "bytes": 4397
+    },
+    {
+      "path": "backend/app/api/v1/organizations.py",
+      "sha256": "56a7f9677c20c62cb1f32423c50d6166c2adc0e4020b3c9231d226d727867951",
+      "bytes": 6580
+    },
+    {
+      "path": "backend/app/api/v1/owner_additions.py",
+      "sha256": "7c18da307bae423e49bc0eb20d91a71c4c3ac3043b0794aca20353b46bc4be65",
+      "bytes": 2941
+    },
+    {
+      "path": "backend/app/api/v1/owner_continuity.py",
+      "sha256": "ab5eca5a184315dc4aba351d73ea3c51b969e8ba05282e1a27348285958c1f9b",
+      "bytes": 3321
+    },
+    {
+      "path": "backend/app/api/v1/owner_transfers.py",
+      "sha256": "4b14c4d5f72306f229ace07e64ad2c08eda4287a9893f7a49f3a8ba0f1038502",
+      "bytes": 2951
+    },
+    {
+      "path": "backend/app/api/v1/placements.py",
+      "sha256": "26af3c936ad35499ef6005974d3fbd7218d4171b24ed1289f71c6e4535bed785",
+      "bytes": 4359
+    },
+    {
+      "path": "backend/app/core/__init__.py",
+      "sha256": "a156ea90d96a9786e1e20b9a0593d71f4ccb5f17e6545f32bca33c1db75d846c",
+      "bytes": 72
+    },
+    {
+      "path": "backend/app/core/audit.py",
+      "sha256": "b16d77d3e49e791115b49aab8e722cb1290d4f8cd7e3dbb8e96de58c225b4665",
+      "bytes": 2573
+    },
+    {
+      "path": "backend/app/core/circuit_breaker.py",
+      "sha256": "d94ae24e3459292064fea0488fc1718b8816647b3b5f21b9781d0c6d9af9588a",
+      "bytes": 7686
+    },
+    {
+      "path": "backend/app/core/config.py",
+      "sha256": "0a0cb56597209e3076ca2679219f9b39ac36801837ba7f9b9f8d794834097a4d",
+      "bytes": 2147
+    },
+    {
+      "path": "backend/app/core/iam_http.py",
+      "sha256": "2107d78eac4fdaac574019df3628fd894757ac98586f18b4f50a151544e1636e",
+      "bytes": 3172
+    },
+    {
+      "path": "backend/app/core/iam_security.py",
+      "sha256": "4f379df294f255cc7624ff253898e44570508e0f113846df6239441dd8604634",
+      "bytes": 3967
+    },
+    {
+      "path": "backend/app/core/readiness.py",
+      "sha256": "ff71137ba43947c0014d457912baac0b77b0f5f28a2386e7a5562848cc35ef77",
+      "bytes": 2692
+    },
+    {
+      "path": "backend/app/db/__init__.py",
+      "sha256": "e23049f0a77656471a3973206d8149a5e1afad470755d5f68c0efb300f467e63",
+      "bytes": 72
+    },
+    {
+      "path": "backend/app/db/institution_onboarding.py",
+      "sha256": "c022ed8f9c1e7649e642c8a0ae4737b099d1a312ab41e0cd0e589e8c0254d2e7",
+      "bytes": 2215
+    },
+    {
+      "path": "backend/app/db/institution_scope.py",
+      "sha256": "6f838b63a87f97231861aa964d8d40afa642d2e3cc7c8a2b417e526d598cceec",
+      "bytes": 2062
+    },
+    {
+      "path": "backend/app/db/schema.py",
+      "sha256": "6b1b125c2d845797ddb6f33bbd61517f745a774509b946c4a9535c319936e8db",
+      "bytes": 5696
+    },
+    {
+      "path": "backend/app/db/session.py",
+      "sha256": "f3def9a25486414888700845ee1ad54d0187e6a9d021b8b235eb22daf81d5c21",
+      "bytes": 7899
+    },
+    {
+      "path": "backend/app/db/storage.py",
+      "sha256": "3b966447910cd1b2402c45f39db186907f7ade5c6ac77a4c40db8049cd97d88e",
+      "bytes": 14874
+    },
+    {
+      "path": "backend/app/main.py",
+      "sha256": "5792c6b88d8f913c9a25c7579a4431c028570cfd75c96f325dcabe69a353032b",
+      "bytes": 9401
+    },
+    {
+      "path": "backend/app/services/__init__.py",
+      "sha256": "ef5f3bd4986f15ad68ecb6bd8e4687d777277ea82c48ac20e09c943946a4be80",
+      "bytes": 58
+    },
+    {
+      "path": "backend/app/services/auth.py",
+      "sha256": "fe46e1d30d28f752cf3a0159f79902a5d8fd472cf1a0ae289c633a0a0dcbcd0e",
+      "bytes": 12850
+    },
+    {
+      "path": "backend/app/services/authority.py",
+      "sha256": "2a168cb99d4a1ad837d716f5095b299581875c38cfe6c00215c1fd0b06bdcc5f",
+      "bytes": 4411
+    },
+    {
+      "path": "backend/app/services/availability.py",
+      "sha256": "6c7a0c3716a7fdfb1274f817bd113f3bd7b129af7c35b6441c8609a26a32d2eb",
+      "bytes": 10733
+    },
+    {
+      "path": "backend/app/services/billing.py",
+      "sha256": "2575adc41a7ca14618bf4416928a52a6539ce1ceb0600e3eff5791f97b3df103",
+      "bytes": 20844
+    },
+    {
+      "path": "backend/app/services/candidates.py",
+      "sha256": "25c38c942472d660737570f00d2374a58464bc3c81fb230ed7a40e6851509a51",
+      "bytes": 6266
+    },
+    {
+      "path": "backend/app/services/feature_flags.py",
+      "sha256": "e5cca89fb2453780b074daae0f85f53be0b719e9cf8f3e3692b2507368a11bd3",
+      "bytes": 3486
+    },
+    {
+      "path": "backend/app/services/files_quarantine.py",
+      "sha256": "619168d5f1daabceb9a8c562d6188f1cde699b6456feae1e73ec627648a5d658",
+      "bytes": 5656
+    },
+    {
+      "path": "backend/app/services/governance.py",
+      "sha256": "b3644bbbff08be288b0ee752f52f7bac113c71d715d5b792faf7f6dc8495ee24",
+      "bytes": 5560
+    },
+    {
+      "path": "backend/app/services/identity.py",
+      "sha256": "7376f7629116e679a2da599aceb9db4d1688e7fa09eaa2e119f663967f7b7927",
+      "bytes": 21270
+    },
+    {
+      "path": "backend/app/services/institution_onboarding.py",
+      "sha256": "c61ba5a145cebacf23cf76a8f5cd9ed94ead7e2939d0a0f044fe5128f3cb543c",
+      "bytes": 53932
+    },
+    {
+      "path": "backend/app/services/internship_logs.py",
+      "sha256": "e65760c147e90def6a7f35b6144262ff1993caa85b37d69e35ed921b99bb2e1d",
+      "bytes": 14993
+    },
+    {
+      "path": "backend/app/services/invitations.py",
+      "sha256": "ddac170b96aae2d5bc7daa8e0866c278002758f45ae14a74f448e8b1b253de2e",
+      "bytes": 13386
+    },
+    {
+      "path": "backend/app/services/moderation_appeals.py",
+      "sha256": "c538b1dc0e168ccb2d35f006c2a09f142e30e4ee7aa785cde4770275a89cb349",
+      "bytes": 12736
+    },
+    {
+      "path": "backend/app/services/operations.py",
+      "sha256": "f408d665eb3da7e82dc7abf1d737138254b088c6e916bab6b2dcc508774e1655",
+      "bytes": 5671
+    },
+    {
+      "path": "backend/app/services/opportunities.py",
+      "sha256": "f457c665f590bec75a1b68d7f0b4f28ebe1a3ac52c19e55f1eab93391aa683d0",
+      "bytes": 10481
+    },
+    {
+      "path": "backend/app/services/organizations.py",
+      "sha256": "33e86d20e4f32d4046cd3dfdfa13e6a880970a61bc8e9252328cec368ef4c800",
+      "bytes": 29930
+    },
+    {
+      "path": "backend/app/services/owner_additions.py",
+      "sha256": "896e3f66fe36734afae89a55451982f2c83009978dc20d593d8854043ca47c9b",
+      "bytes": 21965
+    },
+    {
+      "path": "backend/app/services/owner_continuity.py",
+      "sha256": "b9c52b059624b77ca69c9cea72094e8204c73e1bd9a83c792f804fc4132a166a",
+      "bytes": 25042
+    },
+    {
+      "path": "backend/app/services/owner_transfers.py",
+      "sha256": "578954b3d10f78c60955c493e26704df9d58825f5c499ba03a7d019d5440f4e2",
+      "bytes": 20713
+    },
+    {
+      "path": "backend/app/services/passkeys.py",
+      "sha256": "936e6f6d6b7ebd9bfde90e3d7cf0fab6c4d31b43f742b10932599a294a41b407",
+      "bytes": 11436
+    },
+    {
+      "path": "backend/app/services/placements.py",
+      "sha256": "7206e82e7ea87d4d7baf01ab68e4721628bd1a110e24895b86baf39f3bbc0fa7",
+      "bytes": 10049
+    },
+    {
+      "path": "backend/app/services/retention.py",
+      "sha256": "ce8c7c2e30281d141c72fa466f9579910ff0d003897966d8df71a8f7bbc1f9c3",
+      "bytes": 3471
+    },
+    {
+      "path": "backend/app/services/schedule.py",
+      "sha256": "58c3a2931043a8ed840f52e9f81429538eebeca65dd4408f7f8f231374f37dba",
+      "bytes": 3487
+    },
+    {
+      "path": "backend/app/services/schedule_matching.py",
+      "sha256": "86174279eedec1d2d71c9ab458f661bbb50f4706d911f998dfa24ef512af5790",
+      "bytes": 5704
+    },
+    {
+      "path": "backend/app/workers/__init__.py",
+      "sha256": "a0851882b0e7327d809e31eb9607074d94b4f20c3f1e09a0312fd06147b5d49f",
+      "bytes": 45
+    },
+    {
+      "path": "backend/app/workers/identity_delivery.py",
+      "sha256": "e75af9b2c5154cd4695a390534b84f5e510728cea8dc2191a9af9ea0388381f5",
+      "bytes": 1234
+    },
+    {
+      "path": "backend/app/workers/outbox.py",
+      "sha256": "6c048457b41ce718977ae3fcc59b484f967f22a15212c22d580cb240803194a6",
+      "bytes": 3738
+    },
+    {
+      "path": "backend/app/workers/pdf_check.py",
+      "sha256": "9ee12946bcb6522eb3401fcde1da5a31b33f147e9bdb6b171659c6852d1db6f4",
+      "bytes": 3442
+    },
+    {
+      "path": "backend/app/workers/refunds.py",
+      "sha256": "978d5a563be95fab9e8bd94d50893f494054324d0d9f23aa3e9c499014a45a95",
+      "bytes": 3621
+    },
+    {
+      "path": "backend/pyproject.toml",
+      "sha256": "5033debb2f1ef5dec3819bd8e89aa4111af1531431b47eb8d52213a09548e9e8",
+      "bytes": 449
+    },
+    {
+      "path": "backend/requirements.txt",
+      "sha256": "6ac1782da27dd33fcfe732a3033627f1220c3754fb9fcc7ad38127a6ae22c37b",
+      "bytes": 248
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "sha256": "4b4d0d6a85b31456b01ebfcf7d1fbe9123e192e31a30a20415367a534cdc59c5",
+      "bytes": 6765
+    },
+    {
+      "path": "backend/tests/security/test_academic_authority.py",
+      "sha256": "cb5d42f543b7ae232822a156e2d1e54c8b781b2458b07ca5b5aa920f34675902",
+      "bytes": 22966
+    },
+    {
+      "path": "backend/tests/security/test_adapters_and_quota.py",
+      "sha256": "68eb37f4ca1d0d976baae9a9b03827f0b3cac0c5fb27ab0403b3b85fcfe6c12b",
+      "bytes": 12106
+    },
+    {
+      "path": "backend/tests/security/test_billing_authority.py",
+      "sha256": "39ca6bb354af779579ac96a39ebd11f2b5ec671f8409f38d7aac04871379e21e",
+      "bytes": 19629
+    },
+    {
+      "path": "backend/tests/security/test_candidate.py",
+      "sha256": "3c05149086031e49cbac354e48b269c40e95e2dc24497f8474e10ae0deda59d8",
+      "bytes": 22628
+    },
+    {
+      "path": "backend/tests/security/test_contracts.py",
+      "sha256": "12bde268af452abe0328af58b49d40aae51204814b5701f05793d874f2816b7c",
+      "bytes": 12095
+    },
+    {
+      "path": "backend/tests/security/test_files_authority_controls.py",
+      "sha256": "83eca819e2aaf6e18dbd06984023f0aad488a1a99f07cbe01825729dcc41dcc0",
+      "bytes": 4385
+    },
+    {
+      "path": "backend/tests/security/test_files_authority_expanded.py",
+      "sha256": "ccf5b93eda8a35b101652fef63c9f922810ff662548a2a82959082494f7180a8",
+      "bytes": 5694
+    },
+    {
+      "path": "backend/tests/security/test_iam.py",
+      "sha256": "7bf541b9564d25358daa7d9b20d70894f0f98b80ec91f255efd8bc1de990a35a",
+      "bytes": 34216
+    },
+    {
+      "path": "backend/tests/security/test_iam_http.py",
+      "sha256": "2f56620258b3678a9fe46fd2c190808ec811d197bd190683703c201afb6d7f49",
+      "bytes": 6459
+    },
+    {
+      "path": "backend/tests/security/test_institution_authority.py",
+      "sha256": "dd0439e445ad80214a459adb4c4e7281a2ca4cb62cd9af1e7158278db652c3d0",
+      "bytes": 7679
+    },
+    {
+      "path": "backend/tests/security/test_institution_concurrency.py",
+      "sha256": "bf86bfdd5abc2b7fda517c7dc297f63b35f61f197265bc44bbe3a315c903d1ba",
+      "bytes": 4496
+    },
+    {
+      "path": "backend/tests/security/test_institution_contact_privacy.py",
+      "sha256": "130158c87b43b4b87f5c8e09783313c24447d564eadce3c7e1b593787efc833d",
+      "bytes": 2302
+    },
+    {
+      "path": "backend/tests/security/test_institution_followup_regressions.py",
+      "sha256": "5230233555008e0c1d7c222ab217a5ddc45990d3da512c5f8cd5533245b866d7",
+      "bytes": 3488
+    },
+    {
+      "path": "backend/tests/security/test_institution_migration.py",
+      "sha256": "13a9bc0f98a96fab2bac73282db3860eeab5929dc8ae453580a6ae007a983215",
+      "bytes": 7825
+    },
+    {
+      "path": "backend/tests/security/test_institution_onboarding.py",
+      "sha256": "bc40d01587de477888e660baff940fef1a183e83b08467c32120d1c4d9f4da0e",
+      "bytes": 17995
+    },
+    {
+      "path": "backend/tests/security/test_institution_review_regressions.py",
+      "sha256": "4d9ccd148329d3b2c4722670c7c88b6f94897881796c82dcaed174b3585d8cd4",
+      "bytes": 4389
+    },
+    {
+      "path": "backend/tests/security/test_institution_security.py",
+      "sha256": "6ad73ccd6c5127551fd294edeb618b8f021a93a840221924a85835d22845cb22",
+      "bytes": 11967
+    },
+    {
+      "path": "backend/tests/security/test_institution_transactions.py",
+      "sha256": "d00a80a0e376915e4b285d9325dc136297d50779c4c74c27115a3e9e2e53b1df",
+      "bytes": 5215
+    },
+    {
+      "path": "backend/tests/security/test_invitation_contact_order.py",
+      "sha256": "66c67112a8a6f96f57817237e48313a043a851ab724bb3358d645a4e7fe0da85",
+      "bytes": 6051
+    },
+    {
+      "path": "backend/tests/security/test_invitation_contact_races.py",
+      "sha256": "b007f8fa5a78fcc55beb147be01162f59b2ca45e0bd3111ce1e3616408290b11",
+      "bytes": 6970
+    },
+    {
+      "path": "backend/tests/security/test_invitations.py",
+      "sha256": "1553bd0ce710db3ae5e0e5d0d29da750cfd3036699ca8df128f3ac386e25c076",
+      "bytes": 13969
+    },
+    {
+      "path": "backend/tests/security/test_moderation_appeals.py",
+      "sha256": "6e29651a5796145ca7de7cc7d2fd4de6b00b26233d09bd36d51483e69fd67a3b",
+      "bytes": 21865
+    },
+    {
+      "path": "backend/tests/security/test_moderation_authority.py",
+      "sha256": "c75f18564290c281ea239befe7b3c4791ba65f7c2e8c1483f5c53c839d6cc09d",
+      "bytes": 11215
+    },
+    {
+      "path": "backend/tests/security/test_operations_persistence.py",
+      "sha256": "8ad47d7de158f07023e09b07bf5fcb90c43ea896151f3db8fe92b23019d8e900",
+      "bytes": 8850
+    },
+    {
+      "path": "backend/tests/security/test_org_authority.py",
+      "sha256": "d0b88f0492e04aa552d4d1bac6bd966b65510dd6b2a51ced8b4c68e2049e946a",
+      "bytes": 9467
+    },
+    {
+      "path": "backend/tests/security/test_org_authority_transactions.py",
+      "sha256": "5df4b0ac3fc0e7756ea88b4c793ace56aaa54f79f9a5d6faaf4ac74e14bbd813",
+      "bytes": 7528
+    },
+    {
+      "path": "backend/tests/security/test_organizations.py",
+      "sha256": "d2415e95835ff5d30103c2d9cbb45f33e7ce328d517108dae0c4576f197ad6d0",
+      "bytes": 19845
+    },
+    {
+      "path": "backend/tests/security/test_owner_addition_transactions.py",
+      "sha256": "9abf3052f4a7fc13fb1e3b7380b2bf799863c025faae89b1495ca8f700e69846",
+      "bytes": 11176
+    },
+    {
+      "path": "backend/tests/security/test_owner_additions.py",
+      "sha256": "478766fdc351daa4f41091248f8b53dfa8a69c47011e91dd5e81de89a8558eda",
+      "bytes": 19542
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity.py",
+      "sha256": "aaf32f9ebc94ac998a0755c2caafbbc7729168b1a68ffb07716658825d268e04",
+      "bytes": 6614
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity_history.py",
+      "sha256": "e4b84ea6a8ed5aae210be30af4035d62fe257f172eefc00400c766d8e3e9377d",
+      "bytes": 8175
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity_outcomes.py",
+      "sha256": "429d7e44dff7d9a5458d342611a30e9fce9accc39429914971f60e0b5ae5db38",
+      "bytes": 3295
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity_replay.py",
+      "sha256": "63df3d653690a808697436ca2d364e368c9ae1605b99b13e84814b2fee125bee",
+      "bytes": 3300
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity_security.py",
+      "sha256": "28e080a7540eb700735d8ebf460b1519ba05171f7c159f1ac40dfafa1b55d96e",
+      "bytes": 11616
+    },
+    {
+      "path": "backend/tests/security/test_owner_continuity_transactions.py",
+      "sha256": "7ce26c1ee5b63e0b225b1abfbc44c9b8311ee3b1cc91f8d61d222b0f2ce7b335",
+      "bytes": 9599
+    },
+    {
+      "path": "backend/tests/security/test_owner_grant_boundaries.py",
+      "sha256": "ac333eec56c96d5bedcd1b6aaa29d304733dec0af70de45f9b07b56ae673114f",
+      "bytes": 3577
+    },
+    {
+      "path": "backend/tests/security/test_owner_transfer_history.py",
+      "sha256": "83d49e6f12a2f1352b05a713efb2bc1f6282dbd60c8052d39898d0f88d6a1ed3",
+      "bytes": 5935
+    },
+    {
+      "path": "backend/tests/security/test_owner_transfers.py",
+      "sha256": "43476a09218612404d203e69df980b1dcaca369725c2369c4bce14ebb5dbcb37",
+      "bytes": 22046
+    },
+    {
+      "path": "backend/tests/security/test_peer_review.py",
+      "sha256": "038c5c236e0464787ce9228f6a3b2f23a3e447a8f3972ea03925ca6a7d8593df",
+      "bytes": 3466
+    },
+    {
+      "path": "backend/tests/security/test_regressions.py",
+      "sha256": "53d95479312c304ca7c20afc16d944b4a277206db713afd63cb4679f281f47b6",
+      "bytes": 16910
+    },
+    {
+      "path": "backend/tests/security/test_storage_versioning_integration.py",
+      "sha256": "64f06455841522f8075506f440985cccfd62960755cb693c3dcaf3d15567f248",
+      "bytes": 14203
+    },
+    {
+      "path": "backend/tests/security/test_storage_versions.py",
+      "sha256": "915c5bd2b56fbb858eec5b37608c40470206547a6d4f41977d0394111bb8fd69",
+      "bytes": 10089
+    },
+    {
+      "path": "backend/tests/test_s2_1_3_retention_flags.py",
+      "sha256": "ae0c72f63e121e3e760b9057a14783a7469576962aea080ada9e1daa174523e8",
+      "bytes": 3300
+    },
+    {
+      "path": "infra/.env.example",
+      "sha256": "c54a9d2211a9e2266722d5b596792005e6f95d0814f4f17caeedcf579ac36452",
+      "bytes": 1010
+    },
+    {
+      "path": "infra/compose.yaml",
+      "sha256": "843fbd9ab4f7c6225be3b0fef0f61d37bf800b183eb08d1c5040d413eb162fb3",
+      "bytes": 4636
+    },
+    {
+      "path": "scripts/Test-Backend.ps1",
+      "sha256": "396388d608c586cfc33133ed223d87b95355e4ba4f4d463bbeb123b1ad16c141",
+      "bytes": 1471
+    },
+    {
+      "path": "scripts/check_publish.py",
+      "sha256": "89a278a44ae61b423d711a117bfa980f7020e1245c6a5b3f71fd34445ad3c310",
+      "bytes": 2989
+    },
+    {
+      "path": "scripts/prepare_test_minio.py",
+      "sha256": "b11103257ea7d7106f99f1f90d8b15522cfc1d952140cf8f00039d84a6912008",
+      "bytes": 2543
+    },
+    {
+      "path": "scripts/setup_windows_dependencies.ps1",
+      "sha256": "5fbf9f076f0e70853e1bc8bece066ec8e90a267576253068c57e8d1b8dd636e6",
+      "bytes": 4927
+    },
+    {
+      "path": "specs/v1_4/FlexBridge_model_1_4.json",
+      "sha256": "8ad483fc15c24e554355a756f868bf48eee32a0320d9edb1565754c452894fd0",
+      "bytes": 355664
+    }
+  ]
+}

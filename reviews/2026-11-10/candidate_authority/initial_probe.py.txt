@@ -1,0 +1,47 @@
+"""Next-scope probe: actual HTTP/logout/PG wait; CV metadata is trusted fixture."""
+from concurrent.futures import ThreadPoolExecutor
+import pytest
+from sqlalchemy import select, text
+from app.db.storage import table, transaction, get_engine
+from app.services.schedule import local_today
+from test_candidate import cv_fixture, skill_fixture
+from test_org_authority_transactions import wait_for_blocker
+
+
+@pytest.mark.parametrize('kind', ['profile', 'skills', 'cv', 'rules', 'exceptions'])
+def test_completed_logout_before_profile_wait_release_denies_candidate_write(client, identities, kind):
+    owner = identities()
+    today = local_today().isoformat()
+    if kind == 'profile':
+        request = lambda: client.patch('/api/v1/me/candidate', headers=owner['headers'], json={'headline': 'Changed after completed logout'})
+    elif kind == 'skills':
+        skill = skill_fixture()
+        request = lambda: client.patch('/api/v1/me/candidate/skills', headers=owner['headers'], json={'skills': [{'skill_id': skill['id'], 'level': 'BASIC'}]})
+    elif kind == 'cv':
+        document = cv_fixture(owner)
+        request = lambda: client.post('/api/v1/me/candidate/cv', headers=owner['headers'], json={'file_id': document['id']})
+    elif kind == 'rules':
+        request = lambda: client.put('/api/v1/me/availability', headers=owner['headers'], json={'rules': [{
+            'weekday': 1, 'start_minute': 540, 'end_minute': 600, 'valid_from': today}]})
+    else:
+        request = lambda: client.put('/api/v1/me/availability/exceptions', headers=owner['headers'], json={
+            'from_date': today, 'to_date': today, 'exceptions': [{'local_date': today, 'kind': 'AVAILABLE', 'start_minute': 540, 'end_minute': 600}]})
+    def snapshot():
+        with transaction() as conn:
+            return {name: [tuple(row) for row in conn.execute(select(table(name)).order_by(table(name).c.id))]
+                for name in ('candidate_profiles', 'candidate_skills', 'availability_rules', 'availability_exceptions', 'audit_events')}
+    before = snapshot()
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with get_engine().begin() as blocker:
+            profiles = table('candidate_profiles')
+            blocker.execute(select(profiles).where(profiles.c.id == owner['candidate_id']).with_for_update())
+            pid = blocker.execute(text('SELECT pg_backend_pid()')).scalar_one()
+            pending = pool.submit(request)
+            wait_for_blocker(pid)
+            logout = client.delete('/api/v1/me/sessions/' + owner['session_id'], headers=owner['headers'])
+            assert logout.status_code == 200
+        response = pending.result(timeout=30)
+    # Logout's own IAM audit may be added; the assertion below is the primary red
+    # response proof. A future fix should compare only candidate business/audit data.
+    assert response.status_code in (401, 403), (kind, response.status_code)
+    assert snapshot() == before

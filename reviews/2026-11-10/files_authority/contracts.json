@@ -1,0 +1,802 @@
+{
+  "total": 132,
+  "explicit": 49,
+  "placeholder_501": 83,
+  "missing": 0,
+  "commit": "370d9c32229f023537ff1cdacc77bc53f8bb3c30",
+  "note": "Registration inventory, not acceptance coverage. No canonical handler added in file authority package; registration is not functional acceptance.",
+  "contracts": [
+    {
+      "id": "API-001",
+      "method": "GET",
+      "path": "/api/v1/opportunities",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-002",
+      "method": "GET",
+      "path": "/api/v1/onboarding/options",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-003",
+      "method": "POST",
+      "path": "/api/v1/matching/preview",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-004",
+      "method": "POST",
+      "path": "/api/v1/saved-opportunities",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-005",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-006",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-007",
+      "method": "POST",
+      "path": "/api/v1/moderation-cases",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-008",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/public",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-009",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/opportunities",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-010",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/rating-summary",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-011",
+      "method": "GET",
+      "path": "/api/v1/services/public",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-012",
+      "method": "GET",
+      "path": "/api/v1/prices/public",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-013",
+      "method": "GET",
+      "path": "/api/v1/help/{document}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-014",
+      "method": "GET",
+      "path": "/api/v1/policies/{document}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-015",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-016",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-017",
+      "method": "GET",
+      "path": "/api/v1/institution-onboarding/options",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-018",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-019",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/verify",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-020",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/consume",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-021",
+      "method": "POST",
+      "path": "/api/v1/auth/challenges/{id}/resend",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-022",
+      "method": "POST",
+      "path": "/api/v1/auth/recovery",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-023",
+      "method": "GET",
+      "path": "/api/v1/auth/recovery/{id}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-024",
+      "method": "GET",
+      "path": "/api/v1/invitations/{token}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-025",
+      "method": "POST",
+      "path": "/api/v1/invitations/{token}/accept",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-026",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-027",
+      "method": "POST",
+      "path": "/api/v1/me/enrollments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-028",
+      "method": "PUT",
+      "path": "/api/v1/me/availability",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-029",
+      "method": "GET",
+      "path": "/api/v1/me/applications/summary",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-030",
+      "method": "GET",
+      "path": "/api/v1/me/placements",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-031",
+      "method": "GET",
+      "path": "/api/v1/me/notifications",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-032",
+      "method": "PATCH",
+      "path": "/api/v1/me/candidate/skills",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-033",
+      "method": "POST",
+      "path": "/api/v1/me/candidate/cv",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-034",
+      "method": "GET",
+      "path": "/api/v1/me/enrollments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-035",
+      "method": "GET",
+      "path": "/api/v1/me/availability",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-036",
+      "method": "PUT",
+      "path": "/api/v1/me/availability/exceptions",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-037",
+      "method": "GET",
+      "path": "/api/v1/me/saved-opportunities",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-038",
+      "method": "DELETE",
+      "path": "/api/v1/me/saved-opportunities/{id}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-039",
+      "method": "GET",
+      "path": "/api/v1/me/applications",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-040",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/reapply",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-041",
+      "method": "GET",
+      "path": "/api/v1/me/applications/{id}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-042",
+      "method": "POST",
+      "path": "/api/v1/interviews/{id}/responses",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-043",
+      "method": "POST",
+      "path": "/api/v1/offers/{id}/respond",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-044",
+      "method": "POST",
+      "path": "/api/v1/me/applications/{id}/withdraw",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-045",
+      "method": "GET",
+      "path": "/api/v1/me/engagements/{id}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-046",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/confirmations",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-047",
+      "method": "POST",
+      "path": "/api/v1/engagements/{id}/ratings",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-048",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/accept",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-049",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/completion-requests",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-050",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/plan",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-051",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/assignments/{assignment}/accept",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-052",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/exports",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-053",
+      "method": "GET",
+      "path": "/api/v1/placements/{id}/logs",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-054",
+      "method": "PUT",
+      "path": "/api/v1/placements/{id}/logs/{date}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-055",
+      "method": "POST",
+      "path": "/api/v1/log-entries/{id}/evidence",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-056",
+      "method": "POST",
+      "path": "/api/v1/logs/{id}/submit",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-057",
+      "method": "GET",
+      "path": "/api/v1/me/ratings",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-058",
+      "method": "POST",
+      "path": "/api/v1/ratings/{id}/appeals",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-059",
+      "method": "PUT",
+      "path": "/api/v1/me/notification-preferences",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-060",
+      "method": "PATCH",
+      "path": "/api/v1/me/security",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-061",
+      "method": "DELETE",
+      "path": "/api/v1/me/sessions/{id}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-062",
+      "method": "POST",
+      "path": "/api/v1/me/privacy-requests",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-063",
+      "method": "GET",
+      "path": "/api/v1/me/support-tickets",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-064",
+      "method": "POST",
+      "path": "/api/v1/support-tickets/{id}/messages",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-065",
+      "method": "POST",
+      "path": "/api/v1/organizations",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-066",
+      "method": "POST",
+      "path": "/api/v1/organizations/{id}/verification",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-067",
+      "method": "GET",
+      "path": "/api/v1/organizations/{id}/verification",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-068",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/dashboard",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-069",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/placements",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-070",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/entitlements",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-071",
+      "method": "PATCH",
+      "path": "/api/v1/organizations/{org}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-072",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/capabilities",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-073",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/memberships",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-074",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/invitations",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-075",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/memberships/{id}/revoke",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-076",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/opportunities",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-077",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/transition",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-078",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-079",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/terms",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-080",
+      "method": "PUT",
+      "path": "/api/v1/opportunities/{id}/draft/schedule",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-081",
+      "method": "POST",
+      "path": "/api/v1/opportunities/{id}/publish",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-082",
+      "method": "GET",
+      "path": "/api/v1/opportunities/{id}/applications",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-083",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/transition",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-084",
+      "method": "GET",
+      "path": "/api/v1/applications/{id}/hr",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-085",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/interviews",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-086",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/offers",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-087",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/mentor-assignments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-088",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/host-decisions",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-089",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-assignments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-090",
+      "method": "GET",
+      "path": "/api/v1/me/mentor-review-queue",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-091",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/workplace",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-092",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/workplace-reviews",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-093",
+      "method": "GET",
+      "path": "/api/v1/organizations/{org}/billing",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-094",
+      "method": "POST",
+      "path": "/api/v1/organizations/{org}/orders",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-095",
+      "method": "POST",
+      "path": "/api/v1/orders/{id}/refund-requests",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-096",
+      "method": "POST",
+      "path": "/api/v1/institution-appointments",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-097",
+      "method": "GET",
+      "path": "/api/v1/institution-appointments/{id}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-098",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/supervisions",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-099",
+      "method": "GET",
+      "path": "/api/v1/institutions/{inst}/assignment-queue",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-100",
+      "method": "POST",
+      "path": "/api/v1/institutions/{inst}/exports",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-101",
+      "method": "POST",
+      "path": "/api/v1/student-supervisions",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-102",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-assignments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-103",
+      "method": "POST",
+      "path": "/api/v1/academic-assignments/{id}/revoke",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-104",
+      "method": "GET",
+      "path": "/api/v1/me/academic-assignments",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-105",
+      "method": "GET",
+      "path": "/api/v1/me/academic-review-queue",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-106",
+      "method": "GET",
+      "path": "/api/v1/log-revisions/{revision}/academic",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-107",
+      "method": "POST",
+      "path": "/api/v1/log-revisions/{revision}/academic-reviews",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-108",
+      "method": "POST",
+      "path": "/api/v1/placements/{id}/academic-decisions",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-109",
+      "method": "GET",
+      "path": "/api/v1/operator/verification-cases",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-110",
+      "method": "POST",
+      "path": "/api/v1/operator/verification-cases/{id}/decide",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-111",
+      "method": "POST",
+      "path": "/api/v1/operator/moderation-cases/{id}/actions",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-112",
+      "method": "GET",
+      "path": "/api/v1/operator/support-tickets",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-113",
+      "method": "POST",
+      "path": "/api/v1/operator/support-tickets/{id}/messages",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-114",
+      "method": "POST",
+      "path": "/api/v1/operator/privacy-requests/{id}/resolve",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-115",
+      "method": "GET",
+      "path": "/api/v1/operator/reconciliation",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-116",
+      "method": "POST",
+      "path": "/api/v1/operator/refunds/{id}/approve",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-117",
+      "method": "GET",
+      "path": "/api/v1/operator/finance-summary",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-118",
+      "method": "GET",
+      "path": "/api/v1/operator/audit-events",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-119",
+      "method": "POST",
+      "path": "/api/v1/operator/access-requests",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-120",
+      "method": "POST",
+      "path": "/api/v1/operator/users/{id}/revoke-sessions",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-121",
+      "method": "PATCH",
+      "path": "/api/v1/operator/feature-flags/{code}",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-122",
+      "method": "POST",
+      "path": "/api/v1/operator/incidents",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-123",
+      "method": "GET",
+      "path": "/api/v1/operator/restore-runs",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-124",
+      "method": "GET",
+      "path": "/api/v1/operator/analytics",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-X01",
+      "method": "POST",
+      "path": "/api/v1/files/upload-intents",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X02",
+      "method": "POST",
+      "path": "/api/v1/files/{id}/complete-upload",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X03",
+      "method": "GET",
+      "path": "/api/v1/files/{id}/download",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X04",
+      "method": "POST",
+      "path": "/api/v1/webhooks/payments/{provider}",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X05",
+      "method": "GET",
+      "path": "/api/v1/health/live",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X06",
+      "method": "GET",
+      "path": "/api/v1/health/ready",
+      "status": "EXPLICIT_HANDLER"
+    },
+    {
+      "id": "API-X07",
+      "method": "POST",
+      "path": "/api/v1/internal/workers/scan-result",
+      "status": "PLACEHOLDER_501"
+    },
+    {
+      "id": "API-X08",
+      "method": "POST",
+      "path": "/api/v1/internal/workers/retention-sweep",
+      "status": "PLACEHOLDER_501"
+    }
+  ]
+}

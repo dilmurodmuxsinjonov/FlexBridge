@@ -22,6 +22,15 @@ def mfa_authority(conn,actor):
     session_authority(conn,actor,require_mfa=True)
 
 
+def account_authority(conn,actor,*,require_mfa=False):
+    """Current account/session and the existing global sensitive-role assurance."""
+    from app.services.auth import roles_for
+    from app.core.iam_security import SENSITIVE_ROLES
+    session_authority(conn,actor,require_mfa=require_mfa)
+    if not require_mfa and SENSITIVE_ROLES.intersection(roles_for(conn,actor.user_id)):
+        mfa_authority(conn,actor)
+
+
 def platform_authority(conn,actor,*allowed):
     mfa_authority(conn,actor)
     grants,roles=(table(n) for n in ('platform_role_grants','role_catalog'))
