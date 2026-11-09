@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="8" time="31.815" timestamp="2026-11-09T04:52:54.351928+05:00" hostname="Ditroid"><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[session]" time="5.761"><failure message="AssertionError: ('session', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('session', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[disable_mfa]" time="1.511"><failure message="AssertionError: ('disable_mfa', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('disable_mfa', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[account]" time="3.677"><failure message="AssertionError: ('account', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('account', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[auth_version]" time="3.841"><failure message="AssertionError: ('auth_version', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('auth_version', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[role]" time="3.722"><failure message="AssertionError: ('role', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('role', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_completed_authority_change_blocks_initial_decision[role_expiry]" time="3.092"><failure message="AssertionError: ('role_expiry', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:69: in test_completed_authority_change_blocks_initial_decision
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('role_expiry', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_real_opportunity_lock_wait_rechecks_security[session]" time="3.435"><failure message="AssertionError: ('session', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:89: in test_real_opportunity_lock_wait_rechecks_security
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('session', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_real_opportunity_lock_wait_rechecks_security[disable_mfa]" time="4.758"><failure message="AssertionError: ('disable_mfa', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:89: in test_real_opportunity_lock_wait_rechecks_security
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('disable_mfa', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase></testsuite></testsuites>

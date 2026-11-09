@@ -1,0 +1,9 @@
+An initial moderation request could pass its role preflight, wait for the opportunity and still write a decision after session/account/MFA/role authority had been revoked. Eight changed-state regressions reproduced the stale201 result; actual opportunity-lock tests use independent PostgreSQL connections.
+
+Pass the real ActorContext into the service and acquire existing moderator_authority after locking the opportunity, before reading its revision or making policy/write effects. Preserve the existing global MODERATOR MFA policy, self-author/DRAFT checks, case/action/audit atomicity and appeal provenance. Database security/role changes serialize with the held authority; expiry is evaluated at the post-lock authorization boundary.
+
+Validation:5856dc6 passed native22 (87.685s), old affected93 (367.138s) and both full502-test CI runs42538509986/42538515162 (378.85s/349.18s). Source review found no concrete production defect and suggested grant revoke/expiry during the real row-lock wait. 08626bf adds those two cases only; native24 passed37.93s and final read-only review confirms the gap closed. Both final full504-test CI runs42561301163/42561304587 passed383.65s/391.71s. The24 rerun the earlier22; scopes are reported separately. Coverage includes both authority orderings, valid controls, parallel single effect, write/audit rollback and service session/cache boundaries. No endpoint, dependency or migration added; canonical46 explicit/86 placeholders and pilotfalse remain. Trusted SQL administrative fixtures are not public provisioning, and live providers/browser/DR are outside this evidence.
+
+Separate confirmed financial residual: refund approvals can outlive completed finance session/grant revoke and queue REFUND_EXECUTE. Three failing HTTP/native probes are tracked in #51 for the next package; no real transfer was executed, and this moderation change does not fix that path.
+
+Closes #48

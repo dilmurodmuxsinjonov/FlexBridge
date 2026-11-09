@@ -1,0 +1,77 @@
+{
+  "commit": "08626bf432b4b6f9051c41c9acf20443ab761c4b",
+  "native_baseline": {
+    "commit": "5856dc6b6f73ac2f42f5e98e5993d4604a17c336",
+    "new_cases": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 87.685
+    },
+    "old_affected": {
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 367.138
+    }
+  },
+  "native_final": {
+    "commit": "08626bf432b4b6f9051c41c9acf20443ab761c4b",
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 37.927
+  },
+  "initial_regressions": {
+    "initial": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 12.776
+    },
+    "expanded": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 31.815
+    },
+    "real_lock_repeat": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 10.711
+    }
+  },
+  "ci_runs": [
+    42561301163,
+    42561304587
+  ],
+  "ci_tests": 504,
+  "ci_conclusion": "success",
+  "ci_elapsed_seconds": [
+    383.65,
+    391.71
+  ],
+  "prior_ci": {
+    "commit": "5856dc6b6f73ac2f42f5e98e5993d4604a17c336",
+    "runs": [
+      42538509986,
+      42538515162
+    ],
+    "tests": 502,
+    "conclusion": "success",
+    "elapsed_seconds": [
+      378.85,
+      349.18
+    ]
+  },
+  "residual_security_issue": 51,
+  "pilot_ready": false,
+  "note": "Final runtime matches5856dc6; final test delta adds two actual row-lock role cases. Native24 reruns earlier22, and initial repeated subsets are not distinct coverage; do not sum them as unique tests or claim final native full suite."
+}

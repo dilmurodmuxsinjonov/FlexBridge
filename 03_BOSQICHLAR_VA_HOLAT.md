@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46 merged. Issue47/AUTH-CODEX-002: organization authority race tuzatilmoqda; keyin confirmed initial-moderation race48 va EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49 merged. Issue48/PR50 initial moderation final tekshiruvda; keyin confirmed human-money authority51, so'ng EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -155,9 +155,14 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## AUTH-CODEX-002 — Organization amallarida joriy vakolatni commitgacha ushlash
 
-- Holat: `Tekshiruvda`; Codex; Issue47/PR49, fix/47-org-authority. Reja/dalil: reviews/2026-11-09/org_authority. Old source API0751 failed, expanded15dan14 failed/1 passed, dependency503 download synthetic storage bilan qayta sinab200 kuzatildi; actual org lock/session revoke/MFA disable2 failed.104c436 native43/26/187 va full470 CI o'tganidan keyin review/contact deadlock1 failed aniqlandi;17a0b66 try-lock/NOWAIT/409 rollback va target identity recheck bilan tuzatdi. Native29 va full479 passed.7386da2 test-only delta deterministic contention/existing-contact replacementni yopdi: native10 passed, pinned delta review concrete remaining issue topmadi. Final full480 CI42537111572/42537115610 ham passed,358.80s/311.51s; evidence-only check/merge qolgan. Pilotfalse.
+- Holat: `Bajarildi` (chegaralangan backend paketi); Codex; Issue47 closed, PR49 merge203863d. Reja/dalil: reviews/2026-11-09/org_authority. Old source changed-state failures va reviewdan keyingi contact deadlock reproduksiyasi saqlandi.104c436 native43/26/187/full470,17a0b66 contact fix native29/full479,7386da2 testdelta native10/full480 alohida. Pinned reviewlar concrete remaining issue topmadi. Final source CI42537111572/42537115610 passed358.80s/311.51s; evidence-only bdd8b19 CI42537714800/42537717767 ham480 passed307.01s/358.28s. Pilotfalse.
 - Register/submit/patch/revoke/private join detail/download, invitation create/accept/replay/revoke va member request/approve current-MFA/session/accountni business lockdan keyin tekshiradi. Org authority grantlari ham transaction-bound. Governance servisiga actual ActorContext beriladi, user_iddan sessionsiz actor yasalmaydi. Oldindan o'tgan bekor qilish rad etadi; vakolat avval bloklansa, bekor qilish commitni kutadi. Yangi MFA siyosati, migration yoki grant tarixini almashtirish yo'q.
 - Qabul: changed-state HTTP va actual DB lock wait, teskari commit serialization, scoped grants va rollback; old org/invite/ownership/appeal/IAM/full PostgreSQL CI va pinned peer review. Initial opportunity moderation race separately confirmed2 failed/Issue48; bu paket uni tuzatdi deb aytilmaydi. Pilotfalse; keyin48 va EDU.
+
+## AUTH-CODEX-003 — Initial opportunity moderation authority
+
+- Holat: `Tekshiruvda`; Codex; Issue48/PR50, fix/48-moderation-authority. Reja/dalil reviews/2026-11-09/moderation_authority. Initial2/expanded8 va actual row-lock repeat2 failures saqlandi.5856dc6 native22/old93 va ikkala full502 CI passed; source review concrete production defect topmadi, real row-lockda grant revoke/expiry gapini tavsiya qildi.08626bf test-only delta native24 passed37.93s, final read-only review exit0 gap yopilganini tasdiqladi; full504 CI42561301163/42561304587 ham passed383.65s/391.71s. Native24 eski22ni takrorlaydi. Evidence-only head checks/merge qolgan. Bu authenticated in-flight authority, anonymous bypass emas; trusted SQL provisioning claim emas. Pilotfalse.
+- API actual ActorContextni beradi; service opportunity rowni bloklagach existing current-MFA moderator_authorityni oladi. Existing role/MFA siyosati, self-author/DRAFT/revision, case/action/audit atomikligi saqlanadi; synthetic actor olib tashlandi. Expiry boundary va time/row-lock farqi guideda. Boshqa domain, live/browser/DR va umumiy pilot qabuli yo'q. Yangi confirmed refund authority race Issue51 (3 failed, approval/outbox navbati; real transfer emas) EDUdan oldin tuzatiladi.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 

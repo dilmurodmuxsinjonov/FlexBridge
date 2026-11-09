@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="10.711" timestamp="2026-11-09T04:57:27.904329+05:00" hostname="Ditroid"><testcase classname="tests.security.test_moderation_authority" name="test_real_opportunity_lock_wait_rechecks_security[session]" time="5.731"><failure message="AssertionError: ('session', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:154: in test_real_opportunity_lock_wait_rechecks_security
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('session', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority" name="test_real_opportunity_lock_wait_rechecks_security[disable_mfa]" time="2.602"><failure message="AssertionError: ('disable_mfa', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority.py:154: in test_real_opportunity_lock_wait_rechecks_security
+    assert response.status_code in (401,403),(change,response.status_code)
+E   AssertionError: ('disable_mfa', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase></testsuite></testsuites>

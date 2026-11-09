@@ -2,6 +2,12 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## AUTH-CODEX-003 — initial moderation authority (2026-11-09)
+
+- Mavjud moderator_authority initial opportunity qaroriga qo'llandi: opportunity FOR UPDATE -> current active user/MFA session/platform MODERATOR grant/catalog FOR SHARE -> revision/self-author/DRAFT -> case/action/status/audit bir transaction. API actual ActorContextni beradi; role cache yoki sessionsiz user ID authority o'rniga ishlatilmaydi.
+- Global middleware MODERATOR uchun avvaldan MFA talab qiladi; servis shu siyosatni business lockdan keyin ushlaydi. Expiry shu boundaryda tekshiriladi; rowlocks vaqt o'tishini to'xtatmaydi. Session/security/role DB mutationlari guard oldidan tugasa deny, keyin boshlansa commit/rollbackni kutadi.
+- Migration/dependency/endpoint qo'shilmadi; runtime0010/107 va canonical94 saqlanadi. HTTP session/MFA management, trusted administrative SQL role changes va test delivery/browser cheklovlari dalilda alohida. Final qabul03 va hisobotda.
+
 ## AUTH-CODEX-002 — organization transaction authority (2026-11-09)
 
 - Mavjud SQLAlchemy/PostgreSQL `authority.py` guardlari old organization/invitation/member mutationlariga qo'llanmoqda: business organization/target lock -> current active user `FOR SHARE` -> current MFA session `FOR SHARE` -> current scoped membership/grant/catalog `FOR SHARE`; commit/rollbackgacha saqlanadi. Early preflight tez rad etish uchun qoladi, final authorization sifatida ishlatilmaydi.

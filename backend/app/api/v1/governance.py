@@ -128,7 +128,7 @@ def create_moderation_action_endpoint(payload: ModerationActionRequest, actor: A
     require_platform(actor,'MODERATOR')
     try:
         return governance_service.record_moderation_action(
-            actor_id=actor.user_id,
+            actor=actor,
             target_entity_type=payload.target_entity_type,
             target_entity_id=payload.target_entity_id,
             action_type=payload.action_type,
