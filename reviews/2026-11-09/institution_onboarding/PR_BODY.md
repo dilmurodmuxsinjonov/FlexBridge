@@ -10,11 +10,23 @@ while closing their invalid effective grants. Canonical baseline94 is historical
 runtime111 includes the forward extensions. Evidence snapshots bind file hashes and
 object versions. Teacher-only PASSWORD behavior remains; privileged actors use MFA.
 
-Prototype native intake8 and activation12 passed, including both prerequisite orders,
-independence/private scope and receipt replay; runs overlap. Initial populated upgrade
-and collision/history4 passed; latest membership-history constraints need final rerun.
-Resubmission/revocation/file-view helpers, broader races/migration/affected tests,
-pinned source review and full CI are still in progress. This draft is not ready to
-merge, pilot-ready or a legal identity/document/signature/provider certification.
+Explicit same-case resubmission, revocation and scoped file views preserve history
+and require fresh consent/review after a new revision. Revoked membership history
+coexists with a new active membership. Original grant replacement, recycled contacts,
+changed identity/documents and stale caller sessions cannot activate the old intent.
+Busy contact/foreign-user cases return atomic409/retry.
+
+The full new native PostgreSQL package passed52 tests in236.82s, including populated
+upgrade/collision rollback, both approval/consent orders, replay, private data,
+concurrent registry claims, real session lock waits in both orders and audit rollback.
+Prototype691 CI passed twice, but subsequent pinned source review identified private
+middleware omissions and a separate DB consent MFA policy gap. Three independent
+probes failed on that runtime; the fixes and expanded platform/ORG/institution
+sensitive-role regressions are included in the52. Public HTTP consent was already
+MFA-protected; direct DB setup is trusted and is not claimed as a public exploit.
+
+Affected old modules, full current source review and complete CI are still running.
+Overlapping validation counts are not added as unique coverage. This draft is not
+ready to merge, pilot-ready or a legal identity/document/signature/provider certification.
 
 Closes #55

@@ -20,6 +20,7 @@ from app.services.organizations import evidence_files
 from app.services.placements import get_row,insert_row
 
 KIND='INSTITUTION_APPOINTMENT'
+CONSENT_LIFETIME=timedelta(hours=24)
 
 
 def busy():return GovernanceError('INSTITUTION_BUSY_RETRY',status_code=409)
@@ -137,12 +138,19 @@ class InstitutionOnboardingService:
 
     def _report(self,conn,inst,case,appointment,request):
         consent=latest_consent(conn,case['id']);grant=activated_grant(conn,appointment['id'])
+        revision=submission(conn,case)
+        visible_files={revision['document_file_id'],revision['payload']['agreement_snapshot']['signed_file_id']}
+        proposal={'institution':revision['payload']['institution_fields'],'legal_basis':revision['legal_basis'],
+            'agreement':revision['payload']['agreement_snapshot'],
+            'files':[{'id':fid,'sha256':revision['payload']['file_snapshots'][fid]['sha256'],
+                'byte_size':revision['payload']['file_snapshots'][fid]['byte_size'],
+                'download_path':'/api/v1/institution-appointments/'+appointment['id']+'/files/'+fid+'/download'} for fid in sorted(visible_files)]}
         return {'id':appointment['id'],'institution_id':inst['id'],'case_id':case['id'],'mode':request['mode'],
             'requested_role':'COORDINATOR' if request['mode']=='FIRST_COORDINATOR' else 'TEACHER',
             'status':appointment['status'],'case_status':case['status'],'revision':case['current_revision'],
             'due_at':case['due_at'],'decision_reason':case['decision_reason'],'valid_from':appointment['valid_from'],
             'valid_to':appointment['valid_to'],'accepted_at':appointment['accepted_at'],
-            'ever_activated':grant is not None,'consent':None if consent is None else
+            'ever_activated':grant is not None,'proposal':proposal,'consent':None if consent is None else
                 {key:consent[key] for key in ('decision','revision','created_at','expires_at')}}
 
     def options(self,actor):
@@ -191,11 +199,13 @@ class InstitutionOnboardingService:
             requests=table('institution_onboarding_requests')
             prior=conn.execute(select(requests).where(requests.c.requester_user_id==actor.user_id,requests.c.idempotency_key==idempotency_key)).mappings().first()
             if prior:
+                if prior['institution_id']==inst['id']:
+                    inst,case,appointment,request=locked_request(conn,prior['appointment_id'])
+                account_authority(conn,actor,require_mfa=True)
+                if prior['institution_id']==inst['id'] and prior['mode']=='STAFF_TEACHER':
+                    institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
                 if prior['institution_id']!=inst['id'] or not hmac.compare_digest(fp,prior['request_fingerprint']):
                     raise GovernanceError('IDEMPOTENCY_CONFLICT',status_code=409)
-                inst,case,appointment,request=locked_request(conn,prior['appointment_id'])
-                account_authority(conn,actor,require_mfa=True)
-                if request['mode']=='STAFF_TEACHER':institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
                 return self._report(conn,inst,case,appointment,request)
             # Lock all review material before user/session authority.
             ids=[str(x) for x in file_ids]
@@ -278,6 +288,8 @@ class InstitutionOnboardingService:
     def _pending_current(self,conn,inst,case,appointment,request,materials):
         revision=materials['revision'];agreement=materials['agreement'];files=materials['files'];today=now().astimezone(TASHKENT).date()
         first=request['mode']=='FIRST_COORDINATOR'
+        if {'name':inst['name'],'region':inst['region']}!=revision['payload']['institution_fields']:
+            raise GovernanceError('INSTITUTION_IDENTITY_CHANGED',status_code=409)
         if (appointment['status']=='REVOKED' or appointment['valid_from']!=revision['valid_from'] or appointment['valid_to']!=revision['valid_to']
             or appointment['document_file_id']!=revision['document_file_id'] or (revision['valid_to'] is not None and revision['valid_to']<today)
             or (first and revision['valid_from']>today)):
@@ -359,7 +371,7 @@ class InstitutionOnboardingService:
                     and previous['expires_at']>now() and previous['auth_version']==user['auth_version']
                     and previous['contact_id']==contact['id'] and hmac.compare_digest(previous['contact_digest'],binding)):
                     return self._report(conn,inst,case,appointment,request)
-                proof=dict(contact_id=contact['id'],contact_digest=binding,contact_verified_at=contact['verified_at'],expires_at=now()+timedelta(hours=24))
+                proof=dict(contact_id=contact['id'],contact_digest=binding,contact_verified_at=contact['verified_at'],expires_at=now()+CONSENT_LIFETIME)
             else:
                 if contact_id is not None:raise GovernanceError('DECLINE_HAS_NO_CONTACT_PROOF',status_code=422)
                 if case['status']=='CANCELLED' and previous and previous['decision']=='DECLINE':return self._report(conn,inst,case,appointment,request)
@@ -381,6 +393,131 @@ class InstitutionOnboardingService:
                 .join(requests,requests.c.appointment_id==appointments.c.id).join(cases,cases.c.id==requests.c.case_id)
                 .where(requests.c.target_user_id==actor.user_id).order_by(requests.c.created_at.desc(),appointments.c.id).limit(limit)).mappings()
             return [dict(row) for row in rows]
+
+    def download_own(self,actor,appointment_id,file_id):
+        from app.adapters import storage
+        with transaction() as conn:
+            inst,case,appointment,request=locked_request(conn,appointment_id);revision=submission(conn,case)
+            # A named appointee sees the appointment and agreement, not unrelated
+            # requester evidence. Requesters can also view their own submissions.
+            permitted={revision['document_file_id'],revision['payload']['agreement_snapshot']['signed_file_id']}
+            if actor.user_id==request['requester_user_id']:permitted.update(revision['payload']['evidence_file_ids'])
+            file=get_row(conn,'files',file_id,True) if file_id in permitted else None
+            account_authority(conn,actor)
+            if actor.user_id not in (request['requester_user_id'],request['target_user_id']):
+                raise GovernanceError('INSTITUTION_APPOINTMENT_FORBIDDEN',status_code=403)
+            if actor.user_id==request['target_user_id']:
+                contact,binding=pin_contact(conn,actor.user_id,revision['target_contact_id'])
+                if contact['verified_at']!=revision['target_contact_verified_at'] or not hmac.compare_digest(binding,revision['target_contact_digest']):
+                    raise GovernanceError('INSTITUTION_CONTACT_CHANGED',status_code=403)
+            if not file:raise GovernanceError('EVIDENCE_ACCESS_DENIED',status_code=403)
+            if file['scan_status']!='CLEAN' or file['deleted_at']:raise GovernanceError('INSTITUTION_EVIDENCE_NOT_CURRENT',status_code=409)
+            if {key:file[key] for key in ('sha256','object_version','storage_key','byte_size')}!=revision['payload']['file_snapshots'].get(file_id):
+                raise GovernanceError('INSTITUTION_EVIDENCE_CHANGED',status_code=409)
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_FILE_AUTHORIZED',entity_type='institution_appointment',entity_id=appointment_id,metadata={'file_id':file_id,'revision':case['current_revision']})
+            return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(file['storage_key'])}
+
+    def revoke(self,actor,appointment_id,*,reason):
+        if not isinstance(reason,str) or not 15<=len(reason.strip())<=4000:raise GovernanceError('INSTITUTION_REVOCATION_REASON_REQUIRED',status_code=422)
+        with transaction() as conn:
+            inst,case,appointment,request=locked_request(conn,appointment_id)
+            grants=table('institution_role_grants')
+            rows=list(conn.execute(select(grants).where(grants.c.appointment_id==appointment_id).order_by(grants.c.id).with_for_update()).mappings())
+            account_authority(conn,actor,require_mfa=actor.user_id==request['target_user_id'] and request['mode']=='FIRST_COORDINATOR')
+            if actor.user_id!=request['target_user_id']:
+                institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
+            if appointment['status']=='REVOKED' and not any(row['revoked_at'] is None for row in rows):
+                return self._report(conn,inst,case,appointment,request)
+            stamp=now()
+            conn.execute(grants.update().where(grants.c.appointment_id==appointment_id,grants.c.revoked_at.is_(None)).values(revoked_at=stamp,updated_at=stamp))
+            conn.execute(table('institution_appointments').update().where(table('institution_appointments').c.id==appointment_id).values(status='REVOKED',updated_at=stamp))
+            if not rows:
+                conn.execute(table('verification_cases').update().where(table('verification_cases').c.id==case['id']).values(status='CANCELLED',updated_at=stamp))
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_REVOKED',entity_type='institution_appointment',entity_id=appointment_id,metadata={'reason':reason.strip(),'grant_ids':[row['id'] for row in rows]})
+            return self._report(conn,inst,get_row(conn,'verification_cases',case['id']),get_row(conn,'institution_appointments',appointment_id),request)
+
+    def resubmit(self,actor,appointment_id,*,expected_revision,**fields):
+        canonical={**fields,'registry_code':registry_identity(fields['registry_code']),
+            'file_ids':sorted(str(value) for value in fields['file_ids'])}
+        destination=canonical.pop('target_destination',None)
+        canonical['target_digest']=digest('institution-request-target',fields['target_channel']+':'+normalize_contact(fields['target_channel'],destination)) if fields.get('target_channel') and destination else None
+        fp=fingerprint({'expected_revision':expected_revision,**canonical})
+        rate_limit('institution-appointment-resubmit',actor.user_id,20,3600)
+        with transaction() as conn:
+            inst,case,appointment,request=locked_request(conn,appointment_id);old=submission(conn,case)
+            first=request['mode']=='FIRST_COORDINATOR'
+            ids=[str(x) for x in fields['file_ids']];document_id=str(fields['document_file_id']);today=now().astimezone(TASHKENT).date()
+            if registry_identity(fields['registry_code'])!=registry_identity(inst['registry_code']):raise GovernanceError('INSTITUTION_IDENTITY_IMMUTABLE',status_code=422)
+            # Acquire existing material locks before actor authority; new agreement
+            # versions below are proposals and roll back if any guard rejects.
+            agreement=get_row(conn,'institution_agreements',str(fields['agreement_id']) if fields.get('agreement_id') else old['agreement_id'],True)
+            signed_id=str(fields['agreement_file_id']) if fields.get('agreement_file_id') else agreement['signed_file_id']
+            material_ids=set(ids)
+            if signed_id:material_ids.add(signed_id)
+            files=table('files');material_map={row['id']:dict(row) for row in conn.execute(select(files).where(files.c.id.in_(sorted(material_ids))).order_by(files.c.id).with_for_update()).mappings()}
+            account_authority(conn,actor,require_mfa=True)
+            if actor.user_id!=request['requester_user_id']:raise GovernanceError('INSTITUTION_REQUESTER_REQUIRED',status_code=403)
+            authority=None if first else institution_authority(conn,actor,inst['id'],'COORDINATOR',require_mfa=True)
+            if expected_revision+1==case['current_revision'] and old['payload'].get('resubmission_fingerprint')==fp:
+                return self._report(conn,inst,case,appointment,request)
+            if expected_revision!=case['current_revision'] or case['status'] not in ('NEEDS_INFO','REJECTED','CANCELLED','APPROVED'):
+                raise GovernanceError('CASE_STATE_OR_REVISION_CONFLICT',status_code=409)
+            if activated_grant(conn,appointment_id):raise GovernanceError('ACTIVATED_APPOINTMENT_REQUIRES_NEW_REQUEST',status_code=409)
+            if (first and inst['status']!='PENDING_VERIFICATION') or (not first and inst['status']!='VERIFIED'):
+                raise GovernanceError('INSTITUTION_STATE_CONFLICT',status_code=409)
+            valid_from,valid_to=fields['valid_from'],fields.get('valid_to')
+            if (not isinstance(valid_from,date) or (valid_to is not None and valid_to<max(today,valid_from)) or (first and valid_from>today)):
+                raise GovernanceError('INVALID_APPOINTMENT_DATES',status_code=422)
+            legal_basis=fields['legal_basis'].strip();note=fields['evidence_note'].strip()
+            if not 15<=len(legal_basis)<=4000 or not 15<=len(note)<=4000:raise GovernanceError('INSTITUTION_EVIDENCE_NOTE_REQUIRED',status_code=422)
+            if document_id not in ids:raise GovernanceError('APPOINTMENT_DOCUMENT_NOT_IN_EVIDENCE',status_code=422)
+            evidence_files(conn,actor.user_id,ids)
+            if first:
+                if fields.get('target_channel') or fields.get('target_destination') or fields.get('agreement_id') or signed_id not in ids:
+                    raise GovernanceError('FIRST_INSTITUTION_AGREEMENT_REQUIRED',status_code=422)
+                start=fields.get('agreement_valid_from') or agreement['valid_from'];end=fields.get('agreement_valid_to')
+                purposes=fields.get('purposes') or agreement['purposes']
+                if start>today or (end is not None and end<max(today,start)) or not isinstance(purposes,list) or not purposes or set(purposes)-{'ACADEMIC_VIEW'}:
+                    raise GovernanceError('INVALID_INSTITUTION_AGREEMENT',status_code=422)
+                agreements=table('institution_agreements');version=conn.execute(select(func.max(agreements.c.version)).where(agreements.c.institution_id==inst['id'])).scalar_one()+1
+                agreement=insert_row(conn,'institution_agreements',institution_id=inst['id'],version=version,status='PENDING_REVIEW',valid_from=start,valid_to=end,purposes=purposes,signed_file_id=signed_id)
+                changes={key:fields[key] for key in ('name','region') if fields.get(key) is not None}
+                if changes:
+                    conn.execute(table('institutions').update().where(table('institutions').c.id==inst['id']).values(**changes,updated_at=now()));inst={**inst,**changes}
+            else:
+                if fields.get('name') is not None or fields.get('region') is not None or fields.get('agreement_file_id') is not None:
+                    raise GovernanceError('EXISTING_INSTITUTION_IDENTITY_IMMUTABLE',status_code=422)
+            self._agreement_current(agreement,inst['id'],allow_pending=first)
+            signed=material_map.get(agreement['signed_file_id'])
+            if not signed or signed['scan_status']!='CLEAN' or signed['deleted_at'] or signed['mime_type']!='application/pdf':
+                raise GovernanceError('INSTITUTION_AGREEMENT_FILE_NOT_CURRENT',status_code=409)
+            own,own_binding=pin_contact(conn,actor.user_id,str(fields['contact_id']))
+            if first:recipient,recipient_binding=own,own_binding
+            else:
+                if bool(fields.get('target_channel'))!=bool(fields.get('target_destination')):raise GovernanceError('INSTITUTION_TARGET_REQUIRED',status_code=422)
+                if fields.get('target_channel'):
+                    value=normalize_contact(fields['target_channel'],fields['target_destination']);target=contact_row(conn,fields['target_channel'],value)
+                    if not target or target['user_id']!=request['target_user_id']:raise GovernanceError('INSTITUTION_NAMED_TARGET_IMMUTABLE',status_code=403)
+                    target_contact_id=target['id']
+                else:target_contact_id=old['target_contact_id']
+                recipient,recipient_binding=pin_contact(conn,request['target_user_id'],target_contact_id)
+            target_user=pin_user(conn,request['target_user_id']);requester=pin_user(conn,actor.user_id)
+            new_revision=case['current_revision']+1;new_status='IN_REVIEW' if case['assigned_reviewer_id'] else 'PENDING'
+            conn.execute(table('verification_cases').update().where(table('verification_cases').c.id==case['id']).values(current_revision=new_revision,status=new_status,decision_reason=None,decided_at=None,updated_at=now()))
+            conn.execute(table('institution_appointments').update().where(table('institution_appointments').c.id==appointment_id).values(status='PENDING_REVIEW',accepted_at=None,
+                document_file_id=document_id,valid_from=valid_from,valid_to=valid_to,updated_at=now()))
+            proof_insert(conn,'institution_onboarding_submissions',case_id=case['id'],revision=new_revision,submitted_by_id=actor.user_id,session_id=actor.session_id,
+                auth_version=requester['auth_version'],requester_grant_id=authority['_authority_grant_id'] if authority else None,
+                requester_contact_id=own['id'],requester_contact_digest=own_binding,requester_contact_verified_at=own['verified_at'],
+                target_contact_id=recipient['id'],target_contact_digest=recipient_binding,target_contact_verified_at=recipient['verified_at'],target_auth_version=target_user['auth_version'],
+                document_file_id=document_id,agreement_id=agreement['id'],legal_basis=legal_basis,valid_from=valid_from,valid_to=valid_to,
+                payload=safe_json({'evidence_file_ids':ids,'evidence_note':note,'institution_fields':{'name':inst['name'],'region':inst['region']},
+                    'agreement_snapshot':agreement_snapshot(agreement),'resubmission_fingerprint':fp,
+                    'file_snapshots':{fid:{key:material_map[fid][key] for key in ('sha256','object_version','storage_key','byte_size')} for fid in material_ids}}))
+            for file_id in ids:insert_row(conn,'verification_evidence',case_id=case['id'],revision=new_revision,file_id=file_id)
+            insert_row(conn,'verification_evidence',case_id=case['id'],revision=new_revision,note=note)
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='INSTITUTION_APPOINTMENT_RESUBMITTED',entity_type='institution_appointment',entity_id=appointment_id,metadata={'case_id':case['id'],'revision':new_revision})
+            return self._report(conn,inst,get_row(conn,'verification_cases',case['id']),get_row(conn,'institution_appointments',appointment_id),request)
 
     def _independent(self,conn,actor,request):
         members=table('institution_memberships')

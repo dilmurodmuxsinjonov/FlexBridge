@@ -130,11 +130,11 @@ def active_coordinator(client,identities):
     return f
 
 
-def staff_claim(client,f,teacher):
+def staff_claim(client,f,teacher,extra_file_ids=()):
     verified=contact(teacher,value=str(uuid4())+'@example.test',channel='EMAIL');document=cv_fixture(f['user'])
     body=dict(registry_code=f['body']['registry_code'],document_file_id=document['id'],contact_id=f['contact']['id'],
         valid_from=date.today().isoformat(),valid_to=(date.today()+timedelta(days=90)).isoformat(),legal_basis='Teacher appointment under the reviewed institution agreement',
-        file_ids=[document['id']],evidence_note='Teacher formal appointment for independent platform review',agreement_id=f['agreement_id'],
+        file_ids=[document['id'],*extra_file_ids],evidence_note='Teacher formal appointment for independent platform review',agreement_id=f['agreement_id'],
         target_channel='EMAIL',target_destination=verified['normalized_value'])
     r=client.post('/api/v1/institution-appointments',headers={**f['user']['headers'],'Idempotency-Key':'institution-teacher-request'},json=body)
     assert r.status_code==202,r.text
@@ -173,3 +173,76 @@ def test_independent_reviewer_and_private_queue_dispatch(client,identities):
     assert detail.json()['case']['appointment_id']==r.json()['id']
     assert client.get('/api/v1/operator/verification-cases/'+case,headers=other['headers']).status_code==403
     assert client.get('/api/v1/operator/verification-cases/'+case,headers=f['user']['headers']).status_code==403
+
+
+def test_needs_info_resubmission_preserves_history_and_requires_new_consent(client,identities):
+    f=first_claim(identities);created=submit(client,f);assert created.status_code==202,created.text
+    appointment,case=created.json()['id'],created.json()['case_id'];moderator=identities('MODERATOR')
+    assert accept(client,f,appointment).status_code==200
+    assert claim(client,moderator,case).status_code==200
+    response=decide(client,moderator,case,'NEEDS_INFO');assert response.status_code==200,response.text
+    original_due=response.json()['due_at']
+    body={**f['body'],'expected_revision':1,'evidence_note':'Additional appointment evidence after independent reviewer feedback'}
+    revised=client.post('/api/v1/institution-appointments/'+appointment+'/revisions',headers=f['user']['headers'],json=body)
+    assert revised.status_code==202,revised.text
+    assert revised.json()['revision']==2 and revised.json()['due_at']==original_due
+    assert count('institution_onboarding_submissions')==2 and count('institution_onboarding_consents')==1
+    replay=client.post('/api/v1/institution-appointments/'+appointment+'/revisions',headers=f['user']['headers'],json=body)
+    assert replay.status_code==202,replay.text
+    assert count('institution_onboarding_submissions')==2
+    reviewed=decide(client,moderator,case,revision=2);assert reviewed.status_code==200,reviewed.text
+    assert reviewed.json()['status']=='APPROVED_PENDING_ACCEPT' and count('institution_role_grants')==0
+    assert accept(client,f,appointment,revision=1).status_code==409
+    accepted=accept(client,f,appointment,revision=2);assert accepted.status_code==200,accepted.text
+    assert accepted.json()['status']=='ACTIVE' and count('institution_role_grants')==1
+    with transaction() as conn:
+        outcomes=conn.execute(select(table('institution_onboarding_decisions').c.decision).order_by(table('institution_onboarding_decisions').c.revision)).scalars().all()
+        assert outcomes==['NEEDS_INFO','APPROVE']
+        assert conn.execute(select(table('verification_evidence').c.revision).distinct().order_by(table('verification_evidence').c.revision)).scalars().all()==[1,2]
+
+
+def test_revocation_closes_current_rights_and_replays_never_resurrect_grants(client,identities):
+    f=active_coordinator(client,identities)
+    before=count('audit_events')
+    r=client.post('/api/v1/institution-appointments/'+f['appointment']+'/revoke',headers=f['user']['headers'],json={'reason':'Personal withdrawal of this formal institution appointment'})
+    assert r.status_code==200,r.text
+    assert r.json()['status']=='REVOKED'
+    with transaction() as conn:
+        original=conn.execute(select(table('institution_role_grants'))).mappings().one()
+        assert original['revoked_at'] is not None
+    assert 'COORDINATOR' not in client.get('/api/v1/auth/me',headers=f['user']['headers']).json()['roles']
+    assert accept(client,f,f['appointment']).status_code==200
+    assert decide(client,f['moderator'],f['case']).status_code==200
+    again=client.post('/api/v1/institution-appointments/'+f['appointment']+'/revoke',headers=f['user']['headers'],json={'reason':'Personal withdrawal of this formal institution appointment'})
+    assert again.status_code==200,again.text
+    assert count('audit_events')==before+1
+    with transaction() as conn:
+        current=conn.execute(select(table('institution_role_grants'))).mappings().one()
+        assert current['id']==original['id'] and current['revoked_at']==original['revoked_at']
+    # A fresh key must not turn the known verified institution into first bootstrap.
+    retry=client.post('/api/v1/institution-appointments',headers={**f['user']['headers'],'Idempotency-Key':'new-bootstrap-attempt'},json=f['body'])
+    assert retry.status_code in (403,409,422),retry.text
+    assert count('institutions')==count('institution_onboarding_requests')==count('institution_role_grants')==1
+
+
+def test_named_teacher_can_view_only_current_appointment_and_agreement_files(client,identities,monkeypatch):
+    from app.adapters import storage
+    f=active_coordinator(client,identities);teacher=identities();extra=cv_fixture(f['user'])
+    request,verified,body=staff_claim(client,f,teacher,extra_file_ids=[extra['id']])
+    calls=[]
+    def presign(key):calls.append(key);return 'https://storage.example.test/temporary-object'
+    monkeypatch.setattr(storage,'presign_get',presign)
+    status=client.get('/api/v1/institution-appointments/'+request['id'],headers=teacher['headers']);assert status.status_code==200,status.text
+    proposal=status.json()['proposal'];assert proposal['legal_basis']==body['legal_basis']
+    assert len(proposal['files'])==2 and 'storage_key' not in str(proposal)
+    path=proposal['files'][0]['download_path']
+    stranger=identities()
+    assert client.get(path,headers=stranger['headers']).status_code==403 and calls==[]
+    response=client.get(path,headers=teacher['headers']);assert response.status_code==200,response.text
+    assert response.json()['expires_in_seconds']==60 and len(calls)==1
+    unrelated=cv_fixture(f['user'])
+    assert client.get('/api/v1/institution-appointments/'+request['id']+'/files/'+unrelated['id']+'/download',headers=teacher['headers']).status_code==403
+    assert len(calls)==1
+    extra_path='/api/v1/institution-appointments/'+request['id']+'/files/'+extra['id']+'/download'
+    assert client.get(extra_path,headers=teacher['headers']).status_code==403 and len(calls)==1
+    assert client.get(extra_path,headers=f['user']['headers']).status_code==200 and len(calls)==2

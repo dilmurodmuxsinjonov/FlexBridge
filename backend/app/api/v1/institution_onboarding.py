@@ -38,6 +38,15 @@ class ConsentInput(BaseModel):
     contact_id:UUID|None=None
 
 
+class RevisionInput(AppointmentInput):
+    expected_revision:int=Field(strict=True,ge=1)
+
+
+class RevokeInput(BaseModel):
+    model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+    reason:str=Field(min_length=15,max_length=4000)
+
+
 @router.get('/institution-onboarding/options')
 def options(actor:ActorContext=Depends(require_actor_context)):
     return {'contract_id':'API-017',**service.options(actor)}
@@ -63,3 +72,18 @@ def inbox(limit:int=Query(default=50,ge=1,le=100),actor:ActorContext=Depends(req
 def consent(id:UUID,payload:ConsentInput,actor:ActorContext=Depends(require_actor_context)):
     return service.consent(actor,str(id),expected_revision=payload.expected_revision,decision=payload.decision,
         contact_id=str(payload.contact_id) if payload.contact_id else None)
+
+
+@router.post('/institution-appointments/{id}/revisions',status_code=202)
+def resubmit(id:UUID,payload:RevisionInput,actor:ActorContext=Depends(require_actor_context)):
+    return service.resubmit(actor,str(id),**payload.model_dump())
+
+
+@router.post('/institution-appointments/{id}/revoke')
+def revoke(id:UUID,payload:RevokeInput,actor:ActorContext=Depends(require_actor_context)):
+    return service.revoke(actor,str(id),reason=payload.reason)
+
+
+@router.get('/institution-appointments/{id}/files/{file_id}/download')
+def download(id:UUID,file_id:UUID,actor:ActorContext=Depends(require_actor_context)):
+    return service.download_own(actor,str(id),str(file_id))

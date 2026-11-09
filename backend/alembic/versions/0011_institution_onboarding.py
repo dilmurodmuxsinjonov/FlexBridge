@@ -138,13 +138,13 @@ def upgrade():
         IF EXISTS(SELECT 1 FROM institution_role_grants g JOIN institution_appointments a ON a.id=g.appointment_id
           WHERE g.membership_id=OLD.id
             AND (NEW.user_id<>a.user_id OR NEW.institution_id<>a.institution_id)) THEN
-          RAISE EXCEPTION 'Institution membership identity is bound to active grants' USING ERRCODE='23514';
+          RAISE EXCEPTION 'Institution membership identity is bound to historical grants' USING ERRCODE='23514';
         END IF;
       ELSE
         IF EXISTS(SELECT 1 FROM institution_role_grants g JOIN institution_memberships m ON m.id=g.membership_id
           WHERE g.appointment_id=OLD.id
             AND (NEW.user_id<>m.user_id OR NEW.institution_id<>m.institution_id)) THEN
-          RAISE EXCEPTION 'Institution appointment identity is bound to active grants' USING ERRCODE='23514';
+          RAISE EXCEPTION 'Institution appointment identity is bound to historical grants' USING ERRCODE='23514';
         END IF;
       END IF;
       RETURN NEW;
@@ -207,6 +207,24 @@ def upgrade():
     END $$;
     CREATE TRIGGER guard_institution_submission BEFORE INSERT ON flexbridge.institution_onboarding_submissions
       FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_institution_submission();
+    CREATE FUNCTION flexbridge.institution_sensitive_account(actor uuid) RETURNS boolean
+    LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+      SELECT EXISTS(SELECT 1 FROM platform_role_grants g JOIN role_catalog r ON r.id=g.role_id
+        WHERE g.user_id=actor AND g.revoked_at IS NULL AND g.expires_at>clock_timestamp()
+          AND r.scope_kind='PLATFORM' AND r.code IN ('OWNER','BILLING','COORDINATOR','MODERATOR','SUPPORT','FINANCE','ADMIN'))
+      OR EXISTS(SELECT 1 FROM org_memberships m JOIN org_role_grants g ON g.membership_id=m.id
+        JOIN role_catalog r ON r.id=g.role_id WHERE m.user_id=actor AND m.status='ACTIVE' AND m.revoked_at IS NULL
+          AND g.revoked_at IS NULL AND r.scope_kind='ORG'
+          AND r.code IN ('OWNER','BILLING','COORDINATOR','MODERATOR','SUPPORT','FINANCE','ADMIN'))
+      OR EXISTS(SELECT 1 FROM institution_memberships m JOIN institution_role_grants g ON g.membership_id=m.id
+        JOIN role_catalog r ON r.id=g.role_id JOIN institutions i ON i.id=m.institution_id
+        JOIN institution_appointments a ON a.id=g.appointment_id AND a.user_id=m.user_id AND a.institution_id=m.institution_id
+        WHERE m.user_id=actor AND m.status='ACTIVE' AND m.revoked_at IS NULL AND m.accepted_at<=clock_timestamp()
+          AND g.revoked_at IS NULL AND r.scope_kind='INSTITUTION' AND r.code='COORDINATOR' AND i.status='VERIFIED'
+          AND a.status='ACTIVE' AND a.accepted_at<=clock_timestamp()
+          AND a.valid_from<=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date
+          AND (a.valid_to IS NULL OR a.valid_to>=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date))
+    $$;
     CREATE FUNCTION flexbridge.guard_institution_consent() RETURNS trigger
     LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
       IF NOT EXISTS(SELECT 1 FROM institution_onboarding_requests q
@@ -216,7 +234,7 @@ def upgrade():
         WHERE q.case_id=NEW.case_id AND c.current_revision=NEW.revision AND NEW.actor_id=u.id
           AND u.status='ACTIVE' AND u.auth_version=NEW.auth_version
           AND s.user_id=u.id AND s.auth_version=u.auth_version AND s.revoked_at IS NULL AND s.expires_at>clock_timestamp()
-          AND (r.code='TEACHER' OR s.assurance='MFA') AND
+          AND (s.assurance='MFA' OR (r.code='TEACHER' AND NOT institution_sensitive_account(u.id))) AND
           (NEW.decision='DECLINE' OR (c.status IN ('PENDING','IN_REVIEW','APPROVED') AND
             NEW.contact_id=v.target_contact_id AND NEW.contact_digest=v.target_contact_digest AND
             NEW.contact_verified_at=v.target_contact_verified_at AND u.auth_version=v.target_auth_version AND
