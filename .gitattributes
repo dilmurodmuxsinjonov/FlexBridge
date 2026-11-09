@@ -6,3 +6,4 @@ reviews/**/access_log_redacted.txt -text -whitespace
 reviews/2026-11-10/storage_versioning/*junit.xml -text -whitespace
 reviews/2026-11-10/files_authority/*junit.xml -text -whitespace
 reviews/2026-11-10/candidate_authority/*junit.xml -text -whitespace
+reviews/2026-11-10/enrollment_verification/*junit.xml -text -whitespace

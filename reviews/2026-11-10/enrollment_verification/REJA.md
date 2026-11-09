@@ -1,0 +1,89 @@
+# Next bounded EDU package: own enrollment history and independent verification
+
+Planning snapshot,2026-11-10. PR62 final7fb411b is still under full CI; no new
+enrollment implementation or migration has started. Codex owns implementation.
+
+## Sources and present gap
+
+- specs/v1_3/FlexBridge_toliq_topshiriq.md:61,67, CAP-004(373),
+  PG-012.S02(870), PG-014.S03(891), AC-006(1262): self education history is optional;
+  only approved/current enrollment satisfies student eligibility. Graduation or
+  institution change preserves profile, ordinary work rights and old history.
+- Canonical specs/v1_4/FlexBridge_model_1_4.json: DB-015 enrollments,
+  DB-019 verification_cases, DB-020 verification_evidence; API-027 POST and API-034
+  GET /api/v1/me/enrollments. Enrollment status VERIFIED in existing academic
+  service corresponds to approved verification, not a caller-controlled flag.
+- v1.4 PDF page4: INV-03 composite institution scope; page7: private CLEAN file
+  evidence, independent reviewer and revoke semantics. Existing runtime0012
+  explicit bucket/VersionId/ETag provenance applies to every new evidence snapshot.
+- No explicit enrollment handlers exist. Academic code consumes trusted imported
+  VERIFIED enrollments; it does not implement public enrollment intake. roles_for
+  currently returns CANDIDATE and scoped staff/platform roles, no STUDENT derivation.
+
+## Proposed complete package
+
+1. Canonical027 creates only the actual actor's own enrollment. Strict typed fields:
+   existing institution, program, dates, optional student reference, idempotency key,
+   optional evidence. Caller cannot set candidate/user IDs, status, reviewer,
+   verified flag, case identity or a privileged role. An entry without submitted
+   evidence is DECLARED and never grants current student eligibility. Submitted
+   CLEAN own evidence creates PENDING with a dedicated verification case and exact
+   immutable revision. Institution must be VERIFIED for a new verification request;
+   no authority bootstrap is opened through enrollment.
+2. Canonical034 returns bounded own history/current status, dates, verification
+   queue status/revision and a derived current-student indicator. Preserve multiple
+   enrollments. No raw student reference, private storage locator or foreign data
+   in list responses. Optional reference is purpose-bound HMAC at rest, never PINFL
+   or diploma required for ordinary work. Do not grant a global STUDENT role based
+   on declaration. Decide in review whether roles_for label belongs in this package
+   or the later eligibility consumers; label must never become authority by itself.
+3. Own detail, submit/resubmit verification and end/withdraw helpers complete the
+   lifecycle. NEEDS_INFO creates a new immutable revision on the SAME case and
+   retains rejection/decision history. Changing an approved institution/program or
+   extending an approved end date requires a new reviewed proposal, not a silent
+   rewrite; bounded simpler alternative is a new enrollment preserving the old one.
+   Ending/withdrawing can only reduce own eligibility; it cannot delete education,
+   profile, application or assignment history. Replayed same-key requests return
+   the original receipt; conflicting payloads return409 without extra audit.
+4. Integrate explicit new kind into existing canonical operator109/110 and helper
+   claim/detail/private-evidence dispatch. Dedicated service rejects unrelated
+   cases. Current MFA/platform MODERATOR, assigned independent reviewer, exact
+   revision and reason required. Approval rechecks current owned CLEAN version-pinned
+   evidence, candidate/account/institution/date state. No automatic approval after
+   due time; exact due policy must be traced to source or explicitly recorded as a
+   bounded operational default. Rejected/NEEDS_INFO/ended entries are not current
+   student eligibility. No institution-wide student browse or exports yet.
+5. Forward0013 with typed metadata: immutable intake/idempotency origin,
+   revision/evidence snapshots and lifecycle/decision history sufficient to prove
+   new public transitions. Reuse DB015/019/020 subjects and their exact-one-subject
+   constraint. Keep canonical historical94 unchanged; report actual helper counts.
+   Preserve populated legacy history, no inferred approval or destructive cleanup.
+   Direct DB imports are trusted, not evidence of public legal verification. Decide
+   explicit legacy-current-student policy before writing guards; do not retrofit
+   fake proof to old VERIFIED rows merely to satisfy tests.
+6. Use actualActorContext through all human boundaries with current authority after
+   business/file locks, before provider/write, held to commit. Reuse current RC
+   candidate guard for own reads/writes where appropriate; use an explicit compatible
+   institution->candidate/enrollment->case->file->current actor lock order for
+   operator decisions and reductions, accounting for academic consumers. Avoid
+   user-first then file/profile cycles. Derive own scope before any disclosure.
+   All new own paths need no-store/no-cache/no-referrer and existing body bound.
+   Ordinary PASSWORD and formal TEACHER PASSWORD policy stays unchanged.
+
+## Verification and boundaries
+
+Actual native PostgreSQL HTTP positive/negative lifecycle, own/foreign/anonymous,
+client flags, independent/assigned reviewer and revision conflicts; real row-lock
+logout/revoke ordering; retries/concurrent review vs end/resubmit; atomic audit
+rollback; current dates and graduation/institution change preserving ordinary
+profile/work rows; exact file snapshot/provenance and private download; current
+role/MFA and body/cache protections. Populated upgrade rollback/history, SQL proof
+constraints, old candidate/academic/onboarding/storage regressions and complete
+matching-head GitHub CI plus pinned read-only peer review/evidence/handoff.
+
+This package does not implement supervision/academic assignment acceptance,
+institution exports or signatures. Matching/application eligibility consumers need
+their own explicit acceptance; current source does not enforce all academic/student
+requirements merely because enrollment intake exists. Frontend/live identity/legal
+document truth/DR/pilot remain open. No live pg_live migration is authorized by this
+planning exercise; all schema tests use disposable test databases.

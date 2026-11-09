@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="5" failures="0" skipped="0" tests="5" time="4.048" timestamp="2026-11-10T02:57:22.561752+05:00" hostname="Ditroid"><testcase classname="tests.security.test_enrollment_migration" name="test_fresh_schema_and_unproved_new_verified_insert_are_rejected" time="2.661"><error message="failed on setup with &quot;RuntimeError: Database migrations are not current&quot;">backend\tests\conftest.py:43: in database
+    storage.init_storage()
+backend\app\db\storage.py:158: in init_storage
+    raise RuntimeError('Database migrations are not current')
+E   RuntimeError: Database migrations are not current</error></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_populated_upgrade_preserves_exact_legacy_set_and_prevents_new_legacy_and_resurrection" time="0.000"><error message="failed on setup with &quot;RuntimeError: Database migrations are not current&quot;">backend\tests\conftest.py:43: in database
+    storage.init_storage()
+backend\app\db\storage.py:158: in init_storage
+    raise RuntimeError('Database migrations are not current')
+E   RuntimeError: Database migrations are not current</error></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_declaration_has_no_eligibility_or_direct_decision_promotion" time="0.000"><error message="failed on setup with &quot;RuntimeError: Database migrations are not current&quot;">backend\tests\conftest.py:43: in database
+    storage.init_storage()
+backend\app\db\storage.py:158: in init_storage
+    raise RuntimeError('Database migrations are not current')
+E   RuntimeError: Database migrations are not current</error></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_own_declaration_cannot_record_another_users_session" time="0.000"><error message="failed on setup with &quot;RuntimeError: Database migrations are not current&quot;">backend\tests\conftest.py:43: in database
+    storage.init_storage()
+backend\app\db\storage.py:158: in init_storage
+    raise RuntimeError('Database migrations are not current')
+E   RuntimeError: Database migrations are not current</error></testcase><testcase classname="tests.security.test_regressions" name="test_actual_migration_and_constraints" time="0.000"><error message="failed on setup with &quot;RuntimeError: Database migrations are not current&quot;">backend\tests\conftest.py:43: in database
+    storage.init_storage()
+backend\app\db\storage.py:158: in init_storage
+    raise RuntimeError('Database migrations are not current')
+E   RuntimeError: Database migrations are not current</error></testcase></testsuite></testsuites>

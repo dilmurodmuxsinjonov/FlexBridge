@@ -1,6 +1,7 @@
 # Current-session authority for candidate self-service
 
-Issue61 follows merged PR60. This package is under native/source/CI validation,
+Issue61 follows merged PR60. PR62 mergedb94da55 after final7fb411b complete895 CI
+passed twice547.44s/582.45s; review finding closed. This is bounded backend acceptance,
 not pilot or live-provider/legal identity acceptance. No migration, dependency or
 canonical handler is added: migrated runtime0012/111 tables and canonical94 remain.
 
