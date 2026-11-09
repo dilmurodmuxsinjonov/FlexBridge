@@ -513,3 +513,10 @@ Keyingi kichik qadam:
 - Muhit: project .venv installed/pip check0, native smoke3 passed8.51s. Docker/WSL installers D: da hash/publisher verified, ammo Docker actual exit1 (VMP disabled), WSL MSIX0x80073D28 (admin required); installed/engine-ready emas. Native feature elevation launch canceled (OS: operation was canceled by the user), script ishga tushmagan; automatic reboot yo'q. scripts/setup_windows_dependencies.ps1 syntax valid; elevated branch hali execution proofga ega emas. Q-014 va handoff ayni holatni saqlaydi; codingni native PG/MinIO bilan davom ettirish mumkin.
 
 - LOG-055: new25 storage+old2 private-view27 native passed44.51s; old initial/harness/diagnostic stages alohida artifacts. Actual MinIO integration7 shu27 ichida, AV double/PDF+S3+PG actual. Old affected suites, pinned source review va latest complete CI keyingi qabul gate; draft pilotfalse.
+
+- LOG-055 sourceafd code review exit0 found no concrete version-binding defect (actual root cwd/source cleanliness qualified in REVIEW_CONTEXT.md). Native240:239 passed/1 SCANNING fixture failure350.06s; actual new schema guard retained, fixture corrected and candidate44 passed43.39s. Full current CI remains required. Issue59 separate actual authority probe failed1;57 does not close it.
+
+## AUTH-CODEX-005 - Owner file current-session authority (Issue59)
+
+- Holat: `Rejada`, confirmed residual; Codex;57/PR58 mergedan keyin yangi branch. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
+- Doira: upload intent/complete/owner download actual ActorContext, current account/session/existing sensitive MFA after business locks and thru commit, no sessionless fallback; version/source/outbox/ownership guarantees preserved. Ordinary PASSWORD unchanged. Candidate/CV sibling scope alohida audit qilinadi. Planning peer review, both authority orderings/security/expiry/rollback/provider integration/full CI kerak; pilotfalse.

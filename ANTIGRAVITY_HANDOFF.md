@@ -96,8 +96,11 @@ https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/57
 Branch: fix/57-storage-versioning, draft PR58.0012/app tuzatishlari yozildi, ammo
 qabul hali yo'q. Explicit bucket/version/ETag, source-pinned scan/GET, source event
 fence, snapshots/CV/evidence gates va Enabled readiness implementatsiya qilindi.
-Yangi25 storage holati va existing2 private-view testi27 passed44.51s; old affected
-modullar, source-pinned peer review va full latest-head CI hali keyingi gate.
+Yangi25 storage holati va existing2 private-view testi27 passed44.51s. Sourceafd343a
+read-only Copilot review exit0 no concrete version-binding defect; actual CLI context
+REVIEW_CONTEXT.md ichida. Old affected240 run239 passed/1 invalid SCANNING fixture
+350.06s; fixture actual quarantine reference bilan tuzatildi, candidate44 passed43.39s.
+Runtime guard yumshatilmagan. Full latest-head CI hali qabul gate.
 backend/STORAGE_VERSIONS.md va LOG-055 ni o'qi. Eski red/fixture failures saqlangan.
 
 1. reviews/2026-11-10/storage_versioning/PLAN.md va DECISIONS.md ni o'qi. Baseline
@@ -123,13 +126,25 @@ backend/STORAGE_VERSIONS.md va LOG-055 ni o'qi. Eski red/fixture failures saqlan
    Credentials/presigned URLs log/evidencega chiqmasin. CI'da actual testni skip qilma.
 6. Native PG va provider integration, populated upgrade, affected old suites,
    pinned read-only peer review, full matching-head CI, dalil/jurnallar, PR va
-   matching-head merge bilan paketni yakunla. Keyin manba talablaridan keyingi EDU
-   admission/enrollment paketini rejalashtir. Hali student/grades/frontend qurildi dema.
+   matching-head merge bilan paketni yakunla. Keyin Issue59 file-session authority
+   paketini bajar; shundan keyin manba talablaridan EDU admission/enrollmentni rejalashtir. Hali student/grades/frontend qurildi dema.
 
 scripts/prepare_test_minio.py repo ichida va CI stepga ulangan. Windows verified
 binary bilan actual7 integration holat expanded paketda o'tdi. Linux hash publisher
 checksumdan olingan; joriy app o'zgarishlari uchun Linux CI hali bajarilmagan.
 Yangi lokal testlarda MINIO_TEST_BINARY muhit qiymati majburiy; yo'qligi skip emas failure.
+
+## Keyingi tasdiqlangan xavfsizlik residuali: Issue59
+
+https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/59
+Sourceafd343a pinned review worktree, actual HTTP/native PG probe1 failed33.57s:
+completion actual file-row lockni kutdi, logout200 tugadi, lock ochilgach so'rov202,
+SCANNING va scan-event1 yozdi. S3 HEAD/presign test double; anonymous/foreign/live/AV
+claim emas. Methodga user_id beriladi, actual ActorContext/session final guard yo'q.
+Dalil reviews/2026-11-10/files_authority. PR58 bu masalani yopmaydi; uning storage
+versiya review/CI natijasi session-authority to'liq ishlaydi degani emas.
+PR58 mergedan keyin yangi branch/review bilan3 owner file method/callerni tuzat.
+Candidate/CV boshqa self-service actor-id-only yo'llari alohida ochiq audit scope.
 
 ## Ishlash qoidalari
 

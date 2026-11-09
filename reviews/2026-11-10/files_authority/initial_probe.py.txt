@@ -1,0 +1,32 @@
+"""Independent authenticated file-write race on pinned source; storage is doubled."""
+from concurrent.futures import ThreadPoolExecutor
+from uuid import uuid4
+from sqlalchemy import select, text, func
+from app.adapters import storage
+from app.db.storage import table, transaction, get_engine
+from test_org_authority_transactions import wait_for_blocker
+
+
+def test_completed_logout_before_upload_completion_authority_denies_pending_write(client, identities, monkeypatch):
+    owner = identities()
+    monkeypatch.setattr(storage, 'presign_put', lambda key, size: 'https://fixture.invalid/upload')
+    monkeypatch.setattr(storage, 'head', lambda key: {'ContentLength': 100, 'ETag': '"' + uuid4().hex + '"',
+        'VersionId': str(uuid4())})
+    created = client.post('/api/v1/files/upload-intents', headers=owner['headers'], json={'filename': 'file.pdf', 'size_bytes': 100})
+    assert created.status_code == 201
+    file_id = created.json()['id']
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with get_engine().begin() as blocker:
+            files = table('files')
+            blocker.execute(select(files).where(files.c.id == file_id).with_for_update())
+            pid = blocker.execute(text('SELECT pg_backend_pid()')).scalar_one()
+            pending = pool.submit(lambda: client.post('/api/v1/files/' + file_id + '/complete-upload', headers=owner['headers']))
+            wait_for_blocker(pid)
+            logout = client.delete('/api/v1/me/sessions/' + owner['session_id'], headers=owner['headers'])
+            assert logout.status_code == 200
+        response = pending.result(timeout=30)
+    with transaction() as conn:
+        status = conn.execute(select(files.c.scan_status).where(files.c.id == file_id)).scalar_one()
+        events = conn.execute(select(func.count()).select_from(table('outbox_events'))).scalar_one()
+    assert response.status_code in (401, 403), ('completed_logout', response.status_code, status, events)
+    assert status == 'PENDING_SCAN' and events == 0
