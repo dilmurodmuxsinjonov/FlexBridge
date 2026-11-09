@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 from datetime import date
 
-from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
+from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for,require_org
 from app.services.placements import PlacementScopeError, placement_service
 
 router = APIRouter(prefix="/api/v1", tags=["placements"])
@@ -94,6 +94,7 @@ def create_offer_endpoint(payload: CreateOfferRequest, actor: ActorContext = Dep
 
 @router.post("/placements", status_code=201)
 def create_placement_endpoint(payload: CreatePlacementRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
+    require_org(actor,str(payload.organization_id),'OWNER','HOST_COORDINATOR')
     try:
         return placement_service.create_placement(
             application_id=str(payload.application_id),
@@ -101,7 +102,7 @@ def create_placement_endpoint(payload: CreatePlacementRequest, actor: ActorConte
             opportunity_id=str(payload.opportunity_id),
             candidate_id=str(payload.candidate_id),
             organization_id=str(payload.organization_id),
-            actor_user_id=actor.user_id,
+            actor=actor,
         )
     except PlacementScopeError as exc:
         raise HTTPException(

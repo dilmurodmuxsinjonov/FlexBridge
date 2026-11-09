@@ -1,9 +1,54 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
 Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
-Codex feature/63-enrollment-verification branchida ishlamoqda. Bir xil fayllarni parallel
+Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni parallel
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
+
+## CURRENT LOG-065 - host internship admission
+
+PR64 final08b4129 full930 CI42712465345/42712470234 passed541.51s/651.09s,
+actual head/base/clean/CLEAN/no feedback checked, merged1b2bbbfed70dc9a68b6de52cdd91fb0f9c41351f;
+Issue63 closed. Extra unchanged08b formal TEACHER PASSWORD full own enrollment1
+passed10.14s, separate from930CI; exact probe/JUnit and final receipts in
+reviews/2026-11-10/internship_admission/PR64_ACCEPTANCE.md. Runtime0013/114,
+canonical51 explicit81 placeholder is registration only. Pilotfalse.
+
+Issue65 https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/65, branch
+feature/65-internship-admission from current origin/main1b2bbbf. Actual pinned08b
+3 HTTP/PG probes failed13.64s: ordinary job placement201, general ACTIVE200 with
+zero mentors, HR-only mentor nomination201/unaccepted. Metadata publish/roles are
+trusted setup, no anonymous/live/accepted-review privilege claim. Actual read-only
+source-plan Copilot exit0, no model/SHA/test/pilot certification. Plan/decisions/
+raw probes in internship_admission; Codex sole source owner.
+
+Implement first reachable host unit: canonical030 own placements,048 own candidate
+terms accept,050 plan,051 MENTOR accept,069 host placements,087 mentor nomination,
+088 ACTIVATE/CANCEL,089 own mentor inbox. Intake/plan write/revoke helpers and
+legacy aliases require actual actor/version, no UID fallback. New PLANNED from
+accepted internship only, exact current plan plus personally accepted original
+current MENTOR grant before host activation. Block academic activation until next
+school/teacher unit; don't fake that missing proof with a client flag.51 TEACHER
+and88 completion are explicit remaining contract branches, not complete API claims.
+Forward0014/proof helper count not yet executed or accepted. Preserve legacy rows
+and history without creating false consent/new verified starts. Update old job/
+accepted-field fixtures through genuine internship/session flows. Need actual SQL/
+HTTP/role/side/session/rollback/concurrency/upgrade/native/CI/review/manifests/handoff.
+pg_live is untouched; Docker/WSL admin installation remains incomplete, no reboot.
+
+LOG-066 current code progress: placement intake and mentor nomination now actual
+actors/current host authority/capability; kind/contract and exact offer binding;
+current target MENTOR role (NOWAIT), atomic audit, ordinary-job diary guard. API
+and direct fixtures updated to actual sessions; diary fixture is genuinely INTERNSHIP.
+Initial3 now2 passed/1 failed11.21s: confirm-start still activates without mentor
+personal proof. Keep this red test visible; full admission is not fixed. Business
+wait/logout2 + permanent Teacher control1 passed12.79s; selected diary/academic2
+passed10.75s. Native jobs terminal. Next implement0014 proof/history/terms/versioned
+candidate+mentor consent and canonical activation/private views/legacy aliases,
+then complete current tests/CI/source review. Do not mark65 done from initial2 green.
+
+Below entries retain earlier snapshots. This current block and live git/CI state
+take precedence when resuming; do not restart a process based on an old note.
 
 ## Qabul qilingan paketlar
 

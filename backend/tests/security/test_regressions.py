@@ -37,7 +37,7 @@ def capture(attempt,event='provider-event-123'):
 def placement_fixture(candidate,owner,org,status='ACTIVE'):
     from app.services.opportunities import opportunity_service
     from app.services.placements import placement_service
-    revision=opportunity_service.create_opportunity_revision(organization_id=org,title='Test job',opportunity_kind='PART_TIME_JOB',contract_type='LABOR_PART_TIME',
+    revision=opportunity_service.create_opportunity_revision(organization_id=org,title='Test internship',opportunity_kind='INTERNSHIP',contract_type='INTERNSHIP_AGREEMENT',
         compensation_type='HOURLY',hourly_pay=20000,published=False,actor_user_id=owner['user_id'])
     with transaction() as conn:
         conn.execute(table('opportunities').update().where(table('opportunities').c.id==revision['opportunity_id']).values(status='PUBLISHED'))
@@ -45,7 +45,7 @@ def placement_fixture(candidate,owner,org,status='ACTIVE'):
     placement_service.create_application_attempt(application_id=application['id'],opportunity_id=revision['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=application['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor_user_id=owner['user_id'])
+    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor=billing_actor(owner))
     if status=='ACTIVE':
         placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=candidate['user_id'])
         p=placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=owner['user_id'])

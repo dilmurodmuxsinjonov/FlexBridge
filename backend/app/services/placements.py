@@ -22,6 +22,19 @@ def insert_row(conn,name,**values):
     record={'id':str(uuid4()),'created_at':now(),'updated_at':now(),**values}
     conn.execute(table(name).insert().values(**record)); return record
 
+
+def require_internship_placement(conn,placement):
+    """A job engagement never acquires diary rights through a placement row."""
+    offer=get_row(conn,'offers',placement['offer_id'])
+    application=get_row(conn,'applications',placement['application_id'])
+    revision=get_row(conn,'opportunity_revisions',offer['revision_id'])
+    opportunity=get_row(conn,'opportunities',revision['opportunity_id'])
+    if (opportunity['kind']!='INTERNSHIP' or revision['contract_type'] not in ('INTERNSHIP_AGREEMENT','ACADEMIC_TRIPARTITE')
+        or offer['application_id']!=application['id'] or application['opportunity_id']!=opportunity['id']
+        or application['candidate_id']!=placement['candidate_id'] or opportunity['organization_id']!=placement['organization_id']):
+        raise PlacementScopeError('INTERNSHIP_PLACEMENT_REQUIRED',status_code=404)
+    return opportunity,offer,revision
+
 class ApplicationPlacementService:
     def create_application(self,*,opportunity_id,candidate_id,actor_user_id):
         with transaction() as conn:
@@ -66,12 +79,21 @@ class ApplicationPlacementService:
             conn.execute(table('offers').update().where(table('offers').c.id==offer_id).values(**values))
             return {'contract_id':'API-043',**offer,**values}
 
-    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor_user_id,start_date=None,end_date=None):
+    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor,start_date=None,end_date=None):
+        from app.services.authority import account_authority,org_authority
+        from app.services.organizations import require_capability
         with transaction() as conn:
-            require_org(actor(actor_user_id),organization_id,'OWNER','HR','HOST_COORDINATOR')
+            get_row(conn,'organizations',organization_id,True)
             offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',application_id); opp=get_row(conn,'opportunities',opportunity_id)
+            revision=get_row(conn,'opportunity_revisions',offer['revision_id'])
+            account_authority(conn,actor)
+            org_authority(conn,actor.user_id,organization_id,'OWNER','HOST_COORDINATOR')
             if (offer['application_id']!=application_id or app['opportunity_id']!=opportunity_id or app['candidate_id']!=candidate_id
-                or opp['organization_id']!=organization_id): raise PlacementScopeError('PLACEMENT_SCOPE_MISMATCH')
+                or opp['organization_id']!=organization_id or revision['opportunity_id']!=opportunity_id):
+                raise PlacementScopeError('PLACEMENT_SCOPE_MISMATCH')
+            if opp['kind']!='INTERNSHIP' or revision['contract_type'] not in ('INTERNSHIP_AGREEMENT','ACADEMIC_TRIPARTITE'):
+                raise PlacementScopeError('INTERNSHIP_PLACEMENT_REQUIRED',status_code=409)
+            require_capability(conn,organization_id,'INTERNSHIP_HOST')
             if offer['status']!='ACCEPTED': raise PlacementScopeError('OFFER_NOT_ACCEPTED')
             start=start_date or date.today(); end=end_date or start+timedelta(days=90)
             p=insert_row(conn,'placements',application_id=application_id,offer_id=offer_id,candidate_id=candidate_id,organization_id=organization_id,

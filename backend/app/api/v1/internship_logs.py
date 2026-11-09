@@ -59,7 +59,7 @@ def create_mentor_assignment_endpoint(payload: CreateMentorAssignmentRequest, ac
         placement_id=payload.placement_id,
         organization_id=payload.organization_id,
         mentor_id=payload.mentor_id,
-        actor_user_id=actor.user_id,
+        actor=actor,
     )
 
 

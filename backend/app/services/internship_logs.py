@@ -2,9 +2,10 @@
 from datetime import date
 from uuid import uuid4
 from sqlalchemy import select,text
+from sqlalchemy.exc import OperationalError
 from app.db.storage import table,transaction,now
 from app.api.dependencies import owns_candidate,require_org,ActorContext
-from app.services.placements import get_row,insert_row,PlacementScopeError
+from app.services.placements import get_row,insert_row,PlacementScopeError,require_internship_placement
 from app.core.audit import AppendOnlyAuditStore
 
 class InternshipLogScopeError(Exception):
@@ -14,16 +15,26 @@ class InternshipLogScopeError(Exception):
 
 class InternshipLogService:
     audit_store=AppendOnlyAuditStore()
-    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor_user_id):
+    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor):
+        from app.services.authority import account_authority,org_authority
+        from app.services.organizations import require_capability
         with transaction() as conn:
+            get_row(conn,'organizations',organization_id,True)
             p=get_row(conn,'placements',placement_id,True)
             if p['organization_id']!=organization_id: raise InternshipLogScopeError('MENTOR_ORG_MISMATCH')
-            require_org(ActorContext(actor_user_id,'',()),organization_id,'OWNER','HOST_COORDINATOR')
-            membership=conn.execute(select(table('org_memberships').c.id).where(table('org_memberships').c.user_id==mentor_id,
-                table('org_memberships').c.organization_id==organization_id,table('org_memberships').c.status=='ACTIVE',table('org_memberships').c.revoked_at.is_(None))).scalar_one_or_none()
-            if not membership: raise InternshipLogScopeError('MENTOR_MEMBERSHIP_REQUIRED')
-            return insert_row(conn,'mentor_assignments',placement_id=placement_id,organization_id=organization_id,membership_id=membership,
-                assigned_by_id=actor_user_id,assigned_at=now())
+            require_internship_placement(conn,p)
+            account_authority(conn,actor)
+            org_authority(conn,actor.user_id,organization_id,'OWNER','HOST_COORDINATOR')
+            require_capability(conn,organization_id,'INTERNSHIP_HOST')
+            try:membership=org_authority(conn,mentor_id,organization_id,'MENTOR',nowait=True)
+            except OperationalError as exc:
+                if getattr(exc.orig,'sqlstate',None)=='55P03':
+                    raise InternshipLogScopeError('MENTOR_BUSY_RETRY') from exc
+                raise
+            row=insert_row(conn,'mentor_assignments',placement_id=placement_id,organization_id=organization_id,membership_id=membership['id'],
+                assigned_by_id=actor.user_id,assigned_at=now())
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='MENTOR_ASSIGNMENT_NOMINATED',entity_type='mentor_assignment',entity_id=row['id'])
+            return row
 
     def _academic_binding(self,conn,placement,supervision,institution_id):
         from app.db.institution_scope import TASHKENT
@@ -133,6 +144,7 @@ class InternshipLogService:
         try: p=get_row(conn,'placements',placement_id,True)
         except PlacementScopeError: raise InternshipLogScopeError('PLACEMENT_NOT_FOUND',status_code=404)
         if not owns_candidate(author_id,p['candidate_id']): raise InternshipLogScopeError('PLACEMENT_AUTHOR_FORBIDDEN',status_code=403)
+        require_internship_placement(conn,p)
         if p['status']!='ACTIVE': raise InternshipLogScopeError('ACTIVE_PLACEMENT_REQUIRED')
         if not p['current_terms_id']: raise InternshipLogScopeError('PLACEMENT_TERMS_REQUIRED')
         return p

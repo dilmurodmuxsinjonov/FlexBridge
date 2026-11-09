@@ -1,5 +1,9 @@
 # FlexBridge — texnik modellar va vositalar
 
+## INT-CODEX-001 / current2026-11-10
+
+- Accepted enrollment PR64 final930 CI twice/merge1b2bbbf; runtime0013/114, canonical94 and51 explicit81 placeholder registrations. Issue65 host admission is being built: immutable intake/terms/consent/original-mentor-grant/event proofs, actual ActorContext with business-before-authority locks and existing ordinary/sensitive assurance. Forward0014/helper count not yet executed or accepted. Canonical030/048/050/051-MENTOR/069/087/088-activation/089 plus legacy aliases, then academic/completion follow-ups. No new dependency selected; pilotfalse.
+
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
 ## AUTH-CODEX-006 - candidate current-session boundary2026-11-10
