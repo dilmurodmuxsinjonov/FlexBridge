@@ -253,8 +253,14 @@ def test_reviewed_teacher_password_session_retains_candidate_self_service(client
     assert me.status_code == 200 and 'TEACHER' in me.json()['roles'] and 'COORDINATOR' not in me.json()['roles']
     with transaction() as conn:
         assert conn.execute(select(table('sessions').c.assurance).where(table('sessions').c.id == teacher['session_id'])).scalar_one() == 'PASSWORD'
-    assert client.get('/api/v1/me/candidate', headers=teacher['headers']).status_code == 200
-    assert client.patch('/api/v1/me/candidate', headers=teacher['headers'], json={'headline': 'Teacher candidate profile'}).status_code == 200
-    assert client.get('/api/v1/me/availability', headers=teacher['headers']).status_code == 200
-    document = cv_fixture(teacher)
-    assert client.post('/api/v1/me/candidate/cv', headers=teacher['headers'], json={'file_id': document['id']}).status_code == 200
+    for kind in KINDS:
+        # Both legacy inserts must use a valid nonconflicting schedule fixture.
+        if kind == 'legacy_rule':
+            assert client.put('/api/v1/me/availability',headers=teacher['headers'],json={'rules':[]}).status_code == 200
+        elif kind == 'legacy_exception':
+            today=local_today().isoformat()
+            assert client.put('/api/v1/me/availability/exceptions',headers=teacher['headers'],json={
+                'from_date':today,'to_date':today,'exceptions':[]}).status_code == 200
+        _, _, request, _ = operation(kind,client,identities,owner=teacher)
+        response=request()
+        assert response.status_code == (201 if kind.startswith('legacy_') else 200),(kind,response.status_code,response.text)
