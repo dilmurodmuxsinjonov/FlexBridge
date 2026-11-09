@@ -2,6 +2,13 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## AUTH-CODEX-002 — organization transaction authority (2026-11-09)
+
+- Mavjud SQLAlchemy/PostgreSQL `authority.py` guardlari old organization/invitation/member mutationlariga qo'llanmoqda: business organization/target lock -> current active user `FOR SHARE` -> current MFA session `FOR SHARE` -> current scoped membership/grant/catalog `FOR SHARE`; commit/rollbackgacha saqlanadi. Early preflight tez rad etish uchun qoladi, final authorization sifatida ishlatilmaydi.
+- Governance member servislariga actual ActorContext session_id bilan beriladi. Pending representative/onboarding yoki invited recipientdan hali mavjud bo'lmagan OWNER/staff rolini talab qilinmaydi. Initial moderation #48 alohida, mavjud assurance policy o'zgarmaydi.
+- Yangi dependency/migration yo'q, runtime0010/107 va canonical94 saqlanadi. Real HTTP session revoke/MFA disable va trusted SQL role mutations alohida belgilanadi; test storage adapteri production S3 acceptance emas. Final source/CI qabuli03 va paket hisobotida.
+- Pinned reviewdan keyingi actual create/contact-bind deadlock probe17a0b66da tuzatildi: bir xil contact-lock HMAC/advisory key uchun pg_try_advisory_xact_lock, boshqa target user/inviter authority uchun NOWAIT, keyin exact contact-identity recheck.55P03/busy ->409 INVITATION_BUSY_RETRY va butun UOW rollback; shared org_authority defaulti saqlandi. Public HTTP OTP/register/bind races va retry grant/FK scope testlari mavjud, actual gateway almashtirilgan. Identity service policy o'zgarmadi.
+
 ## Texnik hujjatda ko'rsatilganlar
 
 Manba: `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf`, 2–7-sahifalar.

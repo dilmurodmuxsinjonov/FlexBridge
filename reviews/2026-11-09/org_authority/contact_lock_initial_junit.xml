@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="38.030" timestamp="2026-11-09T04:42:29.201347+05:00" hostname="Ditroid"><testcase classname="tests.security.test_invitation_contact_lock_probe" name="test_contact_rebind_and_invitation_do_not_form_a_database_deadlock" time="34.896"><failure message="AssertionError: (201, 503)&#10;assert (201 == 201 and 503 in (401, 403, 409))&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code&#10; +  and   503 = &lt;Response [503 Service Unavailable]&gt;.status_code">backend\tests\security\test_invitation_contact_lock_probe.py:33: in test_contact_rebind_and_invitation_do_not_form_a_database_deadlock
+    assert binding_result.status_code==201 and invitation_result.status_code in (401,403,409),(
+E   AssertionError: (201, 503)
+E   assert (201 == 201 and 503 in (401, 403, 409))
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code
+E    +  and   503 = &lt;Response [503 Service Unavailable]&gt;.status_code</failure></testcase></testsuite></testsuites>

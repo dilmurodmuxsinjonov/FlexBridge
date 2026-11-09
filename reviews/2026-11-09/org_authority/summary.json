@@ -1,0 +1,99 @@
+{
+  "commit": "7386da2124d7ed24c51f9e3868373adcc9eff47a",
+  "native_baseline": {
+    "commit": "104c43612f05e7ee4bb6f56f743ab0f46caede12",
+    "changed_state": {
+      "tests": 43,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 153.126
+    },
+    "transactions": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 94.88
+    },
+    "old_affected": {
+      "tests": 187,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 642.05
+    }
+  },
+  "native_post_review": {
+    "commit": "17a0b66966ea992427123b0a218b70a4f533cc22",
+    "contact_and_old_invitations": {
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 127.961
+    },
+    "public_contact": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 40.013
+    }
+  },
+  "native_final_contact": {
+    "commit": "7386da2124d7ed24c51f9e3868373adcc9eff47a",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 42.195
+  },
+  "initial_contact_regression": {
+    "runtime_commit": "104c43612f05e7ee4bb6f56f743ab0f46caede12",
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 38.03
+  },
+  "ci_runs": [
+    42537111572,
+    42537115610
+  ],
+  "ci_tests": 480,
+  "ci_conclusion": "success",
+  "ci_elapsed_seconds": [
+    358.8,
+    311.51
+  ],
+  "intermediate_ci": {
+    "commit": "17a0b66966ea992427123b0a218b70a4f533cc22",
+    "runs": [
+      42536888052,
+      42536892278
+    ],
+    "tests": 479,
+    "conclusion": "success",
+    "elapsed_seconds": [
+      365.84,
+      262.84
+    ]
+  },
+  "prior_ci": {
+    "commit": "104c43612f05e7ee4bb6f56f743ab0f46caede12",
+    "runs": [
+      42536321623,
+      42536326963
+    ],
+    "tests": 470,
+    "conclusion": "success",
+    "elapsed_seconds": [
+      343.4,
+      352.7
+    ]
+  },
+  "residual_security_issue": 48,
+  "pilot_ready": false,
+  "note": "Baseline69/187 predate contact-lock fix. Post-review29 includes20 old invitation cases also in baseline; final10 contact cases rerun the prior9 with one addition. Do not sum as distinct tests or claim all baseline tests rerun natively on final source."
+}

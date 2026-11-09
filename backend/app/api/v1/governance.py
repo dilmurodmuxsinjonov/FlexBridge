@@ -73,7 +73,7 @@ def create_org_member_endpoint(org_id: str, payload: CreateOrgMemberRequest, act
         organization_id=org_id,
         user_id=payload.user_id,
         role_code=payload.role_code,
-        created_by=actor.user_id,
+        actor=actor,
     )
 
 
@@ -90,7 +90,7 @@ def approve_org_member_endpoint(
         return governance_service.approve_org_member(
             organization_id=org_id,
             member_id=member_id,
-            approved_by=actor.user_id,
+            actor=actor,
             approver_org_id=org_id,
         )
     except GovernanceError as exc:

@@ -3,7 +3,8 @@ from datetime import timedelta
 import hmac
 import secrets
 from fastapi import HTTPException
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, text
+from sqlalchemy.exc import OperationalError
 
 from app.api.dependencies import ActorContext, require_org
 from app.core.iam_security import digest, normalize_contact, rate_limit
@@ -11,7 +12,8 @@ from app.db.storage import table, transaction, now
 from app.services.governance import GovernanceError
 from app.services.organizations import require_mfa, role_id, audit
 from app.services.placements import get_row, insert_row
-from app.services.identity import lock_contact, contact_row
+from app.services.identity import contact_row
+from app.services.authority import mfa_authority, org_authority
 
 ALLOWED_ROLES = ('HR','HOST_COORDINATOR','MENTOR','BILLING')
 
@@ -22,6 +24,27 @@ def unavailable():
 
 def contact_digest(channel, value):
     return digest('org-invite-contact', channel + ':' + value)
+
+
+def busy():
+    return GovernanceError('INVITATION_BUSY_RETRY',status_code=409)
+
+
+def lock_contact(conn,value):
+    # Contact rebinding holds this lock before rotating the old owner's security.
+    # Never wait for it while holding user authority; abort the whole UOW for retry.
+    acquired=conn.execute(text('SELECT pg_try_advisory_xact_lock(hashtextextended(:key,0))'),
+        {'key':digest('contact-lock',value)}).scalar_one()
+    if not acquired:raise busy()
+
+
+def lock_target_user(conn,user_id):
+    users=table('users')
+    try:
+        conn.execute(select(users.c.id).where(users.c.id==user_id).with_for_update(read=True,nowait=True)).first()
+    except OperationalError as exc:
+        if getattr(exc.orig,'sqlstate',None)=='55P03':raise busy() from exc
+        raise
 
 
 def revoke_pending_for_member(conn, org_id, membership):
@@ -43,13 +66,20 @@ class InvitationService:
         rate_limit('org-invite-create',actor.user_id,20,3600)
         with transaction() as conn:
             org = get_row(conn,'organizations',org_id,True)
-            require_org(actor,org_id,'OWNER')
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,org_id,'OWNER')
             if org['status'] != 'VERIFIED': raise GovernanceError('ORGANIZATION_NOT_VERIFIED')
             members = table('org_memberships')
             member = conn.execute(select(members).where(members.c.organization_id == org_id,
                 members.c.user_id == actor.user_id,members.c.status == 'ACTIVE',members.c.revoked_at.is_(None))).mappings().one()
+            initial = contact_row(conn,channel,value)
+            # Pin the FK target before taking the contact lock. A binder may hold
+            # that user first, so waiting here could also complete a lock cycle.
+            if initial and initial['user_id']!=actor.user_id:lock_target_user(conn,initial['user_id'])
             lock_contact(conn,channel+':'+value)
             target = contact_row(conn,channel,value)
+            if ((initial['id'],initial['user_id']) if initial else None) != ((target['id'],target['user_id']) if target else None):
+                raise busy()
             if target and target['user_id'] == actor.user_id:
                 raise GovernanceError('SELF_INVITATION_FORBIDDEN',status_code=403)
             rid, hashed_contact = role_id(conn,role_code), contact_digest(channel,value)
@@ -74,14 +104,19 @@ class InvitationService:
         if not row: raise unavailable()
         return dict(row)
 
-    def _current_inviter(self,conn,invite):
+    def _current_inviter(self,conn,invite,*,hold_authority=False):
         org = get_row(conn,'organizations',invite['organization_id'])
         inviter = get_row(conn,'org_memberships',invite['inviter_membership_id'])
         user = get_row(conn,'users',inviter['user_id'])
         if org['status'] != 'VERIFIED' or inviter['organization_id'] != org['id'] or user['status'] != 'ACTIVE':
             raise unavailable()
-        try: require_org(ActorContext(user['id'],'',()),org['id'],'OWNER')
-        except HTTPException as exc:
+        try:
+            if hold_authority:org_authority(conn,user['id'],org['id'],'OWNER',nowait=True)
+            else:require_org(ActorContext(user['id'],'',()),org['id'],'OWNER')
+        except OperationalError as exc:
+            if getattr(exc.orig,'sqlstate',None)=='55P03':raise busy() from exc
+            raise
+        except (HTTPException,GovernanceError) as exc:
             if exc.status_code == 403: raise unavailable() from exc
             raise
         role = get_row(conn,'role_catalog',invite['role_id']) if invite['role_id'] else None
@@ -119,6 +154,7 @@ class InvitationService:
             memberships,grants = table('org_memberships'),table('org_role_grants')
             member = conn.execute(select(memberships).where(memberships.c.organization_id == invite['organization_id'],
                 memberships.c.user_id == actor.user_id).with_for_update()).mappings().first()
+            mfa_authority(conn,actor)
             if invite['accepted_at']:
                 grant = conn.execute(select(grants.c.id).where(grants.c.membership_id == member['id'],
                     grants.c.role_id == invite['role_id'],grants.c.revoked_at.is_(None))).first() if member else None
@@ -127,7 +163,7 @@ class InvitationService:
                     raise GovernanceError('ACCEPTED_MEMBERSHIP_NO_LONGER_ACTIVE')
                 return {'membership_id':member['id'],'status':'ACTIVE','idempotent_replay':True}
             if invite['revoked_at'] or invite['expires_at'] <= now(): raise unavailable()
-            org,inviter,role = self._current_inviter(conn,invite)
+            org,inviter,role = self._current_inviter(conn,invite,hold_authority=True)
             if inviter['user_id'] == actor.user_id: raise GovernanceError('SELF_INVITATION_FORBIDDEN',status_code=403)
             self._contact(conn,actor,invite)
             if member and member['status'] == 'REVOKED' and not member['revoked_at']: raise unavailable()
@@ -160,8 +196,10 @@ class InvitationService:
     def revoke(self,actor,org_id,invitation_id,reason):
         require_mfa(actor)
         with transaction() as conn:
-            get_row(conn,'organizations',org_id,True);require_org(actor,org_id,'OWNER')
+            get_row(conn,'organizations',org_id,True)
             invite = get_row(conn,'org_invitations',invitation_id,True)
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,org_id,'OWNER')
             if invite['organization_id'] != org_id: raise GovernanceError('ORG_SCOPE_FORBIDDEN',status_code=403)
             if invite['accepted_at']: raise GovernanceError('INVITATION_ALREADY_ACCEPTED_USE_MEMBERSHIP_REVOKE')
             if not invite['revoked_at']:

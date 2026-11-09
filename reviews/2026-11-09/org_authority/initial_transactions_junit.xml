@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="26" time="95.259" timestamp="2026-11-09T04:36:49.539882+05:00" hostname="Ditroid"><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[revoke_session-membership_revoke]" time="5.485" /><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[revoke_session-invitation_accept]" time="2.341" /><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[revoke_session-member_approve]" time="3.679" /><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[disable_mfa-membership_revoke]" time="2.848" /><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[disable_mfa-invitation_accept]" time="3.607" /><testcase classname="tests.security.test_org_authority_transactions" name="test_authorized_commit_precedes_waiting_security_change[disable_mfa-member_approve]" time="2.948" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[submit]" time="2.857" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[patch]" time="2.749" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[membership_revoke]" time="2.859" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[invitation_create]" time="2.489" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[invitation_revoke]" time="3.427" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[member_create]" time="2.711" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[member_approve]" time="3.527" /><testcase classname="tests.security.test_org_authority_transactions" name="test_completed_scoped_grant_revocation_blocks_after_preflight[join_detail]" time="3.110" /><testcase classname="tests.security.test_org_authority_transactions" name="test_scoped_grant_cannot_change_during_authorized_commit" time="3.258" /><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[register_bootstrap-ORG_VERIFICATION_SUBMITTED]" time="2.842"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[submit-ORG_VERIFICATION_SUBMITTED]" time="2.857"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[resubmit-ORG_VERIFICATION_RESUBMITTED]" time="2.989"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[membership_revoke-ORG_MEMBERSHIP_REVOKED]" time="3.652"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[invitation_create-ORG_INVITATION_CREATED]" time="2.614"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[invitation_accept-ORG_INVITATION_ACCEPTED]" time="2.817"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[invitation_revoke-ORG_INVITATION_REVOKED]" time="3.146"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_audit_failure_rolls_back_authorized_business_effect[member_approve-ORG_MEMBER_APPROVED_DUAL_CONTROL]" time="2.933"><failure message="Failed: DID NOT RAISE RuntimeError">backend\tests\security\test_org_authority_transactions.py:122: in test_audit_failure_rolls_back_authorized_business_effect
+    with pytest.raises(RuntimeError,match='Injected transactional audit failure'):request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_governance_service_requires_actual_current_actor_session[missing]" time="2.577"><failure message="sqlalchemy.exc.DataError: (psycopg.errors.InvalidTextRepresentation) invalid input syntax for type uuid: &quot;&quot;&#10;CONTEXT:  unnamed portal parameter $1 = ''&#10;[SQL: SELECT flexbridge.sessions.id &#10;FROM flexbridge.sessions &#10;WHERE flexbridge.sessions.id = %(id_1)s::UUID AND flexbridge.sessions.user_id = %(user_id_1)s::UUID AND flexbridge.sessions.auth_version = %(auth_version_1)s::INTEGER AND flexbridge.sessions.assurance = %(assurance_1)s::VARCHAR AND flexbridge.sessions.revoked_at IS NULL AND flexbridge.sessions.expires_at &gt; %(expires_at_1)s::TIMESTAMP WITH TIME ZONE FOR SHARE]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/9h9h)">C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.InvalidTextRepresentation: invalid input syntax for type uuid: ""
+E   CONTEXT:  unnamed portal parameter $1 = ''
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_org_authority_transactions.py:133: in test_governance_service_requires_actual_current_actor_session
+    governance_service.create_org_member_request(actor=actor,organization_id=organization,user_id=target['user_id'],role_code='HR')
+backend\app\services\governance.py:22: in create_org_member_request
+    mfa_authority(conn,actor)
+backend\app\services\authority.py:12: in mfa_authority
+    session=None if not user else conn.execute(select(sessions.c.id).where(sessions.c.id==actor.session_id,
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.DataError: (psycopg.errors.InvalidTextRepresentation) invalid input syntax for type uuid: ""
+E   CONTEXT:  unnamed portal parameter $1 = ''
+E   [SQL: SELECT flexbridge.sessions.id
+E   FROM flexbridge.sessions
+E   WHERE flexbridge.sessions.id = %(id_1)s::UUID AND flexbridge.sessions.user_id = %(user_id_1)s::UUID AND flexbridge.sessions.auth_version = %(auth_version_1)s::INTEGER AND flexbridge.sessions.assurance = %(assurance_1)s::VARCHAR AND flexbridge.sessions.revoked_at IS NULL AND flexbridge.sessions.expires_at &gt; %(expires_at_1)s::TIMESTAMP WITH TIME ZONE FOR SHARE]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/9h9h)</failure></testcase><testcase classname="tests.security.test_org_authority_transactions" name="test_governance_service_requires_actual_current_actor_session[other_user]" time="2.746" /><testcase classname="tests.security.test_org_authority_transactions" name="test_governance_service_requires_actual_current_actor_session[unknown]" time="15.457" /></testsuite></testsuites>

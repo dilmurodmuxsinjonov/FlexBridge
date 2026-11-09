@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44 merged. ORG-CODEX-003C1 / Issue45: ikki mustaqil reviewer bilan existing-staff continuity boshlandi. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas. Keyingi: ownership va EDU.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46 merged. Issue47/AUTH-CODEX-002: organization authority race tuzatilmoqda; keyin confirmed initial-moderation race48 va EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -149,9 +149,15 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## ORG-CODEX-003C1 — Fixed-revision existing-staff OWNER continuity
 
-- Holat: `Tekshiruvda`; mas'ul Codex; Issue45/PR46, feature/45-owner-continuity. Doira/qabul: reviews/2026-11-09/org003c/REJA.md va addendum. Runtime0010/107 jadval; populated upgrade105->107 va old proof/history preservation o'tdi. fa40e54 native263 va full393 CI o'tganidan keyin Copilot stale matching replay kamchiligini topdi;3 yangi regression failed. ef4a94b tuzatishi native9 va ikkala full401 CI42534534532/42534538671 bilan o'tdi; follow-up read-only review concrete defect topmadi. Native263 old baseline ekanligi alohida yozildi. Evidence-only check/merge qolgan. API075 session-revocation race alohida Issue47; pilotfalse.
+- Holat: `Bajarildi` (chegaralangan backend paketi); mas'ul Codex; Issue45 yopildi, PR46 mergef726ab6. Doira/qabul: reviews/2026-11-09/org003c/REJA.md va addendum. Runtime0010/107 jadval; populated upgrade105->107 va old proof/history preservation o'tdi. fa40e54 native263 va full393 CI o'tganidan keyin Copilot stale matching replay kamchiligini topdi;3 yangi regression failed. ef4a94b tuzatishi native9 va ikkala full401 CI42534534532/42534538671 bilan o'tdi; follow-up read-only review concrete defect topmadi. Native263 old baseline ekanligi alohida yozildi. Evidence-only d78e028 final CI42535393068/42535396524 ham401 passed,304.52s/311.64s. API075 session-revocation race alohida Issue47; pilotfalse.
 - Existing active staff MFA bilan faqat o'ziga murojaat qiladi; contact/consent/evidence/original grant/OWNER roster immutable. Fixed revision1; MODERATOR tavsiyasi va boshqa COMPLIANCE yakuniy tasdig'i kerak. Eski OWNER grantlari saqlanadi. Generic verification yo'llari bu case'ni approve/resubmit qila olmaydi; account recovery kind alohida.
 - Fayllar: dedicated continuity service/API,0010 migration/storage, IAM kind filter, private HTTP, SQL regressiyalar/guide va01/02/03. Expired/revoked claim closure, owner objection, quorum/roster/replay/race/rollback va old proof regression majburiy. Real identity/legal authority, zero-active-owner/no-staff recovery, live provider/UI/DR va pilot qabuli doiradan tashqarida.
+
+## AUTH-CODEX-002 — Organization amallarida joriy vakolatni commitgacha ushlash
+
+- Holat: `Tekshiruvda`; Codex; Issue47/PR49, fix/47-org-authority. Reja/dalil: reviews/2026-11-09/org_authority. Old source API0751 failed, expanded15dan14 failed/1 passed, dependency503 download synthetic storage bilan qayta sinab200 kuzatildi; actual org lock/session revoke/MFA disable2 failed.104c436 native43/26/187 va full470 CI o'tganidan keyin review/contact deadlock1 failed aniqlandi;17a0b66 try-lock/NOWAIT/409 rollback va target identity recheck bilan tuzatdi. Native29 va full479 passed.7386da2 test-only delta deterministic contention/existing-contact replacementni yopdi: native10 passed, pinned delta review concrete remaining issue topmadi. Final full480 CI42537111572/42537115610 ham passed,358.80s/311.51s; evidence-only check/merge qolgan. Pilotfalse.
+- Register/submit/patch/revoke/private join detail/download, invitation create/accept/replay/revoke va member request/approve current-MFA/session/accountni business lockdan keyin tekshiradi. Org authority grantlari ham transaction-bound. Governance servisiga actual ActorContext beriladi, user_iddan sessionsiz actor yasalmaydi. Oldindan o'tgan bekor qilish rad etadi; vakolat avval bloklansa, bekor qilish commitni kutadi. Yangi MFA siyosati, migration yoki grant tarixini almashtirish yo'q.
+- Qabul: changed-state HTTP va actual DB lock wait, teskari commit serialization, scoped grants va rollback; old org/invite/ownership/appeal/IAM/full PostgreSQL CI va pinned peer review. Initial opportunity moderation race separately confirmed2 failed/Issue48; bu paket uni tuzatdi deb aytilmaydi. Pilotfalse; keyin48 va EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
