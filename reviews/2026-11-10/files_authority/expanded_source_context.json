@@ -1,0 +1,24 @@
+{
+  "source": "b251644fa2c00439cde495ae52ebc3c85b629d40",
+  "runtime_same_as": "afd343ab749a1a2131172e662769ff8fb2369d2c",
+  "review_worktree": "D:/Codex/FlexBridge-review/institution-authority",
+  "initial": {
+    "tests": 15,
+    "failures": 15,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 22.767
+  },
+  "initial_qualification": "12 real denial assertions and3 invalid self-grant fixture errors; DB check retained",
+  "corrected": {
+    "tests": 15,
+    "failures": 15,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 19.269
+  },
+  "corrected_qualification": "15 actual denial assertions failed with201/202/200; not15 anonymous attack paths",
+  "wait_proof": "complete actual row holder; download actual table lock holder; initiate service-entry Event after real HTTP auth, no claimed SQL wait",
+  "storage": "Explicit HEAD/presign double; no S3/AV proof",
+  "runtime_modified": false
+}

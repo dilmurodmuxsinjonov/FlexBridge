@@ -14,11 +14,11 @@ class InitiateUploadRequest(BaseModel):
 @router.post('/upload-intents',status_code=201)
 @router.post('/upload-init',status_code=201,include_in_schema=False)
 def upload(payload:InitiateUploadRequest,actor:ActorContext=Depends(require_actor_context)):
-    return file_quarantine_service.initiate_upload_api_x01(owner_id=actor.user_id,**payload.model_dump())
+    return file_quarantine_service.initiate_upload_api_x01(actor=actor,**payload.model_dump())
 
 @router.post('/{file_id}/complete-upload',status_code=202)
 def complete(file_id:UUID,actor:ActorContext=Depends(require_actor_context)):
-    return file_quarantine_service.complete_upload(str(file_id),actor.user_id)
+    return file_quarantine_service.complete_upload(str(file_id),actor)
 
 @router.post('/{file_id}/complete-scan',include_in_schema=False)
 def retired_scan(file_id:UUID,actor:ActorContext=Depends(require_actor_context)):
@@ -26,4 +26,4 @@ def retired_scan(file_id:UUID,actor:ActorContext=Depends(require_actor_context))
 
 @router.get('/{file_id}/download')
 def download(file_id:UUID,actor:ActorContext=Depends(require_actor_context)):
-    return file_quarantine_service.issue_signed_download_url_api_x03(file_id=str(file_id),requester_id=actor.user_id)
+    return file_quarantine_service.issue_signed_download_url_api_x03(file_id=str(file_id),actor=actor)

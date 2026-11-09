@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="15" skipped="0" tests="15" time="22.767" timestamp="2026-11-10T01:45:06.757218+05:00" hostname="Ditroid"><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[logout-initiate]" time="4.428"><failure message="AssertionError: ('initiate', 'logout', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('initiate', 'logout', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[logout-complete]" time="1.278"><failure message="AssertionError: ('complete', 'logout', 202)&#10;assert 202 in (401, 403)&#10; +  where 202 = &lt;Response [202 Accepted]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('complete', 'logout', 202)
+E   assert 202 in (401, 403)
+E    +  where 202 = &lt;Response [202 Accepted]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[logout-download]" time="1.351"><failure message="AssertionError: ('download', 'logout', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('download', 'logout', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[expiry-initiate]" time="1.159"><failure message="AssertionError: ('initiate', 'expiry', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('initiate', 'expiry', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[expiry-complete]" time="1.029"><failure message="AssertionError: ('complete', 'expiry', 202)&#10;assert 202 in (401, 403)&#10; +  where 202 = &lt;Response [202 Accepted]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('complete', 'expiry', 202)
+E   assert 202 in (401, 403)
+E    +  where 202 = &lt;Response [202 Accepted]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[expiry-download]" time="1.049"><failure message="AssertionError: ('download', 'expiry', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('download', 'expiry', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[auth_version-initiate]" time="1.013"><failure message="AssertionError: ('initiate', 'auth_version', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('initiate', 'auth_version', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[auth_version-complete]" time="1.052"><failure message="AssertionError: ('complete', 'auth_version', 202)&#10;assert 202 in (401, 403)&#10; +  where 202 = &lt;Response [202 Accepted]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('complete', 'auth_version', 202)
+E   assert 202 in (401, 403)
+E    +  where 202 = &lt;Response [202 Accepted]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[auth_version-download]" time="1.073"><failure message="AssertionError: ('download', 'auth_version', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('download', 'auth_version', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[suspended-initiate]" time="1.022"><failure message="AssertionError: ('initiate', 'suspended', 201)&#10;assert 201 in (401, 403)&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('initiate', 'suspended', 201)
+E   assert 201 in (401, 403)
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[suspended-complete]" time="1.118"><failure message="AssertionError: ('complete', 'suspended', 202)&#10;assert 202 in (401, 403)&#10; +  where 202 = &lt;Response [202 Accepted]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('complete', 'suspended', 202)
+E   assert 202 in (401, 403)
+E    +  where 202 = &lt;Response [202 Accepted]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[suspended-download]" time="1.065"><failure message="AssertionError: ('download', 'suspended', 200)&#10;assert 200 in (401, 403)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">backend\tests\security\test_files_authority_expanded.py:100: in test_security_change_after_preflight_denies_owner_file_operation
+    assert response.status_code in (401, 403), (kind, change, response.status_code)
+E   AssertionError: ('download', 'suspended', 200)
+E   assert 200 in (401, 403)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[sensitive_role-initiate]" time="1.067"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;platform_role_grants&quot; violates check constraint &quot;chk_platform_grant_not_self&quot;&#10;DETAIL:  Failing row contains (eb6ebca2-627e-4057-9f54-4c73bd182001, 2026-11-10 01:45:25.97227+05, 2026-11-10 01:45:25.97227+05, cc360647-c1fb-463a-8673-701107f608c7, f3ebe497-defd-494b-8269-a297f2d68c97, cc360647-c1fb-463a-8673-701107f608c7, 2026-11-10 02:45:25.97227+05, null).&#10;[SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (eb6ebca2-627e-4057-9f54-4c73bd182001, 2026-11-10 01:45:25.97227+05, 2026-11-10 01:45:25.97227+05, cc360647-c1fb-463a-8673-701107f608c7, f3ebe497-defd-494b-8269-a297f2d68c97, cc360647-c1fb-463a-8673-701107f608c7, 2026-11-10 02:45:25.97227+05, null).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_files_authority_expanded.py:84: in test_security_change_after_preflight_denies_owner_file_operation
+    change_security(change, client, owner)
+backend\tests\security\test_files_authority_expanded.py:61: in change_security
+    insert_row(conn, 'platform_role_grants', user_id=owner['user_id'], role_id=role,
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (eb6ebca2-627e-4057-9f54-4c73bd182001, 2026-11-10 01:45:25.97227+05, 2026-11-10 01:45:25.97227+05, cc360647-c1fb-463a-8673-701107f608c7, f3ebe497-defd-494b-8269-a297f2d68c97, cc360647-c1fb-463a-8673-701107f608c7, 2026-11-10 02:45:25.97227+05, null).
+E   [SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[sensitive_role-complete]" time="1.033"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;platform_role_grants&quot; violates check constraint &quot;chk_platform_grant_not_self&quot;&#10;DETAIL:  Failing row contains (34c52605-36a9-41d6-b31d-8e37e7ed2f86, 2026-11-10 01:45:27.144988+05, 2026-11-10 01:45:27.144988+05, baa4d135-0b48-48ea-8611-c19b1880d82f, eb71f466-e3d9-42dd-b93a-bf3f3c01e55a, baa4d135-0b48-48ea-8611-c19b1880d82f, 2026-11-10 02:45:27.144988+05, null).&#10;[SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (34c52605-36a9-41d6-b31d-8e37e7ed2f86, 2026-11-10 01:45:27.144988+05, 2026-11-10 01:45:27.144988+05, baa4d135-0b48-48ea-8611-c19b1880d82f, eb71f466-e3d9-42dd-b93a-bf3f3c01e55a, baa4d135-0b48-48ea-8611-c19b1880d82f, 2026-11-10 02:45:27.144988+05, null).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_files_authority_expanded.py:98: in test_security_change_after_preflight_denies_owner_file_operation
+    change_security(change, client, owner)
+backend\tests\security\test_files_authority_expanded.py:61: in change_security
+    insert_row(conn, 'platform_role_grants', user_id=owner['user_id'], role_id=role,
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (34c52605-36a9-41d6-b31d-8e37e7ed2f86, 2026-11-10 01:45:27.144988+05, 2026-11-10 01:45:27.144988+05, baa4d135-0b48-48ea-8611-c19b1880d82f, eb71f466-e3d9-42dd-b93a-bf3f3c01e55a, baa4d135-0b48-48ea-8611-c19b1880d82f, 2026-11-10 02:45:27.144988+05, null).
+E   [SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_files_authority_expanded" name="test_security_change_after_preflight_denies_owner_file_operation[sensitive_role-download]" time="2.129"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;platform_role_grants&quot; violates check constraint &quot;chk_platform_grant_not_self&quot;&#10;DETAIL:  Failing row contains (a2c2e22d-1386-4620-9ede-62e229ef8c35, 2026-11-10 01:45:28.31299+05, 2026-11-10 01:45:28.31299+05, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 5cc5c6a7-2c80-4e54-aa8c-4e0ce80b6c65, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 2026-11-10 02:45:28.31299+05, null).&#10;[SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (a2c2e22d-1386-4620-9ede-62e229ef8c35, 2026-11-10 01:45:28.31299+05, 2026-11-10 01:45:28.31299+05, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 5cc5c6a7-2c80-4e54-aa8c-4e0ce80b6c65, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 2026-11-10 02:45:28.31299+05, null).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_files_authority_expanded.py:98: in test_security_change_after_preflight_denies_owner_file_operation
+    change_security(change, client, owner)
+backend\tests\security\test_files_authority_expanded.py:61: in change_security
+    insert_row(conn, 'platform_role_grants', user_id=owner['user_id'], role_id=role,
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "platform_role_grants" violates check constraint "chk_platform_grant_not_self"
+E   DETAIL:  Failing row contains (a2c2e22d-1386-4620-9ede-62e229ef8c35, 2026-11-10 01:45:28.31299+05, 2026-11-10 01:45:28.31299+05, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 5cc5c6a7-2c80-4e54-aa8c-4e0ce80b6c65, f6a8193b-9d40-45d7-b682-72b1ac3241b0, 2026-11-10 02:45:28.31299+05, null).
+E   [SQL: INSERT INTO flexbridge.platform_role_grants (id, created_at, updated_at, user_id, role_id, granted_by_id, expires_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(user_id)s::UUID, %(role_id)s::UUID, %(granted_by_id)s::UUID, %(expires_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase></testsuite></testsuites>

@@ -4,6 +4,8 @@ from sqlalchemy import select
 from app.db.storage import files_table,transaction,now,enqueue
 from app.adapters import storage,antivirus
 from app.workers.pdf_check import validate_pdf
+from app.api.dependencies import ActorContext
+from app.services.authority import account_authority
 
 class FileQuarantineError(Exception):
     def __init__(self,code,message=None,status_code=409):
@@ -17,20 +19,22 @@ def scan_pdf_bytes_and_structure(raw_bytes,**unused):
         return False,'INVALID_PDF_STRUCTURE'
 
 class FileQuarantineService:
-    def initiate_upload_api_x01(self,*,owner_id,filename,mime_type='application/pdf',size_bytes=1024):
+    def initiate_upload_api_x01(self,*,actor:ActorContext,filename,mime_type='application/pdf',size_bytes=1024):
         if mime_type!='application/pdf' or not 0<size_bytes<=20*1024*1024: raise FileQuarantineError('INVALID_UPLOAD',status_code=422)
         file_id=str(uuid4());key='quarantine/'+file_id+'.pdf'
-        upload_url=storage.presign_put(key,size_bytes)
         with transaction() as conn:
-            conn.execute(files_table.insert().values(id=file_id,created_at=now(),updated_at=now(),owner_user_id=owner_id,
+            account_authority(conn,actor)
+            upload_url=storage.presign_put(key,size_bytes)
+            conn.execute(files_table.insert().values(id=file_id,created_at=now(),updated_at=now(),owner_user_id=actor.user_id,
                 storage_key=key,filename=filename,mime_type=mime_type,byte_size=size_bytes,sha256=None,
                 scan_status='PENDING_SCAN',retention_class='VERIFICATION_EVIDENCE'))
         return {'id':file_id,'scan_status':'PENDING_SCAN','upload_url':upload_url,'expires_in_seconds':300}
 
-    def complete_upload(self,file_id,actor_id):
+    def complete_upload(self,file_id,actor:ActorContext):
         with transaction() as conn:
             record=conn.execute(select(files_table).where(files_table.c.id==file_id).with_for_update()).mappings().first()
-            if not record or record['owner_user_id']!=actor_id: raise FileQuarantineError('FILE_ACCESS_DENIED',status_code=403)
+            if not record or record['owner_user_id']!=actor.user_id: raise FileQuarantineError('FILE_ACCESS_DENIED',status_code=403)
+            account_authority(conn,actor)
             if record['scan_status']!='PENDING_SCAN': raise FileQuarantineError('INVALID_FILE_STATE')
             head=storage.head(record['storage_key'])
             if head['ContentLength']!=record['byte_size']: raise FileQuarantineError('FILE_SIZE_MISMATCH')
@@ -40,10 +44,11 @@ class FileQuarantineService:
             enqueue(conn,'FILE_SCAN_REQUESTED',str(file_id),{'file_id':str(file_id),'source':source},'scan:'+str(file_id))
         return {'id':file_id,'scan_status':'SCANNING'}
 
-    def issue_signed_download_url_api_x03(self,*,file_id,requester_id):
+    def issue_signed_download_url_api_x03(self,*,file_id,actor:ActorContext):
         with transaction() as conn:
-            record=conn.execute(select(files_table).where(files_table.c.id==file_id)).mappings().first()
-            if not record or record['owner_user_id']!=requester_id: raise FileQuarantineError('FILE_ACCESS_DENIED',status_code=403)
+            record=conn.execute(select(files_table).where(files_table.c.id==file_id).with_for_update()).mappings().first()
+            if not record or record['owner_user_id']!=actor.user_id: raise FileQuarantineError('FILE_ACCESS_DENIED',status_code=403)
+            account_authority(conn,actor)
             if record['deleted_at'] or record['scan_status']!='CLEAN': raise FileQuarantineError('FILE_NOT_CLEAN_FOR_DOWNLOAD')
             reference=storage.file_reference(record)
             return {'file_id':file_id,'expires_in_seconds':60,'signed_url':storage.presign_get(record['storage_key'],reference=reference)}

@@ -189,6 +189,23 @@ def test_suspended_private_write_cannot_publish_clean(client, identities, versio
     assert client.get('/api/v1/files/' + file_id + '/download', headers=owner['headers']).status_code == 409
 
 
+def test_recorded_upload_scan_continues_after_owner_logs_out(client, identities, versioned_store, monkeypatch):
+    owner = identities()
+    original = pdf()
+    file_id = begin_upload(client, owner, original)
+    assert complete(client, owner, file_id).status_code == 202
+    logged_out = client.delete('/api/v1/me/sessions/' + owner['session_id'], headers=owner['headers'])
+    assert logged_out.status_code == 200
+    scanned = []
+    monkeypatch.setattr(antivirus, 'scan', lambda raw: scanned.append(raw))
+    assert relay_pending_outbox_events() == 1
+    clean = stored(file_id)
+    assert scanned == [original] and clean['scan_status'] == 'CLEAN'
+    reference = storage.file_reference(clean)
+    assert storage.read(clean['storage_key'], reference, len(original)) == original
+    assert client.get('/api/v1/files/' + file_id + '/download', headers=owner['headers']).status_code == 401
+
+
 def test_changed_source_generation_cannot_publish_or_rebind_queued_intent(client, identities, versioned_store, monkeypatch):
     owner = identities()
     file_id = begin_upload(client, owner, pdf())

@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-10 - Codex. PR56 ham merged12cd307, Issue55 closed; final4ffbe96 ikkala732-test CI passed383.64s/463.87s. Issue57/PR58 explicit storage binding implementatsiyasi yozildi, draft0012/111 validatsiyasi yurmoqda. Windows Docker/WSL administrator bosqichi tugamagan (native UAC launch canceled); loyiha .venv tayyor. Antigravity uchun ANTIGRAVITY_HANDOFF.md ni o'qi.49 explicit/83 placeholder acceptance foizi emas; pilot tayyor emas.
+Yangilangan2026-11-10 - Codex. PR58 merged04ffd42, Issue57 closed; final408b3cd full757 CI375.77s/507.07s. Issue59 file-session authority kodi yozildi, native27 passed36.60s; affected72 passed102.01s; pinned review/fullCI gates qolgan. Runtime0012/111,49 explicit83 placeholder, pilot tayyor emas. Antigravity uchun ANTIGRAVITY_HANDOFF.md; Docker/WSL admin install incomplete, ClamAV local benign smoke passed.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -508,7 +508,7 @@ Keyingi kichik qadam:
 
 ## STORAGE-CODEX-001 - Private object version binding (Issue57)
 
-- Holat: `Tekshiruvda` (draft implementatsiya, hali qabul yo'q); Codex, fix/57-storage-versioning/PR58.0012 va current storage pipeline yozildi. Reja/qarorlar/read-only Copilot exit0 va localhost MinIO proof reviews/2026-11-10/storage_versioning. Trusted provider-admin overwrite old key-only URL baytlarini almashtiradi; explicit VersionId URL originalni qaytaradi. Public overwrite exploit/live/AV claim emas.
+- Holat: `Bajarildi` (storage-version backend scope); Codex; PR58 merge04ffd42e40ac3a475728c203f5da1583023629e4/Issue57 closed. Final408b3cd full757 twice375.77s/507.07s.0012 va current storage pipeline accepted within scope. Reja/qarorlar/read-only Copilot exit0 va localhost MinIO proof reviews/2026-11-10/storage_versioning. Trusted provider-admin overwrite old key-only URL baytlarini almashtiradi; explicit VersionId URL originalni qaytaradi. Public overwrite exploit/live/AV claim emas.
 - Implementatsiya: explicit bucket/version/ETag provenance va no-inference legacy policy; exact source scan/private GET; existing outbox fence/source compare; all6 signer callers/EDU snapshots; Enabled readiness; populated upgrade/native/real provider integration/current CI/review. Accepted role/proof history saqlanadi; unknown provenance yangi approval/download uchun fail closed. Tafsilot ANTIGRAVITY_HANDOFF.md va DECISIONS.md.
 - Muhit: project .venv installed/pip check0, native smoke3 passed8.51s. Docker/WSL installers D: da hash/publisher verified, ammo Docker actual exit1 (VMP disabled), WSL MSIX0x80073D28 (admin required); installed/engine-ready emas. Native feature elevation launch canceled (OS: operation was canceled by the user), script ishga tushmagan; automatic reboot yo'q. scripts/setup_windows_dependencies.ps1 syntax valid; elevated branch hali execution proofga ega emas. Q-014 va handoff ayni holatni saqlaydi; codingni native PG/MinIO bilan davom ettirish mumkin.
 
@@ -518,7 +518,11 @@ Keyingi kichik qadam:
 
 ## AUTH-CODEX-005 - Owner file current-session authority (Issue59)
 
-- Holat: `Rejada`, confirmed residual; Codex;57/PR58 mergedan keyin yangi branch. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
+- Holat: `Tekshiruvda`, implementatsiya yozildi; Codex, fix/59-file-session-authority merged04ffd42 bazasida. Actual pinnedafd HTTP/native probe1 failed33.57s: file-row wait observed, logout200 completes, then stale complete202/SCANNING/event1. Authenticated in-flight issue, anonymous/foreign data claim emas; storage mocked. Evidence reviews/2026-11-10/files_authority.
 - Doira: upload intent/complete/owner download actual ActorContext, current account/session/existing sensitive MFA after business locks and thru commit, no sessionless fallback; version/source/outbox/ownership guarantees preserved. Ordinary PASSWORD unchanged. Candidate/CV sibling scope alohida audit qilinadi. Planning peer review, both authority orderings/security/expiry/rollback/provider integration/full CI kerak; pilotfalse.
 
 - LOG-056: exact b251644 full757 Linux PG/actual MinIO CI42687285321/42687299361 passed530.01s/513.04s. Source/fixture reviews exit0; scoped findings none. Native counts/failures/limits separated in HISOBOT.md. Evidence-only checks/merge remain;59 next, pilotfalse.
+
+- LOG-057:59 actualActorContext/shared account guard implementation initial27 passed36.60s; affected native running, source review/full CI remain. Freshclam exit0 and actual local clamd benign431-byte PDF adapter smoke passed; daemon stopped, no service/detection/live/pilot claim.
+
+- LOG-057 follow-up: current affected72 passed102.01s incl actual8 MinIO cases,0fail/error/skip; current full CI/source review not yet accepted.

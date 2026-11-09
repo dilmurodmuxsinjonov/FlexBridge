@@ -4,3 +4,4 @@ reviews/2026-11-07/codex_fix/legacy_tests/*.py.txt -text whitespace=cr-at-eol
 reviews/**/access_log_redacted.txt -text -whitespace
 # Keep generated failure text/newlines intact in this validation package.
 reviews/2026-11-10/storage_versioning/*junit.xml -text -whitespace
+reviews/2026-11-10/files_authority/*junit.xml -text -whitespace

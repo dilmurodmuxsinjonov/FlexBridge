@@ -10,11 +10,10 @@ from sqlalchemy import select,func,text
 from sqlalchemy.exc import OperationalError
 from app.api.dependencies import ActorContext
 from app.core.audit import AppendOnlyAuditStore
-from app.core.iam_security import digest,normalize_contact,rate_limit,SENSITIVE_ROLES
+from app.core.iam_security import digest,normalize_contact,rate_limit
 from app.db.storage import table,transaction,now
 from app.db.institution_scope import TASHKENT,institution_scope_query
-from app.services.authority import session_authority,mfa_authority,institution_authority,institution_role_authority,moderator_authority
-from app.services.auth import roles_for
+from app.services.authority import account_authority,institution_authority,institution_role_authority,moderator_authority
 from app.services.governance import GovernanceError
 from app.services.identity import contact_row
 from app.services.organizations import evidence_files
@@ -55,11 +54,6 @@ def response_due():
         day+=timedelta(days=1)
         if day.weekday()<5:remaining-=1
     return day
-
-
-def account_authority(conn,actor,*,require_mfa=False):
-    session_authority(conn,actor,require_mfa=require_mfa)
-    if not require_mfa and SENSITIVE_ROLES.intersection(roles_for(conn,actor.user_id)):mfa_authority(conn,actor)
 
 
 def pin_user(conn,user_id):
