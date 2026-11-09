@@ -1,7 +1,7 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
 Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
-Codex fix/61-candidate-session-authority branchida ishlamoqda. Bir xil fayllarni parallel
+Codex feature/63-enrollment-verification branchida ishlamoqda. Bir xil fayllarni parallel
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
@@ -29,6 +29,63 @@ Pilot hali tayyor emas; live IAM/retention/credential rotation/legal identity/DR
 frontend va umumiy R1 AC ochiq. Owner file session authority PR58 doirasiga kirmagan.
 
 ## Qabul qilingan file authority va joriy Issue61
+
+UPDATE LOG-061: PR62 final7fb411ba8874def7014a65b20d5539dabdf1d366 complete895
+CI42704723192/42704729537 passed547.44s/582.45s,1 framework warning each.
+Actual matching head/clean tree/CLEAN/no feedback checked; mergedb94da5516102ee880f0dd10bd429b95b78ea5b9d,
+Issue61 closed. Sourcebc4 both895 also passed549.75s/511.56s. Final metadata is
+enrollment_verification/pr62_final_ci.json. Below61 pending notes are the earlier
+snapshot, not current work.61 bounded acceptance is not global security/pilot.
+
+CURRENT: Issue63 https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/63
+feature/63-enrollment-verification from mergedb94da55. Actual read-only Copilot
+planning exit0/source7fb; Codex full decisions/review in enrollment_verification.
+Implement forward0013 proof/origin layer, then own API027/034/detail/revision/end and
+explicit existing operator dispatch, effective academic predicate and legitimate
+real-session academic fixtures. Capture exact legacy alreadyVERIFIED set without
+invented review; new legacy insert/unproved VERIFIED/promotion denied. New current
+student is exact proof/date/institution derived; roles_for unchanged.1-weekday
+candidate-document response target from1.3:69, no holiday/autoapproval claim.
+Prototype source now implemented:0013 actual fresh/populated114 tables, typed
+origins/submissions/events/current predicate; own027/034/detail/revision/end and
+operator dispatch/claim/detail/file/decide, private middleware, academic binding.
+Schema proof targeted3 passed17.45s; initial API8 passed24.75s; actual session waits/
+audit rollback/concurrency/RR12 passed36.23s. Academic+updated positive63:62 passed/
+1 old date-rewrite fixture rejected237.93s. Actual end + separate already-expired
+assignment denial + SQL immutable-date targeted3 passed13.43s; no guard relaxed.
+Initial startup-head/fixture/NULL comparison failures preserved in native artifacts.
+Counts overlap; no complete current native/full CI/source acceptance yet. Next:
+current source commit/draft PR/full CI and isolated pinned read-only code review,
+remaining security/lifecycle/provider/error/legacy-end edges, source evidence and
+journals. Native processes above are terminal; inspect actual new process/CI state
+before acting. Do not substitute only own handlers for independent review/end.
+PR64 draft https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/64 source
+d36059bdb6eb50003f579709921e762aeb992b6f. CI42710013191(push)/42710023813(PR)
+initial full922 passed547.75s/516.38s; exact d360 metadata in pr64_initial_ci.json.
+This green source still had reproduced P2, so no later fix acceptance. Read-only Copilot complete-source
+review runs in clean detached d360 worktree D:/Codex/FlexBridge-review/candidate-authority.
+Initial full source review completed actual exit0: P2 stale revision replay202 and
+missing self-review coverage. Exact-source new reproduction1 failed/1 passed11.12s
+confirmed changed metadata still202 without new business effect, self-review already
+denied. Codex fix pins current replay files before current account guard, compares
+full snapshot and rejects mismatch409. Unchanged replay idempotent. Native review+
+lifecycle10 passed31.80s, actual replay filewait->logout denial and ordinary
+application history/service access2 passed13.84s. Need pinned follow-up review and
+complete latest-head CI; older d360 runs do not validate the fix. New legacy HTTP3 passed35.10s:
+0012 populated real-session imports ->0013 ->own end/withdraw/replay, preserves
+history/profile and never invents review proof. Test-only80d expansion preceded the
+later runtime replay fix; record current actual commit/head before next action.
+Current complete source/test manifest pin a92e380b97fda3b6dc20d9c20ac0b2bc1a83ab0f;
+runtime still revieweddbc5033a9572cfa10e508b81bfbcd2defaabdabe,
+contracts inventory51 explicit/81 placeholders/0 missing, not acceptance percent.
+Native stages/HISOBOT/source manifests collected. A narrow actual read-only follow-up
+completed from clean detacheddbc5033 actual exit0: P2 appears closed/no concrete
+delta regression or file/authority inversion. Populated upgrade failure rollback1
+passed12.93s (test-onlya92): failed capture rolls back, old version/rows/table survive. Latest
+evidence-head two complete CI checks/closed findings still required before merge;
+preserve app/tests/migrations against pinned source on evidence-only changes.
+Broader eligibility/supervision/export/frontend/live/DR remain open. All source
+ownership is Codex; no agent edits same files. pg_live not started or migrated.
 
 PR60/Issue59 merged73d3565968d26c8d1f31c420febd36a3549649d5, Issue59 closed.
 Source370d9c3; final935742d8dd621c786f2d49026cfe9633525c4647 complete785

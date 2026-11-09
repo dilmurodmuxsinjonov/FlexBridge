@@ -1,7 +1,7 @@
 """SQL-backed diary revisions; ownership is checked before any draft is written."""
 from datetime import date
 from uuid import uuid4
-from sqlalchemy import select
+from sqlalchemy import select,text
 from app.db.storage import table,transaction,now
 from app.api.dependencies import owns_candidate,require_org,ActorContext
 from app.services.placements import get_row,insert_row,PlacementScopeError
@@ -39,6 +39,7 @@ class InternshipLogService:
         purpose=supervision['purpose'];purposes=agreement['purposes']
         enabled=(purpose in purposes) if isinstance(purposes,list) else (isinstance(purposes,dict) and purposes.get(purpose) is True)
         if (enrollment['institution_id']!=institution_id or enrollment['candidate_id']!=placement['candidate_id'] or
+            not conn.execute(text('SELECT flexbridge.enrollment_is_current(:id)'),{'id':enrollment['id']}).scalar_one() or
             enrollment['status']!='VERIFIED' or enrollment['start_date']>today or
             (enrollment['end_date'] is not None and enrollment['end_date']<today) or
             agreement['institution_id']!=institution_id or agreement['status']!='ACTIVE' or agreement['valid_from']>today or

@@ -7,7 +7,7 @@ class IAMHTTPMiddleware:
     async def __call__(self,scope,receive,send):
         if scope['type']!='http' or not scope.get('path','').startswith((
             '/api/v1/auth/', '/api/v1/me/security', '/api/v1/me/contacts',
-            '/api/v1/me/candidate', '/api/v1/me/availability', '/api/v1/candidates/',
+            '/api/v1/me/candidate', '/api/v1/me/availability', '/api/v1/me/enrollments', '/api/v1/candidates/',
             '/api/v1/matching/', '/api/v1/opportunities/feed', '/api/v1/files/',
             '/api/v1/organizations', '/api/v1/operator/verification-cases', '/api/v1/invitations/',
             '/api/v1/operations/', '/api/v1/moderation/', '/api/v1/moderation-appeals/',

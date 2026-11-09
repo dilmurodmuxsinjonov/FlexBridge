@@ -17,16 +17,19 @@ Durable, immutable retention dry-run
 records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
 Separate authenticated opportunity rejection
 appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
-The current branch head is `0012_file_storage_versions` (runtime111 tables;
-canonical v1.4 remains94). Reviewed first-coordinator and named teacher onboarding,
+The accepted baseline head is `0012_file_storage_versions` (runtime111 tables).
+Issue63 currently develops `0013_enrollment_verification` (114 tables in disposable
+PostgreSQL tests); see [ENROLLMENTS.md](ENROLLMENTS.md). Its validation is ongoing;
+canonical v1.4 remains94. Reviewed first-coordinator and named teacher onboarding,
 revision/consent/revocation behavior and bounded validation are documented in
 [INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md). Source eadac11 passed full
 732-test CI twice; final evidence-head732 CI also passed twice and PR56 merged12cd307.
 Private retrieval version binding merged in PR58/Issue57, final757 CI passed twice.
 Migration/legacy policy and real S3 tests are documented in [STORAGE_VERSIONS.md](STORAGE_VERSIONS.md).
 Owner file session authority merged PR60/Issue59 after final785 CI passed twice;
-see [FILE_AUTHORITY.md](FILE_AUTHORITY.md). Candidate self-service authority is under
-validation for Issue61; see [CANDIDATE_AUTHORITY.md](CANDIDATE_AUTHORITY.md). Pilot is not ready.
+see [FILE_AUTHORITY.md](FILE_AUTHORITY.md). Candidate self-service authority merged
+PR62/Issue61 after final895 CI passed twice; see [CANDIDATE_AUTHORITY.md](CANDIDATE_AUTHORITY.md).
+Issue63 own enrollment lifecycle prototype has initial native validation; no final enrollment acceptance yet. Pilot is not ready.
 For the current Windows tool installation status and exact continuation steps, read
 [ANTIGRAVITY_HANDOFF.md](../ANTIGRAVITY_HANDOFF.md). Use the project `.venv` interpreter.
 Additional owners require an existing active staff

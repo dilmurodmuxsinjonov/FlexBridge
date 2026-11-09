@@ -1,0 +1,47 @@
+"""Concrete peer-review replay reproduction and enrollment-specific self-review."""
+from uuid import uuid4
+from sqlalchemy import select
+from app.db.storage import table, transaction
+from test_enrollments import create, enrollment_body
+from test_enrollment_transactions import snapshot
+
+
+def test_revision_retry_rejects_changed_pinned_file_material_without_new_effect(client,identities):
+    owner=identities();body,file=enrollment_body(owner,files=True)
+    entry=create(client,owner,{**body,'file_ids':[],'evidence_note':''})
+    request={key:body[key] for key in ('program','start_date','end_date','file_ids','evidence_note')}
+    request['expected_revision']=1
+    url='/api/v1/me/enrollments/'+entry['id']+'/verification'
+    first=client.post(url,json=request,headers=owner['headers'])
+    assert first.status_code==202 and first.json()['revision']==2,first.text
+    # Trusted metadata mutation models changed material; this is not a public S3 overwrite claim.
+    version=str(uuid4())
+    with transaction() as conn:
+        conn.execute(table('files').update().where(table('files').c.id==file['id']).values(
+            storage_version_id=version,object_version=version,storage_etag=str(uuid4()),
+            sha256='2'*64 if file['sha256']!='2'*64 else '3'*64))
+    before=snapshot();retry=client.post(url,json=request,headers=owner['headers'])
+    assert snapshot()==before
+    assert retry.status_code==409,(retry.status_code,retry.json())
+    assert retry.json()['detail']['code']=='ENROLLMENT_EVIDENCE_CHANGED'
+
+
+def test_requester_with_actual_moderator_mfa_cannot_claim_or_decide_own_case(client,identities):
+    owner=identities('MODERATOR');body,_=enrollment_body(owner,files=True);entry=create(client,owner,body)
+    before=snapshot();base='/api/v1/operator/verification-cases/'+entry['case_id']
+    queue=client.get('/api/v1/operator/verification-cases?unassigned=true',headers=owner['headers'])
+    assert queue.status_code==200 and entry['case_id'] not in [item['id'] for item in queue.json()['items']]
+    claimed=client.post(base+'/claim',headers=owner['headers'])
+    assert claimed.status_code==403,claimed.text
+    denied=client.post(base+'/decide',headers=owner['headers'],json={
+        'decision':'APPROVE','expected_revision':1,'reason':'My moderator role cannot approve my own enrollment.'})
+    assert denied.status_code==403,denied.text
+    assert snapshot()==before
+    independent=identities('MODERATOR')
+    claim=client.post(base+'/claim',headers=independent['headers']);assert claim.status_code==200,claim.text
+    before=snapshot()
+    denied=client.post(base+'/decide',headers=owner['headers'],json={
+        'decision':'APPROVE','expected_revision':1,'reason':'Another assigned reviewer still does not authorize my self-review.'})
+    assert denied.status_code==403 and snapshot()==before
+    with transaction() as conn:
+        assert conn.execute(select(table('enrollments').c.status).where(table('enrollments').c.id==entry['id'])).scalar_one()=='PENDING'

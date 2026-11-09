@@ -40,6 +40,7 @@ from app.api.v1.owner_additions import router as owner_additions_router
 from app.api.v1.owner_transfers import router as owner_transfers_router
 from app.api.v1.owner_continuity import router as owner_continuity_router
 from app.api.v1.institution_onboarding import router as institution_onboarding_router
+from app.api.v1.enrollments import router as enrollments_router
 from app.api.v1.opportunities import router as opportunities_router
 from app.api.v1.placements import router as placements_router
 from app.services.placements import PlacementScopeError
@@ -163,6 +164,7 @@ app.include_router(owner_additions_router)
 app.include_router(owner_transfers_router)
 app.include_router(owner_continuity_router)
 app.include_router(institution_onboarding_router)
+app.include_router(enrollments_router)
 app.include_router(canonical_router)
 
 

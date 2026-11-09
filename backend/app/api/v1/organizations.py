@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.organizations import organization_service as service
 from app.services.institution_onboarding import institution_onboarding_service
+from app.services.enrollments import enrollment_service
 from app.api.dependencies import require_platform
 from app.services.organizations import require_mfa
 from app.db.storage import transaction
@@ -17,7 +18,9 @@ router = APIRouter(prefix='/api/v1', tags=['organizations'])
 def reviewer_service(actor,case_id):
     require_platform(actor,'MODERATOR');require_mfa(actor)
     with transaction() as conn:case=get_row(conn,'verification_cases',case_id)
-    return institution_onboarding_service if case['kind']=='INSTITUTION_APPOINTMENT' else service
+    if case['kind']=='INSTITUTION_APPOINTMENT':return institution_onboarding_service
+    if case['kind']=='ENROLLMENT':return enrollment_service
+    return service
 
 class Input(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
@@ -96,7 +99,7 @@ def revoke(org: UUID, id: UUID, payload: RevokeInput, actor: ActorContext = Depe
 
 @router.get('/operator/verification-cases')
 def queue(unassigned: bool = False, limit: int = Query(default=50, ge=1, le=100), actor: ActorContext = Depends(require_actor_context)):
-    items=service.queue(actor,unassigned,limit)+institution_onboarding_service.queue(actor,unassigned,limit)
+    items=service.queue(actor,unassigned,limit)+institution_onboarding_service.queue(actor,unassigned,limit)+enrollment_service.queue(actor,unassigned,limit)
     return {'contract_id':'API-109','items':sorted(items,key=lambda item:(item['due_at'],item['id']))[:limit]}
 
 @router.post('/operator/verification-cases/{id}/claim')

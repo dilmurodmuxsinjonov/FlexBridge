@@ -1,7 +1,8 @@
 """Native PostgreSQL guards for existing academic writes, using trusted imported scope.
 
-Fixture enrollment/agreement/track/assignment acceptance are admin setup, not proof
-that the later institution intake, academic admission or acceptance APIs work.
+Fixture agreement/track/assignment acceptance are admin setup, not proof that
+academic admission/acceptance APIs work. Enrollment now uses actual-session
+independent review services; its HTTP boundary is exercised in test_enrollments.
 """
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date,datetime,timedelta
@@ -19,15 +20,23 @@ from test_institution_authority import setup_scope
 from test_organizations import actor
 from test_regressions import count
 from test_org_authority_transactions import wait_for_blocker
+from app.services.enrollments import enrollment_service
 
 
 CREATE_PATHS=('/api/v1/internships/academic-assignments','/api/v1/internship-logs/academic-assignments')
 
 
-def academic_fixture(identities,organization):
+def academic_fixture(identities,organization,*,enrollment_end_date=None):
     coord,_,inst,_,member,appointment,grant=setup_scope(identities)
     teacher=identities();candidate=identities();owner=identities('OWNER',organization)
     file=cv_fixture(teacher);today=date.today()
+    enrollment_file=cv_fixture(candidate);reviewer=identities('MODERATOR')
+    request=enrollment_service.create(actor(candidate),institution_id=inst['id'],idempotency_key=str(uuid4()),
+        program='Engineering',start_date=today-timedelta(days=30),end_date=enrollment_end_date,file_ids=[enrollment_file['id']],
+        evidence_note='Independent enrollment evidence for this academic fixture.')
+    enrollment_service.claim(actor(reviewer),request['case_id'])
+    enrollment_service.decide(actor(reviewer),request['case_id'],decision='APPROVE',expected_revision=1,
+        reason='Independent review of this academic enrollment fixture.')
     with transaction() as conn:
         tm=insert_row(conn,'institution_memberships',institution_id=inst['id'],user_id=teacher['user_id'],status='ACTIVE',accepted_at=now())
         ta=insert_row(conn,'institution_appointments',institution_id=inst['id'],user_id=teacher['user_id'],document_file_id=file['id'],status='ACTIVE',
@@ -35,7 +44,7 @@ def academic_fixture(identities,organization):
         roles=table('role_catalog');rid=conn.execute(select(roles.c.id).where(roles.c.code=='TEACHER',roles.c.scope_kind=='INSTITUTION')).scalar_one_or_none()
         if not rid:rid=insert_row(conn,'role_catalog',code='TEACHER',scope_kind='INSTITUTION',description='Trusted teacher fixture')['id']
         tg=insert_row(conn,'institution_role_grants',membership_id=tm['id'],role_id=rid,appointment_id=ta['id'])
-        en=insert_row(conn,'enrollments',institution_id=inst['id'],candidate_id=candidate['candidate_id'],program='Engineering',status='VERIFIED',start_date=today-timedelta(days=30))
+        en=get_row(conn,'enrollments',request['id'])
         agreement=insert_row(conn,'institution_agreements',institution_id=inst['id'],version=1,status='ACTIVE',valid_from=today-timedelta(days=30),purposes=['ACADEMIC_VIEW'])
         supervision=insert_row(conn,'student_supervisions',institution_id=inst['id'],enrollment_id=en['id'],coordinator_membership_id=member['id'],
             agreement_id=agreement['id'],purpose='ACADEMIC_VIEW',status='ACTIVE',legal_basis='Trusted fixture agreement',accepted_at=now())
@@ -120,7 +129,7 @@ def test_teacher_password_session_can_review_current_assignment(client,identitie
 
 @pytest.mark.parametrize('state',['teacher_expired','assignment_revoked','assignment_unaccepted','assignment_future_acceptance',
     'supervision_revoked','supervision_unaccepted','supervision_future_acceptance','agreement_expired','agreement_inactive',
-    'purpose_disabled','basis_empty','enrollment_expired','enrollment_unverified','ordinary_track','inactive_placement','self_review'])
+    'purpose_disabled','basis_empty','enrollment_ended','enrollment_unverified','ordinary_track','inactive_placement','self_review'])
 def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f);request=review_request(client,f,assignment)
     targets={
@@ -132,7 +141,6 @@ def test_review_current_parent_chain_required_without_effect(client,identities,o
         'agreement_inactive':('institution_agreements','agreement',{'status':'REVOKED'}),
         'purpose_disabled':('institution_agreements','agreement',{'purposes':{'ACADEMIC_VIEW':False}}),
         'basis_empty':('student_supervisions','supervision',{'legal_basis':'  '}),
-        'enrollment_expired':('enrollments','enrollment',{'end_date':date.today()-timedelta(days=1)}),
         'enrollment_unverified':('enrollments','enrollment',{'status':'PENDING'}),
         'ordinary_track':('placements','placement',{'academic_track':False}),
         'inactive_placement':('placements','placement',{'status':'CANCELLED'})}
@@ -140,6 +148,10 @@ def test_review_current_parent_chain_required_without_effect(client,identities,o
         if state.startswith('assignment_'):
             vals={'revoked_at':now()} if state=='assignment_revoked' else {'accepted_at':None if state=='assignment_unaccepted' else now()+timedelta(days=1)}
             conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
+        elif state=='enrollment_ended':
+            # End through the real lifecycle; approved proof dates are immutable.
+            enrollment_service.end_own(actor(f['candidate']),f['enrollment']['id'],idempotency_key=str(uuid4()),
+                reason='This student ended their enrollment before the review.',effective_end_date=date.today()-timedelta(days=1))
         elif state=='self_review':
             # A student can also be a teacher, but may never review their own log.
             # Create a properly linked identity rather than retargeting a grant.
@@ -153,6 +165,16 @@ def test_review_current_parent_chain_required_without_effect(client,identities,o
             name,key,values=targets[state];t=table(name);conn.execute(t.update().where(t.c.id==f[key]['id']).values(**values))
     before=count('audit_events');r=request();assert r.status_code==403,r.text
     assert count('academic_log_reviews')==0 and count('audit_events')==before
+
+
+def test_expired_verified_enrollment_cannot_start_academic_assignment(client,identities,organization):
+    f=academic_fixture(identities,organization,enrollment_end_date=date.today()-timedelta(days=1))
+    with transaction() as conn:
+        assert get_row(conn,'enrollments',f['enrollment']['id'])['status']=='VERIFIED'
+    before=count('audit_events')
+    response=client.post(CREATE_PATHS[0],json=assignment_body(f),headers=f['coord']['headers'])
+    assert response.status_code==403,response.text
+    assert count('academic_assignments')==0 and count('audit_events')==before
 
 
 def test_grade_is_rejected_in_diary_review_without_effect(client,identities,organization):

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="5" time="20.422" timestamp="2026-11-10T02:57:39.457464+05:00" hostname="Ditroid"><testcase classname="tests.security.test_enrollment_migration" name="test_fresh_schema_and_unproved_new_verified_insert_are_rejected" time="4.044"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_enrollment_migration.py:55: in test_fresh_schema_and_unproved_new_verified_insert_are_rejected
+    inst=new_institution(conn)
+         ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:16: in new_institution
+    return insert_row(conn, 'institutions', registry_code=str(uuid4()), name='Enrollment school',
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_populated_upgrade_preserves_exact_legacy_set_and_prevents_new_legacy_and_resurrection" time="7.529"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_enrollment_migration.py:71: in test_populated_upgrade_preserves_exact_legacy_set_and_prevents_new_legacy_and_resurrection
+    inst=new_institution(conn)
+         ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:16: in new_institution
+    return insert_row(conn, 'institutions', registry_code=str(uuid4()), name='Enrollment school',
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_declaration_has_no_eligibility_or_direct_decision_promotion" time="1.773"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_enrollment_migration.py:105: in test_declaration_has_no_eligibility_or_direct_decision_promotion
+    owner=identities(); enrollment, case=declared_sql(owner)
+                                         ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:23: in declared_sql
+    inst = new_institution(conn)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:16: in new_institution
+    return insert_row(conn, 'institutions', registry_code=str(uuid4()), name='Enrollment school',
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_enrollment_migration" name="test_own_declaration_cannot_record_another_users_session" time="2.408"><failure message="TypeError: insert_row() got multiple values for argument 'name'">backend\tests\security\test_enrollment_migration.py:118: in test_own_declaration_cannot_record_another_users_session
+    owner=identities(); other=identities(); enrollment, case=declared_sql(owner)
+                                                             ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:23: in declared_sql
+    inst = new_institution(conn)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_enrollment_migration.py:16: in new_institution
+    return insert_row(conn, 'institutions', registry_code=str(uuid4()), name='Enrollment school',
+E   TypeError: insert_row() got multiple values for argument 'name'</failure></testcase><testcase classname="tests.security.test_regressions" name="test_actual_migration_and_constraints" time="3.108" /></testsuite></testsuites>
