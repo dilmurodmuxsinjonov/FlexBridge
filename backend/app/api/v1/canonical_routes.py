@@ -114,7 +114,7 @@ class TransitionRequest(BaseModel):
 
 @router.post('/organizations/{org}/orders',status_code=201)
 def canonical_order(org: UUID,payload: CanonicalOrderRequest,actor: ActorContext=Depends(require_actor_context)):
-    order,invoice=billing_service.create_order_and_invoice(organization_id=str(org),plan_code=payload.plan_code,created_by=actor.user_id,idempotency_key=payload.idempotency_key)
+    order,invoice=billing_service.create_order_and_invoice(organization_id=str(org),plan_code=payload.plan_code,actor=actor,idempotency_key=payload.idempotency_key)
     return {'contract_id':'API-094','order':asdict(order),'invoice':asdict(invoice)}
 
 @router.post('/orders/{id}/refund-requests',status_code=201)
@@ -125,7 +125,7 @@ def canonical_refund(id: UUID,payload: CanonicalRefundRequest,actor: ActorContex
         if not order: raise BillingInvariantError('ORDER_NOT_FOUND')
         require_org(actor,order.organization_id,'OWNER','BILLING')
         invoice=billing_service._invoice_for_order(str(id),conn)
-        return {'contract_id':'API-095',**billing_service.request_refund(invoice_id=invoice.id,amount_uzs=payload.amount_uzs,reason=payload.reason,requested_by=actor.user_id)}
+        return {'contract_id':'API-095',**billing_service.request_refund(invoice_id=invoice.id,amount_uzs=payload.amount_uzs,reason=payload.reason,actor=actor)}
 
 @router.post('/opportunities/{id}/transition')
 def transition(id: UUID,payload: TransitionRequest,actor: ActorContext=Depends(require_actor_context)):
@@ -274,7 +274,7 @@ def api_056_submit_daily_log(
 @router.post("/operator/refunds/{id}/approve")
 def approve_refund(id: UUID, actor: ActorContext = Depends(require_actor_context)):
     from uuid import UUID
-    return billing_service.approve_refund(str(id),actor.user_id)
+    return billing_service.approve_refund(str(id),actor)
 
 
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:

@@ -59,13 +59,15 @@ class BillingQuotaService:
             amount=tariff['price_uzs'],currency='UZS',duration_days=30,tax_included=True,valid_from=now()).on_conflict_do_nothing(index_elements=['id']))
         return price_id,tariff
 
-    def create_order_and_invoice(self,*,organization_id,plan_code,created_by,currency_code='UZS',idempotency_key=None):
-        from app.api.dependencies import ActorContext,require_org
+    def create_order_and_invoice(self,*,actor,organization_id,plan_code,currency_code='UZS',idempotency_key=None):
+        from app.services.authority import mfa_authority,org_authority
+        created_by=actor.user_id
         if currency_code!='UZS': raise BillingInvariantError('INVALID_CURRENCY')
         key=idempotency_key or str(uuid4())
         with transaction() as conn:
             self._guard(conn,organization_id)
-            require_org(ActorContext(created_by,'',()),organization_id,'OWNER','BILLING')
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,organization_id,'OWNER','BILLING')
             price_id,tariff=self._seed_tariff(conn,plan_code)
             # Same user and operation key cannot be reused for a different target or price.
             digest=_fingerprint([organization_id,plan_code,currency_code])
@@ -118,16 +120,18 @@ class BillingQuotaService:
         entitlement=conn.execute(select(table('service_entitlements').c.id).where(table('service_entitlements').c.order_id==r['order_id'])).scalar_one_or_none()
         return PaymentAttemptRecord(r['id'],invoice.id,r['provider'],key,int(r['amount']),r['currency'],r['status'],entitlement,r['created_at'])
 
-    def process_payment_attempt(self,*,invoice_id,provider_code,idempotency_key,amount_uzs,actor_user_id,currency_code='UZS',provider_confirmed=False):
-        from app.api.dependencies import ActorContext,require_org
+    def process_payment_attempt(self,*,actor,invoice_id,provider_code,idempotency_key,amount_uzs,currency_code='UZS',provider_confirmed=False):
+        from app.services.authority import mfa_authority,org_authority
+        actor_user_id=actor.user_id
         if provider_confirmed: raise BillingInvariantError('PROVIDER_CONFIRMATION_MUST_USE_AUTHENTICATED_CALLBACK')
         if provider_code!='HMAC': raise BillingInvariantError('PROVIDER_ADAPTER_NOT_CONFIGURED')
         with transaction() as conn:
             inv=self._get_invoice(invoice_id)
             if not inv: raise BillingInvariantError('INVOICE_NOT_FOUND')
             self._guard(conn,inv.organization_id)
-            require_org(ActorContext(actor_user_id,'',()),inv.organization_id,'OWNER','BILLING')
             invoice=conn.execute(select(table('invoices')).where(table('invoices').c.id==invoice_id).with_for_update()).mappings().one()
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,inv.organization_id,'OWNER','BILLING')
             replay=self._claim(conn,actor_user_id,'PAYMENT_ATTEMPT',idempotency_key,_fingerprint([invoice_id,provider_code,amount_uzs,currency_code]))
             if replay: return self._attempt(conn,replay,idempotency_key)
             if invoice['paid_at']: raise BillingInvariantError('INVOICE_ALREADY_PAID')
@@ -230,15 +234,17 @@ class BillingQuotaService:
             self._audit(actor_user_id,'OPPORTUNITY_'+new_status,'opportunity',opportunity_id)
             return {'opportunity_id':opportunity_id,'status':new_status}
 
-    def request_refund(self,*,invoice_id,amount_uzs,reason,requested_by):
-        from app.api.dependencies import ActorContext,require_org
+    def request_refund(self,*,actor,invoice_id,amount_uzs,reason):
+        from app.services.authority import mfa_authority,org_authority
+        requested_by=actor.user_id
         with transaction() as conn:
             inv=self._get_invoice(invoice_id)
             if not inv: raise BillingInvariantError('INVOICE_NOT_FOUND')
             self._guard(conn,inv.organization_id)
-            require_org(ActorContext(requested_by,'',()),inv.organization_id,'OWNER','BILLING')
             pa=table('payment_attempts')
             captured=conn.execute(select(pa).where(pa.c.order_id==inv.order_id,pa.c.status=='CAPTURED').with_for_update()).mappings().first()
+            mfa_authority(conn,actor)
+            org_authority(conn,actor.user_id,inv.organization_id,'OWNER','BILLING')
             if not captured: raise BillingInvariantError('CAPTURED_PAYMENT_REQUIRED')
             refunds=table('refunds')
             reserved=conn.execute(select(func.coalesce(func.sum(refunds.c.amount),0)).where(refunds.c.payment_attempt_id==captured['id'],
@@ -250,13 +256,14 @@ class BillingQuotaService:
             self._audit(requested_by,'REFUND_REQUESTED','refund',rid)
             return {'refund_id':rid,'status':'REQUESTED'}
 
-    def approve_refund(self,refund_id,actor_id):
-        from app.api.dependencies import ActorContext,require_platform
+    def approve_refund(self,refund_id,actor):
+        from app.services.authority import platform_authority
+        actor_id=actor.user_id
         with transaction() as conn:
             self.circuit_breaker.require_closed()
-            require_platform(ActorContext(actor_id,'',()),'FINANCE')
             t=table('refunds')
             r=conn.execute(select(t).where(t.c.id==refund_id).with_for_update()).mappings().first()
+            platform_authority(conn,actor,'FINANCE')
             if not r: raise BillingInvariantError('REFUND_NOT_FOUND')
             if actor_id in (r['requester_id'],r['approver_id'],r['second_approver_id']): raise BillingInvariantError('SELF_APPROVAL_FORBIDDEN')
             if r['status'] not in ('REQUESTED','PENDING_SECOND_APPROVAL'): raise BillingInvariantError('INVALID_REFUND_STATE')

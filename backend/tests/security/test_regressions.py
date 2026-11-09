@@ -14,15 +14,20 @@ from app.db.storage import table,transaction,now,enqueue,outbox_table
 from app.services.auth import auth_service,AuthError,hash_password,verify_password,generate_totp_code
 from app.services.billing import BillingQuotaService,BillingInvariantError
 from app.core.circuit_breaker import shared_circuit_breaker,FinanceCircuitOpenError
+from app.api.dependencies import ActorContext
 
 billing=BillingQuotaService()
 
 def count(name):
     with transaction() as conn: return conn.execute(select(func.count()).select_from(table(name))).scalar_one()
 
+def billing_actor(user):
+    return ActorContext(user['user_id'],user['session_id'],())
+
+
 def checkout(owner,org,plan='ORG_PLAN_30D'):
-    order,invoice=billing.create_order_and_invoice(organization_id=org,plan_code=plan,created_by=owner['user_id'],idempotency_key='order-key-1234')
-    attempt=billing.process_payment_attempt(invoice_id=invoice.id,provider_code='HMAC',idempotency_key='payment-key-1234',amount_uzs=invoice.amount_uzs,actor_user_id=owner['user_id'])
+    order,invoice=billing.create_order_and_invoice(organization_id=org,plan_code=plan,actor=billing_actor(owner),idempotency_key='order-key-1234')
+    attempt=billing.process_payment_attempt(invoice_id=invoice.id,provider_code='HMAC',idempotency_key='payment-key-1234',amount_uzs=invoice.amount_uzs,actor=billing_actor(owner))
     return order,invoice,attempt
 
 def capture(attempt,event='provider-event-123'):
@@ -118,7 +123,7 @@ def test_pending_payment_no_entitlement_or_refund(identities,organization):
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization)
     assert a.status=='PENDING_PROVIDER' and count('service_entitlements')==0
     with pytest.raises(BillingInvariantError,match='CAPTURED_PAYMENT_REQUIRED'):
-        billing.request_refund(invoice_id=i.id,amount_uzs=1,reason='Valid refund reason',requested_by=owner['user_id'])
+        billing.request_refund(invoice_id=i.id,amount_uzs=1,reason='Valid refund reason',actor=billing_actor(owner))
     assert count('refunds')==0
 
 def test_literal_signature_rejected_and_callback_exactly_once(identities,organization):
@@ -141,15 +146,15 @@ def test_capture_survives_new_process(identities,organization):
 
 def test_parallel_idempotent_orders(identities,organization):
     owner=identities('OWNER',organization)
-    def create(_):return billing.create_order_and_invoice(organization_id=organization,plan_code='ORG_PLAN_30D',created_by=owner['user_id'],idempotency_key='same-key-1234')[0].id
+    def create(_):return billing.create_order_and_invoice(organization_id=organization,plan_code='ORG_PLAN_30D',actor=billing_actor(owner),idempotency_key='same-key-1234')[0].id
     with ThreadPoolExecutor(max_workers=4) as pool: ids=list(pool.map(create,range(4)))
     assert len(set(ids))==1 and count('orders')==count('invoices')==1
     with pytest.raises(BillingInvariantError,match='IDEMPOTENCY_CONFLICT'):
-        billing.create_order_and_invoice(organization_id=organization,plan_code='SINGLE_POST_30D',created_by=owner['user_id'],idempotency_key='same-key-1234')
+        billing.create_order_and_invoice(organization_id=organization,plan_code='SINGLE_POST_30D',actor=billing_actor(owner),idempotency_key='same-key-1234')
 
 def test_refund_requires_two_independent_authenticated_approvals(client,identities,organization):
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization);capture(a)
-    r=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund reason',requested_by=owner['user_id'])
+    r=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund reason',actor=billing_actor(owner))
     rid=r['refund_id'];first,second=identities('FINANCE'),identities('FINANCE')
     assert client.post('/api/v1/operator/refunds/'+rid+'/approve',headers=owner['headers']).status_code==403
     assert client.post('/api/v1/operator/refunds/'+rid+'/approve',headers=first['headers']).json()['status']=='PENDING_SECOND_APPROVAL'
@@ -160,7 +165,7 @@ def test_refund_requires_two_independent_authenticated_approvals(client,identiti
 def test_parallel_refunds_cannot_overreserve(identities,organization):
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization);capture(a)
     def request(_):
-        try:billing.request_refund(invoice_id=i.id,amount_uzs=i.amount_uzs,reason='Valid refund reason',requested_by=owner['user_id']);return True
+        try:billing.request_refund(invoice_id=i.id,amount_uzs=i.amount_uzs,reason='Valid refund reason',actor=billing_actor(owner));return True
         except BillingInvariantError:return False
     with ThreadPoolExecutor(max_workers=2) as pool: results=list(pool.map(request,range(2)))
     assert sorted(results)==[False,True] and count('refunds')==1

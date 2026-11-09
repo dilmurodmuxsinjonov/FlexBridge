@@ -7,7 +7,7 @@ from app.db.storage import transaction,table
 from app.services.opportunities import opportunity_service,OpportunityConstraintError,validate_compensation_contract_matrix
 from app.services.availability import availability_service
 from test_adapters_and_quota import draft,approve_for_test
-from test_regressions import checkout,capture,billing,count,placement_fixture
+from test_regressions import checkout,capture,billing,count,placement_fixture,billing_actor
 
 @pytest.mark.parametrize('contract,compensation,hourly,stipend',[
     ('INVALID','HOURLY',100,None),('LABOR_PART_TIME','HOURLY',100,100),
@@ -111,9 +111,9 @@ def test_independent_moderation_is_durable(client,identities,organization):
 def test_unconfigured_gateway_never_executes_approved_refund(identities,organization,monkeypatch):
     from app.workers.outbox import relay_pending_outbox_events
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization);capture(a)
-    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',requested_by=owner['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
+    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',actor=billing_actor(owner))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
     monkeypatch.delenv('PAYMENT_GATEWAY_URL',raising=False)
     assert relay_pending_outbox_events()==0
     with transaction() as conn:
@@ -125,9 +125,9 @@ def test_gateway_refund_effect_and_acknowledgement(identities,organization,monke
     from app.workers import refunds
     import httpx
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization);capture(a)
-    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',requested_by=owner['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
+    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',actor=billing_actor(owner))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
     calls=[]
     class GatewayClient:
         def __init__(self,**kwargs):pass
@@ -155,9 +155,9 @@ def test_refund_revocation_uses_same_organization_lock(identities,organization):
     from sqlalchemy import text
     import time
     owner=identities('OWNER',organization);o,i,a=checkout(owner,organization);capture(a)
-    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',requested_by=owner['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
-    billing.approve_refund(refund['refund_id'],identities('FINANCE')['user_id'])
+    refund=billing.request_refund(invoice_id=i.id,amount_uzs=100,reason='Valid refund request reason',actor=billing_actor(owner))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
+    billing.approve_refund(refund['refund_id'],billing_actor(identities('FINANCE')))
     started=Event()
     def revoke():
         with transaction() as conn:

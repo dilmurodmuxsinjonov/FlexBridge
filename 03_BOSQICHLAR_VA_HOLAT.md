@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49 merged. Issue48/PR50 initial moderation final tekshiruvda; keyin confirmed human-money authority51, so'ng EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
+Yangilangan: 2026-11-09 - Codex. PR36/38/40/42/44/46/49/50 merged. Issue51 human-money authority tuzatilmoqda, so'ng EDU. 46 explicit handler,86 ta501; bu acceptance foizi emas. Pilot tayyor emas.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
 
@@ -161,8 +161,13 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 ## AUTH-CODEX-003 — Initial opportunity moderation authority
 
-- Holat: `Tekshiruvda`; Codex; Issue48/PR50, fix/48-moderation-authority. Reja/dalil reviews/2026-11-09/moderation_authority. Initial2/expanded8 va actual row-lock repeat2 failures saqlandi.5856dc6 native22/old93 va ikkala full502 CI passed; source review concrete production defect topmadi, real row-lockda grant revoke/expiry gapini tavsiya qildi.08626bf test-only delta native24 passed37.93s, final read-only review exit0 gap yopilganini tasdiqladi; full504 CI42561301163/42561304587 ham passed383.65s/391.71s. Native24 eski22ni takrorlaydi. Evidence-only head checks/merge qolgan. Bu authenticated in-flight authority, anonymous bypass emas; trusted SQL provisioning claim emas. Pilotfalse.
+- Holat: `Bajarildi` (chegaralangan backend paketi); Codex; Issue48 closed, PR50 mergea13caf4. Reja/dalil reviews/2026-11-09/moderation_authority.5856dc6 native22/old93/full502;08626bf test-only delta native24/full504 passed383.65s/391.71s. Native24 eski22ni takrorlaydi. Final pinned review gap closed, concrete remaining issue yo'q. Evidence2d30b7f CI42562123636/42562127723 ham504 passed405.83s/381.81s. Initial failure dalillari/scopes saqlanadi; pilotfalse.
 - API actual ActorContextni beradi; service opportunity rowni bloklagach existing current-MFA moderator_authorityni oladi. Existing role/MFA siyosati, self-author/DRAFT/revision, case/action/audit atomikligi saqlanadi; synthetic actor olib tashlandi. Expiry boundary va time/row-lock farqi guideda. Boshqa domain, live/browser/DR va umumiy pilot qabuli yo'q. Yangi confirmed refund authority race Issue51 (3 failed, approval/outbox navbati; real transfer emas) EDUdan oldin tuzatiladi.
+
+## AUTH-CODEX-004 — Human money transaction authority
+
+- Holat: `Tekshiruvda`; Codex; Issue51/PR52, fix/51-billing-authority. Reja/dalil reviews/2026-11-09/billing_authority. Old5856 refund3/org-wait5/target-repeat3 failures saqlandi. d88ebaf native75/old137 va ikkala full579 CI passed. Code review production defect topmadi;895fb8c replay-role+fresh MFA3 cases passed9.03s.1368ee5 actual wait graphs bilan test proofni kuchaytirdi; final78 native passed104.23s, wait review gap closed. Runtime d88 bilan aynan bir xil; full582 CI42564327339/42564331479 ham passed437.43s/441.90s. Evidence-only checks/merge qolgan. Overlapping native runs distinct total emas. No sessionless fallback/schema/provider change, pilotfalse.
+- Funds/idempotency/price/dual control/audit/outbox saqlanadi; signed callback logoutdan keyin ishlashi positive control. Quota publish/transitiondagi boshqa assurance o'zgarmadi. Synthetic HMAC/admin grant fixtures actual merchant/provider/secret rotation/browser/DR/pilot emas. Scope va expiry boundary guideda; keyin EDU.
 
 ## S0 — Umumiy ish xotirasini tayyorlash
 
