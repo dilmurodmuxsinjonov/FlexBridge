@@ -133,7 +133,7 @@ def test_current_mfa_and_platform_role_do_not_allow_self_moderation(client,ident
     assert snapshot()==before
 
 
-@pytest.mark.parametrize('change',['session','disable_mfa'])
+@pytest.mark.parametrize('change',['session','disable_mfa','role','role_expiry'])
 def test_real_opportunity_lock_wait_rechecks_security(client,identities,organization,monkeypatch,change):
     _,moderator,revision,_,request=setup_action(client,identities,organization)
     checked=Event();engine=get_engine()
