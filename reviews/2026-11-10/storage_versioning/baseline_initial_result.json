@@ -1,0 +1,22 @@
+{
+  "source": "4ffbe96ff4d1463735303844920a253fbcb5500d",
+  "runtime_note": "Current adapter unchanged from eadac11; evidence-only4ffbe96 head",
+  "provider": "minio.exe version RELEASE.2025-02-18T16-25-55Z (commit-id=90f5e1e5f62cbc47be6d0a3ca0634bfd84c2248c)",
+  "binary_provenance": {
+    "source": "https://github.com/minio/minio/releases/download/RELEASE.2025-02-18T16-25-55Z/minio.windows-amd64.RELEASE.2025-02-18T16-25-55Z.exe",
+    "checksum_source": "https://github.com/minio/minio/releases/download/RELEASE.2025-02-18T16-25-55Z/minio.windows-amd64.RELEASE.2025-02-18T16-25-55Z.exe.sha256sum",
+    "sha256": "54761eabfed872d1b977b9bc2cad4a105b5eedafbe2f810a951c2941fcc70e77",
+    "bytes": 119398912,
+    "purpose": "isolated localhost integration, existing compose pinned version; not a production upgrade recommendation",
+    "archive_attempt": "dl.min.io returned410; publisher GitHub release assets used"
+  },
+  "fixture": "Disposable localhost server/bucket, generated credentials, trusted provider-admin overwrite; no public exploit/live deployment/AV claim",
+  "recorded_reference_was_version_id": true,
+  "recorded_reference_was_etag": false,
+  "original_sha256": "54014b35a9dbbc8b742570250f89fc60736bfa3df7f1b6a84f3004aeae361837",
+  "replacement_sha256": "3de2b3788e3232e4fcc07525e218a18d7d81a158d452654317a044163dfb710b",
+  "key_only_url_read_replacement": true,
+  "explicit_version_url_read_original": true,
+  "suspended_put_version_is_null": false,
+  "all_urls_and_credentials_omitted": true
+}

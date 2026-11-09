@@ -1,6 +1,6 @@
 # Reviewed institution appointments
 
-Issue55 / draft PR56 implements first-institution/first-COORDINATOR claims and an
+Issue55 / merged PR56 implements first-institution/first-COORDINATOR claims and an
 existing coordinator's TEACHER requests. This is a bounded backend workflow. It
 does not certify identity, document truth, legal signatures or pilot readiness.
 Additional coordinators, authority-loss recovery, student admission/enrollment,
@@ -113,4 +113,5 @@ Native PostgreSQL evidence uses actual sessions and observed database waits.
 Contact/document/legacy metadata fixtures and mocked presigned storage are trusted
 test setup, not live identity, scanning, provider or legal certification. Source
 review, source-specific native/full CI and evidence-head checks are reported
-separately in reviews/2026-11-09/institution_onboarding. Draft status is not acceptance.
+separately in reviews/2026-11-09/institution_onboarding. Final evidence-head732 tests
+passed twice and PR56 merged12cd307. Acceptance is limited to this backend package.
