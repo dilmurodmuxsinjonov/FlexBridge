@@ -16,6 +16,8 @@ from sqlalchemy import select
 from app.services.schedule import load_snapshot, local_today
 from app.db.storage import table, transaction, now, read_snapshot
 from app.services.placements import insert_row
+from app.services.authority import account_authority
+from app.api.dependencies import ActorContext
 from typing import Any
 
 
@@ -97,15 +99,23 @@ class CandidateAvailabilityService:
                 'intervals': [{'start_minute': a, 'end_minute': b} for a, b in snapshot.intervals(start + timedelta(days=i))]}
                 for i in range(days)]}
 
-    def replace_rules(self, user_id, rules):
+    def get_my_schedule(self, actor:ActorContext, from_date=None, days=28):
+        from app.services.candidates import own_profile,candidate_transaction
+        with candidate_transaction() as conn:
+            profile=own_profile(conn,actor.user_id,'share')
+            account_authority(conn,actor)
+            return self.get_schedule(profile['id'],from_date,days)
+
+    def replace_rules(self, actor:ActorContext, rules):
         from collections import defaultdict
-        from app.services.candidates import own_profile, audit
+        from app.services.candidates import own_profile, audit, candidate_transaction
         groups = defaultdict(list)
         for rule in rules:
             key = (rule['weekday'], rule['valid_from'], rule['valid_to'], rule['timezone'])
             groups[key].append((rule['start_minute'], rule['end_minute']))
-        with transaction() as conn:
-            profile = own_profile(conn, user_id, True)
+        with candidate_transaction() as conn:
+            profile = own_profile(conn, actor.user_id, True)
+            account_authority(conn,actor)
             target = table('availability_rules')
             conn.execute(target.delete().where(target.c.candidate_id == profile['id']))
             for (weekday, valid_from, valid_to, timezone), intervals in groups.items():
@@ -114,18 +124,19 @@ class CandidateAvailabilityService:
                         valid_from=valid_from, valid_to=valid_to, timezone=timezone,
                         start_minute=start, end_minute=end, is_active=True)
             conn.execute(table('candidate_profiles').update().where(table('candidate_profiles').c.id == profile['id']).values(updated_at=now()))
-            audit.append_audit_event(actor_id=user_id, action='CANDIDATE_AVAILABILITY_REPLACED',
+            audit.append_audit_event(actor_id=actor.user_id, action='CANDIDATE_AVAILABILITY_REPLACED',
                 entity_type='candidate_profile', entity_id=profile['id'])
-        return self.get_schedule(profile['id'])
+            return self.get_schedule(profile['id'])
 
-    def replace_exceptions(self, user_id, from_date, to_date, exceptions):
+    def replace_exceptions(self, actor:ActorContext, from_date, to_date, exceptions):
         from collections import defaultdict
-        from app.services.candidates import own_profile, audit
+        from app.services.candidates import own_profile, audit, candidate_transaction
         groups = defaultdict(list)
         for exception in exceptions:
             groups[(exception['local_date'], exception['kind'])].append((exception['start_minute'], exception['end_minute']))
-        with transaction() as conn:
-            profile = own_profile(conn, user_id, True)
+        with candidate_transaction() as conn:
+            profile = own_profile(conn, actor.user_id, True)
+            account_authority(conn,actor)
             target = table('availability_exceptions')
             conn.execute(target.delete().where(target.c.candidate_id == profile['id'],
                 target.c.local_date >= from_date, target.c.local_date <= to_date))
@@ -134,13 +145,14 @@ class CandidateAvailabilityService:
                     insert_row(conn, 'availability_exceptions', candidate_id=profile['id'], local_date=day,
                         kind=kind, start_minute=start, end_minute=end)
             conn.execute(table('candidate_profiles').update().where(table('candidate_profiles').c.id == profile['id']).values(updated_at=now()))
-            audit.append_audit_event(actor_id=user_id, action='CANDIDATE_EXCEPTIONS_REPLACED',
+            audit.append_audit_event(actor_id=actor.user_id, action='CANDIDATE_EXCEPTIONS_REPLACED',
                 entity_type='candidate_profile', entity_id=profile['id'])
-        return self.get_schedule(profile['id'], from_date, (to_date - from_date).days + 1)
+            return self.get_schedule(profile['id'], from_date, (to_date - from_date).days + 1)
 
     def add_availability_rule(
         self,
         *,
+        actor:ActorContext,
         candidate_id: str,
         weekday: int,
         start_minute: int,
@@ -157,14 +169,21 @@ class CandidateAvailabilityService:
             )
         validate_minute_bounds(start_minute, end_minute)
 
-        with transaction() as conn:
-            conn.execute(select(table('candidate_profiles').c.id).where(
-                table('candidate_profiles').c.id == candidate_id).with_for_update())
-            return insert_row(conn,'availability_rules',candidate_id=candidate_id,weekday=weekday,start_minute=start_minute,end_minute=end_minute,is_active=is_active,valid_from=local_today(),timezone='Asia/Tashkent')
+        from app.services.candidates import own_profile,audit,candidate_transaction
+        with candidate_transaction() as conn:
+            profile=own_profile(conn,actor.user_id,True)
+            if profile['id']!=candidate_id:
+                raise AvailabilityConstraintError('CANDIDATE_SCOPE_FORBIDDEN','Use your own candidate profile',403)
+            account_authority(conn,actor)
+            row=insert_row(conn,'availability_rules',candidate_id=candidate_id,weekday=weekday,start_minute=start_minute,end_minute=end_minute,is_active=is_active,valid_from=local_today(),timezone='Asia/Tashkent')
+            audit.append_audit_event(actor_id=actor.user_id,action='CANDIDATE_AVAILABILITY_RULE_CREATED',
+                entity_type='candidate_profile',entity_id=profile['id'],metadata={'rule_id':row['id']})
+            return row
 
     def add_availability_exception(
         self,
         *,
+        actor:ActorContext,
         candidate_id: str,
         exception_date: str,
         start_minute: int,
@@ -181,14 +200,20 @@ class CandidateAvailabilityService:
             )
         validate_minute_bounds(start_minute, end_minute)
 
-        with transaction() as conn:
-            conn.execute(select(table('candidate_profiles').c.id).where(
-                table('candidate_profiles').c.id == candidate_id).with_for_update())
+        from app.services.candidates import own_profile,audit,candidate_transaction
+        with candidate_transaction() as conn:
+            profile=own_profile(conn,actor.user_id,True)
+            if profile['id']!=candidate_id:
+                raise AvailabilityConstraintError('CANDIDATE_SCOPE_FORBIDDEN','Use your own candidate profile',403)
+            account_authority(conn,actor)
             try:
                 day = date.fromisoformat(exception_date)
             except ValueError as exc:
                 raise AvailabilityConstraintError('INVALID_DATE', 'Use an ISO date', 422) from exc
-            return insert_row(conn,'availability_exceptions',candidate_id=candidate_id,local_date=day,start_minute=start_minute,end_minute=end_minute,kind='AVAILABLE' if kind=='AVAILABLE_EXTRA' else kind)
+            row=insert_row(conn,'availability_exceptions',candidate_id=candidate_id,local_date=day,start_minute=start_minute,end_minute=end_minute,kind='AVAILABLE' if kind=='AVAILABLE_EXTRA' else kind)
+            audit.append_audit_event(actor_id=actor.user_id,action='CANDIDATE_AVAILABILITY_EXCEPTION_CREATED',
+                entity_type='candidate_profile',entity_id=profile['id'],metadata={'exception_id':row['id']})
+            return row
 
     def is_candidate_available_for_shift(
         self,

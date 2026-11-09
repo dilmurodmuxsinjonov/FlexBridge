@@ -2,10 +2,15 @@
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
+## AUTH-CODEX-006 - candidate current-session boundary2026-11-10
+
+-9 human API paths take actualActorContext. candidate_transaction requires actual READ COMMITTED (frozen outerRR fail closed). Own profile FOR SHARE read or FOR UPDATE write, CV material then current shared account_authority; policy unchanged, no UID-only human fallback. Legacy availability2 actor-owned ID binding and atomic audits. Same-transaction profile/schedule responses preserve guards tocommit.
+- Internal get_schedule/read_snapshot/load_snapshot/matching unchanged. No new migration/dependency/contract; runtime0012/111,canonical94. Initial109 native107 passed/2 wrong exception-class expectations, fixed2+initial teacher3 passed; affected88 passed215.63s. Source review coverage finding closed after expanded teacher1 passed8.45s and actual follow-up exit0. Runtimebc4/testsa31 pinned; draft PR62 final-head CI gate remains, pilotfalse. PR60/59 final935742d785 CI525.26s/469.37s merged73d3565.
+
 ## STORAGE-CODEX-001 / AUTH-CODEX-005 - current2026-11-10
 
 - Merged PR58 forward0012 adds files.storage_bucket/storage_version_id/storage_etag and new-write guards; legacy object_version is not guessed. Explicit source VersionId+IfMatch, private PUT reference, all6 GET callers, queued source/token fences and live Enabled readiness. Existing accepted authority/proof preserved; no new tables: runtime111/canonical94. Actual MinIO/PG tests and full757 CI passed twice; provider IAM/retention/live and pilot separate.
-- Issue59 code in progress: actual ActorContext through3 owner-file methods/callers, file->current user/session->current sensitive MFA->provider/write->commit. Existing onboarding account_authority logic moved into authority.py without policy change. Ordinary PASSWORD and system recorded-intent scan remain. No migration/dependency/canonical endpoint change; native27 passed, affected/source/CI gates remain.
+- Issue59 mergedPR60/73d3565 after final785 CI passed twice. Actual ActorContext through3 owner-file methods/callers, file->current user/session->current sensitive MFA->provider/write->commit. Existing onboarding account_authority logic moved into authority.py without policy change. Ordinary PASSWORD and system recorded-intent scan remain. No migration/dependency/canonical endpoint change; native27/affected72/review evidence in files_authority, no global authority/pilot claim.
 - Local project .venv is installed/pip check0. Official freshclam databases on D: and actual temporary clamd benign-PDF INSTREAM smoke passed; service/detection/full-pipeline claim yo'q. Docker/WSL verified installers downloaded, native admin launch canceled, installation/engine incomplete; details ANTIGRAVITY_HANDOFF.md.
 
 ## EDU-CODEX-001B — reviewed appointment workflow (2026-11-09, in progress)
