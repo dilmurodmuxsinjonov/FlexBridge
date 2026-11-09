@@ -3,7 +3,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from app.db.storage import table,transaction,now,save_domain_record,load_domain_record
 from app.core.audit import AppendOnlyAuditStore
-from app.api.dependencies import ActorContext,require_org,require_platform
+from app.api.dependencies import ActorContext
 from app.services.placements import get_row,insert_row
 
 class GovernanceError(Exception):
@@ -51,14 +51,16 @@ class GovernanceScopeService:
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ORG_MEMBER_APPROVED_DUAL_CONTROL',entity_type='membership',entity_id=member_id)
             return {**row,'status':'ACTIVE'}
 
-    def record_moderation_action(self,*,actor_id,target_entity_type,target_entity_id,action_type,policy_code,reason_code,justification):
+    def record_moderation_action(self,*,actor:ActorContext,target_entity_type,target_entity_id,action_type,policy_code,reason_code,justification):
+        from app.services.authority import moderator_authority
+        actor_id=actor.user_id
         with transaction() as conn:
-            require_platform(ActorContext(actor_id,'',()),'MODERATOR')
             if target_entity_type not in ('opportunity','opportunities') or action_type not in ('APPROVE','REJECT'):
                 raise GovernanceError('UNSUPPORTED_MODERATION_ACTION',status_code=422)
             if not policy_code.strip() or not reason_code.strip() or len(justification.strip())<15:
                 raise GovernanceError('MODERATION_JUSTIFICATION_REQUIRED',status_code=422)
             opp=get_row(conn,'opportunities',target_entity_id,True)
+            moderator_authority(conn,actor)
             revision=get_row(conn,'opportunity_revisions',opp['current_revision_id'])
             if revision['author_id']==actor_id: raise GovernanceError('SELF_MODERATION_FORBIDDEN',status_code=403)
             if opp['status']!='DRAFT': raise GovernanceError('MODERATION_STATE_CONFLICT')

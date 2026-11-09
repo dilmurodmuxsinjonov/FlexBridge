@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="12.776" timestamp="2026-11-09T04:33:49.918448+05:00" hostname="Ditroid"><testcase classname="tests.security.test_moderation_authority_probe" name="test_initial_moderation_rechecks_after_opportunity_wait[session]" time="7.041"><failure message="AssertionError: ('session', 201, 'REJECTED', 1)&#10;assert (201 in (401, 403))&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority_probe.py:40: in test_initial_moderation_rechecks_after_opportunity_wait
+    assert response.status_code in (401,403) and status=='DRAFT' and actions==0,(change,response.status_code,status,actions)
+E   AssertionError: ('session', 201, 'REJECTED', 1)
+E   assert (201 in (401, 403))
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_moderation_authority_probe" name="test_initial_moderation_rechecks_after_opportunity_wait[platform_role]" time="4.083"><failure message="AssertionError: ('platform_role', 201, 'REJECTED', 1)&#10;assert (201 in (401, 403))&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_moderation_authority_probe.py:40: in test_initial_moderation_rechecks_after_opportunity_wait
+    assert response.status_code in (401,403) and status=='DRAFT' and actions==0,(change,response.status_code,status,actions)
+E   AssertionError: ('platform_role', 201, 'REJECTED', 1)
+E   assert (201 in (401, 403))
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase></testsuite></testsuites>
