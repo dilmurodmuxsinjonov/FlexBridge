@@ -193,11 +193,14 @@ class EnrollmentService:
             proposal=normalize_proposal(actor,inst['id'],**fields)
             if preserve_ref:proposal['student_ref_digest']=enrollment['student_ref_digest']
             if case['current_revision']!=expected_revision:
-                account_authority(conn,actor)
                 previous=current_submission(conn,case)
                 if (case['current_revision']==expected_revision+1 and
                     all(previous[key]==value for key,value in proposal.items())):
+                    snapshots=pin_material(conn,actor.user_id,proposal['file_ids'])
+                    account_authority(conn,actor)
+                    if snapshots!=previous['file_snapshots']:raise fail('ENROLLMENT_EVIDENCE_CHANGED')
                     return self._report(conn,enrollment_id,profile['id'])
+                account_authority(conn,actor)
                 raise fail('ENROLLMENT_REVISION_CONFLICT')
             if enrollment['status'] in ('VERIFIED','ENDED','WITHDRAWN') or case['status'] not in ('DRAFT','NEEDS_INFO','REJECTED'):
                 raise fail('ENROLLMENT_RESUBMISSION_STATE_CONFLICT')

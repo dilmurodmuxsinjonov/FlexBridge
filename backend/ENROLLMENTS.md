@@ -56,6 +56,8 @@ academic relationships. A future-start cancellation preserves valid original
 dates and reduces effective status; it never writes end_date before start_date.
 Own create/end replay keys do not create extra writes/audits; conflicting bodies
 return409. Revision replay is bound to expected revision and identical material.
+The replay path locks and compares current file snapshots before current account
+authority, so an old request cannot acknowledge a changed file version as accepted.
 
 All human service methods receive actual ActorContext, reject frozen outer
 REPEATABLE READ contexts and apply current account/assurance. Mutation/review/end

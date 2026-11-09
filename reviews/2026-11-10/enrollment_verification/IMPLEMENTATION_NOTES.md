@@ -63,6 +63,25 @@ review are running. Read-only agent output/exit must be checked when terminal;
 pending state is not a source acceptance certificate. No new runtime change
 after the prototype commit is implied by the legacy HTTP test expansion.
 
+Actual d360 source review exit0 found P2 revision replay could202 after trusted
+file metadata changed, and a self-review test gap. Codex verified root runtime
+identical to that pinned source before review_initial_junit.xml:1 failed/1 passed
+11.12s, unchanged business/audit state. This is a misleading submission receipt,
+not an approval bypass; new approval already checked current evidence. Own MODERATOR
+with real MFA was already denied self-claim/self-decision. Initial exact probe retained.
+
+Replay branch now locks/pins owned current files before current account authority,
+compares full snapshot to the submitted revision, then returns an idempotent receipt
+or409 ENROLLMENT_EVIDENCE_CHANGED. No guard-first/file-wait inversion is introduced.
+review_fix_junit.xml10 passed31.80s: positive unchanged replay, changed-material
+denial, self-review scopes and all initial lifecycle cases. replay_wait_ordinary_
+junit.xml2 passed13.84s: observed actual file-row wait then completed logout200
+denies revision replay without effects; actual enrollment end preserves an existing
+ordinary application row and the existing service can create another afterward.
+Published opportunity metadata is trusted; this is not acceptance of still-open
+public application/eligibility handlers. Native stages overlap. Pinned follow-up
+source review and full current final-head CI remain required.
+
 Remaining: complete affected outcome, legitimate fixture changes if needed,
 actual session/security/business waits, concurrency/replay/rollback/provider/error
 edges and source-pinned review/full current CI/manifests/HISOBOT/journals/handoff.

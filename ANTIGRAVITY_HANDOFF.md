@@ -63,10 +63,17 @@ PR64 draft https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/64 source
 d36059bdb6eb50003f579709921e762aeb992b6f. CI42710013191(push)/42710023813(PR)
 actual in progress; no pass claimed. Actual read-only Copilot complete-source
 review runs in clean detached d360 worktree D:/Codex/FlexBridge-review/candidate-authority.
-Prompt/output/terminal exit file in enrollment_verification; inspect actual state,
-do not restart on observation timeout. New later test-only legacy HTTP3 passed35.10s:
+Initial full source review completed actual exit0: P2 stale revision replay202 and
+missing self-review coverage. Exact-source new reproduction1 failed/1 passed11.12s
+confirmed changed metadata still202 without new business effect, self-review already
+denied. Codex fix pins current replay files before current account guard, compares
+full snapshot and rejects mismatch409. Unchanged replay idempotent. Native review+
+lifecycle10 passed31.80s, actual replay filewait->logout denial and ordinary
+application history/service access2 passed13.84s. Need pinned follow-up review and
+complete latest-head CI; older d360 runs do not validate the fix. New legacy HTTP3 passed35.10s:
 0012 populated real-session imports ->0013 ->own end/withdraw/replay, preserves
-history/profile and never invents review proof. Current source unchanged afterd360.
+history/profile and never invents review proof. Test-only80d expansion preceded the
+later runtime replay fix; record current actual commit/head before next action.
 Broader eligibility/supervision/export/frontend/live/DR remain open. All source
 ownership is Codex; no agent edits same files. pg_live not started or migrated.
 
