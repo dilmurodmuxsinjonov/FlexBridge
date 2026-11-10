@@ -1,5 +1,47 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
+Registration count correction (LOG-079): actual OpenAPI operation inventory on clean accepted PR71/source726ef299 gives70explicit/62placeholder of132; current source gives71explicit/61placeholder. Only API121 changes registration. Earlier69/63 journal figures were stale. This is registration, not functional coverage; API031 remains local-only and other partial workflows/fullR1/pilot remain unaccepted.
+
+Current LOG-079 / Issue72: main/master FROZEN764fb984; only integration/r1-agent-collaboration is eligible for new PRs/verified merges. Root feature72 and agent branch remain based at accepted integratione5068a07 (PR71 full1090twice; Issue70 closed). Durable API121 state administration draft0017/127,canonical94 is now wired; protected4/R2/paidalias remain fail-closed and downstream business gates are not implemented by this unit. Genuine SQLNULL, false readiness, savepoint audit xmin and implicit ambient-read defects were corrected without weakening guards. Stronger final native49passed1warning214.83s plus disjoint proof-control6passed23.09s (55distinctcases), actual HTTP waiter/blocker properties6 retained. Initial broad47pass2fixtureexpectationfail and all earlier reds remain; those two tests strengthened, focused2passed14.00s. AGY005 actualSUCCESS GeminiArgonHigh and AGY006 actualSUCCESS GeminiFlashHigh, reported-model fields absent; all claimed native execution is Codex's independent run. AGY004 real Sonnet/Opus quota->Gemini edits verified despite stale statusERROR, no cleanSUCCESS claim. Copilot five-file service review exit0/noP1P2 with unchanged pins; two final migration review launches unavailable due account/model-list retrieval (not quota). OpenCode completed source-only3file opinion; six findings individually rejected against source/primaryPG docs/actual tests in OPENCODE_FINDING_ASSESSMENT.md. AGY007 final read-only18file review actually running on requested GeminiArgonHigh; no outcome claimed.19source/doc/test files copied to root with baseline/hash preservation. Publication hygiene passed1026files/0errors before latest evidence updates (not security certification). Integration-target draft/full matching-head CI/current feedback/final source acceptance still pending. FullR1/Issue67/API108/frontend/downstream gates/legal/providers/DR/pilot open, pg_live untouched.
+
+Current LOG-078 / Issue72 (2026-11-10): main/master remain FROZEN764fb984; accepted integratione5068a07 only. Root feature72 and isolated agent branch remain based there. AGY005 SUCCESS/exit0 (requested GeminiArgonHigh, model field absent, conversation29bbe3b4) changed ONLY0017 to DB-owned top-level xid8 audit stamping. Independent compile and corrected native11passed32.43s prove defined savepoint/rollback/old-audit/forged-stamp/read-availability scope. Additional genuine implicit-ambient read error was red1failed6.26s then corrected1passed5.79s. HTTP boundaries5passed21.20s. Broad native49cases had47passed/2fixture-expectation failures215.10s: existing chk_platform_grant_not_self blocks forged self-grant before service; legacy invalid schema blocks before deferred unproved guard. Codex strengthened those exact tests without weakening production; focused2passed14.00s. Actual HTTP PostgreSQL waiter/blocker evidence now persists in JUnit properties. Full corrected broad selection remains pending. Actual Copilot five-file service review exit0/noP1P2 with unchanged pins; two later migration/test review launches failed model-list/account retrieval (not quota), no completed opinion claimed. OpenCode independent three-file read-only snapshot review running after a preserved initial CLI argument-order error. AGY006 actually requested listed GeminiFlashHigh for ONE new proof-control test file; no native tests or completed report claimed yet. Main has not moved; PR71 accepted integration only1090twice and Issue70 closed. New source copy/root/full CI/review/integration acceptance pending; full R1/Issue67/API108/downstream business gates/frontend/legal/providers/DR/pilot open, pg_live untouched.
+
+Current LOG-077 / Issue72 (2026-11-10): MAIN/MASTER remain frozen764fb98496fa40857acb07844fd09fcafa99b7d6. PR71 MERGED ONLY INTO integration/r1-agent-collaboration at e5068a07bc4b94f9238883b80e817fd62cc6e709 after exact726ef299 full1090 CI twice866.78s/879.18s; Issue70 closed. Root feature/72-durable-feature-flags and isolated agent/antigravity-r1 both start at integratione506, existing WIP preserved. AGY003 completed four owned files, independently compiled. Actual draft0017 fresh schema127 observed; canonical94 unchanged. Real initial2 HTTP failures exposed PythonNone/JSONnull; corrected to SQLNULL and actual MFA relogin with required logout audit preserved; corrected positives2passed10.12s. Frozen-head compatibility11passed90.83s. Copilot source review found two P2s, both reproduced2failed8.422s: false flag-storage AVAILABLE and audit xmin rejecting genuine savepoints. Codex actual-query readiness correction has6passed plus2 still-failing savepoint cases26.21s (selection matched module filename; NOT a fully green suite). AGY004 hit real Sonnet/Opus quota, switched to Gemini; Gemini exit0/statusERROR contained a stale quota error despite verified owned-file edits, so no clean CLI SUCCESS is claimed. AGY005 is now actually requested on listed gemini-4-argon-high with fresh task context, ONLY0017 migration ownership for DB-owned top-level xid8 audit stamping. Codex owns wiring/tests/service read probe. Source/runtime/full new-head CI/review/integration acceptance still pending. FullR1/Issue67/API108/business gates/providers/legal/DR/pilot remain open; pg_live untouched. Historical progress below is retained, not current state.
+
+## LIVE LOG-076 / Issue72 / AGY003 - DO NOT MERGE MAIN
+
+Main/master frozen764fb984. PR71 head726ef29946007626b3d360322daa971dc93b253c
+targets integration/r1-agent-collaboration; push42759342959 and PR42759350885
+full checks pending. Only integration is eligible for its eventual verified merge.
+Root is feature/70-legacy-academic-notices; these latest notes are WIP for next
+unit, not a new PR71 commit. Keep its validated published source frozen. Once
+PR71 is accepted into integration, create a fresh Issue72 branch from actual
+integration (working-tree hashes preserved), never reset/rewrite a published branch.
+
+Actual AGY002 SUCCESS, requested Opus5.5High, no quota. Codex review at
+D:/Codex/FlexBridge-agents/AGY-002_CODEX_REVIEW.md. Do not repeat its proposed
+'checked50 repetitions' as execution; it ran no tests. Also rejected actor-FK
+intent before business locks and invalid int+bigint advisory call. New exact
+contract/task D:/Codex/FlexBridge-agents/AGY-003_TASK.md is authoritative.
+
+AGY003 is running in D:/Codex/FlexBridge-agents/antigravity on agent/antigravity-r1,
+based on integration764fb984. Requested Sonnet5.5High for coding; quota controller
+can use suitable listed alternatives only on actual quota. Same conversation
+3ed58526. Native tests NOT yet allowed/claimed: phase1 only FOUR NEW owned files
+(0017 migration, db/feature_flag_admin.py, services/feature_flag_admin.py,
+security/test_feature_flag_admin_api121.py), optional actual py_compile, then report.
+No Git/GitHub mutations by AGY. Codex owns shared storage/head/router/private cache/
+operations/old helper wiring, then real tests and source review. Do not edit AGY's
+owned files while it writes. Runtime127/2helpers is proposed, not observed yet.
+
+Runner/run receipt D:/Codex/FlexBridge-agents/runs/AGY-003 and live task state at
+D:/Codex/FlexBridge-agents/LIVE_HANDOFF.md. Check actual process/report/diff, don't
+restart an ongoing timed-out turn. Confirm each report and real commands before
+next bounded task. Main push hook only protects local pushes; GitHub API requires
+explicit PR-base checks. Full R1/Issue67/API108/pilot/providers/legal/DR remain open.
+
+## Previous completed AGY review-cycle notes (retained)
+
 ## Current Q015 actual agent cycle - integration only
 
 MAIN/MASTER FROZEN764fb984; only integration/r1-agent-collaboration is a new PR

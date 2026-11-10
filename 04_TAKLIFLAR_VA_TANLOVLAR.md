@@ -118,3 +118,15 @@ Oldingi qarorni almashtirsa uning IDsi:
   bo'lsa mos mavjud modelga o'tiladi; timeout yoki transport xatosi quota deyilmaydi.
 - Hammasi D:da; AGENTS.md/handoff, actual receipts va jurnallar davom nuqtasidir.
   Raw credentials, .env/.data va shaxsiy dalillar agent/publish kontekstiga yuborilmaydi.
+
+
+### Issue72 technical choices under existing Q010 authority (Codex, not new user quotes)
+
+- Missing If-Match400, stale412, key conflict409; strict server global schema;
+  protected/R2 enable remains blocked until actual separate prerequisites exist.
+- Legacy R1_PAID_ORG_PLANS PATCH alias denied, read maps to protected paid_checkout.
+  Immutable original provenance remains legacy even after a new genuine ADMIN event.
+- Actor/key advisory precedes code advisory/canonical row/current authority; no
+  actor FK is inserted before business locks. Committed state survives author logout.
+- These choices do not authorize live paid/provider/official grade/signature action
+  or claim downstream integration. Q015/main freeze and Q011/R2 exclusion persist.

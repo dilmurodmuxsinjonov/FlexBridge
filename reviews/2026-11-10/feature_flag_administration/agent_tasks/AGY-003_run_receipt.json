@@ -1,0 +1,25 @@
+{
+  "task": "AGY-003",
+  "listed_candidates": [
+    "claude-sonnet-5-5-high",
+    "claude-opus-5-5-high",
+    "gemini-4-argon-high",
+    "gemini-3.8-flash-high"
+  ],
+  "attempts": [
+    {
+      "requested_model": "claude-sonnet-5-5-high",
+      "reported_model": null,
+      "exit_code": 0,
+      "status": "SUCCESS",
+      "conversation_id": "3ed58526-4a7c-4e8e-b905-42568c7d3e41",
+      "seconds": 633.89,
+      "actual_quota_error": false,
+      "finished_reason": null,
+      "response_chars": 8199
+    }
+  ],
+  "fallback_policy": "only actual quota; continuing timeout does not restart",
+  "phase": "owned four new files/compile only; native tests await Codex wiring",
+  "main_policy": "frozen; no Git mutations; integration/r1-agent-collaboration only"
+}

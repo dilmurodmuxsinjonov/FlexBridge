@@ -1,0 +1,31 @@
+{
+  "distinct_native_cases": 55,
+  "selections": [
+    {
+      "file": "flags_broad_corrected_junit.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "49",
+      "time": "214.831",
+      "timestamp": "2026-11-10T10:54:19.128165+05:00",
+      "hostname": "Ditroid"
+    },
+    {
+      "file": "proof_controls_initial_junit.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "6",
+      "time": "23.095",
+      "timestamp": "2026-11-10T10:56:17.780052+05:00",
+      "hostname": "Ditroid"
+    }
+  ],
+  "scope": "defined flags state/HTTP/SQL/migration/concurrency suite, not full R1/pilot",
+  "main_frozen_sha": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "integration_base": "e5068a07bc4b94f9238883b80e817fd62cc6e709",
+  "source_copy_receipt": "agent_to_root_copy_receipt.json"
+}
