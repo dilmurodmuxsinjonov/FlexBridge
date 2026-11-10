@@ -700,14 +700,16 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 ## Joriy Holat (2026-11-10)
 
 - Master holati: Antigravity Q-016 master succession ostida; Copilot CLI (`1.0.109`) va OpenCode CLI (`1.18.29`) bilan hamkorlikda to'liq avtonom rejimda.
-- Oldingi topshiriq (API-052 / Issue #82): PR #83 muvaffaqiyatli squash-merge qilindi (`c8d7f8d748ee5b1f688a8dc40a698cd8335e079e`), Issue #82 yopildi.
-- Joriy topshiriq (API-053 / Issue #84): Single Placement Diary Logs View (`GET /api/v1/placements/{placement_id}/logs` / `CAP-022` / `PG-022.S01`) `feature/84-placement-diary-logs` tarmog'ida muvaffaqiyatli yakunlandi.
-  * Multi-stakeholder vakolat tekshiruvi (`resolve_logs_actor`): Candidate, Host Organization (`OWNER`, `HOST_COORDINATOR`, `HR`), Workplace Mentor, Academic Teacher, Institutional Coordinator.
-  * Qoralama maxfiyligi & Anti-probing: Nomzod qoralama va topshirilgan loglarini to'liq ko'radi; boshqa barcha manfaatdor tomonlar faqat `SUBMITTED` loglarni ko'radi. `status=DRAFT` bo'yicha nomzod bo'lmagan so'rovlar bo'sh ro'yxat (`total: 0, items: []`) qaytaradi.
-  * Yuqori unumdorlik (Anti-N+1): Yagona joinli sahifalash, vazifalar va taqrizlar `IN (...)` hamda korrelyatsiyalangan subquery orqali paketlab olinadi.
-  * Test dalillari: 15/15 shartnoma & xavfsizlik testlari (`test_placement_logs_api053.py`), 5/5 adversarial & SQL injection testlari (`test_placement_logs_adversarial.py`) izolyatsiyalangan PostgreSQL test klasterida (port 55440) 100% yashil o'tdi (20/20 jami, 100%).
-  * Multi-agent reviews: GitHub Copilot CLI 1.0.109 (`reviews/2026-11-10/placement_logs/COPILOT_REVIEW.md` - 0 zaiflik, High confidence) va OpenCode / Peer Review (`reviews/2026-11-10/placement_logs/OPENCODE_REVIEW.md` - APPROVED).
-  * 130 ta jadval runtime schema regressiyasi 100% tasdiqlangan.
+- Oldingi topshiriqlar (API-057, API-058):
+  * API-057 (Issue #88 / PR #89): Shaxsiy reytinglar ko'rinishi (`GET /api/v1/me/ratings`) $n < 5$ maxfiylik va 14-kunlik double-blind himoyasi bilan to'liq squash-merge bo'ldi.
+  * API-058 (Issue #90 / PR #91): Bahoga rasmiy e'tiroz bildirish (`POST /api/v1/ratings/{id}/appeals`) va moderatsiya navbatiga qo'yish to'liq squash-merge bo'ldi (`b5ffdc47fa2c46f8ee408d6c8b9d62886f44d188`).
+- Joriy topshiriq (API-059 / Issue #92): User Notification Preferences (`PUT /api/v1/me/notification-preferences` va `GET /api/v1/me/notification-preferences` / `CAP-031` / `DB-085` / `DB-011` / `AC-030`) `feature/92-notification-preferences` tarmog'ida muvaffaqiyatli yakunlandi.
+  * Tanqidiy yetkazib berish himoyasi (`AC-030`): Foydalanuvchi `TRANSACTIONAL` va `SECURITY` bildirishnomalarini barcha kanallarda butunlay o'chirib qo'yishi qat'iyan taqiqlandi (kamida bitta kanal ochiq qolishi shart). To'liq o'chirishga urinish 422 Unprocessable Entity (`TRANSACTIONAL_NOTIFICATION_CANNOT_BE_DISABLED`) bilan to'siladi.
+  * Huquqiy rozilik qaydi (`DB-011` / DB-085): Marketing bildirishnomalari (`purpose == 'MARKETING'`) o'zgartirilganda o'zgarmas `consent_events` jadvaliga `action: GRANTED` yoki `action: REVOKED` yozuvi saqlanadi va `consent_event_id` bog'lanadi.
+  * Tizim standartlarini birlashtirish: Baza jadvalida hali yaratilmagan kanallar uchun standart xavfsiz sozlamalar birlashtirib qaytariladi.
+  * Audit jurnali: Har bir o'zgarish `AppendOnlyAuditStore` orqali `NOTIFICATION_PREFERENCES_UPDATED` voqeasi bilan qayd etiladi.
+  * Test dalillari: 14/14 shartnoma & adversarial testlar (`test_notification_preferences_api059.py`, `test_notification_preferences_adversarial.py`), 16/16 `test_contracts.py` va reytinglar regressiyasi bilan jami 48/48 test 100% yashil o'tdi.
+  * Multi-agent reviews: GitHub Copilot CLI 1.0.109 (`reviews/2026-11-10/notification_preferences/COPILOT_REVIEW.md` - APPROVED) va OpenCode Peer Review (`reviews/2026-11-10/notification_preferences/OPENCODE_REVIEW.md` - APPROVED).
 - `main` branch: Strictly muzlatilgan (`764fb98496fa40857acb07844fd09fcafa99b7d6`). Barcha o'zgarishlar va PRlar faqat `integration/r1-agent-collaboration` bazasiga yo'naltiriladi.
 - Alembic head: `0020_placement_exports` (130 runtime tables).
 

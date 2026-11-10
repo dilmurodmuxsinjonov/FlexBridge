@@ -297,3 +297,18 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Anti-Duplication**: Replaying identical pending appeal returns idempotent 200/201 replay; conflicting new reason while pending rejected with 409 Conflict.
   - **Aggregate Recalculation ($n < 5$ Withholding, AC-025)**: Updates submission status to `UNDER_APPEAL` and immediately recomputes target's rating aggregate. If valid non-disputed ratings count drops below 5 ($n < 5$), aggregate score is withheld (`WITHHELD_INSUFFICIENT_SAMPLE`).
   - **Audit Logging**: Persists immutable audit event (`RATING_APPEAL_SUBMITTED`, `RATING_APPEAL_RESOLVED`) via `AppendOnlyAuditStore`.
+
+## NOTIFICATIONS-API059-PREFERENCES — User Notification Preferences (2026-11-10)
+
+- **Capability & Contract**: `NOTIFICATION` (`CAP-031`) / `API-059` (Issue #92), branch `feature/92-notification-preferences`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `PUT /api/v1/me/notification-preferences`: Upsert user notification preferences (HTTP 200).
+  - `GET /api/v1/me/notification-preferences`: Retrieve current user notification preferences merged with system defaults (HTTP 200).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `notification_preferences` (DB-085: `id`, `user_id`, `channel`, `purpose`, `enabled`, `consent_event_id`, `updated_at`), `consent_events` (DB-011: `id`, `user_id`, `purpose`, `action`, `metadata`, `created_at`), `audit_events` (DB-006).
+- **Service & Invariant Architecture (`app/services/notification_preferences.py`)**:
+  - **Ownership Scope**: Authenticated actor updates their own preferences (`user_id == actor.user_id`).
+  - **Channel & Purpose Categorization**: Supports channels `EMAIL`, `SMS`, `PUSH`, `WHATSAPP` and purposes `TRANSACTIONAL`, `SECURITY`, `MARKETING`.
+  - **Critical Delivery Safeguard (`AC-030` / OPS-01)**: Strictly enforces that at least one channel remains enabled for `TRANSACTIONAL` and `SECURITY` notifications. Completely disabling transactional notifications is rejected with 422 Unprocessable Entity (`TRANSACTIONAL_NOTIFICATION_CANNOT_BE_DISABLED`).
+  - **Legal Consent Tracking (`DB-011` / DB-085)**: Opt-in (`enabled=True`) or opt-out (`enabled=False`) for `MARKETING` purpose creates an immutable audit row in `consent_events` with `action: GRANTED` or `action: REVOKED`, and references `consent_event_id` in `notification_preferences`.
+  - **System Defaults Merging**: For channels without an explicit database row, default system policies (`TRANSACTIONAL` enabled by default) are seamlessly merged into query results.
+  - **Audit Logging**: Persists `NOTIFICATION_PREFERENCES_UPDATED` in `audit_events` via `AppendOnlyAuditStore`.
