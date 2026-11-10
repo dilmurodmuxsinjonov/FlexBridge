@@ -1,0 +1,28 @@
+{
+  "reviews": [
+    {
+      "task": "copilot_service",
+      "exit_code": 0,
+      "requested_model": "auto",
+      "reported_model": null,
+      "result": "source opinion completed"
+    },
+    {
+      "task": "copilot_migration_tests",
+      "exit_code": 1,
+      "requested_model": "auto",
+      "reported_model": null,
+      "result": "model list/account retrieval failed before review; not quota or completed opinion"
+    },
+    {
+      "task": "copilot_migration_tests_retry",
+      "exit_code": 1,
+      "requested_model": "auto",
+      "reported_model": null,
+      "result": "model list/account retrieval failed before review; not quota or completed opinion"
+    }
+  ],
+  "opencode": "initial argument-order error retained externally; corrected attempt running, no completed opinion yet",
+  "raw_logs": "external D:/Codex/FlexBridge-agents only",
+  "main_frozen": true
+}

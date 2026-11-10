@@ -4,6 +4,7 @@ import hashlib
 import json
 from uuid import uuid4
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.postgresql import insert
 from app.api.dependencies import require_platform
 from app.core.audit import AppendOnlyAuditStore
@@ -79,6 +80,15 @@ class PilotOperationsService:
         """Generates the S2.10.1 R1 Pilot Readiness Report across schema, DR targets, AC-001..042, and Q-011."""
         from app.core.readiness import dependency_readiness
         report=dependency_readiness()
+        r2_enabled=False
+        flag_status='DATABASE_UNAVAILABLE'
+        if report['checks']['database']:
+            try:
+                self.feature_flag_service.verify_storage()
+                r2_enabled=self.feature_flag_service.is_enabled('R2_FREELANCE_MARKETPLACE')
+            except (SQLAlchemyError,RuntimeError):
+                flag_status='STORAGE_UNAVAILABLE'
+            else:flag_status='AVAILABLE'
         return {
             'pilot_ready':False,
             'acceptance_status':'REQUIRES_E2E_AND_DR_EVIDENCE',
@@ -87,5 +97,6 @@ class PilotOperationsService:
             'finance_circuit_state':self.circuit_breaker.state,
             'release_stage':'R1_IMPLEMENTATION',
             'disaster_recovery_targets':{'rpo_hours':24,'rto_hours':4,'restore_drill_verified':False},
-            'r2_freelance_enabled':self.feature_flag_service.is_enabled('R2_FREELANCE_MARKETPLACE'),
+            'r2_freelance_enabled':r2_enabled,
+            'feature_flag_read_status':flag_status,
         }

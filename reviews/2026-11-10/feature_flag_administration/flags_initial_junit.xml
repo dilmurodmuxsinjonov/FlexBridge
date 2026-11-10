@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="17.299" timestamp="2026-11-10T10:20:09.956812+05:00" hostname="Ditroid"><testcase classname="tests.security.test_feature_flag_admin_api121" name="test_exact_receipt_survives_author_logout_and_replays_only_for_a_current_admin" time="7.769"><failure message="AssertionError: {&quot;detail&quot;:{&quot;code&quot;:&quot;FEATURE_FLAG_PROOF_REJECTED&quot;}}&#10;assert 409 == 200&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">backend\tests\security\test_feature_flag_admin_api121.py:94: in test_exact_receipt_survives_author_logout_and_replays_only_for_a_current_admin
+    assert first.status_code == 200, first.text
+E   AssertionError: {"detail":{"code":"FEATURE_FLAG_PROOF_REJECTED"}}
+E   assert 409 == 200
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase><testcase classname="tests.test_s2_1_3_retention_flags" name="test_feature_flags_persist_current_admin_intent_and_reject_r2_overrides" time="6.904"><failure message="AssertionError: {&quot;detail&quot;:{&quot;code&quot;:&quot;FEATURE_FLAG_PROOF_REJECTED&quot;}}&#10;assert 409 == 200&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">backend\tests\test_s2_1_3_retention_flags.py:66: in test_feature_flags_persist_current_admin_intent_and_reject_r2_overrides
+    assert response.status_code==200,response.text
+E   AssertionError: {"detail":{"code":"FEATURE_FLAG_PROOF_REJECTED"}}
+E   assert 409 == 200
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase></testsuite></testsuites>

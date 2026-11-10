@@ -1,0 +1,216 @@
+{
+  "scope": "UTF8/LF/trailing-space/EOF only; original bytes retained outside repo; no test count/outcome changed",
+  "raw_directory": "D:\\Codex\\FlexBridge-agents\\artifact_format_raw",
+  "changes": [
+    {
+      "file": "agent_to_root_copy_receipt.json",
+      "raw_sha256": "4627bcf8c89e99cbb15bd9dc9f88479055704316ad0cee4628634ce4051dd4e8",
+      "published_sha256": "055d617c520762fe7de3f3df2404b58d3be5ab527fb80b5f4e77fdf988f1911b"
+    },
+    {
+      "file": "ambient_read_corrected_junit.xml",
+      "raw_sha256": "29507498f34c350f77346d49d6e84ecbf64d1b8a5e28dee68274eb31c65acea2",
+      "published_sha256": "6e5361139bed031fb1bfb4129a427beddcaa688b5bc7660887af8aadf52c144a"
+    },
+    {
+      "file": "ambient_read_red_junit.xml",
+      "raw_sha256": "d5b41fe854aef8daf6e701156f75149483774f1353c26353e94fcaa0e2e7c0e4",
+      "published_sha256": "2e293298211fa4f711a33a0bba69cc5fbba966c25d243969816602a0ff727d1e"
+    },
+    {
+      "file": "baseline_route_registration_inventory.json",
+      "raw_sha256": "5ca1462e6335ef5818cb480ed96af526523da2db00078def991b2f2c5692f2d9",
+      "published_sha256": "d64ac89a0b467076a0c786b3ed15404a07b060bd39945662e58e9fb05d01ddef"
+    },
+    {
+      "file": "copilot_frozen_exit.txt",
+      "raw_sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "published_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "file": "copilot_frozen_review.md",
+      "raw_sha256": "7ad4e841c3820675607ef10edbd96bcca9b0f652e06134f0ed5a56b4bf5205d0",
+      "published_sha256": "e8e933cb3b473516d847aedfa666105ea748ac0e527c573ecc4ed4825905f2af"
+    },
+    {
+      "file": "copilot_migration_tests_retry_review.md",
+      "raw_sha256": "70ec9b827006fab18f8202472931e82a53ec902049cd5d1948c0bdc1707becc7",
+      "published_sha256": "50bf717e13b6337388723940a0d024cabd5a4e302999a5913a50f77bcac14712"
+    },
+    {
+      "file": "copilot_migration_tests_review.md",
+      "raw_sha256": "70ec9b827006fab18f8202472931e82a53ec902049cd5d1948c0bdc1707becc7",
+      "published_sha256": "50bf717e13b6337388723940a0d024cabd5a4e302999a5913a50f77bcac14712"
+    },
+    {
+      "file": "copilot_service_review.md",
+      "raw_sha256": "1e5f68b8ae15af92ab950cd7494a9ff17bb663e0c8a7d7c6f9d8b6aed8d2e1df",
+      "published_sha256": "473fb75b0fa3b5593a5d8823cf1310796d010bd5c7732a9d6734701889c862b2"
+    },
+    {
+      "file": "flags_broad_corrected_junit.xml",
+      "raw_sha256": "090bf3ceadbb3c136de718d1702791dc011af2b7f7ad0a28cfa1534d0fca835e",
+      "published_sha256": "4dc1487797f8c22f752b532b021de4fdfe6a2f231242006cdf8e9f45b54db222"
+    },
+    {
+      "file": "flags_broad_initial_junit.xml",
+      "raw_sha256": "1b2ee88dd8f569b56f43809959986a7b5a33da35e18811dfb584edbfb06d5a03",
+      "published_sha256": "8357e4812a80a9eb2a703d804d78f2f949adf4791d3335112335d47958996a98"
+    },
+    {
+      "file": "flags_constraint_diagnostic_junit.xml",
+      "raw_sha256": "86075f5bd5b6ab8e940a0354e843ac7649d5b692c7970ac2549783fceb3bceea",
+      "published_sha256": "6cba55ba26055aad2ae5f00f8be5d2f5f310a96f03ce515d3ae7906a80359947"
+    },
+    {
+      "file": "flags_initial_junit.xml",
+      "raw_sha256": "7b50732b76941258c4c57b9745966ad93e1b0ba8800eb9cbe0f7cb6e7daf05d4",
+      "published_sha256": "56e3c7c7b8139cd516e721004c1d66086b032df7e6e2999a9c476ba4debace77"
+    },
+    {
+      "file": "flags_positive_corrected_junit.xml",
+      "raw_sha256": "9df18d603aad3ec08da356a8bf66fe0a0d7828952324063eaa361dfc6a26aa09",
+      "published_sha256": "9fa2ef511ec0cf3f86a2239d7bd44335f422047dcef58da0d4f3445401afee1c"
+    },
+    {
+      "file": "flags_test_fixture_corrections_junit.xml",
+      "raw_sha256": "66918058fac2bd7159da3a99f5b349e9bab671d9431d04387a5a3d2ad690290d",
+      "published_sha256": "3d4f1bd7aea73d14e7db9f1862c33e78dd78395cbb8553a60a68990ce91b4cb9"
+    },
+    {
+      "file": "fresh_schema_probe.json",
+      "raw_sha256": "1ca6700ab5b74bc1f9b0f111dc2b0526de36b08b1ba6fa8a3aa6f01a417a78e8",
+      "published_sha256": "510e0a80e126e5f84143118fc78fdb2c2e4038ba80f1a86efd5770d1023670a1"
+    },
+    {
+      "file": "frozen_wiring_review_scope.json",
+      "raw_sha256": "03a5e616d6f16608cb988907ceb1e372aa151c6d593b9390dd7181b00df7c1a9",
+      "published_sha256": "b2c37231e778290c2c66fa9deb5f02b84790b18ea5fb3b17f361291bd6f95855"
+    },
+    {
+      "file": "head_compatibility_initial_junit.xml",
+      "raw_sha256": "b7b3a2b3aef2c3bd82c3ae5fbd4b34a60b4ff54f1b6a69e3b360dbabb5bdeb74",
+      "published_sha256": "12502f85c250c204685cc60692f534d07fafa879cb4b9c8d7e6a37859f06ebf1"
+    },
+    {
+      "file": "HISOBOT.md",
+      "raw_sha256": "6adb6bb2241e4223be9c224ef2e30173765e39b538f90231de427d8c6b0fbeb5",
+      "published_sha256": "b4775f6a5c4093b037e9dce84b523ad7be3a236272be8101006e62407b48b552"
+    },
+    {
+      "file": "http_boundary_initial_junit.xml",
+      "raw_sha256": "3a2e39f505226cc176c33bda1db42138324be701d4da496b537ab2b5be3a30d9",
+      "published_sha256": "879ea37872195e2d48259927e52b584fe32e7efff99cd7c4ff69cbe023040c18"
+    },
+    {
+      "file": "migration_tests_retry_scope.json",
+      "raw_sha256": "ee09a53a35d16c3d0392be1de8a6ef686933dfb6f57808b28fd16f1cc6289b2e",
+      "published_sha256": "313fcef8eb94195c68bd1a26a2dfb8eb1f51c5d6850c33964c4fbeb83d3f2bce"
+    },
+    {
+      "file": "migration_tests_review_scope.json",
+      "raw_sha256": "186bc284b7ccb1381a449f3ec6531f730a4b9bb616f59e08a614dea8ea9ce6be",
+      "published_sha256": "017c869a1c118ae22df547b246a390fa001bca697f241d035aba20ecb2776333"
+    },
+    {
+      "file": "native_final_summary.json",
+      "raw_sha256": "6a0218ee802f822c0daebd41ca54f4f7cee88da96ab9bf3f885a6c19451bf14b",
+      "published_sha256": "d10b29d6b9c779a02d0cadee1cae3fea50dd631df132afdf0382e677a59002c9"
+    },
+    {
+      "file": "NEXT.md",
+      "raw_sha256": "8bf9a841620ae9a92b1267e9b210c2c5a5affd4610d5552f81ba004e3c1d5aae",
+      "published_sha256": "0cecced88c9a272e4e9bc8dd8b9d914d463fe9c871cd73076fcc875ad38f205a"
+    },
+    {
+      "file": "opencode_proof_source_review.md",
+      "raw_sha256": "659ee8479efd5f7312929e7f835b478db2a2f79df512449918e88a244c1affa3",
+      "published_sha256": "e99d640a19ad95807713e6cfbdaea52fd0bfe2481926310f88de11011d53daae"
+    },
+    {
+      "file": "opencode_proof_source_scope.json",
+      "raw_sha256": "240ea0fbdc39a0d924e0d5430602612514c9a01ab1477bfc26d5f0d1fc1a6959",
+      "published_sha256": "f6ae96800bede283224d342d22bf92551cf35ed5176e3028b2e0b71db58c382d"
+    },
+    {
+      "file": "proof_controls_initial_junit.xml",
+      "raw_sha256": "f838d84a43573d9ebcb13b09c68621f702dea0c78e4b0bbaa6bf1c6f64a54933",
+      "published_sha256": "82d646f6364d1813509a39ff33ba6a9e741adcd17d32459fc30d8c0aa9687361"
+    },
+    {
+      "file": "PR_BODY.md",
+      "raw_sha256": "0a37da2c83e8fdc663c34602850074e1a2e1a585f8d615aed5054cbd9dd42956",
+      "published_sha256": "530f059b71221d19c8ae462f1e3b132ea0bd6e56cdd3ae3763954739fddf2cb6"
+    },
+    {
+      "file": "readiness_corrected_junit.xml",
+      "raw_sha256": "11b3270a9f2a199a14e7338cc2abac6cf6d2af5b57a560f5ed748b42b3c83b0c",
+      "published_sha256": "2f9817a9c88bc657e0aaeb696aca0ac6273503b5bb756c6d2d6aa2cf689a2cbc"
+    },
+    {
+      "file": "readiness_savepoint_red_junit.xml",
+      "raw_sha256": "6d466c805e1a2948d8dccd23417782f96a03696932468127e42b9c4967f7cd78",
+      "published_sha256": "9980f7a2c221020d666f13734662771ad522ce1f6aea74f46ae8960a9fefd686"
+    },
+    {
+      "file": "readiness_transactions_corrected_junit.xml",
+      "raw_sha256": "678694243d7ed46df0582f57d637ea7e5939579896c04b92580a84eca37cd57a",
+      "published_sha256": "c196b60c4a1bf520d2ea2c52ce49a65e3d590eb45666e783ac8f6336bd14691c"
+    },
+    {
+      "file": "review_execution_receipt.json",
+      "raw_sha256": "8f1e23a206a927eaaf4af53fbf5b47e4813c08b0cd20b9a22c8df76a277bd79a",
+      "published_sha256": "992b388abf6a3cc3ed2f62f0ed509d3aac62ed8ea1147a6dd6dba8675b17166e"
+    },
+    {
+      "file": "route_registration_inventory.json",
+      "raw_sha256": "97242928b0fff1c7c4e4ee7a563e54a90a1d001480ac3cf67ff22f30b02448e0",
+      "published_sha256": "5c0b0f4b69ecf9672ac8584e673f6a84cf89b7696e98a1fea0bfd80f565d8e3a"
+    },
+    {
+      "file": "service_review_scope.json",
+      "raw_sha256": "2c6570def8ab3bb34e8012c764fbe5bd6daf85293b3cc616c1564acd7dc75f57",
+      "published_sha256": "4b741b02b7753726f7760619b9d259d284b240d08028e43f5c7bc0eb2ff775e9"
+    },
+    {
+      "file": "source_manifest.json",
+      "raw_sha256": "337116a47de6ce112b1c4cd61603d0f9c7dc496e13e5d69a5bd4895351db2dc2",
+      "published_sha256": "f74831a10336cd1ee3feab117cca854bfbec296b66d5a044620a0ecf30a4a7d5"
+    },
+    {
+      "file": "agent_tasks/AGY-003_REPORT.md",
+      "raw_sha256": "768d5f1b99b63efd77131bb26a4d9e8a9255ac43927e2d7630e17cf2124ec596",
+      "published_sha256": "dc20e1c4d2c5575de11b839f328108d967cf91b04f1a72fca99764b68ca136da"
+    },
+    {
+      "file": "agent_tasks/AGY-003_run_receipt.json",
+      "raw_sha256": "6cc09c03940588393226ba84e9ac3b2e3c35a81be2a883d97c6caf9f8136f508",
+      "published_sha256": "0222cf3214c5f30eb28146ed4d04978ccc1c0547303d0ebbf32f48b793a3c877"
+    },
+    {
+      "file": "agent_tasks/AGY-004_run_receipt.json",
+      "raw_sha256": "0338267efb1d3a28566664db3517b0fba17eddd67b1c83a2f0d5978740d30c80",
+      "published_sha256": "a5b0d65fd9c8ad6b12aeb799672587308a850936c98c26c309e24d4efaa6f337"
+    },
+    {
+      "file": "agent_tasks/AGY-005_REPORT.md",
+      "raw_sha256": "59072977ea7b9fe723dcbd3cb144d59959bee6415940ac58fd6e12dce498fa5b",
+      "published_sha256": "a0a7be74dcdb17edd7f8dca8be4603297d619822d43330801c5153c180497d3f"
+    },
+    {
+      "file": "agent_tasks/AGY-005_run_receipt.json",
+      "raw_sha256": "b000d68e410c9cc8f3e822a54e0805da4d8b4337055cb9ab33e7059875e43610",
+      "published_sha256": "872b8fc46591f922ab9a66d3b4c2f26f7a2fb295b0dcce1caf44ea5dc326ef0b"
+    },
+    {
+      "file": "agent_tasks/AGY-006_REPORT.md",
+      "raw_sha256": "5606e57d3ad7cbc07f3db108dad80a415111c2222d65a8506db23ddedee43251",
+      "published_sha256": "22c17a7b347a081bf041143dda87b2f49cfe77a40e17d0fd0b578a917f5e0231"
+    },
+    {
+      "file": "agent_tasks/AGY-006_run_receipt.json",
+      "raw_sha256": "7210ffcbcf8d0b1cd61863c65e7cbe3bdbf0843fbebe9793c5f487677a559317",
+      "published_sha256": "0ad329d5a61428ba676ea7b702f2a897c33b905456fe275184e7dfd7cfd2695d"
+    }
+  ]
+}
