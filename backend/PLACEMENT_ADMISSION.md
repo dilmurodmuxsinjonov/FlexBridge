@@ -10,6 +10,9 @@ tables, including four new proof tables. The model's94 canonical tables are unch
    The actual current OWNER/HOST_COORDINATOR, independent host capability and exact
    offer/application/attempt/original revision/candidate/organization binding are required.
    PART_TIME uses job engagements and cannot acquire placement/diary rights.
+   Supply an explicit8–128 character `idempotency_key`. A retry returns the same
+   resource's current projection plus its immutable `intake_receipt`; a changed
+   valid offer/request under the same key is rejected. It never creates a new start.
 2. Read `GET /placements/{id}/plan`. Before activation a host can publish a new
    plan using `PUT /placements/{id}/plan`, supplying the exact old `terms_id`,
    `version`, retry key, title, objectives, limits, required minutes and tasks.
@@ -19,10 +22,12 @@ tables, including four new proof tables. The model's94 canonical tables are unch
 3. The candidate personally calls `POST /placements/{id}/accept` with the exact
    current `terms_id`, `version` and `idempotency_key` of8–128 characters.
 4. The host nominates an actual same-host MENTOR through
-   `POST /placements/{id}/mentor-assignments` with `mentor_id`. The nominee personally
+   `POST /placements/{id}/mentor-assignments` with `mentor_id` and `idempotency_key`. The nominee personally
    calls `POST /placements/{id}/assignments/{assignment}/accept` with the exact
    terms/version/key. A nomination by itself grants no private diary/review rights.
    Candidate self-mentoring is denied. An OWNER may also independently hold MENTOR.
+   Both nomination aliases share the retry identity. Replaying after revocation
+   returns the historical nomination receipt and current revoked row, not a new grant.
 5. The host calls `POST /placements/{id}/host-decisions` with `action: ACTIVATE`
    and the exact terms/version/key. Current original mentor grant and personal
    candidate/mentor consents must still qualify. Host acceptance, the initial start
@@ -30,7 +35,9 @@ tables, including four new proof tables. The model's94 canonical tables are unch
 
 Candidate and host lists are `/me/placements` and `/organizations/{org}/placements`.
 `/me/mentor-assignments` is a minimal own nomination inbox, not a diary feed.
-Lists currently return at most100 records; pagination remains required. Plan access
+Lists use `limit`1–100 (default50), optional own `after` UUID and `next_after`.
+Follow pages until `next_after` is null. Foreign/unavailable cursor anchors fail
+closed; tied timestamps sort by ID. Plan access
 is limited to the candidate, current host authority or currently named original
 mentor scope. Private route families receive no-store headers and bounded bodies.
 
@@ -57,6 +64,22 @@ and create a fresh one. Workplace review now uses the actual actor and original
 current accepted mentor scope. Candidate draft/submit authority remains a separate
 unfinished LOG unit.
 
+Own unread in-app notices are `/me/notifications`; `unread_only=false` includes
+read history and uses the same cursor protocol. `POST /me/notifications/{id}/read`
+acknowledges only one's own row under current authority. Notification timestamps
+and nomination response timestamps are projected as UTC consistently across aliases.
+Nomination, personal acceptance and revoke queue a local notice in the same UOW.
+The fenced outbox worker derives the recipient from immutable placement scope,
+creates one inbox row and acknowledges it atomically. Main worker/compose enable
+`PLACEMENT_MENTOR_NOTICE`; identity delivery stays separate. Scope is historical
+at the recorded intent; current plan/diary links must still pass current resource
+checks. No email/SMS/provider delivery or complete preferences/marketing support
+is claimed. Arbitrary unrelated outbox payloads never appear in this inbox.
+
+SQL diary submission uses the explicit Asia/Tashkent business date, independent
+of the connection timezone. The forward migration refuses unexpected full date
+predicates and verifies the rest of the rewritten function remains unchanged.
+
 Host `CANCEL` records a historical decision. Replaying an earlier start acknowledges
 its original receipt and cannot restore ACTIVE. An active plan amendment requires a
 separate lifecycle. Imported canonical rows and acceptance timestamps are preserved
@@ -72,8 +95,6 @@ preserving rollback exists; transactional failed-upgrade rollback is tested sepa
   API051 implements MENTOR only; its TEACHER branch remains pending.
 - API088 implements ACTIVATE/CANCEL. Completion, dispute and later amendments remain
   explicit follow-ons. Source registration is not full contract completion.
-- Intake/nomination retry receipts, pagination and candidate notification of the
-  new mentor/view scope still need implementation and verification.
 - Restore legitimate academic fixture flows through actual admission services;
   do not waive new proof guards or fabricate post-upgrade legacy rows to make tests green.
 - Finish complete current CI, all affected academic/diary tests, final source review,

@@ -1,5 +1,6 @@
 """Current actor survives no completed logout while waiting for admission material."""
 from concurrent.futures import ThreadPoolExecutor
+from uuid import uuid4
 import pytest
 from sqlalchemy import select,text,or_
 from app.db.storage import get_engine,table,transaction
@@ -12,7 +13,8 @@ def admission_snapshot():
     with transaction() as conn:
         result={}
         for name in ('placements','placement_terms','placement_decisions','mentor_assignments','placement_intakes',
-                     'mentor_assignment_proofs','placement_consents','placement_admission_events','plan_tasks','workplace_log_reviews'):
+                     'mentor_assignment_proofs','placement_consents','placement_admission_events','plan_tasks','workplace_log_reviews',
+                     'outbox_events','notifications'):
             t=table(name)
             result[name]=[dict(row) for row in conn.execute(select(t).order_by(*t.primary_key.columns)).mappings()]
         audit=table('audit_events')
@@ -35,7 +37,7 @@ def test_completed_logout_after_real_business_wait_denies_admission_write(client
         base='/api/v1/placements/'+placement['id'];terms=terms_request(placement)
         if kind=='nominate':
             request=lambda:client.post('/api/v1/internship-logs/mentor-assignments',headers=host['headers'],json={
-                'placement_id':placement['id'],'organization_id':organization,'mentor_id':mentor['user_id']})
+                'placement_id':placement['id'],'organization_id':organization,'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())})
         elif kind=='candidate_accept':
             who=candidate
             request=lambda:client.post(base+'/accept',headers=who['headers'],json=terms)
@@ -46,7 +48,7 @@ def test_completed_logout_after_real_business_wait_denies_admission_write(client
                 'tasks':[{'code':'TASK','title':'Implementation','expected_result':'Working implementation','required':True}]}
             request=lambda:client.put(base+'/plan',headers=who['headers'],json=payload)
         else:
-            assignment=post(client,base+'/mentor-assignments',host,{'mentor_id':mentor['user_id']},201)
+            assignment=post(client,base+'/mentor-assignments',host,{'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())},201)
             if kind=='mentor_accept':
                 who=mentor
                 request=lambda:client.post(base+'/assignments/'+assignment['id']+'/accept',headers=who['headers'],json=terms)

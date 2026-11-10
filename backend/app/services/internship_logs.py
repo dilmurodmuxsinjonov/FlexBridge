@@ -15,10 +15,10 @@ class InternshipLogScopeError(Exception):
 
 class InternshipLogService:
     audit_store=AppendOnlyAuditStore()
-    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor):
+    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor,idempotency_key):
         from app.services.placement_admission import admission_service
         return admission_service.nominate_mentor(actor=actor,placement_id=placement_id,
-            organization_id=organization_id,mentor_id=mentor_id)
+            organization_id=organization_id,mentor_id=mentor_id,idempotency_key=idempotency_key)
 
     def _academic_binding(self,conn,placement,supervision,institution_id):
         from app.db.institution_scope import TASHKENT

@@ -18,7 +18,7 @@ def planned(client, identities, organization):
     candidate, host, body=accepted_offer(client,identities,organization,'INTERNSHIP')
     p=post(client,'/api/v1/placements',host,body,201)
     mentor=identities('MENTOR',organization)
-    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id']},201)
+    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())},201)
     return candidate, host, mentor, p, assignment
 
 
@@ -147,7 +147,7 @@ def test_revoked_and_regranted_mentor_needs_new_nomination_and_personal_acceptan
     denied=client.post(base+'/host-decisions',headers=host['headers'],json={**terms_request(p),'action':'ACTIVATE'})
     assert denied.status_code in (403,409) and saved(p)['status']=='PLANNED',denied.text
     post(client,base+'/mentor-assignments/'+assignment['id']+'/revoke',host,terms_request(p),200)
-    replacement=post(client,base+'/mentor-assignments',host,{'mentor_id':mentor['user_id']},201)
+    replacement=post(client,base+'/mentor-assignments',host,{'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())},201)
     post(client,base+'/assignments/'+replacement['id']+'/accept',mentor,terms_request(p),200)
     post(client,base+'/host-decisions',host,{**terms_request(p),'action':'ACTIVATE'},200)
 
@@ -202,7 +202,7 @@ def test_ordinary_password_mentor_can_personally_accept_current_named_assignment
         insert_row(conn,'org_role_grants',membership_id=member['id'],role_id=rid,granted_by_id=host['user_id'])
         assert conn.execute(select(table('sessions').c.assurance).where(table('sessions').c.id==mentor['session_id'])).scalar_one()=='PASSWORD'
     p=post(client,'/api/v1/placements',host,body,201)
-    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id']},201)
+    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())},201)
     accept_sides(client,candidate,mentor,p,assignment,p)
     post(client,'/api/v1/placements/'+p['id']+'/host-decisions',host,{**terms_request(p),'action':'ACTIVATE'},200)
     assert saved(p)['status']=='ACTIVE'
@@ -220,7 +220,7 @@ def test_ordinary_password_host_coordinator_can_create_and_activate_own_host_pla
         insert_row(conn,'org_role_grants',membership_id=member['id'],role_id=rid,granted_by_id=host['user_id'])
         assert conn.execute(select(table('sessions').c.assurance).where(table('sessions').c.id==host['session_id'])).scalar_one()=='PASSWORD'
     p=post(client,'/api/v1/placements',host,body,201)
-    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id']},201)
+    assignment=post(client,'/api/v1/placements/'+p['id']+'/mentor-assignments',host,{'mentor_id':mentor['user_id'],'idempotency_key':str(uuid4())},201)
     accept_sides(client,candidate,mentor,p,assignment,p)
     post(client,'/api/v1/placements/'+p['id']+'/host-decisions',host,{**terms_request(p),'action':'ACTIVATE'},200)
     assert saved(p)['status']=='ACTIVE'

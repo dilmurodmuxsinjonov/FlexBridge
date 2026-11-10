@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
@@ -18,9 +19,10 @@ router = APIRouter(prefix="/api/v1/internship-logs", tags=["internship-logs"])
 
 
 class CreateMentorAssignmentRequest(StrictDTO):
-    placement_id: str
-    organization_id: str
-    mentor_id: str
+    placement_id: UUID
+    organization_id: UUID
+    mentor_id: UUID
+    idempotency_key: str = Field(min_length=8, max_length=128)
 
 
 class CreateAcademicAssignmentLogScopeRequest(StrictDTO):
@@ -56,10 +58,11 @@ class AcademicLogReviewRequest(StrictDTO):
 @router.post("/mentor-assignments", status_code=201)
 def create_mentor_assignment_endpoint(payload: CreateMentorAssignmentRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return internship_log_service.create_mentor_assignment(
-        placement_id=payload.placement_id,
-        organization_id=payload.organization_id,
-        mentor_id=payload.mentor_id,
+        placement_id=str(payload.placement_id),
+        organization_id=str(payload.organization_id),
+        mentor_id=str(payload.mentor_id),
         actor=actor,
+        idempotency_key=payload.idempotency_key,
     )
 
 

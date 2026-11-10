@@ -9,12 +9,14 @@ def register_tables(metadata, types):
             'offer_id': 'uuid', 'attempt_id': 'uuid', 'revision_id': 'uuid',
             'academic_required': 'boolean', 'actor_id': 'uuid', 'session_id': 'uuid',
             'auth_version': 'integer', 'host_grant_id': 'uuid',
+            'idempotency_key': 'text', 'request_fingerprint': 'text', 'receipt': 'jsonb',
             'initial_snapshot': 'jsonb', 'source_snapshot': 'jsonb'},
         'mentor_assignment_proofs': {
             'assignment_id': 'uuid', 'created_at': 'timestamptz', 'origin': 'text',
             'placement_id': 'uuid', 'mentor_user_id': 'uuid', 'mentor_grant_id': 'uuid',
             'actor_id': 'uuid', 'session_id': 'uuid', 'auth_version': 'integer',
-            'host_grant_id': 'uuid', 'initial_snapshot': 'jsonb'},
+            'host_grant_id': 'uuid', 'initial_snapshot': 'jsonb',
+            'idempotency_key': 'text', 'request_fingerprint': 'text', 'receipt': 'jsonb'},
         'placement_consents': {
             'id': 'uuid', 'created_at': 'timestamptz', 'placement_id': 'uuid', 'terms_id': 'uuid',
             'side': 'text', 'actor_id': 'uuid', 'session_id': 'uuid', 'auth_version': 'integer',
@@ -26,8 +28,8 @@ def register_tables(metadata, types):
             'org_grant_id': 'uuid', 'assignment_id': 'uuid', 'idempotency_key': 'text',
             'request_fingerprint': 'text', 'receipt': 'jsonb'}}
     optional = {
-        'placement_intakes': {'actor_id', 'session_id', 'auth_version', 'host_grant_id'},
-        'mentor_assignment_proofs': {'mentor_grant_id', 'actor_id', 'session_id', 'auth_version', 'host_grant_id'},
+        'placement_intakes': {'actor_id', 'session_id', 'auth_version', 'host_grant_id', 'idempotency_key', 'request_fingerprint', 'receipt'},
+        'mentor_assignment_proofs': {'mentor_grant_id', 'actor_id', 'session_id', 'auth_version', 'host_grant_id', 'idempotency_key', 'request_fingerprint', 'receipt'},
         'placement_consents': {'org_grant_id', 'assignment_id'},
         'placement_admission_events': {'assignment_id'}}
     for name, fields in definitions.items():

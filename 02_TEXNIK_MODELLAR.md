@@ -2,6 +2,12 @@
 
 ## INT-CODEX-001 / current2026-11-10
 
+- Final current host UTC selection115 passed457.42s,0failure/error/skip,1framework warning, source/config frozen. Academic admission excluded; full current CI acceptance and pilot still unproven. Exact raw artifact and source/index hashes: internship_admission/host_utc_final_junit.xml and source_followup_manifest.json.
+
+- LOG-068 current: actual-session host retries persist immutable receipt/fingerprint and return current projection; own/host/mentor and unread inbox keyset pages, local candidate viewer notices with fenced worker, safe current own acknowledgement, explicit Asia/Tashkent SQL calendar and fail-closed predicate drift guard. Source reviews capture15 runtime/config files plus corrected migration/response deltas; current native UTC stage and exact source/index manifest in internship_admission. Draft still0014/118, accepted main0013/114. Model132 registrations60 explicit72 placeholders; API031 in-app basics,051 TEACHER/088 completion and full R1 acceptance still open. No new dependency selected.
+
+Previous LOG-067 snapshot:
+
 - Accepted enrollment PR64 final930 CI twice/merge1b2bbbf remains0013/114. Current draft Issue65 executes0014/118 in native PostgreSQL, with immutable intake/nomination/original-grant/versioned consent/admission events and guarded canonical projections. Eight host handlers plus bounded helpers are implemented; OpenAPI model124+8 contracts now59 explicit73 placeholders, registration only. API051 TEACHER and088 completion/dispute remain pending. Current broad native host selection37 passed156.15s; corrective plan history/rollback2 passed19.83s overlap. Affected integration47 passed/1 academic fixture failed148.70s, so no current full acceptance. Review-only Copilot initial/follow-up exit0, source-only limits. See backend/PLACEMENT_ADMISSION.md and internship_admission/NEXT_ACADEMIC_UNIT.md. No new dependency, live rollout or pilot claim.
 
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.

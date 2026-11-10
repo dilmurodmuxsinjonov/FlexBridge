@@ -8,6 +8,21 @@ branch_labels = depends_on = None
 
 def upgrade():
     op.execute("""
+    -- Preserve the reviewed diary guard except its server-dependent calendar.
+    DO $calendar$ DECLARE definition text; rewritten text;
+      expected text := 'IF v_local_date < v_start_date OR (v_end_date IS NOT NULL AND v_local_date > v_end_date) OR v_local_date > CURRENT_DATE THEN';
+      replacement text := $day$IF v_local_date < v_start_date OR (v_end_date IS NOT NULL AND v_local_date > v_end_date) OR v_local_date > (clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date THEN$day$;
+    BEGIN
+      SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure) INTO definition;
+      IF (length(definition)-length(replace(definition,'CURRENT_DATE','')))/length('CURRENT_DATE')<>1
+        OR (length(definition)-length(replace(definition,expected,'')))/length(expected)<>1
+      THEN RAISE EXCEPTION 'unexpected diary calendar guard definition'; END IF;
+      rewritten := replace(definition,expected,replacement);
+      EXECUTE rewritten;
+      IF pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure) IS DISTINCT FROM rewritten
+      THEN RAISE EXCEPTION 'unexpected diary calendar rewrite result'; END IF;
+    END $calendar$;
+
     CREATE TABLE flexbridge.placement_intakes (
       placement_id uuid PRIMARY KEY REFERENCES flexbridge.placements(id),
       created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
@@ -18,12 +33,18 @@ def upgrade():
       academic_required boolean NOT NULL,
       actor_id uuid REFERENCES flexbridge.users(id), session_id uuid REFERENCES flexbridge.sessions(id),
       auth_version integer, host_grant_id uuid REFERENCES flexbridge.org_role_grants(id),
+      idempotency_key text, request_fingerprint text, receipt jsonb,
       initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),
       source_snapshot jsonb NOT NULL CHECK(jsonb_typeof(source_snapshot)='object'),
       CHECK((origin='PUBLIC' AND actor_id IS NOT NULL AND session_id IS NOT NULL
-        AND auth_version IS NOT NULL AND host_grant_id IS NOT NULL)
+        AND auth_version IS NOT NULL AND host_grant_id IS NOT NULL
+        AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128
+        AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$'
+        AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')
         OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL
-          AND auth_version IS NULL AND host_grant_id IS NULL))
+          AND auth_version IS NULL AND host_grant_id IS NULL AND idempotency_key IS NULL
+          AND request_fingerprint IS NULL AND receipt IS NULL)),
+      UNIQUE(actor_id,idempotency_key)
     );
     INSERT INTO flexbridge.placement_intakes(placement_id,origin,offer_id,attempt_id,revision_id,
       academic_required,initial_snapshot,source_snapshot)
@@ -44,12 +65,18 @@ def upgrade():
       mentor_grant_id uuid REFERENCES flexbridge.org_role_grants(id),
       actor_id uuid REFERENCES flexbridge.users(id), session_id uuid REFERENCES flexbridge.sessions(id),
       auth_version integer, host_grant_id uuid REFERENCES flexbridge.org_role_grants(id),
+      idempotency_key text, request_fingerprint text, receipt jsonb,
       initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),
       FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.mentor_assignments(id,placement_id),
       CHECK((origin='PUBLIC' AND mentor_grant_id IS NOT NULL AND actor_id IS NOT NULL
-        AND session_id IS NOT NULL AND auth_version IS NOT NULL AND host_grant_id IS NOT NULL)
+        AND session_id IS NOT NULL AND auth_version IS NOT NULL AND host_grant_id IS NOT NULL
+        AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128
+        AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$'
+        AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')
         OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL
-          AND auth_version IS NULL AND host_grant_id IS NULL))
+          AND auth_version IS NULL AND host_grant_id IS NULL AND idempotency_key IS NULL
+          AND request_fingerprint IS NULL AND receipt IS NULL)),
+      UNIQUE(actor_id,idempotency_key)
     );
     INSERT INTO flexbridge.mentor_assignment_proofs(assignment_id,origin,placement_id,mentor_user_id,
       mentor_grant_id,initial_snapshot)

@@ -1,5 +1,5 @@
 {
-  "scope": "overlapping preserved stages, not an additive suite total; see HISOBOT for source/failure context",
+  "scope": "overlapping preserved stages, including setup/errors; not additive or full R1 acceptance",
   "stages": [
     {
       "file": "actor_teacher_initial_junit.xml",
@@ -26,6 +26,38 @@
       "xml_seconds": 148.688
     },
     {
+      "file": "business_date_corrected_junit.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 21.633
+    },
+    {
+      "file": "business_date_red_junit.xml",
+      "tests": 4,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 19.849
+    },
+    {
+      "file": "calendar_drift_corrected_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 121.451
+    },
+    {
+      "file": "calendar_drift_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 18.38
+    },
+    {
       "file": "concurrency_initial_junit.xml",
       "tests": 7,
       "failures": 0,
@@ -40,6 +72,30 @@
       "errors": 0,
       "skipped": 0,
       "xml_seconds": 156.148
+    },
+    {
+      "file": "host_utc_current_junit.xml",
+      "tests": 113,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 344.586
+    },
+    {
+      "file": "host_utc_final_junit.xml",
+      "tests": 115,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 457.423
+    },
+    {
+      "file": "host_utc_setup_error_junit.xml",
+      "tests": 113,
+      "failures": 0,
+      "errors": 113,
+      "skipped": 0,
+      "xml_seconds": 3.591
     },
     {
       "file": "initial_guard_junit.xml",
@@ -82,12 +138,36 @@
       "xml_seconds": 40.645
     },
     {
+      "file": "notices_initial_junit.xml",
+      "tests": 12,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 44.471
+    },
+    {
+      "file": "pagination_initial_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.847
+    },
+    {
       "file": "pr64_teacher_final_junit.xml",
       "tests": 1,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
       "xml_seconds": 10.142
+    },
+    {
+      "file": "retries_initial_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 66.942
     },
     {
       "file": "tasks_history_corrected_junit.xml",

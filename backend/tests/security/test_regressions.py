@@ -45,7 +45,7 @@ def placement_fixture(candidate,owner,org,status='ACTIVE'):
     placement_service.create_application_attempt(application_id=application['id'],opportunity_id=revision['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=application['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor=billing_actor(owner),start_date=date.today())
+    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor=billing_actor(owner),idempotency_key=str(uuid4()),start_date=date.today())
     if status=='ACTIVE':
         from app.services.placement_admission import admission_service
         from app.services.placements import insert_row,get_row
@@ -60,7 +60,7 @@ def placement_fixture(candidate,owner,org,status='ACTIVE'):
                 insert_row(conn,'org_role_grants',membership_id=mid,role_id=rid,granted_by_id=owner['user_id'])
         args=dict(placement_id=p['id'],terms_id=p['current_terms_id'],version=1)
         admission_service.accept_candidate(actor=billing_actor(candidate),**args,idempotency_key=str(uuid4()))
-        assignment=admission_service.nominate_mentor(actor=billing_actor(owner),placement_id=p['id'],organization_id=org,mentor_id=owner['user_id'])
+        assignment=admission_service.nominate_mentor(actor=billing_actor(owner),placement_id=p['id'],organization_id=org,mentor_id=owner['user_id'],idempotency_key=str(uuid4()))
         admission_service.accept_mentor(actor=billing_actor(owner),assignment_id=assignment['id'],**args,idempotency_key=str(uuid4()))
         admission_service.host_decision(actor=billing_actor(owner),action='ACTIVATE',**args,idempotency_key=str(uuid4()))
         with transaction() as conn:p=get_row(conn,'placements',p['id'])

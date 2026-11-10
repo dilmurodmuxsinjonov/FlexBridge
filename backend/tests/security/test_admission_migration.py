@@ -55,9 +55,13 @@ def test_populated_upgrade_preserves_canonical_rows_without_creating_consents_or
             good=old_placement(conn)
             bad=old_placement(conn,'PART_TIME')
             before=snapshot(conn)
+            function_before=conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()
         migrate('head')
         with engine.begin() as conn:
             assert snapshot(conn)==before
+            function_after=conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()
+            assert function_after==function_before.replace('v_local_date > CURRENT_DATE THEN',
+                "v_local_date > (clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date THEN")
             intakes=conn.execute(select(table('placement_intakes'))).mappings().all()
             assert len(intakes)==2 and {r['origin'] for r in intakes}=={'LEGACY_IMPORT'}
             assert all(r['actor_id'] is None and r['session_id'] is None for r in intakes)
@@ -79,6 +83,7 @@ def test_failed_populated_upgrade_rolls_back_new_proof_tables_and_keeps_old_rows
         with engine.begin() as conn:
             old_placement(conn)
             before=snapshot(conn)
+            function_before=conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()
             conn.execute(text('CREATE TABLE flexbridge.placement_consents(marker text)'))
             conn.execute(text("INSERT INTO flexbridge.placement_consents VALUES ('keep me')"))
         failed=migrate('head',False)
@@ -86,6 +91,26 @@ def test_failed_populated_upgrade_rolls_back_new_proof_tables_and_keeps_old_rows
         with engine.begin() as conn:
             assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0013_enrollment_verification'
             assert snapshot(conn)==before
+            assert conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()==function_before
             assert conn.execute(text("SELECT to_regclass('flexbridge.placement_intakes')")).scalar_one() is None
             assert conn.execute(text("SELECT to_regclass('flexbridge.mentor_assignment_proofs')")).scalar_one() is None
             assert conn.execute(text('SELECT marker FROM flexbridge.placement_consents')).scalar_one()=='keep me'
+
+
+@pytest.mark.parametrize('replacement',['v_local_date > CURRENT_DATE + 1 THEN','v_local_date >= CURRENT_DATE THEN'])
+def test_changed_diary_predicate_refuses_upgrade_without_mutating_history(replacement):
+    with populated_database() as (engine,migrate):
+        migrate('0013_enrollment_verification')
+        with engine.begin() as conn:
+            old_placement(conn);before=snapshot(conn)
+            original=conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()
+            changed=original.replace('v_local_date > CURRENT_DATE THEN',replacement)
+            assert changed!=original
+            conn.execute(text(changed))
+        result=migrate('head',False)
+        assert result.returncode!=0 and 'unexpected diary calendar guard definition' in result.stderr
+        with engine.begin() as conn:
+            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0013_enrollment_verification'
+            assert snapshot(conn)==before
+            assert conn.execute(text("SELECT pg_get_functiondef('flexbridge.fn_validate_log_submission()'::regprocedure)")).scalar_one()==changed
+            assert conn.execute(text("SELECT to_regclass('flexbridge.placement_intakes')")).scalar_one() is None

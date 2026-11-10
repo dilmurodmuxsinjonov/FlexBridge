@@ -1,4 +1,51 @@
-# LOG-067 — host admission progress, not acceptance
+# LOG-068 — current host follow-up, academic acceptance remains open
+
+Final current native UTC selection:115 passed,0 failures/errors/skips,1 framework
+warning,457.42s. It includes all new host/retry/page/notice/calendar/upgrade/authority
+groups plus existing regression/contract/adapter and ordinary Teacher enrollment
+controls. It excludes the unfinished academic admission fixture group and is not
+the complete project CI. Source/config remained frozen across this run. Raw
+host_utc_final_junit.xml and source_followup_manifest.json pin this publication.
+
+Current draft adds explicit intake/nomination retry receipts, scoped keyset pages
+and transactional candidate in-app mentor notices. API031 unread/read basics are
+implemented; preferences/marketing/external channels are not. Main worker topic
+is configured, worker source/recipient/fence/rollback and current own read authority
+are tested. No provider message or live deployment is claimed. Model registrations
+are now60 explicit72 placeholders of132, not functional acceptance.
+
+SQL date boundary was actually reproduced across connection timezones:
+business_date_red1failed3passed19.85s ->explicit Asia/Tashkent4passed21.63s.
+Intake/nomination retry selection15passed66.94s;105 placement/nomination HTTP
+intakes from trusted upstream metadata and105 tied-timestamp inbox metadata
+pages2passed24.85s. These tests do not certify public bulk upstream creation.
+
+Notice initial1failed11passed44.47s exposed read timestamp offset inconsistency;
+timestamps were normalized. First broad UTC attempt113 setup errors3.62s came
+from URL options encoding, not executed application cases. Correct PGOPTIONS
+preflight showed UTC. Broad UTC stage111passed2failed344.59s exposed alias UTC
+serialization (+00:00/Z) and an obsolete501 assertion on the newly implemented
+inbox. Nomination projection now returns uniform UTC strings; the unimplemented
+assertion targets the still-501 preference API. All raw stages are retained.
+
+Copilot actual read-only source review found calendar P2: counting CURRENT_DATE
+did not detect changed predicates. Actual populated drift probe1failed18.38s;
+full expected predicate/single-substitution/full-function comparison now protects
+the rewrite. Nine corrective UTC tests passed121.47s, including drift refusal,
+failed-upgrade rollback of function/tables/history and preserved rest of function.
+Source follow-ups reported no remaining concrete delta P1/P2; no independent
+model/SHA/runtime certification is inferred. Final UTC run is host_utc_final;
+its terminal result and source/index manifest are recorded for the publication.
+
+Full earlier85065b1 CI remains red:66failed901passed twice599.03s/735.52s,
+63 academic fixture cases and3 diary cases. Source work since that head is separate
+evidence. PR66 stays draft/Issue65 open until genuine pending school/teacher
+admission and complete current CI restore all affected flows. Next work is ordered
+in NEXT_ACADEMIC_UNIT.md; actual old academic lock order is institution before
+placement, correcting the earlier handoff description. Accepted main stays
+0013/114; this draft executes0014/118, pg_live stopped/untouched, pilotfalse.
+
+## Historical LOG-067 snapshot
 
 2026-11-10 Asia/Tashkent. Codex owns source. Issue65/PR66 are still in progress;
 accepted main is1b2bbbf / migration0013 /114 runtime tables. Current0014 executed

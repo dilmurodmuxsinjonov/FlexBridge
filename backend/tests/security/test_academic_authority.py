@@ -57,7 +57,7 @@ def academic_fixture(identities,organization,*,enrollment_end_date=None):
     placement_service.create_application_attempt(application_id=app['id'],opportunity_id=rev['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=app['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor=actor(owner))
+    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor=actor(owner),idempotency_key=str(uuid4()))
     placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=candidate['user_id'])
     placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=owner['user_id'])
     with transaction() as conn:

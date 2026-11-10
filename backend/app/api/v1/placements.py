@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import date
 
@@ -42,6 +42,7 @@ class CreatePlacementRequest(StrictDTO):
     opportunity_id: UUID
     candidate_id: UUID
     organization_id: UUID
+    idempotency_key: str = Field(min_length=8, max_length=128)
 
 
 class ConfirmPlacementStartRequest(TermsRequest):
@@ -104,6 +105,7 @@ def create_placement_endpoint(payload: CreatePlacementRequest, actor: ActorConte
             candidate_id=str(payload.candidate_id),
             organization_id=str(payload.organization_id),
             actor=actor,
+            idempotency_key=payload.idempotency_key,
         )
     except PlacementScopeError as exc:
         raise HTTPException(

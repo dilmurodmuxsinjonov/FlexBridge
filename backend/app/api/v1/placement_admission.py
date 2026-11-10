@@ -2,7 +2,7 @@
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context
@@ -48,21 +48,25 @@ class PlanRequest(TermsRequest):
 class NominateRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     mentor_id: UUID
+    idempotency_key: str = Field(min_length=8, max_length=128)
 
 
 @router.get('/me/placements')
-def own_placements(actor: ActorContext = Depends(require_actor_context)):
-    return service.own_placements(actor)
+def own_placements(limit: int=Query(default=50,ge=1,le=100), after: UUID|None=None,
+                   actor: ActorContext = Depends(require_actor_context)):
+    return service.own_placements(actor,limit=limit,after=after)
 
 
 @router.get('/organizations/{org}/placements')
-def host_placements(org: UUID, actor: ActorContext = Depends(require_actor_context)):
-    return service.host_placements(actor, str(org))
+def host_placements(org: UUID, limit: int=Query(default=50,ge=1,le=100), after: UUID|None=None,
+                    actor: ActorContext = Depends(require_actor_context)):
+    return service.host_placements(actor,str(org),limit=limit,after=after)
 
 
 @router.get('/me/mentor-assignments')
-def own_mentor_assignments(actor: ActorContext = Depends(require_actor_context)):
-    return service.own_mentor_assignments(actor)
+def own_mentor_assignments(limit: int=Query(default=50,ge=1,le=100), after: UUID|None=None,
+                           actor: ActorContext = Depends(require_actor_context)):
+    return service.own_mentor_assignments(actor,limit=limit,after=after)
 
 
 @router.get('/placements/{id}/plan')
@@ -92,7 +96,8 @@ def accept_assignment(id: UUID, assignment: UUID, payload: TermsRequest, actor: 
 def nominate(id: UUID, payload: NominateRequest, actor: ActorContext = Depends(require_actor_context)):
     with transaction() as conn:
         organization_id = get_row(conn, 'placements', str(id))['organization_id']
-    return service.nominate_mentor(actor=actor, placement_id=str(id), organization_id=organization_id, mentor_id=str(payload.mentor_id))
+    return service.nominate_mentor(actor=actor, placement_id=str(id), organization_id=organization_id,
+                                  mentor_id=str(payload.mentor_id), idempotency_key=payload.idempotency_key)
 
 
 @router.post('/placements/{id}/mentor-assignments/{assignment}/revoke')

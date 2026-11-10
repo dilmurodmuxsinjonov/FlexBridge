@@ -1,6 +1,7 @@
 """Versioned host admission. Academic admission is deliberately a separate gate."""
 import hashlib
 import json
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import select, text
@@ -11,6 +12,8 @@ from app.db.storage import table, transaction, now, json_value
 from app.services.authority import account_authority, org_authority
 from app.services.organizations import require_capability
 from app.services.placements import get_row, insert_row, PlacementScopeError, require_internship_placement
+from app.services.pagination import page
+from app.services.mentor_notices import queue_notice
 
 
 def fingerprint(action, **values):
@@ -21,6 +24,22 @@ def fingerprint(action, **values):
 def evidence(conn, actor):
     return dict(actor_id=actor.user_id, session_id=actor.session_id,
                 auth_version=get_row(conn, 'users', actor.user_id)['auth_version'])
+
+
+def request_record(conn, name, actor, key, digest):
+    if not isinstance(key, str) or not 8 <= len(key) <= 128:
+        raise PlacementScopeError('INVALID_IDEMPOTENCY_KEY', status_code=422)
+    t = table(name)
+    old = conn.execute(select(t).where(t.c.actor_id == actor.user_id, t.c.idempotency_key == key)).mappings().first()
+    if old and old['request_fingerprint'] != digest:
+        raise PlacementScopeError('IDEMPOTENCY_KEY_REUSED')
+    return dict(old) if old else None
+
+
+def nomination_result(assignment, receipt):
+    # Both HTTP aliases must serialize the same UTC strings despite different response encoders.
+    return {**{key:value.astimezone(timezone.utc).isoformat() if isinstance(value,datetime) else value
+               for key,value in assignment.items()}, 'nomination_receipt':receipt}
 
 
 class PlacementAdmissionService:
@@ -57,14 +76,8 @@ class PlacementAdmissionService:
             raise PlacementScopeError('STALE_PLAN_VERSION')
 
     def _replay(self, conn, name, actor, key, digest):
-        if not isinstance(key, str) or not 8 <= len(key) <= 128:
-            raise PlacementScopeError('INVALID_IDEMPOTENCY_KEY', status_code=422)
-        t = table(name)
-        old = conn.execute(select(t).where(t.c.actor_id == actor.user_id, t.c.idempotency_key == key)).mappings().first()
-        if old:
-            if old['request_fingerprint'] != digest:
-                raise PlacementScopeError('IDEMPOTENCY_KEY_REUSED')
-            return dict(old['receipt'])
+        old = request_record(conn, name, actor, key, digest)
+        if old:return dict(old['receipt'])
 
     def _consent(self, conn, actor, placement, terms, side, key, digest, *, grant=None, assignment=None):
         stamp, consent_id = now(), str(uuid4())
@@ -74,6 +87,7 @@ class PlacementAdmissionService:
             id=consent_id, created_at=stamp, placement_id=placement['id'], terms_id=terms['id'], side=side,
             **evidence(conn, actor), org_grant_id=grant, assignment_id=assignment,
             idempotency_key=key, request_fingerprint=digest, receipt=receipt))
+        if side=='MENTOR':queue_notice(conn,placement['id'],assignment,'ACCEPTED',consent_id)
         self.audit.append_audit_event(actor_id=actor.user_id, action='PLACEMENT_'+side+'_ACCEPTED',
                                      entity_type='placement_consent', entity_id=consent_id)
         return receipt, stamp
@@ -107,14 +121,18 @@ class PlacementAdmissionService:
                          .values(candidate_accepted_at=stamp, updated_at=stamp))
             return receipt
 
-    def nominate_mentor(self, *, actor, placement_id, organization_id, mentor_id):
+    def nominate_mentor(self, *, actor, placement_id, organization_id, mentor_id, idempotency_key):
+        digest = fingerprint('MENTOR_NOMINATED', placement_id=placement_id, organization_id=organization_id, mentor_id=mentor_id)
         with transaction() as conn:
             placement, _ = self._locked(conn, placement_id)
             if organization_id != placement['organization_id']:
                 raise PlacementScopeError('MENTOR_ORG_MISMATCH')
+            authority = self._host(conn, actor, placement)
+            replay = request_record(conn, 'mentor_assignment_proofs', actor, idempotency_key, digest)
+            if replay:
+                return nomination_result(get_row(conn,'mentor_assignments',replay['assignment_id']),replay['receipt'])
             if placement['status'] not in ('PLANNED', 'PENDING_START_CONFIRMATION', 'ACTIVE'):
                 raise PlacementScopeError('PLACEMENT_NOT_ASSIGNABLE')
-            authority = self._host(conn, actor, placement)
             try:membership = org_authority(conn, mentor_id, organization_id, 'MENTOR', nowait=True)
             except OperationalError as exc:
                 if getattr(exc.orig, 'sqlstate', None) == '55P03':
@@ -127,13 +145,17 @@ class PlacementAdmissionService:
             assignment = get_row(conn, 'mentor_assignments', assignment['id'])
             snapshot = conn.execute(text('SELECT to_jsonb(a) FROM flexbridge.mentor_assignments a WHERE a.id=:id'),
                                     {'id': assignment['id']}).scalar_one()
+            receipt = dict(assignment_id=assignment['id'], placement_id=placement_id, mentor_user_id=mentor_id,
+                           state_at_nomination='NOMINATED', recorded_at=assignment['assigned_at'].isoformat())
             conn.execute(table('mentor_assignment_proofs').insert().values(
                 assignment_id=assignment['id'], placement_id=placement_id, origin='PUBLIC', created_at=now(),
                 mentor_user_id=mentor_id, mentor_grant_id=membership['_authority_grant_id'],
-                **evidence(conn, actor), host_grant_id=authority['_authority_grant_id'], initial_snapshot=snapshot))
+                **evidence(conn, actor), host_grant_id=authority['_authority_grant_id'], initial_snapshot=snapshot,
+                idempotency_key=idempotency_key, request_fingerprint=digest, receipt=receipt))
+            queue_notice(conn,placement_id,assignment['id'],'NOMINATED',assignment['id'])
             self.audit.append_audit_event(actor_id=actor.user_id, action='MENTOR_ASSIGNMENT_NOMINATED',
                                          entity_type='mentor_assignment', entity_id=assignment['id'])
-            return assignment
+            return nomination_result(assignment,receipt)
 
     def _mentor(self, conn, actor, placement, assignment):
         q = table('mentor_assignment_proofs')
@@ -268,6 +290,7 @@ class PlacementAdmissionService:
                                           authority['_authority_grant_id'], assignment=assignment_id)
             conn.execute(table('mentor_assignments').update().where(table('mentor_assignments').c.id == assignment_id)
                 .values(revoked_at=stamp, updated_at=stamp))
+            queue_notice(conn,placement_id,assignment_id,'REVOKED',receipt['event_id'])
             return receipt
 
     def plan(self, *, actor, placement_id):
@@ -294,40 +317,42 @@ class PlacementAdmissionService:
                 t.c.target_minutes).where(t.c.terms_id == terms['id']).order_by(t.c.code)).mappings()]
             # The original revision/offer can contain payroll details. Plan readers get this projection only.
             return dict(placement_id=placement_id, status=placement['status'], terms_id=terms['id'], version=terms['version'],
+                start_date=placement['start_date'], end_date=placement['end_date'],
                 title=terms['terms_snapshot'].get('title'), objectives=terms['terms_snapshot'].get('objectives'),
                 daily_limit_minutes=terms['daily_limit_minutes'], weekly_limit_minutes=terms['weekly_limit_minutes'],
                 required_minutes=terms['required_minutes'], tasks=tasks)
 
-    def own_placements(self, actor):
+    def own_placements(self, actor, *, limit=50, after=None):
         with transaction() as conn:
             account_authority(conn, actor)
             p, c = table('placements'), table('candidate_profiles')
-            return {'items': [dict(r) for r in conn.execute(select(p.c.id, p.c.organization_id, p.c.status,
+            query=select(p.c.id, p.c.organization_id, p.c.status,
                 p.c.start_date, p.c.end_date, p.c.current_terms_id).join(c, c.c.id == p.c.candidate_id)
-                .where(c.c.user_id == actor.user_id).order_by(p.c.created_at, p.c.id).limit(100)).mappings()]}
+            query=query.where(c.c.user_id == actor.user_id)
+            return page(conn,query,p.c.id,p.c.created_at,limit=limit,after=after)
 
-    def host_placements(self, actor, organization_id):
+    def host_placements(self, actor, organization_id, *, limit=50, after=None):
         with transaction() as conn:
             get_row(conn, 'organizations', organization_id, True)
             account_authority(conn, actor)
             org_authority(conn, actor.user_id, organization_id, 'OWNER', 'HOST_COORDINATOR')
             p = table('placements')
-            return {'items': [dict(r) for r in conn.execute(select(p.c.id, p.c.candidate_id, p.c.status,
-                p.c.start_date, p.c.end_date, p.c.current_terms_id).where(p.c.organization_id == organization_id)
-                .order_by(p.c.created_at, p.c.id).limit(100)).mappings()]}
+            query=select(p.c.id,p.c.candidate_id,p.c.status,p.c.start_date,p.c.end_date,p.c.current_terms_id)
+            query=query.where(p.c.organization_id==organization_id)
+            return page(conn,query,p.c.id,p.c.created_at,limit=limit,after=after)
 
-    def own_mentor_assignments(self, actor):
+    def own_mentor_assignments(self, actor, *, limit=50, after=None):
         with transaction() as conn:
             account_authority(conn, actor)
             a, q, m, g, r = (table(n) for n in ('mentor_assignments', 'mentor_assignment_proofs',
                                                'org_memberships', 'org_role_grants', 'role_catalog'))
-            return {'items': [dict(row) for row in conn.execute(select(a.c.id, a.c.placement_id, a.c.organization_id,
+            query=select(a.c.id, a.c.placement_id, a.c.organization_id,
                 a.c.assigned_at, a.c.accepted_at).join(q, q.c.assignment_id == a.c.id).join(m, m.c.id == a.c.membership_id)
-                .join(g, g.c.id == q.c.mentor_grant_id).join(r, r.c.id == g.c.role_id).where(
+            query=query.join(g,g.c.id==q.c.mentor_grant_id).join(r,r.c.id==g.c.role_id).where(
                     q.c.mentor_user_id == actor.user_id, m.c.user_id == actor.user_id,
                     g.c.membership_id == m.c.id, m.c.status == 'ACTIVE', m.c.revoked_at.is_(None),
                     g.c.revoked_at.is_(None), r.c.code == 'MENTOR', r.c.scope_kind == 'ORG', a.c.revoked_at.is_(None))
-                .order_by(a.c.assigned_at, a.c.id).limit(100)).mappings()]}
+            return page(conn,query,a.c.id,a.c.assigned_at,limit=limit,after=after)
 
 
 admission_service = PlacementAdmissionService()

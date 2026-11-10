@@ -1,0 +1,11 @@
+{
+  "scope": "model route registration only; no full functional/pilot acceptance",
+  "total_contracts": 132,
+  "explicit_count": 60,
+  "placeholder_count": 72,
+  "new_scope": "API031 transactional in-app basics; other channels/preferences remain unfinished",
+  "partial": [
+    "API051 TEACHER pending",
+    "API088 completion/dispute pending"
+  ]
+}

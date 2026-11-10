@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="19.849" timestamp="2026-11-10T04:39:08.387931+05:00" hostname="Ditroid"><testcase classname="tests.security.test_diary_business_date" name="test_sql_diary_accepts_business_today_and_rejects_business_tomorrow[0-Etc/GMT+12]" time="8.763"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) Kundalik sanasi (2026-11-10) placement oralig'ida emas yoki kelajak sana (INV-09)&#10;CONTEXT:  PL/pgSQL function fn_validate_log_submission() line 27 at RAISE&#10;[SQL: UPDATE flexbridge.log_revisions SET status=%(status)s::VARCHAR, submitted_at=%(submitted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.log_revisions.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: Kundalik sanasi (2026-11-10) placement oralig'ida emas yoki kelajak sana (INV-09)
+E   CONTEXT:  PL/pgSQL function fn_validate_log_submission() line 27 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_diary_business_date.py:39: in test_sql_diary_accepts_business_today_and_rejects_business_tomorrow
+    else:submit()
+         ^^^^^^^^
+backend\tests\security\test_diary_business_date.py:35: in submit
+    conn.execute(table('log_revisions').update().where(table('log_revisions').c.id==revision['id'])
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) Kundalik sanasi (2026-11-10) placement oralig'ida emas yoki kelajak sana (INV-09)
+E   CONTEXT:  PL/pgSQL function fn_validate_log_submission() line 27 at RAISE
+E   [SQL: UPDATE flexbridge.log_revisions SET status=%(status)s::VARCHAR, submitted_at=%(submitted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.log_revisions.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_diary_business_date" name="test_sql_diary_accepts_business_today_and_rejects_business_tomorrow[0-Pacific/Kiritimati]" time="2.760" /><testcase classname="tests.security.test_diary_business_date" name="test_sql_diary_accepts_business_today_and_rejects_business_tomorrow[1-Etc/GMT+12]" time="2.813" /><testcase classname="tests.security.test_diary_business_date" name="test_sql_diary_accepts_business_today_and_rejects_business_tomorrow[1-Pacific/Kiritimati]" time="4.180" /></testsuite></testsuites>

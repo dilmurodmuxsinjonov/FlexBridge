@@ -79,9 +79,12 @@ class ApplicationPlacementService:
             conn.execute(table('offers').update().where(table('offers').c.id==offer_id).values(**values))
             return {'contract_id':'API-043',**offer,**values}
 
-    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor,start_date=None,end_date=None):
+    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor,idempotency_key,start_date=None,end_date=None):
         from app.services.authority import account_authority,org_authority
         from app.services.organizations import require_capability
+        from app.services.placement_admission import fingerprint,request_record
+        digest=fingerprint('PLACEMENT_INTAKE',application_id=application_id,offer_id=offer_id,opportunity_id=opportunity_id,
+            candidate_id=candidate_id,organization_id=organization_id,start_date=start_date,end_date=end_date)
         with transaction() as conn:
             get_row(conn,'organizations',organization_id,True)
             offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',application_id); opp=get_row(conn,'opportunities',opportunity_id)
@@ -94,6 +97,9 @@ class ApplicationPlacementService:
             if opp['kind']!='INTERNSHIP' or revision['contract_type'] not in ('INTERNSHIP_AGREEMENT','ACADEMIC_TRIPARTITE'):
                 raise PlacementScopeError('INTERNSHIP_PLACEMENT_REQUIRED',status_code=409)
             require_capability(conn,organization_id,'INTERNSHIP_HOST')
+            replay=request_record(conn,'placement_intakes',actor,idempotency_key,digest)
+            if replay:
+                return {**get_row(conn,'placements',replay['placement_id']),'intake_receipt':replay['receipt']}
             if offer['status']!='ACCEPTED': raise PlacementScopeError('OFFER_NOT_ACCEPTED')
             from app.db.institution_scope import TASHKENT
             start=start_date or now().astimezone(TASHKENT).date(); end=end_date or start+timedelta(days=90)
@@ -112,14 +118,16 @@ class ApplicationPlacementService:
                 JOIN flexbridge.application_attempts t ON t.id=o.attempt_id
                 JOIN flexbridge.opportunity_revisions r ON r.id=o.revision_id WHERE p.id=:placement"""),{'placement':p['id']}).one()
             version=get_row(conn,'users',actor.user_id)['auth_version']
+            receipt=dict(placement_id=p['id'],initial_terms_id=p['current_terms_id'],status_at_creation='PLANNED',recorded_at=p['created_at'].isoformat())
             conn.execute(table('placement_intakes').insert().values(placement_id=p['id'],created_at=now(),origin='PUBLIC',
                 offer_id=offer_id,attempt_id=offer['attempt_id'],revision_id=offer['revision_id'],
                 academic_required=revision['contract_type']=='ACADEMIC_TRIPARTITE',actor_id=actor.user_id,
                 session_id=actor.session_id,auth_version=version,host_grant_id=authority['_authority_grant_id'],
-                initial_snapshot=initial_snapshot,source_snapshot=source_snapshot))
+                initial_snapshot=initial_snapshot,source_snapshot=source_snapshot,
+                idempotency_key=idempotency_key,request_fingerprint=digest,receipt=receipt))
             from app.core.audit import AppendOnlyAuditStore
             AppendOnlyAuditStore().append_audit_event(actor_id=actor.user_id,action='PLACEMENT_PLANNED',entity_type='placement',entity_id=p['id'])
-            return p
+            return {**p,'intake_receipt':receipt}
 
     def _party(self,conn,candidate_id,org_id,user_id,party):
         if owns_candidate(user_id,candidate_id):

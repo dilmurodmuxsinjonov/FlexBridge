@@ -5,7 +5,56 @@ Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni pa
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## CURRENT LOG-067 - versioned host admission draft
+## CURRENT LOG-068 - retry, date, pagination and local notice follow-up
+
+Final current native UTC115 passed457.42s,0failure/error/skip,1 framework warning.
+All local native/Copilot jobs from this package are now terminal. This selected
+run excludes unfinished academic admission; not a complete current CI/pilot pass.
+Read source_followup_manifest/HISOBOT and actual GitHub head/check state on resume.
+
+Codex owns the current feature/65-internship-admission edits. PR66 stays draft,
+Issue65 OPEN. Accepted main1b2bbbf /0013/114 unchanged. Draft0014 still118 tables;
+it now stores explicit required PUBLIC intake/nomination nonce/fingerprint/receipt
+and NULL legacy equivalents. Current projections plus immutable historical receipts
+support retries without new starts or revoked-assignment resurrection. Old nomination
+aliases normalize UUIDs and use the same key. No UID fallback.
+
+All own/host/mentor lists paginate with limit1..100, after/next_after;105 real HTTP
+intakes/nominations from trusted upstream metadata and105 tied-time inbox records
+passed. Plans show dates. In-app nominee/accepted/revoked notices use fenced outbox
+and immutable source/recipient derivation, atomic inbox/ack, current own read scope
+and safe projections; no email/SMS/provider claim. Main worker includes the local
+topic, identity worker stays separate. API031 in-app basics adds registration:
+60 explicit72 placeholders of132, not full contract or pilot acceptance.
+
+Calendar defect reproduced1failed3passed19.85s ->4passed21.63s. Retry stage15passed
+66.94s, paging2passed24.85s. Notice initial1failed11passed44.47s ->UTC normalization.
+First broad UTC invocation113 setup errors3.62s was encoded URL options; corrected
+PGOPTIONS='-c TimeZone=UTC' preflight verifies UTC. Broad UTC stage111passed2failed
+344.59s exposed nomination alias Z/+00 formatting and old501 expectation on the
+new inbox; both corrected. Final host_utc_final JUnit carries current terminal
+result. Do not add overlapping counts or label setup errors as application tests.
+
+Copilot read-only15-file source review found one calendar P2; actual changed
+predicate probe1failed18.38s ->exact full predicate/rewrite comparison ->9passed
+121.47s, including populated success/drift/failure rollback. Calendar and nomination
+format source follow-ups report no concrete delta P1/P2; opinions are not model/
+SHA/test certification. Scope hashes/exit codes and all failures are retained.
+
+NEXT: finish genuine academic pending-placement binding/teacher personal accept
+and restore63 academic fixture cases. Earlier85065b1 CI42722020448/42722027846:
+66failed901passed599.03s/735.52s;3 other cases are diary integration. Do not hide
+those failures, waive proofs, restore UID calls, or fabricate new legacy data.
+Actual old academic helpers ALREADY lock institution before placement; earlier
+placement-first handoff wording was wrong and is corrected in NEXT_ACADEMIC_UNIT.md.
+Reconcile org locks and derive bound institution before academic host ACTIVATE;
+retry scope changes rather than locking institution after org/placement. Complete
+current full CI/reviews before any merge. Full diary/completion/exports/frontend/
+provider/legal/DR/R1 remains open. pg_live remains stopped/untouched; Docker/WSL
+admin/reboot installation incomplete. At resume inspect actual git/CI/live job
+handles, not historical prose; don't restart a confirmed-live process on timeout.
+
+## Historical LOG-067 - versioned host admission draft
 
 Issue65/PR66 remain OPEN/DRAFT on feature/65-internship-admission. Accepted main
 is still1b2bbbf /0013/114. Current code has0014, executed118 tables in disposable
