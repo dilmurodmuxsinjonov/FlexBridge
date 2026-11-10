@@ -195,3 +195,17 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 
 
 - LOG-071 current:098/099/105 exact current scoped lists and option/assignment metadata helpers, distinct coordinator creation/binding notices, stale-choice exact-plan guard, post-role-pin current MFA policy. Native current21passed139.56s and notice5passed41.18s overlap; broad56passed1failed363.15s was a lease-reset boundary fixture, corrected explicit-expiry all notice groups15passed73.87s with worker semantics unchanged.9-file current read-only source opinion exit0/no actionable P1/P2, frozen hashes retained. Parentdf87515 full1015 twice549.23s/740.08s does not accept this current source. Registration67/65 of132 is registration only,0015/124 unchanged; latest CI/source pin and detailed106/107/108/full R1 remain. See backend/ACADEMIC_VIEWS.md, source_academic_views_manifest and current handoff.
+
+## PLACEMENT-CODEX-API049 â€” Placement Completion Requests & Two-Sided Closure (2026-11-10)
+
+- Migration `0019_placement_completions`; `flexbridge.placement_completion_requests` jadvali (runtime 129 tables, canonical 94). Statuslar: PENDING_HOST, PENDING_CANDIDATE, COMPLETED, REJECTED, SUPERSEDED.
+- State machine: Candidate yoki Host/Mentor completion request yaratadi. Qarama-qarshi tomon tasdiqlaganda status `COMPLETED` bo'ladi. Agar tomonlardan biri `REJECT_COMPLETION` qilsa, placement `ACTIVE` holatiga qaytadi va barcha kutilayotgan so'rovlar `SUPERSEDED` deb belgilanadi (qayta ikkala tomonlama yangi tasdiq talab etiladi).
+- `guard_placement_start()` triggeri `COMPLETION_REQUESTED -> ACTIVE` o'tishini ruxsat beradi, 0015 academic assignment va admission proof tekshiruvlarini to'liq saqlaydi.
+- Preconditions:
+  * Ochiq `NEEDS_REVISION` (akademik) yoki `CHANGES_REQUESTED` (ish joyi) log reviewlari bo'lmasligi shart.
+  * Tasdiqlangan daqiqalar talab qilingan `required_minutes`dan kam bo'lsa, majburiy `early_reason` kiritilishi shart.
+- Concurrency va Security:
+  * Oracle probing oldini olish: Foydalanuvchi authorization tekshiruvi `terms_id` va `terms_version` tekshiruvidan oldin bajariladi (403 PLACEMENT_ACTOR_FORBIDDEN > 409 TERMS_VERSION_MISMATCH).
+  * Idempotency replay xavfsizligi: Placement `COMPLETED` bo'lgandan keyin ham avvalgi muvaffaqiyatli request replay qilish imkoni bor (idempotency tekshiruvi status preconditiondan oldin).
+  * Multi-review join kartezian ko'payishini oldini olish: `submitted_logs` CTE yordamida har bir log bo'yicha daqiqalar va reviewlar mustaqil hisoblanadi.
+

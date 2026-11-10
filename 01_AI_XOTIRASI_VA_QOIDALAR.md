@@ -879,3 +879,12 @@ reviews/2026-11-10/academic_reviews/NEXT.md va Antigravity handoffda.
 Current Q015 / LOG-075 cycle: AGY-001 returned SUCCESS in actual conversation3ed58526; requested gemini-4-argon-high, reported-model field absent. Isolated worktree remained clean. Codex independently verified primary ADMIN/CAP037/API121/DB092/runtime facts and returned six concrete design corrections (missing-row/cross-code locks, exact grant, immutable legacy origin, identical receipts, paid alias/default-off/R2 schema, current security tests). AGY-002 focused security revision is now actually requested with listed claude-opus-5-5-high; a bounded controller automatically switches suitable listed models only on an actual quota/limit. No quota has been inferred from the earlier timeout. All new PRs/merges target integration/r1-agent-collaboration; main/master frozen764fb984. Guard/source opinion and manual claims stay limited. Issue70 final10native passed77.82s; its integration-target PR/full exact-head CI still pending. Main release/full R1/API108/pilot not accepted.
 
 Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; validated critique/task/result receipt are versioned in agent_collaboration. Raw CLI logs remain outside publication. Copilot policy review requested auto, exit0/no scoped P1/P2; minor workspace/branch path ambiguity corrected.
+
+## LOG-086 / API-049 - Placement Completion Requests & Two-Sided Closure
+
+- Issue #80, PR #81 merged into `integration/r1-agent-collaboration` (`278a5d243e38d5ab6da65a18821346321940c0a9`), `main` frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6`.
+- Antigravity under Q-016 master succession; static reviews by Copilot CLI and OpenCode CLI.
+- Alembic migration `0019_placement_completions` (129 runtime tables). State machine: Candidate <-> Host/Mentor sign-offs lead to `COMPLETED`. Rejection returns status to `ACTIVE` and supersedes pending requests.
+- CTE isolation in `get_placement_diaries_basis` prevents Cartesian multiplication of logged minutes across multi-reviews. Priority auth check prevents oracle probing; safe actor-bound idempotency replay preserves retry capabilities after completion.
+- 55/55 tests passed in isolated PostgreSQL environment; CI (backend and protocol) fully green on GitHub Actions.
+

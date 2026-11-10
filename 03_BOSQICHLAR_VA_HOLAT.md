@@ -665,3 +665,28 @@ Keyingi kichik qadam:
   source frozen remotely. When integration accepts it, create root Issue72 branch
   from actual integration, preserving these live notes; verify/copy agent owned
   diff and Codex wiring without reverting another writer. Full R1 remains active.
+
+## PLACEMENT-ANTIGRAVITY-API049 / LOG-086 - Issue80, PR81: Placement Completion Requests & Two-Sided Closure
+
+- Holat: Bajarildi va qabul qilindi. PR #81 `integration/r1-agent-collaboration`ga
+  squash merge qilindi (commit: `278a5d243e38d5ab6da65a18821346321940c0a9`),
+  Issue #80 yopildi. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6`.
+- Mas'ul: Antigravity (Q016 master succession ostida); peer reviews: GitHub Copilot CLI
+  va OpenCode CLI (ikkalasi ham approved/passed).
+- Foydalanilgan yangiliklar:
+  * Alembic migration `0019_placement_completions`: `flexbridge.placement_completion_requests`
+    table ('PENDING_HOST', 'PENDING_CANDIDATE', 'COMPLETED', 'REJECTED', 'SUPERSEDED'),
+    `guard_placement_start()` trigger funksiyasi yangilandi (`COMPLETION_REQUESTED -> ACTIVE`
+    rejeksiyada qaytishga ruxsat, 0015 academic validation to'liq saqlangan).
+  * `PlacementCompletionService` (API-049 / CAP-022):
+    - Oracle probing himoyasi: authorization check terms versiyasi tekshiruvidan oldin bajariladi.
+    - Idempotency replay xavfsizligi: status prekonditsiyalaridan oldin tekshiriladi, client
+      retries completed placement uchun xatosiz replay beradi.
+    - CTE izolyatsiyasi: `submitted_logs` orqali daqiqalar aggregation qilinadi, ko'p reviewlar
+      bilan Cartesian ko'payish xavfi bartaraf etildi.
+    - Ikki tomonlama rozilik: Candidate va Host/Mentor ikkalasi tasdiqlaganda `COMPLETED`,
+      rad etilganda barcha avvalgi kutuvchi so'rovlar `SUPERSEDED` bo'lib, placement `ACTIVE`ga qaytadi.
+  * Endpoint: `POST /api/v1/placements/{placement_id}/completion-requests`.
+- Testlar: `test_placement_completion_api049.py` 11/11 passed, jami 55/55 migration/regression passed.
+  GitHub Actions CI (`backend` va `protocol`) to'liq yashil.
+
