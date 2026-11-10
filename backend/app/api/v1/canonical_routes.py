@@ -240,7 +240,7 @@ def api_054_put_draft_daily_log(
         total_mins = sum(t.minutes for t in payload.tasks) if payload.tasks else payload.total_minutes
         return internship_log_service.save_draft_daily_log_api_054(
             placement_id=str(id),
-            author_id=actor.user_id,
+            actor=actor,
             log_date=date,
             day_type=payload.day_type,
             summary_text=payload.summary_text,
@@ -263,7 +263,7 @@ def api_056_submit_daily_log(
             raise InternshipLogScopeError("DAILY_LOG_NOT_FOUND", "Kunlik log topilmadi", status_code=404, sqlstate="02000")
         return internship_log_service.submit_daily_log_api_056(
             placement_id=log_row["placement_id"],
-            author_id=actor.user_id,
+            actor=actor,
             log_date=log_row["log_date"],
             log_id=str(id),
         )
