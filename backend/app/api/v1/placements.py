@@ -58,6 +58,12 @@ class PlacementCompletionRequest(StrictDTO):
     early_reason: str | None = Field(default=None, max_length=2000)
 
 
+class PlacementExportRequest(StrictDTO):
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    format: str = Field(default='PDF', pattern='^(PDF|JSON)$')
+    include_reviews: bool = True
+
+
 @router.post("/applications", status_code=201)
 def create_application_endpoint(payload: CreateApplicationRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return placement_service.create_application(
@@ -159,6 +165,28 @@ def request_placement_completion_endpoint(
             decision=payload.decision,
             reason=payload.reason,
             early_reason=payload.early_reason,
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.post("/placements/{placement_id}/exports", status_code=201)
+def export_placement_endpoint(
+    placement_id: str,
+    payload: PlacementExportRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    try:
+        from app.services.placement_export import export_service
+        return export_service.export_placement(
+            actor=actor,
+            placement_id=placement_id,
+            idempotency_key=payload.idempotency_key,
+            export_format=payload.format,
+            include_reviews=payload.include_reviews,
         )
     except PlacementScopeError as exc:
         raise HTTPException(

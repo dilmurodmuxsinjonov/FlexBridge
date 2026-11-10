@@ -879,3 +879,42 @@ reviews/2026-11-10/academic_reviews/NEXT.md va Antigravity handoffda.
 Current Q015 / LOG-075 cycle: AGY-001 returned SUCCESS in actual conversation3ed58526; requested gemini-4-argon-high, reported-model field absent. Isolated worktree remained clean. Codex independently verified primary ADMIN/CAP037/API121/DB092/runtime facts and returned six concrete design corrections (missing-row/cross-code locks, exact grant, immutable legacy origin, identical receipts, paid alias/default-off/R2 schema, current security tests). AGY-002 focused security revision is now actually requested with listed claude-opus-5-5-high; a bounded controller automatically switches suitable listed models only on an actual quota/limit. No quota has been inferred from the earlier timeout. All new PRs/merges target integration/r1-agent-collaboration; main/master frozen764fb984. Guard/source opinion and manual claims stay limited. Issue70 final10native passed77.82s; its integration-target PR/full exact-head CI still pending. Main release/full R1/API108/pilot not accepted.
 
 Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; validated critique/task/result receipt are versioned in agent_collaboration. Raw CLI logs remain outside publication. Copilot policy review requested auto, exit0/no scoped P1/P2; minor workspace/branch path ambiguity corrected.
+
+## LOG-086 / API-049 - Placement Completion Requests & Two-Sided Closure
+
+- Issue #80, PR #81 merged into `integration/r1-agent-collaboration` (`278a5d243e38d5ab6da65a18821346321940c0a9`), `main` frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6`.
+- Antigravity under Q-016 master succession; static reviews by Copilot CLI and OpenCode CLI.
+- Alembic migration `0019_placement_completions` (129 runtime tables). State machine: Candidate <-> Host/Mentor sign-offs lead to `COMPLETED`. Rejection returns status to `ACTIVE` and supersedes pending requests.
+- CTE isolation in `get_placement_diaries_basis` prevents Cartesian multiplication of logged minutes across multi-reviews. Priority auth check prevents oracle probing; safe actor-bound idempotency replay preserves retry capabilities after completion.
+- 55/55 tests passed in isolated PostgreSQL environment; CI (backend and protocol) fully green on GitHub Actions.
+
+
+## LOG-087 / API-052 - Single Placement Report Export (Issue #82)
+
+- **Issue / PR**: GitHub Issue #82 (`API-052`), branch `feature/82-placement-report-exports`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` per user freeze policy (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Subagent execution under Antigravity Teamwork orchestration (Worker `worker_m1_1`, Challengers `challenger_m1_1`, `challenger_m1_2`, Reviewers, Worker `worker_m2_1`).
+- **Actor Resolution Precedence Fix**:
+  In `backend/app/services/placement_export.py:resolve_export_actor`, resolved the dual-role fixture defect where host owners were resolving as `'MENTOR'` instead of `'HOST'`. Evaluation hierarchy updated to:
+  1. `candidate_profiles` check -> `'CANDIDATE'`.
+  2. `org_authority` check (`'OWNER'`, `'HOST_COORDINATOR'`, `'HR'`) -> `'HOST'` (organizational authority takes precedence).
+  3. `mentor_assignments` check -> `'MENTOR'`.
+  4. `academic_assignments` check -> `'TEACHER'`.
+  5. `enrollments` + `institution_authority` check -> `'COORDINATOR'`.
+  Dedicated workplace mentors without host owner authority continue to resolve cleanly as `'MENTOR'`.
+- **Architecture & Lifecycle (`CAP-026`)**:
+  - Alembic migration `0020_placement_exports.py` introduces `flexbridge.placement_exports` table with `idx_placement_exports_placement` and `uq_placement_exports_idempotency` unique constraint (130 tables total in `flexbridge` schema).
+  - Endpoint `POST /api/v1/placements/{placement_id}/exports` supports `'PDF'` and `'JSON'` formats.
+  - Priority authorization check executes before any diary or placement data queries to prevent oracle probing.
+  - Export documents are stored with `retention_class='PRIVATE_EXPORT_FILE'` in `flexbridge.files` (DB-018) with a 24-hour expiration window.
+  - Every export is atomically logged to `flexbridge.audit_events` with action `'REPORT_EXPORT'` (DB-089).
+  - Informational disclaimer embedded: `"Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi."`
+  - Idempotency replay is actor-bound: returns exact receipt for same actor, HTTP 403 on actor mismatch, HTTP 409 on key reuse with different fingerprint.
+- **Empirical Test Verification (Isolated Test DB `FLEXBRIDGE_TEST_ADMIN_URL` on port 55440, pg_live untouched)**:
+  - 11/11 contract & security tests passed in `backend/tests/security/test_placement_exports_api052.py`.
+  - 22/22 adversarial stress tests passed in `backend/tests/security/test_placement_exports_adversarial.py` (cross-candidate, cross-institution, cross-org isolation, revoked assignments, format fuzzing, concurrent requests, SQL injection safety).
+  - 1/1 migration regression test passed in `backend/tests/security/test_regressions.py` verifying 130 tables in schema `flexbridge` and Alembic head at `0020_placement_exports`.
+- **Multi-Agent Code Reviews**:
+  - GitHub Copilot CLI 1.0.108 review logged in `reviews/2026-11-10/placement_exports/COPILOT_REVIEW.md` (verified host owner resolution fix, identified lifecycle & presigned URL refresh items).
+  - OpenCode CLI 1.18.29 & Specialist Peer Review logged in `reviews/2026-11-10/placement_exports/OPENCODE_REVIEW.md` (5-axis approval).
+  - Review synthesis compiled in `reviews/2026-11-10/placement_exports/REVIEW_SUMMARY.md`.
