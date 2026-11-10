@@ -1,0 +1,672 @@
+{
+  "scope": "registration only, not full functionality/R1/pilot acceptance",
+  "total_contracts": 132,
+  "explicit_count": 69,
+  "placeholder_count": 63,
+  "partial": [
+    "API031 local inbox only",
+    "API088 completion/dispute pending"
+  ],
+  "routes": [
+    {
+      "id": "API-001",
+      "explicit": false,
+      "operation_id": "canonical_api_001_api_v1_opportunities_get"
+    },
+    {
+      "id": "API-002",
+      "explicit": false,
+      "operation_id": "canonical_api_002_api_v1_onboarding_options_get"
+    },
+    {
+      "id": "API-003",
+      "explicit": true,
+      "operation_id": "api_003_matching_preview_api_v1_matching_preview_post"
+    },
+    {
+      "id": "API-004",
+      "explicit": false,
+      "operation_id": "canonical_api_004_api_v1_saved_opportunities_post"
+    },
+    {
+      "id": "API-005",
+      "explicit": false,
+      "operation_id": "canonical_api_005_api_v1_opportunities__id__get"
+    },
+    {
+      "id": "API-006",
+      "explicit": false,
+      "operation_id": "canonical_api_006_api_v1_opportunities__id__applications_post"
+    },
+    {
+      "id": "API-007",
+      "explicit": false,
+      "operation_id": "canonical_api_007_api_v1_moderation_cases_post"
+    },
+    {
+      "id": "API-008",
+      "explicit": true,
+      "operation_id": "public_api_v1_organizations__id__public_get"
+    },
+    {
+      "id": "API-009",
+      "explicit": false,
+      "operation_id": "canonical_api_009_api_v1_organizations__id__opportunities_get"
+    },
+    {
+      "id": "API-010",
+      "explicit": false,
+      "operation_id": "canonical_api_010_api_v1_organizations__id__rating_summary_get"
+    },
+    {
+      "id": "API-011",
+      "explicit": false,
+      "operation_id": "canonical_api_011_api_v1_services_public_get"
+    },
+    {
+      "id": "API-012",
+      "explicit": false,
+      "operation_id": "canonical_api_012_api_v1_prices_public_get"
+    },
+    {
+      "id": "API-013",
+      "explicit": false,
+      "operation_id": "canonical_api_013_api_v1_help__document__get"
+    },
+    {
+      "id": "API-014",
+      "explicit": false,
+      "operation_id": "canonical_api_014_api_v1_policies__document__get"
+    },
+    {
+      "id": "API-015",
+      "explicit": true,
+      "operation_id": "register_api_v1_auth_register_post"
+    },
+    {
+      "id": "API-016",
+      "explicit": true,
+      "operation_id": "challenge_api_v1_auth_challenges_post"
+    },
+    {
+      "id": "API-017",
+      "explicit": true,
+      "operation_id": "options_api_v1_institution_onboarding_options_get"
+    },
+    {
+      "id": "API-018",
+      "explicit": true,
+      "operation_id": "login_api_v1_auth_login_post"
+    },
+    {
+      "id": "API-019",
+      "explicit": true,
+      "operation_id": "verify_mfa_api_v1_auth_mfa_verify_post"
+    },
+    {
+      "id": "API-020",
+      "explicit": true,
+      "operation_id": "consume_api_v1_auth_challenges__id__consume_post"
+    },
+    {
+      "id": "API-021",
+      "explicit": true,
+      "operation_id": "resend_api_v1_auth_challenges__id__resend_post"
+    },
+    {
+      "id": "API-022",
+      "explicit": true,
+      "operation_id": "recovery_api_v1_auth_recovery_post"
+    },
+    {
+      "id": "API-023",
+      "explicit": true,
+      "operation_id": "recovery_status_api_v1_auth_recovery__id__get"
+    },
+    {
+      "id": "API-024",
+      "explicit": true,
+      "operation_id": "preview_api_v1_invitations__token__get"
+    },
+    {
+      "id": "API-025",
+      "explicit": true,
+      "operation_id": "accept_api_v1_invitations__token__accept_post"
+    },
+    {
+      "id": "API-026",
+      "explicit": true,
+      "operation_id": "patch_profile_api_v1_me_candidate_patch"
+    },
+    {
+      "id": "API-027",
+      "explicit": true,
+      "operation_id": "create_api_v1_me_enrollments_post"
+    },
+    {
+      "id": "API-028",
+      "explicit": true,
+      "operation_id": "put_availability_api_v1_me_availability_put"
+    },
+    {
+      "id": "API-029",
+      "explicit": false,
+      "operation_id": "canonical_api_029_api_v1_me_applications_summary_get"
+    },
+    {
+      "id": "API-030",
+      "explicit": true,
+      "operation_id": "own_placements_api_v1_me_placements_get"
+    },
+    {
+      "id": "API-031",
+      "explicit": true,
+      "operation_id": "own_api_v1_me_notifications_get"
+    },
+    {
+      "id": "API-032",
+      "explicit": true,
+      "operation_id": "patch_skills_api_v1_me_candidate_skills_patch"
+    },
+    {
+      "id": "API-033",
+      "explicit": true,
+      "operation_id": "link_cv_api_v1_me_candidate_cv_post"
+    },
+    {
+      "id": "API-034",
+      "explicit": true,
+      "operation_id": "list_own_api_v1_me_enrollments_get"
+    },
+    {
+      "id": "API-035",
+      "explicit": true,
+      "operation_id": "get_availability_api_v1_me_availability_get"
+    },
+    {
+      "id": "API-036",
+      "explicit": true,
+      "operation_id": "put_exceptions_api_v1_me_availability_exceptions_put"
+    },
+    {
+      "id": "API-037",
+      "explicit": false,
+      "operation_id": "canonical_api_037_api_v1_me_saved_opportunities_get"
+    },
+    {
+      "id": "API-038",
+      "explicit": false,
+      "operation_id": "canonical_api_038_api_v1_me_saved_opportunities__id__delete"
+    },
+    {
+      "id": "API-039",
+      "explicit": false,
+      "operation_id": "canonical_api_039_api_v1_me_applications_get"
+    },
+    {
+      "id": "API-040",
+      "explicit": false,
+      "operation_id": "canonical_api_040_api_v1_me_applications__id__reapply_post"
+    },
+    {
+      "id": "API-041",
+      "explicit": false,
+      "operation_id": "canonical_api_041_api_v1_me_applications__id__get"
+    },
+    {
+      "id": "API-042",
+      "explicit": false,
+      "operation_id": "canonical_api_042_api_v1_interviews__id__responses_post"
+    },
+    {
+      "id": "API-043",
+      "explicit": true,
+      "operation_id": "api_043_respond_to_offer_api_v1_offers__id__respond_post"
+    },
+    {
+      "id": "API-044",
+      "explicit": false,
+      "operation_id": "canonical_api_044_api_v1_me_applications__id__withdraw_post"
+    },
+    {
+      "id": "API-045",
+      "explicit": false,
+      "operation_id": "canonical_api_045_api_v1_me_engagements__id__get"
+    },
+    {
+      "id": "API-046",
+      "explicit": true,
+      "operation_id": "api_046_confirm_job_engagement_api_v1_engagements__id__confirmations_post"
+    },
+    {
+      "id": "API-047",
+      "explicit": false,
+      "operation_id": "canonical_api_047_api_v1_engagements__id__ratings_post"
+    },
+    {
+      "id": "API-048",
+      "explicit": true,
+      "operation_id": "accept_candidate_api_v1_placements__id__accept_post"
+    },
+    {
+      "id": "API-049",
+      "explicit": false,
+      "operation_id": "canonical_api_049_api_v1_placements__id__completion_requests_post"
+    },
+    {
+      "id": "API-050",
+      "explicit": true,
+      "operation_id": "plan_api_v1_placements__id__plan_get"
+    },
+    {
+      "id": "API-051",
+      "explicit": true,
+      "operation_id": "accept_assignment_api_v1_placements__id__assignments__assignment__accept_post"
+    },
+    {
+      "id": "API-052",
+      "explicit": false,
+      "operation_id": "canonical_api_052_api_v1_placements__id__exports_post"
+    },
+    {
+      "id": "API-053",
+      "explicit": false,
+      "operation_id": "canonical_api_053_api_v1_placements__id__logs_get"
+    },
+    {
+      "id": "API-054",
+      "explicit": true,
+      "operation_id": "api_054_put_draft_daily_log_api_v1_placements__id__logs__date__put"
+    },
+    {
+      "id": "API-055",
+      "explicit": false,
+      "operation_id": "canonical_api_055_api_v1_log_entries__id__evidence_post"
+    },
+    {
+      "id": "API-056",
+      "explicit": true,
+      "operation_id": "api_056_submit_daily_log_api_v1_logs__id__submit_post"
+    },
+    {
+      "id": "API-057",
+      "explicit": false,
+      "operation_id": "canonical_api_057_api_v1_me_ratings_get"
+    },
+    {
+      "id": "API-058",
+      "explicit": false,
+      "operation_id": "canonical_api_058_api_v1_ratings__id__appeals_post"
+    },
+    {
+      "id": "API-059",
+      "explicit": false,
+      "operation_id": "canonical_api_059_api_v1_me_notification_preferences_put"
+    },
+    {
+      "id": "API-060",
+      "explicit": true,
+      "operation_id": "security_api_v1_me_security_patch"
+    },
+    {
+      "id": "API-061",
+      "explicit": true,
+      "operation_id": "revoke_api_v1_me_sessions__id__delete"
+    },
+    {
+      "id": "API-062",
+      "explicit": false,
+      "operation_id": "canonical_api_062_api_v1_me_privacy_requests_post"
+    },
+    {
+      "id": "API-063",
+      "explicit": false,
+      "operation_id": "canonical_api_063_api_v1_me_support_tickets_get"
+    },
+    {
+      "id": "API-064",
+      "explicit": false,
+      "operation_id": "canonical_api_064_api_v1_support_tickets__id__messages_post"
+    },
+    {
+      "id": "API-065",
+      "explicit": true,
+      "operation_id": "register_api_v1_organizations_post"
+    },
+    {
+      "id": "API-066",
+      "explicit": true,
+      "operation_id": "submit_api_v1_organizations__id__verification_post"
+    },
+    {
+      "id": "API-067",
+      "explicit": true,
+      "operation_id": "status_api_v1_organizations__id__verification_get"
+    },
+    {
+      "id": "API-068",
+      "explicit": false,
+      "operation_id": "canonical_api_068_api_v1_organizations__org__dashboard_get"
+    },
+    {
+      "id": "API-069",
+      "explicit": true,
+      "operation_id": "host_placements_api_v1_organizations__org__placements_get"
+    },
+    {
+      "id": "API-070",
+      "explicit": false,
+      "operation_id": "canonical_api_070_api_v1_organizations__org__entitlements_get"
+    },
+    {
+      "id": "API-071",
+      "explicit": true,
+      "operation_id": "patch_api_v1_organizations__org__patch"
+    },
+    {
+      "id": "API-072",
+      "explicit": true,
+      "operation_id": "capabilities_api_v1_organizations__org__capabilities_get"
+    },
+    {
+      "id": "API-073",
+      "explicit": true,
+      "operation_id": "api_073_list_org_memberships_api_v1_organizations__org__memberships_get"
+    },
+    {
+      "id": "API-074",
+      "explicit": true,
+      "operation_id": "create_api_v1_organizations__org__invitations_post"
+    },
+    {
+      "id": "API-075",
+      "explicit": true,
+      "operation_id": "revoke_api_v1_organizations__org__memberships__id__revoke_post"
+    },
+    {
+      "id": "API-076",
+      "explicit": false,
+      "operation_id": "canonical_api_009_api_v1_organizations__id__opportunities_get"
+    },
+    {
+      "id": "API-077",
+      "explicit": true,
+      "operation_id": "transition_api_v1_opportunities__id__transition_post"
+    },
+    {
+      "id": "API-078",
+      "explicit": false,
+      "operation_id": "canonical_api_078_api_v1_opportunities__id__draft_put"
+    },
+    {
+      "id": "API-079",
+      "explicit": false,
+      "operation_id": "canonical_api_079_api_v1_opportunities__id__draft_terms_put"
+    },
+    {
+      "id": "API-080",
+      "explicit": false,
+      "operation_id": "canonical_api_080_api_v1_opportunities__id__draft_schedule_put"
+    },
+    {
+      "id": "API-081",
+      "explicit": true,
+      "operation_id": "api_081_publish_opportunity_api_v1_opportunities__id__publish_post"
+    },
+    {
+      "id": "API-082",
+      "explicit": false,
+      "operation_id": "canonical_api_082_api_v1_opportunities__id__applications_get"
+    },
+    {
+      "id": "API-083",
+      "explicit": false,
+      "operation_id": "canonical_api_083_api_v1_applications__id__transition_post"
+    },
+    {
+      "id": "API-084",
+      "explicit": false,
+      "operation_id": "canonical_api_084_api_v1_applications__id__hr_get"
+    },
+    {
+      "id": "API-085",
+      "explicit": false,
+      "operation_id": "canonical_api_085_api_v1_applications__id__interviews_post"
+    },
+    {
+      "id": "API-086",
+      "explicit": false,
+      "operation_id": "canonical_api_086_api_v1_applications__id__offers_post"
+    },
+    {
+      "id": "API-087",
+      "explicit": true,
+      "operation_id": "nominate_api_v1_placements__id__mentor_assignments_post"
+    },
+    {
+      "id": "API-088",
+      "explicit": true,
+      "operation_id": "host_decision_api_v1_placements__id__host_decisions_post"
+    },
+    {
+      "id": "API-089",
+      "explicit": true,
+      "operation_id": "own_mentor_assignments_api_v1_me_mentor_assignments_get"
+    },
+    {
+      "id": "API-090",
+      "explicit": false,
+      "operation_id": "canonical_api_090_api_v1_me_mentor_review_queue_get"
+    },
+    {
+      "id": "API-091",
+      "explicit": false,
+      "operation_id": "canonical_api_091_api_v1_log_revisions__revision__workplace_get"
+    },
+    {
+      "id": "API-092",
+      "explicit": false,
+      "operation_id": "canonical_api_092_api_v1_log_revisions__revision__workplace_reviews_post"
+    },
+    {
+      "id": "API-093",
+      "explicit": false,
+      "operation_id": "canonical_api_093_api_v1_organizations__org__billing_get"
+    },
+    {
+      "id": "API-094",
+      "explicit": true,
+      "operation_id": "canonical_order_api_v1_organizations__org__orders_post"
+    },
+    {
+      "id": "API-095",
+      "explicit": true,
+      "operation_id": "canonical_refund_api_v1_orders__id__refund_requests_post"
+    },
+    {
+      "id": "API-096",
+      "explicit": true,
+      "operation_id": "submit_api_v1_institution_appointments_post"
+    },
+    {
+      "id": "API-097",
+      "explicit": true,
+      "operation_id": "status_api_v1_institution_appointments__id__get"
+    },
+    {
+      "id": "API-098",
+      "explicit": true,
+      "operation_id": "supervisions_api_v1_institutions__inst__supervisions_get"
+    },
+    {
+      "id": "API-099",
+      "explicit": true,
+      "operation_id": "assignment_queue_api_v1_institutions__inst__assignment_queue_get"
+    },
+    {
+      "id": "API-100",
+      "explicit": false,
+      "operation_id": "canonical_api_100_api_v1_institutions__inst__exports_post"
+    },
+    {
+      "id": "API-101",
+      "explicit": true,
+      "operation_id": "create_supervision_api_v1_student_supervisions_post"
+    },
+    {
+      "id": "API-102",
+      "explicit": true,
+      "operation_id": "nominate_api_v1_placements__id__academic_assignments_post"
+    },
+    {
+      "id": "API-103",
+      "explicit": true,
+      "operation_id": "revoke_api_v1_academic_assignments__id__revoke_post"
+    },
+    {
+      "id": "API-104",
+      "explicit": true,
+      "operation_id": "own_api_v1_me_academic_assignments_get"
+    },
+    {
+      "id": "API-105",
+      "explicit": true,
+      "operation_id": "review_queue_api_v1_me_academic_review_queue_get"
+    },
+    {
+      "id": "API-106",
+      "explicit": true,
+      "operation_id": "academic_revision_api_v1_log_revisions__revision__academic_get"
+    },
+    {
+      "id": "API-107",
+      "explicit": true,
+      "operation_id": "review_revision_api_v1_log_revisions__revision__academic_reviews_post"
+    },
+    {
+      "id": "API-108",
+      "explicit": false,
+      "operation_id": "canonical_api_108_api_v1_placements__id__academic_decisions_post"
+    },
+    {
+      "id": "API-109",
+      "explicit": true,
+      "operation_id": "queue_api_v1_operator_verification_cases_get"
+    },
+    {
+      "id": "API-110",
+      "explicit": true,
+      "operation_id": "decide_api_v1_operator_verification_cases__id__decide_post"
+    },
+    {
+      "id": "API-111",
+      "explicit": true,
+      "operation_id": "decide_api_v1_operator_moderation_cases__id__actions_post"
+    },
+    {
+      "id": "API-112",
+      "explicit": false,
+      "operation_id": "canonical_api_112_api_v1_operator_support_tickets_get"
+    },
+    {
+      "id": "API-113",
+      "explicit": false,
+      "operation_id": "canonical_api_113_api_v1_operator_support_tickets__id__messages_post"
+    },
+    {
+      "id": "API-114",
+      "explicit": false,
+      "operation_id": "canonical_api_114_api_v1_operator_privacy_requests__id__resolve_post"
+    },
+    {
+      "id": "API-115",
+      "explicit": false,
+      "operation_id": "canonical_api_115_api_v1_operator_reconciliation_get"
+    },
+    {
+      "id": "API-116",
+      "explicit": true,
+      "operation_id": "approve_refund_api_v1_operator_refunds__id__approve_post"
+    },
+    {
+      "id": "API-117",
+      "explicit": false,
+      "operation_id": "canonical_api_117_api_v1_operator_finance_summary_get"
+    },
+    {
+      "id": "API-118",
+      "explicit": false,
+      "operation_id": "canonical_api_118_api_v1_operator_audit_events_get"
+    },
+    {
+      "id": "API-119",
+      "explicit": false,
+      "operation_id": "canonical_api_119_api_v1_operator_access_requests_post"
+    },
+    {
+      "id": "API-120",
+      "explicit": false,
+      "operation_id": "canonical_api_120_api_v1_operator_users__id__revoke_sessions_post"
+    },
+    {
+      "id": "API-121",
+      "explicit": false,
+      "operation_id": "canonical_api_121_api_v1_operator_feature_flags__code__patch"
+    },
+    {
+      "id": "API-122",
+      "explicit": false,
+      "operation_id": "canonical_api_122_api_v1_operator_incidents_post"
+    },
+    {
+      "id": "API-123",
+      "explicit": false,
+      "operation_id": "canonical_api_123_api_v1_operator_restore_runs_get"
+    },
+    {
+      "id": "API-124",
+      "explicit": false,
+      "operation_id": "canonical_api_124_api_v1_operator_analytics_get"
+    },
+    {
+      "id": "API-X01",
+      "explicit": true,
+      "operation_id": "upload_api_v1_files_upload_intents_post"
+    },
+    {
+      "id": "API-X02",
+      "explicit": true,
+      "operation_id": "complete_api_v1_files__file_id__complete_upload_post"
+    },
+    {
+      "id": "API-X03",
+      "explicit": true,
+      "operation_id": "download_api_v1_files__file_id__download_get"
+    },
+    {
+      "id": "API-X04",
+      "explicit": true,
+      "operation_id": "api_x04_payment_webhook_api_v1_webhooks_payments__provider__post"
+    },
+    {
+      "id": "API-X05",
+      "explicit": true,
+      "operation_id": "health_live_api_v1_health_live_get"
+    },
+    {
+      "id": "API-X06",
+      "explicit": true,
+      "operation_id": "health_ready_api_v1_health_ready_get"
+    },
+    {
+      "id": "API-X07",
+      "explicit": false,
+      "operation_id": "canonical_api_x07_api_v1_internal_workers_scan_result_post"
+    },
+    {
+      "id": "API-X08",
+      "explicit": false,
+      "operation_id": "canonical_api_x08_api_v1_internal_workers_retention_sweep_post"
+    }
+  ]
+}

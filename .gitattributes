@@ -22,3 +22,8 @@ reviews/2026-11-10/internship_admission/copilot_academic_queues_source_review.md
 reviews/2026-11-10/academic_records/*junit.xml -text -whitespace
 reviews/2026-11-10/academic_records/copilot_plan_review.md -text -whitespace
 reviews/2026-11-10/academic_records/copilot_detail_review.md -text -whitespace
+reviews/2026-11-10/academic_reviews/*junit.xml -text -whitespace
+reviews/2026-11-10/academic_reviews/copilot_writer_review.md -text -whitespace
+reviews/2026-11-10/academic_reviews/copilot_writer_followup_review.md -text -whitespace
+reviews/2026-11-10/academic_reviews/copilot_test_delta_review.md -text -whitespace
+reviews/2026-11-10/academic_reviews/copilot_observed_tests_review.md -text -whitespace

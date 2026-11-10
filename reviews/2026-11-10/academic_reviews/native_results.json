@@ -1,0 +1,93 @@
+{
+  "scope": "Observed overlapping stages including all genuine red/fixture failures; not additive or full acceptance",
+  "stages": [
+    {
+      "file": "cross_host_intent_current_junit.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 20.019
+    },
+    {
+      "file": "extra_intents_current_junit.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 42.155
+    },
+    {
+      "file": "intent_receipt_consent_corrected_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 95.094
+    },
+    {
+      "file": "intent_receipt_red_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 41.359
+    },
+    {
+      "file": "legacy_consent_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 14.951
+    },
+    {
+      "file": "observed_concurrency_initial_junit.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 60.896
+    },
+    {
+      "file": "revocation_fixture_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 26.446
+    },
+    {
+      "file": "writer_authority_initial_junit.xml",
+      "tests": 98,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 633.642
+    },
+    {
+      "file": "writer_corrected_current_junit.xml",
+      "tests": 36,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 294.02
+    },
+    {
+      "file": "writer_final_current_junit.xml",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 303.845
+    },
+    {
+      "file": "writer_initial_junit.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 34.359
+    }
+  ]
+}

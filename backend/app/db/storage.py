@@ -158,7 +158,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0015_academic_admission':
+        if revision != '0016_academic_reviews':
             raise RuntimeError('Database migrations are not current')
     return engine
 

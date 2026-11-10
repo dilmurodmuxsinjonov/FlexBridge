@@ -1,5 +1,10 @@
 # Minimum academic record view (Issue67, LOG-072)
 
+LOG-073 update: API106 PR68 accepted1f717899 after exact53b full1047 CI twice
+618.75s/873.95s. Current separate API107 writer work is documented in
+ACADEMIC_REVIEWS.md and academic_reviews; following historical pending statements
+describe the earlier read draft. Issue67/API108/full R1 and pilot remain open.
+
 GET `/api/v1/log-revisions/{revision}/academic` resolves that exact submitted
 revision, not the daily log's newest pointer. Current exact coordinator binding/
 purpose or personally accepted original teacher scope for its terms is required.

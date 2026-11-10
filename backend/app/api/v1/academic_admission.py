@@ -1,11 +1,13 @@
 """Current coordinator supervision and personally named teacher admission."""
 from uuid import UUID
+from typing import Literal
 from fastapi import APIRouter,Depends,Query
 from pydantic import BaseModel,ConfigDict,Field
 from app.api.dependencies import ActorContext,require_actor_context
 from app.services.academic_admission import academic_service as service
 from app.services.academic_views import academic_view_service as views
 from app.services.academic_records import academic_record_service as records
+from app.services.academic_reviews import academic_review_service as reviews
 from app.api.v1.placement_admission import TermsRequest
 
 router=APIRouter(prefix='/api/v1',tags=['academic-admission'])
@@ -105,3 +107,17 @@ def review_queue(limit:int=Query(default=50,ge=1,le=100),after:UUID|None=None,ac
 @router.get('/log-revisions/{revision}/academic')
 def academic_revision(revision:UUID,actor:ActorContext=Depends(require_actor_context)):
     return records.detail(actor,str(revision))
+
+
+class AcademicReviewRequest(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    academic_assignment_id:UUID
+    decision:Literal['REVIEWED','NEEDS_REVISION']
+    comment:str=Field(default='',max_length=10000)
+    idempotency_key:str=Field(min_length=8,max_length=128)
+
+
+@router.post('/log-revisions/{revision}/academic-reviews',status_code=201)
+def review_revision(revision:UUID,payload:AcademicReviewRequest,actor:ActorContext=Depends(require_actor_context)):
+    return reviews.review(actor=actor,revision_id=str(revision),assignment_id=str(payload.academic_assignment_id),
+        decision=payload.decision,comment=payload.comment,idempotency_key=payload.idempotency_key)

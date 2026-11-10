@@ -1,0 +1,5 @@
+{
+  "backend/tests/security/academic_review_observer.py": "1b49427fe5b449b820f4709b4df1d75883615f600a33a18fab6e785e48924e61",
+  "backend/tests/security/test_academic_reviews.py": "d1fd67686fa40648f5ba9e9bdf7bf6475bfb72dd6cfc8d4673f99bf1ed37b402",
+  "backend/tests/security/test_academic_review_intents.py": "4dd9ef69dcda00268f8b7c78b61f3af5b6250a669450a7d5b6fb85f64015ff10"
+}

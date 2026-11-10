@@ -1,0 +1,71 @@
+{
+  "head": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+  "base": "c4292d66c701cb76688f42483c25736e49a7bde0",
+  "changed_code_test_blobs": 5,
+  "matching_files": [
+    "backend/app/api/v1/academic_admission.py",
+    "backend/app/core/iam_http.py",
+    "backend/app/services/academic_records.py",
+    "backend/tests/security/test_academic_authority.py",
+    "backend/tests/security/test_academic_records.py"
+  ],
+  "pr": {
+    "baseRefOid": "c4292d66c701cb76688f42483c25736e49a7bde0",
+    "comments": [],
+    "headRefOid": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+    "isDraft": true,
+    "mergeStateStatus": "CLEAN",
+    "reviews": [],
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-10T04:09:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42752374509/job/129618743633",
+        "name": "backend",
+        "startedAt": "2026-11-10T03:53:58Z",
+        "status": "COMPLETED",
+        "workflowName": "PostgreSQL backend regressions"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-10T04:03:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42752276640/job/129618431005",
+        "name": "backend",
+        "startedAt": "2026-11-10T03:53:03Z",
+        "status": "COMPLETED",
+        "workflowName": "PostgreSQL backend regressions"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 42752276640,
+      "event": "push",
+      "headSha": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+      "status": "completed",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42752276640",
+      "pytest_summaries": [
+        "1047 passed, 1 warning in 618.75s"
+      ],
+      "failed_tests": [],
+      "pytest_summary": "1047 passed, 1 warning in 618.75s"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42752374509,
+      "event": "pull_request",
+      "headSha": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+      "status": "completed",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42752374509",
+      "pytest_summaries": [
+        "1047 passed, 1 warning in 873.95s"
+      ],
+      "failed_tests": [],
+      "pytest_summary": "1047 passed, 1 warning in 873.95s"
+    }
+  ]
+}

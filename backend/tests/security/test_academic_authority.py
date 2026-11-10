@@ -99,7 +99,8 @@ def accepted_assignment(f):
 
 def review_request(client,f,assignment,**extra):
     log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research work',total_minutes=60)
-    body=dict(placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],decision='APPROVED',comment='Reviewed',**extra)
+    body=dict(placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],
+        expected_revision_id=log['current_revision_id'],idempotency_key=str(uuid4()),decision='REVIEWED',comment='Reviewed',**extra)
     return lambda:client.post('/api/v1/internship-logs/daily-logs/'+log['id']+'/academic-reviews',json=body,headers=f['teacher']['headers'])
 
 
@@ -336,7 +337,8 @@ def test_teacher_who_also_coordinates_cannot_bypass_mfa_in_service(client,identi
     log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
     add_teacher_coordinator_role(f)
     with pytest.raises(GovernanceError,match='MFA_REQUIRED'):
-        service.review_academic(actor=actor(f['teacher']),daily_log_id=log['id'],placement_id=f['placement']['id'],assignment_id=assignment['id'],decision='APPROVED',comment='Reviewed')
+        service.review_academic(actor=actor(f['teacher']),daily_log_id=log['id'],placement_id=f['placement']['id'],assignment_id=assignment['id'],
+            expected_revision_id=log['current_revision_id'],idempotency_key=str(uuid4()),decision='REVIEWED',comment='Reviewed')
     assert count('academic_log_reviews')==0
 
 
@@ -363,6 +365,7 @@ def test_imported_revision_author_must_own_placement_candidate(client,identities
         t=table('log_revisions');conn.execute(t.update().where(t.c.id==draft['current_revision_id']).values(author_id=f['coord']['user_id'],status='SUBMITTED',submitted_at=now()))
     before=count('audit_events')
     r=client.post('/api/v1/internship-logs/daily-logs/'+draft['id']+'/academic-reviews',headers=f['teacher']['headers'],json={
-        'placement_id':f['placement']['id'],'academic_assignment_id':assignment['id'],'decision':'APPROVED'})
+        'placement_id':f['placement']['id'],'academic_assignment_id':assignment['id'],'decision':'REVIEWED',
+        'expected_revision_id':draft['current_revision_id'],'idempotency_key':str(uuid4())})
     assert r.status_code==403,r.text
     assert count('academic_log_reviews')==0 and count('audit_events')==before

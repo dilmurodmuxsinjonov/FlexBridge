@@ -1,0 +1,42 @@
+{
+  "source": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+  "merge": "1f717899242e97e7c1fce3cddda2df44dd7953b1",
+  "source_tree_equals_merge": true,
+  "pr": {
+    "headRefOid": "53b88f4810cd36c5aa01457f9d24cddbe33161e0",
+    "mergeCommit": {
+      "oid": "1f717899242e97e7c1fce3cddda2df44dd7953b1"
+    },
+    "mergedAt": "2026-11-10T04:10:47Z",
+    "state": "MERGED"
+  },
+  "issue": {
+    "state": "OPEN",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/67"
+  },
+  "preserved_unpublished_writer_files": {
+    "backend/alembic/versions/0016_academic_reviews.py": "fa997b45ea6ea86f2ab9ab911ada45bb8f09d8f9307c605d20d6018aa1db56ed",
+    "backend/app/api/v1/academic_admission.py": "04bb3625ab3dae0f3fbb7762adfcb3cc02686b265c46ecfe4dee422c4e1a3df1",
+    "backend/app/api/v1/internship_logs.py": "82f8a3defa9b07bff3eb8dcafd51697edde84d668ba9b4799384e23930ec570d",
+    "backend/app/db/academic_admission.py": "62a760574da1b8fcc7dca9ed0e1b3228365f5ec394658ec3b2a0e2282edc6eaa",
+    "backend/app/db/storage.py": "62dbc1120517c65bbb1e5cf83f93e6feb6142c6422a618e665f0aeafe1fc1771",
+    "backend/app/services/academic_reviews.py": "34baaa43ef8d12e2e922a364e2a0d3de67495f7b39ae0ccf4fe139ca9aefb0dc",
+    "backend/app/services/internship_logs.py": "678992bde41ac86dbaaed77e95efc4d25a0f238d4ffd03020f5aa517d32c8497",
+    "backend/tests/security/test_academic_admission.py": "09c84bf056983cc1c49ac7f6b53b7e17e965a743e0438c1e9179796efd139dcf",
+    "backend/tests/security/test_academic_authority.py": "e3fa9c62d777b75ae729cb7cdc1834d681c1dba92f21b031659491ed14735dd5",
+    "backend/tests/security/test_academic_migration.py": "91b623095ecd40c501a03a63944b659905aad8c8b9e46f2457a9283b24aa3da4",
+    "backend/tests/security/test_academic_review_migration.py": "4187ada107de789f9bd31c234f1da65a4f2a3954671eafc56ab34992598edb0f",
+    "backend/tests/security/test_academic_reviews.py": "98a7a76216500c381a9882ae509266bc05288b41dcdbeb517eb5caaaa698c815",
+    "backend/tests/security/test_enrollment_migration.py": "de377c8c0b46d48f4f8b9a64a5b9e5a89619a55abbb0c17a87f971bbf4d0c202",
+    "backend/tests/security/test_regressions.py": "0e7773a4b8054e3cb97e6ec6b256423d31dfca523bc9ac85d1c59a09840f4bbb",
+    "reviews/2026-11-10/academic_reviews/PLAN.md": "ed177acb3d6937db1343d9a280783d700e49ad8c8ed33b160e1f50f060ce8645",
+    "reviews/2026-11-10/academic_reviews/copilot_writer_exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "reviews/2026-11-10/academic_reviews/copilot_writer_prompt.txt": "3e9995ea5135966443d7202c678808c0db820496134eb27c24cfa29c8f4ca8e7",
+    "reviews/2026-11-10/academic_reviews/copilot_writer_review.md": "2e67563ecf1ec6103bafb1bf4db54cff53f8071f5d7aee5cfabf7d206bc21a1f",
+    "reviews/2026-11-10/academic_reviews/intent_receipt_red_junit.xml": "9f6dda34162061ed514bb882f42b475c41f35d9b3e57f8f7ec8e42410102cac5",
+    "reviews/2026-11-10/academic_reviews/legacy_consent_red_junit.xml": "d5d4d0f140166080b1c59a30d766e33cedb5816cbe7e80ce3cc72e24efd91ee3",
+    "reviews/2026-11-10/academic_reviews/writer_initial_junit.xml": "3272f84fca14af41f628805830364e5dffcc86b96eb2b14bfca900c574beb10a",
+    "reviews/2026-11-10/academic_reviews/writer_review_scope.json": "420e6cc2f2c7c690806e567369a1ebffaca223e88cc9828f2187f4366b456b3e"
+  },
+  "scope": "API106 accepted only; writer/API108 and full R1 still open"
+}

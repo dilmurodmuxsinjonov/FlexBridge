@@ -30,3 +30,9 @@ def register_tables(metadata,types):
     for name,fields in definitions.items():
         Table(name,metadata,*[Column(field,types[kind],primary_key=field==keys[name],nullable=field in nullable.get(name,set()))
                              for field,kind in fields.items()])
+    proof_fields={'review_id':'uuid','created_at':'timestamptz','origin':'text','initial_snapshot':'jsonb',
+        'terms_id':'uuid','actor_id':'uuid','session_id':'uuid','auth_version':'integer','teacher_grant_id':'uuid',
+        'teacher_appointment_id':'uuid','assignment_proof_snapshot':'jsonb','revision_snapshot':'jsonb',
+        'idempotency_key':'text','request_fingerprint':'text','receipt':'jsonb'}
+    Table('academic_review_proofs',metadata,*[Column(field,types[kind],primary_key=field=='review_id',
+        nullable=field not in ('review_id','created_at','origin','initial_snapshot')) for field,kind in proof_fields.items()])

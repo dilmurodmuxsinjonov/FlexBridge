@@ -58,30 +58,12 @@ class InternshipLogService:
         from app.services.academic_admission import academic_service
         return academic_service.revoke(actor,assignment_id)
 
-    def review_academic(self,*,actor,daily_log_id,placement_id,assignment_id,decision,comment):
-        from app.services.academic_admission import academic_service
-        with transaction() as conn:
-            placement,supervision,assignment=self._locked_academic_assignment(conn,assignment_id)
-            log=get_row(conn,'daily_logs',daily_log_id,True)
-            if placement['id']!=placement_id or log['placement_id']!=placement_id:
-                raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
-            self._academic_binding(conn,placement,supervision,assignment['institution_id'])
-            revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
-            if not owns_candidate(revision['author_id'],placement['candidate_id']):
-                raise InternshipLogScopeError('REVISION_AUTHOR_FORBIDDEN',status_code=403)
-            authority=academic_service.teacher(conn,actor,placement,assignment)
-            if (authority['id']!=assignment['teacher_membership_id'] or assignment['revoked_at'] or not assignment['accepted_at']
-                or assignment['accepted_at']>now() or not conn.execute(text('SELECT flexbridge.academic_teacher_current(:a,:t)'),
-                    {'a':assignment_id,'t':revision['terms_id']}).scalar_one()):
-                raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
-            if revision['author_id']==actor.user_id:raise InternshipLogScopeError('SELF_REVIEW_FORBIDDEN',status_code=403)
-            if revision['status']!='SUBMITTED':raise InternshipLogScopeError('SUBMITTED_REVISION_REQUIRED')
-            if decision not in ('APPROVED','REJECTED','CHANGES_REQUESTED'):
-                raise InternshipLogScopeError('INVALID_REVIEW_DECISION',status_code=422)
-            review=insert_row(conn,'academic_log_reviews',revision_id=revision['id'],placement_id=placement_id,
-                academic_assignment_id=assignment_id,decision=decision,comment=comment,decided_at=now())
-            self.audit_store.append_audit_event(actor_id=actor.user_id,action='ACADEMIC_LOG_REVIEWED',entity_type='academic_log_review',entity_id=review['id'])
-            return review
+    def review_academic(self,*,actor,daily_log_id,placement_id,assignment_id,expected_revision_id,
+                        decision,comment,idempotency_key):
+        from app.services.academic_reviews import academic_review_service
+        return academic_review_service.review(actor=actor,daily_log_id=daily_log_id,placement_id=placement_id,
+            assignment_id=assignment_id,revision_id=expected_revision_id,decision=decision,comment=comment,
+            idempotency_key=idempotency_key)
 
     def review(self,*,daily_log_id,placement_id,assignment_id,actor,decision,comment,academic=False):
         if academic:raise InternshipLogScopeError('ACADEMIC_USE_SCOPED_SERVICE',status_code=422)
