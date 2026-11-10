@@ -690,3 +690,27 @@ Keyingi kichik qadam:
 - Testlar: `test_placement_completion_api049.py` 11/11 passed, jami 55/55 migration/regression passed.
   GitHub Actions CI (`backend` va `protocol`) to'liq yashil.
 
+
+## PLACEMENT-ANTIGRAVITY-API052 / LOG-087 - Issue #82: Single Placement Report Export (API-052 / CAP-026)
+
+- **Holat**: Bajarildi va tekshiruvdan o'tdi (PR ochish va integratsiyaga tayyor). Branch `feature/82-placement-report-exports`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork (Milestone 1 Worker & Challengers, Milestone 2 Worker & Reviewers).
+- **Qilingan ishlar va yechimlar**:
+  * **Actor Resolution Precedence Fix (Issue #82)**:
+    `backend/app/services/placement_export.py:resolve_export_actor` funksiyasida tashkiliy vakolat (`org_authority` tekshiruvi: `'OWNER'`, `'HOST_COORDINATOR'`, `'HR'`) mentorlik tekshiruvidan oldinga o'tkazildi. Bu dual-role host egalarining xatolik bilan `'MENTOR'` deb tan olinishini to'liq bartaraf etdi va ularni qonuniy ravishda `'HOST'` sifatida resolve bo'lishini ta'minladi. Mustaqil mentorlar esa `'MENTOR'` bo'lib qoladi.
+  * **Alembic Migration `0020_placement_exports`**:
+    `flexbridge.placement_exports` jadvali va uning indekslari (`(placement_id, created_at DESC)` va unique `(placement_id, idempotency_key)`) yaratildi. Jami runtime jadvallar soni 130 taga yetdi.
+  * **Endpoint & Servis**:
+    `POST /api/v1/placements/{placement_id}/exports` implementatsiya qilindi. PDF va JSON formatlari qo'llab-quvvatlandi.
+  * **Files & Audit integratsiyasi**:
+    Fayllar `flexbridge.files` jadvalida `retention_class='PRIVATE_EXPORT_FILE'` va 24 soatlik amal qilish muddati bilan saqlanadi (DB-018). Har bir eksport amali `flexbridge.audit_events` jadvaliga `action='REPORT_EXPORT'` bilan atomik yoziladi (DB-089).
+  * **Xavfsizlik & Idempotentlik**:
+    Oracle probing oldini oluvchi priority authorization, actor-bound idempotent replay (begona actor uchun 403, farqli payload uchun 409), va rasmiy ogohlantiruvchi diskleymer (`CAP-026`).
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 11/11 contract & security testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_placement_exports_api052.py`).
+  * 22/22 adversarial stress va multi-tenant izolyatsiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_placement_exports_adversarial.py`).
+  * 1/1 migratsiya regressiya testi muvaffaqiyatli o'tdi (130 ta jadval tekshiruvi, `test_actual_migration_and_constraints`).
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.108 review: `reviews/2026-11-10/placement_exports/COPILOT_REVIEW.md` (host-owner resolution fix tasdiqlandi; lifecycle/presigned-url tavsiyalari qayd etildi).
+  * OpenCode CLI 1.18.29 & Peer Review: `reviews/2026-11-10/placement_exports/OPENCODE_REVIEW.md` (5-axis bo'yicha tasdiqlandi).
+  * Review sintezi: `reviews/2026-11-10/placement_exports/REVIEW_SUMMARY.md`.

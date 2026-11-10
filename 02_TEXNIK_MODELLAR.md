@@ -209,3 +209,42 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   * Idempotency replay xavfsizligi: Placement `COMPLETED` bo'lgandan keyin ham avvalgi muvaffaqiyatli request replay qilish imkoni bor (idempotency tekshiruvi status preconditiondan oldin).
   * Multi-review join kartezian ko'payishini oldini olish: `submitted_logs` CTE yordamida har bir log bo'yicha daqiqalar va reviewlar mustaqil hisoblanadi.
 
+
+## PLACEMENT-API052-EXPORTS — Single Placement Report Export (2026-11-10)
+
+- **Capability & Contract**: `REPORT_EXPORT` / `API-052` (Issue #82), branch `feature/82-placement-report-exports`, base `integration/r1-agent-collaboration`.
+- **Endpoint**: `POST /api/v1/placements/{placement_id}/exports`
+- **Alembic Migration `0020_placement_exports.py` & Schema `app/db/placement_exports.py`**:
+  - Creates table `flexbridge.placement_exports` (130 tables total in `flexbridge` schema):
+    - `id UUID PRIMARY KEY`
+    - `created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()`
+    - `placement_id UUID NOT NULL REFERENCES flexbridge.placements(id)`
+    - `actor_id UUID NOT NULL REFERENCES flexbridge.users(id)`
+    - `file_id UUID NOT NULL REFERENCES flexbridge.files(id)`
+    - `export_format TEXT NOT NULL CHECK(export_format IN ('PDF','JSON'))`
+    - `summary_snapshot JSONB NOT NULL CHECK(jsonb_typeof(summary_snapshot)='object')`
+    - `idempotency_key TEXT NOT NULL`
+    - `request_fingerprint TEXT NOT NULL`
+    - `receipt JSONB NOT NULL CHECK(jsonb_typeof(receipt)='object')`
+    - `expires_at TIMESTAMPTZ NOT NULL`
+  - Indexes:
+    - `idx_placement_exports_placement` on `(placement_id, created_at DESC)`
+    - `uq_placement_exports_idempotency` UNIQUE on `(placement_id, idempotency_key)`
+- **Actor Resolution Precedence Hierarchy (`resolve_export_actor`)**:
+  1. `candidate_profiles`: If `candidate.user_id == actor.user_id` -> returns `'CANDIDATE'`.
+  2. `org_authority`: Active host organization role (`'OWNER'`, `'HOST_COORDINATOR'`, `'HR'`) -> returns `'HOST'`. (Organizational authority strictly precedes individual mentor assignment, ensuring dual-role host owners resolve as `'HOST'`).
+  3. `mentor_assignments` JOIN `mentor_assignment_proofs`: Active accepted mentor (`accepted_at IS NOT NULL`, `revoked_at IS NULL`) -> returns `'MENTOR'`.
+  4. Academic track checks:
+     - `academic_assignments` JOIN `academic_assignment_proofs`: Active teacher -> returns `'TEACHER'`.
+     - `enrollments` + `institution_authority`: Active institutional supervisor -> returns `'COORDINATOR'`.
+  5. Unrelated / unauthorized actor -> raises `PlacementScopeError('PLACEMENT_ACTOR_FORBIDDEN', status_code=403)`.
+  6. Unauthenticated guest -> `401 Unauthorized`.
+- **Files Integration (`DB-018`) & Audit Store (`DB-089`)**:
+  - Every generated export document is registered in `flexbridge.files` with `retention_class='PRIVATE_EXPORT_FILE'`, `scan_status='CLEAN'`, and an expiration timestamp `expires_at = now + 24 hours`.
+  - Atomically records an audit event in `flexbridge.audit_events` with `action='REPORT_EXPORT'`, `object_type='placements'`, `object_key=placement_id`, and full scope snapshot (`export_id`, `file_id`, `format`, `actor_role`).
+- **Security & Concurrency**:
+  - Priority authorization check executes before any diary or placement data queries to prevent oracle probing.
+  - Actor-bound idempotency replay: Exact replay returns previous receipt (HTTP 201). Mismatched actor raises HTTP 403 `IDEMPOTENCY_ACTOR_MISMATCH`. Reused key with different payload/fingerprint raises HTTP 409 `IDEMPOTENCY_KEY_REUSE`.
+  - Input validation: Format restricted to `'PDF'` or `'JSON'` (HTTP 422 `INVALID_EXPORT_FORMAT`).
+  - Strict informational disclaimer (`CAP-026`): `"Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi."` embedded in summary and generated files.
+  - Multi-tenant isolation: Host organization B cannot export Organization A placements; unrelated candidates, coordinators, and teachers forbidden. Revoked mentors and teachers immediately lose export permissions.

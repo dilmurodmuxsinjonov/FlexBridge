@@ -694,8 +694,14 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 ## Joriy Holat (2026-11-10)
 
 - Master holati: Antigravity Q-016 master succession ostida; Copilot CLI (`1.0.108`) va OpenCode CLI (`1.18.29`) bilan hamkorlikda.
-- Oxirgi muvaffaqiyatli topshiriq: Issue #80 / PR #81 (API-049 Placement Completion Requests & Two-Sided Closure) `integration/r1-agent-collaboration`ga birlashtirildi (merge commit: `278a5d243e38d5ab6da65a18821346321940c0a9`).
+- Oxirgi bajarilgan va tekshirilgan topshiriq: Issue #82 / API-052 (Single Placement Report Export) `feature/82-placement-report-exports` tarmog'ida muvaffaqiyatli yakunlandi.
+  * Actor resolution precedence tuzatildi (`org_authority` mentorlik tekshiruvidan oldinga olindi; host ownerlar `'HOST'` sifatida resolve bo'ladi).
+  * Alembic migration `0020_placement_exports` (130 ta jadval) va SQLAlchemy sxemasi to'liq ulandi.
+  * DB-018 fayl integratsiyasi (`PRIVATE_EXPORT_FILE`, 24h expiration) va DB-089 atomik audit logging (`REPORT_EXPORT`) joriy etildi.
+  * 11/11 API-052 xavfsizlik testlari, 22/22 adversarial testlar va 1/1 migratsiya regressiya testi izolyatsiyalangan PostgreSQL test klasterida (port 55440) 100% yashil o'tdi.
+  * GitHub Copilot CLI 1.0.108 (`reviews/2026-11-10/placement_exports/COPILOT_REVIEW.md`) va OpenCode CLI / Peer Review (`reviews/2026-11-10/placement_exports/OPENCODE_REVIEW.md`) yakunlandi.
+  * Hozirgi holat: `feature/82-placement-report-exports` tarmog'ini commit qilib, `origin`ga push qilish va `integration/r1-agent-collaboration`ga PR ochishga to'liq tayyor.
 - `main` branch: Strictly muzlatilgan (`764fb98496fa40857acb07844fd09fcafa99b7d6`). Hech qachon to'g'ridan-to'g'ri `main`ga commit yoki push qilinmaydi.
-- Alembic head: `0019_placement_completions` (129 runtime tables).
-- CI holati: GitHub Actions `backend` va `protocol` to'liq muvaffaqiyatli.
+- Alembic head: `0020_placement_exports` (130 runtime tables).
+
 

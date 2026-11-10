@@ -888,3 +888,33 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
 - CTE isolation in `get_placement_diaries_basis` prevents Cartesian multiplication of logged minutes across multi-reviews. Priority auth check prevents oracle probing; safe actor-bound idempotency replay preserves retry capabilities after completion.
 - 55/55 tests passed in isolated PostgreSQL environment; CI (backend and protocol) fully green on GitHub Actions.
 
+
+## LOG-087 / API-052 - Single Placement Report Export (Issue #82)
+
+- **Issue / PR**: GitHub Issue #82 (`API-052`), branch `feature/82-placement-report-exports`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` per user freeze policy (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Subagent execution under Antigravity Teamwork orchestration (Worker `worker_m1_1`, Challengers `challenger_m1_1`, `challenger_m1_2`, Reviewers, Worker `worker_m2_1`).
+- **Actor Resolution Precedence Fix**:
+  In `backend/app/services/placement_export.py:resolve_export_actor`, resolved the dual-role fixture defect where host owners were resolving as `'MENTOR'` instead of `'HOST'`. Evaluation hierarchy updated to:
+  1. `candidate_profiles` check -> `'CANDIDATE'`.
+  2. `org_authority` check (`'OWNER'`, `'HOST_COORDINATOR'`, `'HR'`) -> `'HOST'` (organizational authority takes precedence).
+  3. `mentor_assignments` check -> `'MENTOR'`.
+  4. `academic_assignments` check -> `'TEACHER'`.
+  5. `enrollments` + `institution_authority` check -> `'COORDINATOR'`.
+  Dedicated workplace mentors without host owner authority continue to resolve cleanly as `'MENTOR'`.
+- **Architecture & Lifecycle (`CAP-026`)**:
+  - Alembic migration `0020_placement_exports.py` introduces `flexbridge.placement_exports` table with `idx_placement_exports_placement` and `uq_placement_exports_idempotency` unique constraint (130 tables total in `flexbridge` schema).
+  - Endpoint `POST /api/v1/placements/{placement_id}/exports` supports `'PDF'` and `'JSON'` formats.
+  - Priority authorization check executes before any diary or placement data queries to prevent oracle probing.
+  - Export documents are stored with `retention_class='PRIVATE_EXPORT_FILE'` in `flexbridge.files` (DB-018) with a 24-hour expiration window.
+  - Every export is atomically logged to `flexbridge.audit_events` with action `'REPORT_EXPORT'` (DB-089).
+  - Informational disclaimer embedded: `"Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi."`
+  - Idempotency replay is actor-bound: returns exact receipt for same actor, HTTP 403 on actor mismatch, HTTP 409 on key reuse with different fingerprint.
+- **Empirical Test Verification (Isolated Test DB `FLEXBRIDGE_TEST_ADMIN_URL` on port 55440, pg_live untouched)**:
+  - 11/11 contract & security tests passed in `backend/tests/security/test_placement_exports_api052.py`.
+  - 22/22 adversarial stress tests passed in `backend/tests/security/test_placement_exports_adversarial.py` (cross-candidate, cross-institution, cross-org isolation, revoked assignments, format fuzzing, concurrent requests, SQL injection safety).
+  - 1/1 migration regression test passed in `backend/tests/security/test_regressions.py` verifying 130 tables in schema `flexbridge` and Alembic head at `0020_placement_exports`.
+- **Multi-Agent Code Reviews**:
+  - GitHub Copilot CLI 1.0.108 review logged in `reviews/2026-11-10/placement_exports/COPILOT_REVIEW.md` (verified host owner resolution fix, identified lifecycle & presigned URL refresh items).
+  - OpenCode CLI 1.18.29 & Specialist Peer Review logged in `reviews/2026-11-10/placement_exports/OPENCODE_REVIEW.md` (5-axis approval).
+  - Review synthesis compiled in `reviews/2026-11-10/placement_exports/REVIEW_SUMMARY.md`.
