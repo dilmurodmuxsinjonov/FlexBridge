@@ -38,8 +38,8 @@ def test_populated_review_upgrade_keeps_original_decision_without_fabricated_act
         migrate('head')
         with engine.begin() as conn:
             assert history(conn) == before
-            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one() == '0017_feature_flag_administration'
-            assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one() == 127
+            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one() == '0018_academic_decisions'
+            assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one() == 128
             proof = dict(conn.execute(select(table('academic_review_proofs'))).mappings().one())
             assert proof['review_id'] == review['id'] and proof['origin'] == 'LEGACY_IMPORT'
             assert proof['initial_snapshot']['decision'] == decision

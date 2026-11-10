@@ -1,0 +1,37 @@
+{
+  "migration_exit": 0,
+  "scope": "fresh disposable DDL only; no business/pilot acceptance",
+  "database_kind": "new disposable test database; pg_live untouched",
+  "actual_head": "0018_academic_decisions",
+  "actual_tables": 128,
+  "proof_rows": 0,
+  "proof_columns": [
+    "decision_id",
+    "created_at",
+    "origin",
+    "initial_snapshot",
+    "placement_id",
+    "assignment_id",
+    "terms_id",
+    "terms_version",
+    "actor_id",
+    "session_id",
+    "auth_version",
+    "teacher_grant_id",
+    "teacher_appointment_id",
+    "teacher_consent_id",
+    "consent_snapshot",
+    "assignment_proof_snapshot",
+    "basis_snapshot",
+    "basis_digest",
+    "audit_event_id",
+    "idempotency_key",
+    "request_fingerprint",
+    "receipt"
+  ],
+  "exported_functions": [
+    "academic_decision_basis",
+    "academic_decision_basis_current"
+  ],
+  "seconds": 2.656
+}

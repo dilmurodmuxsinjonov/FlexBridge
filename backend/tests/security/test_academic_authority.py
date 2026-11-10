@@ -30,7 +30,7 @@ from app.db.institution_scope import TASHKENT
 CREATE_PATHS=('/api/v1/internships/academic-assignments','/api/v1/internship-logs/academic-assignments')
 
 
-def academic_fixture(identities,organization,*,enrollment_end_date=None,make_supervision=True,candidate_is_coordinator=False):
+def academic_fixture(identities,organization,*,enrollment_end_date=None,make_supervision=True,candidate_is_coordinator=False,placement_start_date=None):
     coord,_,inst,_,member,appointment,grant=setup_scope(identities)
     teacher=identities();candidate=coord if candidate_is_coordinator else identities();owner=identities('OWNER',organization)
     file=cv_fixture(teacher);today=now().astimezone(TASHKENT).date()
@@ -68,7 +68,7 @@ def academic_fixture(identities,organization,*,enrollment_end_date=None,make_sup
     placement_service.create_application_attempt(application_id=app['id'],opportunity_id=rev['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=app['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor=actor(owner),idempotency_key=str(uuid4()))
+    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor=actor(owner),idempotency_key=str(uuid4()),start_date=placement_start_date)
     if make_supervision:
         academic_service.request_student(actor=actor(candidate),placement_id=p['id'],enrollment_id=en['id'],
             terms_id=p['current_terms_id'],version=1,idempotency_key=str(uuid4()))

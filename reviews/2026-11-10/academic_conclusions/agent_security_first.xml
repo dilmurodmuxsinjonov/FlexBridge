@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="9" time="113.772" timestamp="2026-11-10T12:12:00.744066+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_decisions_api108" name="test_positive_and_negative_conclusions_full_diary_basis_and_stale_digest" time="12.694"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:109: in test_positive_and_negative_conclusions_full_diary_basis_and_stale_digest
+    assert send_review(client, f, draft1, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_replay_survives_pointer_and_cancellation_and_logout_keeps_basis_current" time="11.575"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:232: in test_replay_survives_pointer_and_cancellation_and_logout_keeps_basis_current
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_foreign_and_self_actors_are_denied[candidate]" time="10.785"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:280: in test_foreign_and_self_actors_are_denied
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_foreign_and_self_actors_are_denied[coord]" time="11.317"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:280: in test_foreign_and_self_actors_are_denied
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_foreign_and_self_actors_are_denied[owner]" time="11.450"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:280: in test_foreign_and_self_actors_are_denied
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_foreign_and_self_actors_are_denied[outsider]" time="11.426"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:280: in test_foreign_and_self_actors_are_denied
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_actor_key_lock_precedes_parent_locks_and_mfa_or_revocation_after_wait_is_enforced" time="12.982"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:361: in test_actor_key_lock_precedes_parent_locks_and_mfa_or_revocation_after_wait_is_enforced
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_audit_stamp_savepoint_rollback_timezone_and_isolation_controls" time="8.777"><failure message="TypeError: dict() got multiple values for keyword argument 'decision'">backend\tests\security\test_academic_decisions_api108.py:434: in test_audit_stamp_savepoint_rollback_timezone_and_isolation_controls
+    assert send_review(client, f, draft, review_body(assignment, decision='REVIEWED')).status_code == 201
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_reviews.py:39: in body
+    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
+E   TypeError: dict() got multiple values for keyword argument 'decision'</failure></testcase><testcase classname="tests.security.test_academic_decisions_api108" name="test_populated_0017_to_0018_upgrade_rollback_and_host_decision_compatibility" time="19.589"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) New scanned files require explicit storage provenance&#10;CONTEXT:  PL/pgSQL function guard_file_storage_reference() line 5 at RAISE&#10;[SQL: INSERT INTO flexbridge.files (id, created_at, updated_at, owner_user_id, storage_key, filename, mime_type, byte_size, sha256, scan_status, retention_class, object_version, scanned_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(owner_user_id)s::UUID, %(storage_key)s::VARCHAR, %(filename)s::VARCHAR, %(mime_type)s::VARCHAR, %(byte_size)s::INTEGER, %(sha256)s::VARCHAR, %(scan_status)s::VARCHAR, %(retention_class)s::VARCHAR, %(object_version)s::VARCHAR, %(scanned_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: New scanned files require explicit storage provenance
+E   CONTEXT:  PL/pgSQL function guard_file_storage_reference() line 5 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_decisions_api108.py:515: in test_populated_0017_to_0018_upgrade_rollback_and_host_decision_compatibility
+    f = legacy_academic(conn)
+        ^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_migration.py:24: in legacy_academic
+    coordinator,inst,member,_,_=seed_old_scope(conn)
+                                ^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_institution_migration.py:48: in seed_old_scope
+    file=insert_row(conn,'files',owner_user_id=user['id'],filename='appointment.pdf',mime_type='application/pdf',storage_key='private/legacy/'+str(uuid4()),
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) New scanned files require explicit storage provenance
+E   CONTEXT:  PL/pgSQL function guard_file_storage_reference() line 5 at RAISE
+E   [SQL: INSERT INTO flexbridge.files (id, created_at, updated_at, owner_user_id, storage_key, filename, mime_type, byte_size, sha256, scan_status, retention_class, object_version, scanned_at) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(owner_user_id)s::UUID, %(storage_key)s::VARCHAR, %(filename)s::VARCHAR, %(mime_type)s::VARCHAR, %(byte_size)s::INTEGER, %(sha256)s::VARCHAR, %(scan_status)s::VARCHAR, %(retention_class)s::VARCHAR, %(object_version)s::VARCHAR, %(scanned_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase></testsuite></testsuites>

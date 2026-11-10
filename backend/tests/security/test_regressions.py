@@ -68,8 +68,8 @@ def placement_fixture(candidate,owner,org,status='ACTIVE'):
 
 def test_actual_migration_and_constraints():
     with transaction() as conn:
-        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0017_feature_flag_administration'
-        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==127
+        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0018_academic_decisions'
+        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==128
         assert conn.execute(text("SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON c.connamespace=n.oid WHERE n.nspname='flexbridge' AND contype='f'")).scalar_one()>=214
     with pytest.raises(IntegrityError),transaction() as conn:
         conn.execute(table('payment_attempts').insert().values(id=str(uuid4()),order_id=str(uuid4()),provider='HMAC',amount=-1,currency='UZS',status='PENDING',requested_at=now()))
