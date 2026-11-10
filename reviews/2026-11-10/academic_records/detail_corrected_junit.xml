@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="33.274" timestamp="2026-11-10T08:31:16.268564+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_records" name="test_teacher_password_and_exact_coordinator_read_minimum_diary_and_workplace_decision" time="8.520" /><testcase classname="tests.security.test_academic_records" name="test_historical_submitted_read_survives_pointer_change_and_cancellation_while_draft_stays_private" time="6.956"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.NotNullViolation) null value in column &quot;idempotency_key&quot; of relation &quot;log_revisions&quot; violates not-null constraint&#10;DETAIL:  Failing row contains (75068849-9db4-40e0-b253-aa50e88712b4, 2026-11-10 03:31:32.968176+00, 2026-11-10 03:31:32.968176+00, 711366c9-e36e-4ad5-af47-c863117471d1, 2, fd212501-0780-41aa-80c6-692036d067c5, 273d29cb-229c-46b8-ab07-28e8c8fc2281, WORKED, Unsubmitted private replacement, 0, DRAFT, null, null).&#10;[SQL: INSERT INTO flexbridge.log_revisions (id, created_at, updated_at, daily_log_id, revision, terms_id, author_id, day_type, summary, total_minutes, status) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(daily_log_id)s::UUID, %(revision)s::INTEGER, %(terms_id)s::UUID, %(author_id)s::UUID, %(day_type)s::VARCHAR, %(summary)s::VARCHAR, %(total_minutes)s::INTEGER, %(status)s::VARCHAR)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.NotNullViolation: null value in column "idempotency_key" of relation "log_revisions" violates not-null constraint
+E   DETAIL:  Failing row contains (75068849-9db4-40e0-b253-aa50e88712b4, 2026-11-10 03:31:32.968176+00, 2026-11-10 03:31:32.968176+00, 711366c9-e36e-4ad5-af47-c863117471d1, 2, fd212501-0780-41aa-80c6-692036d067c5, 273d29cb-229c-46b8-ab07-28e8c8fc2281, WORKED, Unsubmitted private replacement, 0, DRAFT, null, null).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_records.py:52: in test_historical_submitted_read_survives_pointer_change_and_cancellation_while_draft_stays_private
+    replacement=insert_row(conn,'log_revisions',daily_log_id=draft['id'],revision=2,terms_id=p['terms_id'],
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.NotNullViolation) null value in column "idempotency_key" of relation "log_revisions" violates not-null constraint
+E   DETAIL:  Failing row contains (75068849-9db4-40e0-b253-aa50e88712b4, 2026-11-10 03:31:32.968176+00, 2026-11-10 03:31:32.968176+00, 711366c9-e36e-4ad5-af47-c863117471d1, 2, fd212501-0780-41aa-80c6-692036d067c5, 273d29cb-229c-46b8-ab07-28e8c8fc2281, WORKED, Unsubmitted private replacement, 0, DRAFT, null, null).
+E   [SQL: INSERT INTO flexbridge.log_revisions (id, created_at, updated_at, daily_log_id, revision, terms_id, author_id, day_type, summary, total_minutes, status) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(daily_log_id)s::UUID, %(revision)s::INTEGER, %(terms_id)s::UUID, %(author_id)s::UUID, %(day_type)s::VARCHAR, %(summary)s::VARCHAR, %(total_minutes)s::INTEGER, %(status)s::VARCHAR)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_records" name="test_academic_reader_does_not_grant_private_attachment_download" time="6.914" /><testcase classname="tests.security.test_academic_records" name="test_coordinator_cannot_read_own_diary_through_staff_role" time="9.265" /></testsuite></testsuites>

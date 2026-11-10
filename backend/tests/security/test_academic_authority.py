@@ -30,9 +30,9 @@ from app.db.institution_scope import TASHKENT
 CREATE_PATHS=('/api/v1/internships/academic-assignments','/api/v1/internship-logs/academic-assignments')
 
 
-def academic_fixture(identities,organization,*,enrollment_end_date=None,make_supervision=True):
+def academic_fixture(identities,organization,*,enrollment_end_date=None,make_supervision=True,candidate_is_coordinator=False):
     coord,_,inst,_,member,appointment,grant=setup_scope(identities)
-    teacher=identities();candidate=identities();owner=identities('OWNER',organization)
+    teacher=identities();candidate=coord if candidate_is_coordinator else identities();owner=identities('OWNER',organization)
     file=cv_fixture(teacher);today=now().astimezone(TASHKENT).date()
     enrollment_file=cv_fixture(candidate);reviewer=identities('MODERATOR')
     request=enrollment_service.create(actor(candidate),institution_id=inst['id'],idempotency_key=str(uuid4()),

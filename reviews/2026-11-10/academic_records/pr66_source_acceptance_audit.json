@@ -1,0 +1,13 @@
+{
+  "head": "5ae9f22594ffa63d1e0e7888ac6e9394acbd841f",
+  "base": "1b2bbbfed70dc9a68b6de52cdd91fb0f9c41351f",
+  "isolated_worktree": "D:\\Codex\\FlexBridge-reviews\\pr66-5ae9f22",
+  "changed_code_test_config": 47,
+  "all_commit_blobs_match_ordered_manifests": true,
+  "manual_test_source_review": {
+    "path": "backend/tests/security/test_enrollment_teacher_policy.py",
+    "sha256": "bb94eed00572a7f6d192698042b0f7f2909d472346454ef8587d6315b9efe63c",
+    "reason": "Genuine formal Teacher PASSWORD complete own enrollment control, source read manually; no assurance mutation or runtime change."
+  },
+  "scope": "Issue65 internship admission plus implemented school/list follow-ups; full R1 and pilot remain unaccepted"
+}

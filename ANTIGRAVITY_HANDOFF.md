@@ -5,7 +5,42 @@ Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni pa
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## CURRENT LOG-071 - scoped academic lists and coordinator notices
+## CURRENT LOG-072 - Issue67 exact academic record read
+
+PR66 is actually MERGEDc4292d66c701cb76688f42483c25736e49a7bde0, Issue65 CLOSED.
+Exact5ae complete1038 CI42747763591/42747768831 passed879.34s/845.71s, one framework
+warning each.47 code/test/config commit blobs and current feedback/base/head were
+verified in isolated D:/Codex/FlexBridge-reviews/pr66-5ae9f22. Merge tree equals
+validated head; no evidence-only commit invalidated checks. Accepted0015/124,
+canonical94. Current source D:/FlexBridge is feature/67-academic-records fromc429;
+all14 WIP files were preserved when moving the unpublished branch ref onto that
+identical accepted tree. Do not edit the old reference worktree as current code.
+
+Codex owns current API106 read prototype/service/router/private middleware/tests.
+Exact submitted revision (not newest pointer), current coordinator purpose or
+original personal Teacher/revision terms; history after cancellation/pointer change,
+no drafts/self/other/reappointed teacher/foreign attachment access. Original review
+vocabulary/assignment IDs, minimum learning data, no intervals/files/URLs/private
+verification/legal/payroll. Atomic read audit/current authority and no-store.
+Native initial fixture errors retained; actual submitted public edit stays409.
+Trusted future-amendment pointer metadata is not a claimed public amendment flow.
+Final current9passed70.44s after earlier9passed67.86s; source5-file Copilot opinion
+exit0/no concrete P1/P2, no model/SHA/runtime certification. Hash scope retained.
+Initial plan review denied external D path and read only repo sources; exact plan
+is now in academic_records/PLAN.md and current source review could read it.
+
+NEXT: current draft source/test pin/new-head full CI and feedback. Then107 current
+Teacher write for exact revision with explicit nonce/expected revision on old alias,
+canonical REVIEWED/NEEDS_REVISION new writes, immutable review evidence/forward0016,
+replay/concurrency/audit/populated upgrade rollback.108 final-conclusion vocabulary
+and official grade/signature policy must not be guessed or imply completion.
+Existing FeatureFlagService keeps RAM/UID updates; do not use it as an authority
+gate. Durable privileged flags remain a real task. API055 actual attachment-sharing/
+host confidentiality must precede any new file-access claim. Full diary/completion/
+amendments/exports/frontend/providers/legal/DR/R1 remain open. Issue67 stays open,
+pilot not accepted. No live DB/Docker/admin/reboot action in this unit.
+
+## Historical LOG-071 - scoped academic lists and coordinator notices
 
 ## LOG-071 current publication evidence
 
