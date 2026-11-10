@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "actual_timeout_even_with_echoed_quota": true,
+    "actual_terminal_individual_quota": true,
+    "actual_contradictory_zero_exit_stale_error": true,
+    "stderr_only_quota_is_not_evidence": true,
+    "structured_provider_quota_code": true,
+    "success_with_stderr_words_stays_success": true,
+    "unconfirmed_handback_rejected": true,
+    "stale_handback_rejected": true,
+    "explicit_confirmed_handback_advances_generation": true,
+    "real_coordinator_state_unchanged": true
+  },
+  "actual_master_started": false,
+  "live_handback_performed": false,
+  "scope": "real prior CLI envelopes and isolated handback logic"
+}

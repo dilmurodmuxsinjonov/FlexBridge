@@ -1,0 +1,27 @@
+{
+  "head": "83548d304ee53d6c6391a8feebb626443b37042a",
+  "base_branch": "integration/r1-agent-collaboration",
+  "source_files_unchanged": 19,
+  "reviewed_code_test_files": 18,
+  "agent_receipt": {
+    "task": "AGY-007",
+    "attempts": [
+      {
+        "requested_model": "gemini-4-argon-high",
+        "reported_model": null,
+        "exit_code": 0,
+        "status": "SUCCESS",
+        "conversation_id": "8b05521c-cb62-4d79-80fa-18e5868e79e5",
+        "seconds": 236.7,
+        "actual_quota_error": false,
+        "finished_reason": null,
+        "response_chars": 10808
+      }
+    ],
+    "owned_before_sha256": "9479cdc809be256ed09272bc9fd1b0ffb1c379f63830bb223ca20b229075e50a",
+    "owned_after_sha256": "9479cdc809be256ed09272bc9fd1b0ffb1c379f63830bb223ca20b229075e50a",
+    "policy": "main frozen; integration only; actual quota fallback; fresh conversation context"
+  },
+  "verdict": "no actionable P1/P2; static opinion only",
+  "controller_assessment": "source paths/claims checked, no executed tests attributed to reviewer; full matching-head CI/current feedback still pending"
+}

@@ -38,6 +38,19 @@
 - Do not read/send `.env`, runtime `.data`, account credentials, private identity
   evidence or provider secrets to agents. Raw CLI logs remain outside publication.
 
+## Conditional master succession (Q016, latest user instruction)
+
+- If Codex reaches its real limit, Antigravity is authorized to take over the
+  complete ongoing development workflow, including Copilot/OpenCode coordination.
+  Follow ANTIGRAVITY_MASTER_PROTOCOL.md and the D: CURRENT_HANDOFF.json.
+- Codex remains master until an explicit takeover trigger. Silence/timeouts are
+  not quota evidence. No detached authoritative Codex quota detector is available;
+  the prepared terminal takeover records the actual supplied trigger.
+- Before later mutations inspect D:/Codex/FlexBridge-agents/coordinator_state.json.
+  If owner is ANTIGRAVITY, do not concurrently write or merge; arrange an orderly
+  handback after the runner/in-flight tasks stop. Main freeze and integration-only
+  policy, source/test/CI verification and user stop instructions always persist.
+
 ## Evidence, continuity and storage
 
 - All new work, tools, reports and artifacts belong on D:. Repo: `D:/FlexBridge`.

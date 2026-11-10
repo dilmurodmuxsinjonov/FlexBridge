@@ -1,0 +1,63 @@
+{
+  "base_branch": "integration/r1-agent-collaboration",
+  "base_sha": "d72462e705df5d45a91963679301bb377b3755c5",
+  "main_frozen": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "files": {
+    "AGENTS.md": {
+      "normalized_sha256": "817eff98cada05e9debf6144d48ce9dc8d10435500a59e8996da5cb137a93389",
+      "index_blob": "984e4304d4531c6420a76e76540fa4e016c26c79"
+    },
+    "ANTIGRAVITY_MASTER_PROTOCOL.md": {
+      "normalized_sha256": "9767897dbe317623bb1f4467d376301343d65f0be86d37a36033149c933c71a7",
+      "index_blob": "eedb51add550cc5b7d5c274103885df7cc9de159"
+    },
+    "scripts/agents/antigravity_master_runner.py": {
+      "normalized_sha256": "bae374c17c1e447132584bc066647c360f77953b805acd4df304dcc622b1ccc9",
+      "index_blob": "501d4f0a68d15d82542db945b0e0a625671faa97"
+    },
+    "scripts/agents/Start-AntigravityMaster.ps1": {
+      "normalized_sha256": "17cb29128240684d778dd8b0029b2da4f5a272242a8e296c52a821f0da1792e3",
+      "index_blob": "59e12b5d31e873d652d38fae6966796c4eda5032"
+    },
+    "scripts/agents/check_master_protocol.py": {
+      "normalized_sha256": "a39474773feec2de99f58705789dd62bd1a8c7cc28258724247c1abac26447ee",
+      "index_blob": "5925bb1f7f993455fd6ecd8bf5c136a7fe9947fb"
+    },
+    "scripts/agents/outcome_samples.json": {
+      "normalized_sha256": "64a6699b5024ff13570ea0508bfae4ab56b25e94f1fbadfbda4dc1a0d11c4eda",
+      "index_blob": "fd8d7eec57ac5657233a6a733717d9ef83b7cea0"
+    },
+    "scripts/agents/README.md": {
+      "normalized_sha256": "f4f9716b09857953030d549972c7ecee431f68394d65f6eb8f2afc902af8901a",
+      "index_blob": "011c5554d28a3c425ec8c5c4f3de73a769df788a"
+    },
+    ".github/workflows/agent-protocol.yml": {
+      "normalized_sha256": "30a26bf3c71d3c3387ae64b16e94e111c7e081cb32e41c19c722087dbcbe0db1",
+      "index_blob": "195fdf0a598d733a07b23079a249b16ab90ee583"
+    }
+  },
+  "static_review_files": 7,
+  "workflow_review": "Codex/new Windows checker only",
+  "protocol_checks": 11,
+  "actual_master_started": false,
+  "review_receipt": {
+    "task": "AGY-013",
+    "attempts": [
+      {
+        "requested_model": "gemini-4-argon-high",
+        "reported_model": null,
+        "exit_code": 0,
+        "status": "SUCCESS",
+        "conversation_id": "ff515afd-ad01-4e0c-a20e-460f065f5212",
+        "seconds": 195.88,
+        "actual_quota_error": false,
+        "finished_reason": null,
+        "response_chars": 5922
+      }
+    ],
+    "owned_before_sha256": "2927f5a1e45c0a9063a33281cc7daf09a42020de66ae67525bf3966c5460f20f",
+    "owned_after_sha256": "2927f5a1e45c0a9063a33281cc7daf09a42020de66ae67525bf3966c5460f20f",
+    "policy": "main frozen; integration only; actual quota fallback; fresh conversation context"
+  },
+  "scope": "conditional successor, manual explicit trigger; own exact-head CI/current feedback pending"
+}

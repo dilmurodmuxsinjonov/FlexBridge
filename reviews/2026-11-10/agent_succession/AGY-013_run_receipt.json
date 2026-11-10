@@ -1,0 +1,19 @@
+{
+  "task": "AGY-013",
+  "attempts": [
+    {
+      "requested_model": "gemini-4-argon-high",
+      "reported_model": null,
+      "exit_code": 0,
+      "status": "SUCCESS",
+      "conversation_id": "ff515afd-ad01-4e0c-a20e-460f065f5212",
+      "seconds": 195.88,
+      "actual_quota_error": false,
+      "finished_reason": null,
+      "response_chars": 5922
+    }
+  ],
+  "owned_before_sha256": "2927f5a1e45c0a9063a33281cc7daf09a42020de66ae67525bf3966c5460f20f",
+  "owned_after_sha256": "2927f5a1e45c0a9063a33281cc7daf09a42020de66ae67525bf3966c5460f20f",
+  "policy": "main frozen; integration only; actual quota fallback; fresh conversation context"
+}

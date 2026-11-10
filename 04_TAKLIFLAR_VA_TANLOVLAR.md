@@ -130,3 +130,7 @@ Oldingi qarorni almashtirsa uning IDsi:
   actor FK is inserted before business locks. Committed state survives author logout.
 - These choices do not authorize live paid/provider/official grade/signature action
   or claim downstream integration. Q015/main freeze and Q011/R2 exclusion persist.
+
+### Q-016 - Antigravity master succession (2026-11-10)
+
+User authorized Antigravity to assume all ongoing work and Copilot/OpenCode coordination if Codex reaches its limit. Preserve Q015 frozen main/master and integration-only workflow. Explicit takeover and exclusive ownership follow ANTIGRAVITY_MASTER_PROTOCOL.md; idle timeout is not quota evidence. Prepared terminal launcher is dormant until supplied trigger, automatic authoritative Codex quota detection is not available. This supersedes sole-Codex coordination only during takeover; fullR1/pilot acceptance still needs actual evidence.
