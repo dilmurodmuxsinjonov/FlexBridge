@@ -1,0 +1,4 @@
+{
+  "backend/app/services/academic_notices.py": "508f869a9c2fb39dfb178091f11c3dfa05187724020f801ef0358c497a220a1c",
+  "backend/tests/security/test_academic_legacy_notices.py": "9d697d81299691766c559b47e5e7b47b24edf6d68c49f2b4e2e388a17436b4d4"
+}

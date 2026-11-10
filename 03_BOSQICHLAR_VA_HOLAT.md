@@ -1,5 +1,9 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
+Current Q015 / LOG-075 cycle: AGY-001 returned SUCCESS in actual conversation3ed58526; requested gemini-4-argon-high, reported-model field absent. Isolated worktree remained clean. Codex independently verified primary ADMIN/CAP037/API121/DB092/runtime facts and returned six concrete design corrections (missing-row/cross-code locks, exact grant, immutable legacy origin, identical receipts, paid alias/default-off/R2 schema, current security tests). AGY-002 focused security revision is now actually requested with listed claude-opus-5-5-high; a bounded controller automatically switches suitable listed models only on an actual quota/limit. No quota has been inferred from the earlier timeout. All new PRs/merges target integration/r1-agent-collaboration; main/master frozen764fb984. Guard/source opinion and manual claims stay limited. Issue70 final10native passed77.82s; its integration-target PR/full exact-head CI still pending. Main release/full R1/API108/pilot not accepted.
+
+Current LOG-075 / Q015: user added actual agy collaboration, task-based model selection and quota fallback, and froze main/master. All new PRs/merges target integration/r1-agent-collaboration, created/pushed from764fb984 (PR69 was merged before the restriction). Root AGENTS.md records the policy; isolated AGY workspace D:/Codex/FlexBridge-agents/antigravity; branch agent/antigravity-r1. Shared repo-local push hook rejects main/master; GitHub API merges additionally require explicit PR-base verification. AGY-001 architecture task requested actual listed gemini-4-argon-high, conversation3ed58526; first CLI print timed out while turn continued, not a quota. Same-conversation checkpoint pending. Do not claim a completed AGY report/model certification yet. Issue70 notice final10passed77.82s, source review/runtime unchanged plus explicit one-field test correction. Parent API107 PR69 accepted764fb984 after exact2928425 complete1084 twice723.27/692.20. Current notice/policy PR must target integration; full R1/Issue67/API108/pilot open, pg_live untouched.
+
 Current LOG-073 publication: API106 PR68 accepted1f717899/exact53b complete1047 twice618.75/873.95. Issue67 remains open. Current API107 writer source7 files + tests/helpers9 pinned from actual corrective and final observed-test reviews (all exit0). Native runtime37passed303.85s plus overlapping latest observed SQL/noauth4passed60.90s; real HTTP PID/blocker chains preserved in JUnit. Three genuine red defects corrected, fixture logout audit kept, all failed stages retained. Draft0016/125, accepted0015/124,canonical94. Registration69 explicit63 placeholders/132 is not functionality. New writer draft/full exact-head CI/current GitHub feedback pending; API108 and all remaining R1/pilot open. Codex owns feature/67-academic-review-write; next concrete work: NEXT.md.
 
 Current LOG-073: API106 PR68 merged1f717899242e97e7c1fce3cddda2df44dd7953b1 after exact53b complete1047 CI twice618.75s/873.95s, five source/test pins and empty current feedback; Issue67 stays OPEN. Accepted0015/124,canonical94. Codex owns feature/67-academic-review-write from that identical accepted tree: API107/new REVIEWED/NEEDS_REVISION, strict alias expected revision/nonce, forward0016 immutable review/session/grant/plan/source evidence. Three actual red cases (expiry during intent wait, mismatched receipt, legacy without exact plan consent) corrected; focused5passed95.10s. Initial broad97passed1fixture-audit-count failure633.64s is not final-current evidence; actual logout audit remains required. Current full writer selection/source follow-up/new-head CI still required. No pilot/full R1 acceptance, no pg_live change. See academic_reviews/PLAN.md and HISOBOT.md.
@@ -610,3 +614,18 @@ Keyingi kichik qadam:
 - Keyingi: NEXT.md legacy acceptance notice probe, API121 durable privileged flags,
   source-consistent API108 nonofficial conclusion, remaining original R1 and pilot
   acceptance. Registration69/63 is not functional percentage or pilot acceptance.
+
+
+## EDU-CODEX-LEGACY-NOTICE / LOG-074 - Issue70
+
+- Holat: Jarayonda; parent PR69/2928425 exact CI hali ishlamoqda, qabul emas.
+- Mas'ul Codex; keyingi Copilot source review faqat o'qish. Fayllar:
+  academic_notices.py, test_academic_legacy_notices.py, legacy_academic_notices
+  dalil/hujjatlari va root journals/handoff. Boshqa writer kodi muzlatilgan.
+- Maqsad: retained legacy assignmentga yangi actual personal exact-plan consent
+  berilganda local candidate notice worker orqali ishlashini birinchi actual
+  populated HTTP/worker test bilan ko'rsatish; tasdiqlangan xatoni tor tuzatish.
+- Qabul: receipt replay/logout/own minimum inbox, forged legacy nomination deny,
+  worker atomic failure/fence/retry, current PUBLIC regressions, source pins va
+  matching-head full CI. Reja: legacy_academic_notices/PLAN.md. No live/grade/
+  signature/completion/pilot acceptance. Issue67/API108 va full R1 ochiq.

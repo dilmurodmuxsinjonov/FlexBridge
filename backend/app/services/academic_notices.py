@@ -33,15 +33,20 @@ def notice_source(conn,payload):
     kind=payload['kind'];terms_id=None
     q=table('academic_assignment_proofs')
     proof=conn.execute(select(q).where(q.c.assignment_id==assignment['id'])).mappings().first()
-    if kind!='REVOKED' and (not proof or proof['origin']!='PUBLIC'):raise PlacementScopeError('NOTICE_SOURCE_MISMATCH')
     if kind=='NOMINATED':
+        # Imported history is not a new nomination intent.
+        if not proof or proof['origin']!='PUBLIC':raise PlacementScopeError('NOTICE_SOURCE_MISMATCH')
         if payload['evidence_id']!=assignment['id']:raise PlacementScopeError('NOTICE_SOURCE_MISMATCH')
         recorded_at=proof['created_at'];terms_id=proof['receipt']['terms_id']
         teacher_id=proof['teacher_user_id']
     elif kind=='ACCEPTED':
+        # A retained assignment can acquire a new personal exact-plan consent.
+        # Deliver that committed action, never a notice inferred from old accepted_at.
+        if not proof:raise PlacementScopeError('NOTICE_SOURCE_MISMATCH')
         consent=get_row(conn,'academic_assignment_consents',payload['evidence_id'])
         if (consent['assignment_id']!=assignment['id'] or consent['placement_id']!=placement['id']
-            or consent['actor_id']!=proof['teacher_user_id'] or consent['teacher_grant_id']!=proof['teacher_grant_id']):
+            or consent['actor_id']!=proof['teacher_user_id'] or consent['teacher_grant_id']!=proof['teacher_grant_id']
+            or consent['teacher_appointment_id']!=proof['teacher_appointment_id']):
             raise PlacementScopeError('NOTICE_SOURCE_MISMATCH')
         recorded_at=consent['created_at'];terms_id=consent['terms_id'];teacher_id=proof['teacher_user_id']
     else:

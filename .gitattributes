@@ -27,3 +27,8 @@ reviews/2026-11-10/academic_reviews/copilot_writer_review.md -text -whitespace
 reviews/2026-11-10/academic_reviews/copilot_writer_followup_review.md -text -whitespace
 reviews/2026-11-10/academic_reviews/copilot_test_delta_review.md -text -whitespace
 reviews/2026-11-10/academic_reviews/copilot_observed_tests_review.md -text -whitespace
+reviews/2026-11-10/legacy_academic_notices/*junit.xml -text -whitespace
+reviews/2026-11-10/legacy_academic_notices/copilot_notice_review.md -text -whitespace
+reviews/2026-11-10/legacy_academic_notices/copilot_forged_consent_review.md -text -whitespace
+.githooks/pre-push text eol=lf
+reviews/2026-11-10/agent_collaboration/copilot_policy_review.md -text -whitespace
