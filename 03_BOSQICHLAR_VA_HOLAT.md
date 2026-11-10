@@ -766,3 +766,25 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: Ikkita muhim masala aniqlandi (lock tartibi konkurentligi va fail-closed maxfiylik filtrlash), ikkalasi ham to'liq tuzatildi va testlar bilan isbotlandi (`reviews/2026-11-10/log_evidence/COPILOT_REVIEW.md`).
   * OpenCode CLI & Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/log_evidence/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/log_evidence/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API057 - Personal Ratings View & Double-Blind Anti-Retaliation (Issue #88)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/88-user-ratings-view`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/user_ratings.py`)**:
+    - `get_my_ratings_api_057`: Foydalanuvchining shaxsiy baholari, agregati, berilgan va olingan baholari ko'rinishi yaratildi.
+    - $n < 5$ Maxfiylik chegarasi (`AC-023` / RAT-03): $n < 5$ holatida umumiy ball yashiriladi (`score: null`, `score_status: "WITHHELD_INSUFFICIENT_SAMPLE"`), bu orqali oz sonli amaliyotlarda baholovchi shaxsini fosh qilish xavfi yo'qotildi.
+    - Baholanmagan vs Nol farqi (`AC-023`): Yangi foydalanuvchilar uchun noto'g'ri 0.0 o'rniga `sample_size: 0`, `score: null`, `score_status: "UNRATED"` qaytariladi.
+    - Ikki tomonlama 14-kunlik Double-Blind himoyasi (`AC-024` / RAT-04): 14-kunlik o'zaro baholash oynasida olingan baholar uchun baholovchi shaxsi (`rater_id: None`) va matnli izoh (`comment: None`) yashiriladi (`status: "BLINDED_PENDING_WINDOW"`). Muddat tugagach, to'liq ma'lumot ochiladi.
+    - O'z baholari va munosib munosabatlar (`AC-022`): Foydalanuvchi o'zi yozgan baholarni to'liq ko'radi va yakunlangan (`COMPLETED`) amaliyotlar munosib munosabat sifatida ko'rsatiladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `GET /api/v1/me/ratings` (API-057, status 200).
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 9/9 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_user_ratings_api057.py`).
+  * 5/5 adversarial va cross-user izolyatsiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_user_ratings_adversarial.py`).
+  * 37/37 API-053 va API-055 regressiyalari to'liq o'tdi. Jami 51/51 test yashil.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/user_ratings/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/user_ratings/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/user_ratings/REVIEW_SUMMARY.md`.

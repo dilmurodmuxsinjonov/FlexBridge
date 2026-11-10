@@ -272,3 +272,15 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Enforces current-revision validity (`entry_row["current_revision_id"] == entry_row["revision_id"]`), blocking evidence attachment to superseded draft revisions (HTTP 409 `SUPERSEDED_REVISION_IMMUTABLE`).
   - Strict storage provenance & anti-malware verification: requires `files.scan_status == 'CLEAN'`; blocks unvetted files (`PENDING_SCAN`, `QUARANTINED`, `deleted_at IS NOT NULL`) with HTTP 422.
   - Fail-closed visibility segregation: Academic supervisors only view evidence tagged for academia (`HOST_AND_ACADEMIC`, `ACADEMIC_ONLY`, `PUBLIC`, `ALL_PARTIES`), preventing host-confidential metadata disclosure.
+
+## RATINGS-API057-VIEW — Candidate & User Personal Ratings View (2026-11-10)
+
+- **Capability & Contract**: `RATING_SUBMIT` (`CAP-027`) / `API-057` (Issue #88), branch `feature/88-user-ratings-view`, base `integration/r1-agent-collaboration`.
+- **Endpoint**: `GET /api/v1/me/ratings`
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `rubric_versions` (DB-062), `rubric_criteria` (DB-063), `rating_submissions` (DB-064), `rating_revisions` (DB-065), `rating_scores` (DB-066), `rating_aggregates` (DB-068), `placements` (DB-049).
+- **Service & Confidentiality Architecture (`app/services/user_ratings.py`)**:
+  - `FeatureFlagService` Integration: Correctly inspects `ratings` global flag; handles R1 locked state cleanly.
+  - $n < 5$ Privacy Threshold (`AC-023` / RAT-03): Strictly withholds aggregate scores when $n < 5$, preventing de-anonymization of raters in small placements. Returns `score: null` and `score_status: "WITHHELD_INSUFFICIENT_SAMPLE"`.
+  - Unrated vs Zero Distinction (`AC-023`): New users receive `sample_size: 0`, `score: null`, `score_status: "UNRATED"` rather than an incorrect 0.0 default.
+  - Bilateral Double-Blind Protection (`AC-024` / RAT-04): Received ratings within the 14-day anti-retaliation window (`publish_after > now_utc`) are masked (`status: "BLINDED_PENDING_WINDOW"`, `rater_id: None`, `comment: None`). Unblinded metadata is surfaced once window elapses.
+  - Submissions Given & Eligible Relations (`AC-022`): Surfaces reviews authored by the actor and completed placements eligible for review.

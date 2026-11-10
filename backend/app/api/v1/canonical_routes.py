@@ -9,6 +9,7 @@ including:
 - `API-054`: `PUT /api/v1/placements/{id}/logs/{date}`
 - `API-055`: `POST /api/v1/log-entries/{id}/evidence`
 - `API-056`: `POST /api/v1/logs/{id}/submit`
+- `API-057`: `GET /api/v1/me/ratings`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
@@ -317,6 +318,15 @@ def api_056_submit_daily_log(
         )
     except InternshipLogScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate}) from exc
+
+
+@router.get("/me/ratings")
+def get_my_ratings_endpoint(
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-057 (`GET /api/v1/me/ratings`): Personal rating summary, rubric version, and score explanation (`AC-021..024`, `CAP-027`)."""
+    from app.services.user_ratings import user_ratings_service
+    return user_ratings_service.get_my_ratings_api_057(actor=actor)
 
 
 @router.post("/operator/refunds/{id}/approve")

@@ -942,7 +942,7 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
 
 ## LOG-089 / API-055 - Task Entry Evidence Attachment (Issue #86)
 
-- **Issue / PR**: GitHub Issue #86 (`API-055`), branch `feature/86-log-entry-evidence`, target `integration/r1-agent-collaboration`.
+- **Issue / PR**: GitHub Issue #86 (`API-055`), branch `feature/86-log-entry-evidence`, target `integration/r1-agent-collaboration`. PR #87 squash merged (commit `f69e2fd`), Issue #86 closed.
 - **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` per user freeze policy (Q-015 / AGENTS.md); zero mutations to main.
 - **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode CLI 1.18.29.
 - **Service & Implementation (`CAP-022` / `PG-022.S03` / `DB-058`)**:
@@ -960,3 +960,24 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: Identified 2 edge cases (concurrency lock order & visibility metadata leakage); both fully remediated and verified with tests (`reviews/2026-11-10/log_evidence/COPILOT_REVIEW.md`).
   * OpenCode CLI & Peer Review: 5-axis review passed (`reviews/2026-11-10/log_evidence/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/log_evidence/REVIEW_SUMMARY.md`.
+
+## LOG-090 / API-057 - Personal Ratings View & Double-Blind Anti-Retaliation (Issue #88)
+
+- **Issue / Branch**: GitHub Issue #88 (`API-057`), branch `feature/88-user-ratings-view`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-027` / `DB-064` / `AC-021..024`)**:
+  - `backend/app/services/user_ratings.py`: Created `UserRatingsService.get_my_ratings_api_057` implementing personal ratings summary.
+  - **Feature Flag Awareness**: Evaluates `FeatureFlagService.is_enabled('ratings')`; reflects R1 locked state cleanly without service degradation.
+  - **Confidentiality & Privacy Threshold (`AC-023` / RAT-03)**: Strictly enforces $n < 5$ withholding; for $n < 5$, `score: null` is returned with `score_status: "WITHHELD_INSUFFICIENT_SAMPLE"`. Unrated users receive `sample_size: 0`, `score: null`, `score_status: "UNRATED"` (distinct from 0.0).
+  - **Bilateral Double-Blind Protection (`AC-024` / RAT-04)**: During 14-day anti-retaliation window (`publish_after > now_utc`), received ratings are masked with `status: "BLINDED_PENDING_WINDOW"`, `rater_id: None`, `comment: None`. Once window elapses, unblinded details are revealed.
+  - **Authored & Eligible Relations (`AC-022` / RAT-02)**: Returns authored ratings in `submissions_given` and eligible completed placements in `eligible_relations`.
+  - Canonical routes: mounted `GET /api/v1/me/ratings` in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 9/9 unit and security tests passed in `backend/tests/security/test_user_ratings_api057.py`.
+  * 5/5 adversarial and isolation tests passed in `backend/tests/security/test_user_ratings_adversarial.py`.
+  * 37/37 regression tests (API-053 & API-055) passed in 305.91s. Total 51/51 tests green.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/user_ratings/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis APPROVED (`reviews/2026-11-10/user_ratings/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/user_ratings/REVIEW_SUMMARY.md`.
