@@ -1,0 +1,141 @@
+{
+  "scope": "current reviewed runtime/config and code/test index; selected native evidence only, unfinished draft and no full CI/R1/pilot acceptance",
+  "parent_commit": "89fda9ddb48c4c3717074873ac7d48445d911cee",
+  "reviewed_runtime_config_files": 16,
+  "native_current_xml": "academic_corrective_current_junit.xml",
+  "native_current": {
+    "tests": 34,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_seconds": 199.218
+  },
+  "reviews": [
+    "copilot_academic_review.md",
+    "copilot_academic_integration_review.md",
+    "copilot_academic_corrective_review.md"
+  ],
+  "remaining": "098/099/105 institutional queues, further lifecycle/cleanup controls, matching-head full CI and all remaining R1 work",
+  "files": {
+    "backend/alembic/versions/0015_academic_admission.py": {
+      "working_sha256": "23281492f7fa927b0ff630dafc75b73c655333017057c6d9da96d8fdafb0b1e4",
+      "index_sha256": "23281492f7fa927b0ff630dafc75b73c655333017057c6d9da96d8fdafb0b1e4",
+      "index_blob": "26dee83e300d122392696c784c1999f6949c4619"
+    },
+    "backend/app/api/v1/academic_admission.py": {
+      "working_sha256": "11767affeb6fd806d41d2be94720bddb259319665b42df6cf91f48e924c1bf9a",
+      "index_sha256": "11767affeb6fd806d41d2be94720bddb259319665b42df6cf91f48e924c1bf9a",
+      "index_blob": "c01fe968468eed12cf807c1a10be52d62dced7cd"
+    },
+    "backend/app/api/v1/governance.py": {
+      "working_sha256": "6f76041497e4363cf176c4d5b116443ad019d2db8dd0705fc2824d046b9a2583",
+      "index_sha256": "6d7e828c194262cfd2442bbf3eef149b4d32417e992c09c0a6c0cf8e5a7a7942",
+      "index_blob": "62c61d7c2d184186fd7d7c992ab8467077edb3c6"
+    },
+    "backend/app/api/v1/internship_logs.py": {
+      "working_sha256": "43dea47c0ab07862875d5bc5b0a8f40f13bfcf9b0f2716f0ba03473f768042bf",
+      "index_sha256": "b2a2be483ffd8a688b567e7ee21af3e9f6a000e0c22841a9f1afd70bfc744937",
+      "index_blob": "4f203c0115f8ee024c208cbb037f1502668f36ce"
+    },
+    "backend/app/api/v1/placement_admission.py": {
+      "working_sha256": "d02fc56cd57c9ede445cf1e6585f2de8f3a2e37c7fea4e90ea4624177de30fe7",
+      "index_sha256": "d02fc56cd57c9ede445cf1e6585f2de8f3a2e37c7fea4e90ea4624177de30fe7",
+      "index_blob": "b373fe228093e0535896cd4f9095f77fe437c4c4"
+    },
+    "backend/app/core/iam_http.py": {
+      "working_sha256": "d078a59ca69d69e80fef7055a4647040beff7fb5ce5465a059fe5bfd237c7748",
+      "index_sha256": "d078a59ca69d69e80fef7055a4647040beff7fb5ce5465a059fe5bfd237c7748",
+      "index_blob": "88212df93f908b0ff7af4ef0755029b915545da0"
+    },
+    "backend/app/db/academic_admission.py": {
+      "working_sha256": "3bb56fb8a1b5253a5d525b7c60ba68d0a41730879dd7f1d5580ff01f17928039",
+      "index_sha256": "3bb56fb8a1b5253a5d525b7c60ba68d0a41730879dd7f1d5580ff01f17928039",
+      "index_blob": "16e874f971bcdc64ecf28dac131ca52eef2434f0"
+    },
+    "backend/app/db/storage.py": {
+      "working_sha256": "2d7d835d2e5a737ab9b04c44694977abf9f6e159c9b0a9c2cb80de7b591dc88d",
+      "index_sha256": "7fd6dedefb57a7e1df54d96193d6cf5702aacf109d46fe439e3c8c065e835bcc",
+      "index_blob": "c24ef5446ae3394aede983b2dbfc00d545556475"
+    },
+    "backend/app/main.py": {
+      "working_sha256": "3f2db8d05169d68fe87cfdc0cbef7b74975d61288dc7cb9c7d31443296921cbb",
+      "index_sha256": "5eef06707f5b2369d9c3edd2c5dd57d26862fb400a542fa7609c8352d6a1652a",
+      "index_blob": "eeedee56a38560912173bba1daa721be42ae340d"
+    },
+    "backend/app/services/academic_admission.py": {
+      "working_sha256": "29de624a6c495804c33b4d872b656b3aa24935c9ad9a09bbca5b072d52bf7fa0",
+      "index_sha256": "29de624a6c495804c33b4d872b656b3aa24935c9ad9a09bbca5b072d52bf7fa0",
+      "index_blob": "341d8acad239d70d0bed85fe58cd95947bb06358"
+    },
+    "backend/app/services/academic_notices.py": {
+      "working_sha256": "471eebdff9c1902a0643420c7c12b41c0b2a387bb75ce40c40479998931d651f",
+      "index_sha256": "471eebdff9c1902a0643420c7c12b41c0b2a387bb75ce40c40479998931d651f",
+      "index_blob": "c21fd635a0dfe466b47ef11cbc939aa3f13b8247"
+    },
+    "backend/app/services/internship_logs.py": {
+      "working_sha256": "db3271d66bc96f9b8d35aed2b420c68685b2a0e2aa0b2feadb73f77e17a6dba5",
+      "index_sha256": "aef7e88624f4a8d6bfa45acf97688517695b6e1e179da68184e138bf771bb54d",
+      "index_blob": "91a92c56f75e7e5251cf1dd8e42a305b6501d893"
+    },
+    "backend/app/services/mentor_notices.py": {
+      "working_sha256": "4fca9c751560f1c9fa08c789fa863130dd01ffed3584d6785a67c003f4b4758e",
+      "index_sha256": "4fca9c751560f1c9fa08c789fa863130dd01ffed3584d6785a67c003f4b4758e",
+      "index_blob": "ff05e0e60aaf2db748170dce3a29b10a6e4ae3c8"
+    },
+    "backend/app/services/placement_admission.py": {
+      "working_sha256": "e16ad62e9d53ec36d7d915156df6beeda7d6f17d1db9dc0ad36c4a187967cd6c",
+      "index_sha256": "e16ad62e9d53ec36d7d915156df6beeda7d6f17d1db9dc0ad36c4a187967cd6c",
+      "index_blob": "5af1d93b99ac02acdaa3354be7c63d6f53a4b58c"
+    },
+    "backend/app/workers/outbox.py": {
+      "working_sha256": "09b7348f4bf385ed1d691b0eaf2f20163a8765631a93ff2a93f4d1fe896080cc",
+      "index_sha256": "09b7348f4bf385ed1d691b0eaf2f20163a8765631a93ff2a93f4d1fe896080cc",
+      "index_blob": "a12bf339b607c8f163eb1084d4f641a2d07cde54"
+    },
+    "backend/tests/security/test_academic_admission.py": {
+      "working_sha256": "7b686ae0ea2fc53ae08f06c79f25fb6233f52081e81a74f74f4f6bf25dc17bcb",
+      "index_sha256": "7b686ae0ea2fc53ae08f06c79f25fb6233f52081e81a74f74f4f6bf25dc17bcb",
+      "index_blob": "4783aa4f38ed6c8e9dd90e507be1d2ee92de50ab"
+    },
+    "backend/tests/security/test_academic_authority.py": {
+      "working_sha256": "c75f674fc3fe1dcf51d0fbce4b1e71f6401a97d76d0a315f7cd90cbccc816c69",
+      "index_sha256": "c75f674fc3fe1dcf51d0fbce4b1e71f6401a97d76d0a315f7cd90cbccc816c69",
+      "index_blob": "f0583629f42b9b9421284448a12e459358de07a0"
+    },
+    "backend/tests/security/test_academic_legacy_edges.py": {
+      "working_sha256": "75ffd0c7971a356905e55e90cb1fe9fbbe93408b46aaeaaa9fe94b7ffcc5b382",
+      "index_sha256": "75ffd0c7971a356905e55e90cb1fe9fbbe93408b46aaeaaa9fe94b7ffcc5b382",
+      "index_blob": "d21c8914c543c73cf2063d7ee9783035f1639f74"
+    },
+    "backend/tests/security/test_academic_lifecycle.py": {
+      "working_sha256": "124778a02560a1453e4459c153c2311730496df78c41aa904e5ed92e2e2d9600",
+      "index_sha256": "124778a02560a1453e4459c153c2311730496df78c41aa904e5ed92e2e2d9600",
+      "index_blob": "7435b337a277ca4759eefcddf5af85739f7bc46d"
+    },
+    "backend/tests/security/test_academic_migration.py": {
+      "working_sha256": "25c65c1848fde3208a2021e3d48922f0038827c17bf7388c89905f24332f24f5",
+      "index_sha256": "25c65c1848fde3208a2021e3d48922f0038827c17bf7388c89905f24332f24f5",
+      "index_blob": "bb6b110d741a0b0edfaa6e837c5e6ca20b0c54dc"
+    },
+    "backend/tests/security/test_academic_notices.py": {
+      "working_sha256": "7d7dd8bc0faac00036a4ca1eb16c67dbdbda15ef685a9792049ec834607028b4",
+      "index_sha256": "7d7dd8bc0faac00036a4ca1eb16c67dbdbda15ef685a9792049ec834607028b4",
+      "index_blob": "af18c5026f41ff6586bcc336dd500140e169a30f"
+    },
+    "backend/tests/security/test_enrollment_migration.py": {
+      "working_sha256": "be283fec381d05b77749e5be88f40cc93b7da0fc71b8558d97c8b2293bd379ad",
+      "index_sha256": "be283fec381d05b77749e5be88f40cc93b7da0fc71b8558d97c8b2293bd379ad",
+      "index_blob": "7bdffbe78e591311daf38ad35e5996dfac190fd0"
+    },
+    "backend/tests/security/test_regressions.py": {
+      "working_sha256": "9d3113355626cf682fe24eb0822de87b0f02d2ce02e3568fdcef4a8e1487b81a",
+      "index_sha256": "e51ed872b09d42eb7078ab9ba8b42ffd52f4a977c6934ed2d6c569b35e6b2943",
+      "index_blob": "eb291a526b58c1e7ec3aa833d38a50e1c27a4f8c"
+    },
+    "infra/compose.yaml": {
+      "working_sha256": "04b60f279d1a21c418f82b4024ab1cbc84675b19f2c678653b05c7f28c3492cb",
+      "index_sha256": "04b60f279d1a21c418f82b4024ab1cbc84675b19f2c678653b05c7f28c3492cb",
+      "index_blob": "089b852108824152b77066aee5f390c641e89978"
+    }
+  }
+}

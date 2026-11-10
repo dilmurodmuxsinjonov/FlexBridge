@@ -1,0 +1,6 @@
+{
+  "scope": "uncommitted calendar predicate corrective delta at read-only review launch",
+  "sha256": {
+    "backend/alembic/versions/0014_placement_admission.py": "e71507e4feae64179d9f85a1a818cc778f8be1ea5000eda3371bdd27c499475e"
+  }
+}

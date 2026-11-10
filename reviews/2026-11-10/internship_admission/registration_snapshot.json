@@ -1,0 +1,12 @@
+{
+  "scope": "OpenAPI registration for the full model contract matrix only; not functional acceptance or pilot readiness",
+  "apis": 124,
+  "helper_apis": 8,
+  "total_contracts": 132,
+  "explicit_count": 59,
+  "placeholder_count": 73,
+  "new_partial_branches": {
+    "API-051": "MENTOR only; TEACHER pending",
+    "API-088": "ACTIVATE/CANCEL only; completion/dispute pending"
+  }
+}

@@ -1,0 +1,397 @@
+{
+  "scope": "overlapping preserved stages including failure/setup errors; not additive or full R1 acceptance",
+  "stages": [
+    {
+      "file": "academic_affected_current_junit.xml",
+      "tests": 86,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 453.173
+    },
+    {
+      "file": "academic_authority_corrected_junit.xml",
+      "tests": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 148.516
+    },
+    {
+      "file": "academic_authority_initial_junit.xml",
+      "tests": 63,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 146.006
+    },
+    {
+      "file": "academic_core_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.239
+    },
+    {
+      "file": "academic_core_initial_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 2,
+      "skipped": 0,
+      "xml_seconds": 6.045
+    },
+    {
+      "file": "academic_corrective_current_junit.xml",
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 199.218
+    },
+    {
+      "file": "academic_http_initial_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 23.303
+    },
+    {
+      "file": "academic_legacy_edges_probe_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 29.829
+    },
+    {
+      "file": "academic_legacy_edges_red_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.341
+    },
+    {
+      "file": "academic_legacy_primary_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.763
+    },
+    {
+      "file": "academic_lifecycle_corrected_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.588
+    },
+    {
+      "file": "academic_lifecycle_initial_junit.xml",
+      "tests": 9,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 42.921
+    },
+    {
+      "file": "academic_notices_corrected_junit.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.796
+    },
+    {
+      "file": "academic_notices_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.953
+    },
+    {
+      "file": "academic_student_choice_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.219
+    },
+    {
+      "file": "academic_upgrade_initial_junit.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.339
+    },
+    {
+      "file": "academic_view_mfa_corrected_junit.xml",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 38.561
+    },
+    {
+      "file": "academic_view_mfa_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.892
+    },
+    {
+      "file": "academic_views_current_junit.xml",
+      "tests": 57,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 363.148
+    },
+    {
+      "file": "academic_views_initial_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 33.901
+    },
+    {
+      "file": "academic_views_notice_corrected_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 73.87
+    },
+    {
+      "file": "academic_views_security_initial_junit.xml",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 139.56
+    },
+    {
+      "file": "actor_teacher_initial_junit.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 12.786
+    },
+    {
+      "file": "affected_guard_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.752
+    },
+    {
+      "file": "affected_integration_initial_junit.xml",
+      "tests": 48,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 148.688
+    },
+    {
+      "file": "business_date_corrected_junit.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 21.633
+    },
+    {
+      "file": "business_date_red_junit.xml",
+      "tests": 4,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 19.849
+    },
+    {
+      "file": "calendar_drift_corrected_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 121.451
+    },
+    {
+      "file": "calendar_drift_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 18.38
+    },
+    {
+      "file": "concurrency_initial_junit.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 37.975
+    },
+    {
+      "file": "coordinator_notice_current_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 41.175
+    },
+    {
+      "file": "host_current_junit.xml",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 156.148
+    },
+    {
+      "file": "host_utc_current_junit.xml",
+      "tests": 113,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 344.586
+    },
+    {
+      "file": "host_utc_final_junit.xml",
+      "tests": 115,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 457.423
+    },
+    {
+      "file": "host_utc_setup_error_junit.xml",
+      "tests": 113,
+      "failures": 0,
+      "errors": 113,
+      "skipped": 0,
+      "xml_seconds": 3.591
+    },
+    {
+      "file": "initial_guard_junit.xml",
+      "tests": 3,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 11.206
+    },
+    {
+      "file": "initial_junit.xml",
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 13.638
+    },
+    {
+      "file": "lifecycle_authority_junit.xml",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 85.246
+    },
+    {
+      "file": "lifecycle_corrected_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 46.359
+    },
+    {
+      "file": "lifecycle_initial_junit.xml",
+      "tests": 12,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 40.645
+    },
+    {
+      "file": "notices_initial_junit.xml",
+      "tests": 12,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 44.471
+    },
+    {
+      "file": "pagination_initial_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.847
+    },
+    {
+      "file": "pr64_teacher_final_junit.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.142
+    },
+    {
+      "file": "retries_initial_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 66.942
+    },
+    {
+      "file": "tasks_history_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 19.826
+    },
+    {
+      "file": "tasks_history_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 34.663
+    },
+    {
+      "file": "upgrade_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 20.537
+    },
+    {
+      "file": "upgrade_initial_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 21.686
+    },
+    {
+      "file": "workplace_mentor_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 13.194
+    }
+  ]
+}

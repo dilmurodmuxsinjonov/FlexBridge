@@ -2,9 +2,10 @@
 from datetime import date
 from uuid import uuid4
 from sqlalchemy import select,text
+from sqlalchemy.exc import OperationalError
 from app.db.storage import table,transaction,now
 from app.api.dependencies import owns_candidate,require_org,ActorContext
-from app.services.placements import get_row,insert_row,PlacementScopeError
+from app.services.placements import get_row,insert_row,PlacementScopeError,require_internship_placement
 from app.core.audit import AppendOnlyAuditStore
 
 class InternshipLogScopeError(Exception):
@@ -14,19 +15,14 @@ class InternshipLogScopeError(Exception):
 
 class InternshipLogService:
     audit_store=AppendOnlyAuditStore()
-    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor_user_id):
-        with transaction() as conn:
-            p=get_row(conn,'placements',placement_id,True)
-            if p['organization_id']!=organization_id: raise InternshipLogScopeError('MENTOR_ORG_MISMATCH')
-            require_org(ActorContext(actor_user_id,'',()),organization_id,'OWNER','HOST_COORDINATOR')
-            membership=conn.execute(select(table('org_memberships').c.id).where(table('org_memberships').c.user_id==mentor_id,
-                table('org_memberships').c.organization_id==organization_id,table('org_memberships').c.status=='ACTIVE',table('org_memberships').c.revoked_at.is_(None))).scalar_one_or_none()
-            if not membership: raise InternshipLogScopeError('MENTOR_MEMBERSHIP_REQUIRED')
-            return insert_row(conn,'mentor_assignments',placement_id=placement_id,organization_id=organization_id,membership_id=membership,
-                assigned_by_id=actor_user_id,assigned_at=now())
+    def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor,idempotency_key):
+        from app.services.placement_admission import admission_service
+        return admission_service.nominate_mentor(actor=actor,placement_id=placement_id,
+            organization_id=organization_id,mentor_id=mentor_id,idempotency_key=idempotency_key)
 
     def _academic_binding(self,conn,placement,supervision,institution_id):
         from app.db.institution_scope import TASHKENT
+        require_internship_placement(conn,placement)
         if (not placement['academic_track'] or placement['status']!='ACTIVE' or
             supervision['institution_id']!=institution_id or supervision['enrollment_id']!=placement['enrollment_id']
             or supervision['status']!='ACTIVE' or supervision['revoked_at'] or not supervision['accepted_at']
@@ -39,6 +35,8 @@ class InternshipLogService:
         purpose=supervision['purpose'];purposes=agreement['purposes']
         enabled=(purpose in purposes) if isinstance(purposes,list) else (isinstance(purposes,dict) and purposes.get(purpose) is True)
         if (enrollment['institution_id']!=institution_id or enrollment['candidate_id']!=placement['candidate_id'] or
+            not conn.execute(text('SELECT flexbridge.academic_supervision_current(:s,:c)'),
+                {'s':supervision['id'],'c':placement['candidate_id']}).scalar_one() or
             not conn.execute(text('SELECT flexbridge.enrollment_is_current(:id)'),{'id':enrollment['id']}).scalar_one() or
             enrollment['status']!='VERIFIED' or enrollment['start_date']>today or
             (enrollment['end_date'] is not None and enrollment['end_date']<today) or
@@ -47,51 +45,21 @@ class InternshipLogService:
             raise InternshipLogScopeError('ACADEMIC_SCOPE_NOT_CURRENT',status_code=403)
 
     def _locked_academic_assignment(self,conn,assignment_id):
-        first=get_row(conn,'academic_assignments',assignment_id)
-        get_row(conn,'institutions',first['institution_id'],True)
-        placement=get_row(conn,'placements',first['placement_id'],True)
-        supervision=get_row(conn,'student_supervisions',first['supervision_id'],True)
-        assignment=get_row(conn,'academic_assignments',assignment_id,True)
-        if any(assignment[key]!=first[key] for key in ('institution_id','placement_id','supervision_id')):
-            raise InternshipLogScopeError('ACADEMIC_SCOPE_CHANGED')
+        from app.services.academic_admission import academic_service
+        placement,_,supervision,assignment=academic_service.locked_assignment(conn,assignment_id)
         return placement,supervision,assignment
 
-    def create_academic_assignment(self,*,actor,placement_id,institution_id,supervisor_id,supervision_id):
-        from app.services.authority import institution_authority,institution_role_authority
-        with transaction() as conn:
-            get_row(conn,'institutions',institution_id,True)
-            placement=get_row(conn,'placements',placement_id,True)
-            supervision=get_row(conn,'student_supervisions',supervision_id,True)
-            self._academic_binding(conn,placement,supervision,institution_id)
-            authority=institution_authority(conn,actor,institution_id,'COORDINATOR',require_mfa=True)
-            membership=get_row(conn,'institution_memberships',supervisor_id)
-            if membership['institution_id']!=institution_id or membership['status']!='ACTIVE' or membership['revoked_at']:
-                raise InternshipLogScopeError('TEACHER_MEMBERSHIP_REQUIRED')
-            if membership['user_id']==actor.user_id:raise InternshipLogScopeError('SELF_ASSIGNMENT_FORBIDDEN',status_code=403)
-            if supervision['coordinator_membership_id']!=authority['id']:
-                raise InternshipLogScopeError('SUPERVISION_ACTOR_FORBIDDEN',status_code=403)
-            teacher=institution_role_authority(conn,membership['user_id'],institution_id,'TEACHER',nowait=True)
-            if teacher['id']!=supervisor_id:raise InternshipLogScopeError('TEACHER_MEMBERSHIP_REQUIRED',status_code=403)
-            assignment=insert_row(conn,'academic_assignments',placement_id=placement_id,institution_id=institution_id,teacher_membership_id=supervisor_id,
-                supervision_id=supervision_id,assigned_by_id=actor.user_id,assigned_at=now())
-            self.audit_store.append_audit_event(actor_id=actor.user_id,action='ACADEMIC_ASSIGNMENT_CREATED',entity_type='academic_assignment',entity_id=assignment['id'])
-            return assignment
+    def create_academic_assignment(self,*,actor,placement_id,institution_id,supervisor_id,supervision_id,idempotency_key):
+        from app.services.academic_admission import academic_service
+        return academic_service.nominate(actor=actor,placement_id=placement_id,institution_id=institution_id,
+            supervisor_id=supervisor_id,supervision_id=supervision_id,idempotency_key=idempotency_key)
 
     def revoke_academic_assignment(self,actor,assignment_id):
-        from app.services.authority import institution_authority
-        with transaction() as conn:
-            _,_,assignment=self._locked_academic_assignment(conn,assignment_id)
-            institution_authority(conn,actor,assignment['institution_id'],'COORDINATOR',require_mfa=True)
-            if assignment['revoked_at'] is None:
-                stamp=now()
-                conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment_id)
-                    .values(revoked_at=stamp,updated_at=stamp))
-                self.audit_store.append_audit_event(actor_id=actor.user_id,action='ACADEMIC_ASSIGNMENT_REVOKED',entity_type='academic_assignment',entity_id=assignment_id)
-                assignment={**assignment,'revoked_at':stamp}
-            return assignment
+        from app.services.academic_admission import academic_service
+        return academic_service.revoke(actor,assignment_id)
 
     def review_academic(self,*,actor,daily_log_id,placement_id,assignment_id,decision,comment):
-        from app.services.authority import institution_authority
+        from app.services.academic_admission import academic_service
         with transaction() as conn:
             placement,supervision,assignment=self._locked_academic_assignment(conn,assignment_id)
             log=get_row(conn,'daily_logs',daily_log_id,True)
@@ -101,9 +69,10 @@ class InternshipLogService:
             revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
             if not owns_candidate(revision['author_id'],placement['candidate_id']):
                 raise InternshipLogScopeError('REVISION_AUTHOR_FORBIDDEN',status_code=403)
-            authority=institution_authority(conn,actor,assignment['institution_id'],'TEACHER')
+            authority=academic_service.teacher(conn,actor,placement,assignment)
             if (authority['id']!=assignment['teacher_membership_id'] or assignment['revoked_at'] or not assignment['accepted_at']
-                or assignment['accepted_at']>now()):
+                or assignment['accepted_at']>now() or not conn.execute(text('SELECT flexbridge.academic_teacher_current(:a,:t)'),
+                    {'a':assignment_id,'t':revision['terms_id']}).scalar_one()):
                 raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
             if revision['author_id']==actor.user_id:raise InternshipLogScopeError('SELF_REVIEW_FORBIDDEN',status_code=403)
             if revision['status']!='SUBMITTED':raise InternshipLogScopeError('SUBMITTED_REVISION_REQUIRED')
@@ -114,25 +83,35 @@ class InternshipLogService:
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ACADEMIC_LOG_REVIEWED',entity_type='academic_log_review',entity_id=review['id'])
             return review
 
-    def review(self,*,daily_log_id,placement_id,assignment_id,actor_user_id,decision,comment,academic=False):
+    def review(self,*,daily_log_id,placement_id,assignment_id,actor,decision,comment,academic=False):
         if academic:raise InternshipLogScopeError('ACADEMIC_USE_SCOPED_SERVICE',status_code=422)
+        from app.services.placement_admission import admission_service
         with transaction() as conn:
+            placement,_=admission_service._locked(conn,placement_id)
             log=get_row(conn,'daily_logs',daily_log_id,True)
-            revision=get_row(conn,'log_revisions',log['current_revision_id'])
-            assignment=get_row(conn,'mentor_assignments',assignment_id)
-            member=get_row(conn,'org_memberships',assignment['membership_id'])
-            if (log['placement_id']!=placement_id or assignment['placement_id']!=placement_id or member['user_id']!=actor_user_id
-                or member['status']!='ACTIVE' or member['revoked_at'] or assignment['revoked_at'] or not assignment['accepted_at']):
+            revision=get_row(conn,'log_revisions',log['current_revision_id'],True)
+            assignment=get_row(conn,'mentor_assignments',assignment_id,True)
+            if (placement['status']!='ACTIVE' or log['placement_id']!=placement_id or assignment['placement_id']!=placement_id
+                or assignment['revoked_at'] or not assignment['accepted_at'] or revision['author_id']==actor.user_id):
                 raise InternshipLogScopeError('REVIEW_SCOPE_FORBIDDEN',status_code=403)
+            admission_service._mentor(conn,actor,placement,assignment)
+            proof=table('mentor_assignment_proofs');consent=table('placement_consents')
+            origin=conn.execute(select(proof.c.origin).where(proof.c.assignment_id==assignment_id)).scalar_one()
+            if origin=='PUBLIC' and not conn.execute(select(consent.c.id).where(consent.c.assignment_id==assignment_id,
+                consent.c.terms_id==revision['terms_id'],consent.c.side=='MENTOR')).first():
+                raise InternshipLogScopeError('MENTOR_PLAN_ACCEPTANCE_REQUIRED',status_code=403)
             if revision['status']!='SUBMITTED': raise InternshipLogScopeError('SUBMITTED_REVISION_REQUIRED')
             if decision not in ('APPROVED','REJECTED','CHANGES_REQUESTED'): raise InternshipLogScopeError('INVALID_REVIEW_DECISION',status_code=422)
-            return insert_row(conn,'workplace_log_reviews',revision_id=revision['id'],placement_id=placement_id,
+            review=insert_row(conn,'workplace_log_reviews',revision_id=revision['id'],placement_id=placement_id,
                 mentor_assignment_id=assignment_id,decision=decision,comment=comment,decided_at=now())
+            self.audit_store.append_audit_event(actor_id=actor.user_id,action='WORKPLACE_LOG_REVIEWED',entity_type='workplace_log_review',entity_id=review['id'])
+            return review
 
     def _owned(self,conn,placement_id,author_id):
         try: p=get_row(conn,'placements',placement_id,True)
         except PlacementScopeError: raise InternshipLogScopeError('PLACEMENT_NOT_FOUND',status_code=404)
         if not owns_candidate(author_id,p['candidate_id']): raise InternshipLogScopeError('PLACEMENT_AUTHOR_FORBIDDEN',status_code=403)
+        require_internship_placement(conn,p)
         if p['status']!='ACTIVE': raise InternshipLogScopeError('ACTIVE_PLACEMENT_REQUIRED')
         if not p['current_terms_id']: raise InternshipLogScopeError('PLACEMENT_TERMS_REQUIRED')
         return p
@@ -149,7 +128,8 @@ class InternshipLogService:
             p=self._owned(conn,placement_id,author_id)
             terms=get_row(conn,'placement_terms',p['current_terms_id'])
             local_date=date.fromisoformat(str(log_date))
-            if not p['start_date']<=local_date<=min(p['end_date'],date.today()): raise InternshipLogScopeError('INVALID_LOG_DATE',status_code=422)
+            from app.db.institution_scope import TASHKENT
+            if not p['start_date']<=local_date<=min(p['end_date'],now().astimezone(TASHKENT).date()): raise InternshipLogScopeError('INVALID_LOG_DATE',status_code=422)
             if day_type not in ('WORKED','ABSENT') or not 0<=total_minutes<=min(480,terms['daily_limit_minutes']) or (day_type=='ABSENT' and total_minutes):
                 raise InternshipLogScopeError('INVALID_DAILY_LOG_MINUTES',status_code=422)
             t=table('daily_logs')

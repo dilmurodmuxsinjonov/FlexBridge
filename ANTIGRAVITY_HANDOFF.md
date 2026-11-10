@@ -1,9 +1,275 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
 Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
-Codex feature/63-enrollment-verification branchida ishlamoqda. Bir xil fayllarni parallel
+Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni parallel
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
+
+## CURRENT LOG-071 - scoped academic lists and coordinator notices
+
+## LOG-071 current publication evidence
+
+Current queue source/config9-file review exited0/no actionable reviewed P1/P2;
+launch scope stayed byte-identical. Native authority/cursor/>100/legacy selection
+21passed139.56s. Separate coordinator notice5passed41.18s. Broad current integration
+57 cases:56passed1failed363.15s; stale-fence fixture set lease_until=now() although
+worker requires strict lease_until<now(). Explicitly expired test lease timestamps
+replace that boundary assumption in all three notice families; production worker
+semantics stay unchanged. Corrective all three notice groups15passed73.87s. These
+are overlapping stages, not a fabricated complete native green. Preserve the raw
+failed stage. Current matching-head full CI still required before merge.
+
+Full parentdf87515 CI1015 twice549.23s/740.08s is captured separately and predates
+this queue source. Current draft registration67 explicit65 placeholders of132 is
+registration only. No new table/dependency/live migration;0015/124, canonical94,
+accepted main0013/114.106 minimum academic detail,107/108 review/decision and all
+remaining R1 work stay open. Source/index receipt: source_academic_views_manifest.json.
+
+
+Codex owns the current queue draft on feature/65 from prior publisheddf87515.
+Check actual git/process/JUnit status on resume. Full parentdf87515 CI42743318591/
+42743326614 both completed success1015passed549.23s/740.08s, raw summaries in
+pr66_academic_core_ci.json. Those checks do not accept the new queue source.
+PR66 stays draft/Issue65 open, accepted main0013/114, working0015/124 unchanged.
+
+Implemented prototypes:098 exact own coordinator purpose OR personally accepted
+original teacher scope;099 latest personal school choice/current plan/unbound
+pending queue;105 submitted current revision metadata only. Scoped paged teacher/
+agreement options and supervision assignment metadata enable actual nomination/
+replacement without using IDs from trusted test setup. No diary summary/evidence/
+payroll in these lists.106/107/108 detailed view/actions are next work. Added
+distinct actual public supervision-created/bound coordinator notices with nullable
+placement, immutable proof-derived student/history, atomic audit/outbox and fenced
+inbox/default worker/compose routing. No new table/dependency/live action.
+
+First actual HTTP/notice5passed33.90s. Late sensitive-role grant after initial
+account check genuinely returned200:1failed10.89s -> second policy check after
+scoped role pin ->6passed38.56s. Later helper/version refinements are covered by
+the currently running expanded controls, not falsely included in that earlier6.
+Read-only Copilot plan/source exited0; current9-file source opinion found no
+actionable P1/P2, no test/SHA/model certification. Source hash scope retained.
+Ambiguous primary legacy probe failed in fixture9.76s: existing canonical unique
+index already blocks it. Test now verifies real uniqueness/preserved valid import;
+no redundant migration change. Source071 does tighten stale choice to the prior
+exact plan when binding creates its next version; no imported consent is invented.
+
+NEXT: inspect actual new-head complete CI and any feedback; current selected
+checks/source review and initial failure/correction are preserved. Do not turn
+parent1015 or selected21/15 into full-current acceptance. The explicit expired
+lease fixture correction needs the full matching-head run; no worker-policy waiver.
+Preserve final source/test pin and only accept the bounded Issue65 requirements
+when current CI/review/evidence genuinely match. The full R1 goal remains active. Additional post-review/runtime follow-up is needed if any
+source changes. Then106 minimum academic detail/107 independent review/108 decision
+and the rest of full R1 continue. Detailed current behavior/limits are in
+backend/ACADEMIC_VIEWS.md and internship_admission/ACADEMIC_QUEUES_PLAN.md. pg_live
+unchanged/stopped at last observed07:18; no Docker/admin/reboot/live migration.
+
+## Historical LOG-069/070 - school admission and viewer notice corrections
+
+Current LOG-070 checkpoint:34 current corrective tests passed199.22s,0fail/error/
+skip,1 framework warning. This exact run includes academic HTTP/lifecycle, both
+mismatched legacy edges, populated upgrade rollback and academic/mentor notice
+controls (active reassignment, author logout, atomic apply failure, stale fence and
+cross-placement payload mismatch). Current runtime/config stayed unchanged during
+this run. Corrective Copilot read-only review exited0, no concrete delta P1/P2;
+launch hashes are academic_corrective_review_scope.json. Initial/integration review
+and earlier63/86 stages are separate; do not sum them or claim full current CI.
+Full matching-head GitHub CI is still required. PR66 remains draft/Issue65 open.
+
+
+Codex owns the current academic draft on feature/65-internship-admission, based on
+published89fda9d. PR66 remains draft, Issue65 open; accepted main1b2bbbf/0013/114.
+Current0015 executes124 tables in disposable native PostgreSQL. Canonical94-table
+schema is preserved; do not replace FlexBridge_1_4_schema.sql with a test dump.
+No pg_live migration, dependency install or Docker/admin/reboot action in this unit.
+
+Implemented: student's own verified-school selection BEFORE coordinator binding;
+actual current formal/MFA coordinator supervision and immutable exact scope;
+pending academic binding creates a new plan; original teacher appointment/grant
+and actual personal exact-version API051 TEACHER consent; host start/diary gates;
+current minimal named-teacher plan/inbox, immutable proof/projection guards,
+audited rollback and current coordinator cleanup even with an invalid parent.
+Reconciled institution -> org -> placement lock paths; ordinary Teacher PASSWORD
+still valid under existing current sensitive-role policy. No UID/proof waiver.
+
+Actual new HTTP5passed23.30s. Old authority63 initially56passed7failed146.01s:
+five tests attempted now-forbidden raw history rewrites; expired enrollment is
+now denied before supervision, and audit hook moved with its actual writer.
+Meaningful SQL denial + valid review controls replace the impossible corruption;
+all63 thenpassed148.52s. Lifecycleinitial8passed1failed42.92s violated the existing
+grant history unique key; proper new formal appointment fixture9passed24.59s.
+Populated upgrade3passed35.34s: exact history, no invented personal consent,
+ambiguous grant stays NULL, regrant cannot resurrect; DDL failure keeps0014 and
+its original functions/history. Raw failures and corrected JUnit remain separate.
+New self/side/latest dual-school cases plus affected host/contracts are running;
+inspect actual process/JUnit status rather than treating this note as completion.
+
+Read-only Copilot academic source review exited0, no unconditional P1/P2 found.
+Its legacy-pending uncertainty is intentionally fail-closed: imported ACTIVE
+history remains, pending imports do not acquire new activation consent. A reviewed
+re-admission lifecycle remains open; do not add a legacy exception to make tests
+green. Launch scope hashes are in academic_review_scope.json. Source opinion is
+not test/model/SHA/pilot certification; integration follow-up is separate.
+
+Published89fda9d full CI42726608461/42726620535 actually63failed924passed765.05s/
+743.64s. Saved pr66_host_followup_ci.json; these predate the current school changes.
+Do not relabel the draft green or merge based on selected local tests.
+
+LOG-070 current correction: integration review found missing active-teacher viewer
+notice P2; actual1failed24.95s -> separate source-derived academic local topic,
+initial academic1+mentor6passed35.80s. Current extended corrective run/review still
+required. Independent legacy-scope probe2failed29.83s reproduced wrong-enrollment
+binding and foreign-school import FK failure; migration now preserves history
+with incompatible supervision NULL and exact teacher eligibility. See HISOBOT
+for raw fixture-error and genuine-red stages.86passed453.18s affected stage predates
+these corrections. Do not label it final-source acceptance.
+
+NEXT in order: finish current corrective checks/review; preserve source
+hashes, journals and draft GitHub checkpoint. Then implement source098/099/105 institution/supervision/review queues and any
+new coordinator-viewer notices required when enabling those private views, with
+exact current enrollment/purpose/named scope, paging/private projections, race/
+retry/rollback evidence. Complete current full CI/reviews before any merge.
+backend/ACADEMIC_ADMISSION.md and NEXT_ACADEMIC_UNIT.md distinguish current work
+from still-open institution workflows. Full diary/completion/amendment/exports/
+frontend/provider/legal/DR/R1 and pilot acceptance remain open.
+
+## Historical LOG-068 - retry, date, pagination and local notice follow-up
+
+Final current native UTC115 passed457.42s,0failure/error/skip,1 framework warning.
+All local native/Copilot jobs from this package are now terminal. This selected
+run excludes unfinished academic admission; not a complete current CI/pilot pass.
+Read source_followup_manifest/HISOBOT and actual GitHub head/check state on resume.
+
+Codex owns the current feature/65-internship-admission edits. PR66 stays draft,
+Issue65 OPEN. Accepted main1b2bbbf /0013/114 unchanged. Draft0014 still118 tables;
+it now stores explicit required PUBLIC intake/nomination nonce/fingerprint/receipt
+and NULL legacy equivalents. Current projections plus immutable historical receipts
+support retries without new starts or revoked-assignment resurrection. Old nomination
+aliases normalize UUIDs and use the same key. No UID fallback.
+
+All own/host/mentor lists paginate with limit1..100, after/next_after;105 real HTTP
+intakes/nominations from trusted upstream metadata and105 tied-time inbox records
+passed. Plans show dates. In-app nominee/accepted/revoked notices use fenced outbox
+and immutable source/recipient derivation, atomic inbox/ack, current own read scope
+and safe projections; no email/SMS/provider claim. Main worker includes the local
+topic, identity worker stays separate. API031 in-app basics adds registration:
+60 explicit72 placeholders of132, not full contract or pilot acceptance.
+
+Calendar defect reproduced1failed3passed19.85s ->4passed21.63s. Retry stage15passed
+66.94s, paging2passed24.85s. Notice initial1failed11passed44.47s ->UTC normalization.
+First broad UTC invocation113 setup errors3.62s was encoded URL options; corrected
+PGOPTIONS='-c TimeZone=UTC' preflight verifies UTC. Broad UTC stage111passed2failed
+344.59s exposed nomination alias Z/+00 formatting and old501 expectation on the
+new inbox; both corrected. Final host_utc_final JUnit carries current terminal
+result. Do not add overlapping counts or label setup errors as application tests.
+
+Copilot read-only15-file source review found one calendar P2; actual changed
+predicate probe1failed18.38s ->exact full predicate/rewrite comparison ->9passed
+121.47s, including populated success/drift/failure rollback. Calendar and nomination
+format source follow-ups report no concrete delta P1/P2; opinions are not model/
+SHA/test certification. Scope hashes/exit codes and all failures are retained.
+
+NEXT: finish genuine academic pending-placement binding/teacher personal accept
+and restore63 academic fixture cases. Earlier85065b1 CI42722020448/42722027846:
+66failed901passed599.03s/735.52s;3 other cases are diary integration. Do not hide
+those failures, waive proofs, restore UID calls, or fabricate new legacy data.
+Actual old academic helpers ALREADY lock institution before placement; earlier
+placement-first handoff wording was wrong and is corrected in NEXT_ACADEMIC_UNIT.md.
+Reconcile org locks and derive bound institution before academic host ACTIVATE;
+retry scope changes rather than locking institution after org/placement. Complete
+current full CI/reviews before any merge. Full diary/completion/exports/frontend/
+provider/legal/DR/R1 remains open. pg_live remains stopped/untouched; Docker/WSL
+admin/reboot installation incomplete. At resume inspect actual git/CI/live job
+handles, not historical prose; don't restart a confirmed-live process on timeout.
+
+## Historical LOG-067 - versioned host admission draft
+
+Issue65/PR66 remain OPEN/DRAFT on feature/65-internship-admission. Accepted main
+is still1b2bbbf /0013/114. Current code has0014, executed118 tables in disposable
+PostgreSQL; pg_live remains untouched/stopped. Canonical model124+8 contracts now
+59 explicit73 placeholders, registration only;051 TEACHER and088 completion/dispute
+are still unfinished. No Docker/WSL/admin/reboot or pilot change.
+
+New host path: accepted internship ->PLANNED -> exact current plan and personal
+candidate/mentor consent ->host ACTIVATE; original current MENTOR grant, current
+actual actors after business waits, independent current host capability. Immutable
+source/nomination/consent/event proofs, preserved closed legacy set, plan versions/
+tasks and audited projection guards. Actual-session old aliases are strict-version;
+workplace review also uses current original mentor scope. Ordinary PASSWORD mentor
+and HOST_COORDINATOR controls pass; no blanket new MFA rule.
+
+Broad host current native37 passed156.15s; task-history/plan-audit rollback2 passed
+19.83s overlap. Earlier26 passed85.25s, concurrency7 passed37.97s and upgrade2 passed
+20.54s are overlapping stages. Preserve failures: initial lifecycle3 failed/9 passed,
+invalid salary upgrade fixtures2 failed; corrected stages saved. Actual superseded
+task append SQL probe1 failed34.67s -> guard/publish-order fix -> correction passed.
+Copilot read-only initial/follow-up exit0; launch source hashes stayed unchanged
+during each review. Review is source opinion, no independent model/SHA/test certificate.
+
+CRITICAL continuation: affected old integration47 passed/1 failed148.70s at
+academic_fixture's old UID-only confirm call. Do not restore fallback, fabricate
+post-upgrade legacy rows or remove that positive control. Build actual pending
+placement -> verified enrollment/coordinator/supervision/agreement/purpose -> named
+teacher personal accept ->host start and reconcile existing academic lock order.
+Before closing host acceptance finish intake/nomination retry receipts, pagination
+and candidate viewer/scope notification. Exact ordered work and source API IDs:
+reviews/2026-11-10/internship_admission/NEXT_ACADEMIC_UNIT.md.
+
+All native/Copilot jobs above are terminal. At resume inspect actual git/PR/CI for
+the published head; do not restart jobs from stale journal text. Last earlier head
+b918679 CI42717366787/42717373976 completed failure:1 failed935 passed647.54s/528.43s;
+that exact red missing-mentor stage is pr66_initial_ci.json, not current final CI.
+Need current complete CI/review/manifest acceptance before merging/closing65.
+Additional real mentor review positive/regrant denial2 passed13.19s, separate from
+37 selection. Verify SQL diary fn_validate_log_submission CURRENT_DATE under UTC
+against new explicit Asia/Tashkent dates; Windows local-time positives do not
+prove Linux/UTC correctness. Source inference only so far, not a reproduced UTC
+failure. Include this before accepting the cross-platform diary/start integration.
+
+## Historical LOG-065 - initial host internship admission
+
+PR64 final08b4129 full930 CI42712465345/42712470234 passed541.51s/651.09s,
+actual head/base/clean/CLEAN/no feedback checked, merged1b2bbbfed70dc9a68b6de52cdd91fb0f9c41351f;
+Issue63 closed. Extra unchanged08b formal TEACHER PASSWORD full own enrollment1
+passed10.14s, separate from930CI; exact probe/JUnit and final receipts in
+reviews/2026-11-10/internship_admission/PR64_ACCEPTANCE.md. Runtime0013/114,
+canonical51 explicit81 placeholder is registration only. Pilotfalse.
+
+Issue65 https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/65, branch
+feature/65-internship-admission from current origin/main1b2bbbf. Actual pinned08b
+3 HTTP/PG probes failed13.64s: ordinary job placement201, general ACTIVE200 with
+zero mentors, HR-only mentor nomination201/unaccepted. Metadata publish/roles are
+trusted setup, no anonymous/live/accepted-review privilege claim. Actual read-only
+source-plan Copilot exit0, no model/SHA/test/pilot certification. Plan/decisions/
+raw probes in internship_admission; Codex sole source owner.
+
+Implement first reachable host unit: canonical030 own placements,048 own candidate
+terms accept,050 plan,051 MENTOR accept,069 host placements,087 mentor nomination,
+088 ACTIVATE/CANCEL,089 own mentor inbox. Intake/plan write/revoke helpers and
+legacy aliases require actual actor/version, no UID fallback. New PLANNED from
+accepted internship only, exact current plan plus personally accepted original
+current MENTOR grant before host activation. Block academic activation until next
+school/teacher unit; don't fake that missing proof with a client flag.51 TEACHER
+and88 completion are explicit remaining contract branches, not complete API claims.
+Forward0014/proof helper count not yet executed or accepted. Preserve legacy rows
+and history without creating false consent/new verified starts. Update old job/
+accepted-field fixtures through genuine internship/session flows. Need actual SQL/
+HTTP/role/side/session/rollback/concurrency/upgrade/native/CI/review/manifests/handoff.
+pg_live is untouched; Docker/WSL admin installation remains incomplete, no reboot.
+
+LOG-066 current code progress: placement intake and mentor nomination now actual
+actors/current host authority/capability; kind/contract and exact offer binding;
+current target MENTOR role (NOWAIT), atomic audit, ordinary-job diary guard. API
+and direct fixtures updated to actual sessions; diary fixture is genuinely INTERNSHIP.
+Initial3 now2 passed/1 failed11.21s: confirm-start still activates without mentor
+personal proof. Keep this red test visible; full admission is not fixed. Business
+wait/logout2 + permanent Teacher control1 passed12.79s; selected diary/academic2
+passed10.75s. Native jobs terminal. Next implement0014 proof/history/terms/versioned
+candidate+mentor consent and canonical activation/private views/legacy aliases,
+then complete current tests/CI/source review. Do not mark65 done from initial2 green.
+
+Below entries retain earlier snapshots. This current block and live git/CI state
+take precedence when resuming; do not restart a process based on an old note.
 
 ## Qabul qilingan paketlar
 

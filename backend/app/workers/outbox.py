@@ -13,7 +13,12 @@ def handlers():
     from app.services.files_quarantine import run_scan,apply_scan
     from app.workers.refunds import run_refund,apply_refund
     from app.workers.identity_delivery import run_delivery,apply_delivery
-    return {'FILE_SCAN_REQUESTED':(run_scan,apply_scan),'REFUND_EXECUTE':(run_refund,apply_refund),'AUTH_OTP_DELIVERY':(run_delivery,apply_delivery)}
+    from app.services.mentor_notices import EVENT_TYPE,run_notice,apply_notice
+    from app.services import academic_notices,supervision_notices
+    return {'FILE_SCAN_REQUESTED':(run_scan,apply_scan),'REFUND_EXECUTE':(run_refund,apply_refund),
+            'AUTH_OTP_DELIVERY':(run_delivery,apply_delivery),EVENT_TYPE:(run_notice,apply_notice),
+            academic_notices.EVENT_TYPE:(academic_notices.run_notice,academic_notices.apply_notice),
+            supervision_notices.EVENT_TYPE:(supervision_notices.run_notice,supervision_notices.apply_notice)}
 
 def relay_pending_outbox_events(batch_size=50,registry=None,event_types=None):
     registry=handlers() if registry is None else registry
@@ -49,7 +54,7 @@ def relay_pending_outbox_events(batch_size=50,registry=None,event_types=None):
 
 def main():
     init_storage()
-    event_types=tuple(v.strip() for v in os.environ.get('OUTBOX_EVENT_TYPES','FILE_SCAN_REQUESTED,REFUND_EXECUTE').split(',') if v.strip())
+    event_types=tuple(v.strip() for v in os.environ.get('OUTBOX_EVENT_TYPES','FILE_SCAN_REQUESTED,REFUND_EXECUTE,PLACEMENT_MENTOR_NOTICE,PLACEMENT_ACADEMIC_NOTICE,SUPERVISION_COORDINATOR_NOTICE').split(',') if v.strip())
     heartbeat_key=os.environ.get('OUTBOX_WORKER_KEY','outbox')
     last_identity_cleanup=0
     while True:

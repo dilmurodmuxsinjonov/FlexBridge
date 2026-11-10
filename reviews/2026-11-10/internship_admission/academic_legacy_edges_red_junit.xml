@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="35.341" timestamp="2026-11-10T07:23:07.202745+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_legacy_edges" name="test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review[False]" time="17.185"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint &quot;institution_agreements_institution_id_version_key&quot;&#10;DETAIL:  Key (institution_id, version)=(4b1963cf-6138-4413-b5f5-dcaaaec03357, 1) already exists.&#10;[SQL: INSERT INTO flexbridge.institution_agreements (id, created_at, updated_at, institution_id, version, status, valid_from, purposes) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(institution_id)s::UUID, %(version)s::INTEGER, %(status)s::VARCHAR, %(valid_from)s::DATE, %(purposes)s::JSONB)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "institution_agreements_institution_id_version_key"
+E   DETAIL:  Key (institution_id, version)=(4b1963cf-6138-4413-b5f5-dcaaaec03357, 1) already exists.
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_legacy_edges.py:32: in test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review
+    agreement=insert_row(conn,'institution_agreements',institution_id=institution_id,version=1,status='ACTIVE',
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint "institution_agreements_institution_id_version_key"
+E   DETAIL:  Key (institution_id, version)=(4b1963cf-6138-4413-b5f5-dcaaaec03357, 1) already exists.
+E   [SQL: INSERT INTO flexbridge.institution_agreements (id, created_at, updated_at, institution_id, version, status, valid_from, purposes) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(institution_id)s::UUID, %(version)s::INTEGER, %(status)s::VARCHAR, %(valid_from)s::DATE, %(purposes)s::JSONB)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_legacy_edges" name="test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review[True]" time="16.460"><failure message="subprocess.CalledProcessError: Command '['D:\\FlexBridge\\.venv\\Scripts\\python.exe', '-m', 'alembic', '-c', 'D:\\FlexBridge\\backend\\alembic.ini', 'upgrade', 'head']' returned non-zero exit status 1.">backend\tests\security\test_academic_legacy_edges.py:40: in test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review
+    migrate('head')
+backend\tests\security\test_institution_migration.py:32: in migrate
+    return subprocess.run([sys.executable,'-m','alembic','-c',str(ROOT/'backend/alembic.ini'),'upgrade',target],
+C:\Users\dilmu\AppData\Local\Programs\Python\Python312\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['D:\\FlexBridge\\.venv\\Scripts\\python.exe', '-m', 'alembic', '-c', 'D:\\FlexBridge\\backend\\alembic.ini', 'upgrade', 'head']' returned non-zero exit status 1.</failure></testcase></testsuite></testsuites>

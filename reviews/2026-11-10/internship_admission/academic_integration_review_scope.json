@@ -1,0 +1,12 @@
+{
+  "base_head": "89fda9ddb48c4c3717074873ac7d48445d911cee",
+  "scope": {
+    "backend/app/main.py": "3f2db8d05169d68fe87cfdc0cbef7b74975d61288dc7cb9c7d31443296921cbb",
+    "backend/app/db/storage.py": "2d7d835d2e5a737ab9b04c44694977abf9f6e159c9b0a9c2cb80de7b591dc88d",
+    "backend/app/core/iam_http.py": "d078a59ca69d69e80fef7055a4647040beff7fb5ce5465a059fe5bfd237c7748",
+    "backend/tests/security/test_academic_lifecycle.py": "02eef3e3f4caf2ef2895b789eb8c5494601e3536d1b5a9d85610d48796fcb303",
+    "backend/tests/security/test_academic_migration.py": "25c65c1848fde3208a2021e3d48922f0038827c17bf7388c89905f24332f24f5",
+    "backend/ACADEMIC_ADMISSION.md": "10c3b4409e4862f7bd05194a203241c9d42f2948b67928bd1af4e6311954abaa"
+  },
+  "limitations": "Read-only integration and test-source opinion; no execution, model or SHA certification."
+}

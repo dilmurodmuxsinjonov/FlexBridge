@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="9.763" timestamp="2026-11-10T07:45:27.068775+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_legacy_edges" name="test_ambiguous_imported_primary_teachers_do_not_gain_current_review_authority" time="8.333"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint &quot;one_current_teacher&quot;&#10;DETAIL:  Key (placement_id)=(727073e8-4502-4700-ac92-6be46b539c38) already exists.&#10;[SQL: INSERT INTO flexbridge.academic_assignments (id, created_at, updated_at, placement_id, teacher_membership_id, supervision_id, assigned_by_id, assigned_at, accepted_at, institution_id) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(placement_id)s::UUID, %(teacher_membership_id)s::UUID, %(supervision_id)s::UUID, %(assigned_by_id)s::UUID, %(assigned_at)s::TIMESTAMP WITH TIME ZONE, %(accepted_at)s::TIMESTAMP WITH TIME ZONE, %(institution_id)s::UUID)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "one_current_teacher"
+E   DETAIL:  Key (placement_id)=(727073e8-4502-4700-ac92-6be46b539c38) already exists.
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_legacy_edges.py:60: in test_ambiguous_imported_primary_teachers_do_not_gain_current_review_authority
+    second=insert_row(conn,'academic_assignments',placement_id=f['placement_id'],institution_id=f['institution_id'],teacher_membership_id=member['id'],
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint "one_current_teacher"
+E   DETAIL:  Key (placement_id)=(727073e8-4502-4700-ac92-6be46b539c38) already exists.
+E   [SQL: INSERT INTO flexbridge.academic_assignments (id, created_at, updated_at, placement_id, teacher_membership_id, supervision_id, assigned_by_id, assigned_at, accepted_at, institution_id) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(placement_id)s::UUID, %(teacher_membership_id)s::UUID, %(supervision_id)s::UUID, %(assigned_by_id)s::UUID, %(assigned_at)s::TIMESTAMP WITH TIME ZONE, %(accepted_at)s::TIMESTAMP WITH TIME ZONE, %(institution_id)s::UUID)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase></testsuite></testsuites>

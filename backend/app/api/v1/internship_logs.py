@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
@@ -18,16 +19,18 @@ router = APIRouter(prefix="/api/v1/internship-logs", tags=["internship-logs"])
 
 
 class CreateMentorAssignmentRequest(StrictDTO):
-    placement_id: str
-    organization_id: str
-    mentor_id: str
+    placement_id: UUID
+    organization_id: UUID
+    mentor_id: UUID
+    idempotency_key: str = Field(min_length=8, max_length=128)
 
 
 class CreateAcademicAssignmentLogScopeRequest(StrictDTO):
-    placement_id: str
-    institution_id: str
-    supervisor_id: str
-    supervision_id: str
+    placement_id: UUID
+    institution_id: UUID
+    supervisor_id: UUID
+    supervision_id: UUID
+    idempotency_key: str=Field(min_length=8,max_length=128)
 
 
 class CreateDailyLogRequest(StrictDTO):
@@ -56,10 +59,11 @@ class AcademicLogReviewRequest(StrictDTO):
 @router.post("/mentor-assignments", status_code=201)
 def create_mentor_assignment_endpoint(payload: CreateMentorAssignmentRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return internship_log_service.create_mentor_assignment(
-        placement_id=payload.placement_id,
-        organization_id=payload.organization_id,
-        mentor_id=payload.mentor_id,
-        actor_user_id=actor.user_id,
+        placement_id=str(payload.placement_id),
+        organization_id=str(payload.organization_id),
+        mentor_id=str(payload.mentor_id),
+        actor=actor,
+        idempotency_key=payload.idempotency_key,
     )
 
 
@@ -69,11 +73,12 @@ def create_academic_assignment_log_scope_endpoint(
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     return internship_log_service.create_academic_assignment(
-        placement_id=payload.placement_id,
-        institution_id=payload.institution_id,
-        supervisor_id=payload.supervisor_id,
-        supervision_id=payload.supervision_id,
+        placement_id=str(payload.placement_id),
+        institution_id=str(payload.institution_id),
+        supervisor_id=str(payload.supervisor_id),
+        supervision_id=str(payload.supervision_id),
         actor=actor,
+        idempotency_key=payload.idempotency_key,
     )
 
 
@@ -110,7 +115,7 @@ def submit_workplace_review_endpoint(
             daily_log_id=daily_log_id,
             placement_id=payload.placement_id,
             assignment_id=payload.mentor_assignment_id,
-            actor_user_id=actor.user_id,
+            actor=actor,
             decision=payload.decision,
             comment=payload.comment,
         )

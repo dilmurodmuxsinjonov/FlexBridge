@@ -1,0 +1,114 @@
+{
+  "scope": "current reviewed queue runtime/config and code/test index; separated selected native stages, no complete current CI/R1/pilot acceptance",
+  "parent_commit": "df87515d95b3686a48a15976db9764b50408c193",
+  "reviewed_runtime_config_files": 9,
+  "reviews": [
+    "copilot_academic_queues_plan_review.md",
+    "copilot_academic_queues_source_review.md"
+  ],
+  "native_views_stage": {
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_seconds": 139.56
+  },
+  "native_notice_correction": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_seconds": 73.87
+  },
+  "preserved_broad_failed_stage": {
+    "tests": 57,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "xml_seconds": 363.148
+  },
+  "stage_limits": "Overlapping, not additive. Broad stale-fence fixture reset-to-now did not guarantee strict expiry; corrected fixtures use explicit past. Runtime/config frozen across stages, worker semantics unchanged. Full matching-head CI required.",
+  "remaining": "106/107/108, additional lifecycle/expired cleanup discovery and the full remaining R1 goal",
+  "files": {
+    "backend/alembic/versions/0015_academic_admission.py": {
+      "working_sha256": "bd0b7ef0713fa2ade9fd16f198fff317386e297b30b245a6f070f0006288b8fa",
+      "index_sha256": "bd0b7ef0713fa2ade9fd16f198fff317386e297b30b245a6f070f0006288b8fa",
+      "index_blob": "202b6ab3dbaff116c0c8ef686a7910820e8b8cef"
+    },
+    "backend/app/api/v1/academic_admission.py": {
+      "working_sha256": "13fad1d769e99c8b868e2a0069eeeb556892ba91e2d21ae22fc1f501c9bb9010",
+      "index_sha256": "13fad1d769e99c8b868e2a0069eeeb556892ba91e2d21ae22fc1f501c9bb9010",
+      "index_blob": "9d76bc22bbc2da7652eb7e4dbe9e30035ff6fad6"
+    },
+    "backend/app/core/iam_http.py": {
+      "working_sha256": "e890eb67805494d2b2868f6432cb00046183d6bd67c1b06dc9fae15cf397a500",
+      "index_sha256": "e890eb67805494d2b2868f6432cb00046183d6bd67c1b06dc9fae15cf397a500",
+      "index_blob": "e8be7dbfa557ff6cba03e65b3eca8f22c3f5001f"
+    },
+    "backend/app/services/academic_admission.py": {
+      "working_sha256": "fb5088cb999c75f06c441403ab8dab51eea327e4bcb1c989abcb29926d3ee838",
+      "index_sha256": "fb5088cb999c75f06c441403ab8dab51eea327e4bcb1c989abcb29926d3ee838",
+      "index_blob": "3517624473a5bf472ce5dd686b6052d6980d5b52"
+    },
+    "backend/app/services/academic_views.py": {
+      "working_sha256": "64bc869ad654a9abe3800281f836bb9fb11c83b48f2002661cf0b0385561f9fc",
+      "index_sha256": "64bc869ad654a9abe3800281f836bb9fb11c83b48f2002661cf0b0385561f9fc",
+      "index_blob": "6be6c4bd8856369ed4d4cf8481b3f131c4c1ff07"
+    },
+    "backend/app/services/mentor_notices.py": {
+      "working_sha256": "29e5691c482fc156c2ec5a4ea6a559995f9957b3a8804dcf04a493669b871e02",
+      "index_sha256": "29e5691c482fc156c2ec5a4ea6a559995f9957b3a8804dcf04a493669b871e02",
+      "index_blob": "beb4eadf33c532f4c4b14174db17c11acc04e39e"
+    },
+    "backend/app/services/supervision_notices.py": {
+      "working_sha256": "c33d6c6495eee3ca3f7f1f1886d4e056d5266d533548d8d02b28bcb437526a8f",
+      "index_sha256": "c33d6c6495eee3ca3f7f1f1886d4e056d5266d533548d8d02b28bcb437526a8f",
+      "index_blob": "6b53659f5666fe4ef612470999f8a3bb51d1a000"
+    },
+    "backend/app/workers/outbox.py": {
+      "working_sha256": "cdb75679fa31d3dc02c268c692ec08c65be0855513a1bfe926f0d9daef6f270f",
+      "index_sha256": "cdb75679fa31d3dc02c268c692ec08c65be0855513a1bfe926f0d9daef6f270f",
+      "index_blob": "60231548e7d17c08737a65c5ef468fdac052a4d3"
+    },
+    "backend/tests/security/test_academic_legacy_edges.py": {
+      "working_sha256": "b4b903d82d8f262f96417e415dff14ac33b1735e0a646f9ad3f064c60629334d",
+      "index_sha256": "b4b903d82d8f262f96417e415dff14ac33b1735e0a646f9ad3f064c60629334d",
+      "index_blob": "16329beccd28d141e4b80a1325375a3c4b993981"
+    },
+    "backend/tests/security/test_academic_notices.py": {
+      "working_sha256": "375a27ca0700c1fffdcc12bfa074c097db4c1999f9d2d2f381a3646ae322b7b8",
+      "index_sha256": "375a27ca0700c1fffdcc12bfa074c097db4c1999f9d2d2f381a3646ae322b7b8",
+      "index_blob": "6fc0f751b87d06dc68225057c9498b9efc26f0c1"
+    },
+    "backend/tests/security/test_academic_view_authority.py": {
+      "working_sha256": "7046915fba9f178a7e66176919ca730f1f67e926fb37d6049e7b70d6b3c75234",
+      "index_sha256": "7046915fba9f178a7e66176919ca730f1f67e926fb37d6049e7b70d6b3c75234",
+      "index_blob": "927b25149cd896ad78e975df0acc80be913d2ec4"
+    },
+    "backend/tests/security/test_academic_view_pages.py": {
+      "working_sha256": "6d19d08c46a7f8bb072e2a414e72306c82687244c1d2785cdbddaa6b51ad7426",
+      "index_sha256": "6d19d08c46a7f8bb072e2a414e72306c82687244c1d2785cdbddaa6b51ad7426",
+      "index_blob": "b4e67914d3d497f570b0770512f5fc02d76cd44e"
+    },
+    "backend/tests/security/test_academic_views.py": {
+      "working_sha256": "c1d022bec7e113ebd6fcad0242928e09ea43cda52b05558f97403989cae021fd",
+      "index_sha256": "c1d022bec7e113ebd6fcad0242928e09ea43cda52b05558f97403989cae021fd",
+      "index_blob": "cadec02596117fc0803b1ac2fdb364deafa11cbb"
+    },
+    "backend/tests/security/test_mentor_notices.py": {
+      "working_sha256": "16863fda102bf9743bd2365a1752c64ca79f1589acaf90c0a8c86397c338f106",
+      "index_sha256": "16863fda102bf9743bd2365a1752c64ca79f1589acaf90c0a8c86397c338f106",
+      "index_blob": "c1d928fd5d8ed56450f5737c447a6a963313eaa7"
+    },
+    "backend/tests/security/test_supervision_notices.py": {
+      "working_sha256": "9d55ffe3364c9ed32a63cd06e54f3a6da58584d291de09a9bc7623d0ff5452bb",
+      "index_sha256": "9d55ffe3364c9ed32a63cd06e54f3a6da58584d291de09a9bc7623d0ff5452bb",
+      "index_blob": "d32029e74ed2f50b2c4c77b08bb359dd25a235bf"
+    },
+    "infra/compose.yaml": {
+      "working_sha256": "90321e2af25a5c843ec79755ea6dd547634d150c9382d340650f8cdb0fba28e4",
+      "index_sha256": "90321e2af25a5c843ec79755ea6dd547634d150c9382d340650f8cdb0fba28e4",
+      "index_blob": "1d751acac456e7dc38a2c47d8892a69443ca4c25"
+    }
+  }
+}

@@ -1,8 +1,8 @@
-"""Native PostgreSQL guards for existing academic writes, using trusted imported scope.
+"""Academic guards with actual-session supervision, nomination, personal acceptance and start.
 
-Fixture agreement/track/assignment acceptance are admin setup, not proof that
-academic admission/acceptance APIs work. Enrollment now uses actual-session
-independent review services; its HTTP boundary is exercised in test_enrollments.
+Institution/appointment/agreement/publication metadata is trusted setup. Enrollment
+uses independent review; new school/teacher/host admission uses real services.
+Dedicated test_academic_admission exercises the new HTTP boundaries.
 """
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date,datetime,timedelta
@@ -10,6 +10,7 @@ from threading import Event
 from uuid import uuid4
 import pytest
 from sqlalchemy import select,text
+from sqlalchemy.exc import IntegrityError
 from app.api.dependencies import ActorContext
 from app.db.storage import get_engine,table,transaction,now
 from app.services.internship_logs import internship_log_service as service
@@ -21,15 +22,18 @@ from test_organizations import actor
 from test_regressions import count
 from test_org_authority_transactions import wait_for_blocker
 from app.services.enrollments import enrollment_service
+from app.services.academic_admission import academic_service
+from app.services.placement_admission import admission_service
+from app.db.institution_scope import TASHKENT
 
 
 CREATE_PATHS=('/api/v1/internships/academic-assignments','/api/v1/internship-logs/academic-assignments')
 
 
-def academic_fixture(identities,organization,*,enrollment_end_date=None):
+def academic_fixture(identities,organization,*,enrollment_end_date=None,make_supervision=True):
     coord,_,inst,_,member,appointment,grant=setup_scope(identities)
     teacher=identities();candidate=identities();owner=identities('OWNER',organization)
-    file=cv_fixture(teacher);today=date.today()
+    file=cv_fixture(teacher);today=now().astimezone(TASHKENT).date()
     enrollment_file=cv_fixture(candidate);reviewer=identities('MODERATOR')
     request=enrollment_service.create(actor(candidate),institution_id=inst['id'],idempotency_key=str(uuid4()),
         program='Engineering',start_date=today-timedelta(days=30),end_date=enrollment_end_date,file_ids=[enrollment_file['id']],
@@ -46,8 +50,15 @@ def academic_fixture(identities,organization,*,enrollment_end_date=None):
         tg=insert_row(conn,'institution_role_grants',membership_id=tm['id'],role_id=rid,appointment_id=ta['id'])
         en=get_row(conn,'enrollments',request['id'])
         agreement=insert_row(conn,'institution_agreements',institution_id=inst['id'],version=1,status='ACTIVE',valid_from=today-timedelta(days=30),purposes=['ACADEMIC_VIEW'])
-        supervision=insert_row(conn,'student_supervisions',institution_id=inst['id'],enrollment_id=en['id'],coordinator_membership_id=member['id'],
-            agreement_id=agreement['id'],purpose='ACADEMIC_VIEW',status='ACTIVE',legal_basis='Trusted fixture agreement',accepted_at=now())
+        rid=conn.execute(select(roles.c.id).where(roles.c.code=='MENTOR',roles.c.scope_kind=='ORG')).scalar_one_or_none()
+        if not rid:rid=insert_row(conn,'role_catalog',code='MENTOR',scope_kind='ORG',description='Trusted host mentor prerequisite')['id']
+        members=table('org_memberships')
+        owner_member=conn.execute(select(members.c.id).where(members.c.user_id==owner['user_id'],members.c.organization_id==organization)).scalar_one()
+        insert_row(conn,'org_role_grants',membership_id=owner_member,role_id=rid,granted_by_id=owner['user_id'])
+    supervision=None
+    if make_supervision:
+        supervision=academic_service.create_supervision(actor(coord),institution_id=inst['id'],enrollment_id=en['id'],
+            agreement_id=agreement['id'],purpose='ACADEMIC_VIEW',legal_basis='Explicit fixture academic agreement basis.',idempotency_key=str(uuid4()))
     rev=opportunity_service.create_opportunity_revision(organization_id=organization,title='Academic internship',opportunity_kind='ACADEMIC_INTERNSHIP',
         contract_type='UNPAID_ACADEMIC_INTERNSHIP_AGREEMENT',compensation_type='UNPAID_ACADEMIC',actor_user_id=owner['user_id'])
     with transaction() as conn:
@@ -57,28 +68,37 @@ def academic_fixture(identities,organization,*,enrollment_end_date=None):
     placement_service.create_application_attempt(application_id=app['id'],opportunity_id=rev['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=app['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor_user_id=owner['user_id'])
-    placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=candidate['user_id'])
-    placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=owner['user_id'])
-    with transaction() as conn:
-        conn.execute(table('placements').update().where(table('placements').c.id==p['id']).values(academic_track=True,enrollment_id=en['id']))
-    return dict(coord=coord,teacher=teacher,candidate=candidate,inst=inst,member=member,appointment=appointment,grant=grant,
+    p=placement_service.create_placement(application_id=app['id'],offer_id=offer['id'],opportunity_id=rev['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=organization,actor=actor(owner),idempotency_key=str(uuid4()))
+    if make_supervision:
+        academic_service.request_student(actor=actor(candidate),placement_id=p['id'],enrollment_id=en['id'],
+            terms_id=p['current_terms_id'],version=1,idempotency_key=str(uuid4()))
+    return dict(coord=coord,teacher=teacher,candidate=candidate,owner=owner,organization=organization,inst=inst,member=member,appointment=appointment,grant=grant,
         teacher_member=tm,teacher_appointment=ta,teacher_grant=tg,enrollment=en,agreement=agreement,supervision=supervision,placement=p)
 
 
 def assignment_body(f):
-    return dict(placement_id=f['placement']['id'],institution_id=f['inst']['id'],supervisor_id=f['teacher_member']['id'],supervision_id=f['supervision']['id'])
+    return dict(placement_id=f['placement']['id'],institution_id=f['inst']['id'],supervisor_id=f['teacher_member']['id'],
+                supervision_id=f['supervision']['id'],idempotency_key=str(uuid4()))
 
 
 def accepted_assignment(f):
     assignment=service.create_academic_assignment(actor=actor(f['coord']),**assignment_body(f))
     with transaction() as conn:
-        conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(accepted_at=now()))
-    return assignment
+        p=get_row(conn,'placements',f['placement']['id']);terms=get_row(conn,'placement_terms',p['current_terms_id'])
+    args=dict(placement_id=p['id'],terms_id=terms['id'],version=terms['version'])
+    academic_service.accept(actor=actor(f['teacher']),assignment_id=assignment['id'],**args,idempotency_key=str(uuid4()))
+    admission_service.accept_candidate(actor=actor(f['candidate']),**args,idempotency_key=str(uuid4()))
+    mentor=admission_service.nominate_mentor(actor=actor(f['owner']),placement_id=p['id'],organization_id=f['organization'],
+        mentor_id=f['owner']['user_id'],idempotency_key=str(uuid4()))
+    admission_service.accept_mentor(actor=actor(f['owner']),assignment_id=mentor['id'],**args,idempotency_key=str(uuid4()))
+    admission_service.host_decision(actor=actor(f['owner']),**args,action='ACTIVATE',idempotency_key=str(uuid4()))
+    with transaction() as conn:
+        f['placement']=get_row(conn,'placements',p['id'])
+        return get_row(conn,'academic_assignments',assignment['id'])
 
 
 def review_request(client,f,assignment,**extra):
-    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=date.today().isoformat(),summary_text='Research work',total_minutes=60)
+    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research work',total_minutes=60)
     body=dict(placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],decision='APPROVED',comment='Reviewed',**extra)
     return lambda:client.post('/api/v1/internship-logs/daily-logs/'+log['id']+'/academic-reviews',json=body,headers=f['teacher']['headers'])
 
@@ -127,9 +147,9 @@ def test_teacher_password_session_can_review_current_assignment(client,identitie
     assert count('academic_log_reviews')==1
 
 
-@pytest.mark.parametrize('state',['teacher_expired','assignment_revoked','assignment_unaccepted','assignment_future_acceptance',
+@pytest.mark.parametrize('state',['teacher_expired','assignment_revoked',
     'supervision_revoked','supervision_unaccepted','supervision_future_acceptance','agreement_expired','agreement_inactive',
-    'purpose_disabled','basis_empty','enrollment_ended','enrollment_unverified','ordinary_track','inactive_placement','self_review'])
+    'purpose_disabled','basis_empty','enrollment_ended','enrollment_unverified','inactive_placement'])
 def test_review_current_parent_chain_required_without_effect(client,identities,organization,state):
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f);request=review_request(client,f,assignment)
     targets={
@@ -142,39 +162,52 @@ def test_review_current_parent_chain_required_without_effect(client,identities,o
         'purpose_disabled':('institution_agreements','agreement',{'purposes':{'ACADEMIC_VIEW':False}}),
         'basis_empty':('student_supervisions','supervision',{'legal_basis':'  '}),
         'enrollment_unverified':('enrollments','enrollment',{'status':'PENDING'}),
-        'ordinary_track':('placements','placement',{'academic_track':False}),
         'inactive_placement':('placements','placement',{'status':'CANCELLED'})}
     with transaction() as conn:
-        if state.startswith('assignment_'):
-            vals={'revoked_at':now()} if state=='assignment_revoked' else {'accepted_at':None if state=='assignment_unaccepted' else now()+timedelta(days=1)}
-            conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
+        if state=='assignment_revoked':
+            academic_service.revoke(actor(f['coord']),assignment['id'],idempotency_key=str(uuid4()))
         elif state=='enrollment_ended':
             # End through the real lifecycle; approved proof dates are immutable.
             enrollment_service.end_own(actor(f['candidate']),f['enrollment']['id'],idempotency_key=str(uuid4()),
                 reason='This student ended their enrollment before the review.',effective_end_date=date.today()-timedelta(days=1))
-        elif state=='self_review':
-            # A student can also be a teacher, but may never review their own log.
-            # Create a properly linked identity rather than retargeting a grant.
-            tm=insert_row(conn,'institution_memberships',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],status='ACTIVE',accepted_at=now())
-            ta=insert_row(conn,'institution_appointments',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],
-                document_file_id=f['teacher_appointment']['document_file_id'],status='ACTIVE',valid_from=date.today(),accepted_at=now())
-            insert_row(conn,'institution_role_grants',membership_id=tm['id'],role_id=f['teacher_grant']['role_id'],appointment_id=ta['id'])
-            conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(teacher_membership_id=tm['id']))
-            f['teacher']['headers']=f['candidate']['headers']
         else:
             name,key,values=targets[state];t=table(name);conn.execute(t.update().where(t.c.id==f[key]['id']).values(**values))
     before=count('audit_events');r=request();assert r.status_code==403,r.text
     assert count('academic_log_reviews')==0 and count('audit_events')==before
 
 
+@pytest.mark.parametrize('state',['assignment_unaccepted','assignment_future_acceptance','ordinary_track','self_review'])
+def test_accepted_academic_identity_and_consent_cannot_be_rewritten(client,identities,organization,state):
+    f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
+    name='academic_assignments';key=assignment['id']
+    if state=='self_review':
+        with transaction() as conn:
+            tm=insert_row(conn,'institution_memberships',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],status='ACTIVE',accepted_at=now())
+            ta=insert_row(conn,'institution_appointments',institution_id=f['inst']['id'],user_id=f['candidate']['user_id'],
+                document_file_id=f['teacher_appointment']['document_file_id'],status='ACTIVE',valid_from=now().astimezone(TASHKENT).date(),accepted_at=now())
+            insert_row(conn,'institution_role_grants',membership_id=tm['id'],role_id=f['teacher_grant']['role_id'],appointment_id=ta['id'])
+        values={'teacher_membership_id':tm['id']}
+    elif state=='ordinary_track':
+        name='placements';key=f['placement']['id'];values={'academic_track':False}
+    else:values={'accepted_at':None if state=='assignment_unaccepted' else now()+timedelta(days=1)}
+    before=count('audit_events')
+    with pytest.raises(IntegrityError),transaction() as conn:
+        t=table(name);conn.execute(t.update().where(t.c.id==key).values(**values))
+    assert count('academic_log_reviews')==0 and count('audit_events')==before
+    # The failed corruption attempt leaves the original personal consent usable.
+    response=review_request(client,f,assignment)();assert response.status_code==201,response.text
+    assert count('academic_log_reviews')==1
+
+
 def test_expired_verified_enrollment_cannot_start_academic_assignment(client,identities,organization):
-    f=academic_fixture(identities,organization,enrollment_end_date=date.today()-timedelta(days=1))
+    f=academic_fixture(identities,organization,enrollment_end_date=now().astimezone(TASHKENT).date()-timedelta(days=1),make_supervision=False)
     with transaction() as conn:
         assert get_row(conn,'enrollments',f['enrollment']['id'])['status']=='VERIFIED'
     before=count('audit_events')
-    response=client.post(CREATE_PATHS[0],json=assignment_body(f),headers=f['coord']['headers'])
+    response=client.post('/api/v1/student-supervisions',json=dict(institution_id=f['inst']['id'],enrollment_id=f['enrollment']['id'],
+        agreement_id=f['agreement']['id'],purpose='ACADEMIC_VIEW',legal_basis='Current school agreement.',idempotency_key=str(uuid4())),headers=f['coord']['headers'])
     assert response.status_code==403,response.text
-    assert count('academic_assignments')==0 and count('audit_events')==before
+    assert count('student_supervisions')==0 and count('academic_assignments')==0 and count('audit_events')==before
 
 
 def test_grade_is_rejected_in_diary_review_without_effect(client,identities,organization):
@@ -230,7 +263,7 @@ def test_target_user_busy_returns_retry_and_rolls_back(client,identities,organiz
 def test_audit_failure_rolls_back_created_assignment(client,identities,organization,monkeypatch):
     f=academic_fixture(identities,organization)
     def fail(**kwargs):raise RuntimeError('Audit unavailable')
-    monkeypatch.setattr(service.audit_store,'append_audit_event',fail)
+    monkeypatch.setattr(academic_service.audit,'append_audit_event',fail)
     r=client.post(CREATE_PATHS[0],json=assignment_body(f),headers=f['coord']['headers']);assert r.status_code==503,r.text
     assert count('academic_assignments')==0
 
@@ -300,7 +333,7 @@ def add_teacher_coordinator_role(f):
 def test_teacher_who_also_coordinates_cannot_bypass_mfa_in_service(client,identities,organization):
     from app.services.governance import GovernanceError
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
-    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=date.today().isoformat(),summary_text='Research',total_minutes=60)
+    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
     add_teacher_coordinator_role(f)
     with pytest.raises(GovernanceError,match='MFA_REQUIRED'):
         service.review_academic(actor=actor(f['teacher']),daily_log_id=log['id'],placement_id=f['placement']['id'],assignment_id=assignment['id'],decision='APPROVED',comment='Reviewed')
@@ -324,7 +357,7 @@ def test_sensitive_role_granted_after_http_preflight_requires_mfa_at_write(clien
 
 def test_imported_revision_author_must_own_placement_candidate(client,identities,organization):
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
-    draft=service.save_draft_daily_log_api_054(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=date.today().isoformat(),summary_text='Research',total_minutes=60)
+    draft=service.save_draft_daily_log_api_054(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
     with transaction() as conn:
         # Trusted legacy/import corruption, not a demonstrated public draft exploit.
         t=table('log_revisions');conn.execute(t.update().where(t.c.id==draft['current_revision_id']).values(author_id=f['coord']['user_id'],status='SUBMITTED',submitted_at=now()))

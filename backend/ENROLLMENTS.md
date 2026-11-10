@@ -1,7 +1,9 @@
 # Own education history and enrollment verification
 
-Issue63 is being implemented and validated. This guide describes the prototype,
-not accepted pilot, live identity verification or production deployment. Runtime
+Issue63 merged in PR64/1b2bbbf after final08b4129 complete930 CI passed twice
+541.51s/651.09s and actual source/follow-up reviews. Additional unchanged-source
+formal Teacher PASSWORD full own lifecycle1 passed10.14s, separate from CI counts.
+This is bounded backend acceptance, not pilot, live identity verification or production deployment. Runtime
 0013 has been loaded on disposable PostgreSQL:114 tables; canonical v1.4 remains94.
 
 Canonical API027 POST and API034 GET `/api/v1/me/enrollments` replace their

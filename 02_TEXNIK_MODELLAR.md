@@ -1,5 +1,19 @@
 # FlexBridge — texnik modellar va vositalar
 
+## INT-CODEX-001 / current2026-11-10
+
+- LOG-069 supersedes the following host-only snapshot: draft0015/124 runs in native disposable PostgreSQL, canonical94 unchanged. Six helper tables pin personal student school selection, coordinator supervision, exact school binding, original teacher grant/appointment, personal versioned consent and revocation. Actual actor/SQL start and academic review gates; institution->org->placement lock reconciliation. New HTTP5passed23.30s, corrected authority63passed148.52s, lifecycle9passed24.59s, populated upgrade3passed35.34s are overlapping selected stages. Current affected checks/integration review/full CI remain; accepted main0013/114. No dependency or live migration. See backend/ACADEMIC_ADMISSION.md and current handoff for remaining institution queues/notices/R1.
+
+Historical LOG-068:
+
+- Final current host UTC selection115 passed457.42s,0failure/error/skip,1framework warning, source/config frozen. Academic admission excluded; full current CI acceptance and pilot still unproven. Exact raw artifact and source/index hashes: internship_admission/host_utc_final_junit.xml and source_followup_manifest.json.
+
+- LOG-068 current: actual-session host retries persist immutable receipt/fingerprint and return current projection; own/host/mentor and unread inbox keyset pages, local candidate viewer notices with fenced worker, safe current own acknowledgement, explicit Asia/Tashkent SQL calendar and fail-closed predicate drift guard. Source reviews capture15 runtime/config files plus corrected migration/response deltas; current native UTC stage and exact source/index manifest in internship_admission. Draft still0014/118, accepted main0013/114. Model132 registrations60 explicit72 placeholders; API031 in-app basics,051 TEACHER/088 completion and full R1 acceptance still open. No new dependency selected.
+
+Previous LOG-067 snapshot:
+
+- Accepted enrollment PR64 final930 CI twice/merge1b2bbbf remains0013/114. Current draft Issue65 executes0014/118 in native PostgreSQL, with immutable intake/nomination/original-grant/versioned consent/admission events and guarded canonical projections. Eight host handlers plus bounded helpers are implemented; OpenAPI model124+8 contracts now59 explicit73 placeholders, registration only. API051 TEACHER and088 completion/dispute remain pending. Current broad native host selection37 passed156.15s; corrective plan history/rollback2 passed19.83s overlap. Affected integration47 passed/1 academic fixture failed148.70s, so no current full acceptance. Review-only Copilot initial/follow-up exit0, source-only limits. See backend/PLACEMENT_ADMISSION.md and internship_admission/NEXT_ACADEMIC_UNIT.md. No new dependency, live rollout or pilot claim.
+
 Faqat model va texnologiya tanlovlari reestri. Ishni qismlarga bo'lish qoidasi 01-faylda, bajarilish holati 03-faylda yuritiladi. Hujjatda yozilgan texnologiya hali loyihada o'rnatilgan yoki ishlatilgan degani emas.
 
 ## AUTH-CODEX-006 - candidate current-session boundary2026-11-10
@@ -147,3 +161,9 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 - Case open uniqueness SQL partial index bilan. Fixed identity/revision/transition va canonical recovery tracking kind/status deferred guards bilan; account recovery handlers faqat ACCOUNT_ACCESS. Generic kind/case-ID submit va review continuity uchun yopiq. Null-previous event yangi kind uchun dedicated proofga, existing initial/addition predicates saqlanadi; departure guard o'zgarmadi.
 - Current authority/contact/evidence/roster commitgacha qulflanadi. Source staff/member va barcha eski OWNERlar saqlanadi. Stale claim/intentni authorized action/read/intake EXPIREDga atomik o'tkazadi; after-commit truthful receipt, rollback bo'ladigan exception yo'q. Owner objection/withdrawal va finalization shu org/case lock orderda.
 - Guide backend/OWNER_CONTINUITY.md. Source consent/contact timestamps HMAC uchun UTCda canonical qilinadi. Yangi dependency yo'q. Legal identity/policy, zero-active-owner/no-staff, live providers/UI/DR va pilot qabuli doiradan tashqari; joriy sinovlar alohida review katalogida.
+
+
+- LOG-070 final current correction stage:34 native UTC tests passed199.22s,0failure/error/skip,1framework warning. Exact academic HTTP/lifecycle, populated/mismatched legacy upgrade, active teacher notice/logout/fence/rollback/source controls plus mentor notices; runtime/config frozen across run. Actual corrective read-only Copilot exit0/no concrete delta P1/P2, scope hashes retained. Earlier63/86 stages predate corrective delta and are not summed. Current exact-head full CI and institution queues098/099/105/more R1 work remain; keep PR66 draft. Source/index publication receipt: internship_admission/source_academic_manifest.json.
+
+
+- LOG-071 current:098/099/105 exact current scoped lists and option/assignment metadata helpers, distinct coordinator creation/binding notices, stale-choice exact-plan guard, post-role-pin current MFA policy. Native current21passed139.56s and notice5passed41.18s overlap; broad56passed1failed363.15s was a lease-reset boundary fixture, corrected explicit-expiry all notice groups15passed73.87s with worker semantics unchanged.9-file current read-only source opinion exit0/no actionable P1/P2, frozen hashes retained. Parentdf87515 full1015 twice549.23s/740.08s does not accept this current source. Registration67/65 of132 is registration only,0015/124 unchanged; latest CI/source pin and detailed106/107/108/full R1 remain. See backend/ACADEMIC_VIEWS.md, source_academic_views_manifest and current handoff.

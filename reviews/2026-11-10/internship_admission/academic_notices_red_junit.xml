@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="24.953" timestamp="2026-11-10T07:22:24.911653+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_notices" name="test_active_teacher_reassignment_notifies_candidate_of_actual_viewer_history" time="23.384"><failure message="assert 0 == 5&#10; +  where 0 = len([])">backend\tests\security\test_academic_notices.py:38: in test_active_teacher_reassignment_notifies_candidate_of_actual_viewer_history
+    assert len(events)==5
+E   assert 0 == 5
+E    +  where 0 = len([])</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="21.686" timestamp="2026-11-10T04:18:03.430293+05:00" hostname="Ditroid"><testcase classname="tests.security.test_admission_migration" name="test_populated_upgrade_preserves_canonical_rows_without_creating_consents_or_verified_starts" time="11.242"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;opportunity_revisions&quot; violates check constraint &quot;chk_opp_rev_salary&quot;&#10;DETAIL:  Failing row contains (f9e69d0b-aaec-44bf-a541-d5c689439aa0, 2026-11-10 04:18:14.350447+05, 2026-11-10 04:18:14.350447+05, 7f770919-cec7-44ec-b7bd-a4e534d1764b, 1, 80ba1c3c-8e69-48af-ae98-49cfa99a6a9c, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).&#10;[SQL: INSERT INTO flexbridge.opportunity_revisions (id, created_at, updated_at, opportunity_id, revision, author_id, title, description, region, work_mode, eligibility, currency, is_paid, start_date, schedule_policy, shift_match_mode, snapshot_schema, contract_type) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(opportunity_id)s::UUID, %(revision)s::INTEGER, %(author_id)s::UUID, %(title)s::VARCHAR, %(description)s::VARCHAR, %(region)s::VARCHAR, %(work_mode)s::VARCHAR, %(eligibility)s::VARCHAR, %(currency)s::VARCHAR, %(is_paid)s, %(start_date)s::DATE, %(schedule_policy)s::VARCHAR, %(shift_match_mode)s::VARCHAR, %(snapshot_schema)s::INTEGER, %(contract_type)s::VARCHAR)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "opportunity_revisions" violates check constraint "chk_opp_rev_salary"
+E   DETAIL:  Failing row contains (f9e69d0b-aaec-44bf-a541-d5c689439aa0, 2026-11-10 04:18:14.350447+05, 2026-11-10 04:18:14.350447+05, 7f770919-cec7-44ec-b7bd-a4e534d1764b, 1, 80ba1c3c-8e69-48af-ae98-49cfa99a6a9c, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_admission_migration.py:54: in test_populated_upgrade_preserves_canonical_rows_without_creating_consents_or_verified_starts
+    good=old_placement(conn)
+         ^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_admission_migration.py:25: in old_placement
+    revision=insert_row(conn,'opportunity_revisions',opportunity_id=opp['id'],revision=1,author_id=owner['id'],title='Imported revision',
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "opportunity_revisions" violates check constraint "chk_opp_rev_salary"
+E   DETAIL:  Failing row contains (f9e69d0b-aaec-44bf-a541-d5c689439aa0, 2026-11-10 04:18:14.350447+05, 2026-11-10 04:18:14.350447+05, 7f770919-cec7-44ec-b7bd-a4e534d1764b, 1, 80ba1c3c-8e69-48af-ae98-49cfa99a6a9c, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).
+E   [SQL: INSERT INTO flexbridge.opportunity_revisions (id, created_at, updated_at, opportunity_id, revision, author_id, title, description, region, work_mode, eligibility, currency, is_paid, start_date, schedule_policy, shift_match_mode, snapshot_schema, contract_type) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(opportunity_id)s::UUID, %(revision)s::INTEGER, %(author_id)s::UUID, %(title)s::VARCHAR, %(description)s::VARCHAR, %(region)s::VARCHAR, %(work_mode)s::VARCHAR, %(eligibility)s::VARCHAR, %(currency)s::VARCHAR, %(is_paid)s, %(start_date)s::DATE, %(schedule_policy)s::VARCHAR, %(shift_match_mode)s::VARCHAR, %(snapshot_schema)s::INTEGER, %(contract_type)s::VARCHAR)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_admission_migration" name="test_failed_populated_upgrade_rolls_back_new_proof_tables_and_keeps_old_rows" time="8.230"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation &quot;opportunity_revisions&quot; violates check constraint &quot;chk_opp_rev_salary&quot;&#10;DETAIL:  Failing row contains (a71d0c6d-29e9-4c11-b038-3dbff3067e6f, 2026-11-10 04:18:23.766958+05, 2026-11-10 04:18:23.766958+05, 51998344-1089-44f2-bcec-9a06d0e8f7d7, 1, 44171ba0-c879-4459-af39-36cdfd86edbf, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).&#10;[SQL: INSERT INTO flexbridge.opportunity_revisions (id, created_at, updated_at, opportunity_id, revision, author_id, title, description, region, work_mode, eligibility, currency, is_paid, start_date, schedule_policy, shift_match_mode, snapshot_schema, contract_type) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(opportunity_id)s::UUID, %(revision)s::INTEGER, %(author_id)s::UUID, %(title)s::VARCHAR, %(description)s::VARCHAR, %(region)s::VARCHAR, %(work_mode)s::VARCHAR, %(eligibility)s::VARCHAR, %(currency)s::VARCHAR, %(is_paid)s, %(start_date)s::DATE, %(schedule_policy)s::VARCHAR, %(shift_match_mode)s::VARCHAR, %(snapshot_schema)s::INTEGER, %(contract_type)s::VARCHAR)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: new row for relation "opportunity_revisions" violates check constraint "chk_opp_rev_salary"
+E   DETAIL:  Failing row contains (a71d0c6d-29e9-4c11-b038-3dbff3067e6f, 2026-11-10 04:18:23.766958+05, 2026-11-10 04:18:23.766958+05, 51998344-1089-44f2-bcec-9a06d0e8f7d7, 1, 44171ba0-c879-4459-af39-36cdfd86edbf, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_admission_migration.py:79: in test_failed_populated_upgrade_rolls_back_new_proof_tables_and_keeps_old_rows
+    old_placement(conn)
+backend\tests\security\test_admission_migration.py:25: in old_placement
+    revision=insert_row(conn,'opportunity_revisions',opportunity_id=opp['id'],revision=1,author_id=owner['id'],title='Imported revision',
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) new row for relation "opportunity_revisions" violates check constraint "chk_opp_rev_salary"
+E   DETAIL:  Failing row contains (a71d0c6d-29e9-4c11-b038-3dbff3067e6f, 2026-11-10 04:18:23.766958+05, 2026-11-10 04:18:23.766958+05, 51998344-1089-44f2-bcec-9a06d0e8f7d7, 1, 44171ba0-c879-4459-af39-36cdfd86edbf, Imported revision, Preserve the original snapshot., Tashkent, ONSITE, OPEN, null, null, null, UZS, null, null, t, 2026-11-10, null, NEGOTIABLE, ANY, 1, null, INTERNSHIP_AGREEMENT).
+E   [SQL: INSERT INTO flexbridge.opportunity_revisions (id, created_at, updated_at, opportunity_id, revision, author_id, title, description, region, work_mode, eligibility, currency, is_paid, start_date, schedule_policy, shift_match_mode, snapshot_schema, contract_type) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(opportunity_id)s::UUID, %(revision)s::INTEGER, %(author_id)s::UUID, %(title)s::VARCHAR, %(description)s::VARCHAR, %(region)s::VARCHAR, %(work_mode)s::VARCHAR, %(eligibility)s::VARCHAR, %(currency)s::VARCHAR, %(is_paid)s, %(start_date)s::DATE, %(schedule_policy)s::VARCHAR, %(shift_match_mode)s::VARCHAR, %(snapshot_schema)s::INTEGER, %(contract_type)s::VARCHAR)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase></testsuite></testsuites>

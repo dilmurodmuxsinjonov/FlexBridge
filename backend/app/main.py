@@ -43,6 +43,9 @@ from app.api.v1.institution_onboarding import router as institution_onboarding_r
 from app.api.v1.enrollments import router as enrollments_router
 from app.api.v1.opportunities import router as opportunities_router
 from app.api.v1.placements import router as placements_router
+from app.api.v1.placement_admission import router as placement_admission_router
+from app.api.v1.notifications import router as notifications_router
+from app.api.v1.academic_admission import router as academic_admission_router
 from app.services.placements import PlacementScopeError
 from app.services.internship_logs import InternshipLogScopeError
 from app.services.governance import GovernanceError
@@ -155,6 +158,9 @@ app.include_router(governance_router)
 app.include_router(availability_router)
 app.include_router(opportunities_router)
 app.include_router(placements_router)
+app.include_router(placement_admission_router)
+app.include_router(notifications_router)
+app.include_router(academic_admission_router)
 app.include_router(internship_logs_router)
 app.include_router(files_router)
 app.include_router(billing_router)

@@ -1,0 +1,6 @@
+{
+  "scope": "uncommitted final nomination response projection at read-only review launch",
+  "sha256": {
+    "backend/app/services/placement_admission.py": "4c8174fd2528309bff94998bc37129dc5f33ec23b1fdfa37966b705b8a0f344d"
+  }
+}

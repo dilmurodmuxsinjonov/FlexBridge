@@ -37,7 +37,7 @@ def capture(attempt,event='provider-event-123'):
 def placement_fixture(candidate,owner,org,status='ACTIVE'):
     from app.services.opportunities import opportunity_service
     from app.services.placements import placement_service
-    revision=opportunity_service.create_opportunity_revision(organization_id=org,title='Test job',opportunity_kind='PART_TIME_JOB',contract_type='LABOR_PART_TIME',
+    revision=opportunity_service.create_opportunity_revision(organization_id=org,title='Test internship',opportunity_kind='INTERNSHIP',contract_type='INTERNSHIP_AGREEMENT',
         compensation_type='HOURLY',hourly_pay=20000,published=False,actor_user_id=owner['user_id'])
     with transaction() as conn:
         conn.execute(table('opportunities').update().where(table('opportunities').c.id==revision['opportunity_id']).values(status='PUBLISHED'))
@@ -45,16 +45,31 @@ def placement_fixture(candidate,owner,org,status='ACTIVE'):
     placement_service.create_application_attempt(application_id=application['id'],opportunity_id=revision['opportunity_id'],actor_user_id=candidate['user_id'])
     offer=placement_service.create_offer(application_id=application['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],offered_by=owner['user_id'])
     placement_service.respond_to_offer_api_043(offer_id=offer['id'],candidate_id=candidate['candidate_id'],decision='ACCEPT')
-    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor_user_id=owner['user_id'])
+    p=placement_service.create_placement(application_id=application['id'],offer_id=offer['id'],opportunity_id=revision['opportunity_id'],candidate_id=candidate['candidate_id'],organization_id=org,actor=billing_actor(owner),idempotency_key=str(uuid4()),start_date=date.today())
     if status=='ACTIVE':
-        placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=candidate['user_id'])
-        p=placement_service.confirm_placement_start(placement_id=p['id'],actor_user_id=owner['user_id'])
+        from app.services.placement_admission import admission_service
+        from app.services.placements import insert_row,get_row
+        # Roles/publication are trusted setup, while all admission/consent uses actual sessions.
+        # An OWNER may independently hold MENTOR; the candidate is always another person.
+        with transaction() as conn:
+            roles,members,grants=(table(n) for n in ('role_catalog','org_memberships','org_role_grants'))
+            rid=conn.execute(select(roles.c.id).where(roles.c.code=='MENTOR',roles.c.scope_kind=='ORG')).scalar_one_or_none()
+            if not rid:rid=insert_row(conn,'role_catalog',code='MENTOR',scope_kind='ORG',description='Trusted mentor role')['id']
+            mid=conn.execute(select(members.c.id).where(members.c.user_id==owner['user_id'],members.c.organization_id==org)).scalar_one()
+            if not conn.execute(select(grants.c.id).where(grants.c.membership_id==mid,grants.c.role_id==rid)).first():
+                insert_row(conn,'org_role_grants',membership_id=mid,role_id=rid,granted_by_id=owner['user_id'])
+        args=dict(placement_id=p['id'],terms_id=p['current_terms_id'],version=1)
+        admission_service.accept_candidate(actor=billing_actor(candidate),**args,idempotency_key=str(uuid4()))
+        assignment=admission_service.nominate_mentor(actor=billing_actor(owner),placement_id=p['id'],organization_id=org,mentor_id=owner['user_id'],idempotency_key=str(uuid4()))
+        admission_service.accept_mentor(actor=billing_actor(owner),assignment_id=assignment['id'],**args,idempotency_key=str(uuid4()))
+        admission_service.host_decision(actor=billing_actor(owner),action='ACTIVATE',**args,idempotency_key=str(uuid4()))
+        with transaction() as conn:p=get_row(conn,'placements',p['id'])
     return p
 
 def test_actual_migration_and_constraints():
     with transaction() as conn:
-        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0013_enrollment_verification'
-        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==114
+        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0015_academic_admission'
+        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==124
         assert conn.execute(text("SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON c.connamespace=n.oid WHERE n.nspname='flexbridge' AND contype='f'")).scalar_one()>=214
     with pytest.raises(IntegrityError),transaction() as conn:
         conn.execute(table('payment_attempts').insert().values(id=str(uuid4()),order_id=str(uuid4()),provider='HMAC',amount=-1,currency='UZS',status='PENDING',requested_at=now()))
@@ -173,9 +188,10 @@ def test_parallel_refunds_cannot_overreserve(identities,organization):
 def test_foreign_org_cannot_confirm_placement_or_engagement(client,identities,organization):
     owner=identities('OWNER',organization);candidate,outsider=identities(),identities()
     p=placement_fixture(candidate,owner,organization,status='PENDING_START_CONFIRMATION')
-    r=client.post('/api/v1/placements/'+p['id']+'/confirm-start',json={'party':'ORGANIZATION'},headers=outsider['headers'])
+    terms=dict(terms_id=p['current_terms_id'],version=1,idempotency_key=str(uuid4()),party='ORGANIZATION')
+    r=client.post('/api/v1/placements/'+p['id']+'/confirm-start',json=terms,headers=outsider['headers'])
     assert r.status_code==403,r.text
-    assert client.post('/api/v1/placements/'+p['id']+'/confirm-start',json={'party':'ORGANIZATION'}).status_code==401
+    assert client.post('/api/v1/placements/'+p['id']+'/confirm-start',json=terms).status_code==401
     from app.services.placements import insert_row
     with transaction() as conn:
         eng=insert_row(conn,'job_engagements',application_id=p['application_id'],offer_id=p['offer_id'],status='PENDING_START_CONFIRMATION',start_date=date.today(),terms_snapshot={})

@@ -1,0 +1,7 @@
+{
+  "scope": "uncommitted task-history corrective delta at review launch",
+  "sha256": {
+    "backend/alembic/versions/0014_placement_admission.py": "26777fee3cdaf8ec60585fd9d2a3d1d7fe63fd7135d42670af352ca9d1c9c5e1",
+    "backend/app/services/placement_admission.py": "1de5525dce9206cc90942987087034eb11ec4ae9b6da470fb8f3272d34060fc7"
+  }
+}

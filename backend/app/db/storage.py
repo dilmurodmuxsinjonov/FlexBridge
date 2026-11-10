@@ -115,6 +115,10 @@ from app.db.institution_onboarding import register_tables as register_institutio
 register_institution_tables(metadata,_TYPES)
 from app.db.enrollment_verification import register_tables as register_enrollment_tables
 register_enrollment_tables(metadata,_TYPES)
+from app.db.placement_admission import register_tables as register_admission_tables
+register_admission_tables(metadata,_TYPES)
+from app.db.academic_admission import register_tables as register_academic_tables
+register_academic_tables(metadata,_TYPES)
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -154,7 +158,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0013_enrollment_verification':
+        if revision != '0015_academic_admission':
             raise RuntimeError('Database migrations are not current')
     return engine
 

@@ -1,0 +1,148 @@
+{
+  "scope": "reviewed source/config and test index in this same unfinished draft commit; no academic/full CI/pilot acceptance",
+  "parent_commit": "85065b13317d3b63e4fef43a3df4a99851034c7a",
+  "reviewed_runtime_config_files": 15,
+  "native_final_xml": {
+    "tests": 115,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "reviews": [
+    "copilot_retry_notice_review.md",
+    "copilot_calendar_followup_review.md",
+    "copilot_nomination_format_review.md"
+  ],
+  "files": {
+    "backend/alembic/versions/0014_placement_admission.py": {
+      "working_sha256": "e71507e4feae64179d9f85a1a818cc778f8be1ea5000eda3371bdd27c499475e",
+      "index_sha256": "e71507e4feae64179d9f85a1a818cc778f8be1ea5000eda3371bdd27c499475e",
+      "index_blob": "1865febb3e277a9e9c3588ac8afc381be60ea3d7"
+    },
+    "backend/app/api/v1/internship_logs.py": {
+      "working_sha256": "9ac38b92e25dee76dd111fb028107dfea9e860cdf3aa8db1e0b3575233252259",
+      "index_sha256": "e6683adbb746d6b32ccb518e372979b4e1e9048d1e4be81a2859a4902b90ed14",
+      "index_blob": "dae8768c914066d9eef112924e8812d37cd6d5e5"
+    },
+    "backend/app/api/v1/notifications.py": {
+      "working_sha256": "951065f6b457e83568396342aab30e2931fbcd73edd95188bc1bf7db884216d7",
+      "index_sha256": "951065f6b457e83568396342aab30e2931fbcd73edd95188bc1bf7db884216d7",
+      "index_blob": "a126adcbb4afc02785089d1f2205217c332ece0e"
+    },
+    "backend/app/api/v1/placement_admission.py": {
+      "working_sha256": "72c0a107a934cf9e47cf3a7ad4347b5681efee2b92f130b870d67ec3ed1f2355",
+      "index_sha256": "72c0a107a934cf9e47cf3a7ad4347b5681efee2b92f130b870d67ec3ed1f2355",
+      "index_blob": "5fb12152f52d4d88ce3bd58f19d4c3ab3ee0cac4"
+    },
+    "backend/app/api/v1/placements.py": {
+      "working_sha256": "2de973ed350e561cef70f9709943428e03d7288b4320e29b2e2d96f19f99dc33",
+      "index_sha256": "83d73f8381c0883e84b9790df0adfa90b6c17817d53e9127bba8a9acb58bb3ff",
+      "index_blob": "44acdbe7351c213b616b7d3eded5641887a891f1"
+    },
+    "backend/app/core/iam_http.py": {
+      "working_sha256": "9e9f8a0320d6ffed62667dd47686f686b3fb45af582ae31e964ce14d568ca170",
+      "index_sha256": "9e9f8a0320d6ffed62667dd47686f686b3fb45af582ae31e964ce14d568ca170",
+      "index_blob": "3e1a4da2af996804fb5751cb1145f9b222048cc5"
+    },
+    "backend/app/db/placement_admission.py": {
+      "working_sha256": "80a5f32a4e3fc47dc8c28325e0d1b003cdeebe45cbf8c2cec6b73822dff0a4c7",
+      "index_sha256": "80a5f32a4e3fc47dc8c28325e0d1b003cdeebe45cbf8c2cec6b73822dff0a4c7",
+      "index_blob": "dd38ee37a4a502523f7d709c6e34665ab24d1ea4"
+    },
+    "backend/app/main.py": {
+      "working_sha256": "a6ac8deb2c4980992b8469ca48b26054ed4d717ee2c950e10d8d62829f39d0c5",
+      "index_sha256": "ac765132fd0ca6708c4003e2dcfb71f27ef08fe7a74eb51274489d94cfefd69f",
+      "index_blob": "71f9244e4b53b109af50fdf788b005f866ee17c5"
+    },
+    "backend/app/services/internship_logs.py": {
+      "working_sha256": "6690f2e553337e41be709df7fda6fd882a7bf6a490c7cd3355df4cfa37110f95",
+      "index_sha256": "4c1c88dd94f82a76d7328f3639ec49ff340859e37600495dbc495360efa19085",
+      "index_blob": "e5d9d9d12f665bad43b3263a5dfe923630c725ec"
+    },
+    "backend/app/services/mentor_notices.py": {
+      "working_sha256": "4039c95ff1aff1907a012b76a6f21923b5ac5adeb9683c876303fe6f9b1f6a4e",
+      "index_sha256": "4039c95ff1aff1907a012b76a6f21923b5ac5adeb9683c876303fe6f9b1f6a4e",
+      "index_blob": "3bf45642e0417f4245f8ab286c7725614fefc241"
+    },
+    "backend/app/services/pagination.py": {
+      "working_sha256": "f4cc63772ed28739104a4559e1426dfdb8575146cc1045fc2f4c64dd12eb8183",
+      "index_sha256": "f4cc63772ed28739104a4559e1426dfdb8575146cc1045fc2f4c64dd12eb8183",
+      "index_blob": "638dfa2313b70d57a9fc5c092ca45d7445369979"
+    },
+    "backend/app/services/placement_admission.py": {
+      "working_sha256": "4c8174fd2528309bff94998bc37129dc5f33ec23b1fdfa37966b705b8a0f344d",
+      "index_sha256": "4c8174fd2528309bff94998bc37129dc5f33ec23b1fdfa37966b705b8a0f344d",
+      "index_blob": "4f5d1e564c4bbb8812412b1fa67f0ed54fafd9a3"
+    },
+    "backend/app/services/placements.py": {
+      "working_sha256": "2298734b4d559ea4276194b6f223bc77428eb9c066b24cd673518f157e50ed1c",
+      "index_sha256": "2298734b4d559ea4276194b6f223bc77428eb9c066b24cd673518f157e50ed1c",
+      "index_blob": "9e9bd796b4c4935cdd248876220e12d072dfcbee"
+    },
+    "backend/app/workers/outbox.py": {
+      "working_sha256": "4039c49fb3c4165d0bd6b1115c25aa5cd415e08f9031a08e132a56d8f8e78b7c",
+      "index_sha256": "4039c49fb3c4165d0bd6b1115c25aa5cd415e08f9031a08e132a56d8f8e78b7c",
+      "index_blob": "fa45731ff2586add65f6e4b4d107c6033d8dc53c"
+    },
+    "backend/tests/security/test_academic_authority.py": {
+      "working_sha256": "c816d75c0525f4b1785781236e17b9763b201468ea09a7adf826bbf60e5093af",
+      "index_sha256": "c816d75c0525f4b1785781236e17b9763b201468ea09a7adf826bbf60e5093af",
+      "index_blob": "3b387563577e8f48dfd9728ee1228d63de865dc2"
+    },
+    "backend/tests/security/test_admission_current_actor.py": {
+      "working_sha256": "0998da6c2c9ec52b016e3242525e6502c00117a45b3a3ed102becaf7790c0dd1",
+      "index_sha256": "0998da6c2c9ec52b016e3242525e6502c00117a45b3a3ed102becaf7790c0dd1",
+      "index_blob": "1b9dd4353dd7a1939e87fcf0de0cc4749b476b21"
+    },
+    "backend/tests/security/test_admission_lifecycle.py": {
+      "working_sha256": "5921f53554a92f12a63dd2cc03e6849e99cf59cf3c4831d5aaad5bfeca08baf9",
+      "index_sha256": "5921f53554a92f12a63dd2cc03e6849e99cf59cf3c4831d5aaad5bfeca08baf9",
+      "index_blob": "2168b2fefb541d435c7b0cfb91dd655101bdc047"
+    },
+    "backend/tests/security/test_admission_migration.py": {
+      "working_sha256": "af78377d97fcbbe51d32e166dd77c5dd0f9ec767105258abc30aaa4e0b951433",
+      "index_sha256": "af78377d97fcbbe51d32e166dd77c5dd0f9ec767105258abc30aaa4e0b951433",
+      "index_blob": "1dbaca6177a644c6137673aab8a5711bfb115bb8"
+    },
+    "backend/tests/security/test_admission_pagination.py": {
+      "working_sha256": "c12d20c47b6f833e8e5e9cb88cfba1d85705467b59b65b3928cdb32b3970a2c7",
+      "index_sha256": "c12d20c47b6f833e8e5e9cb88cfba1d85705467b59b65b3928cdb32b3970a2c7",
+      "index_blob": "1c95c689fb5366d55c5f6d3009b76abbbe92b4cc"
+    },
+    "backend/tests/security/test_admission_retries.py": {
+      "working_sha256": "e945bd25e9ba837546b9ec1ce720d2f4960a08f6abc227d572e4790b0c2d3f8e",
+      "index_sha256": "e945bd25e9ba837546b9ec1ce720d2f4960a08f6abc227d572e4790b0c2d3f8e",
+      "index_blob": "37a4be02a89ac82d464f1845ebca9bd41088fd22"
+    },
+    "backend/tests/security/test_contracts.py": {
+      "working_sha256": "eb3f50910d2ca0d4aee901f50c3ba12ef01571316c454ca3e039bdc802bcf79a",
+      "index_sha256": "8bfa4ff25e785a1ae51a25ef4c35776026f2cdf74359ad6bfa1cdd7b163558b8",
+      "index_blob": "1136c570ab295e809c016984de034ef6130b560b"
+    },
+    "backend/tests/security/test_diary_business_date.py": {
+      "working_sha256": "4c687bd0b9db4901c4652b80a64e8dc8ad8e7fb8e821e6b95d4c92eb3060cb9f",
+      "index_sha256": "4c687bd0b9db4901c4652b80a64e8dc8ad8e7fb8e821e6b95d4c92eb3060cb9f",
+      "index_blob": "1e081acbb8c62ad8af66f1cdc2655b67a73cfb31"
+    },
+    "backend/tests/security/test_internship_admission.py": {
+      "working_sha256": "fab5f62782b81ff549595628ae62d76e0af2a4e11c1e0d65b49e4ea87ff94e32",
+      "index_sha256": "fab5f62782b81ff549595628ae62d76e0af2a4e11c1e0d65b49e4ea87ff94e32",
+      "index_blob": "0f3e3ac614bd65037f2b0ce27a3f6301c0a7ff6a"
+    },
+    "backend/tests/security/test_mentor_notices.py": {
+      "working_sha256": "2019f8ac4dfac4c678dd691db8cef17463a6b9b61afec20faea470fc1af02a42",
+      "index_sha256": "2019f8ac4dfac4c678dd691db8cef17463a6b9b61afec20faea470fc1af02a42",
+      "index_blob": "3ce90722c5f00d5183045d25980fa9e5cbb7ea63"
+    },
+    "backend/tests/security/test_regressions.py": {
+      "working_sha256": "900f6fed44fc39e2f4d0fcaabea0b050daa39089fc84214219da02223d85f1d9",
+      "index_sha256": "962b60620375f50d188f4b67f088a93e9783c922f06ccfd2b0f4a4e027e56d63",
+      "index_blob": "0872aacebe53c6c48a1e9d1be84a926c5e3a6c37"
+    },
+    "infra/compose.yaml": {
+      "working_sha256": "1f04cd4ca587c36beba036e0edb3effa8c65ad5d05bef7bba80b722ca6a2b61c",
+      "index_sha256": "1f04cd4ca587c36beba036e0edb3effa8c65ad5d05bef7bba80b722ca6a2b61c",
+      "index_blob": "c1e1f785955e655ad609e353cd410deca6ad3832"
+    }
+  }
+}
