@@ -5,7 +5,66 @@ Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni pa
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## CURRENT LOG-069/070 - pending school admission and viewer notice corrections
+## CURRENT LOG-071 - scoped academic lists and coordinator notices
+
+## LOG-071 current publication evidence
+
+Current queue source/config9-file review exited0/no actionable reviewed P1/P2;
+launch scope stayed byte-identical. Native authority/cursor/>100/legacy selection
+21passed139.56s. Separate coordinator notice5passed41.18s. Broad current integration
+57 cases:56passed1failed363.15s; stale-fence fixture set lease_until=now() although
+worker requires strict lease_until<now(). Explicitly expired test lease timestamps
+replace that boundary assumption in all three notice families; production worker
+semantics stay unchanged. Corrective all three notice groups15passed73.87s. These
+are overlapping stages, not a fabricated complete native green. Preserve the raw
+failed stage. Current matching-head full CI still required before merge.
+
+Full parentdf87515 CI1015 twice549.23s/740.08s is captured separately and predates
+this queue source. Current draft registration67 explicit65 placeholders of132 is
+registration only. No new table/dependency/live migration;0015/124, canonical94,
+accepted main0013/114.106 minimum academic detail,107/108 review/decision and all
+remaining R1 work stay open. Source/index receipt: source_academic_views_manifest.json.
+
+
+Codex owns the current queue draft on feature/65 from prior publisheddf87515.
+Check actual git/process/JUnit status on resume. Full parentdf87515 CI42743318591/
+42743326614 both completed success1015passed549.23s/740.08s, raw summaries in
+pr66_academic_core_ci.json. Those checks do not accept the new queue source.
+PR66 stays draft/Issue65 open, accepted main0013/114, working0015/124 unchanged.
+
+Implemented prototypes:098 exact own coordinator purpose OR personally accepted
+original teacher scope;099 latest personal school choice/current plan/unbound
+pending queue;105 submitted current revision metadata only. Scoped paged teacher/
+agreement options and supervision assignment metadata enable actual nomination/
+replacement without using IDs from trusted test setup. No diary summary/evidence/
+payroll in these lists.106/107/108 detailed view/actions are next work. Added
+distinct actual public supervision-created/bound coordinator notices with nullable
+placement, immutable proof-derived student/history, atomic audit/outbox and fenced
+inbox/default worker/compose routing. No new table/dependency/live action.
+
+First actual HTTP/notice5passed33.90s. Late sensitive-role grant after initial
+account check genuinely returned200:1failed10.89s -> second policy check after
+scoped role pin ->6passed38.56s. Later helper/version refinements are covered by
+the currently running expanded controls, not falsely included in that earlier6.
+Read-only Copilot plan/source exited0; current9-file source opinion found no
+actionable P1/P2, no test/SHA/model certification. Source hash scope retained.
+Ambiguous primary legacy probe failed in fixture9.76s: existing canonical unique
+index already blocks it. Test now verifies real uniqueness/preserved valid import;
+no redundant migration change. Source071 does tighten stale choice to the prior
+exact plan when binding creates its next version; no imported consent is invented.
+
+NEXT: inspect actual new-head complete CI and any feedback; current selected
+checks/source review and initial failure/correction are preserved. Do not turn
+parent1015 or selected21/15 into full-current acceptance. The explicit expired
+lease fixture correction needs the full matching-head run; no worker-policy waiver.
+Preserve final source/test pin and only accept the bounded Issue65 requirements
+when current CI/review/evidence genuinely match. The full R1 goal remains active. Additional post-review/runtime follow-up is needed if any
+source changes. Then106 minimum academic detail/107 independent review/108 decision
+and the rest of full R1 continue. Detailed current behavior/limits are in
+backend/ACADEMIC_VIEWS.md and internship_admission/ACADEMIC_QUEUES_PLAN.md. pg_live
+unchanged/stopped at last observed07:18; no Docker/admin/reboot/live migration.
+
+## Historical LOG-069/070 - school admission and viewer notice corrections
 
 Current LOG-070 checkpoint:34 current corrective tests passed199.22s,0fail/error/
 skip,1 framework warning. This exact run includes academic HTTP/lifecycle, both

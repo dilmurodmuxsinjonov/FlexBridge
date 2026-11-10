@@ -1,0 +1,15 @@
+{
+  "parent_commit": "df87515d95b3686a48a15976db9764b50408c193",
+  "scope": {
+    "backend/app/services/academic_views.py": "64bc869ad654a9abe3800281f836bb9fb11c83b48f2002661cf0b0385561f9fc",
+    "backend/app/services/supervision_notices.py": "c33d6c6495eee3ca3f7f1f1886d4e056d5266d533548d8d02b28bcb437526a8f",
+    "backend/app/services/academic_admission.py": "fb5088cb999c75f06c441403ab8dab51eea327e4bcb1c989abcb29926d3ee838",
+    "backend/app/services/mentor_notices.py": "29e5691c482fc156c2ec5a4ea6a559995f9957b3a8804dcf04a493669b871e02",
+    "backend/app/api/v1/academic_admission.py": "13fad1d769e99c8b868e2a0069eeeb556892ba91e2d21ae22fc1f501c9bb9010",
+    "backend/app/core/iam_http.py": "e890eb67805494d2b2868f6432cb00046183d6bd67c1b06dc9fae15cf397a500",
+    "backend/app/workers/outbox.py": "cdb75679fa31d3dc02c268c692ec08c65be0855513a1bfe926f0d9daef6f270f",
+    "backend/alembic/versions/0015_academic_admission.py": "bd0b7ef0713fa2ade9fd16f198fff317386e297b30b245a6f070f0006288b8fa",
+    "infra/compose.yaml": "90321e2af25a5c843ec79755ea6dd547634d150c9382d340650f8cdb0fba28e4"
+  },
+  "limitations": "Read-only source review of unaccepted new queues; no tests/SHA/model/pilot certification."
+}

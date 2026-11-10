@@ -1,4 +1,23 @@
-# LOG-069 - current academic admission draft, acceptance remains open
+# LOG-071 - scoped academic views draft, current CI acceptance pending
+
+## LOG-071 current publication evidence
+
+Current queue source/config9-file review exited0/no actionable reviewed P1/P2;
+launch scope stayed byte-identical. Native authority/cursor/>100/legacy selection
+21passed139.56s. Separate coordinator notice5passed41.18s. Broad current integration
+57 cases:56passed1failed363.15s; stale-fence fixture set lease_until=now() although
+worker requires strict lease_until<now(). Explicitly expired test lease timestamps
+replace that boundary assumption in all three notice families; production worker
+semantics stay unchanged. Corrective all three notice groups15passed73.87s. These
+are overlapping stages, not a fabricated complete native green. Preserve the raw
+failed stage. Current matching-head full CI still required before merge.
+
+Full parentdf87515 CI1015 twice549.23s/740.08s is captured separately and predates
+this queue source. Current draft registration67 explicit65 placeholders of132 is
+registration only. No new table/dependency/live migration;0015/124, canonical94,
+accepted main0013/114.106 minimum academic detail,107/108 review/decision and all
+remaining R1 work stay open. Source/index receipt: source_academic_views_manifest.json.
+
 
 Current LOG-070 checkpoint:34 current corrective tests passed199.22s,0fail/error/
 skip,1 framework warning. This exact run includes academic HTTP/lifecycle, both

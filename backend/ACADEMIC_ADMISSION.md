@@ -1,5 +1,7 @@
 # Pending academic admission
 
+Current LOG-071 adds scoped098/099/105 lists, current option/assignment metadata helpers and distinct coordinator responsibility/binding notices. Read ACADEMIC_VIEWS.md and its exact current validation limits; earlier below queue TODOs are historical. Detailed106/107/108 and the full R1 acceptance remain open.
+
 This draft extends host admission with a reachable school and teacher flow before
 ACTIVE. It is not full institutional workflow or pilot acceptance. Accepted main
 remains0013/114; draft0015 executes124 tables in disposable PostgreSQL. The94-table

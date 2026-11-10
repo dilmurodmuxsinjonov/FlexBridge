@@ -1,5 +1,7 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
+Current LOG-071: Codex is implementing source098/099/105 scoped institutional views and distinct coordinator notices on feature/65 from df87515. Files/responsibility/acceptance are recorded before source changes in internship_admission/ACADEMIC_QUEUES_PLAN.md. Full parentdf87515 CI42743318591/42743326614 both passed1015; current queue matching-head CI remains pending; PR66 remains draft, full R1/pilot not accepted.
+
 Yangilangan2026-11-10 - Codex. PR64 merged1b2bbbfed70dc9a68b6de52cdd91fb0f9c41351f/Issue63 closed after final08b4129 complete930 CI541.51s/651.09s, source/follow-up reviews. Additional unchanged-source formal Teacher PASSWORD lifecycle1 passed10.14s. Current feature/65-internship-admission builds host admission after3 independently confirmed old-domain gaps. Accepted runtime0013/114, canonical51 explicit81 placeholder, not functional coverage/pilot. pg_live untouched; Docker/WSL admin install incomplete.
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
@@ -580,3 +582,6 @@ Keyingi kichik qadam:
 
 
 - LOG-070 final current correction stage:34 native UTC tests passed199.22s,0failure/error/skip,1framework warning. Exact academic HTTP/lifecycle, populated/mismatched legacy upgrade, active teacher notice/logout/fence/rollback/source controls plus mentor notices; runtime/config frozen across run. Actual corrective read-only Copilot exit0/no concrete delta P1/P2, scope hashes retained. Earlier63/86 stages predate corrective delta and are not summed. Current exact-head full CI and institution queues098/099/105/more R1 work remain; keep PR66 draft. Source/index publication receipt: internship_admission/source_academic_manifest.json.
+
+
+- LOG-071 current:098/099/105 exact current scoped lists and option/assignment metadata helpers, distinct coordinator creation/binding notices, stale-choice exact-plan guard, post-role-pin current MFA policy. Native current21passed139.56s and notice5passed41.18s overlap; broad56passed1failed363.15s was a lease-reset boundary fixture, corrected explicit-expiry all notice groups15passed73.87s with worker semantics unchanged.9-file current read-only source opinion exit0/no actionable P1/P2, frozen hashes retained. Parentdf87515 full1015 twice549.23s/740.08s does not accept this current source. Registration67/65 of132 is registration only,0015/124 unchanged; latest CI/source pin and detailed106/107/108/full R1 remain. See backend/ACADEMIC_VIEWS.md, source_academic_views_manifest and current handoff.

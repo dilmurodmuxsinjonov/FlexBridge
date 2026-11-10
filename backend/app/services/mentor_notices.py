@@ -92,9 +92,11 @@ class NotificationService:
                     if event['event_type']==EVENT_TYPE:
                         parse,source,prefix=run_notice,notice_source,'PLACEMENT_MENTOR_'
                     else:
-                        from app.services import academic_notices
-                        if event['event_type']!=academic_notices.EVENT_TYPE:continue
-                        parse,source,prefix=academic_notices.run_notice,academic_notices.notice_source,'PLACEMENT_ACADEMIC_'
+                        from app.services import academic_notices,supervision_notices
+                        local={academic_notices.EVENT_TYPE:(academic_notices.run_notice,academic_notices.notice_source,'PLACEMENT_ACADEMIC_'),
+                            supervision_notices.EVENT_TYPE:(supervision_notices.run_notice,supervision_notices.notice_source,'SUPERVISION_COORDINATOR_')}
+                        if event['event_type'] not in local:continue
+                        parse,source,prefix=local[event['event_type']]
                     payload=parse(event)
                     recipient,details=source(conn,payload)
                     if recipient==actor.user_id and payload['placement_id']==row['placement_id'] and row['template_code']==prefix+payload['kind']:

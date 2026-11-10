@@ -193,6 +193,8 @@ def upgrade():
           AND NOT p.academic_track AND p.enrollment_id IS NULL AND p.current_terms_id=t.id AND t.placement_id=p.id
           AND s.institution_id=NEW.institution_id AND s.enrollment_id=NEW.enrollment_id AND m.user_id=NEW.actor_id
           AND EXISTS(SELECT 1 FROM student_academic_requests r WHERE r.placement_id=p.id AND r.enrollment_id=NEW.enrollment_id
+            AND EXISTS(SELECT 1 FROM placement_terms previous WHERE previous.id=r.terms_id
+              AND previous.placement_id=p.id AND previous.version=t.version-1)
             AND r.institution_id=NEW.institution_id AND NOT EXISTS(SELECT 1 FROM student_academic_requests newer
               WHERE newer.placement_id=p.id AND newer.revision>r.revision))
           AND academic_supervision_current(s.id,p.candidate_id) AND NEW.initial_snapshot=to_jsonb(p)

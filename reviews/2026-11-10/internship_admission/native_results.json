@@ -1,5 +1,5 @@
 {
-  "scope": "overlapping preserved stages, including failures/setup errors; not additive or full R1 acceptance",
+  "scope": "overlapping preserved stages including failure/setup errors; not additive or full R1 acceptance",
   "stages": [
     {
       "file": "academic_affected_current_junit.xml",
@@ -74,6 +74,14 @@
       "xml_seconds": 35.341
     },
     {
+      "file": "academic_legacy_primary_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.763
+    },
+    {
       "file": "academic_lifecycle_corrected_junit.xml",
       "tests": 9,
       "failures": 0,
@@ -120,6 +128,54 @@
       "errors": 0,
       "skipped": 0,
       "xml_seconds": 35.339
+    },
+    {
+      "file": "academic_view_mfa_corrected_junit.xml",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 38.561
+    },
+    {
+      "file": "academic_view_mfa_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 10.892
+    },
+    {
+      "file": "academic_views_current_junit.xml",
+      "tests": 57,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 363.148
+    },
+    {
+      "file": "academic_views_initial_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 33.901
+    },
+    {
+      "file": "academic_views_notice_corrected_junit.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 73.87
+    },
+    {
+      "file": "academic_views_security_initial_junit.xml",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 139.56
     },
     {
       "file": "actor_teacher_initial_junit.xml",
@@ -184,6 +240,14 @@
       "errors": 0,
       "skipped": 0,
       "xml_seconds": 37.975
+    },
+    {
+      "file": "coordinator_notice_current_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 41.175
     },
     {
       "file": "host_current_junit.xml",

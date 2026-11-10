@@ -11,6 +11,7 @@ from app.services.placement_admission import fingerprint,evidence,request_record
 from app.services.pagination import page
 from app.services.governance import GovernanceError
 from app.services.academic_notices import queue_notice
+from app.services.supervision_notices import queue_notice as queue_coordinator_notice
 
 
 def proof_for(conn,name,column,key):
@@ -124,6 +125,7 @@ class AcademicAdmissionService:
                 initial_snapshot=snapshot(conn,'student_supervisions',s['id']),**evidence(conn,actor),
                 coordinator_grant_id=coordinator['_authority_grant_id'],idempotency_key=idempotency_key,
                 request_fingerprint=digest,receipt=receipt))
+            queue_coordinator_notice(conn,s['id'])
             self.audit.append_audit_event(actor_id=actor.user_id,action='STUDENT_SUPERVISION_CREATED',entity_type='student_supervision',entity_id=s['id'])
             return projection(get_row(conn,'student_supervisions',s['id']),'supervision_receipt',receipt)
 
@@ -142,6 +144,7 @@ class AcademicAdmissionService:
         choice=conn.execute(select(requests).where(requests.c.placement_id==p['id']).order_by(requests.c.revision.desc()).limit(1)).mappings().first()
         if not choice or choice['institution_id']!=s['institution_id'] or choice['enrollment_id']!=enrollment['id']:
             raise GovernanceError('STUDENT_SCHOOL_CHOICE_REQUIRED',status_code=403)
+        if choice['terms_id']!=terms['id']:raise PlacementScopeError('STALE_STUDENT_SCHOOL_CHOICE')
         scope=dict(institution_id=s['institution_id'],enrollment_id=enrollment['id'],supervision_id=s['id'],
                    agreement_id=agreement['id'],agreement_version=agreement['version'],purpose=s['purpose'],legal_basis=s['legal_basis'])
         new_terms=insert_row(conn,'placement_terms',placement_id=p['id'],version=terms['version']+1,schema_version=terms['schema_version'],
@@ -160,6 +163,7 @@ class AcademicAdmissionService:
             coordinator_grant_id=coordinator['_authority_grant_id'],idempotency_key=key,request_fingerprint=digest,receipt=receipt))
         conn.execute(table('placements').update().where(table('placements').c.id==p['id'])
                      .values(academic_track=True,enrollment_id=enrollment['id'],updated_at=now()))
+        queue_coordinator_notice(conn,s['id'],p['id'])
         self.audit.append_audit_event(actor_id=actor.user_id,action='PLACEMENT_ACADEMIC_BOUND',entity_type='placement',entity_id=p['id'])
         return get_row(conn,'placements',p['id']),get_row(conn,'placement_terms',new_terms['id']),proof_for(conn,'placement_academic_bindings','placement_id',p['id'])
 

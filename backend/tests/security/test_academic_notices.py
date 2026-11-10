@@ -1,5 +1,6 @@
 """Actual academic viewer-change notices from immutable local proof, not external delivery."""
 from uuid import uuid4
+from datetime import timedelta
 import pytest
 
 from sqlalchemy import select
@@ -74,7 +75,8 @@ def test_academic_worker_failure_or_stale_fence_has_no_partial_inbox_effect(clie
     with transaction() as conn:
         e=table('outbox_events');row=conn.execute(select(e).where(e.c.event_type==TOPIC)).mappings().one()
         assert row['processed_at'] is None
-        conn.execute(e.update().where(e.c.id==row['id']).values(available_at=now(),lease_until=now()))
+        expired=now()-timedelta(seconds=1)
+        conn.execute(e.update().where(e.c.id==row['id']).values(available_at=expired,lease_until=expired))
     assert relay_pending_outbox_events(event_types=(TOPIC,))==1
     assert len(client.get('/api/v1/me/notifications',headers=f['candidate']['headers']).json()['items'])==1
 

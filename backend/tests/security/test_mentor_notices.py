@@ -1,6 +1,7 @@
 """Actual in-app worker/inbox effects; no external delivery or live users are involved."""
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
+from datetime import timedelta
 
 from sqlalchemy import select,text
 
@@ -74,7 +75,8 @@ def test_stale_worker_fence_cannot_publish_mentor_notice(client,identities,organ
     with transaction() as conn:
         e=table('outbox_events')
         assert conn.execute(select(e.c.processed_at).where(e.c.event_type==EVENT_TYPE)).scalar_one() is None
-        conn.execute(e.update().where(e.c.event_type==EVENT_TYPE).values(lease_until=now(),available_at=now()))
+        expired=now()-timedelta(seconds=1)
+        conn.execute(e.update().where(e.c.event_type==EVENT_TYPE).values(lease_until=expired,available_at=expired))
     assert deliver()==1 and len(inbox(client,candidate)['items'])==1
 
 
