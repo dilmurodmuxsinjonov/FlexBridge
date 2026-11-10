@@ -98,7 +98,7 @@ def accepted_assignment(f):
 
 
 def review_request(client,f,assignment,**extra):
-    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research work',total_minutes=60)
+    log=service.create_daily_log_with_revision(actor=actor(f['candidate']),placement_id=f['placement']['id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research work',total_minutes=60)
     body=dict(placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],
         expected_revision_id=log['current_revision_id'],idempotency_key=str(uuid4()),decision='REVIEWED',comment='Reviewed',**extra)
     return lambda:client.post('/api/v1/internship-logs/daily-logs/'+log['id']+'/academic-reviews',json=body,headers=f['teacher']['headers'])
@@ -334,7 +334,7 @@ def add_teacher_coordinator_role(f):
 def test_teacher_who_also_coordinates_cannot_bypass_mfa_in_service(client,identities,organization):
     from app.services.governance import GovernanceError
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
-    log=service.create_daily_log_with_revision(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
+    log=service.create_daily_log_with_revision(actor=actor(f['candidate']),placement_id=f['placement']['id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
     add_teacher_coordinator_role(f)
     with pytest.raises(GovernanceError,match='MFA_REQUIRED'):
         service.review_academic(actor=actor(f['teacher']),daily_log_id=log['id'],placement_id=f['placement']['id'],assignment_id=assignment['id'],
@@ -359,7 +359,7 @@ def test_sensitive_role_granted_after_http_preflight_requires_mfa_at_write(clien
 
 def test_imported_revision_author_must_own_placement_candidate(client,identities,organization):
     f=academic_fixture(identities,organization);assignment=accepted_assignment(f)
-    draft=service.save_draft_daily_log_api_054(placement_id=f['placement']['id'],author_id=f['candidate']['user_id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
+    draft=service.save_draft_daily_log_api_054(actor=actor(f['candidate']),placement_id=f['placement']['id'],log_date=f['placement']['start_date'].isoformat(),summary_text='Research',total_minutes=60)
     with transaction() as conn:
         # Trusted legacy/import corruption, not a demonstrated public draft exploit.
         t=table('log_revisions');conn.execute(t.update().where(t.c.id==draft['current_revision_id']).values(author_id=f['coord']['user_id'],status='SUBMITTED',submitted_at=now()))
