@@ -284,3 +284,16 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Unrated vs Zero Distinction (`AC-023`): New users receive `sample_size: 0`, `score: null`, `score_status: "UNRATED"` rather than an incorrect 0.0 default.
   - Bilateral Double-Blind Protection (`AC-024` / RAT-04): Received ratings within the 14-day anti-retaliation window (`publish_after > now_utc`) are masked (`status: "BLINDED_PENDING_WINDOW"`, `rater_id: None`, `comment: None`). Unblinded metadata is surfaced once window elapses.
   - Submissions Given & Eligible Relations (`AC-022`): Surfaces reviews authored by the actor and completed placements eligible for review.
+
+## RATINGS-API058-APPEALS — Rating Appeal Submission & Dispute Resolution (2026-11-10)
+
+- **Capability & Contract**: `RATING_APPEAL` (`CAP-028`) / `API-058` (Issue #90), branch `feature/90-rating-appeals`, base `integration/r1-agent-collaboration`.
+- **Endpoint**: `POST /api/v1/ratings/{id}/appeals` (HTTP 201).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `rating_appeals` (DB-067: `id`, `rating_revision_id`, `appellant_id`, `reason`, `status`, `reviewer_id`, `decision`, `resolved_at`), `rating_submissions` (DB-064), `rating_revisions` (DB-065), `rating_aggregates` (DB-068), `moderation_cases` (DB-078).
+- **Service & Dispute Architecture (`app/services/user_ratings.py`)**:
+  - **Party Authorization ("Baho tomoni" / AC-025)**: Validates that the actor is a party to the rating (`target_user_id`, `rater_id`, active authorized manager of `target_org_id`, or platform `MODERATOR`). Third parties rejected with 403 Forbidden.
+  - **14-Day Boundary Enforcement (`AC-025` / RAT-05)**: Enforces 14 calendar days from rating publication/unblinding (`publish_after`). Stale submissions rejected with 422 Unprocessable Entity.
+  - **Moderation Case Queue & Independent Review (`DB-078`, `AC-028`)**: Automatically queues the dispute into `moderation_cases`. Prohibits self-review (`reviewer != appellant` and `reviewer != rater`, `APPEAL_REVIEWER_CONFLICT` 403).
+  - **Anti-Duplication**: Replaying identical pending appeal returns idempotent 200/201 replay; conflicting new reason while pending rejected with 409 Conflict.
+  - **Aggregate Recalculation ($n < 5$ Withholding, AC-025)**: Updates submission status to `UNDER_APPEAL` and immediately recomputes target's rating aggregate. If valid non-disputed ratings count drops below 5 ($n < 5$), aggregate score is withheld (`WITHHELD_INSUFFICIENT_SAMPLE`).
+  - **Audit Logging**: Persists immutable audit event (`RATING_APPEAL_SUBMITTED`, `RATING_APPEAL_RESOLVED`) via `AppendOnlyAuditStore`.

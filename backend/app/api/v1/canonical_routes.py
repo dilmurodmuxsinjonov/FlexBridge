@@ -10,6 +10,7 @@ including:
 - `API-055`: `POST /api/v1/log-entries/{id}/evidence`
 - `API-056`: `POST /api/v1/logs/{id}/submit`
 - `API-057`: `GET /api/v1/me/ratings`
+- `API-058`: `POST /api/v1/ratings/{id}/appeals`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
@@ -327,6 +328,36 @@ def get_my_ratings_endpoint(
     """Canonical API-057 (`GET /api/v1/me/ratings`): Personal rating summary, rubric version, and score explanation (`AC-021..024`, `CAP-027`)."""
     from app.services.user_ratings import user_ratings_service
     return user_ratings_service.get_my_ratings_api_057(actor=actor)
+
+
+class RatingAppealPayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    reason: str = Field(..., min_length=10, max_length=4000, description="E'tiroz sababi va dalillari")
+    category: str = Field(default="FACTUAL_DISPUTE", max_length=50, description="E'tiroz toifasi")
+    evidence_notes: str | None = Field(default=None, max_length=4000, description="Qo'shimcha dalillar")
+
+
+@router.post("/ratings/{id}/appeals", status_code=201)
+def submit_rating_appeal_endpoint(
+    id: UUID,
+    payload: RatingAppealPayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-058 (`POST /api/v1/ratings/{id}/appeals`): Submit rating appeal (`AC-025`, `CAP-028`, `DB-067`)."""
+    from app.services.user_ratings import RatingScopeError, user_ratings_service
+    try:
+        return user_ratings_service.submit_rating_appeal_api_058(
+            rating_id=str(id),
+            actor=actor,
+            reason=payload.reason,
+            category=payload.category,
+            evidence_notes=payload.evidence_notes,
+        )
+    except RatingScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
+        ) from exc
 
 
 @router.post("/operator/refunds/{id}/approve")
