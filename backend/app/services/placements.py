@@ -79,12 +79,12 @@ class ApplicationPlacementService:
             conn.execute(table('offers').update().where(table('offers').c.id==offer_id).values(**values))
             return {'contract_id':'API-043',**offer,**values}
 
-    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor,idempotency_key,start_date=None,end_date=None):
+    def create_placement(self,*,application_id,offer_id,opportunity_id,candidate_id,organization_id,actor,idempotency_key,start_date=None,end_date=None,required_minutes=0):
         from app.services.authority import account_authority,org_authority
         from app.services.organizations import require_capability
         from app.services.placement_admission import fingerprint,request_record
         digest=fingerprint('PLACEMENT_INTAKE',application_id=application_id,offer_id=offer_id,opportunity_id=opportunity_id,
-            candidate_id=candidate_id,organization_id=organization_id,start_date=start_date,end_date=end_date)
+            candidate_id=candidate_id,organization_id=organization_id,start_date=start_date,end_date=end_date,required_minutes=required_minutes)
         with transaction() as conn:
             get_row(conn,'organizations',organization_id,True)
             offer=get_row(conn,'offers',offer_id,True); app=get_row(conn,'applications',application_id); opp=get_row(conn,'opportunities',opportunity_id)
@@ -108,7 +108,7 @@ class ApplicationPlacementService:
             terms=insert_row(conn,'placement_terms',placement_id=p['id'],version=1,schema_version=1,
                 terms_snapshot={'source_revision_id':revision['id'],'title':revision['title'],
                     'objectives':revision['description'],'work_mode':revision['work_mode'],'contract_type':revision['contract_type']},
-                daily_limit_minutes=480,weekly_limit_minutes=2400,required_minutes=0)
+                daily_limit_minutes=480,weekly_limit_minutes=2400,required_minutes=required_minutes)
             conn.execute(table('placements').update().where(table('placements').c.id==p['id']).values(current_terms_id=terms['id']))
             p=get_row(conn,'placements',p['id'])
             initial_snapshot,source_snapshot=conn.execute(text("""SELECT to_jsonb(p),jsonb_build_object('offer',to_jsonb(o),

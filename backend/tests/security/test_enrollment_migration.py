@@ -54,8 +54,8 @@ def declaration_proof(conn, owner, case, enrollment, session_id=None):
 def test_fresh_schema_and_unproved_new_verified_insert_are_rejected(identities):
     owner=identities()
     with transaction() as conn:
-        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0018_academic_decisions'
-        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==128
+        assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0019_placement_completions'
+        assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==129
         inst=new_institution(conn)
     with pytest.raises(IntegrityError, match='requires exact approval proof'), transaction() as conn:
         insert_row(conn, 'enrollments', candidate_id=owner['candidate_id'], institution_id=inst['id'],

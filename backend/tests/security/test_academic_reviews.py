@@ -27,8 +27,8 @@ from test_organizations import actor
 from academic_review_observer import labeled_requests,wait_for_requests
 
 
-def ready(client, identities, organization, *, submit=True,placement_start_date=None):
-    f = pending_http(client, identities, organization,placement_start_date=placement_start_date)
+def ready(client, identities, organization, *, submit=True,placement_start_date=None,required_minutes=0):
+    f = pending_http(client, identities, organization,placement_start_date=placement_start_date,required_minutes=required_minutes)
     assignment, draft = active_revision(client, f)
     if submit:
         post(client, '/api/v1/logs/' + draft['id'] + '/submit', f['candidate'], {}, 200)
@@ -36,8 +36,10 @@ def ready(client, identities, organization, *, submit=True,placement_start_date=
 
 
 def body(assignment, **extra):
-    return dict(academic_assignment_id=assignment['id'], decision='REVIEWED', comment='Independent academic feedback.',
-                idempotency_key=str(uuid4()), **extra)
+    b = {'academic_assignment_id': assignment['id'], 'decision': 'REVIEWED', 'comment': 'Independent academic feedback.',
+         'idempotency_key': str(uuid4())}
+    b.update(extra)
+    return b
 
 
 def send(client, f, draft, payload, *, user=None):
