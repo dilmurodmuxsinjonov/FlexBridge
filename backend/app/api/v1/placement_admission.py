@@ -27,6 +27,10 @@ class HostDecisionRequest(TermsRequest):
     action: Literal['ACTIVATE', 'CANCEL', 'APPROVE_COMPLETION', 'DISPUTE']
 
 
+class AssignmentAcceptRequest(TermsRequest):
+    assignment_kind:Literal['MENTOR','TEACHER']='MENTOR'
+
+
 class TaskRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     code: str = Field(min_length=1, max_length=80, pattern=r'^[A-Za-z0-9_.-]+$')
@@ -87,9 +91,12 @@ def accept_candidate(id: UUID, payload: TermsRequest, actor: ActorContext = Depe
 
 
 @router.post('/placements/{id}/assignments/{assignment}/accept')
-def accept_assignment(id: UUID, assignment: UUID, payload: TermsRequest, actor: ActorContext = Depends(require_actor_context)):
-    # The academic/TEACHER branch is a follow-on unit; this method resolves only named mentor assignments.
-    return service.accept_mentor(actor=actor, placement_id=str(id), assignment_id=str(assignment), **payload.arguments())
+def accept_assignment(id: UUID, assignment: UUID, payload: AssignmentAcceptRequest, actor: ActorContext = Depends(require_actor_context)):
+    values=payload.arguments();kind=values.pop('assignment_kind')
+    if kind=='TEACHER':
+        from app.services.academic_admission import academic_service
+        return academic_service.accept(actor=actor,placement_id=str(id),assignment_id=str(assignment),**values)
+    return service.accept_mentor(actor=actor, placement_id=str(id), assignment_id=str(assignment), **values)
 
 
 @router.post('/placements/{id}/mentor-assignments', status_code=201)

@@ -1,42 +1,11 @@
-Work in progress: accepted internship offers open PLANNED and require immutable
-exact-version candidate/mentor personal consent plus current host activation.
-Original current mentor grants, immutable plan/task history and historical replay
-prevent stale role grants or cancelled placements acquiring a new start. Human
-actions use actual sessions after business locks; audit and projections commit together.
+Accepted internship offers previously had no complete reachable school/teacher admission path. This draft opens PLANNED and requires personal exact-version candidate/mentor consent, current host activation and, when required by the original opportunity, a student-selected verified school, current formal coordinator/supervision/agreement binding and personally accepted original teacher appointment/grant. Binding creates a new plan version; stale consent or replacement grants cannot revive old authority.
 
-Intake and nomination now require explicit retry keys; both nomination aliases
-share one receipt and return current projection with historical intent. Scoped
-keyset pages reach beyond100. Candidate in-app nominee/accepted/revoked notices
-use the fenced local worker, source-derived recipient and own unread/read access;
-arbitrary outbox payloads are not exposed. Main worker topic is enabled. No external
-channel/provider delivery or complete preferences/marketing implementation is claimed.
+Immutable source/nomination/consent/event proofs, audited canonical projections and institution -> organization -> placement lock order enforce the flow. Candidate in-app mentor and teacher viewer-change notices use source-derived recipients, a fenced local outbox worker and safe own inbox projections. Explicit retry receipts, scoped keyset pages and Asia/Tashkent diary dates are included. No external delivery or live deployment is claimed.
 
-SQL diary dates use Asia/Tashkent independently of server timezone. A reproduced
-migration predicate-drift P2 is fixed by exact full-predicate validation, single
-substitution and complete rewritten-function comparison. Review corrections also
-normalize UTC timestamps consistently across nomination aliases/read receipts.
+0014 and0015 add helper proofs without replacing the94-table canonical model; current fresh/populated disposable PostgreSQL executes124 total tables. Imported canonical history stays exact, incompatible supervision/current authority fails closed, and failed upgrades roll back. No new legacy consent or automatic imported-pending activation is invented. Accepted main remains0013/114; pg_live is untouched and confirmed stopped.
 
-Validation: current native UTC selection115 passed457.42s,0fail/error/skip,
-1 framework warning. It includes new host/retry/page/notice/calendar/upgrade/authority
-groups and existing regression/contract/adapter/ordinary Teacher enrollment controls;
-it excludes unfinished academic admission. Tests exercise105 real HTTP intakes and
-nominations from explicitly trusted upstream bulk metadata,105 tied-time inbox
-records, worker rollback/fencing, foreign cursors/current-session waits and populated
-upgrade/drift/failure rollback. Raw failed and corrected stages are preserved.
-Read-only Copilot review and corrective follow-ups are source opinions, not model/
-SHA/runtime/security certification; final source/index hashes are retained.
+Validation is staged, not additive: old academic authority63passed148.52s; affected HTTP/host/contract/regression86passed453.18s before the corrective delta; final frozen-current corrective34passed199.22s (zero failures/errors/skips, one framework warning). Current controls include actual active teacher replacement notices, author logout, worker rollback/fencing/source mismatch, exact current teacher/regrant/plan/side/dual-school scope and populated/mismatched legacy upgrade rollback. Raw failures and fixes are retained. Actual read-only Copilot review found a missing academic notice P2; it was reproduced and corrected, with final delta review reporting no concrete P1/P2. Source opinions do not certify execution, SHA/model, providers or pilot.
 
-PR66 remains draft: earlier exact85065b1 full CI66failed901passed twice,63 academic
-fixture cases and3 diary cases. Current changes are separate evidence. Next build
-actual pending enrollment/coordinator/supervision/agreement/purpose/teacher personal
-acceptance and restore all academic positives without UID/proof/legacy waivers.
-Complete current full CI/reviews before merging. API051 TEACHER and API088 completion/
-dispute remain unfinished. Registration60 explicit72 placeholders of132 is not
-functional acceptance. Accepted main stays0013/114; draft0014 executes118 tables.
+PR66 remains draft. The preceding published89fda9d complete CI actually63failed924passed twice765.05s/743.64s; exact metadata is retained, never relabeled green. Full current matching-head CI is required. Source098/099/105 institution/supervision/review queues, additional lifecycle/legacy cleanup controls, API088 completion/dispute, amendments, full diary candidate authority, reports/exports/frontend/live/legal/DR and the full R1 objective remain open. Docker/WSL admin installation remains incomplete. Registration64 explicit68 placeholders of132 is registration only.
 
-Evidence and ordered continuation: reviews/2026-11-10/internship_admission/HISOBOT.md,
-NEXT_ACADEMIC_UNIT.md and backend/PLACEMENT_ADMISSION.md. Full diary/completion/
-exports/frontend/provider/legal/DR/R1 remains open. pg_live untouched/stopped;
-Docker/WSL admin installation remains incomplete. No pilot claim.
-
-Closes #65 only after all current requirements/checks are actually accepted.
+Evidence: reviews/2026-11-10/internship_admission/HISOBOT.md, source_academic_manifest.json, NEXT_ACADEMIC_UNIT.md and backend/ACADEMIC_ADMISSION.md. Journals and ANTIGRAVITY_HANDOFF.md record the ordered continuation. Closes #65 only after all current requirements and checks are accepted. Pilot remains false.

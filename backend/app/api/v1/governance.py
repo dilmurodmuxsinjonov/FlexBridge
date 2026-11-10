@@ -6,9 +6,10 @@ Enforces server-side `ActorContext` (`Authorization: Bearer <token>`) on academi
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from app.services.internship_logs import internship_log_service
 
 from app.api.dependencies import ActorContext, require_actor_context, require_org, require_platform
@@ -31,10 +32,11 @@ class ApproveOrgMemberRequest(StrictDTO):
 
 
 class CreateAcademicAssignmentRequest(StrictDTO):
-    institution_id: str
-    placement_id: str
-    supervision_id: str
-    supervisor_id: str
+    institution_id: UUID
+    placement_id: UUID
+    supervision_id: UUID
+    supervisor_id: UUID
+    idempotency_key: str=Field(min_length=8,max_length=128)
 
 
 class UpdateAcademicAssignmentRequest(StrictDTO):
@@ -100,8 +102,8 @@ def create_academic_assignment_endpoint(
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     """Create academic assignment requiring server-authenticated `ActorContext` (`R-01`, `AC-041`)."""
-    return internship_log_service.create_academic_assignment(placement_id=payload.placement_id,institution_id=payload.institution_id,
-        supervisor_id=payload.supervisor_id,supervision_id=payload.supervision_id,actor=actor)
+    return internship_log_service.create_academic_assignment(placement_id=str(payload.placement_id),institution_id=str(payload.institution_id),
+        supervisor_id=str(payload.supervisor_id),supervision_id=str(payload.supervision_id),actor=actor,idempotency_key=payload.idempotency_key)
 
 
 @router.patch("/internships/academic-assignments/{assignment_id}")

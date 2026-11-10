@@ -5,7 +5,76 @@ Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni pa
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.
 Bu fayl Antigravity agenti loyiha review'ini bajarib bo'lgan degani emas.
 
-## CURRENT LOG-068 - retry, date, pagination and local notice follow-up
+## CURRENT LOG-069/070 - pending school admission and viewer notice corrections
+
+Current LOG-070 checkpoint:34 current corrective tests passed199.22s,0fail/error/
+skip,1 framework warning. This exact run includes academic HTTP/lifecycle, both
+mismatched legacy edges, populated upgrade rollback and academic/mentor notice
+controls (active reassignment, author logout, atomic apply failure, stale fence and
+cross-placement payload mismatch). Current runtime/config stayed unchanged during
+this run. Corrective Copilot read-only review exited0, no concrete delta P1/P2;
+launch hashes are academic_corrective_review_scope.json. Initial/integration review
+and earlier63/86 stages are separate; do not sum them or claim full current CI.
+Full matching-head GitHub CI is still required. PR66 remains draft/Issue65 open.
+
+
+Codex owns the current academic draft on feature/65-internship-admission, based on
+published89fda9d. PR66 remains draft, Issue65 open; accepted main1b2bbbf/0013/114.
+Current0015 executes124 tables in disposable native PostgreSQL. Canonical94-table
+schema is preserved; do not replace FlexBridge_1_4_schema.sql with a test dump.
+No pg_live migration, dependency install or Docker/admin/reboot action in this unit.
+
+Implemented: student's own verified-school selection BEFORE coordinator binding;
+actual current formal/MFA coordinator supervision and immutable exact scope;
+pending academic binding creates a new plan; original teacher appointment/grant
+and actual personal exact-version API051 TEACHER consent; host start/diary gates;
+current minimal named-teacher plan/inbox, immutable proof/projection guards,
+audited rollback and current coordinator cleanup even with an invalid parent.
+Reconciled institution -> org -> placement lock paths; ordinary Teacher PASSWORD
+still valid under existing current sensitive-role policy. No UID/proof waiver.
+
+Actual new HTTP5passed23.30s. Old authority63 initially56passed7failed146.01s:
+five tests attempted now-forbidden raw history rewrites; expired enrollment is
+now denied before supervision, and audit hook moved with its actual writer.
+Meaningful SQL denial + valid review controls replace the impossible corruption;
+all63 thenpassed148.52s. Lifecycleinitial8passed1failed42.92s violated the existing
+grant history unique key; proper new formal appointment fixture9passed24.59s.
+Populated upgrade3passed35.34s: exact history, no invented personal consent,
+ambiguous grant stays NULL, regrant cannot resurrect; DDL failure keeps0014 and
+its original functions/history. Raw failures and corrected JUnit remain separate.
+New self/side/latest dual-school cases plus affected host/contracts are running;
+inspect actual process/JUnit status rather than treating this note as completion.
+
+Read-only Copilot academic source review exited0, no unconditional P1/P2 found.
+Its legacy-pending uncertainty is intentionally fail-closed: imported ACTIVE
+history remains, pending imports do not acquire new activation consent. A reviewed
+re-admission lifecycle remains open; do not add a legacy exception to make tests
+green. Launch scope hashes are in academic_review_scope.json. Source opinion is
+not test/model/SHA/pilot certification; integration follow-up is separate.
+
+Published89fda9d full CI42726608461/42726620535 actually63failed924passed765.05s/
+743.64s. Saved pr66_host_followup_ci.json; these predate the current school changes.
+Do not relabel the draft green or merge based on selected local tests.
+
+LOG-070 current correction: integration review found missing active-teacher viewer
+notice P2; actual1failed24.95s -> separate source-derived academic local topic,
+initial academic1+mentor6passed35.80s. Current extended corrective run/review still
+required. Independent legacy-scope probe2failed29.83s reproduced wrong-enrollment
+binding and foreign-school import FK failure; migration now preserves history
+with incompatible supervision NULL and exact teacher eligibility. See HISOBOT
+for raw fixture-error and genuine-red stages.86passed453.18s affected stage predates
+these corrections. Do not label it final-source acceptance.
+
+NEXT in order: finish current corrective checks/review; preserve source
+hashes, journals and draft GitHub checkpoint. Then implement source098/099/105 institution/supervision/review queues and any
+new coordinator-viewer notices required when enabling those private views, with
+exact current enrollment/purpose/named scope, paging/private projections, race/
+retry/rollback evidence. Complete current full CI/reviews before any merge.
+backend/ACADEMIC_ADMISSION.md and NEXT_ACADEMIC_UNIT.md distinguish current work
+from still-open institution workflows. Full diary/completion/amendment/exports/
+frontend/provider/legal/DR/R1 and pilot acceptance remain open.
+
+## Historical LOG-068 - retry, date, pagination and local notice follow-up
 
 Final current native UTC115 passed457.42s,0failure/error/skip,1 framework warning.
 All local native/Copilot jobs from this package are now terminal. This selected

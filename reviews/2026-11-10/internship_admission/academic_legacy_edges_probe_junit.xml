@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="29.829" timestamp="2026-11-10T07:24:42.043332+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_legacy_edges" name="test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review[False]" time="14.271"><failure message="AssertionError: assert '098d10f4-e78b-479f-b496-13903dbeb27d' is None">backend\tests\security\test_academic_legacy_edges.py:45: in test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review
+    assert b['supervision_id'] is None
+E   AssertionError: assert '098d10f4-e78b-479f-b496-13903dbeb27d' is None</failure></testcase><testcase classname="tests.security.test_academic_legacy_edges" name="test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review[True]" time="14.327"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1969, in _exec_single_context&#10;      self.dialect.do_execute(&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py&quot;, line 952, in do_execute&#10;      cursor.execute(statement, parameters)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py&quot;, line 97, in execute&#10;      raise ex.with_traceback(None)&#10;  psycopg.errors.ForeignKeyViolation: insert or update on table &quot;placement_academic_bindings&quot; violates foreign key constraint &quot;placement_academic_bindings_supervision_id_institution_id_fkey&quot;&#10;  DETAIL:  Key (supervision_id, institution_id)=(094c69fc-f24b-4b53-b0d6-f13476bc2839, fceab804-3ee2-482d-a51a-efde2967f3f8) is not present in table &quot;student_supervisions&quot;.&#10;  &#10;  The above exception was the direct cause of the following exception:&#10;  &#10;  Traceback (most recent call last):&#10;    File &quot;&lt;frozen runpy&gt;&quot;, line 198, in _run_module_as_main&#10;    File &quot;&lt;frozen runpy&gt;&quot;, line 88, in _run_code&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\__main__.py&quot;, line 4, in &lt;module&gt;&#10;      main(prog=&quot;alembic&quot;)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py&quot;, line 1039, in main&#10;      CommandLine(prog=prog).main(argv=argv)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py&quot;, line 1029, in main&#10;      self.run_cmd(cfg, options)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py&quot;, line 963, in run_cmd&#10;      fn(&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\command.py&quot;, line 487, in upgrade&#10;      script.run_env()&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\script\base.py&quot;, line 550, in run_env&#10;      util.load_python_file(self.dir, &quot;env.py&quot;)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\util\pyfiles.py&quot;, line 114, in load_python_file&#10;      module = load_module_py(module_id, path)&#10;               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\util\pyfiles.py&quot;, line 132, in load_module_py&#10;      spec.loader.exec_module(module)  # type: ignore&#10;      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;&lt;frozen importlib._bootstrap_external&gt;&quot;, line 999, in exec_module&#10;    File &quot;&lt;frozen importlib._bootstrap&gt;&quot;, line 488, in _call_with_frames_removed&#10;    File &quot;D:\FlexBridge\backend\alembic\env.py&quot;, line 16, in &lt;module&gt;&#10;      run_migrations_online()&#10;    File &quot;D:\FlexBridge\backend\alembic\env.py&quot;, line 11, in run_migrations_online&#10;      context.run_migrations()&#10;    File &quot;&lt;string&gt;&quot;, line 8, in run_migrations&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\runtime\environment.py&quot;, line 970, in run_migrations&#10;      self.get_context().run_migrations(**kw)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\runtime\migration.py&quot;, line 616, in run_migrations&#10;      step.migration_fn(**kw)&#10;    File &quot;D:\FlexBridge\backend\alembic\versions\0015_academic_admission.py&quot;, line 10, in upgrade&#10;      op.execute(&quot;&quot;&quot;&#10;    File &quot;&lt;string&gt;&quot;, line 8, in execute&#10;    File &quot;&lt;string&gt;&quot;, line 3, in execute&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\ops.py&quot;, line 2645, in execute&#10;      return operations.invoke(op)&#10;             ^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\base.py&quot;, line 448, in invoke&#10;      return fn(self, operation)&#10;             ^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\toimpl.py&quot;, line 256, in execute_sql&#10;      operations.migration_context.impl.execute(&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\ddl\impl.py&quot;, line 259, in execute&#10;      self._exec(sql, execution_options)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\alembic\ddl\impl.py&quot;, line 252, in _exec&#10;      return conn.execute(construct, params)&#10;             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1421, in execute&#10;      return meth(&#10;             ^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py&quot;, line 526, in _execute_on_connection&#10;      return connection._execute_clauseelement(&#10;             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1643, in _execute_clauseelement&#10;      ret = self._execute_context(&#10;            ^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1848, in _execute_context&#10;      return self._exec_single_context(&#10;             ^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1988, in _exec_single_context&#10;      self._handle_dbapi_exception(&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 2365, in _handle_dbapi_exception&#10;      raise sqlalchemy_exception.with_traceback(exc_info[2]) from e&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py&quot;, line 1969, in _exec_single_context&#10;      self.dialect.do_execute(&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py&quot;, line 952, in do_execute&#10;      cursor.execute(statement, parameters)&#10;    File &quot;D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py&quot;, line 97, in execute&#10;      raise ex.with_traceback(None)&#10;  sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) insert or update on table &quot;placement_academic_bindings&quot; violates foreign key constraint &quot;placement_academic_bindings_supervision_id_institution_id_fkey&quot;&#10;  DETAIL:  Key (supervision_id, institution_id)=(094c69fc-f24b-4b53-b0d6-f13476bc2839, fceab804-3ee2-482d-a51a-efde2967f3f8) is not present in table &quot;student_supervisions&quot;.&#10;  [SQL: &#10;      CREATE FUNCTION flexbridge.academic_grant_current(actor uuid,inst uuid,gid uuid,role_code text) RETURNS boolean&#10;      LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$&#10;        SELECT EXISTS(SELECT 1 FROM institution_role_grants g JOIN institution_memberships m ON m.id=g.membership_id&#10;          JOIN institution_appointments a ON a.id=g.appointment_id JOIN institutions i ON i.id=m.institution_id&#10;          JOIN role_catalog r ON r.id=g.role_id JOIN users u ON u.id=m.user_id&#10;          WHERE g.id=gid AND g.revoked_at IS NULL AND m.user_id=actor AND u.status='ACTIVE'&#10;            AND m.institution_id=inst AND m.status='ACTIVE' AND m.revoked_at IS NULL&#10;            AND m.accepted_at&lt;=clock_timestamp() AND i.status='VERIFIED'&#10;            AND a.institution_id=inst AND a.user_id=actor AND a.status='ACTIVE' AND a.accepted_at&lt;=clock_timestamp()&#10;            AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date&#10;            AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)&#10;            AND r.scope_kind='INSTITUTION' AND r.code=role_code)&#10;      $$;&#10;      CREATE TABLE flexbridge.supervision_origins (&#10;        supervision_id uuid PRIMARY KEY REFERENCES flexbridge.student_supervisions(id),&#10;        created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),&#10;        initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),&#10;        actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,&#10;        coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,&#10;        UNIQUE(actor_id,idempotency_key),&#10;        CHECK((origin='PUBLIC' AND actor_id IS NOT NULL AND session_id IS NOT NULL AND auth_version IS NOT NULL&#10;          AND coordinator_grant_id IS NOT NULL AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128&#10;          AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')&#10;          OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL&#10;            AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))&#10;      );&#10;      INSERT INTO flexbridge.supervision_origins(supervision_id,origin,initial_snapshot)&#10;        SELECT s.id,'LEGACY_IMPORT',to_jsonb(s) FROM flexbridge.student_supervisions s;&#10;      CREATE TABLE flexbridge.placement_academic_bindings (&#10;        placement_id uuid PRIMARY KEY REFERENCES flexbridge.placement_intakes(placement_id),&#10;        created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),&#10;        institution_id uuid NOT NULL REFERENCES flexbridge.institutions(id),enrollment_id uuid NOT NULL,&#10;        supervision_id uuid,terms_id uuid,&#10;        initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),&#10;        scope_snapshot jsonb NOT NULL CHECK(jsonb_typeof(scope_snapshot)='object'),&#10;        actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,&#10;        coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,&#10;        FOREIGN KEY(enrollment_id,institution_id) REFERENCES flexbridge.enrollments(id,institution_id),&#10;        FOREIGN KEY(supervision_id,institution_id) REFERENCES flexbridge.student_supervisions(id,institution_id),&#10;        FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),&#10;        UNIQUE(actor_id,idempotency_key),&#10;        CHECK((origin='PUBLIC' AND supervision_id IS NOT NULL AND terms_id IS NOT NULL AND actor_id IS NOT NULL&#10;          AND session_id IS NOT NULL AND auth_version IS NOT NULL AND coordinator_grant_id IS NOT NULL&#10;          AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128&#10;          AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')&#10;          OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL&#10;            AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))&#10;      );&#10;      INSERT INTO flexbridge.placement_academic_bindings(placement_id,origin,institution_id,enrollment_id,supervision_id,&#10;        terms_id,initial_snapshot,scope_snapshot)&#10;        SELECT p.id,'LEGACY_IMPORT',e.institution_id,e.id,&#10;          CASE WHEN (SELECT count(DISTINCT a.supervision_id) FROM flexbridge.academic_assignments a WHERE a.placement_id=p.id)=1&#10;            THEN (SELECT a.supervision_id FROM flexbridge.academic_assignments a WHERE a.placement_id=p.id LIMIT 1) END,&#10;          p.current_terms_id,to_jsonb(p),jsonb_build_object('enrollment',to_jsonb(e))&#10;        FROM flexbridge.placements p JOIN flexbridge.enrollments e ON e.id=p.enrollment_id WHERE p.academic_track;&#10;      CREATE TABLE flexbridge.academic_assignment_proofs (&#10;        assignment_id uuid PRIMARY KEY REFERENCES flexbridge.academic_assignments(id),&#10;        created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),&#10;        placement_id uuid NOT NULL REFERENCES flexbridge.placement_academic_bindings(placement_id),&#10;        teacher_user_id uuid NOT NULL REFERENCES flexbridge.users(id),teacher_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),&#10;        teacher_appointment_id uuid REFERENCES flexbridge.institution_appointments(id),&#10;        initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),&#10;        actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,&#10;        coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,&#10;        FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),UNIQUE(actor_id,idempotency_key),&#10;        CHECK((origin='PUBLIC' AND teacher_grant_id IS NOT NULL AND teacher_appointment_id IS NOT NULL AND actor_id IS NOT NULL&#10;          AND session_id IS NOT NULL AND auth_version IS NOT NULL AND coordinator_grant_id IS NOT NULL&#10;          AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128&#10;          AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')&#10;          OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL&#10;            AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))&#10;      );&#10;      INSERT INTO flexbridge.academic_assignment_proofs(assignment_id,origin,placement_id,teacher_user_id,teacher_grant_id,&#10;        teacher_appointment_id,initial_snapshot)&#10;        SELECT a.id,'LEGACY_IMPORT',a.placement_id,m.user_id,imported_authority.gid,imported_authority.appointment,to_jsonb(a)&#10;        FROM flexbridge.academic_assignments a JOIN flexbridge.institution_memberships m ON m.id=a.teacher_membership_id&#10;        JOIN flexbridge.placement_academic_bindings b ON b.placement_id=a.placement_id&#10;        LEFT JOIN LATERAL(SELECT min(g.id::text)::uuid AS gid,min(g.appointment_id::text)::uuid AS appointment&#10;          FROM flexbridge.institution_role_grants g WHERE g.membership_id=m.id&#10;            AND flexbridge.academic_grant_current(m.user_id,a.institution_id,g.id,'TEACHER') HAVING count(*)=1) imported_authority ON true;&#10;      CREATE TABLE flexbridge.academic_assignment_consents (&#10;        id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),&#10;        placement_id uuid NOT NULL REFERENCES flexbridge.placement_academic_bindings(placement_id),&#10;        assignment_id uuid NOT NULL REFERENCES flexbridge.academic_assignment_proofs(assignment_id),terms_id uuid NOT NULL,&#10;        actor_id uuid NOT NULL REFERENCES flexbridge.users(id),session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,&#10;        teacher_grant_id uuid NOT NULL REFERENCES flexbridge.institution_role_grants(id),&#10;        teacher_appointment_id uuid NOT NULL REFERENCES flexbridge.institution_appointments(id),&#10;        idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),&#10;        request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),&#10;        receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),&#10;        FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),&#10;        FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),&#10;        UNIQUE(actor_id,idempotency_key),UNIQUE(assignment_id,terms_id)&#10;      );&#10;      CREATE TABLE flexbridge.academic_assignment_events (&#10;        id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),&#10;        placement_id uuid NOT NULL REFERENCES flexbridge.placements(id),&#10;        assignment_id uuid NOT NULL REFERENCES flexbridge.academic_assignments(id),&#10;        action text NOT NULL CHECK(action='REVOKE'),actor_id uuid NOT NULL REFERENCES flexbridge.users(id),&#10;        session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,&#10;        coordinator_grant_id uuid NOT NULL REFERENCES flexbridge.institution_role_grants(id),&#10;        idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),&#10;        request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),&#10;        receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),&#10;        FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),&#10;        UNIQUE(actor_id,idempotency_key),UNIQUE(assignment_id)&#10;      );&#10;      CREATE TABLE flexbridge.student_academic_requests (&#10;        id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),&#10;        placement_id uuid NOT NULL REFERENCES flexbridge.placement_intakes(placement_id),revision integer NOT NULL CHECK(revision&gt;0),&#10;        institution_id uuid NOT NULL REFERENCES flexbridge.institutions(id),enrollment_id uuid NOT NULL,terms_id uuid NOT NULL,&#10;        actor_id uuid NOT NULL REFERENCES flexbridge.users(id),session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,&#10;        idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),&#10;        request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),&#10;        receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),&#10;        FOREIGN KEY(enrollment_id,institution_id) REFERENCES flexbridge.enrollments(id,institution_id),&#10;        FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),&#10;        UNIQUE(placement_id,revision),UNIQUE(actor_id,idempotency_key)&#10;      );&#10;      CREATE FUNCTION flexbridge.guard_student_academic_request() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ DECLARE p placements; BEGIN&#10;        SELECT * INTO p FROM placements WHERE id=NEW.placement_id FOR UPDATE;&#10;        IF p.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR p.current_terms_id IS DISTINCT FROM NEW.terms_id&#10;          OR EXISTS(SELECT 1 FROM placement_academic_bindings b WHERE b.placement_id=p.id)&#10;          OR NEW.revision&lt;&gt;(SELECT coalesce(max(r.revision),0)+1 FROM student_academic_requests r WHERE r.placement_id=p.id)&#10;          OR NOT EXISTS(SELECT 1 FROM candidate_profiles c JOIN enrollments e ON e.candidate_id=c.id&#10;            JOIN placement_intakes i ON i.placement_id=p.id WHERE c.id=p.candidate_id AND c.user_id=NEW.actor_id&#10;              AND e.id=NEW.enrollment_id AND e.institution_id=NEW.institution_id AND i.academic_required AND enrollment_is_current(e.id))&#10;          OR NOT placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;        THEN RAISE EXCEPTION 'academic school selection requires personal current student and exact verified enrollment' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_student_academic_request BEFORE INSERT ON flexbridge.student_academic_requests&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_student_academic_request();&#10;  &#10;      CREATE FUNCTION flexbridge.academic_supervision_current(sid uuid,candidate uuid) RETURNS boolean&#10;      LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$&#10;        SELECT EXISTS(SELECT 1 FROM student_supervisions s JOIN supervision_origins o ON o.supervision_id=s.id&#10;          JOIN enrollments e ON e.id=s.enrollment_id JOIN institution_agreements a ON a.id=s.agreement_id&#10;          JOIN institutions i ON i.id=s.institution_id&#10;          WHERE s.id=sid AND e.candidate_id=candidate AND e.institution_id=s.institution_id AND a.institution_id=s.institution_id&#10;            AND i.status='VERIFIED' AND enrollment_is_current(e.id) AND s.status='ACTIVE' AND s.revoked_at IS NULL&#10;            AND s.accepted_at&lt;=clock_timestamp() AND s.accepted_at=(o.initial_snapshot-&gt;&gt;'accepted_at')::timestamptz&#10;            AND s.enrollment_id=(o.initial_snapshot-&gt;&gt;'enrollment_id')::uuid&#10;            AND s.coordinator_membership_id=(o.initial_snapshot-&gt;&gt;'coordinator_membership_id')::uuid&#10;            AND s.agreement_id=(o.initial_snapshot-&gt;&gt;'agreement_id')::uuid&#10;            AND s.purpose=o.initial_snapshot-&gt;&gt;'purpose' AND s.legal_basis=o.initial_snapshot-&gt;&gt;'legal_basis'&#10;            AND length(btrim(s.legal_basis))&gt;0 AND a.status='ACTIVE'&#10;            AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date&#10;            AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)&#10;            AND ((jsonb_typeof(a.purposes)='array' AND a.purposes ? s.purpose)&#10;              OR (jsonb_typeof(a.purposes)='object' AND a.purposes-&gt;s.purpose='true'::jsonb)))&#10;      $$;&#10;      CREATE FUNCTION flexbridge.guard_supervision_origin() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'supervision legacy set is closed' USING ERRCODE='23514'; END IF;&#10;        IF NOT EXISTS(SELECT 1 FROM student_supervisions s JOIN enrollments e ON e.id=s.enrollment_id&#10;          JOIN institution_memberships m ON m.id=s.coordinator_membership_id JOIN institution_agreements a ON a.id=s.agreement_id&#10;          WHERE s.id=NEW.supervision_id AND m.user_id=NEW.actor_id AND m.institution_id=s.institution_id&#10;            AND e.institution_id=s.institution_id AND a.institution_id=s.institution_id AND enrollment_is_current(e.id)&#10;            AND s.status='ACTIVE' AND s.accepted_at&lt;=clock_timestamp() AND s.revoked_at IS NULL&#10;            AND length(btrim(s.legal_basis))&gt;0 AND a.status='ACTIVE'&#10;            AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date&#10;            AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)&#10;            AND ((jsonb_typeof(a.purposes)='array' AND a.purposes ? s.purpose)&#10;              OR (jsonb_typeof(a.purposes)='object' AND a.purposes-&gt;s.purpose='true'::jsonb))&#10;            AND NEW.initial_snapshot=to_jsonb(s) AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;            AND academic_grant_current(NEW.actor_id,s.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))&#10;        THEN RAISE EXCEPTION 'supervision requires current exact coordinator and school scope' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_supervision_origin BEFORE INSERT ON flexbridge.supervision_origins&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_supervision_origin();&#10;      CREATE FUNCTION flexbridge.guard_academic_binding() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'academic binding legacy set is closed' USING ERRCODE='23514'; END IF;&#10;        IF NOT EXISTS(SELECT 1 FROM placements p JOIN placement_intakes i ON i.placement_id=p.id&#10;          JOIN student_supervisions s ON s.id=NEW.supervision_id JOIN institution_memberships m ON m.id=s.coordinator_membership_id&#10;          JOIN placement_terms t ON t.id=NEW.terms_id&#10;          WHERE p.id=NEW.placement_id AND i.academic_required AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION')&#10;            AND NOT p.academic_track AND p.enrollment_id IS NULL AND p.current_terms_id=t.id AND t.placement_id=p.id&#10;            AND s.institution_id=NEW.institution_id AND s.enrollment_id=NEW.enrollment_id AND m.user_id=NEW.actor_id&#10;            AND EXISTS(SELECT 1 FROM student_academic_requests r WHERE r.placement_id=p.id AND r.enrollment_id=NEW.enrollment_id&#10;              AND r.institution_id=NEW.institution_id AND NOT EXISTS(SELECT 1 FROM student_academic_requests newer&#10;                WHERE newer.placement_id=p.id AND newer.revision&gt;r.revision))&#10;            AND academic_supervision_current(s.id,p.candidate_id) AND NEW.initial_snapshot=to_jsonb(p)&#10;            AND t.terms_snapshot-&gt;'academic_scope'=NEW.scope_snapshot&#10;            AND NEW.scope_snapshot-&gt;&gt;'institution_id'=NEW.institution_id::text&#10;            AND NEW.scope_snapshot-&gt;&gt;'enrollment_id'=NEW.enrollment_id::text&#10;            AND NEW.scope_snapshot-&gt;&gt;'supervision_id'=NEW.supervision_id::text&#10;            AND NEW.scope_snapshot-&gt;&gt;'agreement_id'=s.agreement_id::text&#10;            AND NEW.scope_snapshot-&gt;&gt;'purpose'=s.purpose AND NEW.scope_snapshot-&gt;&gt;'legal_basis'=s.legal_basis&#10;            AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;            AND academic_grant_current(NEW.actor_id,NEW.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))&#10;        THEN RAISE EXCEPTION 'academic binding requires pending exact school scope and coordinator proof' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_academic_binding BEFORE INSERT ON flexbridge.placement_academic_bindings&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_binding();&#10;      CREATE FUNCTION flexbridge.guard_academic_assignment_proof() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'academic assignment legacy set is closed' USING ERRCODE='23514'; END IF;&#10;        IF NOT EXISTS(SELECT 1 FROM academic_assignments a JOIN placement_academic_bindings b ON b.placement_id=a.placement_id&#10;          JOIN placements p ON p.id=a.placement_id JOIN candidate_profiles c ON c.id=p.candidate_id&#10;          JOIN student_supervisions s ON s.id=a.supervision_id JOIN institution_memberships cm ON cm.id=s.coordinator_membership_id&#10;          JOIN institution_memberships tm ON tm.id=a.teacher_membership_id JOIN institution_role_grants tg ON tg.id=NEW.teacher_grant_id&#10;          WHERE a.id=NEW.assignment_id AND p.id=NEW.placement_id AND p.academic_track AND p.enrollment_id=b.enrollment_id&#10;            AND a.institution_id=b.institution_id AND a.institution_id=s.institution_id AND b.supervision_id=s.id&#10;            AND academic_supervision_current(s.id,p.candidate_id) AND cm.user_id=NEW.actor_id AND cm.user_id&lt;&gt;tm.user_id&#10;            AND tm.user_id=NEW.teacher_user_id AND tm.user_id&lt;&gt;c.user_id AND tg.membership_id=tm.id&#10;            AND tg.appointment_id=NEW.teacher_appointment_id AND a.assigned_by_id=NEW.actor_id&#10;            AND a.accepted_at IS NULL AND a.revoked_at IS NULL AND NEW.initial_snapshot=to_jsonb(a)&#10;            AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION','ACTIVE')&#10;            AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;            AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.coordinator_grant_id,'COORDINATOR')&#10;            AND academic_grant_current(NEW.teacher_user_id,a.institution_id,NEW.teacher_grant_id,'TEACHER'))&#10;        THEN RAISE EXCEPTION 'academic nomination requires exact current coordinator and original teacher scope' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_academic_assignment_proof BEFORE INSERT ON flexbridge.academic_assignment_proofs&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_assignment_proof();&#10;      CREATE FUNCTION flexbridge.guard_academic_consent() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF NOT EXISTS(SELECT 1 FROM academic_assignment_proofs q JOIN academic_assignments a ON a.id=q.assignment_id&#10;          JOIN placements p ON p.id=a.placement_id JOIN placement_academic_bindings b ON b.placement_id=p.id&#10;          WHERE q.assignment_id=NEW.assignment_id AND p.id=NEW.placement_id AND p.current_terms_id=NEW.terms_id&#10;            AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION','ACTIVE') AND p.academic_track&#10;            AND q.teacher_user_id=NEW.actor_id AND q.teacher_grant_id=NEW.teacher_grant_id&#10;            AND q.teacher_appointment_id=NEW.teacher_appointment_id AND a.revoked_at IS NULL&#10;            AND a.supervision_id=b.supervision_id AND academic_supervision_current(a.supervision_id,p.candidate_id)&#10;            AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;            AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.teacher_grant_id,'TEACHER'))&#10;        THEN RAISE EXCEPTION 'teacher consent requires personal current original assignment scope' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_academic_consent BEFORE INSERT ON flexbridge.academic_assignment_consents&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_consent();&#10;      CREATE FUNCTION flexbridge.guard_academic_revoke() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF NOT EXISTS(SELECT 1 FROM academic_assignments a WHERE a.id=NEW.assignment_id AND a.placement_id=NEW.placement_id&#10;          AND a.revoked_at IS NULL AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)&#10;          AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))&#10;        THEN RAISE EXCEPTION 'academic revoke requires current school coordinator proof' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_academic_revoke BEFORE INSERT ON flexbridge.academic_assignment_events&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_revoke();&#10;  &#10;      CREATE FUNCTION flexbridge.academic_teacher_current(aid uuid,tid uuid) RETURNS boolean&#10;      LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$&#10;        SELECT EXISTS(SELECT 1 FROM academic_assignments a JOIN academic_assignment_proofs q ON q.assignment_id=a.id&#10;          JOIN placements p ON p.id=a.placement_id JOIN placement_academic_bindings b ON b.placement_id=p.id&#10;          JOIN student_supervisions s ON s.id=a.supervision_id JOIN institution_agreements agreement ON agreement.id=s.agreement_id&#10;          WHERE a.id=aid AND p.academic_track AND p.enrollment_id=b.enrollment_id&#10;            AND a.institution_id=b.institution_id AND a.revoked_at IS NULL AND a.accepted_at&lt;=clock_timestamp()&#10;            AND academic_supervision_current(a.supervision_id,p.candidate_id)&#10;            AND (b.origin='LEGACY_IMPORT' OR (b.scope_snapshot-&gt;&gt;'agreement_id'=agreement.id::text&#10;              AND (b.scope_snapshot-&gt;&gt;'agreement_version')::integer=agreement.version))&#10;            AND academic_grant_current(q.teacher_user_id,a.institution_id,q.teacher_grant_id,'TEACHER')&#10;            AND ((q.origin='LEGACY_IMPORT' AND q.initial_snapshot-&gt;&gt;'accepted_at' IS NOT NULL&#10;              AND a.accepted_at=(q.initial_snapshot-&gt;&gt;'accepted_at')::timestamptz)&#10;              OR (q.origin='PUBLIC' AND EXISTS(SELECT 1 FROM academic_assignment_consents c WHERE c.assignment_id=a.id&#10;                AND c.terms_id=tid AND c.actor_id=q.teacher_user_id AND c.teacher_grant_id=q.teacher_grant_id))))&#10;      $$;&#10;      CREATE FUNCTION flexbridge.academic_placement_ready(pid uuid,tid uuid) RETURNS boolean&#10;      LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$&#10;        SELECT EXISTS(SELECT 1 FROM placements p JOIN placement_academic_bindings b ON b.placement_id=p.id&#10;          JOIN student_supervisions s ON s.id=b.supervision_id JOIN placement_terms t ON t.id=tid&#10;          JOIN institution_agreements agreement ON agreement.id=s.agreement_id&#10;          WHERE p.id=pid AND b.origin='PUBLIC' AND p.academic_track AND p.enrollment_id=b.enrollment_id&#10;            AND t.placement_id=p.id AND p.current_terms_id=tid AND t.terms_snapshot-&gt;'academic_scope'=b.scope_snapshot&#10;            AND academic_supervision_current(s.id,p.candidate_id)&#10;            AND b.scope_snapshot-&gt;&gt;'agreement_id'=agreement.id::text AND (b.scope_snapshot-&gt;&gt;'agreement_version')::integer=agreement.version&#10;            AND academic_grant_current(b.actor_id,b.institution_id,b.coordinator_grant_id,'COORDINATOR')&#10;            AND EXISTS(SELECT 1 FROM academic_assignments a WHERE a.placement_id=p.id AND a.supervision_id=s.id&#10;              AND academic_teacher_current(a.id,tid)))&#10;      $$;&#10;      CREATE OR REPLACE FUNCTION flexbridge.placement_ready_for_start(pid uuid,tid uuid) RETURNS boolean&#10;      LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$&#10;        SELECT EXISTS(SELECT 1 FROM placements p JOIN placement_intakes i ON i.placement_id=p.id&#10;          JOIN offers o ON o.id=i.offer_id JOIN opportunity_revisions r ON r.id=i.revision_id&#10;          JOIN applications app ON app.id=p.application_id JOIN application_attempts t ON t.id=i.attempt_id&#10;          JOIN opportunities v ON v.id=r.opportunity_id JOIN candidate_profiles c ON c.id=p.candidate_id&#10;          WHERE p.id=pid AND p.current_terms_id=tid AND v.kind='INTERNSHIP'&#10;            AND ((NOT i.academic_required AND NOT p.academic_track AND r.contract_type='INTERNSHIP_AGREEMENT')&#10;              OR (i.academic_required AND r.contract_type='ACADEMIC_TRIPARTITE' AND academic_placement_ready(pid,tid)))&#10;            AND o.id=p.offer_id AND o.application_id=p.application_id AND v.organization_id=p.organization_id&#10;            AND o.revision_id=r.id AND o.attempt_id=t.id AND t.application_id=app.id AND t.revision_id=r.id&#10;            AND t.opportunity_id=app.opportunity_id AND r.opportunity_id=app.opportunity_id AND app.candidate_id=p.candidate_id&#10;            AND EXISTS(SELECT 1 FROM placement_consents x WHERE x.placement_id=p.id AND x.terms_id=tid AND x.side='CANDIDATE' AND x.actor_id=c.user_id)&#10;            AND EXISTS(SELECT 1 FROM placement_consents x JOIN mentor_assignments a ON a.id=x.assignment_id&#10;              JOIN mentor_assignment_proofs q ON q.assignment_id=a.id JOIN org_memberships m ON m.id=a.membership_id&#10;              JOIN org_role_grants g ON g.id=q.mentor_grant_id JOIN role_catalog z ON z.id=g.role_id JOIN users u ON u.id=m.user_id&#10;              WHERE x.placement_id=p.id AND x.terms_id=tid AND x.side='MENTOR' AND a.placement_id=p.id&#10;                AND a.accepted_at IS NOT NULL AND a.revoked_at IS NULL AND m.id=g.membership_id AND m.organization_id=p.organization_id&#10;                AND m.user_id=x.actor_id AND m.status='ACTIVE' AND m.revoked_at IS NULL AND u.status='ACTIVE' AND m.user_id&lt;&gt;c.user_id&#10;                AND g.revoked_at IS NULL AND g.id=x.org_grant_id AND q.mentor_user_id=x.actor_id AND z.scope_kind='ORG' AND z.code='MENTOR'))&#10;      $$;&#10;  &#10;      CREATE OR REPLACE FUNCTION flexbridge.guard_placement_start() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF TG_OP='INSERT' THEN&#10;          IF NEW.status&lt;&gt;'PLANNED' OR NEW.academic_track OR NEW.enrollment_id IS NOT NULL&#10;          THEN RAISE EXCEPTION 'new placement requires planned intake' USING ERRCODE='23514'; END IF;&#10;        ELSE&#10;          IF NEW.status='ACTIVE' AND OLD.status&lt;&gt;'ACTIVE' AND&#10;            (OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR NOT placement_ready_for_start(NEW.id,NEW.current_terms_id)&#10;              OR NOT EXISTS(SELECT 1 FROM placement_admission_events e WHERE e.placement_id=NEW.id AND e.terms_id=NEW.current_terms_id AND e.action='ACTIVATE'))&#10;          THEN RAISE EXCEPTION 'placement start requires immutable admission proof' USING ERRCODE='23514'; END IF;&#10;          IF ROW(NEW.application_id,NEW.offer_id,NEW.candidate_id,NEW.organization_id,NEW.start_date,NEW.end_date)&#10;            IS DISTINCT FROM ROW(OLD.application_id,OLD.offer_id,OLD.candidate_id,OLD.organization_id,OLD.start_date,OLD.end_date)&#10;          THEN RAISE EXCEPTION 'placement source and dates are immutable' USING ERRCODE='23514'; END IF;&#10;          IF ROW(NEW.academic_track,NEW.enrollment_id) IS DISTINCT FROM ROW(OLD.academic_track,OLD.enrollment_id) AND&#10;            (OLD.academic_track OR OLD.enrollment_id IS NOT NULL OR NOT NEW.academic_track&#10;              OR OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR NOT EXISTS(SELECT 1 FROM placement_academic_bindings b&#10;                WHERE b.placement_id=NEW.id AND b.origin='PUBLIC' AND b.enrollment_id=NEW.enrollment_id AND b.terms_id=NEW.current_terms_id))&#10;          THEN RAISE EXCEPTION 'academic binding requires immutable admission proof' USING ERRCODE='23514'; END IF;&#10;          IF NEW.current_terms_id IS DISTINCT FROM OLD.current_terms_id AND OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION')&#10;          THEN RAISE EXCEPTION 'active plan amendment requires a separate lifecycle' USING ERRCODE='23514'; END IF;&#10;        END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE FUNCTION flexbridge.guard_academic_assignment_history() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN&#10;        IF TG_OP='DELETE' THEN RAISE EXCEPTION 'academic assignment history is immutable' USING ERRCODE='23514'; END IF;&#10;        IF TG_OP='INSERT' THEN&#10;          IF NEW.accepted_at IS NOT NULL OR NEW.revoked_at IS NOT NULL&#10;          THEN RAISE EXCEPTION 'new academic nomination cannot invent acceptance' USING ERRCODE='23514'; END IF;&#10;          RETURN NEW;&#10;        END IF;&#10;        IF (to_jsonb(NEW)-ARRAY['updated_at','accepted_at','revoked_at']) IS DISTINCT FROM&#10;          (to_jsonb(OLD)-ARRAY['updated_at','accepted_at','revoked_at'])&#10;        THEN RAISE EXCEPTION 'academic nomination is immutable' USING ERRCODE='23514'; END IF;&#10;        IF NEW.accepted_at IS DISTINCT FROM OLD.accepted_at AND (OLD.accepted_at IS NOT NULL OR NOT EXISTS(&#10;          SELECT 1 FROM academic_assignment_consents c WHERE c.assignment_id=NEW.id AND c.created_at=NEW.accepted_at))&#10;        THEN RAISE EXCEPTION 'academic acceptance requires personal evidence' USING ERRCODE='23514'; END IF;&#10;        IF NEW.revoked_at IS DISTINCT FROM OLD.revoked_at AND (OLD.revoked_at IS NOT NULL OR NOT EXISTS(&#10;          SELECT 1 FROM academic_assignment_events e WHERE e.assignment_id=NEW.id AND e.created_at=NEW.revoked_at))&#10;        THEN RAISE EXCEPTION 'academic revocation requires coordinator evidence' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER valid_academic_assignment_history BEFORE INSERT OR UPDATE OR DELETE ON flexbridge.academic_assignments&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_assignment_history();&#10;      CREATE OR REPLACE FUNCTION flexbridge.guard_plan_task_insert() RETURNS trigger&#10;      LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ DECLARE pid uuid; BEGIN&#10;        SELECT p.id INTO pid FROM placements p JOIN placement_terms t ON t.placement_id=p.id&#10;          WHERE t.id=NEW.terms_id AND p.current_terms_id=t.id AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION') FOR UPDATE OF p;&#10;        IF pid IS NULL OR EXISTS(SELECT 1 FROM placement_consents c WHERE c.terms_id=NEW.terms_id)&#10;          OR EXISTS(SELECT 1 FROM academic_assignment_consents c WHERE c.terms_id=NEW.terms_id)&#10;          OR EXISTS(SELECT 1 FROM placement_academic_bindings b WHERE b.terms_id=NEW.terms_id)&#10;          OR EXISTS(SELECT 1 FROM placement_admission_events e WHERE e.terms_id=NEW.terms_id AND e.action='PLAN_PUBLISHED')&#10;        THEN RAISE EXCEPTION 'published plan tasks are immutable' USING ERRCODE='23514'; END IF;&#10;        RETURN NEW;&#10;      END $$;&#10;      CREATE TRIGGER immutable_supervision_origins BEFORE UPDATE OR DELETE ON flexbridge.supervision_origins&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      CREATE TRIGGER immutable_student_academic_requests BEFORE UPDATE OR DELETE ON flexbridge.student_academic_requests&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      CREATE TRIGGER immutable_academic_bindings BEFORE UPDATE OR DELETE ON flexbridge.placement_academic_bindings&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      CREATE TRIGGER immutable_academic_assignment_proofs BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_proofs&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      CREATE TRIGGER immutable_academic_assignment_consents BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_consents&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      CREATE TRIGGER immutable_academic_assignment_events BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_events&#10;        FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();&#10;      ]&#10;  (Background on this error at: https://sqlalche.me/e/20/gkpj)&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['D:\\FlexBridge\\.venv\\Scripts\\python.exe', '-m', 'alembic', '-c', 'D:\\FlexBridge\\backend\\...ON flexbridge.fn_block_append_only_mutation();\n    ]\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\n').returncode">backend\tests\security\test_academic_legacy_edges.py:41: in test_mismatched_imported_supervision_does_not_break_upgrade_or_grant_review
+    assert result.returncode==0,result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+E         self.dialect.do_execute(
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+E         cursor.execute(statement, parameters)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+E         raise ex.with_traceback(None)
+E     psycopg.errors.ForeignKeyViolation: insert or update on table "placement_academic_bindings" violates foreign key constraint "placement_academic_bindings_supervision_id_institution_id_fkey"
+E     DETAIL:  Key (supervision_id, institution_id)=(094c69fc-f24b-4b53-b0d6-f13476bc2839, fceab804-3ee2-482d-a51a-efde2967f3f8) is not present in table "student_supervisions".
+E     
+E     The above exception was the direct cause of the following exception:
+E     
+E     Traceback (most recent call last):
+E       File "&lt;frozen runpy&gt;", line 198, in _run_module_as_main
+E       File "&lt;frozen runpy&gt;", line 88, in _run_code
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\__main__.py", line 4, in &lt;module&gt;
+E         main(prog="alembic")
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py", line 1039, in main
+E         CommandLine(prog=prog).main(argv=argv)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py", line 1029, in main
+E         self.run_cmd(cfg, options)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\config.py", line 963, in run_cmd
+E         fn(
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\command.py", line 487, in upgrade
+E         script.run_env()
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\script\base.py", line 550, in run_env
+E         util.load_python_file(self.dir, "env.py")
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 114, in load_python_file
+E         module = load_module_py(module_id, path)
+E                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 132, in load_module_py
+E         spec.loader.exec_module(module)  # type: ignore
+E         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "&lt;frozen importlib._bootstrap_external&gt;", line 999, in exec_module
+E       File "&lt;frozen importlib._bootstrap&gt;", line 488, in _call_with_frames_removed
+E       File "D:\FlexBridge\backend\alembic\env.py", line 16, in &lt;module&gt;
+E         run_migrations_online()
+E       File "D:\FlexBridge\backend\alembic\env.py", line 11, in run_migrations_online
+E         context.run_migrations()
+E       File "&lt;string&gt;", line 8, in run_migrations
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\runtime\environment.py", line 970, in run_migrations
+E         self.get_context().run_migrations(**kw)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\runtime\migration.py", line 616, in run_migrations
+E         step.migration_fn(**kw)
+E       File "D:\FlexBridge\backend\alembic\versions\0015_academic_admission.py", line 10, in upgrade
+E         op.execute("""
+E       File "&lt;string&gt;", line 8, in execute
+E       File "&lt;string&gt;", line 3, in execute
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\ops.py", line 2645, in execute
+E         return operations.invoke(op)
+E                ^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\base.py", line 448, in invoke
+E         return fn(self, operation)
+E                ^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\operations\toimpl.py", line 256, in execute_sql
+E         operations.migration_context.impl.execute(
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\ddl\impl.py", line 259, in execute
+E         self._exec(sql, execution_options)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\alembic\ddl\impl.py", line 252, in _exec
+E         return conn.execute(construct, params)
+E                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+E         return meth(
+E                ^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+E         return connection._execute_clauseelement(
+E                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+E         ret = self._execute_context(
+E               ^^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+E         return self._exec_single_context(
+E                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+E         self._handle_dbapi_exception(
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2365, in _handle_dbapi_exception
+E         raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+E         self.dialect.do_execute(
+E       File "D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+E         cursor.execute(statement, parameters)
+E       File "D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py", line 97, in execute
+E         raise ex.with_traceback(None)
+E     sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) insert or update on table "placement_academic_bindings" violates foreign key constraint "placement_academic_bindings_supervision_id_institution_id_fkey"
+E     DETAIL:  Key (supervision_id, institution_id)=(094c69fc-f24b-4b53-b0d6-f13476bc2839, fceab804-3ee2-482d-a51a-efde2967f3f8) is not present in table "student_supervisions".
+E     [SQL: 
+E         CREATE FUNCTION flexbridge.academic_grant_current(actor uuid,inst uuid,gid uuid,role_code text) RETURNS boolean
+E         LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+E           SELECT EXISTS(SELECT 1 FROM institution_role_grants g JOIN institution_memberships m ON m.id=g.membership_id
+E             JOIN institution_appointments a ON a.id=g.appointment_id JOIN institutions i ON i.id=m.institution_id
+E             JOIN role_catalog r ON r.id=g.role_id JOIN users u ON u.id=m.user_id
+E             WHERE g.id=gid AND g.revoked_at IS NULL AND m.user_id=actor AND u.status='ACTIVE'
+E               AND m.institution_id=inst AND m.status='ACTIVE' AND m.revoked_at IS NULL
+E               AND m.accepted_at&lt;=clock_timestamp() AND i.status='VERIFIED'
+E               AND a.institution_id=inst AND a.user_id=actor AND a.status='ACTIVE' AND a.accepted_at&lt;=clock_timestamp()
+E               AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date
+E               AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)
+E               AND r.scope_kind='INSTITUTION' AND r.code=role_code)
+E         $$;
+E         CREATE TABLE flexbridge.supervision_origins (
+E           supervision_id uuid PRIMARY KEY REFERENCES flexbridge.student_supervisions(id),
+E           created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),
+E           initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),
+E           actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,
+E           coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,
+E           UNIQUE(actor_id,idempotency_key),
+E           CHECK((origin='PUBLIC' AND actor_id IS NOT NULL AND session_id IS NOT NULL AND auth_version IS NOT NULL
+E             AND coordinator_grant_id IS NOT NULL AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128
+E             AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')
+E             OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL
+E               AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))
+E         );
+E         INSERT INTO flexbridge.supervision_origins(supervision_id,origin,initial_snapshot)
+E           SELECT s.id,'LEGACY_IMPORT',to_jsonb(s) FROM flexbridge.student_supervisions s;
+E         CREATE TABLE flexbridge.placement_academic_bindings (
+E           placement_id uuid PRIMARY KEY REFERENCES flexbridge.placement_intakes(placement_id),
+E           created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),
+E           institution_id uuid NOT NULL REFERENCES flexbridge.institutions(id),enrollment_id uuid NOT NULL,
+E           supervision_id uuid,terms_id uuid,
+E           initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),
+E           scope_snapshot jsonb NOT NULL CHECK(jsonb_typeof(scope_snapshot)='object'),
+E           actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,
+E           coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,
+E           FOREIGN KEY(enrollment_id,institution_id) REFERENCES flexbridge.enrollments(id,institution_id),
+E           FOREIGN KEY(supervision_id,institution_id) REFERENCES flexbridge.student_supervisions(id,institution_id),
+E           FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),
+E           UNIQUE(actor_id,idempotency_key),
+E           CHECK((origin='PUBLIC' AND supervision_id IS NOT NULL AND terms_id IS NOT NULL AND actor_id IS NOT NULL
+E             AND session_id IS NOT NULL AND auth_version IS NOT NULL AND coordinator_grant_id IS NOT NULL
+E             AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128
+E             AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')
+E             OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL
+E               AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))
+E         );
+E         INSERT INTO flexbridge.placement_academic_bindings(placement_id,origin,institution_id,enrollment_id,supervision_id,
+E           terms_id,initial_snapshot,scope_snapshot)
+E           SELECT p.id,'LEGACY_IMPORT',e.institution_id,e.id,
+E             CASE WHEN (SELECT count(DISTINCT a.supervision_id) FROM flexbridge.academic_assignments a WHERE a.placement_id=p.id)=1
+E               THEN (SELECT a.supervision_id FROM flexbridge.academic_assignments a WHERE a.placement_id=p.id LIMIT 1) END,
+E             p.current_terms_id,to_jsonb(p),jsonb_build_object('enrollment',to_jsonb(e))
+E           FROM flexbridge.placements p JOIN flexbridge.enrollments e ON e.id=p.enrollment_id WHERE p.academic_track;
+E         CREATE TABLE flexbridge.academic_assignment_proofs (
+E           assignment_id uuid PRIMARY KEY REFERENCES flexbridge.academic_assignments(id),
+E           created_at timestamptz NOT NULL DEFAULT clock_timestamp(),origin text NOT NULL CHECK(origin IN ('PUBLIC','LEGACY_IMPORT')),
+E           placement_id uuid NOT NULL REFERENCES flexbridge.placement_academic_bindings(placement_id),
+E           teacher_user_id uuid NOT NULL REFERENCES flexbridge.users(id),teacher_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),
+E           teacher_appointment_id uuid REFERENCES flexbridge.institution_appointments(id),
+E           initial_snapshot jsonb NOT NULL CHECK(jsonb_typeof(initial_snapshot)='object'),
+E           actor_id uuid REFERENCES flexbridge.users(id),session_id uuid REFERENCES flexbridge.sessions(id),auth_version integer,
+E           coordinator_grant_id uuid REFERENCES flexbridge.institution_role_grants(id),idempotency_key text,request_fingerprint text,receipt jsonb,
+E           FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),UNIQUE(actor_id,idempotency_key),
+E           CHECK((origin='PUBLIC' AND teacher_grant_id IS NOT NULL AND teacher_appointment_id IS NOT NULL AND actor_id IS NOT NULL
+E             AND session_id IS NOT NULL AND auth_version IS NOT NULL AND coordinator_grant_id IS NOT NULL
+E             AND idempotency_key IS NOT NULL AND length(idempotency_key) BETWEEN 8 AND 128
+E             AND request_fingerprint IS NOT NULL AND request_fingerprint ~ '^[0-9a-f]{64}$' AND receipt IS NOT NULL AND jsonb_typeof(receipt)='object')
+E             OR (origin='LEGACY_IMPORT' AND actor_id IS NULL AND session_id IS NULL AND auth_version IS NULL
+E               AND coordinator_grant_id IS NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL AND receipt IS NULL))
+E         );
+E         INSERT INTO flexbridge.academic_assignment_proofs(assignment_id,origin,placement_id,teacher_user_id,teacher_grant_id,
+E           teacher_appointment_id,initial_snapshot)
+E           SELECT a.id,'LEGACY_IMPORT',a.placement_id,m.user_id,imported_authority.gid,imported_authority.appointment,to_jsonb(a)
+E           FROM flexbridge.academic_assignments a JOIN flexbridge.institution_memberships m ON m.id=a.teacher_membership_id
+E           JOIN flexbridge.placement_academic_bindings b ON b.placement_id=a.placement_id
+E           LEFT JOIN LATERAL(SELECT min(g.id::text)::uuid AS gid,min(g.appointment_id::text)::uuid AS appointment
+E             FROM flexbridge.institution_role_grants g WHERE g.membership_id=m.id
+E               AND flexbridge.academic_grant_current(m.user_id,a.institution_id,g.id,'TEACHER') HAVING count(*)=1) imported_authority ON true;
+E         CREATE TABLE flexbridge.academic_assignment_consents (
+E           id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+E           placement_id uuid NOT NULL REFERENCES flexbridge.placement_academic_bindings(placement_id),
+E           assignment_id uuid NOT NULL REFERENCES flexbridge.academic_assignment_proofs(assignment_id),terms_id uuid NOT NULL,
+E           actor_id uuid NOT NULL REFERENCES flexbridge.users(id),session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,
+E           teacher_grant_id uuid NOT NULL REFERENCES flexbridge.institution_role_grants(id),
+E           teacher_appointment_id uuid NOT NULL REFERENCES flexbridge.institution_appointments(id),
+E           idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),
+E           request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),
+E           receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),
+E           FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),
+E           FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),
+E           UNIQUE(actor_id,idempotency_key),UNIQUE(assignment_id,terms_id)
+E         );
+E         CREATE TABLE flexbridge.academic_assignment_events (
+E           id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+E           placement_id uuid NOT NULL REFERENCES flexbridge.placements(id),
+E           assignment_id uuid NOT NULL REFERENCES flexbridge.academic_assignments(id),
+E           action text NOT NULL CHECK(action='REVOKE'),actor_id uuid NOT NULL REFERENCES flexbridge.users(id),
+E           session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,
+E           coordinator_grant_id uuid NOT NULL REFERENCES flexbridge.institution_role_grants(id),
+E           idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),
+E           request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),
+E           receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),
+E           FOREIGN KEY(assignment_id,placement_id) REFERENCES flexbridge.academic_assignments(id,placement_id),
+E           UNIQUE(actor_id,idempotency_key),UNIQUE(assignment_id)
+E         );
+E         CREATE TABLE flexbridge.student_academic_requests (
+E           id uuid PRIMARY KEY,created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+E           placement_id uuid NOT NULL REFERENCES flexbridge.placement_intakes(placement_id),revision integer NOT NULL CHECK(revision&gt;0),
+E           institution_id uuid NOT NULL REFERENCES flexbridge.institutions(id),enrollment_id uuid NOT NULL,terms_id uuid NOT NULL,
+E           actor_id uuid NOT NULL REFERENCES flexbridge.users(id),session_id uuid NOT NULL REFERENCES flexbridge.sessions(id),auth_version integer NOT NULL,
+E           idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 128),
+E           request_fingerprint text NOT NULL CHECK(request_fingerprint ~ '^[0-9a-f]{64}$'),
+E           receipt jsonb NOT NULL CHECK(jsonb_typeof(receipt)='object'),
+E           FOREIGN KEY(enrollment_id,institution_id) REFERENCES flexbridge.enrollments(id,institution_id),
+E           FOREIGN KEY(terms_id,placement_id) REFERENCES flexbridge.placement_terms(id,placement_id),
+E           UNIQUE(placement_id,revision),UNIQUE(actor_id,idempotency_key)
+E         );
+E         CREATE FUNCTION flexbridge.guard_student_academic_request() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ DECLARE p placements; BEGIN
+E           SELECT * INTO p FROM placements WHERE id=NEW.placement_id FOR UPDATE;
+E           IF p.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR p.current_terms_id IS DISTINCT FROM NEW.terms_id
+E             OR EXISTS(SELECT 1 FROM placement_academic_bindings b WHERE b.placement_id=p.id)
+E             OR NEW.revision&lt;&gt;(SELECT coalesce(max(r.revision),0)+1 FROM student_academic_requests r WHERE r.placement_id=p.id)
+E             OR NOT EXISTS(SELECT 1 FROM candidate_profiles c JOIN enrollments e ON e.candidate_id=c.id
+E               JOIN placement_intakes i ON i.placement_id=p.id WHERE c.id=p.candidate_id AND c.user_id=NEW.actor_id
+E                 AND e.id=NEW.enrollment_id AND e.institution_id=NEW.institution_id AND i.academic_required AND enrollment_is_current(e.id))
+E             OR NOT placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E           THEN RAISE EXCEPTION 'academic school selection requires personal current student and exact verified enrollment' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_student_academic_request BEFORE INSERT ON flexbridge.student_academic_requests
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_student_academic_request();
+E     
+E         CREATE FUNCTION flexbridge.academic_supervision_current(sid uuid,candidate uuid) RETURNS boolean
+E         LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+E           SELECT EXISTS(SELECT 1 FROM student_supervisions s JOIN supervision_origins o ON o.supervision_id=s.id
+E             JOIN enrollments e ON e.id=s.enrollment_id JOIN institution_agreements a ON a.id=s.agreement_id
+E             JOIN institutions i ON i.id=s.institution_id
+E             WHERE s.id=sid AND e.candidate_id=candidate AND e.institution_id=s.institution_id AND a.institution_id=s.institution_id
+E               AND i.status='VERIFIED' AND enrollment_is_current(e.id) AND s.status='ACTIVE' AND s.revoked_at IS NULL
+E               AND s.accepted_at&lt;=clock_timestamp() AND s.accepted_at=(o.initial_snapshot-&gt;&gt;'accepted_at')::timestamptz
+E               AND s.enrollment_id=(o.initial_snapshot-&gt;&gt;'enrollment_id')::uuid
+E               AND s.coordinator_membership_id=(o.initial_snapshot-&gt;&gt;'coordinator_membership_id')::uuid
+E               AND s.agreement_id=(o.initial_snapshot-&gt;&gt;'agreement_id')::uuid
+E               AND s.purpose=o.initial_snapshot-&gt;&gt;'purpose' AND s.legal_basis=o.initial_snapshot-&gt;&gt;'legal_basis'
+E               AND length(btrim(s.legal_basis))&gt;0 AND a.status='ACTIVE'
+E               AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date
+E               AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)
+E               AND ((jsonb_typeof(a.purposes)='array' AND a.purposes ? s.purpose)
+E                 OR (jsonb_typeof(a.purposes)='object' AND a.purposes-&gt;s.purpose='true'::jsonb)))
+E         $$;
+E         CREATE FUNCTION flexbridge.guard_supervision_origin() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'supervision legacy set is closed' USING ERRCODE='23514'; END IF;
+E           IF NOT EXISTS(SELECT 1 FROM student_supervisions s JOIN enrollments e ON e.id=s.enrollment_id
+E             JOIN institution_memberships m ON m.id=s.coordinator_membership_id JOIN institution_agreements a ON a.id=s.agreement_id
+E             WHERE s.id=NEW.supervision_id AND m.user_id=NEW.actor_id AND m.institution_id=s.institution_id
+E               AND e.institution_id=s.institution_id AND a.institution_id=s.institution_id AND enrollment_is_current(e.id)
+E               AND s.status='ACTIVE' AND s.accepted_at&lt;=clock_timestamp() AND s.revoked_at IS NULL
+E               AND length(btrim(s.legal_basis))&gt;0 AND a.status='ACTIVE'
+E               AND a.valid_from&lt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date
+E               AND (a.valid_to IS NULL OR a.valid_to&gt;=(clock_timestamp() AT TIME ZONE 'Asia/Tashkent')::date)
+E               AND ((jsonb_typeof(a.purposes)='array' AND a.purposes ? s.purpose)
+E                 OR (jsonb_typeof(a.purposes)='object' AND a.purposes-&gt;s.purpose='true'::jsonb))
+E               AND NEW.initial_snapshot=to_jsonb(s) AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E               AND academic_grant_current(NEW.actor_id,s.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))
+E           THEN RAISE EXCEPTION 'supervision requires current exact coordinator and school scope' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_supervision_origin BEFORE INSERT ON flexbridge.supervision_origins
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_supervision_origin();
+E         CREATE FUNCTION flexbridge.guard_academic_binding() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'academic binding legacy set is closed' USING ERRCODE='23514'; END IF;
+E           IF NOT EXISTS(SELECT 1 FROM placements p JOIN placement_intakes i ON i.placement_id=p.id
+E             JOIN student_supervisions s ON s.id=NEW.supervision_id JOIN institution_memberships m ON m.id=s.coordinator_membership_id
+E             JOIN placement_terms t ON t.id=NEW.terms_id
+E             WHERE p.id=NEW.placement_id AND i.academic_required AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION')
+E               AND NOT p.academic_track AND p.enrollment_id IS NULL AND p.current_terms_id=t.id AND t.placement_id=p.id
+E               AND s.institution_id=NEW.institution_id AND s.enrollment_id=NEW.enrollment_id AND m.user_id=NEW.actor_id
+E               AND EXISTS(SELECT 1 FROM student_academic_requests r WHERE r.placement_id=p.id AND r.enrollment_id=NEW.enrollment_id
+E                 AND r.institution_id=NEW.institution_id AND NOT EXISTS(SELECT 1 FROM student_academic_requests newer
+E                   WHERE newer.placement_id=p.id AND newer.revision&gt;r.revision))
+E               AND academic_supervision_current(s.id,p.candidate_id) AND NEW.initial_snapshot=to_jsonb(p)
+E               AND t.terms_snapshot-&gt;'academic_scope'=NEW.scope_snapshot
+E               AND NEW.scope_snapshot-&gt;&gt;'institution_id'=NEW.institution_id::text
+E               AND NEW.scope_snapshot-&gt;&gt;'enrollment_id'=NEW.enrollment_id::text
+E               AND NEW.scope_snapshot-&gt;&gt;'supervision_id'=NEW.supervision_id::text
+E               AND NEW.scope_snapshot-&gt;&gt;'agreement_id'=s.agreement_id::text
+E               AND NEW.scope_snapshot-&gt;&gt;'purpose'=s.purpose AND NEW.scope_snapshot-&gt;&gt;'legal_basis'=s.legal_basis
+E               AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E               AND academic_grant_current(NEW.actor_id,NEW.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))
+E           THEN RAISE EXCEPTION 'academic binding requires pending exact school scope and coordinator proof' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_academic_binding BEFORE INSERT ON flexbridge.placement_academic_bindings
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_binding();
+E         CREATE FUNCTION flexbridge.guard_academic_assignment_proof() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF NEW.origin&lt;&gt;'PUBLIC' THEN RAISE EXCEPTION 'academic assignment legacy set is closed' USING ERRCODE='23514'; END IF;
+E           IF NOT EXISTS(SELECT 1 FROM academic_assignments a JOIN placement_academic_bindings b ON b.placement_id=a.placement_id
+E             JOIN placements p ON p.id=a.placement_id JOIN candidate_profiles c ON c.id=p.candidate_id
+E             JOIN student_supervisions s ON s.id=a.supervision_id JOIN institution_memberships cm ON cm.id=s.coordinator_membership_id
+E             JOIN institution_memberships tm ON tm.id=a.teacher_membership_id JOIN institution_role_grants tg ON tg.id=NEW.teacher_grant_id
+E             WHERE a.id=NEW.assignment_id AND p.id=NEW.placement_id AND p.academic_track AND p.enrollment_id=b.enrollment_id
+E               AND a.institution_id=b.institution_id AND a.institution_id=s.institution_id AND b.supervision_id=s.id
+E               AND academic_supervision_current(s.id,p.candidate_id) AND cm.user_id=NEW.actor_id AND cm.user_id&lt;&gt;tm.user_id
+E               AND tm.user_id=NEW.teacher_user_id AND tm.user_id&lt;&gt;c.user_id AND tg.membership_id=tm.id
+E               AND tg.appointment_id=NEW.teacher_appointment_id AND a.assigned_by_id=NEW.actor_id
+E               AND a.accepted_at IS NULL AND a.revoked_at IS NULL AND NEW.initial_snapshot=to_jsonb(a)
+E               AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION','ACTIVE')
+E               AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E               AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.coordinator_grant_id,'COORDINATOR')
+E               AND academic_grant_current(NEW.teacher_user_id,a.institution_id,NEW.teacher_grant_id,'TEACHER'))
+E           THEN RAISE EXCEPTION 'academic nomination requires exact current coordinator and original teacher scope' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_academic_assignment_proof BEFORE INSERT ON flexbridge.academic_assignment_proofs
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_assignment_proof();
+E         CREATE FUNCTION flexbridge.guard_academic_consent() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF NOT EXISTS(SELECT 1 FROM academic_assignment_proofs q JOIN academic_assignments a ON a.id=q.assignment_id
+E             JOIN placements p ON p.id=a.placement_id JOIN placement_academic_bindings b ON b.placement_id=p.id
+E             WHERE q.assignment_id=NEW.assignment_id AND p.id=NEW.placement_id AND p.current_terms_id=NEW.terms_id
+E               AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION','ACTIVE') AND p.academic_track
+E               AND q.teacher_user_id=NEW.actor_id AND q.teacher_grant_id=NEW.teacher_grant_id
+E               AND q.teacher_appointment_id=NEW.teacher_appointment_id AND a.revoked_at IS NULL
+E               AND a.supervision_id=b.supervision_id AND academic_supervision_current(a.supervision_id,p.candidate_id)
+E               AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E               AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.teacher_grant_id,'TEACHER'))
+E           THEN RAISE EXCEPTION 'teacher consent requires personal current original assignment scope' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_academic_consent BEFORE INSERT ON flexbridge.academic_assignment_consents
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_consent();
+E         CREATE FUNCTION flexbridge.guard_academic_revoke() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF NOT EXISTS(SELECT 1 FROM academic_assignments a WHERE a.id=NEW.assignment_id AND a.placement_id=NEW.placement_id
+E             AND a.revoked_at IS NULL AND placement_actor_current(NEW.actor_id,NEW.session_id,NEW.auth_version)
+E             AND academic_grant_current(NEW.actor_id,a.institution_id,NEW.coordinator_grant_id,'COORDINATOR'))
+E           THEN RAISE EXCEPTION 'academic revoke requires current school coordinator proof' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_academic_revoke BEFORE INSERT ON flexbridge.academic_assignment_events
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_revoke();
+E     
+E         CREATE FUNCTION flexbridge.academic_teacher_current(aid uuid,tid uuid) RETURNS boolean
+E         LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+E           SELECT EXISTS(SELECT 1 FROM academic_assignments a JOIN academic_assignment_proofs q ON q.assignment_id=a.id
+E             JOIN placements p ON p.id=a.placement_id JOIN placement_academic_bindings b ON b.placement_id=p.id
+E             JOIN student_supervisions s ON s.id=a.supervision_id JOIN institution_agreements agreement ON agreement.id=s.agreement_id
+E             WHERE a.id=aid AND p.academic_track AND p.enrollment_id=b.enrollment_id
+E               AND a.institution_id=b.institution_id AND a.revoked_at IS NULL AND a.accepted_at&lt;=clock_timestamp()
+E               AND academic_supervision_current(a.supervision_id,p.candidate_id)
+E               AND (b.origin='LEGACY_IMPORT' OR (b.scope_snapshot-&gt;&gt;'agreement_id'=agreement.id::text
+E                 AND (b.scope_snapshot-&gt;&gt;'agreement_version')::integer=agreement.version))
+E               AND academic_grant_current(q.teacher_user_id,a.institution_id,q.teacher_grant_id,'TEACHER')
+E               AND ((q.origin='LEGACY_IMPORT' AND q.initial_snapshot-&gt;&gt;'accepted_at' IS NOT NULL
+E                 AND a.accepted_at=(q.initial_snapshot-&gt;&gt;'accepted_at')::timestamptz)
+E                 OR (q.origin='PUBLIC' AND EXISTS(SELECT 1 FROM academic_assignment_consents c WHERE c.assignment_id=a.id
+E                   AND c.terms_id=tid AND c.actor_id=q.teacher_user_id AND c.teacher_grant_id=q.teacher_grant_id))))
+E         $$;
+E         CREATE FUNCTION flexbridge.academic_placement_ready(pid uuid,tid uuid) RETURNS boolean
+E         LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+E           SELECT EXISTS(SELECT 1 FROM placements p JOIN placement_academic_bindings b ON b.placement_id=p.id
+E             JOIN student_supervisions s ON s.id=b.supervision_id JOIN placement_terms t ON t.id=tid
+E             JOIN institution_agreements agreement ON agreement.id=s.agreement_id
+E             WHERE p.id=pid AND b.origin='PUBLIC' AND p.academic_track AND p.enrollment_id=b.enrollment_id
+E               AND t.placement_id=p.id AND p.current_terms_id=tid AND t.terms_snapshot-&gt;'academic_scope'=b.scope_snapshot
+E               AND academic_supervision_current(s.id,p.candidate_id)
+E               AND b.scope_snapshot-&gt;&gt;'agreement_id'=agreement.id::text AND (b.scope_snapshot-&gt;&gt;'agreement_version')::integer=agreement.version
+E               AND academic_grant_current(b.actor_id,b.institution_id,b.coordinator_grant_id,'COORDINATOR')
+E               AND EXISTS(SELECT 1 FROM academic_assignments a WHERE a.placement_id=p.id AND a.supervision_id=s.id
+E                 AND academic_teacher_current(a.id,tid)))
+E         $$;
+E         CREATE OR REPLACE FUNCTION flexbridge.placement_ready_for_start(pid uuid,tid uuid) RETURNS boolean
+E         LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
+E           SELECT EXISTS(SELECT 1 FROM placements p JOIN placement_intakes i ON i.placement_id=p.id
+E             JOIN offers o ON o.id=i.offer_id JOIN opportunity_revisions r ON r.id=i.revision_id
+E             JOIN applications app ON app.id=p.application_id JOIN application_attempts t ON t.id=i.attempt_id
+E             JOIN opportunities v ON v.id=r.opportunity_id JOIN candidate_profiles c ON c.id=p.candidate_id
+E             WHERE p.id=pid AND p.current_terms_id=tid AND v.kind='INTERNSHIP'
+E               AND ((NOT i.academic_required AND NOT p.academic_track AND r.contract_type='INTERNSHIP_AGREEMENT')
+E                 OR (i.academic_required AND r.contract_type='ACADEMIC_TRIPARTITE' AND academic_placement_ready(pid,tid)))
+E               AND o.id=p.offer_id AND o.application_id=p.application_id AND v.organization_id=p.organization_id
+E               AND o.revision_id=r.id AND o.attempt_id=t.id AND t.application_id=app.id AND t.revision_id=r.id
+E               AND t.opportunity_id=app.opportunity_id AND r.opportunity_id=app.opportunity_id AND app.candidate_id=p.candidate_id
+E               AND EXISTS(SELECT 1 FROM placement_consents x WHERE x.placement_id=p.id AND x.terms_id=tid AND x.side='CANDIDATE' AND x.actor_id=c.user_id)
+E               AND EXISTS(SELECT 1 FROM placement_consents x JOIN mentor_assignments a ON a.id=x.assignment_id
+E                 JOIN mentor_assignment_proofs q ON q.assignment_id=a.id JOIN org_memberships m ON m.id=a.membership_id
+E                 JOIN org_role_grants g ON g.id=q.mentor_grant_id JOIN role_catalog z ON z.id=g.role_id JOIN users u ON u.id=m.user_id
+E                 WHERE x.placement_id=p.id AND x.terms_id=tid AND x.side='MENTOR' AND a.placement_id=p.id
+E                   AND a.accepted_at IS NOT NULL AND a.revoked_at IS NULL AND m.id=g.membership_id AND m.organization_id=p.organization_id
+E                   AND m.user_id=x.actor_id AND m.status='ACTIVE' AND m.revoked_at IS NULL AND u.status='ACTIVE' AND m.user_id&lt;&gt;c.user_id
+E                   AND g.revoked_at IS NULL AND g.id=x.org_grant_id AND q.mentor_user_id=x.actor_id AND z.scope_kind='ORG' AND z.code='MENTOR'))
+E         $$;
+E     
+E         CREATE OR REPLACE FUNCTION flexbridge.guard_placement_start() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF TG_OP='INSERT' THEN
+E             IF NEW.status&lt;&gt;'PLANNED' OR NEW.academic_track OR NEW.enrollment_id IS NOT NULL
+E             THEN RAISE EXCEPTION 'new placement requires planned intake' USING ERRCODE='23514'; END IF;
+E           ELSE
+E             IF NEW.status='ACTIVE' AND OLD.status&lt;&gt;'ACTIVE' AND
+E               (OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR NOT placement_ready_for_start(NEW.id,NEW.current_terms_id)
+E                 OR NOT EXISTS(SELECT 1 FROM placement_admission_events e WHERE e.placement_id=NEW.id AND e.terms_id=NEW.current_terms_id AND e.action='ACTIVATE'))
+E             THEN RAISE EXCEPTION 'placement start requires immutable admission proof' USING ERRCODE='23514'; END IF;
+E             IF ROW(NEW.application_id,NEW.offer_id,NEW.candidate_id,NEW.organization_id,NEW.start_date,NEW.end_date)
+E               IS DISTINCT FROM ROW(OLD.application_id,OLD.offer_id,OLD.candidate_id,OLD.organization_id,OLD.start_date,OLD.end_date)
+E             THEN RAISE EXCEPTION 'placement source and dates are immutable' USING ERRCODE='23514'; END IF;
+E             IF ROW(NEW.academic_track,NEW.enrollment_id) IS DISTINCT FROM ROW(OLD.academic_track,OLD.enrollment_id) AND
+E               (OLD.academic_track OR OLD.enrollment_id IS NOT NULL OR NOT NEW.academic_track
+E                 OR OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION') OR NOT EXISTS(SELECT 1 FROM placement_academic_bindings b
+E                   WHERE b.placement_id=NEW.id AND b.origin='PUBLIC' AND b.enrollment_id=NEW.enrollment_id AND b.terms_id=NEW.current_terms_id))
+E             THEN RAISE EXCEPTION 'academic binding requires immutable admission proof' USING ERRCODE='23514'; END IF;
+E             IF NEW.current_terms_id IS DISTINCT FROM OLD.current_terms_id AND OLD.status NOT IN ('PLANNED','PENDING_START_CONFIRMATION')
+E             THEN RAISE EXCEPTION 'active plan amendment requires a separate lifecycle' USING ERRCODE='23514'; END IF;
+E           END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE FUNCTION flexbridge.guard_academic_assignment_history() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ BEGIN
+E           IF TG_OP='DELETE' THEN RAISE EXCEPTION 'academic assignment history is immutable' USING ERRCODE='23514'; END IF;
+E           IF TG_OP='INSERT' THEN
+E             IF NEW.accepted_at IS NOT NULL OR NEW.revoked_at IS NOT NULL
+E             THEN RAISE EXCEPTION 'new academic nomination cannot invent acceptance' USING ERRCODE='23514'; END IF;
+E             RETURN NEW;
+E           END IF;
+E           IF (to_jsonb(NEW)-ARRAY['updated_at','accepted_at','revoked_at']) IS DISTINCT FROM
+E             (to_jsonb(OLD)-ARRAY['updated_at','accepted_at','revoked_at'])
+E           THEN RAISE EXCEPTION 'academic nomination is immutable' USING ERRCODE='23514'; END IF;
+E           IF NEW.accepted_at IS DISTINCT FROM OLD.accepted_at AND (OLD.accepted_at IS NOT NULL OR NOT EXISTS(
+E             SELECT 1 FROM academic_assignment_consents c WHERE c.assignment_id=NEW.id AND c.created_at=NEW.accepted_at))
+E           THEN RAISE EXCEPTION 'academic acceptance requires personal evidence' USING ERRCODE='23514'; END IF;
+E           IF NEW.revoked_at IS DISTINCT FROM OLD.revoked_at AND (OLD.revoked_at IS NOT NULL OR NOT EXISTS(
+E             SELECT 1 FROM academic_assignment_events e WHERE e.assignment_id=NEW.id AND e.created_at=NEW.revoked_at))
+E           THEN RAISE EXCEPTION 'academic revocation requires coordinator evidence' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER valid_academic_assignment_history BEFORE INSERT OR UPDATE OR DELETE ON flexbridge.academic_assignments
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.guard_academic_assignment_history();
+E         CREATE OR REPLACE FUNCTION flexbridge.guard_plan_task_insert() RETURNS trigger
+E         LANGUAGE plpgsql SET search_path=pg_catalog,flexbridge AS $$ DECLARE pid uuid; BEGIN
+E           SELECT p.id INTO pid FROM placements p JOIN placement_terms t ON t.placement_id=p.id
+E             WHERE t.id=NEW.terms_id AND p.current_terms_id=t.id AND p.status IN ('PLANNED','PENDING_START_CONFIRMATION') FOR UPDATE OF p;
+E           IF pid IS NULL OR EXISTS(SELECT 1 FROM placement_consents c WHERE c.terms_id=NEW.terms_id)
+E             OR EXISTS(SELECT 1 FROM academic_assignment_consents c WHERE c.terms_id=NEW.terms_id)
+E             OR EXISTS(SELECT 1 FROM placement_academic_bindings b WHERE b.terms_id=NEW.terms_id)
+E             OR EXISTS(SELECT 1 FROM placement_admission_events e WHERE e.terms_id=NEW.terms_id AND e.action='PLAN_PUBLISHED')
+E           THEN RAISE EXCEPTION 'published plan tasks are immutable' USING ERRCODE='23514'; END IF;
+E           RETURN NEW;
+E         END $$;
+E         CREATE TRIGGER immutable_supervision_origins BEFORE UPDATE OR DELETE ON flexbridge.supervision_origins
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         CREATE TRIGGER immutable_student_academic_requests BEFORE UPDATE OR DELETE ON flexbridge.student_academic_requests
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         CREATE TRIGGER immutable_academic_bindings BEFORE UPDATE OR DELETE ON flexbridge.placement_academic_bindings
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         CREATE TRIGGER immutable_academic_assignment_proofs BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_proofs
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         CREATE TRIGGER immutable_academic_assignment_consents BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_consents
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         CREATE TRIGGER immutable_academic_assignment_events BEFORE UPDATE OR DELETE ON flexbridge.academic_assignment_events
+E           FOR EACH ROW EXECUTE FUNCTION flexbridge.fn_block_append_only_mutation();
+E         ]
+E     (Background on this error at: https://sqlalche.me/e/20/gkpj)
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['D:\\FlexBridge\\.venv\\Scripts\\python.exe', '-m', 'alembic', '-c', 'D:\\FlexBridge\\backend\\...ON flexbridge.fn_block_append_only_mutation();\n    ]\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\n').returncode</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,15 @@
+{
+  "base_head": "89fda9ddb48c4c3717074873ac7d48445d911cee",
+  "scope": {
+    "backend/alembic/versions/0015_academic_admission.py": "23281492f7fa927b0ff630dafc75b73c655333017057c6d9da96d8fdafb0b1e4",
+    "backend/app/services/academic_admission.py": "29de624a6c495804c33b4d872b656b3aa24935c9ad9a09bbca5b072d52bf7fa0",
+    "backend/app/services/academic_notices.py": "471eebdff9c1902a0643420c7c12b41c0b2a387bb75ce40c40479998931d651f",
+    "backend/app/services/mentor_notices.py": "4fca9c751560f1c9fa08c789fa863130dd01ffed3584d6785a67c003f4b4758e",
+    "backend/app/workers/outbox.py": "09b7348f4bf385ed1d691b0eaf2f20163a8765631a93ff2a93f4d1fe896080cc",
+    "infra/compose.yaml": "04b60f279d1a21c418f82b4024ab1cbc84675b19f2c678653b05c7f28c3492cb",
+    "backend/tests/security/test_academic_notices.py": "7d7dd8bc0faac00036a4ca1eb16c67dbdbda15ef685a9792049ec834607028b4",
+    "backend/tests/security/test_academic_legacy_edges.py": "75ffd0c7971a356905e55e90cb1fe9fbbe93408b46aaeaaa9fe94b7ffcc5b382",
+    "backend/tests/security/test_academic_lifecycle.py": "124778a02560a1453e4459c153c2311730496df78c41aa904e5ed92e2e2d9600"
+  },
+  "limitations": "Read-only correction source review, no tests/model/SHA certification."
+}

@@ -88,11 +88,16 @@ class NotificationService:
                 event=dict(id=row.pop('_notice_event_id'),payload=row.pop('_notice_payload'),
                            event_type=row.pop('_notice_type'),schema_version=row.pop('_notice_version'))
                 row['notice']=None
-                if event['event_type']!=EVENT_TYPE:continue
                 try:
-                    payload=run_notice(event)
-                    recipient,details=notice_source(conn,payload)
-                    if recipient==actor.user_id and payload['placement_id']==row['placement_id'] and row['template_code']=='PLACEMENT_MENTOR_'+payload['kind']:
+                    if event['event_type']==EVENT_TYPE:
+                        parse,source,prefix=run_notice,notice_source,'PLACEMENT_MENTOR_'
+                    else:
+                        from app.services import academic_notices
+                        if event['event_type']!=academic_notices.EVENT_TYPE:continue
+                        parse,source,prefix=academic_notices.run_notice,academic_notices.notice_source,'PLACEMENT_ACADEMIC_'
+                    payload=parse(event)
+                    recipient,details=source(conn,payload)
+                    if recipient==actor.user_id and payload['placement_id']==row['placement_id'] and row['template_code']==prefix+payload['kind']:
                         row['notice']=details
                 except (ValueError,KeyError,TypeError,PlacementScopeError):
                     # Unknown/corrupt legacy content never exposes an arbitrary event payload.

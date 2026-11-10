@@ -1,4 +1,44 @@
-# LOG-068 — current host follow-up, academic acceptance remains open
+# LOG-069 - current academic admission draft, acceptance remains open
+
+Current LOG-070 checkpoint:34 current corrective tests passed199.22s,0fail/error/
+skip,1 framework warning. This exact run includes academic HTTP/lifecycle, both
+mismatched legacy edges, populated upgrade rollback and academic/mentor notice
+controls (active reassignment, author logout, atomic apply failure, stale fence and
+cross-placement payload mismatch). Current runtime/config stayed unchanged during
+this run. Corrective Copilot read-only review exited0, no concrete delta P1/P2;
+launch hashes are academic_corrective_review_scope.json. Initial/integration review
+and earlier63/86 stages are separate; do not sum them or claim full current CI.
+Full matching-head GitHub CI is still required. PR66 remains draft/Issue65 open.
+
+
+Current source adds0015 school-selection/supervision/binding/original-teacher/
+personal-consent/revocation evidence. Disposable PostgreSQL executes124 tables;
+accepted main remains0013/114, published draft89fda9d remains0014/118 until this
+checkpoint is committed/pushed. No pg_live migration or pilot acceptance.
+
+New actual academic HTTP5passed23.303s. Old authority initial63 had7 failures/
+56passed146.006s; corrected63passed148.516s preserves immutable SQL denials and
+valid positive review controls. Lifecycle initial1failed8passed42.92s was an invalid
+same-appointment regrant fixture; schema already forbids that duplicate history.
+Correct formal replacement fixture9passed24.588s. Populated upgrade3passed35.339s
+compares exact canonical history, current/ambiguous legacy grants, closed legacy
+capture, no invented consents and real partial-DDL rollback to0014. Counts overlap;
+the affected current selection and new latest-school/side cases are separate.
+
+Initial0015 reserved SQL alias caused2 setup errors6.05s; corrected fresh/teacher
+2passed9.24s, then added actual student's pre-binding school choice2passed9.22s.
+These earlier stages are not complete current acceptance. Raw artifacts retained.
+Read-only Copilot11-file academic review exited0, no unconditional P1/P2 findings;
+legacy pending activation uncertainty is intentionally fail-closed and documented.
+No test/model/SHA certification. Integration review and current source pin pending.
+
+Actual published89fda9d full CI42726608461/42726620535 both failed63/passed924,
+765.05s/743.64s; exact failed paths in pr66_host_followup_ci.json. This is not a
+green draft. Current core restores the63 locally; matching-head full CI still
+required. Academic viewer notices, source098/099/105 queues, additional lifecycle/
+race controls and the remaining full R1 acceptance stay open. PR66 remains draft.
+
+# Historical LOG-068 - host follow-up
 
 Final current native UTC selection:115 passed,0 failures/errors/skips,1 framework
 warning,457.42s. It includes all new host/retry/page/notice/calendar/upgrade/authority
@@ -117,3 +157,32 @@ Also verify the old SQL diary CURRENT_DATE check under UTC against the service's
 explicit Asia/Tashkent date. Current Windows positives do not prove that boundary.
 Only complete current CI, actual reviews and requirement-matched evidence can
 support a later merge/acceptance decision.
+
+
+## LOG-070 - academic notice and imported-scope corrections
+
+The following current corrections supersede the earlier notice TODO, not the full
+institution workflow TODO. Integration Copilot review exited0 and identified P2:
+active teacher replacement had no candidate notice. Actual active HTTP replacement
+probe failed24.95s with zero academic notice events. A separate source-derived
+PLACEMENT_ACADEMIC_NOTICE topic now queues nomination, personal acceptance and
+revocation atomically, including cleanup. Worker validates immutable source and
+candidate recipient, commits inbox/ack under its fence, and exposes safe TEACHER
+history through the existing own inbox. Default worker/compose include this local
+topic; identity worker and external provider delivery are unchanged. Initial
+corrected academic1 plus mentor6 passed35.80s. Further logout/fence/rollback/forged
+cross-placement controls run in the current corrective selection.
+
+Independent legacy edge probe initially had one invalid duplicate agreement
+fixture plus a real foreign-school import failure (2failed35.34s). After correcting
+only the fixture version,2failed29.83s reproduced a wrong-enrollment binding and a
+foreign-school FK upgrade failure.0015 now captures incompatible supervision as
+NULL, preserves all original canonical rows, and requires exact binding institution/
+enrollment/supervision in teacher eligibility. No old data is rewritten or granted
+new activation consent. Raw failure diagnostics remain; final corrective results
+and source review are recorded separately. Existing review/affected stage86passed
+453.18s predates these notice/import corrections and is not final-source acceptance.
+
+NEXT still includes source098/099/105 institution/review queues, coordinator-viewer
+notice policy when those private views are enabled, additional legacy cleanup/
+concurrency/retry controls and complete latest-head CI/review. Keep PR66 draft.

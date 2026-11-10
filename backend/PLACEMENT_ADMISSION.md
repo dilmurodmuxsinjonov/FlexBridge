@@ -1,8 +1,9 @@
 # Placement admission — current draft
 
 Issue65 / draft PR66. This branch is not an accepted release. Accepted main remains
-PR64, migration0013 and114 runtime tables. Native tests have executed0014 with118
-tables, including four new proof tables. The model's94 canonical tables are unchanged.
+PR64, migration0013 and114 runtime tables. Native tests executed0014 with118
+tables and current0015 with124. The model's94 canonical tables are unchanged.
+Current school/teacher flow and its remaining work are in ACADEMIC_ADMISSION.md.
 
 ## Host flow
 
@@ -89,13 +90,13 @@ preserving rollback exists; transactional failed-upgrade rollback is tested sepa
 
 ## Remaining acceptance work
 
-- New academic activation is denied until current enrollment, school coordinator
-  supervision/agreement/purpose and personal teacher assignment bind a pending
-  placement. The old ACTIVE-before-teacher helper cannot supply this admission flow.
-  API051 implements MENTOR only; its TEACHER branch remains pending.
+- Academic activation now requires the student's latest verified-school choice,
+  current formal coordinator supervision/agreement/purpose, immutable binding and
+  exact-version personal original-teacher acceptance. API051 implements both
+  assignment kinds; see ACADEMIC_ADMISSION.md for the reachable pending flow.
 - API088 implements ACTIVATE/CANCEL. Completion, dispute and later amendments remain
   explicit follow-ons. Source registration is not full contract completion.
-- Restore legitimate academic fixture flows through actual admission services;
+- Academic fixtures now use actual-session pending admission services;
   do not waive new proof guards or fabricate post-upgrade legacy rows to make tests green.
 - Finish complete current CI, all affected academic/diary tests, final source review,
   manifest and exact-head GitHub acceptance before merging PR66/closing Issue65.

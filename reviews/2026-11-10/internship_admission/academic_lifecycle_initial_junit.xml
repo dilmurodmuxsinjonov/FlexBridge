@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="42.921" timestamp="2026-11-10T05:45:20.281502+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_regrant_cannot_revive_original_assignment[False]" time="4.989"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint &quot;institution_role_grants_membership_id_role_id_appointment_i_key&quot;&#10;DETAIL:  Key (membership_id, role_id, appointment_id)=(a50e5708-7c31-4716-a6de-8f20bb7a7154, 9e2c29c8-5a42-436b-a42c-8783b71956f5, 26855380-3245-4405-a107-8bd57e6ee40e) already exists.&#10;[SQL: INSERT INTO flexbridge.institution_role_grants (id, created_at, updated_at, membership_id, role_id, appointment_id) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(membership_id)s::UUID, %(role_id)s::UUID, %(appointment_id)s::UUID)]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "institution_role_grants_membership_id_role_id_appointment_i_key"
+E   DETAIL:  Key (membership_id, role_id, appointment_id)=(a50e5708-7c31-4716-a6de-8f20bb7a7154, 9e2c29c8-5a42-436b-a42c-8783b71956f5, 26855380-3245-4405-a107-8bd57e6ee40e) already exists.
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_lifecycle.py:38: in test_teacher_regrant_cannot_revive_original_assignment
+    insert_row(conn,'institution_role_grants',membership_id=f['teacher_member']['id'],role_id=f['teacher_grant']['role_id'],appointment_id=appointment['id'])
+backend\app\services\placements.py:23: in insert_row
+    conn.execute(table(name).insert().values(**record)); return record
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint "institution_role_grants_membership_id_role_id_appointment_i_key"
+E   DETAIL:  Key (membership_id, role_id, appointment_id)=(a50e5708-7c31-4716-a6de-8f20bb7a7154, 9e2c29c8-5a42-436b-a42c-8783b71956f5, 26855380-3245-4405-a107-8bd57e6ee40e) already exists.
+E   [SQL: INSERT INTO flexbridge.institution_role_grants (id, created_at, updated_at, membership_id, role_id, appointment_id) VALUES (%(id)s::UUID, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE, %(membership_id)s::UUID, %(role_id)s::UUID, %(appointment_id)s::UUID)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_regrant_cannot_revive_original_assignment[True]" time="2.903" /><testcase classname="tests.security.test_academic_lifecycle" name="test_new_plan_requires_fresh_teacher_consent_and_preserves_historical_receipt" time="2.750" /><testcase classname="tests.security.test_academic_lifecycle" name="test_nomination_audit_failure_rolls_back_new_school_binding_and_plan" time="1.904" /><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_acceptance_rechecks_authority_after_business_lock_wait[session]" time="2.131" /><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_acceptance_rechecks_authority_after_business_lock_wait[grant]" time="2.110" /><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_acceptance_rechecks_authority_after_business_lock_wait[appointment]" time="2.116" /><testcase classname="tests.security.test_academic_lifecycle" name="test_teacher_acceptance_rechecks_authority_after_business_lock_wait[account_version]" time="2.138" /><testcase classname="tests.security.test_academic_lifecycle" name="test_cleanup_after_agreement_expiry_and_start_replay_cannot_restart_cancelled_placement" time="20.519" /></testsuite></testsuites>

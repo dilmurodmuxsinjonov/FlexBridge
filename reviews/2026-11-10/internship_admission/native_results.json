@@ -1,6 +1,126 @@
 {
-  "scope": "overlapping preserved stages, including setup/errors; not additive or full R1 acceptance",
+  "scope": "overlapping preserved stages, including failures/setup errors; not additive or full R1 acceptance",
   "stages": [
+    {
+      "file": "academic_affected_current_junit.xml",
+      "tests": 86,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 453.173
+    },
+    {
+      "file": "academic_authority_corrected_junit.xml",
+      "tests": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 148.516
+    },
+    {
+      "file": "academic_authority_initial_junit.xml",
+      "tests": 63,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 146.006
+    },
+    {
+      "file": "academic_core_corrected_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.239
+    },
+    {
+      "file": "academic_core_initial_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 2,
+      "skipped": 0,
+      "xml_seconds": 6.045
+    },
+    {
+      "file": "academic_corrective_current_junit.xml",
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 199.218
+    },
+    {
+      "file": "academic_http_initial_junit.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 23.303
+    },
+    {
+      "file": "academic_legacy_edges_probe_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 29.829
+    },
+    {
+      "file": "academic_legacy_edges_red_junit.xml",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.341
+    },
+    {
+      "file": "academic_lifecycle_corrected_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.588
+    },
+    {
+      "file": "academic_lifecycle_initial_junit.xml",
+      "tests": 9,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 42.921
+    },
+    {
+      "file": "academic_notices_corrected_junit.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.796
+    },
+    {
+      "file": "academic_notices_red_junit.xml",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 24.953
+    },
+    {
+      "file": "academic_student_choice_junit.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 9.219
+    },
+    {
+      "file": "academic_upgrade_initial_junit.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 35.339
+    },
     {
       "file": "actor_teacher_initial_junit.xml",
       "tests": 3,

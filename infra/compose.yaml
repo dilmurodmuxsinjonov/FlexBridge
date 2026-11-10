@@ -114,7 +114,7 @@ services:
     command: ["python", "-m", "app.workers.outbox"]
     environment:
       <<: *app-env
-      OUTBOX_EVENT_TYPES: FILE_SCAN_REQUESTED,REFUND_EXECUTE,PLACEMENT_MENTOR_NOTICE
+      OUTBOX_EVENT_TYPES: FILE_SCAN_REQUESTED,REFUND_EXECUTE,PLACEMENT_MENTOR_NOTICE,PLACEMENT_ACADEMIC_NOTICE
     mem_limit: 768m
     cpus: 1.0
     depends_on:

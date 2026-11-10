@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="63" time="146.006" timestamp="2026-11-10T05:36:50.564555+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_authority" name="test_create_real_coordinator_and_teacher_then_revoke_idempotently[/api/v1/internships/academic-assignments]" time="5.712" /><testcase classname="tests.security.test_academic_authority" name="test_create_real_coordinator_and_teacher_then_revoke_idempotently[/api/v1/internship-logs/academic-assignments]" time="2.143" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[coord_expired-/api/v1/internships/academic-assignments]" time="2.090" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[coord_expired-/api/v1/internship-logs/academic-assignments]" time="1.965" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_expired-/api/v1/internships/academic-assignments]" time="1.682" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_expired-/api/v1/internship-logs/academic-assignments]" time="1.775" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_unaccepted-/api/v1/internships/academic-assignments]" time="1.734" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_unaccepted-/api/v1/internship-logs/academic-assignments]" time="1.778" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_role_revoked-/api/v1/internships/academic-assignments]" time="1.687" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[teacher_role_revoked-/api/v1/internship-logs/academic-assignments]" time="1.760" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[self_assignment-/api/v1/internships/academic-assignments]" time="1.662" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[self_assignment-/api/v1/internship-logs/academic-assignments]" time="1.737" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[other_coordinator-/api/v1/internships/academic-assignments]" time="1.704" /><testcase classname="tests.security.test_academic_authority" name="test_create_denies_invalid_current_people_without_effect[other_coordinator-/api/v1/internship-logs/academic-assignments]" time="1.856" /><testcase classname="tests.security.test_academic_authority" name="test_teacher_password_session_can_review_current_assignment" time="2.485" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[teacher_expired]" time="2.454" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_revoked]" time="2.361"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic revocation requires coordinator evidence&#10;CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 16 at RAISE&#10;[SQL: UPDATE flexbridge.academic_assignments SET revoked_at=%(revoked_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: academic revocation requires coordinator evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 16 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_authority.py:169: in test_review_current_parent_chain_required_without_effect
+    conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic revocation requires coordinator evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 16 at RAISE
+E   [SQL: UPDATE flexbridge.academic_assignments SET revoked_at=%(revoked_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_unaccepted]" time="2.385"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic acceptance requires personal evidence&#10;CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE&#10;[SQL: UPDATE flexbridge.academic_assignments SET accepted_at=%(accepted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: academic acceptance requires personal evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_authority.py:169: in test_review_current_parent_chain_required_without_effect
+    conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic acceptance requires personal evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE
+E   [SQL: UPDATE flexbridge.academic_assignments SET accepted_at=%(accepted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[assignment_future_acceptance]" time="2.383"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic acceptance requires personal evidence&#10;CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE&#10;[SQL: UPDATE flexbridge.academic_assignments SET accepted_at=%(accepted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: academic acceptance requires personal evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_authority.py:169: in test_review_current_parent_chain_required_without_effect
+    conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(**vals))
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic acceptance requires personal evidence
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 13 at RAISE
+E   [SQL: UPDATE flexbridge.academic_assignments SET accepted_at=%(accepted_at)s::TIMESTAMP WITH TIME ZONE WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_revoked]" time="2.371" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_unaccepted]" time="2.414" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[supervision_future_acceptance]" time="2.423" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[agreement_expired]" time="2.419" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[agreement_inactive]" time="2.369" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[purpose_disabled]" time="2.415" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[basis_empty]" time="2.673" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[enrollment_ended]" time="2.491" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[enrollment_unverified]" time="2.443" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[ordinary_track]" time="2.662"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic binding requires immutable admission proof&#10;CONTEXT:  PL/pgSQL function guard_placement_start() line 17 at RAISE&#10;[SQL: UPDATE flexbridge.placements SET academic_track=%(academic_track)s WHERE flexbridge.placements.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: academic binding requires immutable admission proof
+E   CONTEXT:  PL/pgSQL function guard_placement_start() line 17 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_authority.py:184: in test_review_current_parent_chain_required_without_effect
+    name,key,values=targets[state];t=table(name);conn.execute(t.update().where(t.c.id==f[key]['id']).values(**values))
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic binding requires immutable admission proof
+E   CONTEXT:  PL/pgSQL function guard_placement_start() line 17 at RAISE
+E   [SQL: UPDATE flexbridge.placements SET academic_track=%(academic_track)s WHERE flexbridge.placements.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[inactive_placement]" time="2.588" /><testcase classname="tests.security.test_academic_authority" name="test_review_current_parent_chain_required_without_effect[self_review]" time="2.479"><failure message="sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic nomination is immutable&#10;CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 10 at RAISE&#10;[SQL: UPDATE flexbridge.academic_assignments SET teacher_membership_id=%(teacher_membership_id)s::UUID WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]&#10;[SQL parameters hidden due to hide_parameters=True]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: academic nomination is immutable
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 10 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_authority.py:181: in test_review_current_parent_chain_required_without_effect
+    conn.execute(table('academic_assignments').update().where(table('academic_assignments').c.id==assignment['id']).values(teacher_membership_id=tm['id']))
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) academic nomination is immutable
+E   CONTEXT:  PL/pgSQL function guard_academic_assignment_history() line 10 at RAISE
+E   [SQL: UPDATE flexbridge.academic_assignments SET teacher_membership_id=%(teacher_membership_id)s::UUID WHERE flexbridge.academic_assignments.id = %(id_1)s::UUID]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_expired_verified_enrollment_cannot_start_academic_assignment" time="1.638"><failure message="app.services.governance.GovernanceError: ACADEMIC_SCOPE_NOT_CURRENT">backend\tests\security\test_academic_authority.py:190: in test_expired_verified_enrollment_cannot_start_academic_assignment
+    f=academic_fixture(identities,organization,enrollment_end_date=date.today()-timedelta(days=1))
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_authority.py:59: in academic_fixture
+    supervision=academic_service.create_supervision(actor(coord),institution_id=inst['id'],enrollment_id=en['id'],
+backend\app\services\academic_admission.py:111: in create_supervision
+    raise GovernanceError('ACADEMIC_SCOPE_NOT_CURRENT',status_code=403)
+E   app.services.governance.GovernanceError: ACADEMIC_SCOPE_NOT_CURRENT</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_grade_is_rejected_in_diary_review_without_effect" time="2.558" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-create]" time="2.197" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-revoke]" time="2.573" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[session-review]" time="2.629" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-create]" time="1.766" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-revoke]" time="2.494" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[appointment-review]" time="2.566" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-create]" time="1.730" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-revoke]" time="2.482" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[grant-review]" time="2.568" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-create]" time="1.748" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-revoke]" time="2.591" /><testcase classname="tests.security.test_academic_authority" name="test_committed_security_change_after_real_business_wait_denies_write[account_version-review]" time="2.603" /><testcase classname="tests.security.test_academic_authority" name="test_target_user_busy_returns_retry_and_rolls_back" time="1.809" /><testcase classname="tests.security.test_academic_authority" name="test_audit_failure_rolls_back_created_assignment" time="1.737"><failure message="AssertionError: {&quot;id&quot;:&quot;c6fc5a3a-c2f7-41b9-ad16-af0f5b3c009c&quot;,&quot;created_at&quot;:&quot;2026-11-10T00:38:39.515550Z&quot;,&quot;updated_at&quot;:&quot;2026-11-10T00:38:39.515550Z&quot;,&quot;placement_id&quot;:&quot;889b1ccb-1af4-47e3-a204-db5110f70d97&quot;,&quot;teacher_membership_id&quot;:&quot;ff03d520-d594-4db4-ae24-cefa0af219f5&quot;,&quot;supervision_id&quot;:&quot;609897eb-b336-47ac-b78f-e9587ac9f1e2&quot;,&quot;assigned_by_id&quot;:&quot;8b46dc27-4fdb-420e-9259-5d796155be05&quot;,&quot;assigned_at&quot;:&quot;2026-11-10T00:38:39.515550Z&quot;,&quot;accepted_at&quot;:null,&quot;revoked_at&quot;:null,&quot;institution_id&quot;:&quot;3788e824-2c96-48c4-b037-9acc73d74b04&quot;,&quot;assignment_receipt&quot;:{&quot;assignment_id&quot;:&quot;c6fc5a3a-c2f7-41b9-ad16-af0f5b3c009c&quot;,&quot;placement_id&quot;:&quot;889b1ccb-1af4-47e3-a204-db5110f70d97&quot;,&quot;terms_id&quot;:&quot;22360c24-fcc5-494d-b0be-4212be5bd5b8&quot;,&quot;version&quot;:2,&quot;teacher_user_id&quot;:&quot;5f43e156-6565-435a-bdeb-6254898bf0de&quot;,&quot;state_at_nomination&quot;:&quot;NOMINATED&quot;,&quot;recorded_at&quot;:&quot;2026-11-10T00:38:39.515550+00:00&quot;}}&#10;assert 201 == 503&#10; +  where 201 = &lt;Response [201 Created]&gt;.status_code">backend\tests\security\test_academic_authority.py:253: in test_audit_failure_rolls_back_created_assignment
+    r=client.post(CREATE_PATHS[0],json=assignment_body(f),headers=f['coord']['headers']);assert r.status_code==503,r.text
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: {"id":"c6fc5a3a-c2f7-41b9-ad16-af0f5b3c009c","created_at":"2026-11-10T00:38:39.515550Z","updated_at":"2026-11-10T00:38:39.515550Z","placement_id":"889b1ccb-1af4-47e3-a204-db5110f70d97","teacher_membership_id":"ff03d520-d594-4db4-ae24-cefa0af219f5","supervision_id":"609897eb-b336-47ac-b78f-e9587ac9f1e2","assigned_by_id":"8b46dc27-4fdb-420e-9259-5d796155be05","assigned_at":"2026-11-10T00:38:39.515550Z","accepted_at":null,"revoked_at":null,"institution_id":"3788e824-2c96-48c4-b037-9acc73d74b04","assignment_receipt":{"assignment_id":"c6fc5a3a-c2f7-41b9-ad16-af0f5b3c009c","placement_id":"889b1ccb-1af4-47e3-a204-db5110f70d97","terms_id":"22360c24-fcc5-494d-b0be-4212be5bd5b8","version":2,"teacher_user_id":"5f43e156-6565-435a-bdeb-6254898bf0de","state_at_nomination":"NOMINATED","recorded_at":"2026-11-10T00:38:39.515550+00:00"}}
+E   assert 201 == 503
+E    +  where 201 = &lt;Response [201 Created]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[session-create]" time="1.840" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[session-revoke]" time="2.501" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[session-review]" time="2.540" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[appointment-create]" time="1.758" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[appointment-revoke]" time="2.486" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[appointment-review]" time="2.498" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[grant-create]" time="1.752" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[grant-revoke]" time="2.515" /><testcase classname="tests.security.test_academic_authority" name="test_authorized_commit_precedes_waiting_security_change[grant-review]" time="2.508" /><testcase classname="tests.security.test_academic_authority" name="test_direct_service_cannot_use_cached_claims_with_invalid_session[foreign]" time="1.682" /><testcase classname="tests.security.test_academic_authority" name="test_direct_service_cannot_use_cached_claims_with_invalid_session[unknown]" time="1.664" /><testcase classname="tests.security.test_academic_authority" name="test_direct_service_cannot_use_cached_claims_with_invalid_session[expired]" time="1.658" /><testcase classname="tests.security.test_academic_authority" name="test_direct_service_cannot_use_cached_claims_with_invalid_session[revoked]" time="1.671" /><testcase classname="tests.security.test_academic_authority" name="test_teacher_who_also_coordinates_cannot_bypass_mfa_in_service" time="2.517" /><testcase classname="tests.security.test_academic_authority" name="test_sensitive_role_granted_after_http_preflight_requires_mfa_at_write" time="2.516" /><testcase classname="tests.security.test_academic_authority" name="test_imported_revision_author_must_own_placement_candidate" time="4.884" /></testsuite></testsuites>

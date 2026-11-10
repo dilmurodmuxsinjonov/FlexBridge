@@ -26,10 +26,11 @@ class CreateMentorAssignmentRequest(StrictDTO):
 
 
 class CreateAcademicAssignmentLogScopeRequest(StrictDTO):
-    placement_id: str
-    institution_id: str
-    supervisor_id: str
-    supervision_id: str
+    placement_id: UUID
+    institution_id: UUID
+    supervisor_id: UUID
+    supervision_id: UUID
+    idempotency_key: str=Field(min_length=8,max_length=128)
 
 
 class CreateDailyLogRequest(StrictDTO):
@@ -72,11 +73,12 @@ def create_academic_assignment_log_scope_endpoint(
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
     return internship_log_service.create_academic_assignment(
-        placement_id=payload.placement_id,
-        institution_id=payload.institution_id,
-        supervisor_id=payload.supervisor_id,
-        supervision_id=payload.supervision_id,
+        placement_id=str(payload.placement_id),
+        institution_id=str(payload.institution_id),
+        supervisor_id=str(payload.supervisor_id),
+        supervision_id=str(payload.supervision_id),
         actor=actor,
+        idempotency_key=payload.idempotency_key,
     )
 
 

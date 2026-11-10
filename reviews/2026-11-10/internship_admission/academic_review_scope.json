@@ -1,0 +1,17 @@
+{
+  "base_head": "89fda9ddb48c4c3717074873ac7d48445d911cee",
+  "scope": {
+    "backend/alembic/versions/0015_academic_admission.py": "4129a2112e1fe3e0270e83c6e0945658849b95feab35b84fddb69f084f05c3ca",
+    "backend/app/db/academic_admission.py": "3bb56fb8a1b5253a5d525b7c60ba68d0a41730879dd7f1d5580ff01f17928039",
+    "backend/app/services/academic_admission.py": "b4842e7dd5396063ed4e94b699b0e79cf5e8663f047bf8d85147930177556a12",
+    "backend/app/api/v1/academic_admission.py": "11767affeb6fd806d41d2be94720bddb259319665b42df6cf91f48e924c1bf9a",
+    "backend/app/services/placement_admission.py": "e16ad62e9d53ec36d7d915156df6beeda7d6f17d1db9dc0ad36c4a187967cd6c",
+    "backend/app/services/internship_logs.py": "db3271d66bc96f9b8d35aed2b420c68685b2a0e2aa0b2feadb73f77e17a6dba5",
+    "backend/app/api/v1/placement_admission.py": "d02fc56cd57c9ede445cf1e6585f2de8f3a2e37c7fea4e90ea4624177de30fe7",
+    "backend/app/api/v1/governance.py": "6f76041497e4363cf176c4d5b116443ad019d2db8dd0705fc2824d046b9a2583",
+    "backend/app/api/v1/internship_logs.py": "43dea47c0ab07862875d5bc5b0a8f40f13bfcf9b0f2716f0ba03473f768042bf",
+    "backend/tests/security/test_academic_admission.py": "7b686ae0ea2fc53ae08f06c79f25fb6233f52081e81a74f74f4f6bf25dc17bcb",
+    "backend/tests/security/test_academic_authority.py": "c75f674fc3fe1dcf51d0fbce4b1e71f6401a97d76d0a315f7cd90cbccc816c69"
+  },
+  "limitations": "Read-only source opinion. Not test execution, commit certification, full R1 acceptance or model certification."
+}

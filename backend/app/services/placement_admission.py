@@ -47,8 +47,13 @@ class PlacementAdmissionService:
 
     def _locked(self, conn, placement_id):
         hint = get_row(conn, 'placements', placement_id)
+        bindings=table('placement_academic_bindings')
+        institution=conn.execute(select(bindings.c.institution_id).where(bindings.c.placement_id==placement_id)).scalar_one_or_none()
+        if institution:get_row(conn,'institutions',institution,True)
         get_row(conn, 'organizations', hint['organization_id'], True)
         placement = get_row(conn, 'placements', placement_id, True)
+        actual=conn.execute(select(bindings.c.institution_id).where(bindings.c.placement_id==placement_id)).scalar_one_or_none()
+        if actual!=institution:raise PlacementScopeError('ACADEMIC_SCOPE_CHANGED_RETRY')
         require_internship_placement(conn, placement)
         terms = get_row(conn, 'placement_terms', placement['current_terms_id'], True)
         if terms['placement_id'] != placement_id:
@@ -202,6 +207,10 @@ class PlacementAdmissionService:
             assignments = table('mentor_assignments')
             rows = [dict(r) for r in conn.execute(select(assignments).where(
                 assignments.c.placement_id == placement_id).order_by(assignments.c.id).with_for_update()).mappings()]
+            school_material=None
+            if action=='ACTIVATE' and placement['academic_track']:
+                from app.services.academic_admission import academic_service
+                school_material=academic_service.start_material(conn,placement)
             authority = self._host(conn, actor, placement)
             replay = self._replay(conn, 'placement_admission_events', actor, idempotency_key, digest)
             if replay:return replay
@@ -212,7 +221,9 @@ class PlacementAdmissionService:
             if action == 'ACTIVATE':
                 intake = table('placement_intakes')
                 academic = conn.execute(select(intake.c.academic_required).where(intake.c.placement_id == placement_id)).scalar_one()
-                if academic:raise PlacementScopeError('ACADEMIC_ADMISSION_REQUIRED')
+                if academic:
+                    from app.services.academic_admission import academic_service
+                    academic_service.pin_start_authority(conn,placement,terms,school_material)
                 # Pin the original current mentor grant through commit, after business rows.
                 found = False
                 consents, proofs = table('placement_consents'), table('mentor_assignment_proofs')
@@ -263,7 +274,8 @@ class PlacementAdmissionService:
                 raise PlacementScopeError('INVALID_PLAN', status_code=422)
             _, _, revision = require_internship_placement(conn, placement)
             new_terms = insert_row(conn, 'placement_terms', placement_id=placement_id, version=terms['version']+1,
-                schema_version=1, terms_snapshot={'source_revision_id': revision['id'], 'title': title, 'objectives': objectives},
+                schema_version=1, terms_snapshot={'source_revision_id': revision['id'], 'title': title, 'objectives': objectives,
+                    **({'academic_scope':terms['terms_snapshot']['academic_scope']} if 'academic_scope' in terms['terms_snapshot'] else {})},
                 daily_limit_minutes=daily_limit_minutes, weekly_limit_minutes=weekly_limit_minutes, required_minutes=required_minutes)
             conn.execute(table('placements').update().where(table('placements').c.id == placement_id)
                 .values(current_terms_id=new_terms['id'], updated_at=now(), version=placement['version']+1))
@@ -300,6 +312,10 @@ class PlacementAdmissionService:
             assignments = table('mentor_assignments')
             nominated = [dict(r) for r in conn.execute(select(assignments).where(
                 assignments.c.placement_id == placement_id).order_by(assignments.c.id).with_for_update()).mappings()]
+            school_material=None
+            if placement['academic_track']:
+                from app.services.academic_admission import academic_service
+                school_material=academic_service.start_material(conn,placement)
             account_authority(conn, actor)
             if get_row(conn, 'candidate_profiles', placement['candidate_id'])['user_id'] != actor.user_id:
                 try:org_authority(conn, actor.user_id, placement['organization_id'], 'OWNER', 'HOST_COORDINATOR')
@@ -311,6 +327,14 @@ class PlacementAdmissionService:
                             allowed = True
                             break
                         except (PlacementScopeError, GovernanceError):continue
+                    if not allowed and school_material:
+                        for assignment in school_material[1]:
+                            try:
+                                academic_service.teacher(conn,actor,placement,assignment)
+                                if conn.execute(text('SELECT flexbridge.academic_supervision_current(:s,:c)'),
+                                    {'s':assignment['supervision_id'],'c':placement['candidate_id']}).scalar_one():
+                                    allowed=True;break
+                            except (PlacementScopeError,GovernanceError):continue
                     if not allowed:raise PlacementScopeError('PLACEMENT_NOT_FOUND', status_code=404)
             t = table('plan_tasks')
             tasks = [dict(r) for r in conn.execute(select(t.c.code, t.c.title, t.c.expected_result, t.c.required,
@@ -318,6 +342,9 @@ class PlacementAdmissionService:
             # The original revision/offer can contain payroll details. Plan readers get this projection only.
             return dict(placement_id=placement_id, status=placement['status'], terms_id=terms['id'], version=terms['version'],
                 start_date=placement['start_date'], end_date=placement['end_date'],
+                academic_required=bool(conn.execute(select(table('placement_intakes').c.academic_required)
+                    .where(table('placement_intakes').c.placement_id==placement_id)).scalar_one()),
+                academic_scope={k:v for k,v in terms['terms_snapshot'].get('academic_scope',{}).items() if k in ('institution_id','purpose')},
                 title=terms['terms_snapshot'].get('title'), objectives=terms['terms_snapshot'].get('objectives'),
                 daily_limit_minutes=terms['daily_limit_minutes'], weekly_limit_minutes=terms['weekly_limit_minutes'],
                 required_minutes=terms['required_minutes'], tasks=tasks)
