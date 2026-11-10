@@ -15,8 +15,8 @@ def school_body(f):
                 purpose='ACADEMIC_VIEW',legal_basis='Explicit current institution academic agreement.',idempotency_key=str(uuid4()))
 
 
-def pending_http(client,identities,organization,*,choose=True,placement_start_date=None):
-    f=academic_fixture(identities,organization,make_supervision=False,placement_start_date=placement_start_date)
+def pending_http(client,identities,organization,*,choose=True,placement_start_date=None,required_minutes=0):
+    f=academic_fixture(identities,organization,make_supervision=False,placement_start_date=placement_start_date,required_minutes=required_minutes)
     if choose:
         post(client,'/api/v1/placements/'+f['placement']['id']+'/academic-requests',f['candidate'],
              {**terms_request(f['placement']),'enrollment_id':f['enrollment']['id']},201)

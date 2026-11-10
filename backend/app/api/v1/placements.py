@@ -49,6 +49,15 @@ class ConfirmPlacementStartRequest(TermsRequest):
     party: str  # CANDIDATE | ORGANIZATION
 
 
+class PlacementCompletionRequest(StrictDTO):
+    terms_id: UUID
+    version: int
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    decision: str = Field(default='REQUEST_COMPLETION', pattern='^(REQUEST_COMPLETION|CONFIRM_COMPLETION|REJECT_COMPLETION)$')
+    reason: str | None = Field(default=None, max_length=2000)
+    early_reason: str | None = Field(default=None, max_length=2000)
+
+
 @router.post("/applications", status_code=201)
 def create_application_endpoint(payload: CreateApplicationRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return placement_service.create_application(
@@ -125,6 +134,31 @@ def confirm_placement_start_endpoint(
             placement_id=placement_id,
             actor=actor,
             **payload.arguments(),
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.post("/placements/{placement_id}/completion-requests", status_code=201)
+def request_placement_completion_endpoint(
+    placement_id: str,
+    payload: PlacementCompletionRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    try:
+        from app.services.placement_completion import completion_service
+        return completion_service.request_or_confirm_completion(
+            actor=actor,
+            placement_id=placement_id,
+            terms_id=str(payload.terms_id),
+            version=payload.version,
+            idempotency_key=payload.idempotency_key,
+            decision=payload.decision,
+            reason=payload.reason,
+            early_reason=payload.early_reason,
         )
     except PlacementScopeError as exc:
         raise HTTPException(
