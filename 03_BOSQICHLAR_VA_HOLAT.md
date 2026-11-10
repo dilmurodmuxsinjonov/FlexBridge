@@ -1,5 +1,9 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
+Current LOG-073 publication: API106 PR68 accepted1f717899/exact53b complete1047 twice618.75/873.95. Issue67 remains open. Current API107 writer source7 files + tests/helpers9 pinned from actual corrective and final observed-test reviews (all exit0). Native runtime37passed303.85s plus overlapping latest observed SQL/noauth4passed60.90s; real HTTP PID/blocker chains preserved in JUnit. Three genuine red defects corrected, fixture logout audit kept, all failed stages retained. Draft0016/125, accepted0015/124,canonical94. Registration69 explicit63 placeholders/132 is not functionality. New writer draft/full exact-head CI/current GitHub feedback pending; API108 and all remaining R1/pilot open. Codex owns feature/67-academic-review-write; next concrete work: NEXT.md.
+
+Current LOG-073: API106 PR68 merged1f717899242e97e7c1fce3cddda2df44dd7953b1 after exact53b complete1047 CI twice618.75s/873.95s, five source/test pins and empty current feedback; Issue67 stays OPEN. Accepted0015/124,canonical94. Codex owns feature/67-academic-review-write from that identical accepted tree: API107/new REVIEWED/NEEDS_REVISION, strict alias expected revision/nonce, forward0016 immutable review/session/grant/plan/source evidence. Three actual red cases (expiry during intent wait, mismatched receipt, legacy without exact plan consent) corrected; focused5passed95.10s. Initial broad97passed1fixture-audit-count failure633.64s is not final-current evidence; actual logout audit remains required. Current full writer selection/source follow-up/new-head CI still required. No pilot/full R1 acceptance, no pg_live change. See academic_reviews/PLAN.md and HISOBOT.md.
+
 Current LOG-072: PR66 mergedc429/Issue65 closed after exact5ae complete1038 twice879.34s/845.71s,47 code/test/config blobs and current feedback/source audit. Accepted runtime0015/124,canonical94. Issue67/feature67 current API106 minimum exact submitted history read, final9 native passed70.44s/source opinion exit0; full new draft CI still required.107/108/forward0016/legacy revision+nonce and all remaining R1 open. See backend/ACADEMIC_RECORDS.md and academic_records/HISOBOT; pilot not accepted.
 
 Current LOG-072: Issue67 / feature/67-academic-records from5ae9f22. Codex owns new academic_records service/API/tests/docs. Primary source and acceptance are recorded before implementation in reviews/2026-11-10/academic_records/PLAN.md. Parent PR66 full CI still running; no main merge or pilot claim. Read-only plan reviewer could read repository sources but denied the external D: plan path; its output records that limitation. The plan is now copied into this repository for subsequent exact review.
@@ -589,3 +593,20 @@ Keyingi kichik qadam:
 
 
 - LOG-071 current:098/099/105 exact current scoped lists and option/assignment metadata helpers, distinct coordinator creation/binding notices, stale-choice exact-plan guard, post-role-pin current MFA policy. Native current21passed139.56s and notice5passed41.18s overlap; broad56passed1failed363.15s was a lease-reset boundary fixture, corrected explicit-expiry all notice groups15passed73.87s with worker semantics unchanged.9-file current read-only source opinion exit0/no actionable P1/P2, frozen hashes retained. Parentdf87515 full1015 twice549.23s/740.08s does not accept this current source. Registration67/65 of132 is registration only,0015/124 unchanged; latest CI/source pin and detailed106/107/108/full R1 remain. See backend/ACADEMIC_VIEWS.md, source_academic_views_manifest and current handoff.
+
+
+## EDU-CODEX-API107 / LOG-073 - exact revision academic feedback
+
+- Holat: Tekshiruvda, writer draft publication/current-head full CI; mas'ul Codex,
+  read-only source/test reviewer Copilot CLI. Issue67/API108 hali ochiq.
+- Fayllar: API2, DB metadata/storage2, service2, forward0016; tests/helpers9,
+  backend/ACADEMIC_REVIEWS.md, academic_reviews evidence/source_manifest va4 journals.
+- Qabul: original personally accepted Teacher exact plan/revision, current
+  session/MFA after waits, nonce conflict/replay/concurrency, immutable original
+  history/proof/receipt, SQL/audit/upgrade rollback. Native37 current runtime and
+  latest4 observed delta passed, preserved red/fixture stages not hidden. All16
+  source/test blobs need current pin; full exact-head CI/current feedback before
+  ordinary merge. No official grade/completion/workplace substitution.
+- Keyingi: NEXT.md legacy acceptance notice probe, API121 durable privileged flags,
+  source-consistent API108 nonofficial conclusion, remaining original R1 and pilot
+  acceptance. Registration69/63 is not functional percentage or pilot acceptance.

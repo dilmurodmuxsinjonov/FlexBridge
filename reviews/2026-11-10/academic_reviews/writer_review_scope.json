@@ -1,0 +1,16 @@
+{
+  "backend/alembic/versions/0016_academic_reviews.py": "fa997b45ea6ea86f2ab9ab911ada45bb8f09d8f9307c605d20d6018aa1db56ed",
+  "backend/app/services/academic_reviews.py": "34baaa43ef8d12e2e922a364e2a0d3de67495f7b39ae0ccf4fe139ca9aefb0dc",
+  "backend/app/api/v1/academic_admission.py": "04bb3625ab3dae0f3fbb7762adfcb3cc02686b265c46ecfe4dee422c4e1a3df1",
+  "backend/app/api/v1/internship_logs.py": "618c5eacf866f109cd422af57cd70f34230b3fd34f98aece9476f769d30369ad",
+  "backend/app/services/internship_logs.py": "98ba38cd3fdf35faff1efdf3de2d14d017c68bd17d6f575be85bf80901c635c9",
+  "backend/app/db/academic_admission.py": "62a760574da1b8fcc7dca9ed0e1b3228365f5ec394658ec3b2a0e2282edc6eaa",
+  "backend/app/db/storage.py": "53c13ee11fe0f32401d2dc95decea8c53ba9163efebe354792c520003499da81",
+  "backend/tests/security/test_academic_reviews.py": "523591934a30337d79cfc739bf867ee5b282d79504ec18df80c270317f0ecf52",
+  "backend/tests/security/test_academic_review_migration.py": "cc9f67a59f0aaffab4ae0a7d88d20200938b5c9337e06a2f8cbd04f3e726433d",
+  "backend/tests/security/test_academic_authority.py": "e3fa9c62d777b75ae729cb7cdc1834d681c1dba92f21b031659491ed14735dd5",
+  "backend/tests/security/test_academic_admission.py": "09c84bf056983cc1c49ac7f6b53b7e17e965a743e0438c1e9179796efd139dcf",
+  "backend/tests/security/test_academic_migration.py": "91b623095ecd40c501a03a63944b659905aad8c8b9e46f2457a9283b24aa3da4",
+  "backend/tests/security/test_enrollment_migration.py": "de377c8c0b46d48f4f8b9a64a5b9e5a89619a55abbb0c17a87f971bbf4d0c202",
+  "backend/tests/security/test_regressions.py": "4b6398fd733e684899503b30b034af3097bc3e5065d1e2425dea87b022c66863"
+}

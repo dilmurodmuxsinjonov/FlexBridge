@@ -49,11 +49,13 @@ class WorkplaceLogReviewRequest(StrictDTO):
 
 
 class AcademicLogReviewRequest(StrictDTO):
-    placement_id: str
-    academic_assignment_id: str
+    placement_id: UUID
+    academic_assignment_id: UUID
+    expected_revision_id: UUID
+    idempotency_key: str = Field(min_length=8, max_length=128)
     decision: str
     academic_grade: int | None = None
-    comment: str = ""
+    comment: str = Field(default="", max_length=10000)
 
 
 @router.post("/mentor-assignments", status_code=201)
@@ -137,8 +139,10 @@ def submit_academic_review_endpoint(
             raise HTTPException(422,detail={'code':'OFFICIAL_GRADE_USE_SEPARATE_WORKFLOW'})
         return internship_log_service.review_academic(
             daily_log_id=daily_log_id,
-            placement_id=payload.placement_id,
-            assignment_id=payload.academic_assignment_id,
+            placement_id=str(payload.placement_id),
+            assignment_id=str(payload.academic_assignment_id),
+            expected_revision_id=str(payload.expected_revision_id),
+            idempotency_key=payload.idempotency_key,
             actor=actor,
             decision=payload.decision,
             comment=payload.comment,

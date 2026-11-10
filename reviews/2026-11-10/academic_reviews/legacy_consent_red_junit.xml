@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="14.951" timestamp="2026-11-10T09:08:30.903269+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_review_migration" name="test_legacy_assignment_without_exact_plan_consent_cannot_create_public_review" time="13.679"><failure message="Failed: DID NOT RAISE IntegrityError">backend\tests\security\test_academic_review_migration.py:91: in test_legacy_assignment_without_exact_plan_consent_cannot_create_public_review
+    with pytest.raises(IntegrityError,match='exact current teacher'),engine.begin() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IntegrityError</failure></testcase></testsuite></testsuites>

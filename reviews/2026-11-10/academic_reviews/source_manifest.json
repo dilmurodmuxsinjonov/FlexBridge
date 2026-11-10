@@ -1,0 +1,188 @@
+{
+  "scope": "API107 exact Teacher/revision feedback, not API108/full R1/pilot acceptance",
+  "parent_commit": "1f717899242e97e7c1fce3cddda2df44dd7953b1",
+  "reviewed_runtime_files": 7,
+  "code_test_files": 16,
+  "native_current_runtime": {
+    "tests": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 303.845
+  },
+  "latest_observed_test_delta": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 60.896
+  },
+  "limits": "Overlapping stages not additive. Runtime37 loaded prior barrier test implementations; final4 observes each HTTP DB PID/lock and alias401. Read-only opinions do not certify execution/model/SHA/legal/provider/pilot. Full exact-head CI pending.",
+  "reviews": [
+    "copilot_writer_review.md",
+    "copilot_writer_followup_review.md",
+    "copilot_test_delta_review.md",
+    "copilot_observed_tests_review.md"
+  ],
+  "actual_observed_waits": {
+    "same_revision_overlap_True": [
+      {
+        "pid": 21372,
+        "application_name": "review-45b906a4-44f1-427a-98a5-09503c352373-0",
+        "wait_event": "advisory",
+        "blockers": [
+          9716
+        ],
+        "at_intent_lock": true
+      },
+      {
+        "pid": 43564,
+        "application_name": "review-b9c9325f-6263-4f52-b73a-75e0f79bfb7e-1",
+        "wait_event": "transactionid",
+        "blockers": [
+          21372
+        ],
+        "at_intent_lock": false
+      }
+    ],
+    "same_revision_overlap_False": [
+      {
+        "pid": 9716,
+        "application_name": "review-40b4a7c9-c99e-4252-8501-aad4a937241c-0",
+        "wait_event": "advisory",
+        "blockers": [
+          36312
+        ],
+        "at_intent_lock": true
+      },
+      {
+        "pid": 21372,
+        "application_name": "review-fa599abe-8022-4fc6-8895-ac8b1d6b455d-1",
+        "wait_event": "transactionid",
+        "blockers": [
+          9716
+        ],
+        "at_intent_lock": false
+      }
+    ],
+    "cross_host_actor_key_overlap": [
+      {
+        "pid": 9716,
+        "application_name": "cross-host-311a456c-9135-4aa6-98a3-e0d7ed9cd40d-0",
+        "wait_event": "advisory",
+        "blockers": [
+          21372,
+          43564
+        ],
+        "at_intent_lock": true
+      },
+      {
+        "pid": 43564,
+        "application_name": "cross-host-524f93ee-4539-4e6d-a158-17081752f54b-1",
+        "wait_event": "advisory",
+        "blockers": [
+          21372
+        ],
+        "at_intent_lock": true
+      }
+    ]
+  },
+  "files": {
+    "backend/alembic/versions/0016_academic_reviews.py": {
+      "working_sha256": "71af50f22e322ff267201e72c9d0efdfecf31c9db6e005439501af38123ee34d",
+      "normalized_sha256": "71af50f22e322ff267201e72c9d0efdfecf31c9db6e005439501af38123ee34d",
+      "index_sha256": "71af50f22e322ff267201e72c9d0efdfecf31c9db6e005439501af38123ee34d",
+      "index_blob": "5efd829870a06193ffaf19e6a8b3ee621156826c"
+    },
+    "backend/app/api/v1/academic_admission.py": {
+      "working_sha256": "04bb3625ab3dae0f3fbb7762adfcb3cc02686b265c46ecfe4dee422c4e1a3df1",
+      "normalized_sha256": "04bb3625ab3dae0f3fbb7762adfcb3cc02686b265c46ecfe4dee422c4e1a3df1",
+      "index_sha256": "04bb3625ab3dae0f3fbb7762adfcb3cc02686b265c46ecfe4dee422c4e1a3df1",
+      "index_blob": "7951ba378d27f6385cd8f252bcd7eaac64130dd0"
+    },
+    "backend/app/api/v1/internship_logs.py": {
+      "working_sha256": "82f8a3defa9b07bff3eb8dcafd51697edde84d668ba9b4799384e23930ec570d",
+      "normalized_sha256": "618c5eacf866f109cd422af57cd70f34230b3fd34f98aece9476f769d30369ad",
+      "index_sha256": "618c5eacf866f109cd422af57cd70f34230b3fd34f98aece9476f769d30369ad",
+      "index_blob": "5f2ab78ec60078cfcc427afdc3a3c6a0a1c24314"
+    },
+    "backend/app/db/academic_admission.py": {
+      "working_sha256": "62a760574da1b8fcc7dca9ed0e1b3228365f5ec394658ec3b2a0e2282edc6eaa",
+      "normalized_sha256": "62a760574da1b8fcc7dca9ed0e1b3228365f5ec394658ec3b2a0e2282edc6eaa",
+      "index_sha256": "62a760574da1b8fcc7dca9ed0e1b3228365f5ec394658ec3b2a0e2282edc6eaa",
+      "index_blob": "41a7cc378381f7225bc7b5a3f6569a2558580385"
+    },
+    "backend/app/db/storage.py": {
+      "working_sha256": "62dbc1120517c65bbb1e5cf83f93e6feb6142c6422a618e665f0aeafe1fc1771",
+      "normalized_sha256": "53c13ee11fe0f32401d2dc95decea8c53ba9163efebe354792c520003499da81",
+      "index_sha256": "53c13ee11fe0f32401d2dc95decea8c53ba9163efebe354792c520003499da81",
+      "index_blob": "55b33239bb3b8a52aaea2da20035cd72ff26ef24"
+    },
+    "backend/app/services/academic_reviews.py": {
+      "working_sha256": "9464c0cb2eb499c24b22ace55361d70ecdaa2916854e3defa44c3776d6141928",
+      "normalized_sha256": "9464c0cb2eb499c24b22ace55361d70ecdaa2916854e3defa44c3776d6141928",
+      "index_sha256": "9464c0cb2eb499c24b22ace55361d70ecdaa2916854e3defa44c3776d6141928",
+      "index_blob": "a6221572d1bde1fc8943bf94d67b69c13387370d"
+    },
+    "backend/app/services/internship_logs.py": {
+      "working_sha256": "678992bde41ac86dbaaed77e95efc4d25a0f238d4ffd03020f5aa517d32c8497",
+      "normalized_sha256": "98ba38cd3fdf35faff1efdf3de2d14d017c68bd17d6f575be85bf80901c635c9",
+      "index_sha256": "98ba38cd3fdf35faff1efdf3de2d14d017c68bd17d6f575be85bf80901c635c9",
+      "index_blob": "05c765023702d4faebf7c775652cad751b952762"
+    },
+    "backend/tests/security/academic_review_observer.py": {
+      "working_sha256": "1b49427fe5b449b820f4709b4df1d75883615f600a33a18fab6e785e48924e61",
+      "normalized_sha256": "1b49427fe5b449b820f4709b4df1d75883615f600a33a18fab6e785e48924e61",
+      "index_sha256": "1b49427fe5b449b820f4709b4df1d75883615f600a33a18fab6e785e48924e61",
+      "index_blob": "1a34930fd18556ff5ea5f9340e04f8f7dcf97fb2"
+    },
+    "backend/tests/security/test_academic_admission.py": {
+      "working_sha256": "09c84bf056983cc1c49ac7f6b53b7e17e965a743e0438c1e9179796efd139dcf",
+      "normalized_sha256": "09c84bf056983cc1c49ac7f6b53b7e17e965a743e0438c1e9179796efd139dcf",
+      "index_sha256": "09c84bf056983cc1c49ac7f6b53b7e17e965a743e0438c1e9179796efd139dcf",
+      "index_blob": "5060f13e02222abee3726dcf2759cdc8814f7ea9"
+    },
+    "backend/tests/security/test_academic_authority.py": {
+      "working_sha256": "e3fa9c62d777b75ae729cb7cdc1834d681c1dba92f21b031659491ed14735dd5",
+      "normalized_sha256": "e3fa9c62d777b75ae729cb7cdc1834d681c1dba92f21b031659491ed14735dd5",
+      "index_sha256": "e3fa9c62d777b75ae729cb7cdc1834d681c1dba92f21b031659491ed14735dd5",
+      "index_blob": "b11e8112f3971e5169e2de91504a479d0ab5b521"
+    },
+    "backend/tests/security/test_academic_migration.py": {
+      "working_sha256": "91b623095ecd40c501a03a63944b659905aad8c8b9e46f2457a9283b24aa3da4",
+      "normalized_sha256": "91b623095ecd40c501a03a63944b659905aad8c8b9e46f2457a9283b24aa3da4",
+      "index_sha256": "91b623095ecd40c501a03a63944b659905aad8c8b9e46f2457a9283b24aa3da4",
+      "index_blob": "f19da941d0dff4c27bb1e489f79244df4fb97814"
+    },
+    "backend/tests/security/test_academic_review_intents.py": {
+      "working_sha256": "4dd9ef69dcda00268f8b7c78b61f3af5b6250a669450a7d5b6fb85f64015ff10",
+      "normalized_sha256": "4dd9ef69dcda00268f8b7c78b61f3af5b6250a669450a7d5b6fb85f64015ff10",
+      "index_sha256": "4dd9ef69dcda00268f8b7c78b61f3af5b6250a669450a7d5b6fb85f64015ff10",
+      "index_blob": "2a80727785a872a62a8fa2d32d1c211ef17b2927"
+    },
+    "backend/tests/security/test_academic_review_migration.py": {
+      "working_sha256": "4187ada107de789f9bd31c234f1da65a4f2a3954671eafc56ab34992598edb0f",
+      "normalized_sha256": "4187ada107de789f9bd31c234f1da65a4f2a3954671eafc56ab34992598edb0f",
+      "index_sha256": "4187ada107de789f9bd31c234f1da65a4f2a3954671eafc56ab34992598edb0f",
+      "index_blob": "9660abd5103c6a5d9b7076d62df6f2bf8450606d"
+    },
+    "backend/tests/security/test_academic_reviews.py": {
+      "working_sha256": "d1fd67686fa40648f5ba9e9bdf7bf6475bfb72dd6cfc8d4673f99bf1ed37b402",
+      "normalized_sha256": "d1fd67686fa40648f5ba9e9bdf7bf6475bfb72dd6cfc8d4673f99bf1ed37b402",
+      "index_sha256": "d1fd67686fa40648f5ba9e9bdf7bf6475bfb72dd6cfc8d4673f99bf1ed37b402",
+      "index_blob": "c0448d3a856f7dfed668b42e963d08cd341a0492"
+    },
+    "backend/tests/security/test_enrollment_migration.py": {
+      "working_sha256": "de377c8c0b46d48f4f8b9a64a5b9e5a89619a55abbb0c17a87f971bbf4d0c202",
+      "normalized_sha256": "de377c8c0b46d48f4f8b9a64a5b9e5a89619a55abbb0c17a87f971bbf4d0c202",
+      "index_sha256": "de377c8c0b46d48f4f8b9a64a5b9e5a89619a55abbb0c17a87f971bbf4d0c202",
+      "index_blob": "8de589b476d1079aec146b092f26f40a3e84124c"
+    },
+    "backend/tests/security/test_regressions.py": {
+      "working_sha256": "0e7773a4b8054e3cb97e6ec6b256423d31dfca523bc9ac85d1c59a09840f4bbb",
+      "normalized_sha256": "4b6398fd733e684899503b30b034af3097bc3e5065d1e2425dea87b022c66863",
+      "index_sha256": "4b6398fd733e684899503b30b034af3097bc3e5065d1e2425dea87b022c66863",
+      "index_blob": "7c00c3c3b9f6767ceb491020e816c45f72422199"
+    }
+  }
+}

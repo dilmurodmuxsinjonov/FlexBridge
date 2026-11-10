@@ -1,5 +1,76 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
+## Current LOG-073 - source ready for writer draft and exact-head CI
+
+PR68 API106 accepted1f717899 after exact53b complete1047 twice618.75/873.95.
+Current branch feature/67-academic-review-write; Issue67 OPEN. Accepted0015/124,
+writer draft0016/125,canonical94. Runtime source7 current pins match corrective
+review, final test/helper3 observed delta plus unchanged inherited tests cover
+all16 changed Python blobs. All four actual read-only Copilot reviews exited0;
+final observed-source opinion closed the two test-coverage findings. Opinion is
+not runtime/model/SHA/legal/provider/pilot certification.
+
+Native current runtime37passed303.85s (prior barrier concurrency implementations)
+and final stronger observed SQL/noauth delta4passed60.90s overlap. JUnit records
+actual HTTP backend PIDs/blockers: same revision request A at intent + B at scoped
+row lock; distinct hosts/institutions both at shared actor/key advisory intent.
+No original SQL/authority override, only transaction-local diagnostic labels.
+Actual populated legacy session can read200 but both review aliases403 without
+exact plan consent. Revoked/reappointed original grant cannot replay. Logout
+audit remains required; corrected fixture2passed26.45s. Three genuine defect red
+artifacts and both earlier fixture failures preserved. No aggregate unique count.
+
+NEXT: publish pinned writer draft; complete matching-head push/PR CI, inspect actual
+counts/current feedback and normal merge only after evidence. Issue67/API108/full
+R1 remain open. Follow academic_reviews/NEXT.md: legacy fresh-acceptance notice
+source probe, durable authenticated API121 flag administration (API122=incidents),
+then explicit nonofficial API108 contract and separately gated official effect.
+Never use RAM flags/UID setter for privilege or infer completion/workplace approval.
+Evidence sharing/host confidentiality, candidate diary authority, completion/
+amendments/exports/frontend/providers/legal/DR/UAT/performance/accessibility and
+remaining63 placeholders/partial branches stay real work. pg_live untouched;
+Docker/WSL admin installation still incomplete. No dependency/install/admin action
+needed for this unit. Revalidate actual git/process/CI state on resume.
+
+## Historical LOG-073 construction notes (retained)
+
+## Current LOG-073 - API107 writer in progress
+
+API106 PR68 is accepted1f717899 after matching53b full1047 twice618.75/873.95,
+five blob/source audit and empty feedback. Issue67 remains open; current writer
+branch adopted identical squash tree with all WIP files hash-preserved. Receipt
+and CI/source audit in academic_reviews. Accepted0015/124; draft0016/125.
+
+Current API107 and old daily-log alias share exact revision/original Teacher/
+personal terms consent, canonical REVIEWED/NEEDS_REVISION, explicit nonce and
+immutable review/proof/receipt/audit transaction. Alias new intent rejects changed
+current revision; canonical old submitted revision can be explicitly reviewed.
+Old receipt replay under current relationship after cancellation changes no state.
+New feedback requires ACTIVE; academic feedback never completes a placement or
+substitutes workplace approval. Imported old vocabulary is preserved verbatim.
+
+Copilot initial source found legacy accepted_at bypass of exact plan consent.
+Actual SQL red confirmed it. Codex actual red tests also confirmed expired-session
+replay after advisory wait and SQL receipt/comment mismatch. Corrected checks:
+intent wait before current scope/session, explicit matching consent even on legacy,
+complete receipt=canonical snapshot. Follow-up source opinion exit0 closed those
+three scoped findings; it is not execution/model/SHA/legal/pilot certification.
+Corrective5 native passed95.10s. Initial loaded-source98-case stage97passed1failed
+633.64s: denial worked, but actual logout added its required audit event and the
+test counted all audits as unchanged. Fix that assertion, preserve original failure.
+
+NEXT: finish final-current writer/upgrade/concurrent/authority checks, including
+cross-placement same actor/key and populated legacy actual-session HTTP denial;
+pin all current source/test blobs, add native failed-stage receipts, publication
+gate and draft PR under Issue67. Exact full new-head CI/current source feedback
+required before merge. API108 semantics and durable official grade/signature gate
+remain open; RAM flags cannot grant privilege. Do not guess evidence visibility,
+auto share files or claim candidate diary/completion/amendments/frontend/live/
+legal/DR/UAT/full R1/pilot readiness. pg_live is untouched; Docker/WSL admin install
+is still incomplete. This bounded unit needs no dependency/admin action.
+
+## Previous LOG-072 handoff (retained history)
+
 Yangilangan2026-11-10, Asia/Tashkent; mas'ul Codex, D:\FlexBridge.
 Codex feature/65-internship-admission branchida ishlamoqda. Bir xil fayllarni parallel
 tahrir qilma. Ishni boshlashda git status, GitHub va actual jarayonlarni tekshir.

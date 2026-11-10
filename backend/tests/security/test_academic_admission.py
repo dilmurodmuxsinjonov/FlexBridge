@@ -65,7 +65,8 @@ def test_actual_pending_school_and_teacher_http_flow_then_password_review(client
     assert draft.status_code==200,draft.text
     post(client,'/api/v1/logs/'+draft.json()['id']+'/submit',f['candidate'],{},200)
     post(client,'/api/v1/internship-logs/daily-logs/'+draft.json()['id']+'/academic-reviews',f['teacher'],dict(
-        placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],decision='APPROVED',comment='Actual academic review.'),201)
+        placement_id=f['placement']['id'],academic_assignment_id=assignment['id'],decision='REVIEWED',comment='Actual academic review.',
+        expected_revision_id=draft.json()['current_revision_id'],idempotency_key=str(uuid4())),201)
     with transaction() as conn:
         assert conn.execute(select(table('sessions').c.assurance).where(table('sessions').c.id==f['teacher']['session_id'])).scalar_one()=='PASSWORD'
         assert conn.execute(text('SELECT count(*) FROM flexbridge.academic_assignment_consents')).scalar_one()==1

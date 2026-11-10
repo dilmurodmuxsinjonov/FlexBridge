@@ -1,5 +1,9 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
+Current LOG-073 publication: API106 PR68 accepted1f717899/exact53b complete1047 twice618.75/873.95. Issue67 remains open. Current API107 writer source7 files + tests/helpers9 pinned from actual corrective and final observed-test reviews (all exit0). Native runtime37passed303.85s plus overlapping latest observed SQL/noauth4passed60.90s; real HTTP PID/blocker chains preserved in JUnit. Three genuine red defects corrected, fixture logout audit kept, all failed stages retained. Draft0016/125, accepted0015/124,canonical94. Registration69 explicit63 placeholders/132 is not functionality. New writer draft/full exact-head CI/current GitHub feedback pending; API108 and all remaining R1/pilot open. Codex owns feature/67-academic-review-write; next concrete work: NEXT.md.
+
+Current LOG-073: API106 PR68 merged1f717899242e97e7c1fce3cddda2df44dd7953b1 after exact53b complete1047 CI twice618.75s/873.95s, five source/test pins and empty current feedback; Issue67 stays OPEN. Accepted0015/124,canonical94. Codex owns feature/67-academic-review-write from that identical accepted tree: API107/new REVIEWED/NEEDS_REVISION, strict alias expected revision/nonce, forward0016 immutable review/session/grant/plan/source evidence. Three actual red cases (expiry during intent wait, mismatched receipt, legacy without exact plan consent) corrected; focused5passed95.10s. Initial broad97passed1fixture-audit-count failure633.64s is not final-current evidence; actual logout audit remains required. Current full writer selection/source follow-up/new-head CI still required. No pilot/full R1 acceptance, no pg_live change. See academic_reviews/PLAN.md and HISOBOT.md.
+
 Boshlanish: 2026-11-06. Ushbu to'rtta boshqaruv fayli barcha AIlar uchun umumiy ish xotirasidir.
 
 ## O'qish tartibi va manbalar
@@ -825,3 +829,24 @@ Tekshiruvchi AI / tekshiruv natijasi:
 - Issue67/feature67 now implements API106 exact submitted academic record under original accepted Teacher/revision terms or current exact coordinator purpose. Historical reads after pointer change/cancel, no drafts/self/stale or other teacher/foreign file access; minimum task outcome/minutes, original review attribution/vocabulary, no intervals/files/URLs/payroll/legal/private verification. Business material locks precede actual current role/session policy, atomic private read audit/no content on audit failure, no-store. Codex owns code; actual Copilot read-only current5-file source opinion exit0/no concrete P1/P2, unchanged launch hashes. No execution/model/SHA/legal identity certification by reviewer.
 - Initial2failed2passed32.07s were wrong route/unsupported amendment assumptions. Corrected3passed1failed33.28s lacked required DRAFT nonce in labelled trusted pointer-advance setup; nonce fixed and focusedhistory1passed11.01s. Native authorization9passed67.86s; final projection9passed70.44s. Overlapping stages, all raw failures retained. Actual public submitted edit stays409; trusted staff/file/amendment metadata is not live identity/scan or public amendment proof.
 - Current new draft full CI/source/test pin remains required.107/108 are still501 and Issue67 remains open. Next forward0016 immutable current Teacher review proofs, explicit expected revision/nonce on canonical and legacy aliases, REVIEWED/NEEDS_REVISION for new writes while preserving stored old vocabulary; separate final-conclusion semantics and durable official grading policy. Existing FeatureFlagService RAM state/UID updates cannot be an authority gate. File confidentiality/sharing intake055, full diary/completion/amendment/report/frontend/provider/legal/DR and full R1 still open. No goal scope discarded or pilot accepted.
+
+
+## LOG-073 / 2026-11-10 Asia/Tashkent - aniq revision akademik fikri
+
+AI: Codex, amalga oshirish va tekshirish; Copilot CLI faqat o'qish reviewlari,
+chiqish kodlari0. Aniq model nomi CLI natijasi bilan tasdiqlanmagan.
+Issue67/feature67 writer. PR68 source53b o'qish qismi1047 CI618.75/873.95dan
+keyin1f717899ga birlashtirildi; Issue67 ochiq. Yangi API107 actual original
+Teacher, exact revision/terms consent, REVIEWED/NEEDS_REVISION, strict legacy
+expected revision/nonce, immutable SQL proof/receipt/audit va forward0016/125.
+Native red: expiry receipt replay2 holatdan biri, changed receipt SQL, legacy
+accepted_at without exact consent;3 tasida ham himoya yetishmasligi mustaqil
+ko'rsatildi. Tuzatishlar va source follow-up exit0; runtime37passed303.85s.
+Logout audit count fixture xatosi yashirilmagan, corrected2passed26.45s.
+Thread start barrier SQL overlap isboti emasligi reviewda topildi; actual HTTP
+request label/PID/blocker bilan yangi4passed60.90s, JUnit property saqlangan.
+Barcha bosqichlar ustma-ust, yig'indi test soni deyilmaydi. Source/index16
+fayl manifesti va yangi draft/head CI gate kerak. Rasmiy baho/imzo, API108,
+evidence-sharing, candidate diary, completion/amendments/exports/frontend/live/
+legal/DR va butun R1/pilot ochiq; pg_livega tegilmadi. Keyingi aniq qadamlar
+reviews/2026-11-10/academic_reviews/NEXT.md va Antigravity handoffda.
