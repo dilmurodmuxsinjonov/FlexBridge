@@ -259,3 +259,16 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Candidate Draft Confidentiality: Non-candidate actors only see `SUBMITTED` logs. Querying with `status=DRAFT` returns an empty page (`total: 0, items: []`) preventing existence oracle attacks.
   - Anti-N+1 Query Architecture: Paginated fetch on `daily_logs JOIN log_revisions`, batched subquery for tasks with correlated scalar subquery for evidence count, and batched queries for workplace and academic reviews.
   - Strict Parameter Validation: Date parsing with `date.fromisoformat`, `from_date <= to_date`, page >= 1, 1 <= page_size <= 100.
+
+## LOG-API055-EVIDENCE — Task Entry Evidence Attachment (2026-11-10)
+
+- **Capability & Contract**: `LOG_WRITE` (`CAP-022`) / `API-055` (Issue #86), branch `feature/86-log-entry-evidence`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `POST /api/v1/log-entries/{id}/evidence`: Attach verified clean file evidence to draft task entry (HTTP 201).
+  - `GET /api/v1/log-entries/{id}/evidence`: List attached evidence for task entry with stakeholder visibility filtering.
+- **Zero New DDL / Schema**: Leverages existing 130 tables runtime schema: `log_task_entries` (DB-057), `log_evidence` (DB-058: `id`, `created_at`, `updated_at`, `entry_id`, `file_id`, `visibility`), `files` (DB-018).
+- **Concurrency & Mutability Architecture**:
+  - Employs atomic join row locking across `(daily_logs, log_revisions, log_task_entries)` via `.with_for_update(of=(t_dl, t_rev, t_te))` to guarantee serialization against concurrent `API-056` submission.
+  - Enforces current-revision validity (`entry_row["current_revision_id"] == entry_row["revision_id"]`), blocking evidence attachment to superseded draft revisions (HTTP 409 `SUPERSEDED_REVISION_IMMUTABLE`).
+  - Strict storage provenance & anti-malware verification: requires `files.scan_status == 'CLEAN'`; blocks unvetted files (`PENDING_SCAN`, `QUARANTINED`, `deleted_at IS NOT NULL`) with HTTP 422.
+  - Fail-closed visibility segregation: Academic supervisors only view evidence tagged for academia (`HOST_AND_ACADEMIC`, `ACADEMIC_ONLY`, `PUBLIC`, `ALL_PARTIES`), preventing host-confidential metadata disclosure.

@@ -939,3 +939,24 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109 review: `reviews/2026-11-10/placement_logs/COPILOT_REVIEW.md` (0 vulnerabilities, High confidence).
   * OpenCode CLI 1.18.29 & Peer Review: `reviews/2026-11-10/placement_logs/OPENCODE_REVIEW.md` (APPROVED).
   * Review synthesis: `reviews/2026-11-10/placement_logs/REVIEW_SUMMARY.md`.
+
+## LOG-089 / API-055 - Task Entry Evidence Attachment (Issue #86)
+
+- **Issue / PR**: GitHub Issue #86 (`API-055`), branch `feature/86-log-entry-evidence`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` per user freeze policy (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode CLI 1.18.29.
+- **Service & Implementation (`CAP-022` / `PG-022.S03` / `DB-058`)**:
+  - `backend/app/services/internship_logs.py`: Implemented `attach_task_evidence_api_055` and `get_task_entry_evidence_api_055`.
+  - Atomic concurrency lock across `(daily_logs, log_revisions, log_task_entries)` via `.with_for_update(of=(t_dl, t_rev, t_te))` to prevent race conditions with concurrent `API-056` submission.
+  - Superseded draft revision protection (`entry_row["current_revision_id"] == entry_row["revision_id"]`), blocking attachments to obsolete draft revisions (409 Conflict).
+  - Storage provenance and anti-malware verification: requires `files.scan_status == 'CLEAN'`; files in `PENDING_SCAN` or `QUARANTINED` blocked with 422; foreign files blocked with 403; deleted files blocked with 422.
+  - Fail-closed stakeholder visibility segregation: academic viewers only receive evidence tagged for academia (`HOST_AND_ACADEMIC`, `ACADEMIC_ONLY`, `PUBLIC`, `ALL_PARTIES`); host-confidential evidence (`HOST_ONLY`, `PRIVATE_HOST_EVIDENCE`) is strictly hidden from academic reviewers.
+  - Canonical routes: mounted `POST /api/v1/log-entries/{id}/evidence` (201 Created) and `GET /api/v1/log-entries/{id}/evidence` in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB `FLEXBRIDGE_TEST_ADMIN_URL` on port 55440, pg_live untouched)**:
+  * 16/16 contract and security tests passed in `backend/tests/security/test_log_evidence_api055.py`.
+  * 6/6 adversarial stress tests passed in `backend/tests/security/test_log_evidence_adversarial.py`.
+  * 20/20 API-053 regressions passed in `backend/tests/security/test_placement_logs_api053.py` & `test_placement_logs_adversarial.py`.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: Identified 2 edge cases (concurrency lock order & visibility metadata leakage); both fully remediated and verified with tests (`reviews/2026-11-10/log_evidence/COPILOT_REVIEW.md`).
+  * OpenCode CLI & Peer Review: 5-axis review passed (`reviews/2026-11-10/log_evidence/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/log_evidence/REVIEW_SUMMARY.md`.
