@@ -248,3 +248,14 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Input validation: Format restricted to `'PDF'` or `'JSON'` (HTTP 422 `INVALID_EXPORT_FORMAT`).
   - Strict informational disclaimer (`CAP-026`): `"Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi."` embedded in summary and generated files.
   - Multi-tenant isolation: Host organization B cannot export Organization A placements; unrelated candidates, coordinators, and teachers forbidden. Revoked mentors and teachers immediately lose export permissions.
+
+## PLACEMENT-API053-LOGS — Single Placement Diary Logs View (2026-11-10)
+
+- **Capability & Contract**: `LOG_WRITE` (`CAP-022`) / `API-053` (Issue #84), branch `feature/84-placement-diary-logs`, base `integration/r1-agent-collaboration`.
+- **Endpoint**: `GET /api/v1/placements/{placement_id}/logs`
+- **Zero New DDL / Schema**: Leverages the 130 runtime tables schema: `daily_logs` (DB-055), `log_revisions` (DB-056), `log_task_entries` (DB-057), `log_evidence` (DB-058), `workplace_log_reviews` (DB-059), `academic_log_reviews` (DB-060).
+- **Service & Implementation (`app/services/placement_logs.py`)**:
+  - `resolve_logs_actor`: Evaluates stakeholder relationship with Candidate-first, Host-second, Mentor-third, Teacher-fourth, Coordinator-fifth precedence hierarchy.
+  - Candidate Draft Confidentiality: Non-candidate actors only see `SUBMITTED` logs. Querying with `status=DRAFT` returns an empty page (`total: 0, items: []`) preventing existence oracle attacks.
+  - Anti-N+1 Query Architecture: Paginated fetch on `daily_logs JOIN log_revisions`, batched subquery for tasks with correlated scalar subquery for evidence count, and batched queries for workplace and academic reviews.
+  - Strict Parameter Validation: Date parsing with `date.fromisoformat`, `from_date <= to_date`, page >= 1, 1 <= page_size <= 100.

@@ -693,7 +693,7 @@ Keyingi kichik qadam:
 
 ## PLACEMENT-ANTIGRAVITY-API052 / LOG-087 - Issue #82: Single Placement Report Export (API-052 / CAP-026)
 
-- **Holat**: Bajarildi va tekshiruvdan o'tdi (PR ochish va integratsiyaga tayyor). Branch `feature/82-placement-report-exports`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Holat**: Bajarildi va integratsiya qilindi (PR #83 merged into `integration/r1-agent-collaboration` commit `c8d7f8d748ee5b1f688a8dc40a698cd8335e079e`). Branch `feature/82-placement-report-exports`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
 - **Mas'ul**: Antigravity Teamwork (Milestone 1 Worker & Challengers, Milestone 2 Worker & Reviewers).
 - **Qilingan ishlar va yechimlar**:
   * **Actor Resolution Precedence Fix (Issue #82)**:
@@ -714,3 +714,31 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.108 review: `reviews/2026-11-10/placement_exports/COPILOT_REVIEW.md` (host-owner resolution fix tasdiqlandi; lifecycle/presigned-url tavsiyalari qayd etildi).
   * OpenCode CLI 1.18.29 & Peer Review: `reviews/2026-11-10/placement_exports/OPENCODE_REVIEW.md` (5-axis bo'yicha tasdiqlandi).
   * Review sintezi: `reviews/2026-11-10/placement_exports/REVIEW_SUMMARY.md`.
+
+
+## PLACEMENT-ANTIGRAVITY-API053 / LOG-088 - Issue #84: Single Placement Diary Logs View (API-053 / CAP-022 / PG-022.S01)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi (PR ochish va integratsiyaga tayyor). Branch `feature/84-placement-diary-logs`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/placement_logs.py`)**:
+    `PlacementLogsService.get_placement_logs_api_053` metodi yaratildi:
+    - Multi-stakeholder vakolat tekshiruvi: Candidate, Host Organization (`OWNER`, `HOST_COORDINATOR`, `HR`), Workplace Mentor, Academic Teacher, Institutional Coordinator.
+    - Qoralama (Draft) maxfiyligi: Faqat nomzod o'zining `DRAFT` va `SUBMITTED` loglarini ko'ra oladi; boshqa barcha manfaatdor tomonlar faqat `SUBMITTED` loglarni ko'radi.
+    - Anti-probing & Oracle himoyasi: Begona yoki ruxsatsiz rollar `status=DRAFT` bo'yicha qidirganda xatolik berilmaydi, bo'sh sahifa (`total: 0, items: []`) qaytariladi.
+    - Yuqori unumdorlik (Anti-N+1): Bitta joinli so'rov orqali `daily_logs` va `log_revisions` olinadi; vazifalar va taqrizlar `IN (...)` hamda korrelyatsiyalangan skalyar subquery orqali paketlab olinadi.
+    - Filtrlash va sahifalash: `from_date`, `to_date`, `status`, `page`, `page_size`, `include_tasks`, `include_reviews` to'liq nazorat qilinadi (422 xatolar tekshiruvi bilan).
+  * **FastAPI Endpoint (`backend/app/api/v1/placements.py`)**:
+    `GET /api/v1/placements/{placement_id}/logs` yo'nalishi ulandi.
+  * **Delegatsiya interfeysi (`backend/app/services/internship_logs.py`)**:
+    `InternshipLogService.get_placement_logs_api_053` yo'naltiruvchi metodi qo'shildi.
+  * **Kanonik marshrutlar xaritasi (`backend/app/api/v1/canonical_routes.py`)**:
+    `API-053` docstringga qayd etildi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 15/15 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_placement_logs_api053.py`).
+  * 5/5 adversarial va SQL injection testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_placement_logs_adversarial.py`).
+  * 130 ta jadval schema regressiyasi 100% buzilmaganligi tasdiqlandi.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109 review: `reviews/2026-11-10/placement_logs/COPILOT_REVIEW.md` (0 xavfsizlik zaifligi, High confidence).
+  * OpenCode CLI 1.18.29 & Peer Review: `reviews/2026-11-10/placement_logs/OPENCODE_REVIEW.md` (5-axis bo'yicha tasdiqlandi).
+  * Review sintezi: `reviews/2026-11-10/placement_logs/REVIEW_SUMMARY.md`.

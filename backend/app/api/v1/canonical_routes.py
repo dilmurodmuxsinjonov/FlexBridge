@@ -5,6 +5,7 @@ including:
 - `API-003`: `POST /api/v1/matching/preview`
 - `API-043`: `POST /api/v1/offers/{id}/respond`
 - `API-046`: `POST /api/v1/engagements/{id}/confirmations`
+- `API-053`: `GET /api/v1/placements/{id}/logs` (in `placements.py`)
 - `API-054`: `PUT /api/v1/placements/{id}/logs/{date}`
 - `API-056`: `POST /api/v1/logs/{id}/submit`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
