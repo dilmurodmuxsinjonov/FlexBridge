@@ -5,6 +5,7 @@ from pydantic import BaseModel,ConfigDict,Field
 from app.api.dependencies import ActorContext,require_actor_context
 from app.services.academic_admission import academic_service as service
 from app.services.academic_views import academic_view_service as views
+from app.services.academic_records import academic_record_service as records
 from app.api.v1.placement_admission import TermsRequest
 
 router=APIRouter(prefix='/api/v1',tags=['academic-admission'])
@@ -99,3 +100,8 @@ def teachers(inst:UUID,limit:int=Query(default=50,ge=1,le=100),after:UUID|None=N
 @router.get('/me/academic-review-queue')
 def review_queue(limit:int=Query(default=50,ge=1,le=100),after:UUID|None=None,actor:ActorContext=Depends(require_actor_context)):
     return views.review_queue(actor,limit=limit,after=str(after) if after else None)
+
+
+@router.get('/log-revisions/{revision}/academic')
+def academic_revision(revision:UUID,actor:ActorContext=Depends(require_actor_context)):
+    return records.detail(actor,str(revision))

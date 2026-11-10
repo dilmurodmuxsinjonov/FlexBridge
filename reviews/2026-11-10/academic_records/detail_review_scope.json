@@ -1,0 +1,11 @@
+{
+  "parent": "c4292d66c701cb76688f42483c25736e49a7bde0",
+  "scope": {
+    "backend/app/services/academic_records.py": "ddbf34d01cc7841912c996ed29f040d77eeca744625c3c8f288bb9ee888ba162",
+    "backend/app/api/v1/academic_admission.py": "8e078e6153e0dbeb10ac3b5793ae7a1a022c1be913608335923dcf9b0fd32433",
+    "backend/app/core/iam_http.py": "c9bedeaa3c009f05b788600d13b17022d8bb02331a5db6bc735e65f5d485c37b",
+    "backend/tests/security/test_academic_records.py": "8522ad879787dd6c4734d19def52d020e476f5b32560e627bc77ce76f9ddcc41",
+    "backend/tests/security/test_academic_authority.py": "bcfc890e35d173a24289acb426839b91d12b2e3867131555e1c44ec75960b39d"
+  },
+  "limits": "Current API106 read source only;107/108 remain unimplemented. No test/model/SHA/pilot certification."
+}

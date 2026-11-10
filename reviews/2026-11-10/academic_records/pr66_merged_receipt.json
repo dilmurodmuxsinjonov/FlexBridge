@@ -1,0 +1,21 @@
+{
+  "accepted_pr": {
+    "headRefOid": "5ae9f22594ffa63d1e0e7888ac6e9394acbd841f",
+    "mergeCommit": {
+      "oid": "c4292d66c701cb76688f42483c25736e49a7bde0"
+    },
+    "mergedAt": "2026-11-10T03:32:42Z",
+    "state": "MERGED",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/pull/66"
+  },
+  "closed_issue": {
+    "state": "CLOSED",
+    "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/65"
+  },
+  "accepted_main": "c4292d66c701cb76688f42483c25736e49a7bde0",
+  "accepted_runtime": "0015/124",
+  "next_branch": "feature/67-academic-records",
+  "next_unit_wip_files_preserved": 14,
+  "accepted_source_tree_equals_validated_head": true,
+  "scope": "bounded Issue65 and implemented follow-ups; full R1/pilot not complete"
+}

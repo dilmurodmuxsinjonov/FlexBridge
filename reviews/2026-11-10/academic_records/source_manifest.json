@@ -1,0 +1,43 @@
+{
+  "scope": "API106 minimum academic read and current test index, not107/108/attachment/full R1/pilot acceptance",
+  "parent_commit": "c4292d66c701cb76688f42483c25736e49a7bde0",
+  "reviewed_runtime_files": 3,
+  "native_current": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 70.441
+  },
+  "reviews": [
+    "copilot_detail_review.md"
+  ],
+  "limits": "Read-only opinion; initial external plan access denied, current source review reads repo plan. Trusted staff/file/pointer metadata is not live identity/scan/public amendment proof. Current complete new-head CI pending.",
+  "files": {
+    "backend/app/api/v1/academic_admission.py": {
+      "working_sha256": "8e078e6153e0dbeb10ac3b5793ae7a1a022c1be913608335923dcf9b0fd32433",
+      "index_sha256": "8e078e6153e0dbeb10ac3b5793ae7a1a022c1be913608335923dcf9b0fd32433",
+      "index_blob": "e461ca6f45e88cacf433da46800c4cf983a997c0"
+    },
+    "backend/app/core/iam_http.py": {
+      "working_sha256": "c9bedeaa3c009f05b788600d13b17022d8bb02331a5db6bc735e65f5d485c37b",
+      "index_sha256": "c9bedeaa3c009f05b788600d13b17022d8bb02331a5db6bc735e65f5d485c37b",
+      "index_blob": "f46f477923a3d62118daa3d90d87f6fe7ff8c26b"
+    },
+    "backend/app/services/academic_records.py": {
+      "working_sha256": "ddbf34d01cc7841912c996ed29f040d77eeca744625c3c8f288bb9ee888ba162",
+      "index_sha256": "ddbf34d01cc7841912c996ed29f040d77eeca744625c3c8f288bb9ee888ba162",
+      "index_blob": "9621e5b17e851cc8ba099734e78a0611dd112a62"
+    },
+    "backend/tests/security/test_academic_authority.py": {
+      "working_sha256": "bcfc890e35d173a24289acb426839b91d12b2e3867131555e1c44ec75960b39d",
+      "index_sha256": "bcfc890e35d173a24289acb426839b91d12b2e3867131555e1c44ec75960b39d",
+      "index_blob": "0a36f2179ac5299e8622205ab78da3b888d2c7bd"
+    },
+    "backend/tests/security/test_academic_records.py": {
+      "working_sha256": "8522ad879787dd6c4734d19def52d020e476f5b32560e627bc77ce76f9ddcc41",
+      "index_sha256": "8522ad879787dd6c4734d19def52d020e476f5b32560e627bc77ce76f9ddcc41",
+      "index_blob": "79da0d3645077415eef118a8e2753525425463d0"
+    }
+  }
+}

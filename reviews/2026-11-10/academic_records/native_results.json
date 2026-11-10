@@ -1,0 +1,45 @@
+{
+  "scope": "overlapping observed stages including failures, not additive or full acceptance",
+  "stages": [
+    {
+      "file": "detail_authority_current_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 67.86
+    },
+    {
+      "file": "detail_corrected_junit.xml",
+      "tests": 4,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.274
+    },
+    {
+      "file": "detail_history_corrected_junit.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.014
+    },
+    {
+      "file": "detail_initial_junit.xml",
+      "tests": 4,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 32.065
+    },
+    {
+      "file": "detail_projection_current_junit.xml",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 70.441
+    }
+  ]
+}

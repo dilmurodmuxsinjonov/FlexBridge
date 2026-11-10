@@ -1,5 +1,7 @@
 # FlexBridge — texnik modellar va vositalar
 
+Current LOG-072: PR66 mergedc429/Issue65 closed after exact5ae complete1038 twice879.34s/845.71s,47 code/test/config blobs and current feedback/source audit. Accepted runtime0015/124,canonical94. Issue67/feature67 current API106 minimum exact submitted history read, final9 native passed70.44s/source opinion exit0; full new draft CI still required.107/108/forward0016/legacy revision+nonce and all remaining R1 open. See backend/ACADEMIC_RECORDS.md and academic_records/HISOBOT; pilot not accepted.
+
 ## INT-CODEX-001 / current2026-11-10
 
 - LOG-069 supersedes the following host-only snapshot: draft0015/124 runs in native disposable PostgreSQL, canonical94 unchanged. Six helper tables pin personal student school selection, coordinator supervision, exact school binding, original teacher grant/appointment, personal versioned consent and revocation. Actual actor/SQL start and academic review gates; institution->org->placement lock reconciliation. New HTTP5passed23.30s, corrected authority63passed148.52s, lifecycle9passed24.59s, populated upgrade3passed35.34s are overlapping selected stages. Current affected checks/integration review/full CI remain; accepted main0013/114. No dependency or live migration. See backend/ACADEMIC_ADMISSION.md and current handoff for remaining institution queues/notices/R1.
