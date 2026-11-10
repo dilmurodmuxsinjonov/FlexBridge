@@ -134,3 +134,7 @@ Oldingi qarorni almashtirsa uning IDsi:
 ### Q-016 - Antigravity master succession (2026-11-10)
 
 User authorized Antigravity to assume all ongoing work and Copilot/OpenCode coordination if Codex reaches its limit. Preserve Q015 frozen main/master and integration-only workflow. Explicit takeover and exclusive ownership follow ANTIGRAVITY_MASTER_PROTOCOL.md; idle timeout is not quota evidence. Prepared terminal launcher is dormant until supplied trigger, automatic authoritative Codex quota detection is not available. This supersedes sole-Codex coordination only during takeover; fullR1/pilot acceptance still needs actual evidence.
+
+### T-API108-WHOLESET / new technical design under Q010 (Issue76)
+
+Codex chooses a placement-wide server-derived current diary/review digest and minimal scoped contextGET for API108, rather than treating one revision review as a final placement conclusion. New declared vocabulary ACADEMIC_REVIEW_COMPLETE / ACADEMIC_REVISION_REQUIRED, no official grade/credit/signature or automatic COMPLETED. Positive requires all current academic reviews complete; hours/workplace/remaining completion rules remain separate. This is a technical design choice, not a source-mandated enum or new user approval. PLAN.md/AGY014 task records ownership/acceptance; forward0018/one helper proposed. Q016 conditional succession and Q015 main freeze apply to this sibling worktree from the session/global current policy.

@@ -119,6 +119,8 @@ from app.db.placement_admission import register_tables as register_admission_tab
 register_admission_tables(metadata,_TYPES)
 from app.db.academic_admission import register_tables as register_academic_tables
 register_academic_tables(metadata,_TYPES)
+from app.db.academic_decisions import register_tables as register_academic_decision_tables
+register_academic_decision_tables(metadata,_TYPES)
 from app.db.feature_flag_admin import register_tables as register_feature_flag_tables
 register_feature_flag_tables(metadata,_TYPES)
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
@@ -160,7 +162,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision != '0017_feature_flag_administration':
+        if revision != '0018_academic_decisions':
             raise RuntimeError('Database migrations are not current')
     return engine
 

@@ -1,0 +1,12 @@
+{
+  "task": "AGY-014-checkpoint",
+  "conversation_id": "0d246251-7bc5-454e-8f36-6dafafd824a0",
+  "requested_model": "gemini-4-argon-high",
+  "reported_model": null,
+  "status": "ERROR",
+  "exit_code": 3,
+  "seconds": 543.88,
+  "classification": "continuing_timeout",
+  "finished_reason": "print_timeout",
+  "response_chars": 0
+}

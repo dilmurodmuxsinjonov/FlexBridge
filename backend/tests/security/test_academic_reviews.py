@@ -27,8 +27,8 @@ from test_organizations import actor
 from academic_review_observer import labeled_requests,wait_for_requests
 
 
-def ready(client, identities, organization, *, submit=True):
-    f = pending_http(client, identities, organization)
+def ready(client, identities, organization, *, submit=True,placement_start_date=None):
+    f = pending_http(client, identities, organization,placement_start_date=placement_start_date)
     assignment, draft = active_revision(client, f)
     if submit:
         post(client, '/api/v1/logs/' + draft['id'] + '/submit', f['candidate'], {}, 200)

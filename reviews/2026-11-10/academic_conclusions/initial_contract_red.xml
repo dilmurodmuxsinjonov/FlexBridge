@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="21.444" timestamp="2026-11-10T11:43:56.101880+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_conclusion_contract" name="test_current_teacher_gets_minimum_whole_placement_context" time="9.663"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">backend\tests\security\test_academic_conclusion_contract.py:45: in test_current_teacher_gets_minimum_whole_placement_context
+    ctx=context(client,f,assignment)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\security\test_academic_conclusion_contract.py:26: in context
+    assert response.status_code==200,response.text
+E   AssertionError: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404 Not Found]&gt;.status_code</failure></testcase><testcase classname="tests.security.test_academic_conclusion_contract" name="test_official_grade_input_is_rejected_before_any_conclusion_effect" time="8.762"><failure message="AssertionError: {&quot;contract_id&quot;:&quot;API-108&quot;,&quot;domain&quot;:&quot;SYS&quot;,&quot;method&quot;:&quot;POST&quot;,&quot;path&quot;:&quot;/api/v1/placements/{id}/academic-decisions&quot;,&quot;actor_id&quot;:&quot;cdf776b9-c0f9-4164-b469-cbdf6f0016c7&quot;,&quot;status&quot;:&quot;NOT_IMPLEMENTED&quot;}&#10;assert 501 == 422&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">backend\tests\security\test_academic_conclusion_contract.py:59: in test_official_grade_input_is_rejected_before_any_conclusion_effect
+    assert response.status_code==422,response.text
+E   AssertionError: {"contract_id":"API-108","domain":"SYS","method":"POST","path":"/api/v1/placements/{id}/academic-decisions","actor_id":"cdf776b9-c0f9-4164-b469-cbdf6f0016c7","status":"NOT_IMPLEMENTED"}
+E   assert 501 == 422
+E    +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code</failure></testcase></testsuite></testsuites>

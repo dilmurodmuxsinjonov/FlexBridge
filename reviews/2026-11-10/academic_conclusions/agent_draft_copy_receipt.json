@@ -1,0 +1,24 @@
+{
+  "files": {
+    "backend/alembic/versions/0018_academic_decisions.py": {
+      "raw_sha256": "2461ebcc3f459004dfe0821de00fc1dc98dfbd3b5fb9d6d4b8800aabc56bc068",
+      "normalized_sha256": "2461ebcc3f459004dfe0821de00fc1dc98dfbd3b5fb9d6d4b8800aabc56bc068"
+    },
+    "backend/app/db/academic_decisions.py": {
+      "raw_sha256": "52ffa55453711173c5d8b17d0144264185c5a67375108d9803373975ee5e3679",
+      "normalized_sha256": "52ffa55453711173c5d8b17d0144264185c5a67375108d9803373975ee5e3679"
+    },
+    "backend/app/services/academic_decisions.py": {
+      "raw_sha256": "db954eb0d5b735ed771469e8bd4167947d4463a645613dea1c2ea01bee1f471a",
+      "normalized_sha256": "db954eb0d5b735ed771469e8bd4167947d4463a645613dea1c2ea01bee1f471a"
+    },
+    "backend/tests/security/test_academic_decisions_api108.py": {
+      "raw_sha256": "6a7b6a061227256405bfb055f7d693492d8578273442b9b50a94d5b193880067",
+      "normalized_sha256": "6a7b6a061227256405bfb055f7d693492d8578273442b9b50a94d5b193880067"
+    }
+  },
+  "independent_compile_exit": 0,
+  "scope": "draft copied after explicit frozen ownership acknowledgement; native not yet run",
+  "conversation_id": "0d246251-7bc5-454e-8f36-6dafafd824a0",
+  "timeout_policy": "same conversation, no quota/freshmodel inferred"
+}
