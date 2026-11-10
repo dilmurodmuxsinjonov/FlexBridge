@@ -6,6 +6,7 @@ review and all conclusion/context actions are real HTTP, not mock route returns.
 from datetime import date,timedelta
 from uuid import uuid4
 
+import pytest
 from sqlalchemy import select,text
 
 from app.db.storage import table,transaction,now
@@ -147,3 +148,32 @@ def test_committed_conclusion_survives_logout_without_resurrecting_old_session(c
     assert session['session_id']!=f['teacher']['session_id']
     f['teacher']={**f['teacher'],**session,'headers':{'Authorization':'Bearer '+session['access_token']}}
     assert context(client,f,assignment)['current_conclusion']==first.json()
+
+
+@pytest.mark.parametrize('writer_zone',['Asia/Tashkent','America/New_York'])
+def test_review_proofs_written_in_a_non_utc_session_still_count(client,identities,organization,monkeypatch,writer_zone):
+    """Regression: API-107 proofs snapshot rows in the writer's session TimeZone.
+
+    A non-UTC server/session (FlexBridge's real Asia/Tashkent locale) previously
+    rendered +05:00 offsets that never matched the UTC-pinned basis function, so
+    every genuine review counted as pending and positive conclusions were impossible.
+    """
+    from sqlalchemy import create_engine
+    from app.db import storage
+    zoned=create_engine(storage.get_database_url(),pool_pre_ping=True,hide_parameters=True,
+        connect_args={'prepare_threshold':None,'options':'-c TimeZone='+writer_zone})
+    monkeypatch.setattr(storage,'_ENGINE',zoned)
+    try:
+        with transaction() as conn:
+            assert conn.execute(text('SHOW TimeZone')).scalar_one()==writer_zone
+        f,assignment,_=reviewed(client,identities,organization)
+        ctx=context(client,f,assignment)
+        assert ctx['log_count']==ctx['submitted_count']==ctx['reviewed_count']==1
+        assert ctx['pending_count']==0 and ctx['academic_review_complete'] is True
+        first=conclude(client,f,request_body(assignment,ctx))
+        assert first.status_code==201,first.text
+        with transaction() as conn:
+            assert conn.execute(text('SELECT flexbridge.academic_decision_basis_current(CAST(:id AS uuid))'),
+                {'id':first.json()['id']}).scalar_one() is True
+    finally:
+        zoned.dispose()

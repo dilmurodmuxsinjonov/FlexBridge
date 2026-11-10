@@ -192,33 +192,30 @@ def upgrade():
             ) AS items,
             CAST(count(*) AS integer) AS total_review_count,
             CAST(count(*) FILTER (
-              WHERE rv.decision='REVIEWED'
-                AND rv.decided_at<=clock_timestamp()
-                AND rp.origin='PUBLIC'
-                AND rp.terms_id=r.terms_id
-                AND rp.actor_id=q.teacher_user_id
-                AND rp.teacher_grant_id=q.teacher_grant_id
-                AND rp.teacher_appointment_id=q.teacher_appointment_id
-                AND rp.initial_snapshot=to_jsonb(rv)
-                AND rp.revision_snapshot=to_jsonb(r)
-                AND rp.assignment_proof_snapshot=to_jsonb(q)
-                AND rp.receipt=to_jsonb(rv)
+              WHERE rv.decision='REVIEWED' AND pv.public_proof
             ) AS integer) AS public_reviewed_count,
             CAST(count(*) FILTER (
-              WHERE rv.decision='NEEDS_REVISION'
-                AND rv.decided_at<=clock_timestamp()
-                AND rp.origin='PUBLIC'
-                AND rp.terms_id=r.terms_id
-                AND rp.actor_id=q.teacher_user_id
-                AND rp.teacher_grant_id=q.teacher_grant_id
-                AND rp.teacher_appointment_id=q.teacher_appointment_id
-                AND rp.initial_snapshot=to_jsonb(rv)
-                AND rp.revision_snapshot=to_jsonb(r)
-                AND rp.assignment_proof_snapshot=to_jsonb(q)
-                AND rp.receipt=to_jsonb(rv)
+              WHERE rv.decision='NEEDS_REVISION' AND pv.public_proof
             ) AS integer) AS public_needs_revision_count
           FROM academic_log_reviews rv
           LEFT JOIN academic_review_proofs rp ON rp.review_id=rv.id
+          -- API-107 proofs store to_jsonb() rendered in the WRITER's session
+          -- TimeZone. Compare them as typed rows, not JSON text, so timestamptz
+          -- offsets (+05:00 vs +00:00) cannot make a genuine proof unequal.
+          CROSS JOIN LATERAL (
+            SELECT COALESCE(
+              rv.decided_at<=clock_timestamp()
+              AND rp.origin='PUBLIC'
+              AND rp.terms_id=r.terms_id
+              AND rp.actor_id=q.teacher_user_id
+              AND rp.teacher_grant_id=q.teacher_grant_id
+              AND rp.teacher_appointment_id=q.teacher_appointment_id
+              AND jsonb_populate_record(CAST(NULL AS flexbridge.academic_log_reviews),rp.initial_snapshot) IS NOT DISTINCT FROM rv
+              AND jsonb_populate_record(CAST(NULL AS flexbridge.academic_log_reviews),rp.receipt) IS NOT DISTINCT FROM rv
+              AND jsonb_populate_record(CAST(NULL AS flexbridge.log_revisions),rp.revision_snapshot) IS NOT DISTINCT FROM r
+              AND jsonb_populate_record(CAST(NULL AS flexbridge.academic_assignment_proofs),rp.assignment_proof_snapshot) IS NOT DISTINCT FROM q,
+            false) AS public_proof
+          ) pv
           WHERE r.id IS NOT NULL
             AND rv.revision_id=r.id
             AND rv.academic_assignment_id=a.id
