@@ -1,12 +1,14 @@
 """SQL-backed diary revisions; ownership is checked before any draft is written."""
 from datetime import date
-from uuid import uuid4
+from uuid import UUID,uuid4
 from sqlalchemy import select,text
 from sqlalchemy.exc import OperationalError
 from app.db.storage import table,transaction,now
 from app.api.dependencies import owns_candidate,require_org,ActorContext
 from app.services.placements import get_row,insert_row,PlacementScopeError,require_internship_placement
 from app.core.audit import AppendOnlyAuditStore
+from app.services.authority import account_authority
+from app.services.governance import GovernanceError
 
 class InternshipLogScopeError(Exception):
     def __init__(self,code,message='',status_code=409,sqlstate='23503',rejected_revision_id=None):
@@ -15,6 +17,35 @@ class InternshipLogScopeError(Exception):
 
 class InternshipLogService:
     audit_store=AppendOnlyAuditStore()
+
+    @staticmethod
+    def _diary_actor_id(actor):
+        try:
+            uid=str(UUID(str(actor.user_id)))
+            UUID(str(actor.session_id))
+        except (AttributeError,TypeError,ValueError):
+            raise GovernanceError('AUTH_REQUIRED',status_code=401) from None
+        return uid
+
+    @staticmethod
+    def _diary_read_committed(conn):
+        if conn.execute(text("SELECT current_setting('transaction_isolation')")).scalar_one()!='read committed':
+            raise InternshipLogScopeError('DIARY_ISOLATION_UNSAFE',status_code=503)
+
+    def _current_diary_author(self,conn,actor,placement):
+        """Check after all business waits and pin ownership/account/session to the write."""
+        uid=self._diary_actor_id(actor);candidates=table('candidate_profiles')
+        candidate=conn.execute(select(candidates.c.user_id).where(candidates.c.id==placement['candidate_id'])
+            .with_for_update(read=True)).first()
+        if not candidate or candidate.user_id!=uid:
+            raise InternshipLogScopeError('PLACEMENT_AUTHOR_FORBIDDEN',status_code=403)
+        account_authority(conn,actor)
+        # A session row lock can itself wait beyond expires_at. Re-evaluate
+        # against the DB clock after every authority wait, not a pre-wait bound now().
+        version=get_row(conn,'users',uid)['auth_version']
+        if not conn.execute(text('SELECT flexbridge.placement_actor_current(CAST(:uid AS uuid),CAST(:sid AS uuid),:v)'),
+            {'uid':uid,'sid':str(actor.session_id),'v':version}).scalar_one():
+            raise GovernanceError('AUTH_REVOKED',status_code=401)
     def create_mentor_assignment(self,*,placement_id,organization_id,mentor_id,actor,idempotency_key):
         from app.services.placement_admission import admission_service
         return admission_service.nominate_mentor(actor=actor,placement_id=placement_id,
@@ -105,10 +136,12 @@ class InternshipLogService:
             rev=get_row(conn,'log_revisions',row['current_revision_id'])
             return {**row,'author_id':rev['author_id'],'log_date':row['local_date'].isoformat(),'status':rev['status']}
 
-    def save_draft_daily_log_api_054(self,*,placement_id,author_id,log_date,summary_text,total_minutes=240,day_type='WORKED',tasks=None):
+    def save_draft_daily_log_api_054(self,*,actor,placement_id,log_date,summary_text,total_minutes=240,day_type='WORKED',tasks=None):
+        author_id=self._diary_actor_id(actor)
         with transaction() as conn:
+            self._diary_read_committed(conn)
             p=self._owned(conn,placement_id,author_id)
-            terms=get_row(conn,'placement_terms',p['current_terms_id'])
+            terms=get_row(conn,'placement_terms',p['current_terms_id'],True)
             local_date=date.fromisoformat(str(log_date))
             from app.db.institution_scope import TASHKENT
             if not p['start_date']<=local_date<=min(p['end_date'],now().astimezone(TASHKENT).date()): raise InternshipLogScopeError('INVALID_LOG_DATE',status_code=422)
@@ -117,11 +150,14 @@ class InternshipLogService:
             t=table('daily_logs')
             old=conn.execute(select(t).where(t.c.placement_id==placement_id,t.c.local_date==local_date).with_for_update()).mappings().first()
             if old:
-                previous=get_row(conn,'log_revisions',old['current_revision_id'])
+                previous=get_row(conn,'log_revisions',old['current_revision_id'],True)
                 if previous['status']!='DRAFT': raise InternshipLogScopeError('SUBMITTED_LOG_IMMUTABLE')
                 log=dict(old); version=old['version']+1
             else:
-                log=insert_row(conn,'daily_logs',placement_id=placement_id,local_date=local_date,version=1); version=1
+                log=None;version=1
+            self._current_diary_author(conn,actor,p)
+            if log is None:
+                log=insert_row(conn,'daily_logs',placement_id=placement_id,local_date=local_date,version=1)
             revision=insert_row(conn,'log_revisions',daily_log_id=log['id'],revision=version,terms_id=p['current_terms_id'],author_id=author_id,
                 day_type=day_type,summary=summary_text,total_minutes=total_minutes,status='DRAFT',idempotency_key=str(uuid4()))
             entries=tasks if tasks else ([{'minutes':total_minutes,'title':summary_text or 'Daily work'}] if total_minutes else [])
@@ -131,21 +167,24 @@ class InternshipLogService:
             conn.execute(t.update().where(t.c.id==log['id']).values(current_revision_id=revision['id'],version=version,updated_at=now()))
             return {'contract_id':'API-054',**log,'current_revision_id':revision['id'],'version':version,'status':'DRAFT','log_date':local_date.isoformat()}
 
-    def submit_daily_log_api_056(self,*,placement_id,author_id,log_date,log_id=None):
+    def submit_daily_log_api_056(self,*,actor,placement_id,log_date,log_id=None):
+        author_id=self._diary_actor_id(actor)
         with transaction() as conn:
-            self._owned(conn,placement_id,author_id)
+            self._diary_read_committed(conn)
+            p=self._owned(conn,placement_id,author_id)
             row=get_row(conn,'daily_logs',log_id,True)
             if row['placement_id']!=placement_id: raise InternshipLogScopeError('LOG_PLACEMENT_MISMATCH')
             rev=get_row(conn,'log_revisions',row['current_revision_id'],True)
             if rev['author_id']!=author_id: raise InternshipLogScopeError('LOG_AUTHOR_FORBIDDEN',status_code=403)
             if rev['status']!='DRAFT': raise InternshipLogScopeError('LOG_NOT_DRAFT')
             if rev['day_type']=='WORKED' and not 1<=rev['total_minutes']<=480: raise InternshipLogScopeError('INVALID_SUBMIT_LOG_MINUTES',status_code=422)
+            self._current_diary_author(conn,actor,p)
             conn.execute(table('log_revisions').update().where(table('log_revisions').c.id==rev['id']).values(status='SUBMITTED',submitted_at=now(),updated_at=now()))
             return {'contract_id':'API-056',**row,'status':'SUBMITTED'}
 
-    def create_daily_log_with_revision(self,**kwargs):
+    def create_daily_log_with_revision(self,*,actor,**kwargs):
         with transaction():
-            draft=self.save_draft_daily_log_api_054(**kwargs)
-            return self.submit_daily_log_api_056(placement_id=kwargs['placement_id'],author_id=kwargs['author_id'],log_date=kwargs['log_date'],log_id=draft['id'])
+            draft=self.save_draft_daily_log_api_054(actor=actor,**kwargs)
+            return self.submit_daily_log_api_056(actor=actor,placement_id=kwargs['placement_id'],log_date=kwargs['log_date'],log_id=draft['id'])
 
 internship_log_service=InternshipLogService()

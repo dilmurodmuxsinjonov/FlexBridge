@@ -53,7 +53,7 @@ def test_submitted_log_summary_database_immutable(client,identities,organization
     owner=identities('OWNER',organization);candidate=identities();p=placement_fixture(candidate,owner,organization)
     from datetime import date
     from app.services.internship_logs import internship_log_service
-    log=internship_log_service.create_daily_log_with_revision(placement_id=p['id'],author_id=candidate['user_id'],log_date=date.today().isoformat(),summary_text='Test work',total_minutes=60)
+    log=internship_log_service.create_daily_log_with_revision(actor=billing_actor(candidate),placement_id=p['id'],log_date=date.today().isoformat(),summary_text='Test work',total_minutes=60)
     with pytest.raises(IntegrityError),transaction() as conn:
         conn.execute(table('log_revisions').update().where(table('log_revisions').c.id==log['current_revision_id']).values(summary='Mutated'))
 
