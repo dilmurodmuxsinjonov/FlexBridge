@@ -981,3 +981,26 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/user_ratings/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis APPROVED (`reviews/2026-11-10/user_ratings/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/user_ratings/REVIEW_SUMMARY.md`.
+
+## LOG-091 / API-058 - Rating Appeal Submission (Issue #90)
+
+- **Issue / Branch**: GitHub Issue #90 (`API-058`), branch `feature/90-rating-appeals`, target `integration/r1-agent-collaboration`. PR #91.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-028` / `DB-067` / `AC-025` / `RAT-05`)**:
+  - `backend/app/services/user_ratings.py`: Created `UserRatingsService.submit_rating_appeal_api_058`, `recompute_aggregate`, and `resolve_rating_appeal`.
+  - **Party Authority ("Baho tomoni" / AC-025)**: Authenticated actor must be `target_user_id`, `rater_id`, active authorized member of `target_org_id`, or platform `MODERATOR`. Unrelated third parties rejected with 403 Forbidden (`RATING_APPEAL_FORBIDDEN`).
+  - **14-Day Appeal Window (`AC-025` / RAT-05)**: Strictly enforces 14 calendar days from rating publication/unblinding. Stale appeals rejected with 422 Unprocessable Entity (`RATING_APPEAL_WINDOW_EXPIRED`).
+  - **Moderation Queue & Independent Review (`DB-078`)**: Queues appeal in `moderation_cases` with category `FACTUAL_DISPUTE`, severity `NORMAL`. Self-review strictly blocked (`reviewer != appellant` and `reviewer != rater`, AC-028).
+  - **Anti-Duplication**: Replaying identical pending appeal returns idempotent 200/201 replay; conflicting new reason while pending rejected with 409 Conflict (`APPEAL_ALREADY_PENDING`).
+  - **Aggregate Recalculation ($n < 5$ Withholding)**: Disputed rating status updated to `UNDER_APPEAL` and excluded from active published aggregate. If remaining valid count drops below 5 ($n < 5$), aggregate score is immediately withheld (`WITHHELD_INSUFFICIENT_SAMPLE`).
+  - **Audit Logging**: Persists immutable audit event (`RATING_APPEAL_SUBMITTED`, `RATING_APPEAL_RESOLVED`) via `AppendOnlyAuditStore`.
+  - Canonical routes: mounted `POST /api/v1/ratings/{id}/appeals` in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 9/9 unit and security tests passed in `backend/tests/security/test_rating_appeals_api058.py`.
+  * 6/6 adversarial and boundary tests passed in `backend/tests/security/test_rating_appeals_adversarial.py`.
+  * 29/29 full ratings domain regression tests passed in 153.43s.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/rating_appeals/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/rating_appeals/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/rating_appeals/REVIEW_SUMMARY.md`.

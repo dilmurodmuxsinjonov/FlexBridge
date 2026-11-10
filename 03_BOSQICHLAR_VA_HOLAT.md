@@ -788,3 +788,27 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/user_ratings/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/user_ratings/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/user_ratings/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API058 - Rating Appeal Submission (Issue #90)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/90-rating-appeals`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/user_ratings.py`)**:
+    - `submit_rating_appeal_api_058`: Baholashga rasmiy e'tiroz (appeal) berish metodi amalga oshirildi.
+    - Baho tomoni vakolati (`AC-025`): Faqat baholangan foydalanuvchi (`target_user_id`), baholovchi (`rater_id`), baholangan korxona vakili yoki platforma moderatori e'tiroz bera oladi. Begona uchinchi shaxslar 403 Forbidden bilan to'siladi.
+    - 14-kunlik e'tiroz oynasi (`AC-025` / RAT-05): Baho nashr qilingan / ochilgan vaqtdan boshlab 14 kalendar kun davomida e'tiroz berish mumkin. Muddat o'tgach, 422 Unprocessable Entity xatosi qaytariladi.
+    - Moderatsiya navbati va mustaqil ko'rib chiqish (`DB-078`, `AC-028`): E'tiroz `moderation_cases` jadvaliga navbatga qo'yiladi. Ko'rib chiquvchi o'z-o'zini tasdiqlashi (appellant yoki rater bo'lishi) qat'iyan taqiqlanadi (`APPEAL_REVIEWER_CONFLICT` 403).
+    - Dublikatdan himoya: Bir xil sabab bilan qayta murojaat qilinganda idempotent 200/201 javob qaytariladi; ko'rib chiqilayotgan e'tiroz ustiga boshqa sabab bilan murojaat 409 Conflict bilan to'siladi.
+    - Agregatni qayta hisoblash ($n < 5$ yashirish): E'tiroz berilgan baho `UNDER_APPEAL` holatiga o'tkazilib, aktiv agregatdan chiqariladi. Agar qolgan toza baholar soni 5 tadan kamayib ketsa ($n < 5$), umumiy ball darhol yashiriladi (`WITHHELD_INSUFFICIENT_SAMPLE`).
+    - Audit jurnali: Har bir e'tiroz yuborilishi va hal qilinishi `AppendOnlyAuditStore` orqali o'zgarmas `audit_events` jadvaliga yoziladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `POST /api/v1/ratings/{id}/appeals` (API-058, status 201).
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 9/9 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_rating_appeals_api058.py`).
+  * 6/6 adversarial va chegara testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_rating_appeals_adversarial.py`).
+  * 29/29 butun reyting sohasi (API-057 va API-058) regressiya testlari to'liq o'tdi (153.43s).
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/rating_appeals/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/rating_appeals/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/rating_appeals/REVIEW_SUMMARY.md`.
