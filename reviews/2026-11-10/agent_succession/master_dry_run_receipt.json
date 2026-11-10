@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-10T06:27:45.166927+00:00",
+  "branch": "feature/74-antigravity-master",
+  "head": "d72462e705df5d45a91963679301bb377b3755c5",
+  "main_frozen_sha": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "protocol_sha256": "9767897dbe317623bb1f4467d376301343d65f0be86d37a36033149c933c71a7",
+  "listed_candidates": [
+    "gemini-4-argon-high",
+    "gemini-3.8-flash-high",
+    "gpt-oss-120b-medium",
+    "claude-opus-5-5-high",
+    "claude-sonnet-5-5-high"
+  ],
+  "automatic_quota_detection": false,
+  "result": "DRY_RUN_NO_OWNER_CHANGE_NO_AGENT_STARTED"
+}

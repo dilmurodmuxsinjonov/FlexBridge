@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "actual_print_timeout": true,
+    "actual_quota": true,
+    "actual_stale_zero_exit_error": true,
+    "stderr_only_not_quota": true,
+    "structured_provider_quota": true,
+    "unconfirmed_handback_denied": true,
+    "stale_handback_denied": true,
+    "confirmed_handback_generation": true,
+    "second_process_lock_denied": true,
+    "lock_released": true,
+    "real_owner_unchanged": true
+  },
+  "actual_master_started": false,
+  "live_handback": false,
+  "automatic_quota_detector": false
+}
