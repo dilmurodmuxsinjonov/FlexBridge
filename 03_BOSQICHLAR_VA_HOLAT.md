@@ -742,3 +742,27 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109 review: `reviews/2026-11-10/placement_logs/COPILOT_REVIEW.md` (0 xavfsizlik zaifligi, High confidence).
   * OpenCode CLI 1.18.29 & Peer Review: `reviews/2026-11-10/placement_logs/OPENCODE_REVIEW.md` (5-axis bo'yicha tasdiqlandi).
   * Review sintezi: `reviews/2026-11-10/placement_logs/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API055 - Task Entry Evidence Attachment (Issue #86)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/86-log-entry-evidence`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/internship_logs.py`)**:
+    - `attach_task_evidence_api_055`: Topshiriq dalili (evidence) biriktirish metodi yaratildi.
+    - Konkurentlik himoyasi: `daily_logs`, `log_revisions`, va `log_task_entries` jadvallari bitta so'rovda `.with_for_update(of=(t_dl, t_rev, t_te))` orqali qulflanadi (API-056 topshirish bilan race condition to'liq bartaraf qilindi).
+    - Eski qoralama himoyasi: faqat amaldagi qoralamaga dalil qo'shish mumkin (`current_revision_id == revision_id`); eskirgan qoralama versiyalarga dalil qo'shish 409 xatosi bilan to'siladi.
+    - Xavfsiz fayl tekshiruvi: faqat antivirus va PDF strukturasi tekshiruvidan o'tgan toza (`scan_status == 'CLEAN'`) va muallifga tegishli fayllar qabul qilinadi (`PENDING_SCAN` va `QUARANTINED` 422 bilan rad etiladi).
+    - Maxfiylik segregatsiyasi: o'qituvchilar va koordinatorlarga faqat akademik auditoriyaga ruxsat berilgan dalillar (`HOST_AND_ACADEMIC`, `ACADEMIC_ONLY`, `PUBLIC`) ko'rsatiladi; korxona ichki maxfiy dalillari (`HOST_ONLY`, `PRIVATE_HOST_EVIDENCE`) akademik foydalanuvchilardan to'liq yashiriladi.
+    - `get_task_entry_evidence_api_055`: Foydalanuvchi roliga qarab filtrlangan dalillar ro'yxatini qaytaradi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `POST /api/v1/log-entries/{id}/evidence` (API-055, status 201).
+    - `GET /api/v1/log-entries/{id}/evidence` (dalillar ro'yxati va umumiy soni).
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 16/16 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_log_evidence_api055.py`).
+  * 6/6 adversarial va SQL injection testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_log_evidence_adversarial.py`).
+  * 20/20 API-053 regressiyalari to'liq o'tdi.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: Ikkita muhim masala aniqlandi (lock tartibi konkurentligi va fail-closed maxfiylik filtrlash), ikkalasi ham to'liq tuzatildi va testlar bilan isbotlandi (`reviews/2026-11-10/log_evidence/COPILOT_REVIEW.md`).
+  * OpenCode CLI & Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/log_evidence/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/log_evidence/REVIEW_SUMMARY.md`.

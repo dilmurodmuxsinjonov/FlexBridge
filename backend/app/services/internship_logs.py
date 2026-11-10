@@ -1,5 +1,6 @@
 """SQL-backed diary revisions; ownership is checked before any draft is written."""
 from datetime import date
+from typing import Any
 from uuid import UUID,uuid4
 from sqlalchemy import select,text
 from sqlalchemy.exc import OperationalError
@@ -190,5 +191,237 @@ class InternshipLogService:
     def get_placement_logs_api_053(self, **kwargs):
         from app.services.placement_logs import placement_logs_service
         return placement_logs_service.get_placement_logs_api_053(**kwargs)
+
+    def attach_task_evidence_api_055(
+        self,
+        *,
+        actor: ActorContext,
+        task_entry_id: str | UUID,
+        file_id: str | UUID,
+        visibility: str = "HOST_AND_ACADEMIC",
+    ) -> dict[str, Any]:
+        """Attach verified CLEAN file evidence to a draft daily log task entry (API-055 / DB-058 / CAP-022)."""
+        author_id = self._diary_actor_id(actor)
+        try:
+            entry_uid = str(UUID(str(task_entry_id)))
+        except (ValueError, TypeError):
+            raise InternshipLogScopeError("INVALID_TASK_ENTRY_ID", "Invalid task entry UUID", status_code=422)
+        try:
+            file_uid = str(UUID(str(file_id)))
+        except (ValueError, TypeError):
+            raise InternshipLogScopeError("INVALID_FILE_ID", "Invalid file UUID", status_code=422)
+
+        allowed_visibilities = {"HOST_AND_ACADEMIC", "HOST_ONLY", "ACADEMIC_ONLY"}
+        if visibility not in allowed_visibilities:
+            raise InternshipLogScopeError(
+                "INVALID_EVIDENCE_VISIBILITY",
+                f"Invalid visibility '{visibility}'. Allowed: {sorted(allowed_visibilities)}",
+                status_code=422,
+            )
+
+        with transaction() as conn:
+            self._diary_read_committed(conn)
+
+            t_te = table("log_task_entries")
+            t_rev = table("log_revisions")
+            t_dl = table("daily_logs")
+            t_files = table("files")
+            t_ev = table("log_evidence")
+
+            # 1. Concurrency-safe lock: lock daily_log, current revision, and task entry
+            # in lock order compatible with submission (API-056) to prevent race conditions
+            entry_stmt = (
+                select(
+                    t_te.c.id.label("entry_id"),
+                    t_te.c.revision_id,
+                    t_rev.c.id.label("rev_id"),
+                    t_rev.c.daily_log_id,
+                    t_rev.c.author_id,
+                    t_rev.c.status.label("rev_status"),
+                    t_dl.c.id.label("daily_log_id"),
+                    t_dl.c.current_revision_id,
+                    t_dl.c.placement_id,
+                )
+                .select_from(
+                    t_te.join(t_rev, t_rev.c.id == t_te.c.revision_id)
+                    .join(t_dl, t_dl.c.id == t_rev.c.daily_log_id)
+                )
+                .where(t_te.c.id == entry_uid)
+                .with_for_update(of=(t_dl, t_rev, t_te))
+            )
+            entry_row = conn.execute(entry_stmt).mappings().first()
+            if not entry_row:
+                raise InternshipLogScopeError("TASK_ENTRY_NOT_FOUND", "Log task entry not found", status_code=404)
+
+            # 2. Check draft mutability, current revision validity, & authorship
+            if entry_row["current_revision_id"] != entry_row["revision_id"]:
+                raise InternshipLogScopeError(
+                    "SUPERSEDED_REVISION_IMMUTABLE",
+                    "Cannot attach evidence to a superseded revision task entry",
+                    status_code=409,
+                )
+            if entry_row["rev_status"] != "DRAFT":
+                raise InternshipLogScopeError(
+                    "SUBMITTED_LOG_IMMUTABLE",
+                    f"Cannot attach evidence to log revision in status '{entry_row['rev_status']}'",
+                    status_code=409,
+                )
+            if str(entry_row["author_id"]) != author_id:
+                raise InternshipLogScopeError(
+                    "LOG_AUTHOR_FORBIDDEN",
+                    "Only the diary author can attach evidence to task entries",
+                    status_code=403,
+                )
+
+            # 3. Verify placement active status and current candidate author authority
+            p = self._owned(conn, str(entry_row["placement_id"]), author_id)
+            self._current_diary_author(conn, actor, p)
+
+            # 4. Lock and check file
+            file_row = conn.execute(
+                select(t_files).where(t_files.c.id == file_uid).with_for_update()
+            ).mappings().first()
+            if not file_row:
+                raise InternshipLogScopeError("FILE_NOT_FOUND", "Evidence file not found", status_code=404)
+            if str(file_row["owner_user_id"]) != author_id:
+                raise InternshipLogScopeError(
+                    "FILE_ACCESS_DENIED",
+                    "Evidence file belongs to another user",
+                    status_code=403,
+                )
+            if file_row.get("deleted_at") is not None:
+                raise InternshipLogScopeError("FILE_DELETED", "Deleted file cannot be attached as evidence", status_code=422)
+            if file_row["scan_status"] != "CLEAN":
+                raise InternshipLogScopeError(
+                    "FILE_NOT_CLEAN_FOR_EVIDENCE",
+                    f"File scan status is '{file_row['scan_status']}'. Only CLEAN files can be attached as evidence.",
+                    status_code=422,
+                )
+
+            # 5. Check duplicate evidence attachment
+            existing_ev = conn.execute(
+                select(t_ev).where(t_ev.c.entry_id == entry_uid, t_ev.c.file_id == file_uid)
+            ).mappings().first()
+            if existing_ev:
+                raise InternshipLogScopeError(
+                    "EVIDENCE_ALREADY_ATTACHED",
+                    "File evidence already attached to this task entry",
+                    status_code=409,
+                )
+
+            # 6. Insert evidence record
+            ev_id = str(uuid4())
+            now_ts = now()
+            conn.execute(
+                t_ev.insert().values(
+                    id=ev_id,
+                    created_at=now_ts,
+                    updated_at=now_ts,
+                    entry_id=entry_uid,
+                    file_id=file_uid,
+                    visibility=visibility,
+                )
+            )
+
+            return {
+                "contract_id": "API-055",
+                "id": ev_id,
+                "entry_id": entry_uid,
+                "file_id": file_uid,
+                "visibility": visibility,
+                "created_at": now_ts.isoformat(),
+            }
+
+    def get_task_entry_evidence_api_055(
+        self,
+        *,
+        actor: ActorContext,
+        task_entry_id: str | UUID,
+    ) -> list[dict[str, Any]]:
+        """List attached evidence for a task entry with stakeholder visibility enforcement (API-055 / DB-058)."""
+        author_id = self._diary_actor_id(actor)
+        try:
+            entry_uid = str(UUID(str(task_entry_id)))
+        except (ValueError, TypeError):
+            raise InternshipLogScopeError("INVALID_TASK_ENTRY_ID", "Invalid task entry UUID", status_code=422)
+
+        with transaction() as conn:
+            self._diary_read_committed(conn)
+
+            t_te = table("log_task_entries")
+            t_rev = table("log_revisions")
+            t_dl = table("daily_logs")
+            t_files = table("files")
+            t_ev = table("log_evidence")
+
+            entry_stmt = (
+                select(
+                    t_te.c.id.label("entry_id"),
+                    t_rev.c.id.label("rev_id"),
+                    t_rev.c.daily_log_id,
+                    t_rev.c.author_id,
+                    t_rev.c.status.label("rev_status"),
+                    t_dl.c.placement_id,
+                )
+                .select_from(
+                    t_te.join(t_rev, t_rev.c.id == t_te.c.revision_id)
+                    .join(t_dl, t_dl.c.id == t_rev.c.daily_log_id)
+                )
+                .where(t_te.c.id == entry_uid)
+            )
+            entry_row = conn.execute(entry_stmt).mappings().first()
+            if not entry_row:
+                raise InternshipLogScopeError("TASK_ENTRY_NOT_FOUND", "Log task entry not found", status_code=404)
+
+            # Resolve viewer role and verify account authority
+            from app.services.placement_logs import resolve_logs_actor
+            p = get_row(conn, "placements", str(entry_row["placement_id"]), True)
+            role = resolve_logs_actor(conn, actor, p)
+            account_authority(conn, actor)
+            if not role:
+                raise InternshipLogScopeError("LOG_ACCESS_DENIED", "Unauthorized to view evidence", status_code=403)
+
+            # Non-candidate cannot view DRAFT evidence
+            if role != "CANDIDATE" and entry_row["rev_status"] == "DRAFT":
+                return []
+
+            ev_stmt = (
+                select(
+                    t_ev.c.id,
+                    t_ev.c.entry_id,
+                    t_ev.c.file_id,
+                    t_ev.c.visibility,
+                    t_ev.c.created_at,
+                    t_files.c.filename,
+                    t_files.c.byte_size,
+                    t_files.c.mime_type,
+                    t_files.c.scan_status,
+                )
+                .select_from(t_ev.join(t_files, t_files.c.id == t_ev.c.file_id))
+                .where(t_ev.c.entry_id == entry_uid)
+                .order_by(t_ev.c.created_at.asc())
+            )
+            ev_rows = conn.execute(ev_stmt).mappings().all()
+
+            results = []
+            for r in ev_rows:
+                v = (r["visibility"] or "").upper().strip()
+                # Fail-closed visibility segregation protecting host and academic confidentiality
+                if role in ("HOST", "MENTOR") and v in ("ACADEMIC_ONLY", "ACADEMIC_CONFIDENTIAL"):
+                    continue
+                if role in ("TEACHER", "COORDINATOR") and v not in ("HOST_AND_ACADEMIC", "ACADEMIC_ONLY", "PUBLIC", "ALL_PARTIES"):
+                    continue
+                results.append({
+                    "id": str(r["id"]),
+                    "entry_id": str(r["entry_id"]),
+                    "file_id": str(r["file_id"]),
+                    "filename": r["filename"],
+                    "byte_size": r["byte_size"],
+                    "mime_type": r["mime_type"],
+                    "scan_status": r["scan_status"],
+                    "visibility": r["visibility"],
+                    "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+                })
+            return results
 
 internship_log_service=InternshipLogService()

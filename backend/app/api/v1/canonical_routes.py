@@ -7,6 +7,7 @@ including:
 - `API-046`: `POST /api/v1/engagements/{id}/confirmations`
 - `API-053`: `GET /api/v1/placements/{id}/logs` (in `placements.py`)
 - `API-054`: `PUT /api/v1/placements/{id}/logs/{date}`
+- `API-055`: `POST /api/v1/log-entries/{id}/evidence`
 - `API-056`: `POST /api/v1/logs/{id}/submit`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
@@ -250,6 +251,52 @@ def api_054_put_draft_daily_log(
         )
     except InternshipLogScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate}) from exc
+
+
+class AttachEvidenceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    file_id: UUID
+    visibility: str = Field(default="HOST_AND_ACADEMIC", min_length=1, max_length=50)
+
+
+@router.post("/log-entries/{id}/evidence", status_code=201)
+def api_055_post_log_entry_evidence(
+    id: UUID,
+    payload: AttachEvidenceRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-055 (`POST /api/v1/log-entries/{id}/evidence`): Attach clean file evidence to daily log task entry (`AC-040`)."""
+    try:
+        return internship_log_service.attach_task_evidence_api_055(
+            actor=actor,
+            task_entry_id=str(id),
+            file_id=str(payload.file_id),
+            visibility=payload.visibility,
+        )
+    except InternshipLogScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
+        ) from exc
+
+
+@router.get("/log-entries/{id}/evidence")
+def api_055_get_log_entry_evidence(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Get attached evidence for a daily log task entry with visibility enforcement."""
+    try:
+        items = internship_log_service.get_task_entry_evidence_api_055(
+            actor=actor,
+            task_entry_id=str(id),
+        )
+        return {"items": items, "total": len(items)}
+    except InternshipLogScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
+        ) from exc
 
 
 @router.post("/logs/{id}/submit")
