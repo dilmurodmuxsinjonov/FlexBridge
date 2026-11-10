@@ -187,4 +187,8 @@ class InternshipLogService:
             draft=self.save_draft_daily_log_api_054(actor=actor,**kwargs)
             return self.submit_daily_log_api_056(actor=actor,placement_id=kwargs['placement_id'],log_date=kwargs['log_date'],log_id=draft['id'])
 
+    def get_placement_logs_api_053(self, **kwargs):
+        from app.services.placement_logs import placement_logs_service
+        return placement_logs_service.get_placement_logs_api_053(**kwargs)
+
 internship_log_service=InternshipLogService()

@@ -193,3 +193,36 @@ def export_placement_endpoint(
             status_code=exc.status_code,
             detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
         ) from exc
+
+
+@router.get("/placements/{placement_id}/logs")
+def get_placement_logs_endpoint(
+    placement_id: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    include_tasks: bool = True,
+    include_reviews: bool = True,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Single Placement Diary Logs View (API-053 / CAP-022 / PG-022.S01)."""
+    try:
+        from app.services.placement_logs import placement_logs_service
+        return placement_logs_service.get_placement_logs_api_053(
+            actor=actor,
+            placement_id=placement_id,
+            from_date=from_date,
+            to_date=to_date,
+            status=status,
+            page=page,
+            page_size=page_size,
+            include_tasks=include_tasks,
+            include_reviews=include_reviews,
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
