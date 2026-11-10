@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="15.002" timestamp="2026-11-10T09:30:40.186315+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_legacy_notices" name="test_fresh_personal_legacy_consent_review_and_logout_deliver_one_minimum_notice" time="12.062"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = relay_pending_outbox_events(event_types=('PLACEMENT_ACADEMIC_NOTICE',))">backend\tests\security\test_academic_legacy_notices.py:76: in test_fresh_personal_legacy_consent_review_and_logout_deliver_one_minimum_notice
+    assert relay_pending_outbox_events(event_types=(TOPIC,))==1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = relay_pending_outbox_events(event_types=('PLACEMENT_ACADEMIC_NOTICE',))</failure></testcase></testsuite></testsuites>

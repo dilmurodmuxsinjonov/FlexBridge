@@ -1,5 +1,75 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
+## Current Q015 actual agent cycle - integration only
+
+MAIN/MASTER FROZEN764fb984; only integration/r1-agent-collaboration is a new PR
+target. AGY-001 completed SUCCESS, requested gemini-4-argon-high, reported model
+not exposed by CLI. No agent worktree changes. Actual receipt/critique/tasks are in
+reviews/2026-11-10/agent_collaboration; full report D:/Codex/FlexBridge-agents/
+AGY-001_REPORT.md. Source opinion is not execution or model/legal/pilot certification.
+
+Codex checked primary facts and rejected the broad implementation until six
+design points are revised: absent-row and cross-code nonce serialization before
+authority; exact locked ADMIN grant; immutable initial legacy origins; identical
+stored replay receipt/config survives valid author's logout; protected paid alias/
+default-off/R2/strict server schema; security-suite tests/412 version semantics.
+AGY-002 is an actual same-conversation narrow READ-ONLY security revision, max1400
+words, requested claude-opus-5-5-high. Its controller has actual-quota fallback
+through suitable CLI-listed alternatives, not on a continuing print timeout.
+Run handle/receipt D:/Codex/FlexBridge-agents/runs/AGY-002; revalidate actual result
+and worktree. No production implementation authorized for AGY002. On completion
+Codex must check its result, then assign explicit owned files for AGY003; Codex
+keeps shared storage/router/operations wiring. No overlapping uncontrolled edits.
+
+Issue70 notice code final10native passed77.82s, old red/fixture failures and one
+manual test-field correction retained. Prepare only integration-target draft PR
+and matching-head full CI; never use historical main-merging helpers. Parent
+API107 PR69 accepted764fb984/exact2928425 complete1084 twice before Q015. Full R1,
+Issue67/API108/durable flags/business gates/frontend/live/legal/DR/pilot open.
+
+## Earlier Q015 setup/checkpoint snapshot (retained)
+
+## CURRENT USER OVERRIDE Q015 / LOG-075 - MAIN FROZEN
+
+All new work integrates only into integration/r1-agent-collaboration. Main/master
+frozen at764fb98496fa40857acb07844fd09fcafa99b7d6; PR69 merged before this user
+instruction. No future main push/merge/rebase/PR retarget/settings change until
+the user explicitly lifts it. Read root AGENTS.md. Shared local pre-push guard
+was manually verified to reject main/master and allow feature/integration refs;
+it cannot block GitHub API merges, so controller must assert PR base explicitly.
+
+Codex coordinates actual agy and Copilot, verifies each result, then gives the next
+bounded task. AGY isolated worktree D:/Codex/FlexBridge-agents/antigravity, branch
+agent/antigravity-r1. AGY-001: read-only durable API121 architecture from primary
+CAP037/ADMIN/DB092, requested model gemini-4-argon-high (actually listed by CLI).
+Conversation3ed58526-4a7c-4e8e-b905-42568c7d3e41. First print180s timed out with
+backend turn in progress; no quota evidence. Its --disable-slash-commands made
+--mode plan ineffective (CLI warning); task prompt remained read-only, sandbox
+active, actual worktree stayed clean. Same-conversation checkpoint removes that
+flag and requests existing result,300s. Check actual processes/receipts; don't
+start a duplicate task or claim report/model execution merely from availability.
+Raw logs D:/Codex/FlexBridge-agents/runs, not published. On actual quota choose a
+suitable listed alternative and preserve context; transport/timeouts are separate.
+
+Issue70 source notice fix is ready: final10passed77.82s, actual original legacy
+fresh consent/replay/review/logout/worker/minimum own inbox plus forged nomination/
+missing or borrowed consent denial and atomic apply/fence retry. Initial genuine
+red1failed15.01s, corrected8passed79.05s; extra fixture1passed1failed21.43s used
+wrong outbox field. Exact one-field dedupe_key correction logged after source
+opinion, runtime unchanged, final10 confirms it. Parent writer PR69 accepted
+764fb984 after source2928425 complete1084 CI twice723.27/692.20, source16/runtime7.
+Prepare current notices/policy PR against integration (never main), code/test pins,
+full exact-head CI/current feedback before integration merge. Issue67/API108 and
+full R1 remain open, no pilot/provider/legal/DR certification, pg_live untouched.
+
+NEXT: retrieve AGY-001, check source/contract/claims, then send an explicit next
+task (limited security review or owned implementation after agreement on design).
+Current proper flag source is CAP037/ADMIN API121, default OFF ratings/official
+academic export/WhatsApp/paid_checkout. Old NEXT CAP036/SUPER_ADMIN is corrected.
+No RAM/UID privilege, no R2 activation in R1. API108 official effect stays gated.
+
+## Historical pre-Q015 handoff (retained)
+
 ## Current LOG-073 - source ready for writer draft and exact-head CI
 
 PR68 API106 accepted1f717899 after exact53b complete1047 twice618.75/873.95.

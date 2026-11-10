@@ -1,0 +1,47 @@
+{
+  "source": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+  "merge": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "source_tree_equals_merge": true,
+  "pr": {
+    "headRefOid": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+    "mergeCommit": {
+      "oid": "764fb98496fa40857acb07844fd09fcafa99b7d6"
+    },
+    "mergedAt": "2026-11-10T04:42:19Z",
+    "state": "MERGED"
+  },
+  "issues": {
+    "67": {
+      "state": "OPEN",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/67"
+    },
+    "70": {
+      "state": "OPEN",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/70"
+    }
+  },
+  "preserved_unpublished_notice_files": {
+    ".gitattributes": "0836cd00477a66f9b336a45e53feaa867e7d19427fd4a4e07c7c293b036f4c66",
+    "03_BOSQICHLAR_VA_HOLAT.md": "049870a32d7e83e0ce52f725bd7ac20ee75205dbd2516c8fdaf18264f3c87cdf",
+    "backend/ACADEMIC_LEGACY_NOTICES.md": "425aaf8114287fe27ca59b56e953ad981130192b76766fd575e3ed25262ff9dd",
+    "backend/app/services/academic_notices.py": "508f869a9c2fb39dfb178091f11c3dfa05187724020f801ef0358c497a220a1c",
+    "backend/tests/security/test_academic_legacy_notices.py": "8353b5f8c004e7510d24d1fb05f7b19d8ee019a24b976a04acb86dec431f1b8e",
+    "reviews/2026-11-10/academic_reviews/NEXT.md": "0cbcf5308ee6e926c7ffc0805e332c5d5e16c2aac418c1d42322bea1ce3cc1f5",
+    "reviews/2026-11-10/legacy_academic_notices/HISOBOT.md": "4eef57650d28b9cac1ff35d2ba40d0c4fdf7fd87f11362a943861440dbb4b428",
+    "reviews/2026-11-10/legacy_academic_notices/PLAN.md": "10cbfaec6141faa17b49b735e5ffe3b82e101b377ed5ca7dd01e85789ea6b73c",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_forged_consent_exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_forged_consent_prompt.txt": "d5d44d26a81dd0a622be70d36ecf0d2c37ff9b419c01c19ce1fb629c1978bcc7",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_forged_consent_review.md": "e908f6b79c84586b317d2c213a4638e6a41de1e5d7742cf4b4604464f9583786",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_notice_exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_notice_prompt.txt": "c978ad6430705b235221314f72495094469308fba1aa6911db429864d4460937",
+    "reviews/2026-11-10/legacy_academic_notices/copilot_notice_review.md": "605ab0fe89a85a30ff8cfdbdbca2a0e9c8d1200277d6f8e9787d85e516c04bd0",
+    "reviews/2026-11-10/legacy_academic_notices/legacy_delivery_corrected_junit.xml": "f362463064796aecad03a640fef81c294b189bc796677dae2c749877a3a65926",
+    "reviews/2026-11-10/legacy_academic_notices/legacy_delivery_final_current_junit.xml": "9f5d42e985ee8ef9dab5e142c7eb617bda69a19c20246485c61bb4898f045c1e",
+    "reviews/2026-11-10/legacy_academic_notices/legacy_delivery_red_junit.xml": "9bddb6eac5f28e92dfb57de98350d38c2d62c5d3b119b9999b2edc930c93d114",
+    "reviews/2026-11-10/legacy_academic_notices/legacy_forged_acceptance_current_junit.xml": "c470a84e3264657b4481f1598ee63fb3f400eb132b45c7d91ff39f5f02a8c51e",
+    "reviews/2026-11-10/legacy_academic_notices/manual_test_field_correction.json": "91b074e331be00a051819e19fa37f3c2aa344549dc0a9ef34fcc83d4dfbaa26b",
+    "reviews/2026-11-10/legacy_academic_notices/notice_followup_scope.json": "0e8cef9a8d2b451c23250c65ca06d550b274a6a259b65f08f25c3c517c32c907",
+    "reviews/2026-11-10/legacy_academic_notices/notice_review_scope.json": "5f143b08faf3efb7e6005f319e3d087d4f885efc7d53b8d7c00f8c828ed68548"
+  },
+  "scope": "API107 accepted; Issue70 notice/API108/Issue67/full R1 remain open"
+}

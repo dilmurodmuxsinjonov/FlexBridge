@@ -100,3 +100,21 @@ Oldingi qarorni almashtirsa uning IDsi:
 - Foydalanuvchining aniq javobi / sana: `"qarorlarni toliq ihtiyoringa qol;diraman qurishni davom etir"` / `2026-11-06` (`Q-010`)
 - Tanlov ta'sir qiladigan fayllar va vazifalar: `02_TEXNIK_MODELLAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md`, `S1.3`, `S1.4`, `S2.1..S2.10`
 - Oldingi qarorni almashtirsa uning IDsi: `Yo'q (O-002 ni yopadi)`
+
+
+## Q-015 - Antigravity hamkorligi, model tanlovi va yangi umumiy branch (2026-11-10)
+
+- Manba: foydalanuvchining joriy topshirig'i: terminaldagi `agy`ni Copilot kabi
+  qo'shish, vazifalar berish, natijalarni tekshirish, navbatdagi vazifani aniq berish,
+  ishga mos model va haqiqiy limitda boshqa mos modelga o'tish; barcha yangi ish
+  katta yangi branchda, main'ga tegilmasin.
+- Yangi umumiy branch integration/r1-agent-collaboration. Main/master freeze
+  boshi764fb98496fa40857acb07844fd09fcafa99b7d6; PR69 topshiriq kelishidan oldin
+  birlashtirilgan. Q013 davomiy ishlash tartibi saqlanadi, ammo keyingi PR/merge
+  faqatintegration branchga. Foydalanuvchi aniq bekor qilmaguncha main mutatsiyasi yo'q.
+- Codex boshqaradi/tekshiradi; actual agy va Copilot qatnashadi. Har vazifaga ID,
+  isolated branch/worktree, fayl egaligi, talab/dalil/qabul va navbatdagi topshiriq.
+  Model listi ijro tasdig'i emas; requested/reported model ajratiladi. Haqiqiy quota
+  bo'lsa mos mavjud modelga o'tiladi; timeout yoki transport xatosi quota deyilmaydi.
+- Hammasi D:da; AGENTS.md/handoff, actual receipts va jurnallar davom nuqtasidir.
+  Raw credentials, .env/.data va shaxsiy dalillar agent/publish kontekstiga yuborilmaydi.
