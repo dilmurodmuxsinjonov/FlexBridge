@@ -114,14 +114,6 @@ class JobEngagementService:
             if prof:
                 is_candidate = True
 
-        if is_candidate:
-            if party not in (None, "CANDIDATE"):
-                raise EngagementForbiddenError(
-                    code="ENGAGEMENT_ACTOR_FORBIDDEN",
-                    message="Nomzod faqat CANDIDATE tomoni nomidan tasdiqlay oladi",
-                )
-            return "CANDIDATE"
-
         # Check organization membership for EMPLOYER side
         t_memberships = table("org_memberships")
         membership = conn.execute(
@@ -133,12 +125,28 @@ class JobEngagementService:
             )
         ).mappings().first()
 
-        if membership:
-            if party not in (None, "ORGANIZATION", "EMPLOYER"):
+        # If a specific party was asserted by caller, verify eligibility against that party
+        if party in ("ORGANIZATION", "EMPLOYER"):
+            if not membership:
                 raise EngagementForbiddenError(
                     code="ENGAGEMENT_ACTOR_FORBIDDEN",
-                    message="Tashkilot xodimi faqat EMPLOYER tomoni nomidan tasdiqlay oladi",
+                    message="Faqat vakolatli ish beruvchi ushbu tomon nomidan tasdiqlay oladi",
                 )
+            return "EMPLOYER"
+
+        if party == "CANDIDATE":
+            if not is_candidate:
+                raise EngagementForbiddenError(
+                    code="ENGAGEMENT_ACTOR_FORBIDDEN",
+                    message="Faqat nomzod o'z nomidan tasdiqlay oladi",
+                )
+            return "CANDIDATE"
+
+        # Party not explicitly specified: resolve automatically from verified identity
+        if is_candidate:
+            return "CANDIDATE"
+
+        if membership:
             return "EMPLOYER"
 
         # Actor is neither candidate nor org member -> uniform 404 to prevent IDOR probing
