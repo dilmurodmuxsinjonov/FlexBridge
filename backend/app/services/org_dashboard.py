@@ -70,20 +70,7 @@ class OrgDashboardService:
             ).first()
 
             if not is_member:
-                # Check if actor is platform admin
-                t_platform_grants = table("platform_role_grants")
-                is_admin = conn.execute(
-                    select(t_roles.c.id)
-                    .join(t_platform_grants, t_platform_grants.c.role_id == t_roles.c.id)
-                    .where(
-                        t_platform_grants.c.user_id == actor.user_id,
-                        t_platform_grants.c.revoked_at.is_(None),
-                        t_roles.c.code.in_(["ADMIN", "SUPERADMIN"]),
-                        t_roles.c.scope_kind == "PLATFORM",
-                    )
-                ).first()
-                if not is_admin:
-                    raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
+                raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
 
             # 3. High-performance aggregated metrics (Zero N+1)
             t_opps = table("opportunities")
@@ -194,12 +181,12 @@ class OrgDashboardService:
         clamped_limit = min(max(1, limit), 50)
 
         with transaction() as conn:
-            # 1. Organization check
+            # 1. Organization check (must be VERIFIED)
             t_orgs = table("organizations")
-            org_exists = conn.execute(
-                select(t_orgs.c.id).where(t_orgs.c.id == org_uuid)
-            ).first()
-            if not org_exists:
+            org_row = conn.execute(
+                select(t_orgs.c.id, t_orgs.c.status).where(t_orgs.c.id == org_uuid)
+            ).mappings().first()
+            if not org_row or org_row["status"] != "VERIFIED":
                 raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
 
             # 2. Query only PUBLISHED opportunities
@@ -291,22 +278,30 @@ class OrgDashboardService:
             }
 
     def get_public_rating_summary_api_010(self, *, organization_id: str) -> dict[str, Any]:
-        """Retrieve public rating aggregate for an organization (`API-010` / `CAP-027`)."""
+        """Retrieve public rating aggregate for an organization (`API-010` / `CAP-027` / `CAP-040`)."""
         try:
             org_uuid = str(UUID(organization_id))
         except (ValueError, TypeError):
             raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
 
         with transaction() as conn:
-            # 1. Organization check
+            # 1. Organization check (must exist and be VERIFIED)
             t_orgs = table("organizations")
             org_row = conn.execute(
-                select(t_orgs.c.id, t_orgs.c.legal_name).where(t_orgs.c.id == org_uuid)
+                select(t_orgs.c.id, t_orgs.c.status, t_orgs.c.legal_name).where(t_orgs.c.id == org_uuid)
             ).mappings().first()
-            if not org_row:
+            if not org_row or org_row["status"] != "VERIFIED":
                 raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
 
-            # 2. Rating aggregate query
+            # 2. Check feature flag status (CAP-040)
+            feature_enabled = False
+            try:
+                from app.services.feature_flags import FeatureFlagService
+                feature_enabled = bool(FeatureFlagService().is_enabled("ratings"))
+            except Exception:
+                feature_enabled = False
+
+            # 3. Rating aggregate query (deterministic order by latest window and computation)
             t_agg = table("rating_aggregates")
             agg_row = conn.execute(
                 select(
@@ -314,7 +309,13 @@ class OrgDashboardService:
                     t_agg.c.sample_size,
                     t_agg.c.computed_at,
                     t_agg.c.rubric_id,
-                ).where(t_agg.c.target_org_id == org_uuid)
+                )
+                .where(t_agg.c.target_org_id == org_uuid)
+                .order_by(
+                    t_agg.c.window_end.desc().nullslast(),
+                    t_agg.c.computed_at.desc().nullslast(),
+                    t_agg.c.created_at.desc(),
+                )
             ).mappings().first()
 
             if not agg_row or not agg_row["sample_size"]:
@@ -324,6 +325,8 @@ class OrgDashboardService:
                     "score": None,
                     "score_status": "UNRATED",
                     "sample_size": 0,
+                    "feature_flag": "ratings",
+                    "feature_enabled": feature_enabled,
                     "computed_at": None,
                 }
 
@@ -336,6 +339,8 @@ class OrgDashboardService:
                     "score": None,
                     "score_status": "WITHHELD_INSUFFICIENT_SAMPLE",
                     "sample_size": sample_size,
+                    "feature_flag": "ratings",
+                    "feature_enabled": feature_enabled,
                     "computed_at": (
                         agg_row["computed_at"].isoformat()
                         if isinstance(agg_row["computed_at"], datetime)
@@ -349,6 +354,8 @@ class OrgDashboardService:
                 "score": float(agg_row["score"]) if agg_row["score"] is not None else None,
                 "score_status": "PUBLISHED",
                 "sample_size": sample_size,
+                "feature_flag": "ratings",
+                "feature_enabled": feature_enabled,
                 "computed_at": (
                     agg_row["computed_at"].isoformat()
                     if isinstance(agg_row["computed_at"], datetime)
