@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
+from uuid import UUID
 
 from app.api.v1.billing import billing_service
 from app.db.storage import table, transaction, now
@@ -212,9 +213,14 @@ class OpportunityMatchingService:
 
     def get_opportunity_detail(self, opportunity_id: str, actor: ActorContext | None = None) -> dict[str, Any]:
         """Canonical API-005: Retrieve published immutable opportunity revision, wage, eligibility, shifts, skills, and organization details."""
+        try:
+            opp_uuid = str(UUID(str(opportunity_id)))
+        except (ValueError, TypeError, AttributeError):
+            raise OpportunityConstraintError("OPPORTUNITY_NOT_FOUND", "E'lon topilmadi", status_code=404)
+
         with transaction() as conn:
             t_opp = table("opportunities")
-            opp = conn.execute(select(t_opp).where(t_opp.c.id == opportunity_id)).mappings().first()
+            opp = conn.execute(select(t_opp).where(t_opp.c.id == opp_uuid)).mappings().first()
             if not opp:
                 raise OpportunityConstraintError("OPPORTUNITY_NOT_FOUND", "E'lon topilmadi", status_code=404)
 
@@ -341,7 +347,12 @@ class OpportunityMatchingService:
 
             capacity = opp["capacity"]
             occupied_count = opp["occupied_count"]
-            vacancies_available = max(0, capacity - occupied_count)
+            now_dt = now()
+            is_active_open = (
+                opp["status"] == "PUBLISHED"
+                and (opp["expires_at"] is None or opp["expires_at"] > now_dt)
+            )
+            vacancies_available = max(0, capacity - occupied_count) if is_active_open else 0
 
             org_data = None
             if org:

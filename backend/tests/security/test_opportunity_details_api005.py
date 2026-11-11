@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import select
 
 from app.db.storage import now, table, transaction
-from app.services.opportunities import opportunity_service
+from app.services.opportunities import opportunity_service, OpportunityConstraintError
 from app.services.schedule import local_today
 from test_candidate import published_fixture
 
@@ -307,3 +307,56 @@ def test_unpaid_academic_opportunity_details(client, identities, organization):
     assert data["revision"]["salary_min"] is None
     assert data["revision"]["salary_period"] is None
     assert data["revision"]["contract_type"] == "ACADEMIC_TRIPARTITE"
+
+
+def test_closed_opportunity_with_unfilled_capacity_reports_zero_vacancies(client, identities, organization):
+    """API-005: Opportunity closed with leftover capacity (capacity=5, occupied=1) strictly reports vacancies_available=0."""
+    owner = identities("OWNER", organization)
+    rev = published_fixture(owner, organization)
+    opp_id = rev["opportunity_id"]
+
+    with transaction() as conn:
+        t_opp = table("opportunities")
+        conn.execute(
+            t_opp.update()
+            .where(t_opp.c.id == opp_id)
+            .values(status="CLOSED", closed_at=now(), capacity=5, occupied_count=1)
+        )
+
+    res = client.get(f"/api/v1/opportunities/{opp_id}")
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["status"] == "CLOSED"
+    assert data["capacity"] == 5
+    assert data["occupied_count"] == 1
+    assert data["vacancies_available"] == 0
+
+
+def test_expired_opportunity_reports_zero_vacancies(client, identities, organization):
+    """API-005: Published opportunity whose expires_at is in the past reports vacancies_available=0."""
+    owner = identities("OWNER", organization)
+    rev = published_fixture(owner, organization)
+    opp_id = rev["opportunity_id"]
+
+    past_date = now() - timedelta(days=2)
+    with transaction() as conn:
+        t_opp = table("opportunities")
+        conn.execute(
+            t_opp.update()
+            .where(t_opp.c.id == opp_id)
+            .values(status="PUBLISHED", expires_at=past_date, capacity=5, occupied_count=1)
+        )
+
+    res = client.get(f"/api/v1/opportunities/{opp_id}")
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["status"] == "PUBLISHED"
+    assert data["vacancies_available"] == 0
+
+
+def test_direct_invalid_uuid_call_raises_404():
+    """API-005: Calling get_opportunity_detail directly with non-UUID string defensively raises 404."""
+    with pytest.raises(OpportunityConstraintError) as exc_info:
+        opportunity_service.get_opportunity_detail("not-a-valid-uuid-at-all")
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.code == "OPPORTUNITY_NOT_FOUND"
