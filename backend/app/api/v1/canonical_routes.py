@@ -43,7 +43,7 @@ from pathlib import Path
 from typing import Any
 from dataclasses import asdict
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from fastapi import APIRouter, Body, Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -661,6 +661,155 @@ def delete_saved_opportunity_endpoint(
 def approve_refund(id: UUID, actor: ActorContext = Depends(require_actor_context)):
     from uuid import UUID
     return billing_service.approve_refund(str(id),actor)
+
+
+# -------------------------------------------------------------------------
+# Candidate Applications & Reapply System (API-006, API-029, API-039, API-040, API-041, API-044 / CAP-007)
+# -------------------------------------------------------------------------
+
+@router.post("/opportunities/{id}/applications", status_code=201)
+def submit_opportunity_application_endpoint(
+    id: UUID,
+    payload: dict[str, Any] = Body(default={}),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Submit initial candidate application with snapshot and schedule evaluation (API-006 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.submit_application(
+            actor=actor,
+            opportunity_id=str(id),
+            idempotency_key=idempotency_key,
+            enrollment_id=payload.get("enrollment_id"),
+            proposed_slots=payload.get("proposed_slots"),
+            note=payload.get("note"),
+        )
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/me/applications/summary")
+def get_my_applications_summary_endpoint(
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve candidate application summary metrics (API-029 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.get_applications_summary(actor=actor)
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/me/applications")
+def list_my_applications_endpoint(
+    status: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    after: str | None = Query(default=None),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """List candidate's own applications with keyset cursor pagination (API-039 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.list_my_applications(
+            actor=actor,
+            status=status,
+            limit=limit,
+            after=after,
+        )
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.post("/me/applications/{id}/reapply", status_code=201)
+def reapply_application_endpoint(
+    id: UUID,
+    payload: dict[str, Any] = Body(default={}),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Reapply to an existing application enforcing 24h cooldown and 3/30d limit (API-040 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.reapply_application(
+            actor=actor,
+            application_id=str(id),
+            idempotency_key=idempotency_key,
+            reason=payload.get("reason"),
+            proposed_slots=payload.get("proposed_slots"),
+        )
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/me/applications/{id}")
+def get_my_application_detail_endpoint(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve application detail with full attempt history and timeline events (API-041 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.get_application_detail(
+            actor=actor,
+            application_id=str(id),
+        )
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.post("/me/applications/{id}/withdraw")
+def withdraw_my_application_endpoint(
+    id: UUID,
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Withdraw application and release reserved capacity if occupied (API-044 / CAP-007)."""
+    from app.services.candidate_applications import (
+        ApplicationError,
+        candidate_application_service,
+    )
+    try:
+        return candidate_application_service.withdraw_application(
+            actor=actor,
+            application_id=str(id),
+            reason=payload.get("reason"),
+        )
+    except ApplicationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
 
 
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
