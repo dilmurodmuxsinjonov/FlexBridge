@@ -1033,3 +1033,27 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/notification_preferences/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/notification_preferences/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/notification_preferences/REVIEW_SUMMARY.md`.
+
+## LOG-093 / API-062 - User Privacy Requests (Issue #94)
+
+- **Issue / Branch**: GitHub Issue #94 (`API-062`), branch `feature/94-privacy-requests`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-032` / `DB-082` / `DB-084` / `AC-031` / `OPS-02`)**:
+  - `backend/app/services/privacy.py`: Created `PrivacyService` with `create_privacy_request_api_062` and `get_my_privacy_requests`.
+  - **Ownership Scope**: Authenticated user submits and queries their own requests (`user_id == actor.user_id`).
+  - **Request Kinds**: Full support for data subject rights `EXPORT`, `DELETE`, `RECTIFY`.
+  - **Legal Hold Check (`DB-084` / AC-031)**: For `DELETE` requests, active legal holds (`user_id == actor.user_id`, `released_at IS NULL`, `expires_at > now()`) prevent erasure with 422 Unprocessable Entity (`LEGAL_HOLD_ACTIVE`). Data export access remains permitted under hold.
+  - **Anti-Duplication**: Rejects concurrent pending/in-progress duplicate requests with 409 Conflict (`PRIVACY_REQUEST_ALREADY_PENDING`).
+  - **Statutory 30-Day SLA**: Sets statutory deadline `due_at = created_at + timedelta(days=30)`.
+  - **Append-Only Auditing**: Records `PRIVACY_REQUEST_CREATED` in `audit_events` via `AppendOnlyAuditStore`.
+  - Canonical routes: mounted `POST /api/v1/me/privacy-requests` and `GET /api/v1/me/privacy-requests` in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 8/8 unit and contract tests passed in `backend/tests/security/test_privacy_requests_api062.py`.
+  * 6/6 adversarial and security tests passed in `backend/tests/security/test_privacy_requests_adversarial.py`.
+  * 16/16 contract regression tests passed in `backend/tests/security/test_contracts.py`.
+  * Combined 38 tests passed in 237.84s.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/privacy_requests/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/privacy_requests/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/privacy_requests/REVIEW_SUMMARY.md`.

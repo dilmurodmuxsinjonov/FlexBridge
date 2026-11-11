@@ -14,6 +14,7 @@ including:
 - `API-059`: `PUT /api/v1/me/notification-preferences`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
+- `API-062`: `POST /api/v1/me/privacy-requests`
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
 - `API-081`: `POST /api/v1/opportunities/{id}/publish`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
@@ -399,6 +400,53 @@ def update_notification_preferences_endpoint(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
         ) from exc
+
+
+class PrivacyRequestPayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    kind: str = Field(..., description="Privacy so'rovi turi: EXPORT, DELETE, RECTIFY")
+    reason: str | None = Field(default=None, max_length=2000, description="So'rov sababi")
+    details: dict[str, Any] | None = Field(default=None, description="Qo'shimcha tafsilotlar")
+
+
+@router.post("/me/privacy-requests", status_code=201)
+def create_privacy_request_endpoint(
+    payload: PrivacyRequestPayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-062 (`POST /api/v1/me/privacy-requests`): Submit user privacy request (`CAP-032`, `AC-031`)."""
+    from app.services.privacy import PrivacyError, privacy_service
+    try:
+        return privacy_service.create_privacy_request_api_062(
+            actor=actor,
+            kind=payload.kind,
+            reason=payload.reason,
+            details=payload.details,
+        )
+    except PrivacyError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/me/privacy-requests")
+def get_privacy_requests_endpoint(
+    kind: str | None = None,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Query user privacy requests (`CAP-032`)."""
+    from app.services.privacy import privacy_service
+    return privacy_service.get_my_privacy_requests(
+        actor=actor,
+        kind=kind,
+        status=status,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.post("/operator/refunds/{id}/approve")

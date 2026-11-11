@@ -312,3 +312,18 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Legal Consent Tracking (`DB-011` / DB-085)**: Opt-in (`enabled=True`) or opt-out (`enabled=False`) for `MARKETING` purpose creates an immutable audit row in `consent_events` with `action: GRANTED` or `action: REVOKED`, and references `consent_event_id` in `notification_preferences`.
   - **System Defaults Merging**: For channels without an explicit database row, default system policies (`TRANSACTIONAL` enabled by default) are seamlessly merged into query results.
   - **Audit Logging**: Persists `NOTIFICATION_PREFERENCES_UPDATED` in `audit_events` via `AppendOnlyAuditStore`.
+
+## PRIVACY-API062-REQUESTS — User Privacy Requests (2026-11-10)
+
+- **Capability & Contract**: `PRIVACY` (`CAP-032`) / `API-062` (Issue #94), branch `feature/94-privacy-requests`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `POST /api/v1/me/privacy-requests`: Submit a formal privacy request (HTTP 201).
+  - `GET /api/v1/me/privacy-requests`: Query personal privacy requests with filtering and pagination (HTTP 200).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `privacy_requests` (DB-082: `id`, `created_at`, `updated_at`, `user_id`, `kind`, `status`, `verified_at`, `due_at`, `result_file_id`, `resolved_at`, `reason`), `legal_holds` (DB-084), `audit_events` (DB-006).
+- **Service & Invariant Architecture (`app/services/privacy.py`)**:
+  - **Ownership Scope**: Authenticated actor requests privacy operations for their own account (`user_id == actor.user_id`).
+  - **Data Subject Rights Kinds**: `EXPORT` (data portability), `DELETE` (erasure), `RECTIFY` (correction).
+  - **Legal Hold Enforcement (`DB-084` / AC-031)**: Inspects active `legal_holds` where `released_at IS NULL` and `expires_at > now()`. Active holds prevent deletion (HTTP 422 `LEGAL_HOLD_ACTIVE`), preserving dispute records, while export access remains permitted.
+  - **Anti-Duplication**: Prevents duplicate concurrent requests of the same kind while in `PENDING` or `IN_PROGRESS` (HTTP 409 `PRIVACY_REQUEST_ALREADY_PENDING`).
+  - **Statutory Due Date**: Enforces statutory 30-day fulfillment deadline (`due_at = created_at + timedelta(days=30)`).
+  - **Audit Logging**: Persists `PRIVACY_REQUEST_CREATED` in `audit_events` via `AppendOnlyAuditStore`.
