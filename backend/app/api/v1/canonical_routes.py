@@ -53,6 +53,7 @@ from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError, file_quarantine_service
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
 from app.services.interviews_and_offers import InterviewOfferError, interview_offer_service
+from app.services.job_engagements import JobEngagementError, job_engagement_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
 from app.services.placements import PlacementScopeError, placement_service
 
@@ -108,8 +109,9 @@ class CreateOfferRequest(BaseModel):
 class EngagementConfirmRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    action: str = Field(default="CONFIRM_START", pattern="^(CONFIRM_START|DISPUTE_START)$")
+    action: str = Field(default="CONFIRM_START", pattern="^(?i:(CONFIRM_START|DISPUTE_START|CONFIRM_END|DISPUTE_END))$")
     party: str | None = None
+    note: str | None = None
 
 
 class DraftTaskEntryInput(BaseModel):
@@ -336,21 +338,38 @@ def api_086_issue_offer(
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
 
 
+@router.get("/me/engagements/{id}")
+def api_045_get_my_engagement(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-045 (`GET /api/v1/me/engagements/{id}`): View engagement details, confirmations, dual-sided status (CAP-012)."""
+    try:
+        return job_engagement_service.get_engagement(
+            actor=actor,
+            engagement_id=str(id),
+        )
+    except JobEngagementError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
 @router.post("/engagements/{id}/confirmations")
 def api_046_confirm_job_engagement(
     id: UUID,
     payload: EngagementConfirmRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
-    """Canonical API-046 (`POST /api/v1/engagements/{id}/confirmations`): Independent party start confirmation."""
+    """Canonical API-046 (`POST /api/v1/engagements/{id}/confirmations`): Dual-party start/end/dispute confirmation (CAP-012 / AC-014)."""
     try:
-        return placement_service.confirm_engagement_by_actor_api_046(
-            placement_id=str(id),
-            actor_user_id=actor.user_id,
-            actor_roles=list(actor.roles),
+        return job_engagement_service.confirm_engagement(
+            actor=actor,
+            engagement_id=str(id),
+            action=payload.action.upper(),
             party=payload.party,
-            action=payload.action,
+            note=payload.note,
         )
+    except JobEngagementError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
     except PlacementScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
 
