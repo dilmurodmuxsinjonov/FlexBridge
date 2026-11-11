@@ -73,6 +73,7 @@ async def authentication_boundary(request: Request, call_next):
     public_path=request.url.path in public or bool(re.fullmatch(r'/api/v1/auth/(?:challenges/[^/]+/(?:consume|resend)|recovery/[^/]+(?:/complete)?)',request.url.path))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/organizations/[^/]+/public',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/invitations/[^/]+',request.url.path)))
+    public_path = public_path or (request.method in ('GET','HEAD') and request.url.path != '/api/v1/opportunities/feed' and bool(re.fullmatch(r'/api/v1/opportunities/[^/]+',request.url.path)))
     if request.url.path.startswith('/api/v1/') and not public_path and not request.url.path.startswith('/api/v1/webhooks/payments/'):
         value=request.headers.get('authorization','')
         if not value.startswith('Bearer '):

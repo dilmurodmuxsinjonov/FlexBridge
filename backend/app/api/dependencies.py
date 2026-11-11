@@ -47,6 +47,34 @@ def require_actor_context(authorization: str | None = Header(default=None)) -> A
         roles=tuple(sess.get("roles", [])),
     )
 
+
+def optional_actor_context(authorization: str | None = Header(default=None)) -> ActorContext | None:
+    """Optionally resolve `ActorContext` from `Authorization: Bearer <token>`; returns None for guests."""
+    if not authorization:
+        return None
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "AUTH_REQUIRED",
+                "message": "Authorization sarlavhasi 'Bearer <token>' formatida bo'lishi kerak",
+            },
+        )
+    token = authorization.removeprefix("Bearer ").strip()
+    try:
+        sess = auth_service.validate_session(token)
+    except AuthError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+    return ActorContext(
+        user_id=str(sess["user_id"]),
+        session_id=str(sess["session_id"]),
+        roles=tuple(sess.get("roles", [])),
+    )
+
 def require_platform(actor: ActorContext, *allowed: str) -> None:
     grants,catalog=table('platform_role_grants'),table('role_catalog')
     with transaction() as conn:

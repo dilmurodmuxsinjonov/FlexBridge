@@ -4,6 +4,8 @@ Registers canonical routes from `specs/v1_4/FlexBridge_model_1_4.json` and `cont
 including:
 - `API-003`: `POST /api/v1/matching/preview`
 - `API-004`: `POST /api/v1/saved-opportunities`
+- `API-005`: `GET /api/v1/opportunities/{id}`
+- `API-031`: `GET /api/v1/me/notifications` (in `notifications.py`)
 - `API-037`: `GET /api/v1/me/saved-opportunities`
 - `API-038`: `DELETE /api/v1/me/saved-opportunities/{id}`
 - `API-043`: `POST /api/v1/offers/{id}/respond`
@@ -45,7 +47,7 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.api.dependencies import ActorContext, require_actor_context, require_org, require_platform, candidate_id_for
+from app.api.dependencies import ActorContext, require_actor_context, optional_actor_context, require_org, require_platform, candidate_id_for
 from app.api.v1.billing import billing_service
 from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError, file_quarantine_service
@@ -188,6 +190,24 @@ def api_081_publish_opportunity(
         status_code = getattr(exc, "status_code", 409)
         code = getattr(exc, "code", "PUBLISH_QUOTA_OR_CONTRACT_ERROR")
         raise HTTPException(status_code=status_code, detail={"code": code, "message": str(exc)}) from exc
+
+
+@router.get("/opportunities/{id}")
+def api_005_get_opportunity_detail(
+    id: UUID,
+    actor: ActorContext | None = Depends(optional_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-005 (`GET /api/v1/opportunities/{id}`): Public immutable published revision, wage, eligibility, and org details (`CAP-001`)."""
+    try:
+        return opportunity_service.get_opportunity_detail(
+            opportunity_id=str(id),
+            actor=actor,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
 
 
 @router.post("/webhooks/payments/{provider}")

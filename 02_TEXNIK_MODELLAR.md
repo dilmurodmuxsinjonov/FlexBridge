@@ -359,3 +359,23 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Status Preservation (`CAP-006` Rule)**: Preserves original opportunity status (`CLOSED`, `ARCHIVED`) and computes `is_closed` boolean indicator to display archive status without dropping records.
   - **Repeat Deletion**: Accepts either `saved_opportunities.id` or `opportunity_id`. Repeat calls return HTTP 204 No Content (`repeat204`). Cross-candidate deletion attempts rejected with 403 `SAVED_OPPORTUNITY_ACCESS_DENIED`.
   - **Audit Logging**: Persists `OPPORTUNITY_SAVED` and `OPPORTUNITY_UNSAVED` in `audit_events` via `AppendOnlyAuditStore`.
+
+
+## OPPORTUNITY-API005-NOTIFICATIONS-API031 — Opportunity Details & Notification Inbox (2026-11-11)
+
+- **Capability & Contract**: `PUBLIC_SEARCH` (`CAP-001`) / `API-005` & `NOTIFICATION` (`CAP-031`) / `API-031` (Issue #100), branch `feature/100-opportunity-details-and-notifications`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `GET /api/v1/opportunities/{id}` (API-005): Retrieve published immutable opportunity revision, wage, eligibility, shifts, skills, and organization details (HTTP 200).
+  - `GET /api/v1/me/notifications` (API-031): User notification inbox with read/unread statuses and keyset cursor pagination (HTTP 200).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `opportunities` (DB-035), `opportunity_revisions` (DB-036), `opportunity_skills` (DB-037), `opportunity_shifts` (DB-038), `organizations` (DB-021), `skills` (DB-013), `notifications` (DB-087), `outbox_events` (DB-086), `audit_events` (DB-006).
+- **Service & Invariant Architecture**:
+  - **API-005 Visibility Boundaries (`app/services/opportunities.py`)**:
+    - `PUBLISHED` and `CLOSED` opportunities are accessible without authentication (`GUEST` role support via `optional_actor_context`).
+    - `DRAFT`, `PENDING_MODERATION`, and `ARCHIVED` opportunities are completely shielded: only accessible to authenticated owning organization staff (`OWNER`, `HR`, `HOST_COORDINATOR`) or platform operators (`ADMIN`, `MODERATOR`). Public or foreign callers receive HTTP 404 (`OPPORTUNITY_NOT_FOUND`).
+    - Immutable revision snapshot details: `contract_type`, `work_mode`, gross/net wage matrix, structured shift schedule windows, and required skills with minimum proficiency levels.
+    - Real-time `vacancies_available = max(0, capacity - occupied_count) if is_active_open else 0` (strictly 0 for CLOSED, PAUSED, or expired opportunities). Defensively validates UUID input to prevent internal database errors.
+  - **API-031 Inbox Architecture (`app/services/mentor_notices.py`)**:
+    - Keyset pagination with `limit` (1..100) and `after` cursor, strictly bound to caller (`n.c.user_id == actor.user_id`).
+    - `outerjoin` on `outbox_events` prevents notification dropping when background events are processed or deleted.
+    - Exposes entity scope IDs (`opportunity_id`, `application_id`, `ticket_id`, `placement_id`) and computed `is_read` boolean flag alongside `read_at`.
+    - Protected Payload Policy: arbitrary outbox payload content is never disclosed; structured details are only computed for validated domain notification templates.
