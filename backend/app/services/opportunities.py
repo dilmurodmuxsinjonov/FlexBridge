@@ -210,5 +210,194 @@ class OpportunityMatchingService:
             commute_minutes=commute_buffer_minutes, limit=limit, after_id=after_id,
             opportunity_id=opportunity_id, revision_id=revision_id)
 
+    def get_opportunity_detail(self, opportunity_id: str, actor: ActorContext | None = None) -> dict[str, Any]:
+        """Canonical API-005: Retrieve published immutable opportunity revision, wage, eligibility, shifts, skills, and organization details."""
+        with transaction() as conn:
+            t_opp = table("opportunities")
+            opp = conn.execute(select(t_opp).where(t_opp.c.id == opportunity_id)).mappings().first()
+            if not opp:
+                raise OpportunityConstraintError("OPPORTUNITY_NOT_FOUND", "E'lon topilmadi", status_code=404)
+
+            # Access control:
+            # PUBLISHED and CLOSED opportunities are publicly accessible.
+            # DRAFT, PENDING_MODERATION, and ARCHIVED are only visible to owning org members or platform admins/moderators.
+            status = opp["status"]
+            if status not in ("PUBLISHED", "CLOSED"):
+                authorized = False
+                if actor is not None:
+                    # Check platform role (ADMIN, MODERATOR)
+                    t_pgrants = table("platform_role_grants")
+                    t_rcat = table("role_catalog")
+                    plat_found = conn.execute(
+                        select(t_pgrants.c.id)
+                        .select_from(t_pgrants.join(t_rcat, t_pgrants.c.role_id == t_rcat.c.id))
+                        .where(
+                            t_pgrants.c.user_id == actor.user_id,
+                            t_pgrants.c.revoked_at.is_(None),
+                            t_pgrants.c.expires_at > now(),
+                            t_rcat.c.scope_kind == "PLATFORM",
+                            t_rcat.c.code.in_(("ADMIN", "MODERATOR")),
+                        )
+                    ).first()
+                    if plat_found:
+                        authorized = True
+                    else:
+                        # Check org role (OWNER, HR, HOST_COORDINATOR)
+                        t_mem = table("org_memberships")
+                        t_ogrants = table("org_role_grants")
+                        org_found = conn.execute(
+                            select(t_mem.c.id)
+                            .select_from(
+                                t_mem.join(t_ogrants, t_ogrants.c.membership_id == t_mem.c.id)
+                                .join(t_rcat, t_ogrants.c.role_id == t_rcat.c.id)
+                            )
+                            .where(
+                                t_mem.c.user_id == actor.user_id,
+                                t_mem.c.organization_id == opp["organization_id"],
+                                t_mem.c.status == "ACTIVE",
+                                t_mem.c.revoked_at.is_(None),
+                                t_ogrants.c.revoked_at.is_(None),
+                                t_rcat.c.scope_kind == "ORG",
+                                t_rcat.c.code.in_(("OWNER", "HR", "HOST_COORDINATOR")),
+                            )
+                        ).first()
+                        if org_found:
+                            authorized = True
+
+                if not authorized:
+                    raise OpportunityConstraintError("OPPORTUNITY_NOT_FOUND", "E'lon topilmadi", status_code=404)
+
+            # Fetch current revision
+            t_rev = table("opportunity_revisions")
+            rev = None
+            if opp["current_revision_id"]:
+                rev = conn.execute(
+                    select(t_rev).where(t_rev.c.id == opp["current_revision_id"])
+                ).mappings().first()
+            if not rev:
+                # Fallback to latest revision
+                rev = conn.execute(
+                    select(t_rev)
+                    .where(t_rev.c.opportunity_id == opp["id"])
+                    .order_by(t_rev.c.revision.desc())
+                ).mappings().first()
+
+            # Fetch organization details (DB-021)
+            t_org = table("organizations")
+            org = conn.execute(
+                select(t_org).where(t_org.c.id == opp["organization_id"])
+            ).mappings().first()
+
+            # Fetch skills (DB-037, DB-013)
+            skills_list = []
+            shifts_list = []
+            if rev:
+                t_opp_skills = table("opportunity_skills")
+                t_skills = table("skills")
+                skills_rows = conn.execute(
+                    select(
+                        t_skills.c.id,
+                        t_skills.c.code,
+                        t_skills.c.name_uz,
+                        t_skills.c.name_ru,
+                        t_opp_skills.c.required,
+                        t_opp_skills.c.minimum_level,
+                    )
+                    .select_from(
+                        t_opp_skills.join(t_skills, t_opp_skills.c.skill_id == t_skills.c.id)
+                    )
+                    .where(t_opp_skills.c.revision_id == rev["id"])
+                    .order_by(t_skills.c.name_uz)
+                ).mappings().all()
+
+                for s in skills_rows:
+                    skills_list.append({
+                        "id": str(s["id"]),
+                        "code": s["code"],
+                        "name_uz": s["name_uz"],
+                        "name_ru": s["name_ru"],
+                        "required": bool(s["required"]),
+                        "minimum_level": s["minimum_level"],
+                    })
+
+                # Fetch shifts (DB-038)
+                t_shifts = table("opportunity_shifts")
+                shifts_rows = conn.execute(
+                    select(t_shifts)
+                    .where(t_shifts.c.revision_id == rev["id"])
+                    .order_by(t_shifts.c.weekday, t_shifts.c.start_minute)
+                ).mappings().all()
+
+                for sh in shifts_rows:
+                    shifts_list.append({
+                        "id": str(sh["id"]),
+                        "revision_id": str(sh["revision_id"]),
+                        "weekday": sh["weekday"],
+                        "start_minute": sh["start_minute"],
+                        "end_minute": sh["end_minute"],
+                        "timezone": sh["timezone"],
+                        "group_code": sh["group_code"],
+                    })
+
+            capacity = opp["capacity"]
+            occupied_count = opp["occupied_count"]
+            vacancies_available = max(0, capacity - occupied_count)
+
+            org_data = None
+            if org:
+                org_data = {
+                    "id": str(org["id"]),
+                    "legal_name": org["legal_name"],
+                    "public_name": org["public_name"],
+                    "region": org["region"],
+                    "description": org.get("description"),
+                    "website": org.get("website"),
+                    "status": org["status"],
+                }
+
+            rev_data = None
+            if rev:
+                rev_data = {
+                    "id": str(rev["id"]),
+                    "opportunity_id": str(opp["id"]),
+                    "revision": rev["revision"],
+                    "title": rev["title"],
+                    "description": rev["description"],
+                    "region": rev["region"],
+                    "work_mode": rev["work_mode"],
+                    "eligibility": rev["eligibility"],
+                    "program_required": rev.get("program_required"),
+                    "contract_type": rev["contract_type"],
+                    "is_paid": rev["is_paid"],
+                    "salary_min": float(rev["salary_min"]) if rev.get("salary_min") is not None else None,
+                    "salary_max": float(rev["salary_max"]) if rev.get("salary_max") is not None else None,
+                    "currency": rev["currency"],
+                    "salary_period": rev.get("salary_period"),
+                    "salary_basis": rev.get("salary_basis"),
+                    "start_date": rev["start_date"].isoformat() if rev.get("start_date") else None,
+                    "end_date": rev["end_date"].isoformat() if rev.get("end_date") else None,
+                    "schedule_policy": rev["schedule_policy"],
+                    "shift_match_mode": rev["shift_match_mode"],
+                    "published_at": rev["published_at"].isoformat() if rev.get("published_at") else None,
+                }
+
+            return {
+                "contract_id": "API-005",
+                "id": str(opp["id"]),
+                "organization_id": str(opp["organization_id"]),
+                "kind": opp["kind"],
+                "status": opp["status"],
+                "capacity": capacity,
+                "occupied_count": occupied_count,
+                "vacancies_available": vacancies_available,
+                "published_at": opp["published_at"].isoformat() if opp.get("published_at") else None,
+                "expires_at": opp["expires_at"].isoformat() if opp.get("expires_at") else None,
+                "closed_at": opp["closed_at"].isoformat() if opp.get("closed_at") else None,
+                "revision": rev_data,
+                "organization": org_data,
+                "skills": skills_list,
+                "shifts": shifts_list,
+            }
+
 
 opportunity_service = OpportunityMatchingService()
