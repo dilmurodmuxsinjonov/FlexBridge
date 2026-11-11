@@ -700,19 +700,20 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 ## Joriy Holat (2026-11-10)
 
 - Master holati: Antigravity Q-016 master succession ostida; Copilot CLI (`1.0.109`) va OpenCode CLI (`1.18.29`) bilan hamkorlikda to'liq avtonom rejimda.
-- Oldingi topshiriqlar (API-057, API-058, API-059, API-062):
-  * API-057 (Issue #88 / PR #89): Shaxsiy reytinglar ko'rinishi (`GET /api/v1/me/ratings`) $n < 5$ maxfiylik va 14-kunlik double-blind himoyasi bilan to'liq squash-merge bo'ldi.
+- Oldingi topshiriqlar (API-057, API-058, API-059, API-062, API-063..064):
+  * API-057 (Issue #88 / PR #89): Shaxsiy reytinglar ko'rinishi (`GET /api/v1/me/ratings`) $n < 5$ maxfiylik va 14-kunlik double-blind himoyasi bilan to'liq squash-merge bo'ldi (`c22e0222f986ba612dae729a997a3cf120c15383`).
   * API-058 (Issue #90 / PR #91): Bahoga rasmiy e'tiroz bildirish (`POST /api/v1/ratings/{id}/appeals`) va moderatsiya navbatiga qo'yish to'liq squash-merge bo'ldi (`b5ffdc47fa2c46f8ee408d6c8b9d62886f44d188`).
   * API-059 (Issue #92 / PR #93): Bildirishnoma sozlamalari (`PUT /api/v1/me/notification-preferences`) va consent logging to'liq squash-merge bo'ldi (`182608b6bf3f3d19d7fbabf3640ba9a0b037aa99`).
   * API-062 (Issue #94 / PR #95): Maxfiylik va ma'lumotlar sub'ekti huquqlari (`POST /api/v1/me/privacy-requests`) legal hold himoyasi bilan to'liq squash-merge bo'ldi (`b1e53673b9e45ecf91bf7e8d5a9ca4b0b1e9f1de`).
-- Joriy topshiriq (API-063 & API-064 / Issue #96): User Support Tickets & Customer Messaging (`GET /api/v1/me/support-tickets`, `POST /api/v1/me/support-tickets`, `POST /api/v1/support-tickets/{id}/messages`, `GET /api/v1/support-tickets/{id}/messages` / `CAP-033` / `DB-080` / `DB-081` / `AC-032`) `feature/96-support-tickets` tarmog'ida muvaffaqiyatli yakunlandi.
-  * Ichki qaydlar himoyasi (`AC-032` / DB-081): Foydalanuvchilar ichki xizmat qaydlarini (`internal = True`) ko'ra olmaydi va yoza olmaydi. Operatorlar va adminlar esa to'liq ichki qaydlarni boshqara oladi.
-  * Avtomatik SLA hisobi: Muhimlik darajasiga ko'ra birinchi javob muddati (`first_response_due_at`: URGENT 4h, HIGH 12h, NORMAL 24h, LOW 48h) avtomatik belgilanadi.
-  * Holatlar almashinuvi: Foydalanuvchi javob yozganda status `PENDING_SUPPORT`, xodim javob yozganda `PENDING_USER` holatiga o'tadi. Yopilgan (`CLOSED`) ticketga yangi xabar yozish 409 Conflict bilan to'siladi.
-  * Anti-N+1 so'rovlar: Xabarlar soni skaljar subquery orqali bir martalik so'rovda hisoblanadi.
-  * Audit jurnali: Har bir yangi ticket va xabar `AppendOnlyAuditStore` orqali `audit_events` jadvaliga yoziladi.
-  * Test dalillari: 14/14 shartnoma & adversarial testlar (`test_support_tickets_api063_064.py`, `test_support_tickets_adversarial.py`), 16/16 `test_contracts.py` va maxfiylik testlari bilan jami 44/44 test 100% yashil o'tdi.
-  * Multi-agent reviews: GitHub Copilot CLI 1.0.109 (`reviews/2026-11-10/support_tickets/COPILOT_REVIEW.md` - APPROVED) va OpenCode Peer Review (`reviews/2026-11-10/support_tickets/OPENCODE_REVIEW.md` - APPROVED).
+  * API-063 & API-064 (Issue #96 / PR #97): Foydalanuvchi support ticketlari va xabarlashuv tizimi ichki qaydlar segregatsiyasi bilan to'liq squash-merge bo'ldi (`1fc06f0f767863c5a3debca37d2dfc61b6e53608`), Issue #96 yopildi.
+- Joriy topshiriq (API-004, API-037, API-038 / Issue #98): Nomzod saqlagan e'lonlar tizimi (`POST /api/v1/saved-opportunities`, `GET /api/v1/me/saved-opportunities`, `DELETE /api/v1/me/saved-opportunities/{id}` / `CAP-006` / `DB-040`) `feature/98-saved-opportunities` tarmog'ida muvaffaqiyatli yakunlandi.
+  * Nomzod izolyatsiyasi: Faqat nomzod profili mavjud foydalanuvchilar (`candidate_id_for`) e'lon saqlay oladi; boshqa nomzod nomidan saqlash (`CANDIDATE_ACCESS_DENIED`) yoki boshqaning saqlangan e'lonini o'chirish (`SAVED_OPPORTUNITY_ACCESS_DENIED`) 403 bilan qat'iy to'siladi.
+  * Idempotentlik va Toggle (`API-004`): Bir xil e'lonni qayta saqlash xatosiz mavjud yozuvni qaytaradi (200 OK). `toggle=True` yuborilganda esa mavjud bo'lsa o'chiradi (200 OK), bo'lmasa saqlaydi (201 Created).
+  * Yopilgan e'lon statusi saqlanishi (`API-037` / CAP-006): Saqlangan e'lonlar ro'yxatida e'lonning original holati (`CLOSED`, `ARCHIVED`) va `is_closed` boolean belgisi ko'rsatiladi.
+  * Idempotent o'chirish (`API-038`): `saved_opportunities.id` yoki `opportunity_id` orqali o'chirishni qo'llab-quvvatlaydi; takroriy o'chirish 204 No Content qaytaradi (`repeat204`).
+  * Baza va Audit: `flexbridge.saved_opportunities` (DB-040) jadvaliga yoziladi, har bir amal `AppendOnlyAuditStore` orqali `audit_events` jadvaliga qayd etiladi.
+  * Test dalillari: 16/16 shartnoma & adversarial testlar (`test_saved_opportunities_api004_037_038.py`, `test_saved_opportunities_adversarial.py`) va 40/40 kanonik regressiya testlari bilan jami 56/56 test 100% yashil o'tdi.
+  * Multi-agent reviews: GitHub Copilot CLI 1.0.109 (`reviews/2026-11-10/saved_opportunities/COPILOT_REVIEW.md` - APPROVED) va OpenCode Peer Review (`reviews/2026-11-10/saved_opportunities/OPENCODE_REVIEW.md` - APPROVED).
 - `main` branch: Strictly muzlatilgan (`764fb98496fa40857acb07844fd09fcafa99b7d6`). Barcha o'zgarishlar va PRlar faqat `integration/r1-agent-collaboration` bazasiga yo'naltiriladi.
 - Alembic head: `0020_placement_exports` (130 runtime tables).
 

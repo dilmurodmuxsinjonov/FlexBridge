@@ -3,6 +3,9 @@
 Registers canonical routes from `specs/v1_4/FlexBridge_model_1_4.json` and `contracts/r1_api_matrix.csv`,
 including:
 - `API-003`: `POST /api/v1/matching/preview`
+- `API-004`: `POST /api/v1/saved-opportunities`
+- `API-037`: `GET /api/v1/me/saved-opportunities`
+- `API-038`: `DELETE /api/v1/me/saved-opportunities/{id}`
 - `API-043`: `POST /api/v1/offers/{id}/respond`
 - `API-046`: `POST /api/v1/engagements/{id}/confirmations`
 - `API-053`: `GET /api/v1/placements/{id}/logs` (in `placements.py`)
@@ -39,7 +42,7 @@ from typing import Any
 from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context, require_org, require_platform, candidate_id_for
@@ -549,6 +552,85 @@ def get_support_messages_endpoint(
             page_size=page_size,
         )
     except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+class SaveOpportunityPayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    opportunity_id: UUID
+    candidate_id: UUID | None = None
+    toggle: bool | None = False
+
+
+@router.post("/saved-opportunities")
+def save_opportunity_endpoint(
+    payload: SaveOpportunityPayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> Response:
+    """Save an opportunity for candidate, with idempotency or toggle (`API-004`, `CAP-006`)."""
+    from app.services.saved_opportunities import (
+        SavedOpportunityError,
+        saved_opportunities_service,
+    )
+    try:
+        data, status_code = saved_opportunities_service.save_opportunity(
+            actor=actor,
+            opportunity_id=str(payload.opportunity_id),
+            candidate_id=str(payload.candidate_id) if payload.candidate_id else None,
+            toggle=bool(payload.toggle),
+        )
+        return JSONResponse(status_code=status_code, content=data)
+    except SavedOpportunityError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/me/saved-opportunities")
+def get_saved_opportunities_endpoint(
+    page: int = 1,
+    page_size: int = 20,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """List candidate's saved opportunities with preserved status (`API-037`, `CAP-006`)."""
+    from app.services.saved_opportunities import (
+        SavedOpportunityError,
+        saved_opportunities_service,
+    )
+    try:
+        return saved_opportunities_service.get_my_saved_opportunities(
+            actor=actor,
+            page=page,
+            page_size=page_size,
+        )
+    except SavedOpportunityError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.delete("/me/saved-opportunities/{id}", status_code=204)
+def delete_saved_opportunity_endpoint(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> Response:
+    """Unsave an opportunity with idempotent repeat 204 (`API-038`, `CAP-006`)."""
+    from app.services.saved_opportunities import (
+        SavedOpportunityError,
+        saved_opportunities_service,
+    )
+    try:
+        saved_opportunities_service.delete_saved_opportunity(
+            actor=actor,
+            identifier=str(id),
+        )
+        return Response(status_code=204)
+    except SavedOpportunityError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc)},

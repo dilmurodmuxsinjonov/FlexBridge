@@ -895,3 +895,30 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/support_tickets/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/support_tickets/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/support_tickets/REVIEW_SUMMARY.md`.
+
+
+## DIARY-ANTIGRAVITY-API004-037-038 - Candidate Saved Opportunities (Issue #98)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/98-saved-opportunities`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/saved_opportunities.py`)**:
+    - `save_opportunity`, `get_my_saved_opportunities` va `delete_saved_opportunity` metodlari amalga oshirildi.
+    - Nomzod izolyatsiyasi: Faqat nomzod profili mavjud foydalanuvchilar (`candidate_id_for`) e'lon saqlay oladi; boshqa nomzod nomidan saqlash (`CANDIDATE_ACCESS_DENIED`) yoki boshqaning saqlangan e'lonini o'chirish (`SAVED_OPPORTUNITY_ACCESS_DENIED`) 403 bilan qat'iy to'siladi.
+    - Idempotentlik va Toggle (`API-004`): Bir xil e'lonni qayta saqlash xatosiz mavjud yozuvni qaytaradi (200 OK). `toggle=True` yuborilganda esa mavjud bo'lsa o'chiradi (200 OK), bo'lmasa saqlaydi (201 Created).
+    - Yopilgan e'lon statusi saqlanishi (`API-037` / CAP-006): Saqlangan e'lonlar ro'yxatida e'lonning original holati (`CLOSED`, `ARCHIVED`) va `is_closed` boolean belgisi ko'rsatiladi.
+    - Idempotent o'chirish (`API-038`): `saved_opportunities.id` yoki `opportunity_id` orqali o'chirishni qo'llab-quvvatlaydi; takroriy o'chirish 204 No Content qaytaradi (`repeat204`).
+    - Baza va Audit: `flexbridge.saved_opportunities` (DB-040) jadvaliga yoziladi, har bir amal `AppendOnlyAuditStore` orqali `audit_events` jadvaliga qayd etiladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `POST /api/v1/saved-opportunities` (API-004, status 201/200).
+    - `GET /api/v1/me/saved-opportunities` (API-037, status 200).
+    - `DELETE /api/v1/me/saved-opportunities/{id}` (API-038, status 204).
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 9/9 shartnoma va funksional testlar muvaffaqiyatli o'tdi (`backend/tests/security/test_saved_opportunities_api004_037_038.py`).
+  * 7/7 adversarial va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_saved_opportunities_adversarial.py`).
+  * 40/40 kanonik regressiya testlari muvaffaqiyatli o'tdi (`test_contracts.py`, `test_notification_preferences_api059.py`, `test_privacy_requests_api062.py`, `test_support_tickets_api063_064.py`).
+  * Jami 56/56 test yashil.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/saved_opportunities/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/saved_opportunities/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/saved_opportunities/REVIEW_SUMMARY.md`.

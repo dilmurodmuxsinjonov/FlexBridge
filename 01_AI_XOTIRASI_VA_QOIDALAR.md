@@ -1079,3 +1079,26 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/support_tickets/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/support_tickets/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/support_tickets/REVIEW_SUMMARY.md`.
+
+
+## LOG-095 / API-004..038 - Candidate Saved Opportunities (Issue #98)
+
+- **Issue / Branch**: GitHub Issue #98 (`API-004`, `API-037`, `API-038`), branch `feature/98-saved-opportunities`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-006` / `DB-040` / `DB-035` / `DB-036`)**:
+  - `backend/app/services/saved_opportunities.py`: Created `SavedOpportunitiesService` with `save_opportunity`, `get_my_saved_opportunities`, and `delete_saved_opportunity`.
+  - **Ownership Scope**: Strict candidate context enforced via `candidate_id_for(actor)` and `owns_candidate(actor.user_id, candidate_id)`. Non-candidate users rejected with 403 `CANDIDATE_PROFILE_REQUIRED`. Cross-candidate spoofing rejected with 403 `CANDIDATE_ACCESS_DENIED`.
+  - **Idempotency & Toggle (`API-004`)**: Repeat POST requests for an existing saved opportunity are idempotent (HTTP 200). Toggle mode (`toggle=True`) seamlessly toggles between saved (201) and unsaved (200).
+  - **Closed Status Preservation (`API-037`)**: Returns opportunity details preserving original status (`CLOSED`, `ARCHIVED`) and computes `is_closed` boolean indicator per `CAP-006` rule ("yopilganini arxiv belgisi bilan ko'rsatish").
+  - **Idempotent Deletion (`API-038`)**: Accepts either `saved_opportunity.id` or `opportunity_id`. Repeat calls return HTTP 204 No Content (`repeat204`). Cross-candidate deletion attempts strictly rejected with 403 `SAVED_OPPORTUNITY_ACCESS_DENIED`.
+  - **Append-Only Auditing**: Records `OPPORTUNITY_SAVED` and `OPPORTUNITY_UNSAVED` in `audit_events` via `AppendOnlyAuditStore`.
+  - Canonical routes: mounted in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 9/9 unit and contract tests passed in `backend/tests/security/test_saved_opportunities_api004_037_038.py`.
+  * 7/7 adversarial and security tests passed in `backend/tests/security/test_saved_opportunities_adversarial.py`.
+  * 40/40 regression tests passed across active contracts. Total 56/56 tests green.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/saved_opportunities/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/saved_opportunities/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/saved_opportunities/REVIEW_SUMMARY.md`.
