@@ -838,3 +838,30 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/notification_preferences/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/notification_preferences/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/notification_preferences/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API062 - User Privacy Requests (Issue #94)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/94-privacy-requests`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/privacy.py`)**:
+    - `create_privacy_request_api_062` va `get_my_privacy_requests`: Foydalanuvchi ma'lumotlariga oid so'rovlarni (eksport, o'chirish, to'g'rilash) yuborish va ko'rish xizmati yaratildi.
+    - Legal Hold tekshiruvi (`AC-031` / DB-084): Ma'lumotlarni o'chirish (`DELETE`) so'ralganda faol sud yoki moderatsiya cheklovi (`legal_holds`) mavjud bo'lsa, o'chirish rad etiladi (422 Unprocessable Entity `LEGAL_HOLD_ACTIVE`). Eksport so'rovi esa ochiq qoladi.
+    - Dublikatdan himoya: Bir xil turdagi so'rov `PENDING` yoki `IN_PROGRESS` holatida turganda yangi so'rov 409 Conflict (`PRIVACY_REQUEST_ALREADY_PENDING`) bilan to'siladi.
+    - Qonuniy muddat hisobi: Qonuniy 30-kunlik ijro muddati (`due_at = created_at + 30 kun`) avtomatik belgilanadi.
+    - Audit jurnali: Har bir so'rov `AppendOnlyAuditStore` orqali `PRIVACY_REQUEST_CREATED` voqeasi bilan qayd etiladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `POST /api/v1/me/privacy-requests` (API-062, status 201).
+    - `GET /api/v1/me/privacy-requests` (API-062, status 200).
+  * **Test shartnomalari (`backend/tests/security/test_contracts.py`)**:
+    - Amalga oshirilmagan shartnoma tekshiruvi `API-063` (`GET /api/v1/me/support-tickets`) ga ko'chirildi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 8/8 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_privacy_requests_api062.py`).
+  * 6/6 adversarial va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_privacy_requests_adversarial.py`).
+  * 16/16 shartnoma regressiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_contracts.py`).
+  * 8/8 bildirishnoma sozlamalari regressiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_notification_preferences_api059.py`).
+  * Jami 38/38 test yashil (237.84s).
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/privacy_requests/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/privacy_requests/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/privacy_requests/REVIEW_SUMMARY.md`.
