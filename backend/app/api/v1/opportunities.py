@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 
 from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
+from app.services.application_hr import ApplicationHRError, application_hr_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
 
 router = APIRouter(prefix="/api/v1/opportunities", tags=["opportunities"])
@@ -262,4 +263,28 @@ def api_080_update_opportunity_schedule(
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/{id}/applications", status_code=200)
+def api_082_list_opportunity_applications(
+    id: UUID,
+    status: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-082: List applications for this opportunity (`CAP-008`, `APPLICATION_HR`)."""
+    try:
+        return application_hr_service.list_opportunity_applications(
+            actor=actor,
+            opportunity_id=str(id),
+            status=status,
+            limit=limit,
+            cursor=cursor,
+        )
+    except ApplicationHRError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
         ) from exc

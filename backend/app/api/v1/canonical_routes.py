@@ -26,6 +26,9 @@ including:
 - `API-064`: `POST /api/v1/support-tickets/{id}/messages`
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
 - `API-081`: `POST /api/v1/opportunities/{id}/publish`
+- `API-082`: `GET /api/v1/opportunities/{id}/applications` (in `opportunities.py`)
+- `API-083`: `POST /api/v1/applications/{id}/transition`
+- `API-084`: `GET /api/v1/applications/{id}/hr`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
 - `API-095`: `POST /api/v1/orders/{id}/refund-requests`
 - `API-116`: `POST /api/v1/operator/refunds/{id}/approve`
@@ -51,6 +54,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.dependencies import ActorContext, require_actor_context, optional_actor_context, require_org, require_platform, candidate_id_for
 from app.api.v1.billing import billing_service
+from app.services.application_hr import ApplicationHRError, application_hr_service
 from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError, file_quarantine_service
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
@@ -1065,6 +1069,52 @@ def api_014_public_policy_document(document: str) -> dict[str, Any]:
     """API-014: Public versioned legal policies CMS documentation (`CAP-039`, `PUBLIC_INFO`)."""
     from app.services.discovery_and_catalog import discovery_and_catalog_service
     return discovery_and_catalog_service.get_public_policies_api_014(document=document)
+
+
+class ApplicationTransitionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    to_status: str = Field(..., description="Target status for application")
+    reason: str | None = Field(default=None, max_length=1000)
+
+
+@router.post("/applications/{id}/transition", status_code=200)
+def api_083_transition_application(
+    id: UUID,
+    payload: ApplicationTransitionRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-083: Transition application status according to state machine (`CAP-008`, `APPLICATION_HR`)."""
+    try:
+        return application_hr_service.transition_application_status(
+            actor=actor,
+            application_id=str(id),
+            to_status=payload.to_status,
+            reason=payload.reason,
+        )
+    except ApplicationHRError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/applications/{id}/hr", status_code=200)
+def api_084_get_application_hr_detail(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-084: Retrieve applicant attempt snapshot and event timeline (`CAP-008`, `APPLICATION_HR`)."""
+    try:
+        return application_hr_service.get_application_hr_detail(
+            actor=actor,
+            application_id=str(id),
+        )
+    except ApplicationHRError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
 
 
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
