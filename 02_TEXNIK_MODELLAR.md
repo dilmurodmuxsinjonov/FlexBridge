@@ -373,7 +373,7 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
     - `PUBLISHED` and `CLOSED` opportunities are accessible without authentication (`GUEST` role support via `optional_actor_context`).
     - `DRAFT`, `PENDING_MODERATION`, and `ARCHIVED` opportunities are completely shielded: only accessible to authenticated owning organization staff (`OWNER`, `HR`, `HOST_COORDINATOR`) or platform operators (`ADMIN`, `MODERATOR`). Public or foreign callers receive HTTP 404 (`OPPORTUNITY_NOT_FOUND`).
     - Immutable revision snapshot details: `contract_type`, `work_mode`, gross/net wage matrix, structured shift schedule windows, and required skills with minimum proficiency levels.
-    - Real-time `vacancies_available = max(0, capacity - occupied_count)`.
+    - Real-time `vacancies_available = max(0, capacity - occupied_count) if is_active_open else 0` (strictly 0 for CLOSED, PAUSED, or expired opportunities). Defensively validates UUID input to prevent internal database errors.
   - **API-031 Inbox Architecture (`app/services/mentor_notices.py`)**:
     - Keyset pagination with `limit` (1..100) and `after` cursor, strictly bound to caller (`n.c.user_id == actor.user_id`).
     - `outerjoin` on `outbox_events` prevents notification dropping when background events are processed or deleted.

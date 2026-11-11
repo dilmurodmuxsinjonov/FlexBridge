@@ -1,6 +1,6 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-Current LOG-096 / API-005 & API-031 Opportunity Details & Notification Inbox (2026-11-11): API-005 (GET /api/v1/opportunities/{id}, DB-035..038, DB-021, DB-013, CAP-001) and API-031 (GET /api/v1/me/notifications, DB-085..088, CAP-031) implemented, tested, and reviewed on branch feature/100-opportunity-details-and-notifications targeting integration/r1-agent-collaboration. Main/master strictly FROZEN at 764fb98496fa40857acb07844fd09fcafa99b7d6. API-005 supports public/guest view for PUBLISHED and CLOSED opportunities, with strict 404 isolation for DRAFT/PENDING_MODERATION (only visible to owning org staff or platform admin/moderator). API-031 provides inbox listing with outerjoin on outbox_events, keyset cursor pagination, entity scopes, and is_read status computation. 37/37 unit, security, and adversarial tests passed on disposable PostgreSQL (port 55440). GitHub Copilot CLI 1.0.109 and OpenCode reviews approved. Zero mutations to main.
+Current LOG-096 / API-005 & API-031 Opportunity Details & Notification Inbox (2026-11-11): API-005 (GET /api/v1/opportunities/{id}, DB-035..038, DB-021, DB-013, CAP-001) and API-031 (GET /api/v1/me/notifications, DB-085..088, CAP-031) implemented, tested, and reviewed on branch feature/100-opportunity-details-and-notifications targeting integration/r1-agent-collaboration (PR #101, commit 0b3418c). Main/master strictly FROZEN at 764fb98496fa40857acb07844fd09fcafa99b7d6. API-005 supports public/guest view for PUBLISHED and CLOSED opportunities, with strict 404 isolation for DRAFT/PENDING_MODERATION (only visible to owning org staff or platform admin/moderator). Vacancies available strictly evaluates to 0 for CLOSED, PAUSED, or expired opportunities (otherwise max(0, capacity - occupied_count)). API-031 provides inbox listing with outerjoin on outbox_events, keyset cursor pagination, entity scopes, and is_read status computation. 34/34 unit, security, and adversarial tests passed on disposable PostgreSQL (port 55440); 26/26 domain regression tests passed (60/60 total green). GitHub Copilot CLI 1.0.109 and OpenCode reviews approved. Zero mutations to main.
 
 Current LOG-084 / Q016 Master Takeover / Issues 76 & 77 (2026-11-10): after Codex reached its hard usage limit at 2026-11-10T07:17:47Z and the user explicitly instructed Antigravity to continue with Copilot and OpenCode collaboration, coordinator_state.json switched to owner=ANTIGRAVITY, generation=1 (conversation 37bc4c57-80dc-42b9-8186-86d25bbe262a). Main/master remain strictly FROZEN at 764fb98496fa40857acb07844fd09fcafa99b7d6; all PRs and verified merges target integration/r1-agent-collaboration (currently ca1685cb after PR75 merge). On Issue77 (feature/77-diary-current-authority), test_diary_postwait_session_probe.py UUID/str comparison was fixed and verified 20/20 passed (160.46s) plus 79/79 caller regressions passed (578.76s) on disposable PostgreSQL, with independent static reviews by both Copilot CLI (1.0.108, exit 0) and OpenCode (opencode/nemotron-3.5-lightning-free, exit 0); published as PR78 (head 47d8ff6) targeting integration/r1-agent-collaboration. On Issue76 (feature/76-academic-conclusions, API-108 placement-wide advisory academic conclusions, migration 0018_academic_decisions / 128 runtime tables, 72/132 explicit routes), disposable PostgreSQL verified 6/6 contract tests (77.67s), 9/9 API-108 security tests (112.64s), 44/44 migration/regression tests (271.82s), and 95/95 academic suite tests (676.46s); independent static reviews completed by Antigravity (AGY-015), Copilot CLI (exit 0, 0 P1/P2), and OpenCode (exit 0, 6 static observations evaluated and rejected against SQL/service proofs in HISOBOT.md). Full matching-head CI required before integration merge; Full R1/Issue67/pilot remain open, pg_live untouched.
 
@@ -928,14 +928,14 @@ Keyingi kichik qadam:
 
 ## DIARY-ANTIGRAVITY-API005-031 - Opportunity Details & Notification Inbox (Issue #100)
 
-- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/100-opportunity-details-and-notifications`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/100-opportunity-details-and-notifications`, base `integration/r1-agent-collaboration` (PR #101, commit `0b3418c`). `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
 - **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
 - **Qilingan ishlar va yechimlar**:
   * **E'lon tafsilotlari servisi (`backend/app/services/opportunities.py`)**:
     - `get_opportunity_detail` metodi `API-005` (CAP-001) talablariga mos ravishda to'liq amalga oshirildi.
     - Ochiqlik chegaralari: `PUBLISHED` va `CLOSED` e'lonlar hamma uchun (mehmonlar `GUEST` va nomzodlar) ochiq. Qoralamalar (`DRAFT`, `PENDING_MODERATION`, `ARCHIVED`) faqat tegishli tashkilot a'zolari (`OWNER`, `HR`, `HOST_COORDINATOR`) yoki platforma ma'murlariga (`ADMIN`, `MODERATOR`) ko'rinadi; boshqa barcha so'rovchilar uchun 404 (`OPPORTUNITY_NOT_FOUND`) qaytariladi.
     - O'zgarmas nusxa ma'lumotlari: amaldagi reviziya shartnomasi (`LABOR_PART_TIME`, `CIVIL_GPC`, `INTERNSHIP_AGREEMENT`, `ACADEMIC_TRIPARTITE`), ish tartibi, maosh matritsasi, malaka talablari (`opportunity_skills` + `skills`) va smena jadvallari (`opportunity_shifts`).
-    - Haqiqiy vaqt hisobi: `vacancies_available = max(0, capacity - occupied_count)`.
+    - Haqiqiy vaqt hisobi: `vacancies_available = max(0, capacity - occupied_count) if is_active_open else 0` (yopiq `CLOSED`, to'xtatilgan `PAUSED` yoki muddati o'tgan e'lonlar uchun qat'iy 0). UUID kiritmasi xavfsiz tekshiriladi (404 himoyasi).
     - Marshrut: `GET /api/v1/opportunities/{id}` `backend/app/api/v1/canonical_routes.py` ga `optional_actor_context` bilan ulandi.
   * **Bildirishnomalar inboksi servisi (`backend/app/services/mentor_notices.py`)**:
     - `NotificationService.own` metodi `API-031` (CAP-031) doirasida yaxshilandi.
@@ -944,11 +944,12 @@ Keyingi kichik qadam:
     - Hisoblangan `is_read` (True/False) belgisi va `read_at` vaqti qaytariladi.
     - Keyset kursor paginatsiyasi (`limit`, `after`, `next_after`) kursor xavfsizligi bilan ishlaydi.
 - **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
-  * 12/12 shartnoma va funksional testlar muvaffaqiyatli o'tdi (`backend/tests/security/test_opportunity_details_api005.py`).
+  * 15/15 shartnoma va funksional testlar muvaffaqiyatli o'tdi (`backend/tests/security/test_opportunity_details_api005.py`).
   * 9/9 bildirishnoma inbosi va paginatsiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_notification_inbox_api031.py`).
-  * 6/6 adversarial va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_api005_api031_adversarial.py`).
+  * 5/5 e'lon tafsilotlari adversarial va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_opportunity_details_adversarial.py`).
+  * 5/5 bildirishnoma inbosi adversarial va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_notification_inbox_adversarial.py`).
   * 26/26 kanonik regressiya testlari muvaffaqiyatli o'tdi (`test_mentor_notices.py`, `test_academic_notices.py`, `test_supervision_notices.py`, `test_admission_pagination.py`, `test_saved_opportunities_api004_037_038.py`).
-  * Jami 53/53 test yashil.
+  * Jami 60/60 test yashil.
 - **Multi-Agent Code Reviews**:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-11/opportunity_and_notifications/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-11/opportunity_and_notifications/OPENCODE_REVIEW.md`).
