@@ -86,8 +86,16 @@ class PlacementAdmissionService:
 
     def _consent(self, conn, actor, placement, terms, side, key, digest, *, grant=None, assignment=None):
         stamp, consent_id = now(), str(uuid4())
-        receipt = dict(consent_id=consent_id, placement_id=placement['id'], terms_id=terms['id'],
-                       version=terms['version'], side=side, assignment_id=assignment, recorded_at=stamp.isoformat())
+        receipt = dict(
+            consent_id=consent_id,
+            placement_id=placement['id'],
+            terms_id=terms['id'],
+            version=terms['version'],
+            side=side,
+            assignment_id=assignment,
+            recorded_at=stamp.isoformat(),
+            **({'contract_id': 'API-048'} if side == 'CANDIDATE' else {}),
+        )
         conn.execute(table('placement_consents').insert().values(
             id=consent_id, created_at=stamp, placement_id=placement['id'], terms_id=terms['id'], side=side,
             **evidence(conn, actor), org_grant_id=grant, assignment_id=assignment,

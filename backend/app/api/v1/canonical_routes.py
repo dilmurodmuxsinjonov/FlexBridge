@@ -9,7 +9,9 @@ including:
 - `API-037`: `GET /api/v1/me/saved-opportunities`
 - `API-038`: `DELETE /api/v1/me/saved-opportunities/{id}`
 - `API-043`: `POST /api/v1/offers/{id}/respond`
+- `API-045`: `GET /api/v1/me/engagements/{id}`
 - `API-046`: `POST /api/v1/engagements/{id}/confirmations`
+- `API-047`: `POST /api/v1/engagements/{id}/ratings`
 - `API-053`: `GET /api/v1/placements/{id}/logs` (in `placements.py`)
 - `API-054`: `PUT /api/v1/placements/{id}/logs/{date}`
 - `API-055`: `POST /api/v1/log-entries/{id}/evidence`
@@ -372,6 +374,49 @@ def api_046_confirm_job_engagement(
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
     except PlacementScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
+
+
+class CriterionScoreInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    criterion_id: UUID
+    score: int = Field(..., ge=1, le=5)
+
+
+class SubmitEngagementRatingPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    rubric_id: UUID | None = None
+    scores: list[CriterionScoreInput] = Field(..., min_length=1, max_length=50)
+    comment: str | None = Field(default=None, max_length=2000)
+    idempotency_key: str | None = Field(default=None, max_length=128)
+
+
+@router.post("/engagements/{id}/ratings", status_code=201)
+def api_047_post_engagement_rating(
+    id: UUID,
+    payload: SubmitEngagementRatingPayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-047 (`POST /api/v1/engagements/{id}/ratings`): Mutual double-blind engagement ratings (CAP-027 / AC-024)."""
+    from app.services.user_ratings import RatingScopeError, user_ratings_service
+    try:
+        return user_ratings_service.submit_engagement_rating_api_047(
+            actor=actor,
+            engagement_id=str(id),
+            scores=[s.model_dump() for s in payload.scores],
+            rubric_id=str(payload.rubric_id) if payload.rubric_id else None,
+            comment=payload.comment,
+            idempotency_key=payload.idempotency_key,
+        )
+    except RatingScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
+        ) from exc
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
 
 
 @router.put("/placements/{id}/logs/{date}")
