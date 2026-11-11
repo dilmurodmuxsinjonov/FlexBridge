@@ -52,6 +52,7 @@ from app.api.v1.billing import billing_service
 from app.services.billing import BillingInvariantError
 from app.services.files_quarantine import FileQuarantineError, file_quarantine_service
 from app.services.internship_logs import InternshipLogScopeError, internship_log_service
+from app.services.interviews_and_offers import InterviewOfferError, interview_offer_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
 from app.services.placements import PlacementScopeError, placement_service
 
@@ -74,7 +75,34 @@ class MatchingPreviewRequest(BaseModel):
 class OfferRespondRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    decision: str = Field(..., pattern="^(ACCEPT|DECLINE)$")
+    decision: str | None = None
+    response: str | None = None
+    note: str | None = None
+
+
+class InterviewResponseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    response: str = Field(..., pattern="^(?i:(ACCEPTED|DECLINED|RESCHEDULE_REQUESTED|COMPLETED|NO_SHOW))$")
+    note: str | None = None
+
+
+class CreateInterviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    starts_at: str
+    ends_at: str
+    mode: str = Field(default="ONLINE", pattern="^(?i:(ONLINE|IN_PERSON))$")
+    location_or_link: str | None = None
+    timezone: str = "Asia/Tashkent"
+
+
+class CreateOfferRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expires_at: str | None = None
+    terms_snapshot: dict[str, Any] | None = None
+    idempotency_key: str | None = None
 
 
 class EngagementConfirmRequest(BaseModel):
@@ -223,21 +251,89 @@ def api_x04_payment_webhook(provider: str, payload: PaymentWebhookPayload) -> di
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+@router.post("/interviews/{id}/responses")
+def api_042_respond_to_interview(
+    id: UUID,
+    payload: InterviewResponseRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-042 (`POST /api/v1/interviews/{id}/responses`): Candidate or host responds to interview (CAP-009)."""
+    try:
+        return interview_offer_service.respond_to_interview(
+            actor=actor,
+            interview_id=str(id),
+            response=payload.response.upper(),
+            note=payload.note,
+        )
+    except InterviewOfferError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
 @router.post("/offers/{id}/respond")
 def api_043_respond_to_offer(
     id: UUID,
     payload: OfferRespondRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
-    """Canonical API-043 (`POST /api/v1/offers/{id}/respond`): Candidate responds to a pending offer."""
-    try:
-        return placement_service.respond_to_offer_api_043(
-            offer_id=str(id),
-            candidate_id=candidate_id_for(actor),
-            decision=payload.decision,
+    """Canonical API-043 (`POST /api/v1/offers/{id}/respond`): Candidate responds to a pending offer (CAP-011)."""
+    dec = payload.decision or payload.response
+    if not dec or dec.upper() not in ("ACCEPT", "DECLINE"):
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "VALIDATION_ERROR", "message": "Faqat 'ACCEPT' yoki 'DECLINE' qabul qilinadi"},
         )
+    try:
+        return interview_offer_service.respond_to_offer(
+            actor=actor,
+            offer_id=str(id),
+            response=dec.upper(),
+            note=payload.note,
+        )
+    except InterviewOfferError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
     except PlacementScopeError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
+
+
+@router.post("/applications/{id}/interviews")
+def api_085_schedule_interview(
+    id: UUID,
+    payload: CreateInterviewRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-085 (`POST /api/v1/applications/{id}/interviews`): Host schedules interview for application (CAP-009)."""
+    try:
+        return interview_offer_service.schedule_interview(
+            actor=actor,
+            application_id=str(id),
+            starts_at=payload.starts_at,
+            ends_at=payload.ends_at,
+            mode=payload.mode.upper(),
+            location_or_link=payload.location_or_link,
+            timezone_str=payload.timezone,
+        )
+    except InterviewOfferError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/applications/{id}/offers")
+def api_086_issue_offer(
+    id: UUID,
+    payload: CreateOfferRequest | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-086 (`POST /api/v1/applications/{id}/offers`): Host issues offer for application (CAP-011)."""
+    p = payload or CreateOfferRequest()
+    try:
+        return interview_offer_service.issue_offer(
+            actor=actor,
+            application_id=str(id),
+            expires_at=p.expires_at,
+            terms_snapshot=p.terms_snapshot,
+            idempotency_key=p.idempotency_key,
+        )
+    except InterviewOfferError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
 
 
 @router.post("/engagements/{id}/confirmations")
