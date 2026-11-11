@@ -343,3 +343,19 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Priority SLA**: Response deadlines (`first_response_due_at` calculated as: URGENT 4h, HIGH 12h, NORMAL 24h, LOW 48h).
   - **Lifecycle States**: Requesters replying flips status to `PENDING_SUPPORT`; staff public replies flip status to `PENDING_USER`. Closed tickets reject new messages with 409 Conflict (`TICKET_CLOSED`).
   - **Audit Logging**: Persists `SUPPORT_TICKET_CREATED` and `SUPPORT_MESSAGE_POSTED` in `audit_events` via `AppendOnlyAuditStore`.
+
+
+## SAVED-OPPORTUNITIES-API004-037-038 — Candidate Saved Opportunities (2026-11-10)
+
+- **Capability & Contract**: `SAVE_JOB` (`CAP-006`) / `API-004`, `API-037`, `API-038` (Issue #98), branch `feature/98-saved-opportunities`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `POST /api/v1/saved-opportunities` (API-004): Save opportunity for candidate (HTTP 201/200, toggle idempotent).
+  - `GET /api/v1/me/saved-opportunities` (API-037): List candidate's saved opportunities with preserved status (HTTP 200).
+  - `DELETE /api/v1/me/saved-opportunities/{id}` (API-038): Unsave opportunity (HTTP 204, repeat204).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `saved_opportunities` (DB-040: `id`, `created_at`, `updated_at`, `candidate_id`, `opportunity_id`, UNIQUE `(candidate_id, opportunity_id)`), `opportunities` (DB-035), `opportunity_revisions` (DB-036), `audit_events` (DB-006).
+- **Service & Invariant Architecture (`app/services/saved_opportunities.py`)**:
+  - **Ownership Scope**: Authenticated caller operates under candidate context (`candidate_id_for(actor)`). Non-candidate accounts rejected (403 `CANDIDATE_PROFILE_REQUIRED`). Cross-candidate save spoofing rejected (403 `CANDIDATE_ACCESS_DENIED`).
+  - **Idempotency & Toggle**: Repeated saves return existing row without duplication (200 OK). Optional `toggle=True` parameter deletes if present (200 OK) or inserts if absent (201 Created).
+  - **Status Preservation (`CAP-006` Rule)**: Preserves original opportunity status (`CLOSED`, `ARCHIVED`) and computes `is_closed` boolean indicator to display archive status without dropping records.
+  - **Repeat Deletion**: Accepts either `saved_opportunities.id` or `opportunity_id`. Repeat calls return HTTP 204 No Content (`repeat204`). Cross-candidate deletion attempts rejected with 403 `SAVED_OPPORTUNITY_ACCESS_DENIED`.
+  - **Audit Logging**: Persists `OPPORTUNITY_SAVED` and `OPPORTUNITY_UNSAVED` in `audit_events` via `AppendOnlyAuditStore`.
