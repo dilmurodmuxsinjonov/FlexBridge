@@ -114,3 +114,36 @@ def api_003_opportunity_feed(
             status_code=exc.status_code,
             detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
         ) from exc
+
+
+@router.get("", status_code=200)
+@router.get("/", status_code=200, include_in_schema=False)
+def search_public_opportunities_endpoint(
+    region: str | None = Query(default=None),
+    kind: str | None = Query(default=None),
+    is_paid: bool | None = Query(default=None),
+    min_hourly_pay: int | None = Query(default=None),
+    schedule_policy: str | None = Query(default=None),
+    query: str | None = Query(default=None),
+    skill_id: UUID | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    after: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """API-001: Public opportunity search and discovery catalog (`CAP-001`, `PUBLIC_SEARCH`)."""
+    try:
+        return opportunity_service.search_public_opportunities(
+            region=region,
+            kind=kind,
+            is_paid=is_paid,
+            min_hourly_pay=min_hourly_pay,
+            schedule_policy=schedule_policy,
+            query=query,
+            skill_id=str(skill_id) if skill_id else None,
+            limit=limit,
+            after=after,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc

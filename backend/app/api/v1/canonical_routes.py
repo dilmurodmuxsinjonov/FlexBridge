@@ -1032,6 +1032,41 @@ def api_010_get_organization_rating_summary(
         ) from exc
 
 
+@router.get("/onboarding/options", status_code=200)
+def api_002_onboarding_options() -> dict[str, Any]:
+    """API-002: Public onboarding options and persona tracks (`CAP-002`, `AUTH_SELF`)."""
+    from app.services.discovery_and_catalog import discovery_and_catalog_service
+    return discovery_and_catalog_service.get_onboarding_options_api_002()
+
+
+@router.get("/services/public", status_code=200)
+def api_011_public_services() -> dict[str, Any]:
+    """API-011: Public service offerings catalog (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.services.discovery_and_catalog import discovery_and_catalog_service
+    return discovery_and_catalog_service.get_public_services_api_011()
+
+
+@router.get("/prices/public", status_code=200)
+def api_012_public_prices() -> dict[str, Any]:
+    """API-012: Public pricing rules, listing duration, and refund policy (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.services.discovery_and_catalog import discovery_and_catalog_service
+    return discovery_and_catalog_service.get_public_prices_api_012()
+
+
+@router.get("/help/{document}", status_code=200)
+def api_013_public_help_document(document: str) -> dict[str, Any]:
+    """API-013: Public versioned help & FAQ CMS documentation (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.services.discovery_and_catalog import discovery_and_catalog_service
+    return discovery_and_catalog_service.get_public_help_api_013(document=document)
+
+
+@router.get("/policies/{document}", status_code=200)
+def api_014_public_policy_document(document: str) -> dict[str, Any]:
+    """API-014: Public versioned legal policies CMS documentation (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.services.discovery_and_catalog import discovery_and_catalog_service
+    return discovery_and_catalog_service.get_public_policies_api_014(document=document)
+
+
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     """Ensure all canonical route signatures from `FlexBridge_model_1_4.json` are registered in OpenAPI (`FIX-01`)."""
     model_path = Path(__file__).resolve().parents[4] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
