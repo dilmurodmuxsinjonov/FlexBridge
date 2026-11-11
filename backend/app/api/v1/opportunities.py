@@ -147,3 +147,119 @@ def search_public_opportunities_endpoint(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc)},
         ) from exc
+
+
+class UpdateOpportunityDraftRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    region: str | None = None
+    work_mode: str | None = None
+    eligibility: str | None = None
+    capacity: int | None = None
+    contract_type: str | None = None
+    program_required: str | None = None
+
+
+class UpdateOpportunityTermsRequest(BaseModel):
+    is_paid: bool
+    salary_min: float | int | None = None
+    salary_max: float | int | None = None
+    currency: str = "UZS"
+    salary_period: str | None = None
+    salary_basis: str | None = None
+    start_date: date | str | None = None
+    end_date: date | str | None = None
+    program_required: str | None = None
+    fee_terms_note: str | None = None
+
+
+class ShiftIntervalItem(BaseModel):
+    weekday: int
+    start_minute: int
+    end_minute: int
+    group_code: str = "GROUP_A"
+    timezone: str = "Asia/Tashkent"
+
+
+class UpdateOpportunityScheduleRequest(BaseModel):
+    schedule_policy: str = "STRICT"
+    shift_match_mode: str = "ALL"
+    shifts: list[ShiftIntervalItem] | None = None
+
+
+@router.put("/{id}/draft", status_code=200)
+def api_078_update_opportunity_draft(
+    id: UUID,
+    payload: UpdateOpportunityDraftRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-078: Update opportunity draft core metadata (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_draft_api_078(
+            opportunity_id=str(id),
+            actor=actor,
+            title=payload.title,
+            description=payload.description,
+            region=payload.region,
+            work_mode=payload.work_mode,
+            eligibility=payload.eligibility,
+            capacity=payload.capacity,
+            contract_type=payload.contract_type,
+            program_required=payload.program_required,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.put("/{id}/draft/terms", status_code=200)
+def api_079_update_opportunity_terms(
+    id: UUID,
+    payload: UpdateOpportunityTermsRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-079: Update opportunity draft financial and duration terms (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_terms_api_079(
+            opportunity_id=str(id),
+            actor=actor,
+            is_paid=payload.is_paid,
+            salary_min=payload.salary_min,
+            salary_max=payload.salary_max,
+            currency=payload.currency,
+            salary_period=payload.salary_period,
+            salary_basis=payload.salary_basis,
+            start_date=payload.start_date,
+            end_date=payload.end_date,
+            program_required=payload.program_required,
+            fee_terms_note=payload.fee_terms_note,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.put("/{id}/draft/schedule", status_code=200)
+def api_080_update_opportunity_schedule(
+    id: UUID,
+    payload: UpdateOpportunityScheduleRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-080: Update opportunity draft schedule policy, match mode, and shift intervals (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_schedule_api_080(
+            opportunity_id=str(id),
+            actor=actor,
+            schedule_policy=payload.schedule_policy,
+            shift_match_mode=payload.shift_match_mode,
+            shifts=[s.model_dump() for s in payload.shifts] if payload.shifts is not None else None,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
