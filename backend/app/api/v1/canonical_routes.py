@@ -972,6 +972,66 @@ def withdraw_my_application_endpoint(
         ) from exc
 
 
+@router.get("/organizations/{org}/dashboard")
+def api_068_get_organization_dashboard(
+    org: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve organization HR analytics dashboard (`API-068` / `CAP-015`)."""
+    from app.services.org_dashboard import org_dashboard_service
+    from app.services.governance import GovernanceError
+    try:
+        return org_dashboard_service.get_dashboard_api_068(
+            actor=actor,
+            organization_id=str(org),
+        )
+    except GovernanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/organizations/{id}/opportunities")
+def api_009_get_organization_opportunities(
+    id: UUID,
+    limit: int = Query(default=20, ge=1, le=50),
+    after: str | None = None,
+) -> dict[str, Any]:
+    """Retrieve public PUBLISHED opportunities for an organization (`API-009` / `CAP-001`)."""
+    from app.services.org_dashboard import org_dashboard_service
+    from app.services.governance import GovernanceError
+    try:
+        return org_dashboard_service.get_public_opportunities_api_009(
+            organization_id=str(id),
+            limit=limit,
+            after=after,
+        )
+    except GovernanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/organizations/{id}/rating-summary")
+def api_010_get_organization_rating_summary(
+    id: UUID,
+) -> dict[str, Any]:
+    """Retrieve public rating aggregate summary for an organization (`API-010` / `CAP-027`)."""
+    from app.services.org_dashboard import org_dashboard_service
+    from app.services.governance import GovernanceError
+    try:
+        return org_dashboard_service.get_public_rating_summary_api_010(
+            organization_id=str(id),
+        )
+    except GovernanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     """Ensure all canonical route signatures from `FlexBridge_model_1_4.json` are registered in OpenAPI (`FIX-01`)."""
     model_path = Path(__file__).resolve().parents[4] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
