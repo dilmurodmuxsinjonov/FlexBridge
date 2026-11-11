@@ -327,3 +327,19 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Anti-Duplication**: Prevents duplicate concurrent requests of the same kind while in `PENDING` or `IN_PROGRESS` (HTTP 409 `PRIVACY_REQUEST_ALREADY_PENDING`).
   - **Statutory Due Date**: Enforces statutory 30-day fulfillment deadline (`due_at = created_at + timedelta(days=30)`).
   - **Audit Logging**: Persists `PRIVACY_REQUEST_CREATED` in `audit_events` via `AppendOnlyAuditStore`.
+
+## SUPPORT-API063-064-TICKETS — User Support Tickets & Messaging (2026-11-10)
+
+- **Capability & Contract**: `SUPPORT` (`CAP-033`) / `API-063` & `API-064` (Issue #96), branch `feature/96-support-tickets`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `GET /api/v1/me/support-tickets` (API-063): List support tickets for authenticated user (HTTP 200).
+  - `POST /api/v1/me/support-tickets`: Create a new support ticket with initial message (HTTP 201).
+  - `POST /api/v1/support-tickets/{id}/messages` (API-064): Reply to ticket thread (HTTP 201).
+  - `GET /api/v1/support-tickets/{id}/messages`: Get visible conversation thread (HTTP 200).
+- **Zero New DDL / Schema**: Leverages existing 130 runtime tables: `support_tickets` (DB-080: `id`, `created_at`, `updated_at`, `requester_id`, `category`, `priority`, `status`, `assignee_id`, `subject`, `first_response_due_at`, `resolved_at`), `support_messages` (DB-081: `id`, `created_at`, `updated_at`, `ticket_id`, `author_id`, `body`, `file_id`, `internal`), `audit_events` (DB-006).
+- **Service & Invariant Architecture (`app/services/support_tickets.py`)**:
+  - **Ownership Scope**: Authenticated requester manages and views their own tickets (`requester_id == actor.user_id`).
+  - **Internal Operator Notes (`DB-081` / AC-032)**: Requesters can never author or read internal operator notes (`internal = True`). Staff (`SUPPORT` / `ADMIN`) can read and author internal notes.
+  - **Priority SLA**: Response deadlines (`first_response_due_at` calculated as: URGENT 4h, HIGH 12h, NORMAL 24h, LOW 48h).
+  - **Lifecycle States**: Requesters replying flips status to `PENDING_SUPPORT`; staff public replies flip status to `PENDING_USER`. Closed tickets reject new messages with 409 Conflict (`TICKET_CLOSED`).
+  - **Audit Logging**: Persists `SUPPORT_TICKET_CREATED` and `SUPPORT_MESSAGE_POSTED` in `audit_events` via `AppendOnlyAuditStore`.

@@ -865,3 +865,33 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/privacy_requests/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/privacy_requests/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/privacy_requests/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API063-064 - User Support Tickets & Messaging (Issue #96)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/96-support-tickets`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/support_tickets.py`)**:
+    - `create_ticket`, `get_my_tickets`, `post_message` va `get_ticket_messages` metodlari amalga oshirildi.
+    - Ichki qaydlar himoyasi (`AC-032` / DB-081): Oddiy foydalanuvchilar ichki xizmat qaydlarini (`internal = True`) ko'ra olmaydi va yoza olmaydi. Operatorlar va adminlar esa to'liq ichki qaydlarni boshqara oladi.
+    - Avtomatik SLA hisobi: Muhimlik darajasiga ko'ra birinchi javob muddati (`first_response_due_at`: URGENT 4h, HIGH 12h, NORMAL 24h, LOW 48h) avtomatik belgilanadi.
+    - Holatlar almashinuvi: Foydalanuvchi javob yozganda status `PENDING_SUPPORT`, xodim javob yozganda `PENDING_USER` holatiga o'tadi. Yopilgan (`CLOSED`) ticketga yangi xabar yozish 409 Conflict bilan to'siladi.
+    - Anti-N+1 so'rovlar: Xabarlar soni skaljar subquery orqali bir martalik so'rovda hisoblanadi.
+    - Audit jurnali: Har bir yangi ticket va xabar `AppendOnlyAuditStore` orqali `audit_events` jadvaliga yoziladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `GET /api/v1/me/support-tickets` (API-063, status 200).
+    - `POST /api/v1/me/support-tickets` (status 201).
+    - `POST /api/v1/support-tickets/{id}/messages` (API-064, status 201).
+    - `GET /api/v1/support-tickets/{id}/messages` (status 200).
+  * **Test shartnomalari (`backend/tests/security/test_contracts.py`)**:
+    - Amalga oshirilmagan shartnoma tekshiruvi `API-068` (`GET /api/v1/organizations/{org}/entitlements`) ga ko'chirildi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 8/8 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_support_tickets_api063_064.py`).
+  * 6/6 adversarial va chegara testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_support_tickets_adversarial.py`).
+  * 16/16 shartnoma regressiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_contracts.py`).
+  * 14/14 maxfiylik regressiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_privacy_requests_api062.py`, `test_privacy_requests_adversarial.py`).
+  * Jami 44/44 test yashil.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/support_tickets/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/support_tickets/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/support_tickets/REVIEW_SUMMARY.md`.
