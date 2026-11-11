@@ -650,6 +650,12 @@ class InterviewOfferService:
                 if not opp:
                     raise InterviewOfferConflictError(code="OPPORTUNITY_NOT_FOUND", message="E'lon topilmadi")
 
+                if opp["status"] != "PUBLISHED":
+                    raise InterviewOfferConflictError(
+                        code="OPPORTUNITY_NOT_ACTIVE",
+                        message=f"E'lon faol emas ({opp['status']})",
+                    )
+
                 capacity = opp["capacity"]
                 occupied_count = opp["occupied_count"]
 
