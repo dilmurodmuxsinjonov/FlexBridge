@@ -1057,3 +1057,25 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/privacy_requests/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/privacy_requests/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/privacy_requests/REVIEW_SUMMARY.md`.
+
+## LOG-094 / API-063..064 - User Support Tickets & Messaging (Issue #96)
+
+- **Issue / Branch**: GitHub Issue #96 (`API-063` / `API-064`), branch `feature/96-support-tickets`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-033` / `DB-080` / `DB-081` / `AC-032` / `OPS-03`)**:
+  - `backend/app/services/support_tickets.py`: Created `SupportTicketsService` with `create_ticket`, `get_my_tickets`, `post_message`, and `get_ticket_messages`.
+  - **Ownership Scope**: Authenticated user submits tickets and views their own conversation threads (`requester_id == actor.user_id`). Third-party access blocked with 403 Forbidden.
+  - **Internal Note Segregation (`DB-081` / AC-032)**: Requesters can never author or view internal notes (`internal = True`). Platform staff (`SUPPORT` / `ADMIN`) can read and author internal operator notes.
+  - **Priority SLA Tracking (`first_response_due_at`)**: Priority-based response deadlines (`URGENT` 4h, `HIGH` 12h, `NORMAL` 24h, `LOW` 48h).
+  - **State Machine**: User reply flips status to `PENDING_SUPPORT`; staff reply flips status to `PENDING_USER`. Closed tickets reject new messages with 409 Conflict (`TICKET_CLOSED`).
+  - **Append-Only Auditing**: Records `SUPPORT_TICKET_CREATED` and `SUPPORT_MESSAGE_POSTED` in `audit_events` via `AppendOnlyAuditStore`.
+  - Canonical routes: mounted in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 8/8 unit and contract tests passed in `backend/tests/security/test_support_tickets_api063_064.py`.
+  * 6/6 adversarial and security tests passed in `backend/tests/security/test_support_tickets_adversarial.py`.
+  * 16/16 contract regression tests in `test_contracts.py` + 14/14 privacy regression tests. Total 44/44 tests green.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/support_tickets/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/support_tickets/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/support_tickets/REVIEW_SUMMARY.md`.

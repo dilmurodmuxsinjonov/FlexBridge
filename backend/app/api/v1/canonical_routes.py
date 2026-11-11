@@ -15,6 +15,8 @@ including:
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
 - `API-062`: `POST /api/v1/me/privacy-requests`
+- `API-063`: `GET /api/v1/me/support-tickets`
+- `API-064`: `POST /api/v1/support-tickets/{id}/messages`
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
 - `API-081`: `POST /api/v1/opportunities/{id}/publish`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
@@ -447,6 +449,110 @@ def get_privacy_requests_endpoint(
         page=page,
         page_size=page_size,
     )
+
+
+class SupportTicketCreatePayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    subject: str = Field(..., min_length=3, max_length=255, description="Ticket mavzusi")
+    body: str = Field(..., min_length=5, max_length=4000, description="Dastlabki murojaat matni")
+    category: str = Field(default="GENERAL", description="Kategoriya")
+    priority: str = Field(default="NORMAL", description="Muhimlik darajasi")
+    file_id: str | None = Field(default=None, description="Ilova qilingan fayl UUID")
+
+
+class SupportMessageCreatePayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    body: str = Field(..., min_length=1, max_length=4000, description="Javob xabari matni")
+    file_id: str | None = Field(default=None, description="Ilova qilingan fayl UUID")
+    internal: bool = Field(default=False, description="Ichki operator qaydi (faqat xodimlar uchun)")
+
+
+@router.get("/me/support-tickets")
+def get_my_support_tickets_endpoint(
+    status: str | None = None,
+    category: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-063 (`GET /api/v1/me/support-tickets`): List support tickets for authenticated user (`CAP-033`, `AC-032`)."""
+    from app.services.support_tickets import support_tickets_service
+    return support_tickets_service.get_my_tickets(
+        actor=actor,
+        status=status,
+        category=category,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/me/support-tickets", status_code=201)
+def create_support_ticket_endpoint(
+    payload: SupportTicketCreatePayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Create a new support ticket with initial message (`CAP-033`, `AC-032`)."""
+    from app.services.support_tickets import SupportTicketError, support_tickets_service
+    try:
+        return support_tickets_service.create_ticket(
+            actor=actor,
+            subject=payload.subject,
+            body=payload.body,
+            category=payload.category,
+            priority=payload.priority,
+            file_id=payload.file_id,
+        )
+    except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.post("/support-tickets/{id}/messages", status_code=201)
+def post_support_message_endpoint(
+    id: UUID,
+    payload: SupportMessageCreatePayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-064 (`POST /api/v1/support-tickets/{id}/messages`): Post message to ticket thread (`CAP-033`, `AC-032`)."""
+    from app.services.support_tickets import SupportTicketError, support_tickets_service
+    try:
+        return support_tickets_service.post_message(
+            actor=actor,
+            ticket_id=str(id),
+            body=payload.body,
+            file_id=payload.file_id,
+            internal=payload.internal,
+        )
+    except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/support-tickets/{id}/messages")
+def get_support_messages_endpoint(
+    id: UUID,
+    page: int = 1,
+    page_size: int = 50,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Get conversation thread for support ticket (`CAP-033`, `AC-032`)."""
+    from app.services.support_tickets import SupportTicketError, support_tickets_service
+    try:
+        return support_tickets_service.get_ticket_messages(
+            actor=actor,
+            ticket_id=str(id),
+            page=page,
+            page_size=page_size,
+        )
+    except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
 
 
 @router.post("/operator/refunds/{id}/approve")
