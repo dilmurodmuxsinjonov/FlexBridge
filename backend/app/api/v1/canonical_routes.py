@@ -29,6 +29,9 @@ including:
 - `API-082`: `GET /api/v1/opportunities/{id}/applications` (in `opportunities.py`)
 - `API-083`: `POST /api/v1/applications/{id}/transition`
 - `API-084`: `GET /api/v1/applications/{id}/hr`
+- `API-090`: `GET /api/v1/me/mentor-review-queue`
+- `API-091`: `GET /api/v1/log-revisions/{revision}/workplace`
+- `API-092`: `POST /api/v1/log-revisions/{revision}/workplace-reviews`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
 - `API-095`: `POST /api/v1/orders/{id}/refund-requests`
 - `API-116`: `POST /api/v1/operator/refunds/{id}/approve`
@@ -62,6 +65,7 @@ from app.services.interviews_and_offers import InterviewOfferError, interview_of
 from app.services.job_engagements import JobEngagementError, job_engagement_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
 from app.services.placements import PlacementScopeError, placement_service
+from app.services.workplace_reviews import WorkplaceReviewError, workplace_review_service
 
 router = APIRouter(prefix="/api/v1", tags=["canonical-v1.4"])
 
@@ -1111,6 +1115,72 @@ def api_084_get_application_hr_detail(
             application_id=str(id),
         )
     except ApplicationHRError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+class SubmitWorkplaceReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    decision: str = Field(..., pattern="^(APPROVED|CHANGES_REQUESTED|REJECTED)$")
+    comment: str | None = Field(default=None, max_length=2000)
+
+
+@router.get("/me/mentor-review-queue", status_code=200)
+def api_090_list_mentor_review_queue(
+    limit: int = 20,
+    cursor: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-090: Mentor review queue containing only own accepted assignments (`CAP-023`, `LOG_MENTOR`)."""
+    try:
+        return workplace_review_service.list_mentor_review_queue(
+            actor=actor,
+            limit=limit,
+            cursor=cursor,
+        )
+    except WorkplaceReviewError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/log-revisions/{revision}/workplace", status_code=200)
+def api_091_get_workplace_log_revision(
+    revision: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-091: Workplace view of daily log revision (`CAP-023`, `LOG_MENTOR`)."""
+    try:
+        return workplace_review_service.get_workplace_log_revision_detail(
+            revision_id=str(revision),
+            actor=actor,
+        )
+    except WorkplaceReviewError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.post("/log-revisions/{revision}/workplace-reviews", status_code=200)
+def api_092_submit_workplace_review(
+    revision: UUID,
+    payload: SubmitWorkplaceReviewRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-092: Workplace review decision (`CAP-023`, `LOG_MENTOR`)."""
+    try:
+        return workplace_review_service.submit_workplace_review(
+            revision_id=str(revision),
+            decision=payload.decision,
+            comment=payload.comment,
+            actor=actor,
+        )
+    except WorkplaceReviewError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": exc.message},
