@@ -6,11 +6,13 @@ from dataclasses import dataclass, field
 from typing import Any
 from uuid import UUID
 
+import base64
+from datetime import datetime
 from app.api.v1.billing import billing_service
 from app.db.storage import table, transaction, now
 from app.services.placements import get_row, insert_row
 from app.api.dependencies import ActorContext, require_org
-from sqlalchemy import select
+from sqlalchemy import select, and_, or_
 from app.services.schedule import local_today
 from app.services.availability import (
     CandidateAvailabilityService,
@@ -408,6 +410,193 @@ class OpportunityMatchingService:
                 "organization": org_data,
                 "skills": skills_list,
                 "shifts": shifts_list,
+            }
+
+    def search_public_opportunities(
+        self,
+        *,
+        region: str | None = None,
+        kind: str | None = None,
+        is_paid: bool | None = None,
+        min_hourly_pay: int | None = None,
+        schedule_policy: str | None = None,
+        query: str | None = None,
+        skill_id: str | None = None,
+        limit: int = 20,
+        after: str | None = None,
+    ) -> dict[str, Any]:
+        """Canonical API-001: Public opportunity search and discovery catalog (`CAP-001`, `PUBLIC_SEARCH`).
+        
+        Strict invariants:
+        - Only returns opportunities with status == 'PUBLISHED', closed_at IS NULL, and (expires_at IS NULL OR expires_at > now()).
+        - Owning organization must have status == 'VERIFIED'.
+        - Real-time vacancies_available = max(0, capacity - occupied_count).
+        - Stable Keyset cursor pagination over (published_at DESC, id DESC).
+        """
+        valid_limit = max(1, min(100, int(limit)))
+        with transaction() as conn:
+            t_opp = table("opportunities")
+            t_rev = table("opportunity_revisions")
+            t_org = table("organizations")
+
+            stmt = (
+                select(
+                    t_opp.c.id.label("opp_id"),
+                    t_opp.c.organization_id,
+                    t_opp.c.kind.label("opp_kind"),
+                    t_opp.c.capacity,
+                    t_opp.c.occupied_count,
+                    t_opp.c.published_at,
+                    t_opp.c.expires_at,
+                    t_rev.c.id.label("rev_id"),
+                    t_rev.c.title,
+                    t_rev.c.description,
+                    t_rev.c.region.label("rev_region"),
+                    t_rev.c.work_mode,
+                    t_rev.c.contract_type,
+                    t_rev.c.is_paid,
+                    t_rev.c.salary_min,
+                    t_rev.c.salary_max,
+                    t_rev.c.currency,
+                    t_rev.c.schedule_policy,
+                    t_org.c.legal_name.label("org_legal_name"),
+                    t_org.c.public_name.label("org_public_name"),
+                    t_org.c.region.label("org_region"),
+                )
+                .select_from(
+                    t_opp.join(t_rev, t_opp.c.current_revision_id == t_rev.c.id)
+                    .join(t_org, t_opp.c.organization_id == t_org.c.id)
+                )
+                .where(
+                    t_opp.c.status == "PUBLISHED",
+                    t_opp.c.closed_at.is_(None),
+                    or_(t_opp.c.expires_at.is_(None), t_opp.c.expires_at > now()),
+                    t_org.c.status == "VERIFIED",
+                )
+            )
+
+            # Optional filter: region
+            if region:
+                reg_clean = str(region).strip()
+                stmt = stmt.where(
+                    or_(t_org.c.region.ilike(f"%{reg_clean}%"), t_rev.c.region.ilike(f"%{reg_clean}%"))
+                )
+
+            # Optional filter: kind
+            if kind:
+                stmt = stmt.where(t_opp.c.kind == str(kind).strip())
+
+            # Optional filter: is_paid
+            if is_paid is not None:
+                stmt = stmt.where(t_rev.c.is_paid == bool(is_paid))
+
+            # Optional filter: min_hourly_pay (strictly for hourly positions)
+            if min_hourly_pay is not None:
+                stmt = stmt.where(
+                    and_(
+                        t_rev.c.salary_period == "HOUR",
+                        or_(
+                            t_rev.c.salary_min >= min_hourly_pay,
+                            t_rev.c.salary_max >= min_hourly_pay,
+                        ),
+                    )
+                )
+
+            # Optional filter: schedule_policy
+            if schedule_policy:
+                stmt = stmt.where(t_rev.c.schedule_policy == schedule_policy)
+
+            # Optional filter: query (title or description)
+            if query:
+                q_clean = str(query).strip()
+                stmt = stmt.where(
+                    or_(
+                        t_rev.c.title.ilike(f"%{q_clean}%"),
+                        t_rev.c.description.ilike(f"%{q_clean}%"),
+                    )
+                )
+
+            # Optional filter: skill_id
+            if skill_id:
+                try:
+                    s_uuid = str(UUID(str(skill_id)))
+                    t_opp_skills = table("opportunity_skills")
+                    stmt = stmt.where(
+                        t_rev.c.id.in_(
+                            select(t_opp_skills.c.revision_id).where(t_opp_skills.c.skill_id == s_uuid)
+                        )
+                    )
+                except (ValueError, TypeError, AttributeError):
+                    pass
+
+            # Keyset cursor pagination: (published_at DESC, id DESC)
+            if after:
+                try:
+                    decoded = base64.b64decode(after.encode("utf-8")).decode("utf-8")
+                    after_ts_str, after_id_str = decoded.split("|", 1)
+                    after_ts = datetime.fromisoformat(after_ts_str)
+                    after_id = str(UUID(after_id_str))
+                except Exception as exc:
+                    raise OpportunityConstraintError(
+                        "INVALID_CURSOR",
+                        "Noto'g'ri yoki buzilgan sahifalash kursori",
+                        status_code=400,
+                    ) from exc
+
+                stmt = stmt.where(
+                    or_(
+                        t_opp.c.published_at < after_ts,
+                        and_(t_opp.c.published_at == after_ts, t_opp.c.id < after_id),
+                    )
+                )
+
+            stmt = stmt.order_by(t_opp.c.published_at.desc(), t_opp.c.id.desc()).limit(valid_limit + 1)
+            rows = conn.execute(stmt).mappings().all()
+
+            has_more = len(rows) > valid_limit
+            items_rows = rows[:valid_limit]
+
+            items = []
+            for r in items_rows:
+                capacity = int(r["capacity"] or 0)
+                occupied = int(r["occupied_count"] or 0)
+                vacancies = max(0, capacity - occupied)
+                items.append({
+                    "id": str(r["opp_id"]),
+                    "organization_id": str(r["organization_id"]),
+                    "organization_name": r["org_public_name"] or r["org_legal_name"],
+                    "organization_region": r["org_region"],
+                    "title": r["title"],
+                    "description": r["description"],
+                    "region": r["rev_region"],
+                    "kind": r["opp_kind"],
+                    "work_mode": r["work_mode"],
+                    "contract_type": r["contract_type"],
+                    "is_paid": bool(r["is_paid"]),
+                    "salary_min": float(r["salary_min"]) if r["salary_min"] is not None else None,
+                    "salary_max": float(r["salary_max"]) if r["salary_max"] is not None else None,
+                    "currency": r["currency"] or "UZS",
+                    "schedule_policy": r["schedule_policy"],
+                    "capacity": capacity,
+                    "occupied_count": occupied,
+                    "vacancies_available": vacancies,
+                    "published_at": r["published_at"].isoformat() if r["published_at"] else None,
+                    "expires_at": r["expires_at"].isoformat() if r["expires_at"] else None,
+                })
+
+            next_after = None
+            if has_more and items_rows:
+                last = items_rows[-1]
+                last_pub = last["published_at"].isoformat() if last["published_at"] else ""
+                last_id = str(last["opp_id"])
+                next_after = base64.b64encode(f"{last_pub}|{last_id}".encode("utf-8")).decode("utf-8")
+
+            return {
+                "contract_id": "API-001",
+                "items": items,
+                "limit": valid_limit,
+                "has_more": has_more,
+                "next_after": next_after,
             }
 
 
