@@ -1004,3 +1004,32 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/rating_appeals/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/rating_appeals/OPENCODE_REVIEW.md`).
   * Review synthesis: `reviews/2026-11-10/rating_appeals/REVIEW_SUMMARY.md`.
+
+## LOG-092 / API-059 - User Notification Preferences (Issue #92)
+
+- **Issue / Branch**: GitHub Issue #92 (`API-059`), branch `feature/92-notification-preferences`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Service & Implementation (`CAP-031` / `DB-085` / `DB-011` / `AC-030` / `OPS-01`)**:
+  - `backend/app/services/notification_preferences.py`: Created `NotificationPreferencesService` with `get_preferences` and `update_preferences_api_059`.
+  - **Ownership Scope**: Authenticated user updates their own notification settings (`user_id == actor.user_id`).
+  - **Channel & Purpose Categorization**: Supports channels `EMAIL`, `SMS`, `PUSH`, `WHATSAPP` across purposes `TRANSACTIONAL`, `SECURITY`, `MARKETING`.
+  - **Mandatory Critical Delivery Guard ("Transactional/marketing alohida", AC-030)**:
+    - Users cannot disable `TRANSACTIONAL` notifications across all channels (at least 1 channel must remain enabled).
+    - Users cannot disable `SECURITY` notifications across all channels.
+    - Disabling across all channels is rejected with 422 Unprocessable Entity (`TRANSACTIONAL_NOTIFICATION_CANNOT_BE_DISABLED`).
+  - **Legal Consent Tracking (`DB-011` / DB-085)**:
+    - Marketing preference mutations automatically record immutable legal consent events in `consent_events` (`action='GRANTED'` or `'REVOKED'`).
+    - Explicitly links `consent_event_id` in `notification_preferences`.
+  - **Defaults Merging**: `GET /api/v1/me/notification-preferences` returns stored preferences merged with default system preferences.
+  - **Append-Only Auditing**: Records `NOTIFICATION_PREFERENCES_UPDATED` in `audit_events`.
+  - Canonical routes: mounted `PUT /api/v1/me/notification-preferences` and `GET /api/v1/me/notification-preferences` in `backend/app/api/v1/canonical_routes.py`.
+- **Empirical Test Verification (Isolated Test DB on port 55440)**:
+  * 8/8 unit and contract tests passed in `backend/tests/security/test_notification_preferences_api059.py`.
+  * 6/6 adversarial and boundary tests passed in `backend/tests/security/test_notification_preferences_adversarial.py`.
+  * 16/16 contract regression tests in `backend/tests/security/test_contracts.py`.
+  * Combined 30 tests passed in 144.75s; full domain regression (48/48 tests) passed in 244.66s.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/notification_preferences/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: APPROVED across all axes (`reviews/2026-11-10/notification_preferences/OPENCODE_REVIEW.md`).
+  * Review synthesis: `reviews/2026-11-10/notification_preferences/REVIEW_SUMMARY.md`.

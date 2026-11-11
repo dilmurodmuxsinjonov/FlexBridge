@@ -11,6 +11,7 @@ including:
 - `API-056`: `POST /api/v1/logs/{id}/submit`
 - `API-057`: `GET /api/v1/me/ratings`
 - `API-058`: `POST /api/v1/ratings/{id}/appeals`
+- `API-059`: `PUT /api/v1/me/notification-preferences`
 - `API-060`: `PATCH /api/v1/me/security` (in `auth.py`)
 - `API-061`: `DELETE /api/v1/me/sessions/{id}` (in `auth.py`)
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
@@ -354,6 +355,46 @@ def submit_rating_appeal_endpoint(
             evidence_notes=payload.evidence_notes,
         )
     except RatingScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},
+        ) from exc
+
+
+class PreferenceUpdateItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    channel: str = Field(..., description="Kanal: EMAIL, SMS, PUSH, WHATSAPP")
+    purpose: str = Field(..., description="Maqsad: TRANSACTIONAL, SECURITY, MARKETING")
+    enabled: bool = Field(..., description="Holat: true / false")
+
+
+class NotificationPreferencesUpdatePayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    preferences: list[PreferenceUpdateItem] = Field(..., min_length=1, description="Sozlamalar ro'yxati")
+
+
+@router.get("/me/notification-preferences")
+def get_notification_preferences_endpoint(
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve current notification preferences for authenticated user."""
+    from app.services.notification_preferences import notification_preferences_service
+    return notification_preferences_service.get_preferences(actor=actor)
+
+
+@router.put("/me/notification-preferences")
+def update_notification_preferences_endpoint(
+    payload: NotificationPreferencesUpdatePayload,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-059 (`PUT /api/v1/me/notification-preferences`): Update user notification preferences (`CAP-031`, `AC-030`)."""
+    from app.services.notification_preferences import NotificationScopeError, notification_preferences_service
+    try:
+        return notification_preferences_service.update_preferences_api_059(
+            actor=actor,
+            preferences=[item.model_dump() for item in payload.preferences],
+        )
+    except NotificationScopeError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": str(exc), "sqlstate": exc.sqlstate},

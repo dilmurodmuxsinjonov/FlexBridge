@@ -812,3 +812,29 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/rating_appeals/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/rating_appeals/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-10/rating_appeals/REVIEW_SUMMARY.md`.
+
+## DIARY-ANTIGRAVITY-API059 - User Notification Preferences (Issue #92)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Branch `feature/92-notification-preferences`, base `integration/r1-agent-collaboration`. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md).
+- **Mas'ul**: Antigravity Teamwork & Autonomous Execution.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/notification_preferences.py`)**:
+    - `get_preferences` va `update_preferences_api_059`: Foydalanuvchi bildirishnoma sozlamalarini ko'rish va yangilash xizmati yaratildi.
+    - Tanqidiy yetkazib berish himoyasi (`AC-030` / OPS-01): `TRANSACTIONAL` va `SECURITY` bildirishnomalarini barcha kanallarda butunlay o'chirib qo'yish qat'iyan taqiqlandi (kamida bitta kanal ochiq qolishi shart). Hamma kanallarni o'chirishga urinish 422 Unprocessable Entity (`TRANSACTIONAL_NOTIFICATION_CANNOT_BE_DISABLED`) bilan to'siladi.
+    - Huquqiy rozilik qaydi (`DB-011` / DB-085): Marketing bildirishnomalari (`purpose == 'MARKETING'`) o'zgartirilganda o'zgarmas `consent_events` jadvaliga `action: GRANTED` yoki `action: REVOKED` yozuvi saqlanadi va `consent_event_id` bog'lanadi.
+    - Tizim standartlarini birlashtirish: Baza jadvalida hali yaratilmagan kanallar uchun standart xavfsiz sozlamalar birlashtirib qaytariladi.
+    - Audit jurnali: Har bir o'zgarish `AppendOnlyAuditStore` orqali `NOTIFICATION_PREFERENCES_UPDATED` voqeasi bilan qayd etiladi.
+  * **Kanonik marshrutlar (`backend/app/api/v1/canonical_routes.py`)**:
+    - `PUT /api/v1/me/notification-preferences` (API-059, status 200).
+    - `GET /api/v1/me/notification-preferences` (API-059, status 200).
+  * **Test shartnomalari (`backend/tests/security/test_contracts.py`)**:
+    - Amalga oshirilmagan shartnoma tekshiruvi `API-062` (`POST /api/v1/me/privacy-requests`) ga yo'naltirilib, 501 regressiya tekshiruvi saqlab qolindi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, `FLEXBRIDGE_TEST_ADMIN_URL` port 55440, pg_live tegilmadi)**:
+  * 8/8 shartnoma va xavfsizlik testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_notification_preferences_api059.py`).
+  * 6/6 adversarial va chegara testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_notification_preferences_adversarial.py`).
+  * 16/16 shartnoma regressiya testlari muvaffaqiyatli o'tdi (`backend/tests/security/test_contracts.py`).
+  * Jami 48/48 test yashil.
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-10/notification_preferences/COPILOT_REVIEW.md`).
+  * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-10/notification_preferences/OPENCODE_REVIEW.md`).
+  * Review sintezi: `reviews/2026-11-10/notification_preferences/REVIEW_SUMMARY.md`.

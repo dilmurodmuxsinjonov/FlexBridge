@@ -60,7 +60,7 @@ def test_submitted_log_summary_database_immutable(client,identities,organization
 def test_unimplemented_contract_never_claims_success(client,identities):
     user=identities()
     # An endpoint outside this remediation remains explicitly unimplemented.
-    r=client.put('/api/v1/me/notification-preferences',json={},headers=user['headers'])
+    r=client.post('/api/v1/me/privacy-requests',json={},headers=user['headers'])
     assert r.status_code==501,r.text
     assert r.json()['status']=='NOT_IMPLEMENTED'
 
