@@ -18,9 +18,9 @@ from uuid import UUID, uuid4
 from sqlalchemy import and_, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.dependencies import ActorContext, candidate_id_for
+from app.api.dependencies import ActorContext, candidate_id_for, owns_candidate
 from app.core.audit import AppendOnlyAuditStore
-from app.db.storage import table, transaction
+from app.db.storage import now, table, transaction
 from app.services.authority import account_authority
 from app.services.feature_flags import FeatureFlagService
 from app.services.placements import PlacementScopeError, insert_row
@@ -763,6 +763,410 @@ class UserRatingsService:
             "submission_status": new_status,
             "resolved_at": now_utc.astimezone(timezone.utc).isoformat(),
             "aggregate_summary": agg_result,
+        }
+
+    def submit_engagement_rating_api_047(
+        self,
+        *,
+        actor: ActorContext,
+        engagement_id: str,
+        scores: list[dict[str, Any]],
+        rubric_id: str | None = None,
+        comment: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Submit mutual performance rating for a completed job engagement (API-047 / CAP-027 / AC-024).
+
+        Invariants & Protections:
+        1. Engagement must exist; non-participants receive uniform 404 ENGAGEMENT_NOT_FOUND (IDOR defense).
+        2. Engagement must be in COMPLETED status; otherwise returns 409 ENGAGEMENT_NOT_COMPLETED.
+        3. Candidate rates the organization (target_org_id); Employer rates the candidate (target_user_id).
+        4. AC-024 Bilateral Double-Blind: Rating held in PENDING_BLIND with publish_after = now + 14 days
+           until BOTH parties submit or window expires. Upon dual submission, both transition to PUBLISHED.
+        5. Validates active rubric, required criteria presence, and score bounds (scale_min..scale_max).
+        6. Idempotent replay on identical submissions; 409 RATING_ALREADY_SUBMITTED on conflicting attempts.
+        7. Recomputes aggregate scores once published (respecting n >= 5 privacy threshold under AC-023).
+        8. Records append-only audit event in AppendOnlyAuditStore.
+        """
+        try:
+            eng_uuid = UUID(engagement_id)
+        except (ValueError, TypeError) as exc:
+            raise RatingScopeError(
+                "ENGAGEMENT_NOT_FOUND",
+                "Noto'g'ri ish munosabati identifikatori",
+                status_code=404,
+                sqlstate="02000",
+            ) from exc
+
+        if not scores:
+            raise RatingScopeError(
+                "MISSING_SCORES",
+                "Baholash ballari kiritilishi shart",
+                status_code=422,
+                sqlstate="22000",
+            )
+
+        now_utc = datetime.now(timezone.utc)
+
+        with transaction() as conn:
+            # 1. Verify actor authority
+            account_authority(conn, actor)
+
+            # 2. Row lock on job_engagements to prevent concurrency race conditions
+            t_eng = table("job_engagements")
+            eng = conn.execute(
+                select(t_eng).where(t_eng.c.id == eng_uuid).with_for_update()
+            ).mappings().first()
+
+            if not eng:
+                raise RatingScopeError(
+                    "ENGAGEMENT_NOT_FOUND",
+                    "Ish munosabati topilmadi",
+                    status_code=404,
+                    sqlstate="02000",
+                )
+
+            # 3. Verify engagement lifecycle status
+            if eng["status"] != "COMPLETED":
+                raise RatingScopeError(
+                    "ENGAGEMENT_NOT_COMPLETED",
+                    f"Baholash faqat yakunlangan (COMPLETED) ish munosabatlari uchun mumkin, joriy holat: {eng['status']}",
+                    status_code=409,
+                    sqlstate="22000",
+                )
+
+            # 4. Resolve actor's role and target party via applications & opportunities
+            t_apps = table("applications")
+            t_opp = table("opportunities")
+
+            app = conn.execute(
+                select(t_apps).where(t_apps.c.id == eng["application_id"])
+            ).mappings().first()
+            if not app:
+                raise RatingScopeError(
+                    "ENGAGEMENT_NOT_FOUND",
+                    "Ish munosabatiga tegishli ariza topilmadi",
+                    status_code=404,
+                    sqlstate="02000",
+                )
+
+            opp = conn.execute(
+                select(t_opp).where(t_opp.c.id == app["opportunity_id"])
+            ).mappings().first()
+            if not opp:
+                raise RatingScopeError(
+                    "ENGAGEMENT_NOT_FOUND",
+                    "Ish munosabatiga tegishli e'lon topilmadi",
+                    status_code=404,
+                    sqlstate="02000",
+                )
+
+            candidate_id = app["candidate_id"]
+            organization_id = opp["organization_id"]
+
+            t_cand = table("candidate_profiles")
+            cand = conn.execute(
+                select(t_cand).where(t_cand.c.id == candidate_id)
+            ).mappings().first()
+
+            is_candidate = False
+            candidate_user_id = cand["user_id"] if cand else None
+            if cand and str(cand["user_id"]) == str(actor.user_id):
+                is_candidate = True
+            if not is_candidate:
+                try:
+                    is_candidate = owns_candidate(actor.user_id, str(candidate_id))
+                except Exception:
+                    is_candidate = False
+
+            t_mem = table("org_memberships")
+            membership = conn.execute(
+                select(t_mem).where(
+                    t_mem.c.organization_id == organization_id,
+                    t_mem.c.user_id == actor.user_id,
+                    t_mem.c.status == "ACTIVE",
+                    t_mem.c.revoked_at.is_(None),
+                )
+            ).mappings().first()
+            is_employer = (membership is not None)
+
+            # Anti-IDOR uniform 404 for unassociated actors
+            if not is_candidate and not is_employer:
+                raise RatingScopeError(
+                    "ENGAGEMENT_NOT_FOUND",
+                    "Ish munosabati topilmadi",
+                    status_code=404,
+                    sqlstate="02000",
+                )
+
+            if is_candidate:
+                rater_role = "CANDIDATE"
+                target_user_id = None
+                target_org_id = organization_id
+            else:
+                rater_role = "EMPLOYER"
+                target_user_id = candidate_user_id
+                target_org_id = None
+
+            # 5. Resolve active rubric
+            t_rub = table("rubric_versions")
+            t_crit = table("rubric_criteria")
+
+            if rubric_id:
+                try:
+                    rub_uuid = UUID(rubric_id)
+                except (ValueError, TypeError) as exc:
+                    raise RatingScopeError(
+                        "RUBRIC_NOT_FOUND",
+                        "Noto'g'ri rubrika identifikatori",
+                        status_code=404,
+                        sqlstate="02000",
+                    ) from exc
+
+                rubric = conn.execute(
+                    select(t_rub).where(t_rub.c.id == rub_uuid, t_rub.c.status == "ACTIVE")
+                ).mappings().first()
+                if not rubric:
+                    raise RatingScopeError(
+                        "RUBRIC_NOT_FOUND",
+                        "Aktiv baholash rubrikasi topilmadi",
+                        status_code=404,
+                        sqlstate="02000",
+                    )
+            else:
+                rubric = conn.execute(
+                    select(t_rub)
+                    .where(t_rub.c.status == "ACTIVE")
+                    .order_by(t_rub.c.published_at.desc().nullslast(), t_rub.c.version.desc())
+                ).mappings().first()
+                if not rubric:
+                    raise RatingScopeError(
+                        "RUBRIC_NOT_CONFIGURED",
+                        "Tizimda faol baholash rubrikasi topilmadi",
+                        status_code=422,
+                        sqlstate="22000",
+                    )
+
+            # 6. Validate criteria & score values against rubric
+            criteria = conn.execute(
+                select(t_crit).where(t_crit.c.rubric_id == rubric["id"])
+            ).mappings().all()
+            crit_by_id = {str(c["id"]): c for c in criteria}
+            required_crit_ids = {str(c["id"]) for c in criteria if c["required"]}
+
+            submitted_crit_ids = set()
+            for item in scores:
+                cid = str(item.get("criterion_id", ""))
+                if cid not in crit_by_id:
+                    raise RatingScopeError(
+                        "INVALID_CRITERION_ID",
+                        f"Rubrikaga tegishli bo'lmagan mezon: {cid}",
+                        status_code=422,
+                        sqlstate="22000",
+                    )
+                if cid in submitted_crit_ids:
+                    raise RatingScopeError(
+                        "DUPLICATE_CRITERION_SCORE",
+                        f"Bitta mezon uchun ikki marta ball yuborildi: {cid}",
+                        status_code=422,
+                        sqlstate="22000",
+                    )
+                submitted_crit_ids.add(cid)
+                raw_sc = item.get("score")
+                if not isinstance(raw_sc, int) or raw_sc < rubric["scale_min"] or raw_sc > rubric["scale_max"]:
+                    raise RatingScopeError(
+                        "SCORE_OUT_OF_BOUNDS",
+                        f"Ball {rubric['scale_min']} va {rubric['scale_max']} oralig'ida butun son bo'lishi kerak",
+                        status_code=422,
+                        sqlstate="22000",
+                    )
+
+            missing_req = required_crit_ids - submitted_crit_ids
+            if missing_req:
+                raise RatingScopeError(
+                    "MISSING_REQUIRED_CRITERIA",
+                    "Barcha majburiy baholash mezonlari to'ldirilishi shart",
+                    status_code=422,
+                    sqlstate="22000",
+                )
+
+            # 7. Check existing submission by actor for this engagement
+            t_sub = table("rating_submissions")
+            t_rev = table("rating_revisions")
+            t_sco = table("rating_scores")
+
+            existing_sub = conn.execute(
+                select(t_sub).where(
+                    t_sub.c.engagement_id == eng_uuid,
+                    t_sub.c.rater_id == actor.user_id,
+                    t_sub.c.rubric_id == rubric["id"],
+                )
+            ).mappings().first()
+
+            if existing_sub:
+                existing_rev = conn.execute(
+                    select(t_rev).where(t_rev.c.submission_id == existing_sub["id"]).order_by(t_rev.c.version.desc())
+                ).mappings().first()
+                existing_scores = conn.execute(
+                    select(t_sco).where(t_sco.c.rating_revision_id == existing_rev["id"])
+                ).mappings().all()
+                existing_score_map = {str(s["criterion_id"]): s["score"] for s in existing_scores}
+                new_score_map = {str(item["criterion_id"]): item["score"] for item in scores}
+
+                clean_comment = comment.strip() if comment else None
+                if existing_score_map == new_score_map and (existing_sub["comment"] or None) == clean_comment:
+                    return {
+                        "contract_id": "API-047",
+                        "submission_id": str(existing_sub["id"]),
+                        "engagement_id": str(eng_uuid),
+                        "rater_id": str(actor.user_id),
+                        "rater_role": rater_role,
+                        "target_user_id": str(existing_sub["target_user_id"]) if existing_sub["target_user_id"] else None,
+                        "target_org_id": str(existing_sub["target_org_id"]) if existing_sub["target_org_id"] else None,
+                        "status": existing_sub["status"],
+                        "double_blind_active": (existing_sub["status"] == "PENDING_BLIND"),
+                        "publish_after": existing_sub["publish_after"].astimezone(timezone.utc).isoformat() if existing_sub["publish_after"] else None,
+                        "submitted_at": existing_sub["submitted_at"].astimezone(timezone.utc).isoformat() if existing_sub["submitted_at"] else None,
+                        "idempotent_replay": True,
+                        "message": "Baho allaqachon topshirilgan (idempotent javob)",
+                    }
+                raise RatingScopeError(
+                    "RATING_ALREADY_SUBMITTED",
+                    "Ushbu ish munosabati uchun baho allaqachon topshirilgan",
+                    status_code=409,
+                    sqlstate="23505",
+                )
+
+            # 8. Check peer submission (AC-024 Bilateral Double-Blind Anti-Retaliation)
+            peer_sub = conn.execute(
+                select(t_sub).where(
+                    t_sub.c.engagement_id == eng_uuid,
+                    t_sub.c.rater_id != actor.user_id,
+                    t_sub.c.status.in_(("PENDING_BLIND", "SUBMITTED")),
+                ).with_for_update()
+            ).mappings().first()
+
+            if peer_sub:
+                # Both sides have now completed ratings! Release both from blind hold immediately!
+                sub_status = "PUBLISHED"
+                publish_after = now_utc
+                double_blind_active = False
+
+                conn.execute(
+                    t_sub.update()
+                    .where(t_sub.c.id == peer_sub["id"])
+                    .values(
+                        status="PUBLISHED",
+                        publish_after=now_utc,
+                        updated_at=now_utc,
+                    )
+                )
+            else:
+                # First submission -> hold in 14-day double-blind window
+                sub_status = "PENDING_BLIND"
+                publish_after = now_utc + timedelta(days=BLIND_WINDOW_DAYS)
+                double_blind_active = True
+
+            # 9. Insert rating_submissions, rating_revisions, and rating_scores
+            sub_id = str(uuid4())
+            rev_id = str(uuid4())
+            clean_comment = comment.strip() if comment else None
+
+            insert_row(
+                conn,
+                "rating_submissions",
+                id=sub_id,
+                placement_id=None,
+                engagement_id=eng_uuid,
+                rubric_id=rubric["id"],
+                rater_id=actor.user_id,
+                target_user_id=target_user_id,
+                target_org_id=target_org_id,
+                version=1,
+                status=sub_status,
+                comment=clean_comment,
+                submitted_at=now_utc,
+                publish_after=publish_after,
+            )
+
+            insert_row(
+                conn,
+                "rating_revisions",
+                id=rev_id,
+                submission_id=sub_id,
+                version=1,
+                comment=clean_comment,
+                submitted_at=now_utc,
+                rubric_snapshot={
+                    "family": rubric["family"],
+                    "version": rubric["version"],
+                    "scale_min": rubric["scale_min"],
+                    "scale_max": rubric["scale_max"],
+                },
+            )
+
+            for item in scores:
+                insert_row(
+                    conn,
+                    "rating_scores",
+                    id=str(uuid4()),
+                    rating_revision_id=rev_id,
+                    criterion_id=UUID(str(item["criterion_id"])),
+                    score=int(item["score"]),
+                    evidence_revision_id=None,
+                    rubric_id=rubric["id"],
+                )
+
+            # 10. Recompute aggregate score if published (AC-023)
+            if sub_status == "PUBLISHED":
+                self.recompute_aggregate(
+                    conn,
+                    target_user_id=str(target_user_id) if target_user_id else None,
+                    target_org_id=str(target_org_id) if target_org_id else None,
+                    rubric_id=str(rubric["id"]),
+                )
+                if peer_sub:
+                    self.recompute_aggregate(
+                        conn,
+                        target_user_id=str(peer_sub["target_user_id"]) if peer_sub["target_user_id"] else None,
+                        target_org_id=str(peer_sub["target_org_id"]) if peer_sub["target_org_id"] else None,
+                        rubric_id=str(peer_sub["rubric_id"]),
+                    )
+
+        # 11. Append audit log
+        self.audit_store.append_audit_event(
+            actor_id=actor.user_id,
+            action="ENGAGEMENT_RATING_SUBMITTED",
+            entity_type="rating_submission",
+            entity_id=sub_id,
+            metadata={
+                "engagement_id": str(eng_uuid),
+                "rater_role": rater_role,
+                "status": sub_status,
+                "double_blind_active": double_blind_active,
+                "publish_after": publish_after.isoformat() if publish_after else None,
+                "rubric_id": str(rubric["id"]),
+            },
+        )
+
+        return {
+            "contract_id": "API-047",
+            "submission_id": sub_id,
+            "engagement_id": str(eng_uuid),
+            "rater_id": str(actor.user_id),
+            "rater_role": rater_role,
+            "target_user_id": str(target_user_id) if target_user_id else None,
+            "target_org_id": str(target_org_id) if target_org_id else None,
+            "status": sub_status,
+            "double_blind_active": double_blind_active,
+            "publish_after": publish_after.astimezone(timezone.utc).isoformat() if publish_after else None,
+            "submitted_at": now_utc.astimezone(timezone.utc).isoformat(),
+            "idempotent_replay": False,
+            "message": (
+                "Baholar 14-kunlik ikki tomonlama maxfiylik (double-blind) oynasida saqlanmoqda (AC-024)"
+                if double_blind_active
+                else "Ikki tomonlama baholar to'liq qabul qilindi va darhol nashr etildi (PUBLISHED, AC-024)"
+            ),
         }
 
 
