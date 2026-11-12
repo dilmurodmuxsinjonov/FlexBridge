@@ -10,7 +10,7 @@ import json
 import os
 import time
 from uuid import uuid4, uuid5, NAMESPACE_URL
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from sqlalchemy.dialects.postgresql import insert
 from app.db.storage import table, transaction, now, enqueue
 from app.core.circuit_breaker import shared_circuit_breaker
@@ -278,3 +278,249 @@ class BillingQuotaService:
 
     def request_and_approve_refund(self,**kwargs):
         raise BillingInvariantError('INDEPENDENT_APPROVAL_REQUIRED')
+
+    def _authorize_org_billing(self, conn, actor, org_uuid: str) -> None:
+        from app.services.governance import GovernanceError
+        t_orgs = table("organizations")
+        org_row = conn.execute(
+            select(t_orgs.c.id, t_orgs.c.status).where(t_orgs.c.id == org_uuid)
+        ).mappings().first()
+        if not org_row:
+            raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
+
+        t_roles = table("role_catalog")
+        t_p_grants = table("platform_role_grants")
+        is_admin = conn.execute(
+            select(t_roles.c.id)
+            .join(t_p_grants, t_p_grants.c.role_id == t_roles.c.id)
+            .where(
+                t_p_grants.c.user_id == actor.user_id,
+                t_p_grants.c.revoked_at.is_(None),
+                t_roles.c.scope_kind == "PLATFORM",
+                t_roles.c.code.in_(("ADMIN", "FINANCE")),
+            )
+        ).first()
+        if is_admin:
+            return
+
+        t_members = table("org_memberships")
+        member_row = conn.execute(
+            select(t_members.c.id).where(
+                t_members.c.user_id == actor.user_id,
+                t_members.c.organization_id == org_uuid,
+                t_members.c.status == "ACTIVE",
+                t_members.c.revoked_at.is_(None),
+            )
+        ).first()
+
+        if not member_row:
+            # Outsider with no active membership in target org -> uniform 404 anti-enumeration
+            raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
+
+        t_grants = table("org_role_grants")
+        has_role = conn.execute(
+            select(t_grants.c.id)
+            .join(t_roles, t_roles.c.id == t_grants.c.role_id)
+            .where(
+                t_grants.c.membership_id == member_row[0],
+                t_grants.c.revoked_at.is_(None),
+                t_roles.c.scope_kind == "ORG",
+                t_roles.c.code.in_(("OWNER", "BILLING")),
+            )
+        ).first()
+
+        if not has_role:
+            raise GovernanceError("ORG_SCOPE_FORBIDDEN", status_code=403)
+
+    def get_organization_entitlements(self, *, actor, organization_id: str) -> dict:
+        """API-070: Retrieve active service entitlement, quota, concurrent limit, and usage."""
+        from uuid import UUID
+        from app.services.governance import GovernanceError
+
+        try:
+            org_uuid = str(UUID(organization_id))
+        except (ValueError, TypeError):
+            raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
+
+        with transaction() as conn:
+            # 1. Authorize actor
+            self._authorize_org_billing(conn, actor, org_uuid)
+
+            # 3. Retrieve active entitlement
+            t_ent = table("service_entitlements")
+            current_time = now()
+            ent = conn.execute(
+                select(t_ent)
+                .where(
+                    t_ent.c.organization_id == org_uuid,
+                    t_ent.c.status == "ACTIVE",
+                    t_ent.c.starts_at <= current_time,
+                    t_ent.c.ends_at > current_time,
+                )
+                .order_by(t_ent.c.ends_at.desc(), t_ent.c.id)
+                .limit(1)
+            ).mappings().first()
+
+            # 4. Count active published opportunities
+            t_opps = table("opportunities")
+            active_opp_count = conn.execute(
+                select(func.count())
+                .select_from(t_opps)
+                .where(
+                    t_opps.c.organization_id == org_uuid,
+                    t_opps.c.status == "PUBLISHED",
+                    or_(t_opps.c.expires_at.is_(None), t_opps.c.expires_at > current_time),
+                )
+            ).scalar_one()
+
+            if ent:
+                days_rem = max(0, (ent["ends_at"] - current_time).days)
+                quota_rem = max(0, ent["quota"]) if ent["quota"] is not None else None
+                limit = ent["concurrent_active_limit"] or 0
+                slots_rem = max(0, limit - active_opp_count)
+                active_payload = {
+                    "id": str(ent["id"]),
+                    "order_id": str(ent["order_id"]) if ent["order_id"] else None,
+                    "service_kind": ent["service_kind"],
+                    "plan_code": ent["service_kind"],
+                    "status": ent["status"],
+                    "starts_at": ent["starts_at"].isoformat() if ent["starts_at"] else None,
+                    "ends_at": ent["ends_at"].isoformat() if ent["ends_at"] else None,
+                    "days_remaining": days_rem,
+                    "quota": quota_rem,
+                    "post_credits_remaining": quota_rem,
+                    "concurrent_active_limit": limit,
+                    "concurrent_active_count": active_opp_count,
+                    "concurrent_slots_remaining": slots_rem,
+                    "created_at": ent["created_at"].isoformat() if ent["created_at"] else None,
+                }
+            else:
+                active_payload = None
+
+            return {
+                "contract_id": "API-070",
+                "organization_id": org_uuid,
+                "has_active_entitlement": ent is not None,
+                "active_entitlement": active_payload,
+                "usage": {
+                    "concurrent_active_opportunities": active_opp_count,
+                    "concurrent_active_limit": ent["concurrent_active_limit"] if ent else 0,
+                    "concurrent_slots_available": max(0, (ent["concurrent_active_limit"] or 0) - active_opp_count) if ent else 0,
+                    "quota_remaining": max(0, ent["quota"]) if (ent and ent["quota"] is not None) else None,
+                    "days_remaining": max(0, (ent["ends_at"] - current_time).days) if (ent and ent["ends_at"]) else 0,
+                },
+            }
+
+    def get_organization_billing_overview(self, *, actor, organization_id: str) -> dict:
+        """API-093: Retrieve organization billing overview, plan, recent orders, and invoices."""
+        from uuid import UUID
+        from app.services.governance import GovernanceError
+
+        try:
+            org_uuid = str(UUID(organization_id))
+        except (ValueError, TypeError):
+            raise GovernanceError("ORGANIZATION_NOT_FOUND", status_code=404)
+
+        with transaction() as conn:
+            # 1. Authorize actor
+            self._authorize_org_billing(conn, actor, org_uuid)
+
+            # 2. Retrieve active entitlement
+            t_ent = table("service_entitlements")
+            current_time = now()
+            ent = conn.execute(
+                select(t_ent)
+                .where(
+                    t_ent.c.organization_id == org_uuid,
+                    t_ent.c.status == "ACTIVE",
+                    t_ent.c.starts_at <= current_time,
+                    t_ent.c.ends_at > current_time,
+                )
+                .order_by(t_ent.c.ends_at.desc(), t_ent.c.id)
+                .limit(1)
+            ).mappings().first()
+
+            # 4. Plan info
+            if ent:
+                plan_info = {
+                    "code": ent["service_kind"],
+                    "status": "ACTIVE",
+                    "starts_at": ent["starts_at"].isoformat() if ent["starts_at"] else None,
+                    "ends_at": ent["ends_at"].isoformat() if ent["ends_at"] else None,
+                    "quota": max(0, ent["quota"]) if ent["quota"] is not None else None,
+                    "concurrent_active_limit": ent["concurrent_active_limit"],
+                }
+            else:
+                plan_info = {
+                    "code": "FREE",
+                    "status": "INACTIVE",
+                    "starts_at": None,
+                    "ends_at": None,
+                    "quota": 0,
+                    "concurrent_active_limit": 0,
+                }
+
+            # 5. Recent orders for this organization
+            t_orders = table("orders")
+            order_rows = conn.execute(
+                select(t_orders)
+                .where(t_orders.c.organization_id == org_uuid)
+                .order_by(t_orders.c.created_at.desc())
+                .limit(50)
+            ).mappings().all()
+
+            order_list = []
+            for r in order_rows:
+                order_list.append({
+                    "id": str(r["id"]),
+                    "amount": int(r["amount"]),
+                    "currency": r["currency"],
+                    "status": r["status"],
+                    "plan_code": r["price_snapshot"].get("plan_code") if r["price_snapshot"] else None,
+                    "price_snapshot": r["price_snapshot"],
+                    "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+                })
+
+            # 6. Invoices for this organization's orders
+            t_invoices = table("invoices")
+            order_ids = [r["id"] for r in order_rows]
+            if order_ids:
+                invoice_rows = conn.execute(
+                    select(t_invoices)
+                    .where(t_invoices.c.order_id.in_(order_ids))
+                    .order_by(t_invoices.c.issued_at.desc(), t_invoices.c.created_at.desc())
+                    .limit(50)
+                ).mappings().all()
+            else:
+                invoice_rows = []
+
+            invoice_list = []
+            for inv in invoice_rows:
+                invoice_list.append({
+                    "id": str(inv["id"]),
+                    "order_id": str(inv["order_id"]),
+                    "number": inv["number"],
+                    "amount": int(inv["amount"]),
+                    "currency": inv["currency"],
+                    "fiscal_status": inv["fiscal_status"],
+                    "status": "PAID" if inv["paid_at"] else "PENDING",
+                    "issued_at": inv["issued_at"].isoformat() if inv["issued_at"] else None,
+                    "paid_at": inv["paid_at"].isoformat() if inv["paid_at"] else None,
+                })
+
+            return {
+                "contract_id": "API-093",
+                "organization_id": org_uuid,
+                "plan": plan_info,
+                "entitlement": {
+                    "has_active": ent is not None,
+                    "service_kind": ent["service_kind"] if ent else None,
+                    "quota": max(0, ent["quota"]) if (ent and ent["quota"] is not None) else None,
+                    "concurrent_active_limit": ent["concurrent_active_limit"] if ent else 0,
+                    "ends_at": ent["ends_at"].isoformat() if (ent and ent["ends_at"]) else None,
+                },
+                "orders": order_list,
+                "invoices": invoice_list,
+            }
+
+billing_service = BillingQuotaService()

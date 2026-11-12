@@ -24,6 +24,7 @@ including:
 - `API-062`: `POST /api/v1/me/privacy-requests`
 - `API-063`: `GET /api/v1/me/support-tickets`
 - `API-064`: `POST /api/v1/support-tickets/{id}/messages`
+- `API-070`: `GET /api/v1/organizations/{org}/entitlements`
 - `API-073`: `GET /api/v1/organizations/{org}/memberships` (in `governance.py`)
 - `API-081`: `POST /api/v1/opportunities/{id}/publish`
 - `API-082`: `GET /api/v1/opportunities/{id}/applications` (in `opportunities.py`)
@@ -32,6 +33,7 @@ including:
 - `API-090`: `GET /api/v1/me/mentor-review-queue`
 - `API-091`: `GET /api/v1/log-revisions/{revision}/workplace`
 - `API-092`: `POST /api/v1/log-revisions/{revision}/workplace-reviews`
+- `API-093`: `GET /api/v1/organizations/{org}/billing`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
 - `API-095`: `POST /api/v1/orders/{id}/refund-requests`
 - `API-116`: `POST /api/v1/operator/refunds/{id}/approve`
@@ -990,6 +992,44 @@ def api_068_get_organization_dashboard(
     from app.services.governance import GovernanceError
     try:
         return org_dashboard_service.get_dashboard_api_068(
+            actor=actor,
+            organization_id=str(org),
+        )
+    except GovernanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/organizations/{org}/entitlements", status_code=200)
+def api_070_get_organization_entitlements(
+    org: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve organization service entitlement, quota, and concurrent limit (`API-070` / `CAP-025`, `CAP-029`)."""
+    from app.services.governance import GovernanceError
+    try:
+        return billing_service.get_organization_entitlements(
+            actor=actor,
+            organization_id=str(org),
+        )
+    except GovernanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/organizations/{org}/billing", status_code=200)
+def api_093_get_organization_billing_overview(
+    org: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Retrieve organization billing overview, plan, recent orders, and invoices (`API-093` / `CAP-026`, `CAP-029`)."""
+    from app.services.governance import GovernanceError
+    try:
+        return billing_service.get_organization_billing_overview(
             actor=actor,
             organization_id=str(org),
         )
