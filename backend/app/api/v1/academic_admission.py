@@ -100,6 +100,7 @@ def teachers(inst:UUID,limit:int=Query(default=50,ge=1,le=100),after:UUID|None=N
 
 
 @router.get('/me/academic-review-queue')
+@router.get('/me/teacher-review-queue')
 def review_queue(limit:int=Query(default=50,ge=1,le=100),after:UUID|None=None,actor:ActorContext=Depends(require_actor_context)):
     return views.review_queue(actor,limit=limit,after=str(after) if after else None)
 
