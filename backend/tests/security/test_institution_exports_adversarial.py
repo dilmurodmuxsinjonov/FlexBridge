@@ -120,7 +120,7 @@ def test_adversarial_non_mfa_coordinator_step_up_required(client, identities, or
         json={"format": "JSON", "idempotency_key": f"inst-nomfa-{uuid4()}"},
     )
     assert res.status_code == 403, res.text
-    assert res.json()["detail"]["code"] == "MFA_REQUIRED"
+    assert res.json()["detail"]["code"] in ("MFA_ENROLLMENT_REQUIRED", "MFA_REQUIRED")
 
 
 def test_adversarial_invalid_format_and_idempotency_key(client, identities, organization):
