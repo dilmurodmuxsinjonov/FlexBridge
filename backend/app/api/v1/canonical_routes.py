@@ -1231,7 +1231,7 @@ def api_092_submit_workplace_review(
 class CreateModerationCaseRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    category: str = Field(..., min_length=2, max_length=100)
+    category: str = Field(..., min_length=2, max_length=100, pattern=r"^[A-Za-z0-9_ -]+$")
     reason: str = Field(..., min_length=10, max_length=4000)
     opportunity_id: UUID | None = None
     organization_id: UUID | None = None
@@ -1245,7 +1245,7 @@ def api_007_create_moderation_case(
     payload: CreateModerationCaseRequest,
     actor: ActorContext = Depends(require_actor_context),
 ) -> dict[str, Any]:
-    """API-007: Report abuse / create moderation case (`CAP-034`, `REPORT_ABUSE`, `DB-078`)."""
+    """API-007: Report abuse / create moderation case (`CAP-032`, `REPORT_ABUSE`, `DB-078`)."""
     try:
         return moderation_cases_service.create_case(
             actor=actor,

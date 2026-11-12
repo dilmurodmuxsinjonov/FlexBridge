@@ -1,4 +1,4 @@
-"""Functional and contract verification for API-007: POST /api/v1/moderation-cases (CAP-034 / DB-078)."""
+"""Functional and contract verification for API-007: POST /api/v1/moderation-cases (CAP-032 / DB-078)."""
 
 from datetime import datetime, timezone
 from uuid import uuid4

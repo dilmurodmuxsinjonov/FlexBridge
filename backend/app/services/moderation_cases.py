@@ -1,9 +1,12 @@
-"""Abuse reporting and moderation cases service (API-007 / CAP-034 / DB-078).
+"""Abuse reporting and moderation cases service (API-007 / CAP-032 / DB-078).
 
 Implements canonical `API-007` (`POST /api/v1/moderation-cases`):
 - Accepts abuse/moderation reports on opportunities, organizations, ratings, or files ("Target FK va asos").
 - Strictly enforces DB-078 check constraint `num_nonnulls(opportunity_id, organization_id, rating_id, file_id) = 1`.
 - Validates target entity existence in database with uniform 404 anti-enumeration defense.
+- Excludes soft-deleted files (`deleted_at IS NOT NULL`) from reportable targets.
+- Uses transaction-level advisory locking to serialize concurrent duplicate report submissions.
+- Normalizes categories and deduplicates active cases (`OPEN`, `PENDING`, `IN_REVIEW`) case-insensitively.
 - Computes SLA due_at by severity: CRITICAL (24h), HIGH (48h), MEDIUM (72h), LOW (168h).
 - Idempotent submission: replaying the same active report for the same target and category returns the existing case.
 - Immutable audit event logging via AppendOnlyAuditStore.
@@ -17,7 +20,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select, text
 
 from app.api.dependencies import ActorContext
 from app.core.audit import AppendOnlyAuditStore
@@ -95,7 +98,7 @@ class ModerationCasesService:
         }[target_field]
 
         # 2. Category & severity validation
-        cat_clean = category.strip()
+        cat_clean = category.strip().upper()
         if not (2 <= len(cat_clean) <= 100):
             raise ModerationCaseValidationError("INVALID_CATEGORY", "Category must be between 2 and 100 characters")
 
@@ -113,6 +116,13 @@ class ModerationCasesService:
         due_delta = timedelta(hours=SEVERITY_DUE_HOURS[sev])
 
         with transaction() as conn:
+            # 2.1 Advisory lock on user + target + category FIRST to serialize concurrent duplicate submissions
+            lock_key = f"moderation-case:{actor.user_id}:{target_id}:{cat_clean}"
+            conn.execute(
+                text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+                {"key": lock_key},
+            )
+
             account_authority(conn, actor)
 
             # 3. Verify target entity existence in database (anti-enumeration defense)
@@ -133,7 +143,12 @@ class ModerationCasesService:
                     raise ModerationCaseNotFoundError("RATING_NOT_FOUND", "Target rating does not exist")
             elif target_field == "file_id":
                 t_files = table("files")
-                f = conn.execute(select(t_files.c.id).where(t_files.c.id == target_id)).first()
+                f = conn.execute(
+                    select(t_files.c.id).where(
+                        t_files.c.id == target_id,
+                        t_files.c.deleted_at.is_(None),
+                    )
+                ).first()
                 if not f:
                     raise ModerationCaseNotFoundError("FILE_NOT_FOUND", "Target file does not exist")
 
@@ -144,8 +159,8 @@ class ModerationCasesService:
                 select(t_cases).where(
                     t_cases.c.reporter_id == actor.user_id,
                     target_filter,
-                    t_cases.c.category == cat_clean,
-                    t_cases.c.status.in_(("OPEN", "IN_REVIEW")),
+                    func.upper(t_cases.c.category) == cat_clean,
+                    t_cases.c.status.in_(("OPEN", "PENDING", "IN_REVIEW")),
                 )
             ).mappings().first()
 
