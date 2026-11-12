@@ -36,6 +36,10 @@ including:
 - `API-093`: `GET /api/v1/organizations/{org}/billing`
 - `API-094`: `POST /api/v1/organizations/{org}/orders`
 - `API-095`: `POST /api/v1/orders/{id}/refund-requests`
+- `API-100`: `POST /api/v1/institutions/{inst}/exports`
+- `API-112`: `GET /api/v1/operator/support-tickets`
+- `API-113`: `POST /api/v1/operator/support-tickets/{id}/messages`
+- `API-114`: `POST /api/v1/operator/privacy-requests/{id}/resolve`
 - `API-116`: `POST /api/v1/operator/refunds/{id}/approve`
 - `API-X01`: `POST /api/v1/files/upload-intents`
 - `API-X02`: `POST /api/v1/files/{id}/complete-upload`
@@ -1289,6 +1293,99 @@ def api_100_export_institution(
             include_details=payload.include_details,
         )
     except InstitutionExportError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/operator/support-tickets")
+def api_112_operator_support_tickets(
+    status: str | None = None,
+    category: str | None = None,
+    assignee_id: UUID | None = None,
+    priority: str | None = None,
+    limit: int = 20,
+    cursor: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-112: Operator support ticket queue with keyset pagination and filtering (CAP-034 / SUPPORT)."""
+    try:
+        from app.services.support_tickets import support_tickets_service, SupportTicketError
+        return support_tickets_service.get_operator_tickets(
+            actor=actor,
+            status=status,
+            category=category,
+            assignee_id=str(assignee_id) if assignee_id else None,
+            priority=priority,
+            limit=limit,
+            cursor=cursor,
+        )
+    except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+class OperatorTicketMessageRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    body: str = Field(..., min_length=1, max_length=4000)
+    internal: bool = False
+    status: str | None = None
+    file_id: UUID | None = None
+
+
+@router.post("/operator/support-tickets/{id}/messages", status_code=201)
+def api_113_operator_support_ticket_message(
+    id: UUID,
+    payload: OperatorTicketMessageRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-113: Operator reply or internal note with status update (CAP-034 / SUPPORT)."""
+    try:
+        from app.services.support_tickets import support_tickets_service, SupportTicketError
+        return support_tickets_service.post_operator_message(
+            actor=actor,
+            ticket_id=str(id),
+            body=payload.body,
+            internal=payload.internal,
+            status=payload.status,
+            file_id=str(payload.file_id) if payload.file_id else None,
+        )
+    except SupportTicketError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+class OperatorPrivacyResolveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: str = Field(..., pattern="^(?i:(RESOLVED|COMPLETED|REJECTED))$")
+    reason: str = Field(..., min_length=5, max_length=1000)
+    result_file_id: UUID | None = None
+
+
+@router.post("/operator/privacy-requests/{id}/resolve")
+def api_114_operator_privacy_request_resolve(
+    id: UUID,
+    payload: OperatorPrivacyResolveRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-114: Operator resolves or rejects privacy request (CAP-035 / PRIVACY)."""
+    try:
+        from app.services.privacy import privacy_service, PrivacyError
+        return privacy_service.resolve_privacy_request(
+            actor=actor,
+            request_id=str(id),
+            status=payload.status,
+            reason=payload.reason,
+            result_file_id=str(payload.result_file_id) if payload.result_file_id else None,
+        )
+    except PrivacyError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": exc.message},

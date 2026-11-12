@@ -24,7 +24,8 @@ from app.services.placements import PlacementScopeError, insert_row
 
 
 VALID_KINDS = frozenset({"EXPORT", "DELETE", "RECTIFY"})
-VALID_STATUSES = frozenset({"PENDING", "IN_PROGRESS", "COMPLETED", "REJECTED"})
+VALID_STATUSES = frozenset({"PENDING", "IN_PROGRESS", "COMPLETED", "RESOLVED", "REJECTED"})
+STAFF_ROLES = frozenset({"SUPPORT", "ADMIN", "MODERATOR"})
 
 
 class PrivacyError(Exception):
@@ -56,6 +57,16 @@ class PrivacyLegalHoldError(PrivacyError):
 
     def __init__(self, code: str, message: str) -> None:
         super().__init__(code=code, message=message, status_code=422)
+
+
+class PrivacyNotFoundError(PrivacyError):
+    def __init__(self, code: str = "PRIVACY_REQUEST_NOT_FOUND", message: str = "Privacy so'rovi topilmadi") -> None:
+        super().__init__(code=code, message=message, status_code=404)
+
+
+class PrivacyForbiddenError(PrivacyError):
+    def __init__(self, code: str = "PERMISSION_DENIED", message: str = "Ushbu amal taqiqlangan") -> None:
+        super().__init__(code=code, message=message, status_code=403)
 
 
 class PrivacyService:
@@ -241,6 +252,127 @@ class PrivacyService:
                 "page": page,
                 "page_size": page_size,
                 "items": items,
+            }
+
+    def resolve_privacy_request(
+        self,
+        *,
+        actor: ActorContext,
+        request_id: str,
+        status: str,
+        reason: str,
+        result_file_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Canonical API-114: Operator resolves or rejects privacy request (CAP-035)."""
+        is_staff = bool(STAFF_ROLES.intersection(set(actor.roles or [])))
+        if not is_staff:
+            raise PrivacyForbiddenError(
+                code="PERMISSION_DENIED", message="Ushbu amal faqat operatorlar uchun ruxsat etilgan"
+            )
+
+        s_clean = (status or "").strip().upper()
+        if s_clean not in ("RESOLVED", "COMPLETED", "REJECTED"):
+            raise PrivacyValidationError(
+                "INVALID_RESOLUTION_STATUS", "Status faqat RESOLVED yoki REJECTED bo'lishi kerak"
+            )
+
+        reason_clean = (reason or "").strip()
+        if len(reason_clean) < 5 or len(reason_clean) > 1000:
+            raise PrivacyValidationError(
+                "INVALID_RESOLUTION_REASON", "Qaror sababi 5 dan 1000 belgigacha bo'lishi kerak"
+            )
+
+        clean_file_id = None
+        if result_file_id:
+            try:
+                from uuid import UUID
+                clean_file_id = str(UUID(result_file_id))
+            except ValueError as exc:
+                raise PrivacyValidationError("INVALID_RESULT_FILE_ID", "Yaroqsiz result_file_id UUID") from exc
+
+        with transaction() as conn:
+            account_authority(conn, actor)
+            user_id = str(actor.user_id)
+
+            t_reqs = table("privacy_requests")
+            t_holds = table("legal_holds")
+
+            req = conn.execute(
+                select(t_reqs).where(t_reqs.c.id == request_id).with_for_update()
+            ).mappings().first()
+
+            if not req:
+                raise PrivacyNotFoundError(
+                    code="PRIVACY_REQUEST_NOT_FOUND", message="Privacy so'rovi topilmadi"
+                )
+
+            # Self-resolution forbidden: actor cannot resolve their own privacy request
+            if str(req["user_id"]) == user_id:
+                raise PrivacyForbiddenError(
+                    code="SELF_RESOLUTION_FORBIDDEN", message="Own request huquqi operator resolve bermaydi"
+                )
+
+            # Terminal state check: cannot resolve an already resolved/rejected request
+            if req["status"] in ("RESOLVED", "COMPLETED", "REJECTED"):
+                raise PrivacyConflictError(
+                    code="PRIVACY_REQUEST_ALREADY_RESOLVED", message="Privacy so'rovi allaqachon yakunlangan"
+                )
+
+            now_utc = now()
+
+            # Legal hold check: if kind == DELETE and attempting to resolve/complete, active legal hold blocks it (409)
+            if req["kind"] == "DELETE" and s_clean in ("RESOLVED", "COMPLETED"):
+                active_hold = conn.execute(
+                    select(t_holds).where(
+                        t_holds.c.user_id == req["user_id"],
+                        t_holds.c.released_at.is_(None),
+                        t_holds.c.expires_at > now_utc,
+                    )
+                ).mappings().first()
+
+                if active_hold:
+                    raise PrivacyConflictError(
+                        "LEGAL_HOLD_ACTIVE",
+                        f"Active legal hold '{active_hold['reason']}' prevents deletion until resolution.",
+                    )
+
+            # Update privacy request
+            conn.execute(
+                t_reqs.update()
+                .where(t_reqs.c.id == request_id)
+                .values(
+                    status=s_clean,
+                    reason=reason_clean,
+                    result_file_id=clean_file_id,
+                    resolved_at=now_utc,
+                    updated_at=now_utc,
+                )
+            )
+
+            # Append-only audit
+            AppendOnlyAuditStore().append_audit_event(
+                actor_id=user_id,
+                action="PRIVACY_REQUEST_RESOLVED",
+                entity_type="privacy_request",
+                entity_id=request_id,
+                metadata={
+                    "status": s_clean,
+                    "reason": reason_clean,
+                    "result_file_id": clean_file_id,
+                },
+            )
+
+            return {
+                "contract_id": "API-114",
+                "capability": "PRIVACY",
+                "id": str(request_id),
+                "user_id": str(req["user_id"]),
+                "kind": req["kind"],
+                "status": s_clean,
+                "reason": reason_clean,
+                "result_file_id": clean_file_id,
+                "resolved_at": now_utc.isoformat(),
+                "updated_at": now_utc.isoformat(),
             }
 
 
