@@ -1264,6 +1264,37 @@ def api_007_create_moderation_case(
         ) from exc
 
 
+class InstitutionExportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    idempotency_key: str = Field(..., min_length=8, max_length=128)
+    format: str = Field(default="PDF", pattern="^(?i:(PDF|JSON))$")
+    include_details: bool = True
+
+
+@router.post("/institutions/{inst}/exports", status_code=201)
+def api_100_export_institution(
+    inst: UUID,
+    payload: InstitutionExportRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-100: Institution summary report export (`CAP-018`, `CAP-026`, `REPORT_EXPORT`)."""
+    try:
+        from app.services.institution_exports import institution_export_service, InstitutionExportError
+        return institution_export_service.export_institution(
+            actor=actor,
+            institution_id=inst,
+            idempotency_key=payload.idempotency_key,
+            export_format=payload.format,  # type: ignore[arg-type]
+            include_details=payload.include_details,
+        )
+    except InstitutionExportError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     """Ensure all canonical route signatures from `FlexBridge_model_1_4.json` are registered in OpenAPI (`FIX-01`)."""
     model_path = Path(__file__).resolve().parents[4] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
