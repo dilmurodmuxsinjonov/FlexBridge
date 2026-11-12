@@ -1444,6 +1444,141 @@ def api_117_operator_finance_summary(
         ) from exc
 
 
+# -------------------------------------------------------------------------
+# Operator Security, Audit & Operations System (API-118, API-119, API-120, API-122, API-123, API-124)
+# -------------------------------------------------------------------------
+
+
+@router.get("/operator/audit-events")
+def api_118_operator_audit_events(
+    actor_id: str | None = None,
+    action: str | None = None,
+    object_type: str | None = None,
+    object_key: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    limit: int = 50,
+    cursor: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-118: Query append-only audit event history with keyset pagination (CAP-036 / ADMIN_AUDIT)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.get_audit_events(
+            actor=actor,
+            actor_id=actor_id,
+            action=action,
+            object_type=object_type,
+            object_key=object_key,
+            start_date=start_date,
+            end_date=end_date,
+            limit=limit,
+            cursor=cursor,
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/operator/access-requests", status_code=201)
+def api_119_operator_access_requests(
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-119: Break-glass temporary privileged role grant with independent dual approval (CAP-036 / ADMIN)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.create_access_request(
+            actor=actor,
+            target_user_id=payload.get("target_user_id"),
+            role_code=payload.get("role_code"),
+            reason=payload.get("reason"),
+            independent_approver_id=payload.get("independent_approver_id"),
+            duration_minutes=payload.get("duration_minutes"),
+            duration_hours=payload.get("duration_hours"),
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/operator/users/{id}/revoke-sessions")
+def api_120_operator_revoke_user_sessions(
+    id: UUID,
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-120: Emergency revocation of all active sessions for target user (CAP-036 / ADMIN)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.revoke_user_sessions(
+            actor=actor,
+            target_user_id=str(id),
+            reason=payload.get("reason", "Operator emergency revocation"),
+            incident_id=payload.get("incident_id"),
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/operator/incidents", status_code=201)
+def api_122_operator_declare_incident(
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-122: Declare an operational incident and assign incident commander (CAP-037 / OPERATIONS / ADMIN)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.declare_incident(
+            actor=actor,
+            severity=payload.get("severity"),
+            summary=payload.get("summary"),
+            title=payload.get("title"),
+            commander_id=payload.get("commander_id"),
+            commander_user_id=payload.get("commander_user_id"),
+            postmortem_ref=payload.get("postmortem_ref"),
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.get("/operator/restore-runs")
+def api_123_operator_restore_runs(
+    limit: int = 50,
+    status: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-123: Query DR restore run proofs and evaluate SLA against targets (CAP-037 / OPERATIONS)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.get_restore_runs(
+            actor=actor,
+            limit=limit,
+            status=status,
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.get("/operator/analytics")
+def api_124_operator_analytics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    cohort: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-124: Platform operational analytics, dedup checks, and mutual start verification (CAP-038 / OPERATIONS)."""
+    try:
+        from app.services.operator_security import operator_security_service, OperatorSecurityError
+        return operator_security_service.get_operator_analytics(
+            actor=actor,
+            start_date=start_date,
+            end_date=end_date,
+            cohort=cohort,
+        )
+    except OperatorSecurityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     """Ensure all canonical route signatures from `FlexBridge_model_1_4.json` are registered in OpenAPI (`FIX-01`)."""
     model_path = Path(__file__).resolve().parents[4] / "specs" / "v1_4" / "FlexBridge_model_1_4.json"
