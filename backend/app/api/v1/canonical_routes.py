@@ -40,7 +40,9 @@ including:
 - `API-112`: `GET /api/v1/operator/support-tickets`
 - `API-113`: `POST /api/v1/operator/support-tickets/{id}/messages`
 - `API-114`: `POST /api/v1/operator/privacy-requests/{id}/resolve`
+- `API-115`: `GET /api/v1/operator/reconciliation`
 - `API-116`: `POST /api/v1/operator/refunds/{id}/approve`
+- `API-117`: `GET /api/v1/operator/finance-summary`
 - `API-X01`: `POST /api/v1/files/upload-intents`
 - `API-X02`: `POST /api/v1/files/{id}/complete-upload`
 - `API-X03`: `GET /api/v1/files/{id}/download` (in `files.py`)
@@ -1386,6 +1388,56 @@ def api_114_operator_privacy_request_resolve(
             result_file_id=str(payload.result_file_id) if payload.result_file_id else None,
         )
     except PrivacyError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/operator/reconciliation")
+def api_115_operator_reconciliation(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    provider: str | None = None,
+    discrepancy_only: bool = False,
+    limit: int = 50,
+    cursor: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-115: Operator reconciliation of ledger vs gateway attempts (zero customer PII) (CAP-030 / FINANCE)."""
+    try:
+        from app.services.operator_finance import operator_finance_service, FinanceError
+        return operator_finance_service.get_reconciliation(
+            actor=actor,
+            start_date=start_date,
+            end_date=end_date,
+            provider=provider,
+            discrepancy_only=discrepancy_only,
+            limit=limit,
+            cursor=cursor,
+        )
+    except FinanceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/operator/finance-summary")
+def api_117_operator_finance_summary(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-117: Financial accounting summary (cash, recognized, deferred, active subscriptions) (CAP-038 / FINANCE_REPORT)."""
+    try:
+        from app.services.operator_finance import operator_finance_service, FinanceError
+        return operator_finance_service.get_finance_summary(
+            actor=actor,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    except FinanceError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": exc.message},
