@@ -66,6 +66,7 @@ from app.services.internship_logs import InternshipLogScopeError, internship_log
 from app.services.interviews_and_offers import InterviewOfferError, interview_offer_service
 from app.services.job_engagements import JobEngagementError, job_engagement_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
+from app.services.moderation_cases import ModerationCaseError, moderation_cases_service
 from app.services.placements import PlacementScopeError, placement_service
 from app.services.workplace_reviews import WorkplaceReviewError, workplace_review_service
 
@@ -1221,6 +1222,42 @@ def api_092_submit_workplace_review(
             actor=actor,
         )
     except WorkplaceReviewError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+class CreateModerationCaseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    category: str = Field(..., min_length=2, max_length=100)
+    reason: str = Field(..., min_length=10, max_length=4000)
+    opportunity_id: UUID | None = None
+    organization_id: UUID | None = None
+    rating_id: UUID | None = None
+    file_id: UUID | None = None
+    severity: str = Field(default="MEDIUM", pattern="^(?i:(LOW|MEDIUM|HIGH|CRITICAL))$")
+
+
+@router.post("/moderation-cases", status_code=201)
+def api_007_create_moderation_case(
+    payload: CreateModerationCaseRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-007: Report abuse / create moderation case (`CAP-034`, `REPORT_ABUSE`, `DB-078`)."""
+    try:
+        return moderation_cases_service.create_case(
+            actor=actor,
+            category=payload.category,
+            reason=payload.reason,
+            opportunity_id=payload.opportunity_id,
+            organization_id=payload.organization_id,
+            rating_id=payload.rating_id,
+            file_id=payload.file_id,
+            severity=payload.severity,
+        )
+    except ModerationCaseError as exc:
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "message": exc.message},
