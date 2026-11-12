@@ -188,7 +188,15 @@ def test_api115_provider_filtering_and_refund_reconciliation(client, identities,
     refund_id = str(uuid4())
     ledger_id = str(uuid4())
 
+    req_user = str(uuid4())
+    appr1_user = str(uuid4())
+    appr2_user = str(uuid4())
+
     with transaction() as conn:
+        insert_row(conn, "users", id=req_user, display_name="Refund Requester", status="ACTIVE", locale="uz", timezone="Asia/Tashkent")
+        insert_row(conn, "users", id=appr1_user, display_name="Refund Approver 1", status="ACTIVE", locale="uz", timezone="Asia/Tashkent")
+        insert_row(conn, "users", id=appr2_user, display_name="Refund Approver 2", status="ACTIVE", locale="uz", timezone="Asia/Tashkent")
+
         price_id, tariff = billing_service._seed_tariff(conn, "SINGLE_POST_30D")
 
         insert_row(
@@ -203,17 +211,17 @@ def test_api115_provider_filtering_and_refund_reconciliation(client, identities,
             conn, "payment_attempts",
             id=attempt_id, created_at=now_utc, updated_at=now_utc,
             order_id=order_id, provider="PAYME", provider_transaction_id="payme-ref-99",
-            amount=149000.0, currency="UZS", status="REFUNDED",
+            amount=149000.0, currency="UZS", status="CAPTURED",
             requested_at=now_utc, confirmed_at=now_utc,
         )
         insert_row(
             conn, "refunds",
             id=refund_id, created_at=now_utc, updated_at=now_utc,
-            payment_attempt_id=attempt_id, requester_id=user["user_id"],
-            approver_id=user["user_id"], amount=149000.0, currency="UZS",
+            payment_attempt_id=attempt_id, requester_id=req_user,
+            approver_id=appr1_user, amount=149000.0, currency="UZS",
             reason="Candidate requested refund", status="REFUNDED",
             provider_refund_id="payme-refund-999", resolved_at=now_utc,
-            second_approver_id=user["user_id"],
+            second_approver_id=appr2_user,
         )
         insert_row(
             conn, "billing_ledger",
