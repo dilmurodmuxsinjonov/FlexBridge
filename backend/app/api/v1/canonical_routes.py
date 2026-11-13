@@ -1578,6 +1578,69 @@ def api_124_operator_analytics(
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
 
 
+# -------------------------------------------------------------------------
+# Internal Workers System (API-X07, API-X08)
+# -------------------------------------------------------------------------
+
+
+@router.post("/internal/workers/scan-result")
+def api_x07_internal_worker_scan_result(
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext | None = Depends(optional_actor_context),
+    x_internal_worker_token: str | None = Header(default=None, alias="X-Internal-Worker-Token"),
+) -> dict[str, Any]:
+    """API-X07: Record malware/PDF scan results into DB-018 and enforce quarantine containment (CAP-039)."""
+    try:
+        from app.services.internal_workers import internal_worker_service, InternalWorkerError
+        return internal_worker_service.record_scan_result(
+            actor=actor,
+            worker_token=x_internal_worker_token,
+            file_id=payload.get("file_id"),
+            scan_status=payload.get("scan_status") or payload.get("status"),
+            scanner_name=payload.get("scanner_name", "clamav"),
+            scanner_version=payload.get("scanner_version", "1.4.0"),
+            sha256=payload.get("sha256"),
+            virus_name=payload.get("virus_name"),
+            error_message=payload.get("error_message"),
+        )
+    except InternalWorkerError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/internal/workers/retention-sweep")
+def api_x08_internal_worker_retention_sweep(
+    payload: dict[str, Any] = Body(default={}),
+    actor: ActorContext | None = Depends(optional_actor_context),
+    x_internal_worker_token: str | None = Header(default=None, alias="X-Internal-Worker-Token"),
+) -> dict[str, Any]:
+    """API-X08: Execute automated background retention cleanup per DB-083 legal policies (CAP-040)."""
+    try:
+        from app.services.internal_workers import internal_worker_service, InternalWorkerError
+        return internal_worker_service.execute_retention_sweep(
+            actor=actor,
+            worker_token=x_internal_worker_token,
+            data_category=payload.get("data_category") or payload.get("data_class"),
+            dry_run=bool(payload.get("dry_run", False)),
+            limit=int(payload.get("limit", 1000)),
+        )
+    except InternalWorkerError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+@router.post("/unimplemented-contract-test")
+def api_unimplemented_contract_test(actor: ActorContext = Depends(require_actor_context)) -> JSONResponse:
+    """Explicitly unimplemented test contract probe verifying 501 NOT_IMPLEMENTED response."""
+    return JSONResponse(
+        status_code=501,
+        content={
+            "contract_id": "API-UNIMPLEMENTED",
+            "domain": "SYS",
+            "status": "NOT_IMPLEMENTED",
+            "actor_id": actor.user_id,
+        },
+    )
+
+
 
 def register_remaining_canonical_model_routes(app: FastAPI) -> None:
     """Ensure all canonical route signatures from `FlexBridge_model_1_4.json` are registered in OpenAPI (`FIX-01`)."""
