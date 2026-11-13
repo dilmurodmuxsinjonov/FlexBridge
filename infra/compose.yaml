@@ -53,6 +53,7 @@ services:
     image: edoburu/pgbouncer:1.23.1-p0
     depends_on:
       postgres: {condition: service_healthy}
+    ports: ["127.0.0.1:5432:5432"]
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -92,6 +93,12 @@ services:
   clamav:
     image: clamav/clamav:1.4
     volumes: ["clamavdata:/var/lib/clamav"]
+    healthcheck:
+      test: ["CMD-SHELL", "clamdcheck.sh || echo PING | nc -w 2 127.0.0.1 3310 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   backend:
     <<: *app
@@ -100,7 +107,7 @@ services:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
       storage-init: {condition: service_completed_successfully}
-      clamav: {condition: service_started}
+      clamav: {condition: service_healthy}
     ports: ["127.0.0.1:8000:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready',timeout=10)"]
@@ -121,7 +128,7 @@ services:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
       storage-init: {condition: service_completed_successfully}
-      clamav: {condition: service_started}
+      clamav: {condition: service_healthy}
 
   identity-worker:
     <<: *app
@@ -136,6 +143,22 @@ services:
     depends_on:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
+    restart: unless-stopped
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      BACKEND_INTERNAL_URL: http://backend:8000
+    depends_on:
+      backend: {condition: service_healthy}
 
 volumes:
   pgdata:
