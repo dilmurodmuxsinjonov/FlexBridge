@@ -1077,3 +1077,31 @@ Keyingi kichik qadam:
   * 12/12 barcha discovery va CMS testlari yashil.
 
 
+## DIARY-ANTIGRAVITY-FRONTEND-NEXTJS-UI - Frontend Web UI Scaffolding, Google Stitch MCP Integration & Multi-Portal Implementation
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. Next.js 14 App Router, TypeScript va Tailwind CSS asosidagi enterprise darajadagi zamonaviy frontend ekotizimi yaratildi. Tarmoq: `feature/frontend-nextjs-ui` (asosiy integratsiya tarmog'i `integration/r1-agent-collaboration` ga yo'naltiriladi). `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Mas'ul**: Antigravity Autonomous Master Execution & Principal Design Technologist.
+- **Google Stitch MCP Integratsiyasi (`projects/2559619469139242048`, `assets/10a88304d58a4778a6a26fc81281a9c3`)**:
+  * Google Stitch MCP vositasidan maksimal foydalanildi: dizayn tizimi (Design System) va 4 ta asosiy ekran Stitch orqali generatsiya qilinib, to'liq HTML/CSS spetsifikatsiyalari yuklab olindi va Next.js React komponentlariga integratsiya qilindi:
+    1. **Ekran 1 (Screen 1 - 68309106d1594762abb76c43b66c3099)**: Talaba/Nomzod Portali va Bo'sh Ish O'rinlari Qidiruvi.
+    2. **Ekran 2 (Screen 2 - 928f96b46f3d474f9ca6c596465adc01)**: Ish Beruvchi (Tashkilot) HR Kabineti va Kanban Voronkasi.
+    3. **Ekran 3 (Screen 3 - dabeb8b1a4ea4a77b331e985bc4ceb8a)**: Universitet (OTM) Koordinatori va Kundalik Nazorati Portali.
+    4. **Ekran 4 (Screen 4 - 1a38a48572a148fd9089bfeea86336ac)**: Platforma Operatori va Xavfsizlik SOC Boshqaruv Markazi.
+- **Anti-Slop Dizayn Qoidalariga Qat'iy Muvofiqlik**:
+  * Chuqur qora enterprise fon (`#09090b` zamin, `#121214` kartalar), nozik sub-piksel chegaralar (`rgba(255,255,255,0.08)`), Electric Cobalt (`#3b82f6`) asosiy interaktiv urg'ular, Deep Emerald (`#10b981`) rasmiy akkreditatsiya va moslik ko'rsatkichlari.
+  * Zero emojis (xom emojilar 100% taqiqlandi), toza yagona vaznli Lucide SVG piktogrammalari, tabular raqamli tipografiya (`tabular-nums` maosh, GPA, vaqtlar uchun).
+- **Yaratilgan Portallar va Marshrutlar**:
+  * `/` (`frontend/src/app/page.tsx`): Talaba qidiruv markazi, viloyat/kontrakt/rejim filtrlari, Bento formatidagi Uzum, Korzinka, Kapitalbank, Payme vakansiyalari, 96% neyro-moslik indikatori va amaliyot kundaligi topshirish eslatmasi.
+  * `/employer` (`frontend/src/app/employer/page.tsx`): Uzum Technologies HR kabineti, 4 bosqichli interaktiv Kanban (Yangi, Test, Suhbat, Taklif), nomzodlar harakati, dars va ish grafigi to'qnashuvini tahlil qiluvchi taqvim (08:30-13:30 dars, 14:00-18:00 ish, MK 118-modda 100% muvofiqligi).
+  * `/university` (`frontend/src/app/university/page.tsx`): TATU Karyera markazi telemetriyasi (842 talaba, 68 hamkor, 4.85M maosh, 94.2% intizom), talabalar filtrlangan jadvali, elektron amaliyot kundaligi va mentor taqrizi inspektori, E-IMZO tasdig'i, va HEMIS v3.2 tizimiga uzatish mexanizmi.
+  * `/operator` (`frontend/src/app/operator/page.tsx`): Xavfsizlik SOC markazi, 132 ta API telemetriyasi, append-only SHA-256 Merkle audit jurnali, va Jamshid Karimov (Uzum HR) tomonidan yuborilgan Break-Glass ruxsat so'rovini 2-operator TOTP/YubiKey kodi orqali tasdiqlash/rad etish tizimi.
+  * `frontend/src/components/Navbar.tsx`: Portallar aro bir zumda o'tish (switcher), HEMIS live status pulsatsiyasi, `Ctrl+K` qidiruv yorlig'i, va L4 xavfsizlik darajasi profili.
+  * `frontend/src/components/Footer.tsx`: O'RQ-547 va O'RQ-764 qonunlari, MK 118-moddasi, HEMIS v3.2, va SHA-256 Merkle block telemetriyasi.
+  * `frontend/src/lib/api.ts`: 132 ta backend kanonik shartnomalari bilan integratsiyalangan TypeScript API mijozi.
+- **Ishlab Chiqish va Build Natijasi**:
+  * `npm run build`: **Barcha 7/7 statik sahifalar 100% xatosiz kompilyatsiya qilindi**.
+  * TypeScript xatolari: **0 ta (ZERO ERRORS)**.
+  * Shared First Load JS: atigi **87.3 kB** (yuqori tezlik va optimallashtirish).
+
+
+
