@@ -992,3 +992,47 @@ Keyingi kichik qadam:
   * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-11/opportunity_and_notifications/COPILOT_REVIEW.md`).
   * OpenCode Peer Review: 5-axis bo'yicha to'liq tasdiqlandi (`reviews/2026-11-11/opportunity_and_notifications/OPENCODE_REVIEW.md`).
   * Review sintezi: `reviews/2026-11-11/opportunity_and_notifications/REVIEW_SUMMARY.md`.
+
+
+## DIARY-ANTIGRAVITY-API118-124 - Operator Security Operations (Issue #132)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. PR #133 merge commit `7ad82ac` orqali `integration/r1-agent-collaboration` tarmog'iga birlashtirildi; Issue #132 yopildi. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Mas'ul**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/operator_security.py`)**:
+    - `API-118` (`GET /api/v1/operator/audit-events` / `CAP-036` / `ADMIN_AUDIT`): Keyset kursor paginatsiyasi (`occurred_at DESC, id DESC`), ko'p parametrli filtrlash (`actor_id`, `action`, `object_type`, `object_key`, sana oraliqlari), qat'iy RBAC (`ADMIN` va `AUDITOR`), hamda Zero Customer PII kafolati.
+    - `API-119` (`POST /api/v1/operator/access-requests` / `CAP-036` / `ADMIN_AUDIT`): Break-glass imtiyozli ruxsatnomalar, Ikki Shaxs Qoidasi (Dual-Control Invariant: o'z-o'zini tasdiqlash taqiqlanadi, `actor.user_id != approver_id`, 403 `SELF_APPROVAL_FORBIDDEN`), chegaralangan muddatlar (<= 240 daqiqa), `platform_role_grants` ga yozish va `BREAK_GLASS_ROLE_GRANTED` o'zgarmas auditi.
+    - `API-120` (`POST /api/v1/operator/users/{id}/revoke-sessions` / `CAP-036` / `ADMIN_AUDIT`): Foydalanuvchining barcha faol sessiyalarini darhol bekor qilish (`revoked_at=now()`), majburiy sabab, foydalanuvchini qidirib topishda 404 IDOR anti-enumeration himoyasi va `USER_SESSIONS_EMERGENCY_REVOKED` auditi.
+    - `API-122` (`POST /api/v1/operator/incidents` / `CAP-037` / `OPERATIONS`): Operatsion insident deklaratsiyasi, qat'iy daraja tekshiruvi (`P1`..`P4`), komandir mavjudligi tekshiruvi (mavjud bo'lmasa 404 `COMMANDER_NOT_FOUND`) va audit qaydi.
+    - `API-123` (`GET /api/v1/operator/restore-runs` / `CAP-037` / `OPERATIONS`): Falokatdan tiklash (DR) drillari sinovi, SLA ko'rsatkichlari (RPO <= 24 soat, RTO <= 4 soat, `sla_met` va `restore_drill_verified`).
+    - `API-124` (`GET /api/v1/operator/analytics` / `CAP-038` / `OPERATIONS`): Operatsion tahliliy ko'rsatkichlar, hodisalarni dublikatsiyadan tozalash samaradorligi, ikki tomonlama ish boshlanish ko'rsatkichi (`mutual_start_rate_pct`), outbox salomatligi, `Cache-Control: no-store` va Zero PII.
+  * **Kanonik marshrutlar**: `backend/app/api/v1/canonical_routes.py` ga explicit `contract_id` bilan ulandi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, port 55440, pg_live tegilmadi)**:
+  * 31/31 yangi shartnoma, funksional va adversarial testlar yashil (`test_operator_security_operations_api118_124.py`, `test_operator_security_adversarial.py`).
+  * 16/16 shartnoma regressiya testlari yashil (`test_contracts.py`).
+  * GitHub Actions CI: 1,650+ testlar 100% yashil o'tdi (runs 43280411399, 43280554325, 43280411470, 43280554251).
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-12/operator_security_operations/COPILOT_REVIEW.md`).
+  * OpenCode 1.18.29: APPROVED (`reviews/2026-11-12/operator_security_operations/OPENCODE_REVIEW.md`).
+  * Maxsus 4 ta agent (@whitebox, @blackbox, @watcher, @guardian hamda @auditor): Bir ovozdan tasdiqladi.
+
+
+## DIARY-ANTIGRAVITY-API-X07-X08 - Internal Workers Callbacks (Issue #134)
+
+- **Holat**: Bajarildi va to'liq tasdiqlandi. PR #135 merge commit `e1c21fb` orqali `integration/r1-agent-collaboration` tarmog'iga birlashtirildi; Issue #134 yopildi. `main`/`master` strictly frozen at `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Tarixiy ko'rsatkich**: Loyiha TZ (`specs/v1_4/FlexBridge_model_1_4.json`) bo'yicha **132/132 (100.0%) KANONIK KONTRAKTLAR TO'LIQ AMALGA OSHIRILDI**, 0 ta qoldiq stub marshrut qoldi.
+- **Mas'ul**: Antigravity Autonomous Master Execution with GitHub Copilot CLI 1.0.109 and OpenCode Peer Review.
+- **Qilingan ishlar va yechimlar**:
+  * **Servis (`backend/app/services/internal_workers.py`)**:
+    - `API-X07` (`POST /api/v1/internal/workers/scan-result` / `CAP-039` / `OPERATIONS` / `DB-073`): ClamAV va PDF skaner callback servisi. Karantin mexanizmi (`QUARANTINED` bo'lganda yuklab olishni API-X03 orqali doimiy to'sish, faylni karantin storage'ga ko'chirish, `FILE_SCAN_QUARANTINED` auditi). Toza fayllarni xavfsiz `private/{file_uuid}.pdf` ga o'tkazish, SHA-256 va `object_version` atributlarini saqlash, hamda `FILE_SCAN_CLEAN` auditi. Bir xil 404 IDOR anti-enumeration himoyasi.
+    - `API-X08` (`POST /api/v1/internal/workers/retention-sweep` / `CAP-040` / `OPERATIONS` / `DB-083`): DB-083 qonuniy saqlash muddatlari tugagan yozuvlarni fon tozalash servisi (`ALL`, `SESSIONS`, `ROLE_GRANTS`, `FILES`, `SECURITY_LOGIN_METADATA`, `VERIFICATION_EVIDENCE`). `dry_run` ko'rib chiqish, 1..10,000 dona chegaralangan partiyalar, Zero Customer PII kafolati, va `RETENTION_SWEEP_EXECUTED` auditi.
+  * **Kanonik marshrutlar**: `backend/app/api/v1/canonical_routes.py` ga explicit `contract_id` va bag'ishlangan ichki ishchi autentifikatsiyasi bilan ulandi.
+- **Test natijalari (Izolyatsiyalangan PostgreSQL 17 test klasterida, port 55440, pg_live tegilmadi)**:
+  * 13/13 yangi shartnoma, funksional va adversarial testlar yashil (`test_internal_workers_api_x07_x08.py`, `test_internal_workers_adversarial.py`).
+  * 16/16 shartnoma regressiya testlari yashil (`test_contracts.py`). Jami 29/29 test yashil.
+  * GitHub Actions CI: 1,680+ testlar 100% yashil o'tdi (runs 43351191581 [23m1s pass], 43351246383 [24m48s pass], 43351191688 [17s pass], 43351246373 [12s pass]).
+- **Multi-Agent Code Reviews**:
+  * GitHub Copilot CLI 1.0.109: APPROVED (`reviews/2026-11-13/internal_workers_callbacks/COPILOT_REVIEW.md`).
+  * OpenCode 1.18.29: APPROVED (`reviews/2026-11-13/internal_workers_callbacks/OPENCODE_REVIEW.md`).
+  * Maxsus 4 ta agent (@whitebox, @blackbox, @watcher, @guardian hamda @auditor): Bir ovozdan tasdiqladi.
+
