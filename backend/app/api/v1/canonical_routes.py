@@ -244,9 +244,12 @@ def api_081_publish_opportunity(
 @router.get("/opportunities/{id}")
 def api_005_get_opportunity_detail(
     id: UUID,
+    response: Response,
     actor: ActorContext | None = Depends(optional_actor_context),
 ) -> dict[str, Any]:
     """Canonical API-005 (`GET /api/v1/opportunities/{id}`): Public immutable published revision, wage, eligibility, and org details (`CAP-001`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_SHORT
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_SHORT
     try:
         return opportunity_service.get_opportunity_detail(
             opportunity_id=str(id),
@@ -1088,37 +1091,47 @@ def api_010_get_organization_rating_summary(
 
 
 @router.get("/onboarding/options", status_code=200)
-def api_002_onboarding_options() -> dict[str, Any]:
+def api_002_onboarding_options(response: Response) -> dict[str, Any]:
     """API-002: Public onboarding options and persona tracks (`CAP-002`, `AUTH_SELF`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_MEDIUM
     from app.services.discovery_and_catalog import discovery_and_catalog_service
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_MEDIUM
     return discovery_and_catalog_service.get_onboarding_options_api_002()
 
 
 @router.get("/services/public", status_code=200)
-def api_011_public_services() -> dict[str, Any]:
+def api_011_public_services(response: Response) -> dict[str, Any]:
     """API-011: Public service offerings catalog (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_MEDIUM
     from app.services.discovery_and_catalog import discovery_and_catalog_service
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_MEDIUM
     return discovery_and_catalog_service.get_public_services_api_011()
 
 
 @router.get("/prices/public", status_code=200)
-def api_012_public_prices() -> dict[str, Any]:
+def api_012_public_prices(response: Response) -> dict[str, Any]:
     """API-012: Public pricing rules, listing duration, and refund policy (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_MEDIUM
     from app.services.discovery_and_catalog import discovery_and_catalog_service
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_MEDIUM
     return discovery_and_catalog_service.get_public_prices_api_012()
 
 
 @router.get("/help/{document}", status_code=200)
-def api_013_public_help_document(document: str) -> dict[str, Any]:
+def api_013_public_help_document(document: str, response: Response) -> dict[str, Any]:
     """API-013: Public versioned help & FAQ CMS documentation (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_LONG
     from app.services.discovery_and_catalog import discovery_and_catalog_service
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_LONG
     return discovery_and_catalog_service.get_public_help_api_013(document=document)
 
 
 @router.get("/policies/{document}", status_code=200)
-def api_014_public_policy_document(document: str) -> dict[str, Any]:
+def api_014_public_policy_document(document: str, response: Response) -> dict[str, Any]:
     """API-014: Public versioned legal policies CMS documentation (`CAP-039`, `PUBLIC_INFO`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_LONG
     from app.services.discovery_and_catalog import discovery_and_catalog_service
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_LONG
     return discovery_and_catalog_service.get_public_policies_api_014(document=document)
 
 

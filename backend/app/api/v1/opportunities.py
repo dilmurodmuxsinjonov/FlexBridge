@@ -6,7 +6,7 @@ from typing import Any
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Response
 from pydantic import BaseModel
 
 from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
@@ -120,6 +120,7 @@ def api_003_opportunity_feed(
 @router.get("", status_code=200)
 @router.get("/", status_code=200, include_in_schema=False)
 def search_public_opportunities_endpoint(
+    response: Response,
     region: str | None = Query(default=None),
     kind: str | None = Query(default=None),
     is_paid: bool | None = Query(default=None),
@@ -131,6 +132,8 @@ def search_public_opportunities_endpoint(
     after: str | None = Query(default=None),
 ) -> dict[str, Any]:
     """API-001: Public opportunity search and discovery catalog (`CAP-001`, `PUBLIC_SEARCH`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_SHORT
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_SHORT
     try:
         return opportunity_service.search_public_opportunities(
             region=region,

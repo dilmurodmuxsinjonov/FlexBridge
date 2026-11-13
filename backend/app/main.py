@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError, ProgrammingError
@@ -92,6 +92,8 @@ async def authentication_boundary(request: Request, call_next):
     return await call_next(request)
 
 from app.core.iam_http import IAMHTTPMiddleware
+from app.core.http_cache import HTTPCacheMiddleware
+app.add_middleware(HTTPCacheMiddleware)
 app.add_middleware(IAMHTTPMiddleware)
 
 @app.exception_handler(PlacementScopeError)
@@ -182,8 +184,10 @@ app.include_router(canonical_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])
-def health_live() -> dict[str, Any]:
+def health_live(response: Response) -> dict[str, Any]:
     """API-X05: Liveness probe endpoint."""
+    from app.core.http_cache import apply_no_store
+    apply_no_store(response)
     return {
         "status": "alive",
         "service": settings.app_name,
@@ -194,8 +198,10 @@ def health_live() -> dict[str, Any]:
 
 
 @app.get("/api/v1/health/ready", tags=["health"])
-def health_ready() -> dict[str, Any]:
+def health_ready(response: Response) -> dict[str, Any]:
     """API-X06: Readiness probe verifying 1.4 schema artifacts and PostgreSQL invariant checks."""
+    from app.core.http_cache import apply_no_store
+    apply_no_store(response)
     from app.core.readiness import dependency_readiness
     report=dependency_readiness()
     if not report['ready']: raise HTTPException(503,detail={'code':'SERVICE_NOT_READY',**report})
@@ -203,8 +209,10 @@ def health_ready() -> dict[str, Any]:
 
 
 @app.get("/api/v1/meta/schema-summary", tags=["meta"])
-def meta_schema_summary() -> dict[str, Any]:
+def meta_schema_summary(response: Response) -> dict[str, Any]:
     """Return the verified 1.4 schema summary and DB-083 retention policies."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_MEDIUM
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_MEDIUM
     return {
         "summary": get_schema_summary(),
         "retention_policies_v1": get_retention_policies_v1(),
