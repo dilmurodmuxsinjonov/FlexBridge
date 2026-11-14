@@ -57,3 +57,28 @@ def test_runner_masks_the_database_password_even_when_a_phase_fails(monkeypatch,
     assert secret not in output
     assert "***" in output
     assert "RuntimeError" in output
+    assert "main:" in output
+
+
+def test_runner_rejects_compose_incompatible_password_without_echoing_it(tmp_path, monkeypatch):
+    monkeypatch.delenv("FLEXBRIDGE_STAGING_DATABASE_URL", raising=False)
+    sample = tmp_path / ".env"
+    secret = "unsafe@passphrase"
+    sample.write_text("POSTGRES_PASSWORD="+secret+"\n")
+    with pytest.raises(RuntimeError, match="URL-safe") as exc_info:
+        runner().staging_database_url(sample)
+    assert secret not in str(exc_info.value)
+
+
+@pytest.mark.parametrize("name,value", [
+    ("BACKEND_URL", "https://staging.example.com"),
+    ("BACKEND_URL", "http://127.0.0.1:8001"),
+    ("FRONTEND_URL", "http://evil.example:3000"),
+    ("MINIO_URL", "http://localhost:9000/private"),
+])
+def test_runner_rejects_nonlocal_or_unexpected_http_targets(monkeypatch, capsys, name, value):
+    monkeypatch.setenv("FLEXBRIDGE_STAGING_DATABASE_URL", "postgresql+psycopg://u:local-test@127.0.0.1:5432/flexbridge")
+    monkeypatch.setenv(name, value)
+    module = runner()
+    assert module.main() == 2
+    assert "Staging database configuration rejected" in capsys.readouterr().out

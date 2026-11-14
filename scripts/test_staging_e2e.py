@@ -14,9 +14,11 @@ from __future__ import annotations
 import hashlib
 import io
 import os
+import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import httpx
@@ -48,6 +50,8 @@ def staging_database_url(env_file: Path | None = None) -> str:
         password = values.get("POSTGRES_PASSWORD")
         if not password:
             raise RuntimeError("Set POSTGRES_PASSWORD in the ignored infra/.env staging file")
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", password):
+            raise RuntimeError("POSTGRES_PASSWORD must be URL-safe for Compose DATABASE_URL interpolation")
         url = URL.create(
             "postgresql+psycopg",
             username=values.get("POSTGRES_USER") or "flexbridge_owner",
@@ -60,6 +64,19 @@ def staging_database_url(env_file: Path | None = None) -> str:
             or url.port != 5432 or url.database != "flexbridge" or not url.password):
         raise RuntimeError("Staging SQL target must be local PostgreSQL/PgBouncer 127.0.0.1:5432/flexbridge")
     return url.render_as_string(hide_password=False)
+
+
+def validate_staging_http_targets() -> None:
+    for name, value, port in (
+        ("BACKEND_URL", BACKEND_URL, 8000),
+        ("FRONTEND_URL", FRONTEND_URL, 3000),
+        ("MINIO_URL", MINIO_URL, 9000),
+    ):
+        target = urlsplit(value)
+        if (target.scheme != "http" or target.hostname not in ("127.0.0.1", "localhost")
+                or target.port != port or target.username or target.password
+                or target.path or target.query or target.fragment):
+            raise RuntimeError(f"{name} must be local staging HTTP on port {port}")
 
 
 def log(phase: str, message: str, status: str = "INFO"):
@@ -323,7 +340,7 @@ def phase_4_clean_file_lifecycle(client: httpx.Client, access_token: str) -> str
     while time.monotonic() < deadline:
         with engine.connect() as conn:
             status = conn.execute(
-                text("SELECT scan_status FROM flexbridge.files WHERE id = :id"),
+                text("SELECT scan_status FROM flexbridge.files WHERE id = CAST(:id AS uuid)"),
                 {"id": file_id},
             ).scalar()
             if status in ("CLEAN", "QUARANTINED"):
@@ -391,7 +408,7 @@ def phase_5_eicar_quarantine(client: httpx.Client, access_token: str) -> None:
     while time.monotonic() < deadline:
         with engine.connect() as conn:
             status = conn.execute(
-                text("SELECT scan_status FROM flexbridge.files WHERE id = :id"),
+                text("SELECT scan_status FROM flexbridge.files WHERE id = CAST(:id AS uuid)"),
                 {"id": file_id},
             ).scalar()
             if status in ("CLEAN", "QUARANTINED"):
@@ -414,6 +431,7 @@ def main() -> int:
     global DATABASE_URL
     try:
         DATABASE_URL = staging_database_url()
+        validate_staging_http_targets()
     except Exception as exc:
         log("CONFIG", f"Staging database configuration rejected ({type(exc).__name__})", "FAIL")
         return 2
@@ -449,7 +467,13 @@ def main() -> int:
             return 0
 
         except Exception as exc:
-            log("ERROR", f"Staging E2E Suite failed ({type(exc).__name__}); inspect local service logs", "FAIL")
+            frame = exc.__traceback__
+            location = "unknown"
+            while frame:
+                if Path(frame.tb_frame.f_code.co_filename).resolve() == Path(__file__).resolve():
+                    location = f"{frame.tb_frame.f_code.co_name}:{frame.tb_lineno}"
+                frame = frame.tb_next
+            log("ERROR", f"Staging E2E Suite failed at {location} ({type(exc).__name__}); inspect local service logs", "FAIL")
             return 1
 
 
