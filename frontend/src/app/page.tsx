@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -64,7 +65,9 @@ function VacancyCard({ job }: { job: Opportunity }) {
                 Tasdiqlangan tashkilot
               </span>
             </div>
-            <h2 className="font-heading text-base font-bold text-white">{job.title}</h2>
+            <h2 className="font-heading text-base font-bold text-white transition-colors hover:text-primary">
+              <Link href={`/ishlar/${job.id}`}>{job.title}</Link>
+            </h2>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
               {place && (
                 <span className="inline-flex items-center gap-1">
@@ -101,14 +104,22 @@ function VacancyCard({ job }: { job: Opportunity }) {
           </p>
         </div>
       </div>
-      {job.description && (
-        <details className="group mt-4 border-t border-white/[0.06] pt-3 text-xs text-zinc-400">
-          <summary className="flex cursor-pointer list-none items-center gap-1 font-semibold text-zinc-300 hover:text-primary">
-            Tavsifni ko‘rish <ArrowRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" aria-hidden="true" />
-          </summary>
-          <p className="mt-2 whitespace-pre-wrap leading-relaxed">{job.description}</p>
-        </details>
-      )}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
+        {job.description ? (
+          <details className="group text-xs text-zinc-400">
+            <summary className="flex cursor-pointer list-none items-center gap-1 font-semibold text-zinc-300 hover:text-primary">
+              Tavsifni ko‘rish <ArrowRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" aria-hidden="true" />
+            </summary>
+            <p className="mt-2 whitespace-pre-wrap leading-relaxed">{job.description}</p>
+          </details>
+        ) : <div />}
+        <Link
+          href={`/ishlar/${job.id}`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+        >
+          Batafsil / Ariza <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </Link>
+      </div>
     </article>
   );
 }
