@@ -259,7 +259,173 @@ def phase_2_auth_and_session(client: httpx.Client) -> tuple[str, str, str]:
     assert preserved_resp.json().get("user_id") == candidate_id, f"Mismatched user_id in preserved session: {preserved_resp.json()}"
     log("PHASE 2", "Primary session (Session 1) verified active and preserved after Session 2 revocation.")
 
-    log("PHASE 2", "Phase 2 PASSED: Authentication & session lifecycle fully verified.", "PASS")
+    # 2.6 Multi-Tenant & Multi-Role Boundary Verification (HR and TEACHER scopes)
+    from datetime import date, timedelta
+    org_a_id = str(uuid4())
+    org_b_id = str(uuid4())
+    hr_user_id = str(uuid4())
+    hr_password = f"StagingHR_Pass_{uuid4().hex[:12]}!"
+    inst_a_id = str(uuid4())
+    teacher_user_id = str(uuid4())
+    teacher_password = f"StagingTeacher_Pass_{uuid4().hex[:12]}!"
+    file_id = str(uuid4())
+
+    with engine.begin() as conn:
+        hr_role_id = conn.execute(text("SELECT id FROM flexbridge.role_catalog WHERE code = 'HR'")).scalar()
+        teacher_role_id = conn.execute(text("SELECT id FROM flexbridge.role_catalog WHERE code = 'TEACHER'")).scalar()
+
+        # Seed Users
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.users (id, created_at, updated_at, display_name, password_hash, status, locale, timezone, adult_declared_at)
+                VALUES (:id, NOW(), NOW(), 'HR Director Alpha', :password_hash, 'ACTIVE', 'uz', 'Asia/Tashkent', NOW())
+            """),
+            {"id": hr_user_id, "password_hash": hash_password(hr_password)}
+        )
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.users (id, created_at, updated_at, display_name, password_hash, status, locale, timezone, adult_declared_at)
+                VALUES (:id, NOW(), NOW(), 'Docent Aliyev', :password_hash, 'ACTIVE', 'uz', 'Asia/Tashkent', NOW())
+            """),
+            {"id": teacher_user_id, "password_hash": hash_password(teacher_password)}
+        )
+
+        # File fixture for teacher appointment satisfying provenance trigger
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.files (
+                    id, created_at, updated_at, owner_user_id, storage_key, filename, mime_type, byte_size,
+                    scan_status, retention_class, storage_bucket, storage_version_id, storage_etag, object_version, sha256, scanned_at
+                )
+                VALUES (
+                    :id, NOW(), NOW(), :owner_id, :storage_key, 'appointment.pdf', 'application/pdf', 1024,
+                    'CLEAN', 'VERIFICATION_EVIDENCE', 'flexbridge-private', 'v1', 'etag123', 'v1',
+                    'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', NOW()
+                )
+            """),
+            {"id": file_id, "owner_id": teacher_user_id, "storage_key": f"private/{file_id}/appointment.pdf"}
+        )
+
+        # Seed Org A and Org B
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.organizations (id, created_at, updated_at, tax_id, legal_name, public_name, region, status)
+                VALUES (:id, NOW(), NOW(), :tax_id, 'Alpha Tech MCHJ', 'Alpha Tech', 'Tashkent', 'ACTIVE')
+            """),
+            {"id": org_a_id, "tax_id": f"TAX_A_{uuid4().hex[:8]}"}
+        )
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.organizations (id, created_at, updated_at, tax_id, legal_name, public_name, region, status)
+                VALUES (:id, NOW(), NOW(), :tax_id, 'Beta Global MCHJ', 'Beta Global', 'Samarkand', 'ACTIVE')
+            """),
+            {"id": org_b_id, "tax_id": f"TAX_B_{uuid4().hex[:8]}"}
+        )
+
+        # HR Membership & Role in Org A
+        hr_mem_id = str(uuid4())
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.org_memberships (id, created_at, updated_at, organization_id, user_id, status, accepted_at)
+                VALUES (:id, NOW(), NOW(), :org_id, :user_id, 'ACTIVE', NOW())
+            """),
+            {"id": hr_mem_id, "org_id": org_a_id, "user_id": hr_user_id}
+        )
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.org_role_grants (id, created_at, updated_at, membership_id, role_id, granted_by_id)
+                VALUES (:id, NOW(), NOW(), :mem_id, :role_id, :granted_by)
+            """),
+            {"id": str(uuid4()), "mem_id": hr_mem_id, "role_id": hr_role_id, "granted_by": hr_user_id}
+        )
+
+        # Institution A & Teacher Membership, Appointment, and Role Grant
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.institutions (id, created_at, updated_at, name, registry_code, region, status)
+                VALUES (:id, NOW(), NOW(), 'Tashkent National University', :code, 'Tashkent', 'ACTIVE')
+            """),
+            {"id": inst_a_id, "code": f"REG_{uuid4().hex[:8]}"}
+        )
+        inst_mem_id = str(uuid4())
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.institution_memberships (id, created_at, updated_at, institution_id, user_id, status, accepted_at)
+                VALUES (:id, NOW(), NOW(), :inst_id, :user_id, 'ACTIVE', NOW())
+            """),
+            {"id": inst_mem_id, "inst_id": inst_a_id, "user_id": teacher_user_id}
+        )
+        appt_id = str(uuid4())
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.institution_appointments (id, created_at, updated_at, institution_id, user_id, document_file_id, status, valid_from, valid_to, accepted_at)
+                VALUES (:id, NOW(), NOW(), :inst_id, :user_id, :file_id, 'ACTIVE', :from_date, :to_date, NOW())
+            """),
+            {
+                "id": appt_id,
+                "inst_id": inst_a_id,
+                "user_id": teacher_user_id,
+                "file_id": file_id,
+                "from_date": date.today() - timedelta(days=30),
+                "to_date": date.today() + timedelta(days=60),
+            }
+        )
+        conn.execute(
+            text("""
+                INSERT INTO flexbridge.institution_role_grants (id, created_at, updated_at, membership_id, role_id, appointment_id)
+                VALUES (:id, NOW(), NOW(), :mem_id, :role_id, :appt_id)
+            """),
+            {"id": str(uuid4()), "mem_id": inst_mem_id, "role_id": teacher_role_id, "appt_id": appt_id}
+        )
+
+    log("PHASE 2", f"Seeded multi-tenant fixtures: Org A ({org_a_id[:8]}), Org B ({org_b_id[:8]}), Inst A ({inst_a_id[:8]})")
+
+    # 2.7 Verify unauthenticated access denial (HTTP 401)
+    unauth_resp = client.get(f"{BACKEND_URL}/api/v1/organizations/{org_a_id}/dashboard", timeout=10.0)
+    assert unauth_resp.status_code in (401, 404), f"Unauthenticated request was not rejected: {unauth_resp.status_code}"
+    log("PHASE 2", "Unauthenticated request to tenant dashboard rejected with HTTP 401/404.")
+
+    # 2.8 Verify Candidate access denial to privileged HR endpoint (HTTP 404 IDOR defense)
+    cand_denied = client.get(f"{BACKEND_URL}/api/v1/organizations/{org_a_id}/dashboard", headers=headers, timeout=10.0)
+    assert cand_denied.status_code in (403, 404), f"Candidate was not denied HR dashboard: {cand_denied.status_code}"
+    log("PHASE 2", "Candidate access to organization HR dashboard rejected with uniform 404.")
+
+    # 2.9 HR Login & Own-Scope Verification (HTTP 200, API-068)
+    hr_login = client.post(
+        f"{BACKEND_URL}/api/v1/auth/login",
+        json={"user_id": hr_user_id, "password": hr_password},
+        timeout=10.0,
+    )
+    assert hr_login.status_code == 200, f"HR login failed: {hr_login.text}"
+    hr_headers = {"Authorization": f"Bearer {hr_login.json()['access_token']}"}
+    hr_dashboard = client.get(f"{BACKEND_URL}/api/v1/organizations/{org_a_id}/dashboard", headers=hr_headers, timeout=10.0)
+    assert hr_dashboard.status_code == 200, f"HR own-scope dashboard failed: {hr_dashboard.status_code}"
+    assert hr_dashboard.json().get("contract_id") == "API-068", f"Unexpected contract_id: {hr_dashboard.json()}"
+    log("PHASE 2", "HR user own-scope organization dashboard verified: HTTP 200 (API-068).")
+
+    # 2.10 Cross-Tenant Isolation: HR accessing Organization B (HTTP 404 uniform IDOR defense)
+    hr_cross = client.get(f"{BACKEND_URL}/api/v1/organizations/{org_b_id}/dashboard", headers=hr_headers, timeout=10.0)
+    assert hr_cross.status_code == 404, f"Cross-tenant HR request did not return 404: {hr_cross.status_code}"
+    log("PHASE 2", "Cross-tenant access to foreign organization cleanly denied with HTTP 404.")
+
+    # 2.11 Teacher Login & Academic Review Queue Verification (HTTP 200)
+    teacher_login = client.post(
+        f"{BACKEND_URL}/api/v1/auth/login",
+        json={"user_id": teacher_user_id, "password": teacher_password},
+        timeout=10.0,
+    )
+    assert teacher_login.status_code == 200, f"Teacher login failed: {teacher_login.text}"
+    teacher_headers = {"Authorization": f"Bearer {teacher_login.json()['access_token']}"}
+    teacher_queue = client.get(f"{BACKEND_URL}/api/v1/me/academic-review-queue", headers=teacher_headers, timeout=10.0)
+    assert teacher_queue.status_code == 200, f"Teacher review queue failed: {teacher_queue.status_code}"
+    log("PHASE 2", "Teacher user academic review queue verified: HTTP 200.")
+
+    # 2.12 Teacher role boundary: Teacher attempting HR dashboard (HTTP 404)
+    teacher_cross = client.get(f"{BACKEND_URL}/api/v1/organizations/{org_a_id}/dashboard", headers=teacher_headers, timeout=10.0)
+    assert teacher_cross.status_code in (403, 404), f"Teacher was not denied HR dashboard: {teacher_cross.status_code}"
+    log("PHASE 2", "Teacher access to organization HR dashboard rejected with HTTP 404.")
+
+    log("PHASE 2", "Phase 2 PASSED: Authentication & multi-tenant session lifecycle fully verified.", "PASS")
     return candidate_id, test_password, access_token
 
 
@@ -288,6 +454,33 @@ def phase_3_pgbouncer_transactions(client: httpx.Client, access_token: str) -> N
         val = conn.execute(text("SELECT 1 AS ready_probe")).scalar()
         assert val == 1, "Direct PgBouncer SELECT 1 failed"
     log("PHASE 3", f"Direct pooled query through PgBouncer verified: {result} existing opportunities.")
+
+    # 3.4 Concurrent PgBouncer transaction probes (10 worker threads, 20 concurrent transactions)
+    import concurrent.futures
+
+    concurrent_engine = create_engine(
+        DATABASE_URL,
+        connect_args={"prepare_threshold": None},
+        pool_size=15,
+        max_overflow=10,
+        pool_pre_ping=True,
+    )
+
+    def run_worker_transaction(worker_id: int) -> bool:
+        with concurrent_engine.connect() as conn:
+            with conn.begin():
+                opp_c = conn.execute(text("SELECT count(*) FROM flexbridge.opportunities")).scalar()
+                probe = conn.execute(text("SELECT 1 AS ready_probe")).scalar()
+                assert probe == 1
+                roles_c = conn.execute(text("SELECT count(*) FROM flexbridge.role_catalog")).scalar()
+                assert roles_c >= 7
+        return True
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(run_worker_transaction, i) for i in range(20)]
+        for f in concurrent.futures.as_completed(futures):
+            assert f.result() is True
+    log("PHASE 3", "20 concurrent atomic transactions verified through PgBouncer transaction pooling.")
 
     log("PHASE 3", "Phase 3 PASSED: PgBouncer transaction pooling verified.", "PASS")
 
