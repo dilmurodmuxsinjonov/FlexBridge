@@ -14,12 +14,16 @@ from __future__ import annotations
 import hashlib
 import io
 import os
+import re
 import sys
 import time
+from pathlib import Path
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import httpx
 from pypdf import PdfWriter
+from sqlalchemy.engine import URL, make_url
 
 # Ensure backend imports are accessible when running in repo root
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,10 +35,48 @@ if BACKEND_DIR not in sys.path:
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:3000").rstrip("/")
 MINIO_URL = os.environ.get("MINIO_URL", "http://127.0.0.1:9000").rstrip("/")
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL",
-    "postgresql+psycopg://flexbridge_owner:stg_secure_pg_pass_2026_flexbridge_isolated@127.0.0.1:5432/flexbridge",
-)
+DATABASE_URL: str | None = None
+
+
+def staging_database_url(env_file: Path | None = None) -> str:
+    """Use the ignored Compose credentials and restrict all direct SQL to local staging."""
+    explicit = os.environ.get("FLEXBRIDGE_STAGING_DATABASE_URL")
+    if explicit:
+        url = make_url(explicit)
+    else:
+        from dotenv import dotenv_values
+
+        values = dotenv_values(env_file or Path(REPO_ROOT) / "infra" / ".env")
+        password = values.get("POSTGRES_PASSWORD")
+        if not password:
+            raise RuntimeError("Set POSTGRES_PASSWORD in the ignored infra/.env staging file")
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", password):
+            raise RuntimeError("POSTGRES_PASSWORD must be URL-safe for Compose DATABASE_URL interpolation")
+        url = URL.create(
+            "postgresql+psycopg",
+            username=values.get("POSTGRES_USER") or "flexbridge_owner",
+            password=password,
+            host="127.0.0.1",
+            port=5432,
+            database=values.get("POSTGRES_DB") or "flexbridge",
+        )
+    if (url.drivername != "postgresql+psycopg" or url.host not in ("127.0.0.1", "localhost")
+            or url.port != 5432 or url.database != "flexbridge" or not url.password):
+        raise RuntimeError("Staging SQL target must be local PostgreSQL/PgBouncer 127.0.0.1:5432/flexbridge")
+    return url.render_as_string(hide_password=False)
+
+
+def validate_staging_http_targets() -> None:
+    for name, value, port in (
+        ("BACKEND_URL", BACKEND_URL, 8000),
+        ("FRONTEND_URL", FRONTEND_URL, 3000),
+        ("MINIO_URL", MINIO_URL, 9000),
+    ):
+        target = urlsplit(value)
+        if (target.scheme != "http" or target.hostname not in ("127.0.0.1", "localhost")
+                or target.port != port or target.username or target.password
+                or target.path or target.query or target.fragment):
+            raise RuntimeError(f"{name} must be local staging HTTP on port {port}")
 
 
 def log(phase: str, message: str, status: str = "INFO"):
@@ -146,7 +188,7 @@ def phase_2_auth_and_session(client: httpx.Client) -> tuple[str, str, str]:
         conn.execute(
             text(
                 """
-                INSERT INTO users (id, created_at, updated_at, display_name, password_hash, status, locale, timezone, adult_declared_at)
+                INSERT INTO flexbridge.users (id, created_at, updated_at, display_name, password_hash, status, locale, timezone, adult_declared_at)
                 VALUES (:id, NOW(), NOW(), :display_name, :password_hash, 'ACTIVE', 'uz', 'Asia/Tashkent', NOW())
                 ON CONFLICT (id) DO NOTHING
                 """
@@ -156,7 +198,7 @@ def phase_2_auth_and_session(client: httpx.Client) -> tuple[str, str, str]:
         conn.execute(
             text(
                 """
-                INSERT INTO candidate_profiles (id, created_at, updated_at, user_id, headline, region, experience_months, visibility)
+                INSERT INTO flexbridge.candidate_profiles (id, created_at, updated_at, user_id, headline, region, experience_months, visibility)
                 VALUES (:profile_id, NOW(), NOW(), :user_id, :headline, 'Tashkent', 12, 'PUBLIC')
                 ON CONFLICT (user_id) DO NOTHING
                 """
@@ -175,8 +217,8 @@ def phase_2_auth_and_session(client: httpx.Client) -> tuple[str, str, str]:
     login_data = login_resp.json()
     access_token = login_data["access_token"]
     session_id = login_data["session_id"]
-    assert access_token and session_id, f"Missing token or session_id in response: {login_data}"
-    log("PHASE 2", f"Login successful: session_id={session_id}")
+    assert access_token and session_id, "Login response is missing an access token or session ID"
+    log("PHASE 2", "Login returned an access token and session ID")
 
     # 2.2 Verify active user context via GET /api/v1/auth/me
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -185,7 +227,7 @@ def phase_2_auth_and_session(client: httpx.Client) -> tuple[str, str, str]:
     me_data = me_resp.json()
     assert me_data.get("user_id") == candidate_id, f"Mismatched user_id in /auth/me: {me_data}"
     assert "CANDIDATE" in me_data.get("roles", []), f"Role CANDIDATE not in roles: {me_data}"
-    log("PHASE 2", f"Verified active actor identity: {me_data}")
+    log("PHASE 2", "Verified active actor identity and candidate role")
 
     # Create a secondary session to test explicit revocation without invalidating primary token
     login_resp2 = client.post(
@@ -232,14 +274,14 @@ def phase_3_pgbouncer_transactions(client: httpx.Client, access_token: str) -> N
     headers = {"Authorization": f"Bearer {access_token}"}
     saved_resp = client.get(f"{BACKEND_URL}/api/v1/me/saved-opportunities", headers=headers, timeout=10.0)
     assert saved_resp.status_code == 200, f"/me/saved-opportunities returned {saved_resp.status_code}: {saved_resp.text}"
-    log("PHASE 3", f"Candidate saved opportunities queried via pooled connection: {saved_resp.json()}")
+    log("PHASE 3", "Candidate saved opportunities queried via pooled connection")
 
     # 3.3 Direct PgBouncer pooling verification (prepare_threshold=None safety)
     from sqlalchemy import create_engine, text
 
     engine = create_engine(DATABASE_URL, connect_args={"prepare_threshold": None}, pool_pre_ping=True)
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT count(*) FROM opportunities")).scalar()
+        result = conn.execute(text("SELECT count(*) FROM flexbridge.opportunities")).scalar()
         val = conn.execute(text("SELECT 1 AS ready_probe")).scalar()
         assert val == 1, "Direct PgBouncer SELECT 1 failed"
     log("PHASE 3", f"Direct pooled query through PgBouncer verified: {result} existing opportunities.")
@@ -298,7 +340,7 @@ def phase_4_clean_file_lifecycle(client: httpx.Client, access_token: str) -> str
     while time.monotonic() < deadline:
         with engine.connect() as conn:
             status = conn.execute(
-                text("SELECT scan_status FROM files WHERE id = :id"),
+                text("SELECT scan_status FROM flexbridge.files WHERE id = CAST(:id AS uuid)"),
                 {"id": file_id},
             ).scalar()
             if status in ("CLEAN", "QUARANTINED"):
@@ -366,7 +408,7 @@ def phase_5_eicar_quarantine(client: httpx.Client, access_token: str) -> None:
     while time.monotonic() < deadline:
         with engine.connect() as conn:
             status = conn.execute(
-                text("SELECT scan_status FROM files WHERE id = :id"),
+                text("SELECT scan_status FROM flexbridge.files WHERE id = CAST(:id AS uuid)"),
                 {"id": file_id},
             ).scalar()
             if status in ("CLEAN", "QUARANTINED"):
@@ -386,13 +428,20 @@ def phase_5_eicar_quarantine(client: httpx.Client, access_token: str) -> None:
 
 
 def main() -> int:
+    global DATABASE_URL
+    try:
+        DATABASE_URL = staging_database_url()
+        validate_staging_http_targets()
+    except Exception as exc:
+        log("CONFIG", f"Staging database configuration rejected ({type(exc).__name__})", "FAIL")
+        return 2
     print("=" * 70)
     print(" FlexBridge Staging & E2E Container Integration Test Runner")
     print("=" * 70)
     print(f"Backend Target:  {BACKEND_URL}")
     print(f"Frontend Target: {FRONTEND_URL}")
     print(f"MinIO Target:    {MINIO_URL}")
-    print(f"Database Target: {DATABASE_URL}")
+    print(f"Database Target: {make_url(DATABASE_URL).render_as_string(hide_password=True)}")
     print("-" * 70)
 
     with httpx.Client(follow_redirects=True) as client:
@@ -418,9 +467,13 @@ def main() -> int:
             return 0
 
         except Exception as exc:
-            log("ERROR", f"Staging E2E Suite failed with exception: {exc}", "FAIL")
-            import traceback
-            traceback.print_exc()
+            frame = exc.__traceback__
+            location = "unknown"
+            while frame:
+                if Path(frame.tb_frame.f_code.co_filename).resolve() == Path(__file__).resolve():
+                    location = f"{frame.tb_frame.f_code.co_name}:{frame.tb_lineno}"
+                frame = frame.tb_next
+            log("ERROR", f"Staging E2E Suite failed at {location} ({type(exc).__name__}); inspect local service logs", "FAIL")
             return 1
 
 
