@@ -121,7 +121,7 @@ export default function EmployerPortal() {
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
                 Uzum Technologies HR Hub
               </span>
-              <span className="text-zinc-500 text-xs">• Mirzo Ulug'bek filiali</span>
+              <span className="text-zinc-500 text-xs">• Mirzo Ulug&apos;bek filiali</span>
               <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 14 ta faol vakansiya
               </span>
@@ -134,7 +134,7 @@ export default function EmployerPortal() {
               <span>•</span>
               <span>Davlat akkreditatsiyasi №UZ-448</span>
               <span>•</span>
-              <span className="text-emerald-400 font-semibold">Dual ta'lim dasturi faol</span>
+              <span className="text-emerald-400 font-semibold">Dual ta&apos;lim dasturi faol</span>
             </div>
           </div>
 
@@ -172,13 +172,13 @@ export default function EmployerPortal() {
             </div>
           </div>
           <div className="p-3 rounded bg-surface-lowest border border-white/[0.06]">
-            <span className="text-[11px] text-zinc-400">O'rtacha neyro-moslik</span>
+            <span className="text-[11px] text-zinc-400">O&apos;rtacha neyro-moslik</span>
             <div className="font-mono text-base font-bold text-emerald-400 mt-0.5">
               92.4%
             </div>
           </div>
           <div className="p-3 rounded bg-surface-lowest border border-white/[0.06]">
-            <span className="text-[11px] text-zinc-400">O'rtacha GPA</span>
+            <span className="text-[11px] text-zinc-400">O&apos;rtacha GPA</span>
             <div className="font-mono text-base font-bold text-primary mt-0.5">
               4.45 <span className="text-[11px] text-zinc-500 font-normal">(TATU, Inha)</span>
             </div>
@@ -186,7 +186,7 @@ export default function EmployerPortal() {
           <div className="p-3 rounded bg-surface-lowest border border-white/[0.06]">
             <span className="text-[11px] text-zinc-400">Kvota holati</span>
             <div className="font-mono text-base font-bold text-amber-400 mt-0.5">
-              4 ta bo'sh o'rin
+              4 ta bo&apos;sh o&apos;rin
             </div>
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function EmployerPortal() {
                   <div className="p-2.5 flex-1 flex flex-col gap-2.5 overflow-y-auto">
                     {stageCandidates.length === 0 ? (
                       <div className="text-center py-10 text-[11px] text-zinc-500">
-                        Hozircha nomzod yo'q
+                        Hozircha nomzod yo&apos;q
                       </div>
                     ) : (
                       stageCandidates.map((cand) => {
@@ -283,7 +283,7 @@ export default function EmployerPortal() {
                                   }}
                                   className="w-full py-1 rounded bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-semibold transition-all text-center"
                                 >
-                                  Testga o'tkazish →
+                                  Testga o&apos;tkazish →
                                 </button>
                               )}
                               {cand.stage === "review" && (
@@ -368,7 +368,7 @@ export default function EmployerPortal() {
 
               {/* Block 2: Transition / Lunch */}
               <div className="p-2 px-3 rounded bg-surface-lowest/50 border border-dashed border-white/[0.06] flex items-center justify-between">
-                <span className="text-[10px] text-zinc-400">Tushlik va yo'l vaqti</span>
+                <span className="text-[10px] text-zinc-400">Tushlik va yo&apos;l vaqti</span>
                 <span className="text-[10px] text-zinc-400 font-mono">13:30 - 14:00 (30 daq.)</span>
               </div>
 
@@ -395,8 +395,8 @@ export default function EmployerPortal() {
             <div className="mt-4 p-3 rounded bg-surface-lowest border border-white/[0.06] flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <p className="text-[11px] text-zinc-300 leading-relaxed">
-                O'zbekiston Respublikasi <strong>Mehnat Kodeksi 118-moddasi</strong>ga
-                muvofiq talaba uchun haftalik 20 soatlik norma to'liq ta'minlangan.
+                O&apos;zbekiston Respublikasi <strong>Mehnat Kodeksi 118-moddasi</strong>ga
+                muvofiq talaba uchun haftalik 20 soatlik norma to&apos;liq ta&apos;minlangan.
               </p>
             </div>
 
@@ -420,7 +420,7 @@ export default function EmployerPortal() {
                   </div>
                 </div>
                 <span className="text-[10px] text-primary hover:underline cursor-pointer">
-                  O'zgartirish
+                  O&apos;zgartirish
                 </span>
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function EmployerPortal() {
               type="button"
               className="w-full mt-4 py-2 rounded bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all active:scale-[0.98]"
             >
-              Uchrashuv va sinov topshirig'ini tasdiqlash
+              Uchrashuv va sinov topshirig&apos;ini tasdiqlash
             </button>
           </div>
         </aside>

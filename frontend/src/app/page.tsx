@@ -19,6 +19,9 @@ import { fetchOpportunities, Opportunity, OpportunityPage } from "@/lib/api";
 
 type Filters = { query: string; region: string; paid: "" | "true" | "false" };
 type FeedStatus = "loading" | "ready" | "error";
+type FeedSnapshot =
+  | { key: string; status: "ready"; page: OpportunityPage }
+  | { key: string; status: "error"; page: null };
 const emptyFilters: Filters = { query: "", region: "", paid: "" };
 
 const modeLabels: Record<string, string> = {
@@ -117,14 +120,15 @@ export default function StudentPortal() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [cursor, setCursor] = useState<string | null>(null);
   const [history, setHistory] = useState<(string | null)[]>([]);
-  const [page, setPage] = useState<OpportunityPage | null>(null);
-  const [status, setStatus] = useState<FeedStatus>("loading");
+  const [snapshot, setSnapshot] = useState<FeedSnapshot | null>(null);
   const [reload, setReload] = useState(0);
+  const requestKey = JSON.stringify([filters.query, filters.region, filters.paid, cursor, reload]);
+  const current = snapshot?.key === requestKey ? snapshot : null;
+  const status: FeedStatus = current?.status || "loading";
+  const page = current?.page || null;
 
   useEffect(() => {
     const controller = new AbortController();
-    setStatus("loading");
-    setPage(null);
     fetchOpportunities({
       query: filters.query || undefined,
       region: filters.region || undefined,
@@ -133,14 +137,17 @@ export default function StudentPortal() {
       signal: controller.signal,
     })
       .then((result) => {
-        setPage(result);
-        setStatus("ready");
+        if (!controller.signal.aborted) {
+          setSnapshot({ key: requestKey, status: "ready", page: result });
+        }
       })
       .catch(() => {
-        if (!controller.signal.aborted) setStatus("error");
+        if (!controller.signal.aborted) {
+          setSnapshot({ key: requestKey, status: "error", page: null });
+        }
       });
     return () => controller.abort();
-  }, [filters, cursor, reload]);
+  }, [filters, cursor, requestKey]);
 
   function submitFilters(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

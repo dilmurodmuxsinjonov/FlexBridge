@@ -106,14 +106,14 @@ export default function OperatorPortal() {
                 • Node: uz-tashkent-dc1 (Stage)
               </span>
               <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                132/132 API Sog'lom
+                132/132 API Sog&apos;lom
               </span>
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-zinc-100">
               Platforma Operatori va Xavfsizlik Boshqaruv Paneli
             </h1>
             <p className="text-xs text-zinc-400">
-              Qat'iy append-only SHA-256 audit oqimi • O'RQ-547 va O'RQ-764 talablariga to'liq muvofiq
+              Qat&apos;iy append-only SHA-256 audit oqimi • O&apos;RQ-547 va O&apos;RQ-764 talablariga to&apos;liq muvofiq
             </p>
           </div>
 
@@ -253,10 +253,10 @@ export default function OperatorPortal() {
                 <ShieldAlert className="w-4 h-4 text-amber-400" />
                 <div>
                   <h3 className="font-heading text-sm font-bold text-zinc-100">
-                    Break-Glass Ruxsat So'rovi: #BG-2025-089
+                    Break-Glass Ruxsat So&apos;rovi: #BG-2025-089
                   </h3>
                   <span className="text-[10px] text-zinc-400 font-mono">
-                    4-Ko'z (Dual Control) Protokoli Talab Qilinadi
+                    4-Ko&apos;z (Dual Control) Protokoli Talab Qilinadi
                   </span>
                 </div>
               </div>
@@ -268,13 +268,13 @@ export default function OperatorPortal() {
             {/* Request Meta Card */}
             <div className="mt-4 p-3 rounded bg-surface-lowest border border-white/[0.06] flex flex-col gap-2 text-xs">
               <div>
-                <span className="text-zinc-500 text-[11px] block">So'rovchi:</span>
+                <span className="text-zinc-500 text-[11px] block">So&apos;rovchi:</span>
                 <span className="text-zinc-200 font-semibold">
                   Jamshid Karimov (Uzum HR Xavfsizlik vakili)
                 </span>
               </div>
               <div>
-                <span className="text-zinc-500 text-[11px] block">Bog'langan talaba:</span>
+                <span className="text-zinc-500 text-[11px] block">Bog&apos;langan talaba:</span>
                 <span className="text-zinc-200 font-semibold">
                   Azizbek Rahimov (TATU, ID: TATU-2022-0814)
                 </span>
@@ -282,12 +282,12 @@ export default function OperatorPortal() {
               <div>
                 <span className="text-zinc-500 text-[11px] block">Asos va Sabab:</span>
                 <p className="text-zinc-300 text-[11px] mt-0.5 leading-relaxed bg-white/[0.02] p-2 rounded border border-white/[0.04]">
-                  "Talaba shartnomasidagi bank rekvizitlarini Mehnat.uz bilan moslashtirishdagi
-                  ziddiyatni bartaraf etish va oylik stajirovka to'lovini blokdan chiqarish."
+                  &quot;Talaba shartnomasidagi bank rekvizitlarini Mehnat.uz bilan moslashtirishdagi
+                  ziddiyatni bartaraf etish va oylik stajirovka to&apos;lovini blokdan chiqarish.&quot;
                 </p>
               </div>
               <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
-                <span>Ruxsat doirasi: <strong className="text-zinc-200">Faqat o'qish (Read-only PII)</strong></span>
+                <span>Ruxsat doirasi: <strong className="text-zinc-200">Faqat o&apos;qish (Read-only PII)</strong></span>
                 <span className="text-red-400 font-semibold">Max 2 soat</span>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function OperatorPortal() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-primary" />
-                  <span>2-Imzolovchi Operator Xavfsizlik Tasdig'i</span>
+                  <span>2-Imzolovchi Operator Xavfsizlik Tasdig&apos;i</span>
                 </span>
                 <span className="text-[10px] text-zinc-400 font-mono">YubiKey L4</span>
               </div>
@@ -324,7 +324,7 @@ export default function OperatorPortal() {
               ) : breakGlassRejected ? (
                 <div className="p-3 rounded bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center justify-center gap-2">
                   <XCircle className="w-4 h-4 text-red-400" />
-                  <span>So'rov rad etildi va xavfsizlik auditiga yuborildi</span>
+                  <span>So&apos;rov rad etildi va xavfsizlik auditiga yuborildi</span>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
@@ -348,7 +348,7 @@ export default function OperatorPortal() {
             </div>
 
             <div className="mt-3 text-[10px] text-zinc-500 text-center">
-              Har bir ochilgan ma'lumot bayti O'zbekiston Kiberxavfsizlik markazi reyestriga yuboriladi.
+              Har bir ochilgan ma&apos;lumot bayti O&apos;zbekiston Kiberxavfsizlik markazi reyestriga yuboriladi.
             </div>
           </div>
         </aside>

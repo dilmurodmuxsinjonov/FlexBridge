@@ -123,14 +123,14 @@ export default function UniversityPortal() {
                 TATU Karyera Markazi
               </span>
               <span className="text-zinc-500 text-xs">
-                • 2025-2026 o'quv yili amaliyoti
+                • 2025-2026 o&apos;quv yili amaliyoti
               </span>
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-zinc-100">
               Universitet Koordinatori va Talabalar Amaliyoti Nazorati Portali
             </h1>
             <p className="text-xs text-zinc-400">
-              HEMIS API v3.2 sinxronizatsiyasi • 2,410 nafar ro'yxatdan o'tgan talaba
+              HEMIS API v3.2 sinxronizatsiyasi • 2,410 nafar ro&apos;yxatdan o&apos;tgan talaba
             </p>
           </div>
 
@@ -174,7 +174,7 @@ export default function UniversityPortal() {
             </div>
           </div>
           <div className="p-3 rounded bg-surface-lowest border border-white/[0.06]">
-            <span className="text-[11px] text-zinc-400">O'rtacha oylik maosh</span>
+            <span className="text-[11px] text-zinc-400">O&apos;rtacha oylik maosh</span>
             <div className="font-mono text-base font-bold text-emerald-400 mt-0.5">
               4,850,000 UZS
             </div>
@@ -289,7 +289,7 @@ export default function UniversityPortal() {
 
             {/* Pagination footer */}
             <div className="p-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-zinc-400">
-              <span>Ko'rsatilmoqda: 1 - 5 jami 842 ta talaba</span>
+              <span>Ko&apos;rsatilmoqda: 1 - 5 jami 842 ta talaba</span>
               <div className="flex gap-1">
                 <button
                   type="button"
@@ -346,7 +346,7 @@ export default function UniversityPortal() {
                 </span>
               </div>
               <p className="text-xs text-zinc-300 italic leading-relaxed">
-                "{selectedStudent.mentor_review}"
+                &quot;{selectedStudent.mentor_review}&quot;
               </p>
               <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-400">
                 <span>Mentor: {selectedStudent.mentor_name}</span>
@@ -359,13 +359,13 @@ export default function UniversityPortal() {
             {/* Faculty Department Review Box */}
             <div className="mt-3 p-3 rounded bg-surface-lowest border border-white/[0.06]">
               <span className="text-xs font-semibold text-zinc-200 block mb-1">
-                Kafedra ekspertizasi va o'quv rejasiga muvofiqligi
+                Kafedra ekspertizasi va o&apos;quv rejasiga muvofiqligi
               </span>
               <p className="text-xs text-zinc-300 leading-relaxed">
                 {selectedStudent.teacher_review}
               </p>
               <span className="text-[10px] text-zinc-400 block mt-2">
-                Mas'ul: {selectedStudent.teacher_name}
+                Mas&apos;ul: {selectedStudent.teacher_name}
               </span>
             </div>
 
@@ -381,7 +381,7 @@ export default function UniversityPortal() {
                 </span>
               </div>
               <span className="text-[10px] text-emerald-400 font-semibold font-mono">
-                0% To'qnashuv
+                0% To&apos;qnashuv
               </span>
             </div>
 
