@@ -783,5 +783,7 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
   * Multi-agent reviews: GitHub Copilot CLI 1.0.109 (`reviews/2026-11-10/saved_opportunities/COPILOT_REVIEW.md` - APPROVED) va OpenCode Peer Review (`reviews/2026-11-10/saved_opportunities/OPENCODE_REVIEW.md` - APPROVED).
 - `main` branch: Strictly muzlatilgan (`764fb98496fa40857acb07844fd09fcafa99b7d6`). Barcha o'zgarishlar va PRlar faqat `integration/r1-agent-collaboration` bazasiga yo'naltiriladi.
 - Alembic head: `0020_placement_exports` (130 runtime tables).
+- So'nggi topshiriq (FB-152 / Issue #152): Universitet portali talabalar amaliyot kundaliklarini ko'rib chiqish va baholash tizimi (`feature/152-university-academic-reviews`). API-105, API-106, API-107 Next.js BFF endpoints, AcademicReviewModal.tsx, va 8-bosqichli staging test paketi (`scripts/test_university_academic_reviews_staging.py`) muvaffaqiyatli topshirildi va 100% yashil o'tdi.
+
 
 

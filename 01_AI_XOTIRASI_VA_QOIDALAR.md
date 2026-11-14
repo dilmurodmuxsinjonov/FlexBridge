@@ -1239,3 +1239,37 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Mustaqil Victory Auditor: **VICTORY CONFIRMED**.
 
 
+## LOG-129 / University Academic Log Reviews & Evaluation Workflow (FB-152, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #152, Branch `feature/152-university-academic-reviews`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - `frontend/src/app/api/bff/university/log-revisions/[revision]/academic/route.ts`: API-106 contract proxy with strict session validation (`HTTP 401 AUTH_REQUIRED`) and detailed error handling.
+  - `frontend/src/app/api/bff/university/log-revisions/[revision]/academic-reviews/route.ts`: API-107 mutating contract proxy with CSRF origin validation (`HTTP 403 CSRF_ORIGIN_MISMATCH`), automatic `academic_assignment_id` resolution fallback, and idempotent submission headers.
+  - `frontend/src/lib/api.ts`: Added typed data models (`AcademicLogTaskEntry`, `AcademicLogRevisionDetail`, `SubmitAcademicReviewPayload`, `AcademicReviewResult`) and client methods (`fetchAcademicLogRevision`, `submitAcademicLogReview`).
+  - `frontend/src/components/AcademicReviewModal.tsx`: Anti-slop deep dark interface (`#09090b` / `#121214`), task minute breakdowns, workplace mentor feedback history, decision toggle (`REVIEWED` / `NEEDS_REVISION`), and comment submission.
+  - `frontend/src/app/university/page.tsx`: Integrated "Ko‘rib chiqish" action button on each review queue item with automatic table refreshing upon review approval.
+  - `scripts/test_university_academic_reviews_staging.py`: 700-line comprehensive automated verification suite executing against live Docker staging stack (PgBouncer port 5432, Next.js frontend port 3000):
+    1. Phase 1: Unauthenticated request rejection (HTTP 401 AUTH_REQUIRED).
+    2. Phase 2: Staging database fixture seeding via PgBouncer.
+    3. Phase 3: Teacher authentication via Next.js BFF (`/api/auth/login`).
+    4. Phase 4: Teacher review queue retrieval (API-105: `GET /api/bff/university/review-queue`).
+    5. Phase 5: Log revision detail inspection (API-106: `GET /api/bff/university/log-revisions/[revision]/academic`).
+    6. Phase 6: Academic review submission (API-107: `POST /api/bff/university/log-revisions/[revision]/academic-reviews`).
+    7. Phase 7: Cross-site CSRF rejection (HTTP 403 `CSRF_ORIGIN_MISMATCH`).
+    8. Phase 8: Idempotent resubmission and double-review rejection defense (HTTP 409).
+- **Independent Verification & Full Staging Regressions (0 Regressions)**:
+  - `scripts/test_university_academic_reviews_staging.py`: 8/8 phases green [PASS].
+  - `scripts/test_employer_kanban_staging.py`: 12/12 phases green [PASS].
+  - `scripts/test_candidate_applications_staging.py`: 12/12 phases green [PASS].
+  - `scripts/test_opportunity_application_staging.py`: 6/6 phases green [PASS].
+  - `scripts/test_bff_staging.py`: 8/8 phases green [PASS].
+  - `scripts/test_staging_e2e.py`: 5/5 phases green [PASS].
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint ...`: 0 errors / 0 warnings.
+  - `npm run build`: Turbopack 31/31 routes compiled cleanly.
+  - Forensic audit report: `reviews/2026-11-15/university_academic_reviews/UNIVERSITY_ACADEMIC_REVIEWS_REPORT.md`.
+
+
+
