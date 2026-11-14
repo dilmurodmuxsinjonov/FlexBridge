@@ -13,10 +13,10 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const navLinks = [
-    { href: "/", label: "E’lonlar", icon: Search, prototype: false },
-    { href: "/employer", label: "Ish beruvchi", icon: Briefcase, prototype: true },
-    { href: "/university", label: "Universitet", icon: Building2, prototype: true },
-    { href: "/operator", label: "Operator", icon: Lock, prototype: true },
+    { href: "/", label: "E’lonlar", icon: Search },
+    { href: "/employer", label: "Ish beruvchi", icon: Briefcase },
+    { href: "/university", label: "Universitet", icon: Building2 },
+    { href: "/operator", label: "Operator", icon: Lock },
   ];
 
   return (
@@ -34,7 +34,6 @@ export default function Navbar() {
             v1.4
           </span>
         </Link>
-
       </div>
 
       <nav aria-label="Asosiy bo‘limlar" className="order-3 flex w-full items-center gap-1 overflow-x-auto md:order-none md:w-auto">
@@ -46,18 +45,12 @@ export default function Navbar() {
               className={`inline-flex shrink-0 items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? "border border-primary/30 bg-primary/10 text-primary" : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"}`}>
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{item.label}</span>
-              {item.prototype && <span className="text-[10px] text-amber-300">Maket</span>}
             </Link>
           );
         })}
       </nav>
       <span className="hidden rounded border border-white/[0.08] px-2.5 py-1 text-[11px] text-zinc-400 lg:inline-flex">R1 sinov interfeysi</span>
     </header>
-    {pathname !== "/" && (
-      <p role="status" className="border-b border-amber-500/20 bg-amber-500/[0.08] px-4 py-2 text-center text-xs text-amber-200 md:px-8">
-        Bu bo‘lim maket. Undagi ma’lumotlar va amallar haqiqiy hisobingizga ulanmagan.
-      </p>
-    )}
     </>
   );
 }

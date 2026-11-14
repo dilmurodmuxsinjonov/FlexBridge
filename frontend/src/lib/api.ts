@@ -73,6 +73,84 @@ export interface SecurityAuditEvent {
   status_badge: "warning" | "verified" | "danger" | "info" | "neutral";
 }
 
+// ---------------------------------------------------------------------------
+// BFF & Server-Session Types (FB-140B)
+// ---------------------------------------------------------------------------
+
+export interface AuthUser {
+  user_id: string;
+  session_id: string;
+  roles: string[];
+}
+
+export type LoginResult =
+  | { ok: true; mfa_required?: false; user_id: string; roles: string[] }
+  | { ok: true; mfa_required: true; mfa_ticket: string; expires_in: number }
+  | { ok: false; error: string };
+
+export interface EmployerDashboardMetrics {
+  contract_id: "API-068";
+  organization_id: string;
+  metrics: {
+    opportunities: {
+      total: number;
+      published: number;
+      draft: number;
+      closed: number;
+      paused: number;
+    };
+    applications: {
+      total: number;
+      pending: number;
+      shortlisted: number;
+      interviewed: number;
+      offered: number;
+      accepted: number;
+      rejected: number;
+      withdrawn: number;
+    };
+    engagements: {
+      total: number;
+      active: number;
+      pending_start: number;
+      completed: number;
+      disputed: number;
+    };
+    interviews: {
+      total: number;
+      scheduled: number;
+      completed: number;
+      cancelled: number;
+      no_show: number;
+    };
+  };
+}
+
+export interface AcademicReviewQueueItem {
+  id: string;
+  daily_log_id: string;
+  placement_id: string;
+  institution_id: string;
+  purpose: string;
+  local_date: string;
+  revision: number;
+  submitted_at: string;
+  student_name: string;
+}
+
+export interface OperatorAuditEventItem {
+  id: string;
+  occurred_at: string;
+  actor_id: string;
+  session_id: string;
+  action: string;
+  object_type: string;
+  object_key: string;
+  before_digest: string | null;
+  after_digest: string | null;
+  reason: string | null;
+}
+
 type OpportunitySearch = {
   query?: string;
   region?: string;
@@ -152,4 +230,124 @@ export async function fetchOpportunities(params: OpportunitySearch = {}): Promis
     has_more: data.has_more,
     next_after: data.next_after,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Client BFF Methods
+// ---------------------------------------------------------------------------
+
+export async function loginUser(
+  destination: string,
+  password: string,
+  totp_code?: string
+): Promise<LoginResult> {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ destination, password, totp_code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 202) {
+    return {
+      ok: true,
+      mfa_required: true,
+      mfa_ticket: data.mfa_ticket,
+      expires_in: data.expires_in || 300,
+    };
+  }
+  if (!res.ok) {
+    return { ok: false, error: data.error || "LOGIN_FAILED" };
+  }
+  return {
+    ok: true,
+    user_id: data.user_id,
+    roles: data.roles || [],
+  };
+}
+
+export async function verifyMfa(mfa_ticket: string, code: string): Promise<LoginResult> {
+  const res = await fetch("/api/auth/mfa/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ mfa_ticket, code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { ok: false, error: data.error || "MFA_VERIFICATION_FAILED" };
+  }
+  return {
+    ok: true,
+    user_id: data.user_id,
+    roles: data.roles || [],
+  };
+}
+
+export async function logoutUser(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: { Accept: "application/json" },
+  }).catch(() => {});
+}
+
+export async function fetchAuthMe(): Promise<AuthUser | null> {
+  try {
+    const res = await fetch("/api/auth/me", {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.ok || !data.user) return null;
+    return data.user as AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchEmployerDashboard(
+  orgId: string
+): Promise<EmployerDashboardMetrics> {
+  const res = await fetch(`/api/bff/employer/dashboard?org=${encodeURIComponent(orgId)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || "DASHBOARD_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as EmployerDashboardMetrics;
+}
+
+export async function fetchUniversityReviewQueue(): Promise<AcademicReviewQueueItem[]> {
+  const res = await fetch("/api/bff/university/review-queue", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || "REVIEW_QUEUE_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as AcademicReviewQueueItem[];
+}
+
+export async function fetchOperatorAuditEvents(): Promise<OperatorAuditEventItem[]> {
+  const res = await fetch("/api/bff/operator/audit-events", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || "AUDIT_EVENTS_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as OperatorAuditEventItem[];
 }
