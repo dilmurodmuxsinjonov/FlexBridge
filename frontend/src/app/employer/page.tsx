@@ -12,8 +12,17 @@ import {
   LogIn,
   LogOut,
   AlertCircle,
+  Plus,
+  CheckCircle2,
 } from "lucide-react";
-import { fetchAuthMe, fetchEmployerDashboard, logoutUser, AuthUser, EmployerDashboardMetrics } from "@/lib/api";
+import {
+  fetchAuthMe,
+  fetchEmployerDashboard,
+  logoutUser,
+  createEmployerOpportunity,
+  AuthUser,
+  EmployerDashboardMetrics,
+} from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
 export default function EmployerPortal() {
@@ -26,6 +35,17 @@ export default function EmployerPortal() {
   const [dashboard, setDashboard] = useState<EmployerDashboardMetrics | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
+
+  // New opportunity creation state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createTitle, setCreateTitle] = useState("");
+  const [createKind, setCreateKind] = useState("PART_TIME_JOB");
+  const [createContract, setCreateContract] = useState("LABOR_PART_TIME");
+  const [createCompensation, setCreateCompensation] = useState("HOURLY");
+  const [createPay, setCreatePay] = useState("35000");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async (targetOrgId: string) => {
     if (!targetOrgId.trim()) return;
@@ -79,6 +99,36 @@ export default function EmployerPortal() {
     }
   };
 
+  const handleCreateOpportunity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orgId.trim()) {
+      setCreateError("Tashkilot ID (UUID) kiritilishi shart.");
+      return;
+    }
+    setIsCreating(true);
+    setCreateError(null);
+    setCreateSuccess(null);
+    try {
+      const payNum = Number(createPay) || 0;
+      await createEmployerOpportunity({
+        organization_id: orgId.trim(),
+        title: createTitle.trim(),
+        opportunity_kind: createKind,
+        contract_type: createContract,
+        compensation_type: createCompensation,
+        hourly_pay: createCompensation === "HOURLY" ? payNum : undefined,
+        stipend_amount: createCompensation === "STIPEND" ? payNum : undefined,
+      });
+      setCreateSuccess("E'lon muvaffaqiyatli qoralama (DRAFT) sifatida yaratildi!");
+      setCreateTitle("");
+      loadDashboard(orgId.trim());
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : "Yaratishda xatolik yuz berdi");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* AUTH STATUS & HEADER BAR */}
@@ -116,14 +166,28 @@ export default function EmployerPortal() {
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreateModalOpen(true);
+                    setCreateSuccess(null);
+                    setCreateError(null);
+                  }}
+                  className="px-3.5 py-2 rounded bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Yangi e’lon joylash</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="px-3.5 py-2 rounded bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Chiqish</span>
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
@@ -303,6 +367,163 @@ export default function EmployerPortal() {
         title="Ish Beruvchi Tizimiga Kirish"
         subtitle="Tashkilot HR yoki Rahbar hisob ma’lumotlaringizni kiriting"
       />
+
+      {/* CREATE OPPORTUNITY MODAL */}
+      {isCreateModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-opportunity-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-[#121214] p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <h2
+                id="create-opportunity-title"
+                className="font-heading text-lg font-bold text-white"
+              >
+                Yangi Vakansiya / E’lon Yaratish
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="rounded-lg p-1 text-zinc-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {createSuccess ? (
+              <div className="py-6 text-center">
+                <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" />
+                <h3 className="mt-4 text-base font-bold text-white">{createSuccess}</h3>
+                <p className="mt-2 text-xs text-zinc-400">
+                  E’lon qoralama (DRAFT) holatida saqlandi. Moderatsiyadan so‘ng e’lon qilinadi.
+                </p>
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setCreateSuccess(null);
+                    }}
+                    className="rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-white hover:bg-primary-hover"
+                  >
+                    Tushunarli
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateOpportunity} className="mt-4 space-y-4">
+                <div>
+                  <label htmlFor="create-title" className="block text-xs font-semibold text-zinc-300">
+                    Vakansiya / Lavozim nomi
+                  </label>
+                  <input
+                    id="create-title"
+                    type="text"
+                    required
+                    value={createTitle}
+                    onChange={(e) => setCreateTitle(e.target.value)}
+                    placeholder="masalan: Junior Backend Dasturchi"
+                    className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="create-kind" className="block text-xs font-semibold text-zinc-300">
+                      Imkoniyat turi
+                    </label>
+                    <select
+                      id="create-kind"
+                      value={createKind}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCreateKind(val);
+                        if (val === "PART_TIME_JOB") {
+                          setCreateContract("LABOR_PART_TIME");
+                        } else {
+                          setCreateContract("INTERNSHIP_AGREEMENT");
+                        }
+                      }}
+                      className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-2.5 text-xs text-zinc-200 focus:border-primary focus:outline-none"
+                    >
+                      <option value="PART_TIME_JOB">Yarim stavka ish</option>
+                      <option value="GENERAL_INTERNSHIP">Amaliyot / Stajirovka</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="create-comp" className="block text-xs font-semibold text-zinc-300">
+                      To‘lov formati
+                    </label>
+                    <select
+                      id="create-comp"
+                      value={createCompensation}
+                      onChange={(e) => setCreateCompensation(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-2.5 text-xs text-zinc-200 focus:border-primary focus:outline-none"
+                    >
+                      <option value="HOURLY">Soatbay to‘lov</option>
+                      <option value="STIPEND">Oylik stipendiya</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="create-pay" className="block text-xs font-semibold text-zinc-300">
+                    {createCompensation === "HOURLY" ? "Soatbay stavka (UZS / soat)" : "Oylik miqdor (UZS)"}
+                  </label>
+                  <input
+                    id="create-pay"
+                    type="number"
+                    min="1"
+                    required
+                    value={createPay}
+                    onChange={(e) => setCreatePay(e.target.value)}
+                    placeholder="35000"
+                    className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                {createError && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-rose-500/20 bg-rose-500/[0.05] p-3 text-xs text-rose-300"
+                  >
+                    {createError}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="rounded-lg border border-white/[0.1] px-4 py-2 text-xs font-semibold text-zinc-300 hover:border-zinc-500"
+                  >
+                    Bekor qilish
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating || !createTitle.trim()}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Yaratilmoqda...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-3.5 w-3.5" /> E’lonni yaratish
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

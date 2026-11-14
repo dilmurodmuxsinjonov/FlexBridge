@@ -3,6 +3,7 @@ import crypto from "crypto";
 
 export interface SessionData {
   token: string;
+  access_token?: string;
   user_id: string;
   roles: string[];
   expires_at: number;
@@ -77,6 +78,18 @@ export async function getSession(): Promise<SessionData | null> {
   const cookie = cookieStore.get(COOKIE_NAME);
   if (!cookie?.value) return null;
   return decryptSession(cookie.value);
+}
+
+/**
+ * Retrieves session from cookie and provides access_token alias for token.
+ */
+export async function getSessionFromCookie(): Promise<(SessionData & { access_token: string }) | null> {
+  const session = await getSession();
+  if (!session) return null;
+  return {
+    ...session,
+    access_token: session.token,
+  };
 }
 
 /**

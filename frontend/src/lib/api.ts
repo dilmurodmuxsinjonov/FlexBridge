@@ -351,3 +351,125 @@ export async function fetchOperatorAuditEvents(): Promise<OperatorAuditEventItem
   }
   return (data.items || []) as OperatorAuditEventItem[];
 }
+
+export interface OpportunityDetail {
+  contract_id: "API-005";
+  id: string;
+  organization_id: string;
+  kind: string;
+  status: string;
+  capacity: number;
+  occupied_count: number;
+  vacancies_available: number;
+  published_at: string | null;
+  expires_at: string | null;
+  closed_at: string | null;
+  revision: {
+    title: string;
+    description: string | null;
+    region: string | null;
+    work_mode: string | null;
+    eligibility: string | null;
+    contract_type: string | null;
+    is_paid: boolean;
+    salary_min: number | null;
+    salary_max: number | null;
+    currency: string;
+    salary_period: string | null;
+    salary_basis: string | null;
+    schedule_policy: string | null;
+  };
+  organization: {
+    id: string;
+    name: string;
+    status: string;
+    rating?: number | null;
+  };
+  skills: Array<{ id: string; name: string }>;
+  shifts: Array<{
+    id: string;
+    group_code: string;
+    weekday: number;
+    start_minute: number;
+    end_minute: number;
+    is_required: boolean;
+  }>;
+}
+
+export interface ApplicationSubmissionResult {
+  ok: boolean;
+  contract_id?: string;
+  application_id?: string;
+  error?: string;
+  message?: string;
+}
+
+export async function fetchOpportunityDetail(id: string): Promise<OpportunityDetail> {
+  const res = await fetch(`/api/bff/opportunities/${encodeURIComponent(id)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.error || "OPPORTUNITY_NOT_FOUND");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OpportunityDetail;
+}
+
+export async function submitOpportunityApplication(
+  id: string,
+  payload: { note?: string; enrollment_id?: string; proposed_slots?: string[] }
+): Promise<ApplicationSubmissionResult> {
+  const res = await fetch(`/api/bff/opportunities/${encodeURIComponent(id)}/apply`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "APPLICATION_FAILED");
+    (err as unknown as { status: number; code?: string }).status = res.status;
+    (err as unknown as { code?: string }).code = data.detail?.code || data.error;
+    throw err;
+  }
+  return {
+    ok: true,
+    contract_id: data.contract_id || "API-006",
+    application_id: data.id || data.application_id,
+  };
+}
+
+export async function createEmployerOpportunity(payload: {
+  organization_id: string;
+  title: string;
+  opportunity_kind: string;
+  contract_type: string;
+  compensation_type: string;
+  hourly_pay?: number | null;
+  stipend_amount?: number | null;
+  fee_terms_note?: string | null;
+}): Promise<Record<string, unknown>> {
+  const res = await fetch("/api/bff/employer/opportunities/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "CREATION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
