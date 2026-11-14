@@ -13,11 +13,10 @@ import {
   Award,
   Users,
   RefreshCw,
-  Clock,
   ShieldCheck,
   Send,
   UserCheck,
-  ChevronRight,
+  X,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -275,7 +274,7 @@ export default function UniversityPortal() {
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* HEADER BAR */}
-      <section className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-6 shadow-sm">
+      <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -311,7 +310,7 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 active:scale-[0.98]"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Chiqish</span>
@@ -320,7 +319,7 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>O‘qituvchi sifatida kirish</span>
@@ -385,7 +384,7 @@ export default function UniversityPortal() {
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-[#121214]/60 border border-white/[0.08] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+        <section className="w-full bg-surface-card/60 border border-white/[0.08] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
           <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <GraduationCap className="w-7 h-7" />
           </div>
@@ -400,7 +399,7 @@ export default function UniversityPortal() {
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg shadow-primary/25"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg shadow-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
           >
             <LogIn className="w-4 h-4" />
             <span>Tizimga kirish</span>
@@ -419,12 +418,12 @@ export default function UniversityPortal() {
           )}
 
           {isLoadingQueue ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <span className="text-xs">Akademik ko‘rib chiqish navbati yuklanmoqda...</span>
             </div>
           ) : queueItems.length === 0 ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-1" />
               <h3 className="text-sm font-semibold text-white">Ko‘rib chiqish navbati bo‘sh</h3>
               <p className="text-xs text-zinc-400 max-w-md">
@@ -432,7 +431,7 @@ export default function UniversityPortal() {
               </p>
             </div>
           ) : (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
               <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
                 <span className="text-xs font-semibold text-white">
                   Kutilayotgan kundaliklar ({queueItems.length} ta)
@@ -440,7 +439,7 @@ export default function UniversityPortal() {
                 <button
                   type="button"
                   onClick={loadQueue}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5"
+                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Yangilash</span>
@@ -479,7 +478,7 @@ export default function UniversityPortal() {
                       <button
                         type="button"
                         onClick={() => handleOpenReview(item)}
-                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20"
+                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                       >
                         <FileCheck className="w-3.5 h-3.5" />
                         <span>Ko‘rib chiqish</span>
@@ -504,12 +503,12 @@ export default function UniversityPortal() {
           )}
 
           {isLoadingAssignments ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <span className="text-xs">Biriktirilgan amaliyotlar yuklanmoqda...</span>
             </div>
           ) : assignments.length === 0 ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
               <BookOpen className="w-8 h-8 text-zinc-500 mb-1" />
               <h3 className="text-sm font-semibold text-white">Biriktirilgan amaliyotlar mavjud emas</h3>
               <p className="text-xs text-zinc-400 max-w-md">
@@ -517,7 +516,7 @@ export default function UniversityPortal() {
               </p>
             </div>
           ) : (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
               <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
                 <span className="text-xs font-semibold text-white">
                   Biriktirilgan amaliyotlar ({assignments.length} ta)
@@ -525,7 +524,7 @@ export default function UniversityPortal() {
                 <button
                   type="button"
                   onClick={loadAssignments}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5"
+                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Yangilash</span>
@@ -561,7 +560,7 @@ export default function UniversityPortal() {
                       <button
                         type="button"
                         onClick={() => handleOpenConclusionModal(assignment.placement_id, assignment.id)}
-                        className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20"
+                        className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                       >
                         <Award className="w-3.5 h-3.5" />
                         <span>Akademik Xulosa (API-108)</span>
@@ -586,12 +585,12 @@ export default function UniversityPortal() {
           )}
 
           {isLoadingCoord ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <span className="text-xs">Kafedra taqsimot navbati yuklanmoqda...</span>
             </div>
           ) : coordinatorQueue.length === 0 ? (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-1" />
               <h3 className="text-sm font-semibold text-white">Taqsimot navbati bo‘sh</h3>
               <p className="text-xs text-zinc-400 max-w-md">
@@ -599,7 +598,7 @@ export default function UniversityPortal() {
               </p>
             </div>
           ) : (
-            <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
               <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-white">
@@ -614,7 +613,7 @@ export default function UniversityPortal() {
                 <button
                   type="button"
                   onClick={loadCoordinatorQueue}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5"
+                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Yangilash</span>
@@ -647,7 +646,7 @@ export default function UniversityPortal() {
                       <button
                         type="button"
                         onClick={() => handleOpenNominateModal(item)}
-                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20"
+                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                       >
                         <UserCheck className="w-3.5 h-3.5" />
                         <span>O‘qituvchi tayinlash</span>
@@ -664,7 +663,7 @@ export default function UniversityPortal() {
       {/* PLACEMENT CONCLUSION MODAL (API-108) */}
       {isConclusionModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-lg bg-[#121214] border border-white/[0.1] rounded-xl shadow-2xl p-6 flex flex-col gap-5">
+          <div className="w-full max-w-lg bg-surface-card border border-white/[0.1] rounded-xl shadow-2xl p-6 flex flex-col gap-5">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2 text-white font-heading font-semibold text-base">
                 <Award className="w-5 h-5 text-primary" />
@@ -673,9 +672,10 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={() => setIsConclusionModalOpen(false)}
-                className="text-zinc-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-white/[0.05]"
+                aria-label="Yopish"
+                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -704,28 +704,28 @@ export default function UniversityPortal() {
                 )}
 
                 {/* Metrics Context Summary */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#18181b] p-3 rounded-lg border border-white/[0.06] text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-surface-container p-3 rounded-lg border border-white/[0.06] text-center">
                   <div className="flex flex-col">
                     <span className="text-[10px] text-zinc-400">Jami hisobotlar</span>
-                    <span className="text-sm font-semibold font-mono text-zinc-200">
+                    <span className="text-sm font-semibold font-mono tabular-nums text-zinc-200">
                       {conclusionContext?.log_count ?? 0}
                     </span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] text-zinc-400">Topshirilgan</span>
-                    <span className="text-sm font-semibold font-mono text-amber-300">
+                    <span className="text-sm font-semibold font-mono tabular-nums text-amber-300">
                       {conclusionContext?.submitted_count ?? 0}
                     </span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] text-zinc-400">Ko‘rib chiqilgan</span>
-                    <span className="text-sm font-semibold font-mono text-emerald-400">
+                    <span className="text-sm font-semibold font-mono tabular-nums text-emerald-400">
                       {conclusionContext?.reviewed_count ?? 0}
                     </span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] text-zinc-400">Qaytarilgan</span>
-                    <span className="text-sm font-semibold font-mono text-rose-400">
+                    <span className="text-sm font-semibold font-mono tabular-nums text-rose-400">
                       {conclusionContext?.needs_revision_count ?? 0}
                     </span>
                   </div>
@@ -750,7 +750,7 @@ export default function UniversityPortal() {
                     <button
                       type="button"
                       onClick={() => setConclusionDecision("ACADEMIC_REVIEW_COMPLETE")}
-                      className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                      className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 active:scale-[0.98] ${
                         conclusionDecision === "ACADEMIC_REVIEW_COMPLETE"
                           ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                           : "bg-surface border-white/[0.08] text-zinc-400 hover:text-white"
@@ -763,7 +763,7 @@ export default function UniversityPortal() {
                     <button
                       type="button"
                       onClick={() => setConclusionDecision("ACADEMIC_REVISION_REQUIRED")}
-                      className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                      className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-[0.98] ${
                         conclusionDecision === "ACADEMIC_REVISION_REQUIRED"
                           ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
                           : "bg-surface border-white/[0.08] text-zinc-400 hover:text-white"
@@ -784,12 +784,12 @@ export default function UniversityPortal() {
                     rows={4}
                     value={conclusionReason}
                     onChange={(e) => setConclusionReason(e.target.value)}
-                    placeholder="Talabaning amaliyot davomidagi faoliyati, kundaliklar sifati va o'zlashtirish darajasi bo'yicha yakuniy xulosa..."
-                    className="w-full bg-[#18181b] border border-white/[0.08] focus:border-primary rounded-lg p-3 text-xs text-white placeholder-zinc-500 focus:outline-none transition-all resize-none"
+                    placeholder="Talabaning amaliyot davomidagi faoliyati, kundaliklar sifati va o‘zlashtirish darajasi bo‘yicha yakuniy xulosa..."
+                    className="w-full bg-surface-container border border-white/[0.08] focus:border-primary rounded-lg p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all resize-none"
                   />
                   <div className="flex justify-between text-[10px] text-zinc-500">
                     <span>Minimal 1 ta belgi</span>
-                    <span className="font-mono">{conclusionReason.length} / 2000</span>
+                    <span className="font-mono tabular-nums">{conclusionReason.length} / 2000</span>
                   </div>
                 </div>
 
@@ -797,7 +797,7 @@ export default function UniversityPortal() {
                   <button
                     type="button"
                     onClick={() => setIsConclusionModalOpen(false)}
-                    className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                    className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                   >
                     Bekor qilish
                   </button>
@@ -805,7 +805,7 @@ export default function UniversityPortal() {
                     type="button"
                     disabled={isSubmittingConclusion || conclusionReason.trim().length < 1}
                     onClick={handleSubmitConclusion}
-                    className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-primary/20"
+                    className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                   >
                     {isSubmittingConclusion ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -824,7 +824,7 @@ export default function UniversityPortal() {
       {/* TEACHER NOMINATION MODAL (API-102) */}
       {isNominateModalOpen && nominatePlacement && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#121214] border border-white/[0.1] rounded-xl shadow-2xl p-6 flex flex-col gap-5">
+          <div className="w-full max-w-md bg-surface-card border border-white/[0.1] rounded-xl shadow-2xl p-6 flex flex-col gap-5">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2 text-white font-heading font-semibold text-base">
                 <UserCheck className="w-5 h-5 text-primary" />
@@ -833,9 +833,10 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={() => setIsNominateModalOpen(false)}
-                className="text-zinc-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-white/[0.05]"
+                aria-label="Yopish"
+                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -857,7 +858,7 @@ export default function UniversityPortal() {
                 </div>
               )}
 
-              <div className="p-3 bg-[#18181b] rounded-lg border border-white/[0.06] flex flex-col gap-1 text-xs">
+              <div className="p-3 bg-surface-container rounded-lg border border-white/[0.06] flex flex-col gap-1 text-xs">
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Talaba:</span>
                   <span className="font-semibold text-white">{nominatePlacement.student_name}</span>
@@ -875,9 +876,9 @@ export default function UniversityPortal() {
                 <select
                   value={selectedTeacherId}
                   onChange={(e) => setSelectedTeacherId(e.target.value)}
-                  className="w-full bg-[#18181b] border border-white/[0.08] focus:border-primary rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full bg-surface-container border border-white/[0.08] focus:border-primary rounded-lg p-2.5 text-xs text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                 >
-                  <option value="">O'qituvchini tanlang...</option>
+                  <option value="">O‘qituvchini tanlang...</option>
                   {teachersList.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.display_name}
@@ -886,7 +887,7 @@ export default function UniversityPortal() {
                 </select>
                 {teachersList.length === 0 && (
                   <span className="text-[11px] text-amber-400">
-                    Kafedrada faol akademik o'qituvchilar topilmadi.
+                    Kafedrada faol akademik o‘qituvchilar topilmadi.
                   </span>
                 )}
               </div>
@@ -895,7 +896,7 @@ export default function UniversityPortal() {
                 <button
                   type="button"
                   onClick={() => setIsNominateModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                 >
                   Bekor qilish
                 </button>
@@ -903,7 +904,7 @@ export default function UniversityPortal() {
                   type="button"
                   disabled={isSubmittingNominate || !selectedTeacherId}
                   onClick={handleSubmitNomination}
-                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-primary/20"
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
                 >
                   {isSubmittingNominate ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
