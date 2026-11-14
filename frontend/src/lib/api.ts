@@ -473,3 +473,208 @@ export async function createEmployerOpportunity(payload: {
   }
   return data as Record<string, unknown>;
 }
+
+// ---------------------------------------------------------------------------
+// Candidate Applications Types & Helpers (FB-148 / API-029, 039, 041, 044, 040)
+// ---------------------------------------------------------------------------
+
+export interface CandidateApplicationsSummary {
+  contract_id: "API-029";
+  candidate_id: string;
+  total_applications: number;
+  submitted: number;
+  under_review: number;
+  interview_scheduled: number;
+  interviews_total: number;
+  offered: number;
+  offers_total: number;
+  accepted: number;
+  rejected: number;
+  withdrawn: number;
+  expired: number;
+}
+
+export interface CandidateApplicationItem {
+  id: string;
+  opportunity_id: string;
+  status: "SUBMITTED" | "UNDER_REVIEW" | "INTERVIEW_SCHEDULED" | "OFFERED" | "ACCEPTED" | "REJECTED" | "WITHDRAWN" | "EXPIRED";
+  version: number;
+  created_at: string;
+  updated_at: string;
+  opportunity: {
+    id: string;
+    title: string;
+    organization_name: string;
+    work_mode: string | null;
+    contract_type: string | null;
+    status: string;
+  };
+  current_attempt: {
+    attempt_no: number;
+    submitted_at: string;
+    schedule_result: string | null;
+  } | null;
+}
+
+export interface CandidateApplicationsListResponse {
+  contract_id: "API-039";
+  items: CandidateApplicationItem[];
+  next_after: string | null;
+}
+
+export interface CandidateApplicationDetail {
+  contract_id: "API-041";
+  id: string;
+  candidate_id: string;
+  opportunity_id: string;
+  status: string;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  occupied_at: string | null;
+  released_at: string | null;
+  opportunity: {
+    id: string;
+    title: string | null;
+    organization_id: string | null;
+    organization_name: string | null;
+    work_mode: string | null;
+    contract_type: string | null;
+    status: string | null;
+  };
+  attempts: Array<{
+    id: string;
+    attempt_no: number;
+    revision_id: string;
+    enrollment_id: string | null;
+    profile_snapshot: Record<string, unknown> | null;
+    schedule_result: string | null;
+    matching_version: string | null;
+    proposed_slots: unknown[] | null;
+    submitted_at: string;
+  }>;
+  timeline: Array<{
+    id: string;
+    attempt_id: string | null;
+    actor_id: string;
+    from_status: string;
+    to_status: string;
+    reason: string | null;
+    occurred_at: string;
+  }>;
+  interview: {
+    id: string;
+    starts_at: string;
+    ends_at: string;
+    timezone: string;
+    mode: string;
+    location_or_link: string;
+    status: string;
+  } | null;
+  offer: {
+    id: string;
+    status: string;
+    terms_snapshot: Record<string, unknown> | null;
+    expires_at: string | null;
+    accepted_at: string | null;
+  } | null;
+}
+
+export async function fetchCandidateApplicationsSummary(): Promise<CandidateApplicationsSummary> {
+  const res = await fetch("/api/bff/candidate/applications/summary", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUMMARY_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateApplicationsSummary;
+}
+
+export async function fetchCandidateApplications(params?: {
+  status?: string;
+  limit?: number;
+  after?: string;
+}): Promise<CandidateApplicationsListResponse> {
+  const sp = new URLSearchParams();
+  if (params?.status) sp.set("status", params.status);
+  if (params?.limit) sp.set("limit", String(params.limit));
+  if (params?.after) sp.set("after", params.after);
+  const qs = sp.toString();
+
+  const res = await fetch(`/api/bff/candidate/applications${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "APPLICATIONS_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateApplicationsListResponse;
+}
+
+export async function fetchCandidateApplicationDetail(id: string): Promise<CandidateApplicationDetail> {
+  const res = await fetch(`/api/bff/candidate/applications/${encodeURIComponent(id)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "APPLICATION_DETAIL_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateApplicationDetail;
+}
+
+export async function withdrawCandidateApplication(
+  id: string,
+  reason?: string
+): Promise<{ ok: boolean; message?: string; status?: string }> {
+  const res = await fetch(`/api/bff/candidate/applications/${encodeURIComponent(id)}/withdraw`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ reason }),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "WITHDRAW_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return { ok: true, message: data.message, status: data.status };
+}
+
+export async function reapplyCandidateApplication(
+  id: string,
+  payload: { reason?: string; proposed_slots?: unknown[] }
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/candidate/applications/${encodeURIComponent(id)}/reapply`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "REAPPLY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
