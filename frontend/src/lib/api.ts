@@ -1502,3 +1502,168 @@ export async function saveCandidateAvailability(
   }
   return data as { ok: boolean; [key: string]: unknown };
 }
+
+// ---------------------------------------------------------------------------
+// University Placements, Conclusions & Nomination Types & Helpers (FB-160 / API-102, 103, 104, 108)
+// ---------------------------------------------------------------------------
+
+export interface TeacherAcademicAssignmentItem {
+  id: string;
+  placement_id: string;
+  institution_id: string;
+  assigned_at: string;
+  accepted_at: string | null;
+  student_name?: string;
+  organization_name?: string;
+  status?: string;
+}
+
+export interface AcademicDecisionContext {
+  ok: boolean;
+  contract_id: "API-108-CONTEXT";
+  placement_id: string;
+  academic_assignment_id: string;
+  terms_id: string;
+  version: number;
+  basis_digest: string;
+  log_count: number;
+  submitted_count: number;
+  reviewed_count: number;
+  needs_revision_count: number;
+  current_conclusion?: {
+    receipt?: Record<string, unknown>;
+    decision?: string;
+    concluded_at?: string;
+  } | null;
+  decision_eligible: boolean;
+}
+
+export interface CoordinatorAssignmentQueueItem {
+  id: string;
+  request_revision: number;
+  placement_id: string;
+  enrollment_id: string;
+  institution_id: string;
+  terms_id: string;
+  student_name: string;
+}
+
+export interface AcademicTeacherOption {
+  id: string;
+  display_name: string;
+}
+
+export async function fetchTeacherAcademicAssignments(limit = 50): Promise<TeacherAcademicAssignmentItem[]> {
+  const res = await fetch(`/api/bff/university/assignments?limit=${limit}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ASSIGNMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as TeacherAcademicAssignmentItem[];
+}
+
+export async function fetchPlacementDecisionContext(
+  placementId: string,
+  assignmentId?: string
+): Promise<AcademicDecisionContext> {
+  const sp = new URLSearchParams();
+  if (assignmentId) sp.set("academic_assignment_id", assignmentId);
+
+  const res = await fetch(`/api/bff/university/placements/${encodeURIComponent(placementId)}/conclusion-context?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_CONTEXT_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as AcademicDecisionContext;
+}
+
+export async function submitAcademicPlacementConclusion(
+  placementId: string,
+  payload: {
+    decision: "ACADEMIC_REVIEW_COMPLETE" | "ACADEMIC_REVISION_REQUIRED";
+    reason: string;
+    academic_assignment_id?: string;
+    terms_id?: string;
+    version?: number;
+    expected_basis_digest?: string;
+  }
+): Promise<{ ok: boolean; receipt?: Record<string, unknown> }> {
+  const res = await fetch(`/api/bff/university/placements/${encodeURIComponent(placementId)}/conclude`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUBMIT_CONCLUSION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; receipt?: Record<string, unknown> };
+}
+
+export async function fetchCoordinatorAssignmentQueue(
+  institutionId?: string
+): Promise<{ items: CoordinatorAssignmentQueueItem[]; teachers: AcademicTeacherOption[]; institution_id?: string }> {
+  const sp = new URLSearchParams();
+  if (institutionId) sp.set("institution_id", institutionId);
+
+  const res = await fetch(`/api/bff/university/assignment-queue?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_QUEUE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return {
+    items: (data.items || []) as CoordinatorAssignmentQueueItem[],
+    teachers: (data.teachers || []) as AcademicTeacherOption[],
+    institution_id: data.institution_id,
+  };
+}
+
+export async function assignTeacherToPlacement(
+  placementId: string,
+  payload: {
+    institution_id: string;
+    supervisor_id: string;
+    supervision_id: string;
+  }
+): Promise<{ ok: boolean; assignment?: Record<string, unknown> }> {
+  const res = await fetch(`/api/bff/university/placements/${encodeURIComponent(placementId)}/assign-teacher`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ASSIGN_TEACHER_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; assignment?: Record<string, unknown> };
+}
