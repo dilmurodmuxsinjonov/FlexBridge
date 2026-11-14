@@ -1133,3 +1133,182 @@ export async function submitDailyLog(logId: string): Promise<SubmitDailyLogResul
   }
   return data as SubmitDailyLogResult;
 }
+
+// ============================================================================
+// Operator Portal (Verification Cases, Break-Glass, Emergency Revocation)
+// ============================================================================
+
+export interface OperatorVerificationCaseItem {
+  id: string;
+  kind?: string;
+  entity_id?: string;
+  entity_type?: string;
+  revision?: number;
+  status?: string;
+  due_at?: string;
+  assigned_to_id?: string | null;
+  assigned_reviewer_id?: string | null;
+  organization_name?: string;
+  tax_id?: string;
+  institution_name?: string;
+}
+
+export interface OperatorVerificationCasesResponse {
+  ok: boolean;
+  contract_id: string;
+  items: OperatorVerificationCaseItem[];
+}
+
+export interface DecideVerificationCasePayload {
+  decision: "APPROVE" | "REJECT" | "NEEDS_INFO";
+  expected_revision: number;
+  reason: string;
+}
+
+export interface DecideVerificationCaseResult {
+  ok: boolean;
+  contract_id: string;
+  case_id?: string;
+  decision?: string;
+  status?: string;
+}
+
+export interface BreakGlassAccessPayload {
+  target_user_id: string;
+  role_code: string;
+  reason: string;
+  independent_approver_id: string;
+  duration_minutes: number;
+}
+
+export interface BreakGlassAccessResult {
+  ok: boolean;
+  contract_id: string;
+  grant_id?: string;
+  target_user_id?: string;
+  role_code?: string;
+  expires_at?: string;
+  duration_minutes?: number;
+  status?: string;
+}
+
+export interface EmergencyRevokeSessionsPayload {
+  reason: string;
+  incident_id?: string | null;
+}
+
+export interface EmergencyRevokeSessionsResult {
+  ok: boolean;
+  contract_id: string;
+  target_user_id?: string;
+  revoked_count?: number;
+  status?: string;
+}
+
+export async function fetchOperatorVerificationCases(params?: {
+  limit?: number;
+  unassigned?: boolean;
+}): Promise<OperatorVerificationCaseItem[]> {
+  const searchParams = new URLSearchParams();
+  if (params?.limit) searchParams.set("limit", String(params.limit));
+  if (params?.unassigned !== undefined) searchParams.set("unassigned", String(params.unassigned));
+  const qs = searchParams.toString();
+
+  const res = await fetch(`/api/bff/operator/verification-cases${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || "FETCH_CASES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as OperatorVerificationCaseItem[];
+}
+
+export async function claimVerificationCase(
+  caseId: string
+): Promise<{ ok: boolean; [key: string]: unknown }> {
+  const res = await fetch(`/api/bff/operator/verification-cases/${encodeURIComponent(caseId)}/claim`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CLAIM_CASE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; [key: string]: unknown };
+}
+
+export async function decideVerificationCase(
+  caseId: string,
+  payload: DecideVerificationCasePayload
+): Promise<DecideVerificationCaseResult> {
+  const res = await fetch(`/api/bff/operator/verification-cases/${encodeURIComponent(caseId)}/decide`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "DECIDE_CASE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as DecideVerificationCaseResult;
+}
+
+export async function requestBreakGlassAccess(
+  payload: BreakGlassAccessPayload
+): Promise<BreakGlassAccessResult> {
+  const res = await fetch(`/api/bff/operator/access-requests`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "BREAK_GLASS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as BreakGlassAccessResult;
+}
+
+export async function emergencyRevokeUserSessions(
+  userId: string,
+  payload: EmergencyRevokeSessionsPayload
+): Promise<EmergencyRevokeSessionsResult> {
+  const res = await fetch(`/api/bff/operator/users/${encodeURIComponent(userId)}/revoke-sessions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "REVOKE_SESSIONS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as EmergencyRevokeSessionsResult;
+}
