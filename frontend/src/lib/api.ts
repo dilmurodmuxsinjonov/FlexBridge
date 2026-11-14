@@ -678,3 +678,206 @@ export async function reapplyCandidateApplication(
   }
   return data as Record<string, unknown>;
 }
+
+// ---------------------------------------------------------------------------
+// Employer Applications & Kanban Workflow (FB-150 / API-082, 083, 084, 085, 086)
+// ---------------------------------------------------------------------------
+
+export interface EmployerOpportunityApplicationItem {
+  application_id: string;
+  opportunity_id: string;
+  candidate_id: string;
+  status: "SUBMITTED" | "REVIEWING" | "SHORTLISTED" | "INVITED_TO_INTERVIEW" | "OFFER_PENDING" | "OFFERED" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+  attempt_no: number;
+  headline?: string | null;
+  region?: string | null;
+  schedule_result?: string | null;
+  created_at: string;
+  updated_at: string;
+  submitted_at: string;
+}
+
+export interface EmployerOpportunityApplicationsResponse {
+  contract_id: "API-082";
+  opportunity_id: string;
+  items: EmployerOpportunityApplicationItem[];
+  limit: number;
+  has_more: boolean;
+  next_cursor: string | null;
+}
+
+export interface ApplicationTransitionResult {
+  contract_id: "API-083";
+  application_id: string;
+  from_status: string;
+  to_status: string;
+  version: number;
+  transitioned_at: string;
+}
+
+export interface ApplicationHRDetailResponse {
+  contract_id: "API-084";
+  application_id: string;
+  candidate_id: string;
+  opportunity_id: string;
+  status: string;
+  version: number;
+  attempt?: {
+    attempt_id: string | null;
+    attempt_no: number;
+    revision_id: string | null;
+    enrollment_id?: string | null;
+    profile_snapshot: Record<string, unknown>;
+    schedule_result: string | null;
+    matching_version: string;
+    proposed_slots?: unknown;
+    submitted_at: string;
+  } | null;
+  snapshot?: Record<string, unknown>;
+  events: Array<{
+    id: string;
+    from_status: string | null;
+    to_status: string;
+    reason: string | null;
+    occurred_at: string;
+  }>;
+}
+
+export interface ScheduleInterviewPayload {
+  starts_at: string;
+  ends_at: string;
+  mode?: "ONLINE" | "IN_PERSON";
+  location_or_link?: string;
+  timezone?: string;
+}
+
+export interface ScheduleInterviewResult {
+  contract_id: "API-085";
+  id: string;
+  application_id: string;
+  status: "SCHEDULED";
+  starts_at: string;
+  ends_at: string;
+  mode: string;
+  timezone: string;
+}
+
+export interface IssueOfferPayload {
+  expires_at?: string;
+  terms_snapshot?: Record<string, unknown>;
+  idempotency_key?: string;
+}
+
+export interface IssueOfferResult {
+  contract_id: "API-086";
+  id: string;
+  application_id: string;
+  status: "OFFERED";
+  expires_at?: string | null;
+  terms_snapshot?: Record<string, unknown> | null;
+}
+
+export async function fetchEmployerOpportunityApplications(
+  oppId: string,
+  params?: { status?: string; limit?: number; cursor?: string }
+): Promise<EmployerOpportunityApplicationsResponse> {
+  const sp = new URLSearchParams();
+  if (params?.status) sp.set("status", params.status);
+  if (params?.limit) sp.set("limit", String(params.limit));
+  if (params?.cursor) sp.set("cursor", params.cursor);
+  const qs = sp.toString();
+
+  const res = await fetch(`/api/bff/employer/opportunities/${encodeURIComponent(oppId)}/applications${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "FETCH_APPLICATIONS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as EmployerOpportunityApplicationsResponse;
+}
+
+export async function transitionApplicationStatus(
+  appId: string,
+  payload: { to_status: string; reason?: string }
+): Promise<ApplicationTransitionResult> {
+  const res = await fetch(`/api/bff/employer/applications/${encodeURIComponent(appId)}/transition`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "TRANSITION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ApplicationTransitionResult;
+}
+
+export async function fetchApplicationHRDetail(appId: string): Promise<ApplicationHRDetailResponse> {
+  const res = await fetch(`/api/bff/employer/applications/${encodeURIComponent(appId)}/hr`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "FETCH_HR_DETAIL_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ApplicationHRDetailResponse;
+}
+
+export async function scheduleApplicationInterview(
+  appId: string,
+  payload: ScheduleInterviewPayload
+): Promise<ScheduleInterviewResult> {
+  const res = await fetch(`/api/bff/employer/applications/${encodeURIComponent(appId)}/interviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "SCHEDULE_INTERVIEW_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ScheduleInterviewResult;
+}
+
+export async function issueApplicationOffer(
+  appId: string,
+  payload?: IssueOfferPayload
+): Promise<IssueOfferResult> {
+  const res = await fetch(`/api/bff/employer/applications/${encodeURIComponent(appId)}/offers`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "ISSUE_OFFER_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as IssueOfferResult;
+}
