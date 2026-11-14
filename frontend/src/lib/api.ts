@@ -1312,3 +1312,193 @@ export async function emergencyRevokeUserSessions(
   }
   return data as EmergencyRevokeSessionsResult;
 }
+
+// ============================================================================
+// Candidate Profile, Skills & Availability Management (FB-158)
+// ============================================================================
+
+export interface CandidateProfileSkill {
+  skill_id: string;
+  level: string;
+  code: string;
+  name_uz: string;
+  name_ru: string;
+  active: boolean;
+  verified?: boolean;
+}
+
+export interface CandidateProfileData {
+  id: string;
+  user_id: string;
+  headline?: string | null;
+  region?: string | null;
+  bio?: string | null;
+  experience_months?: number;
+  visibility?: string;
+  cv_file_id?: string | null;
+  skills: CandidateProfileSkill[];
+}
+
+export interface CatalogSkillItem {
+  id: string;
+  code: string;
+  name_uz: string;
+  name_ru: string;
+  category?: string;
+  active: boolean;
+}
+
+export interface AvailabilityRuleItem {
+  id?: string;
+  weekday: number; // 1 = Dushanba .. 7 = Yakshanba
+  start_minute: number;
+  end_minute: number;
+  valid_from?: string;
+  valid_to?: string | null;
+  timezone?: string;
+}
+
+export interface AvailabilityScheduleDay {
+  date: string;
+  weekday: number;
+  is_available: boolean;
+  intervals: Array<{ start_minute: number; end_minute: number }>;
+}
+
+export interface AvailabilityScheduleResponse {
+  ok: boolean;
+  contract_id: string;
+  rules?: AvailabilityRuleItem[];
+  days?: AvailabilityScheduleDay[];
+}
+
+export interface UpdateCandidateProfilePayload {
+  headline?: string;
+  region?: string;
+  bio?: string | null;
+  experience_months?: number;
+}
+
+export interface UpdateCandidateSkillsPayload {
+  skills?: Array<{ skill_id: string; level: string }>;
+  remove_skill_ids?: string[];
+}
+
+export async function fetchCandidateProfile(): Promise<CandidateProfileData> {
+  const res = await fetch(`/api/bff/candidate/profile`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_PROFILE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data.profile as CandidateProfileData;
+}
+
+export async function updateCandidateProfile(
+  payload: UpdateCandidateProfilePayload
+): Promise<CandidateProfileData> {
+  const res = await fetch(`/api/bff/candidate/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "UPDATE_PROFILE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateProfileData;
+}
+
+export async function fetchCatalogSkills(q = ""): Promise<CatalogSkillItem[]> {
+  const sp = new URLSearchParams();
+  if (q) sp.set("q", q);
+  sp.set("limit", "100");
+
+  const res = await fetch(`/api/bff/candidate/skills?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_SKILLS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as CatalogSkillItem[];
+}
+
+export async function updateCandidateSkills(
+  payload: UpdateCandidateSkillsPayload
+): Promise<{ ok: boolean; [key: string]: unknown }> {
+  const res = await fetch(`/api/bff/candidate/skills`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "UPDATE_SKILLS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; [key: string]: unknown };
+}
+
+export async function fetchCandidateAvailability(
+  fromDate?: string,
+  days = 28
+): Promise<AvailabilityScheduleResponse> {
+  const sp = new URLSearchParams();
+  if (fromDate) sp.set("from_date", fromDate);
+  sp.set("days", String(days));
+
+  const res = await fetch(`/api/bff/candidate/availability?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_AVAILABILITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as AvailabilityScheduleResponse;
+}
+
+export async function saveCandidateAvailability(
+  rules: AvailabilityRuleItem[]
+): Promise<{ ok: boolean; [key: string]: unknown }> {
+  const res = await fetch(`/api/bff/candidate/availability`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ rules }),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SAVE_AVAILABILITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; [key: string]: unknown };
+}
