@@ -84,16 +84,19 @@ def log(phase: str, message: str, status: str = "INFO"):
     print(f"[{timestamp}] [{phase}] [{status}] {message}")
 
 
-def make_pdf(size: int = 100, comment: bytes | None = None) -> bytes:
-    """Generate a syntactically valid PDF in-memory, optionally embedding comment bytes."""
+def make_pdf(size: int = 100, stream_payload: bytes | None = None) -> bytes:
+    """Generate a syntactically valid PDF in-memory, optionally embedding a stream payload."""
     writer = PdfWriter()
     writer.add_blank_page(width=size, height=size)
+    if stream_payload:
+        from pypdf.generic import DecodedStreamObject
+
+        stream = DecodedStreamObject()
+        stream.set_data(stream_payload)
+        writer._add_object(stream)
     buf = io.BytesIO()
     writer.write(buf)
-    data = buf.getvalue()
-    if comment:
-        data = data + b"\n% " + comment + b"\n"
-    return data
+    return buf.getvalue()
 
 
 # Standard EICAR antivirus test signature
@@ -369,7 +372,7 @@ def phase_4_clean_file_lifecycle(client: httpx.Client, access_token: str) -> str
 def phase_5_eicar_quarantine(client: httpx.Client, access_token: str) -> None:
     log("PHASE 5", "Starting EICAR Malware Quarantine Verification...")
 
-    eicar_pdf = make_pdf(size=100, comment=EICAR_SIGNATURE)
+    eicar_pdf = make_pdf(size=100, stream_payload=EICAR_SIGNATURE)
     pdf_size = len(eicar_pdf)
     headers = {"Authorization": f"Bearer {access_token}"}
 
