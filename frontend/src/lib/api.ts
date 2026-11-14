@@ -977,3 +977,159 @@ export async function submitAcademicLogReview(
   }
   return data as AcademicReviewResult;
 }
+
+// ---------------------------------------------------------------------------
+// Candidate Internship Daily Logs (API-030, API-053, API-054, API-056)
+// ---------------------------------------------------------------------------
+
+export interface CandidatePlacementItem {
+  id: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  academic_track: boolean;
+  opportunity_id?: string;
+  opportunity_title?: string;
+  organization_id?: string;
+  organization_name?: string;
+  created_at: string;
+  current_terms_id?: string;
+}
+
+export interface CandidatePlacementsResponse {
+  contract_id: string;
+  items: CandidatePlacementItem[];
+  next_after?: string | null;
+}
+
+export interface DailyLogTaskItem {
+  id?: string;
+  title: string;
+  minutes: number;
+  start_minute?: number | null;
+  end_minute?: number | null;
+}
+
+export interface DailyLogItem {
+  id: string;
+  local_date: string;
+  placement_id: string;
+  current_revision_id: string;
+  revision: number;
+  day_type: "WORKED" | "ABSENT";
+  summary: string;
+  total_minutes: number;
+  status: "DRAFT" | "SUBMITTED" | "REVIEWED" | "NEEDS_REVISION";
+  submitted_at?: string | null;
+  tasks?: DailyLogTaskItem[];
+  workplace_reviews?: Array<{ decision: string; comment?: string; decided_at: string }>;
+  academic_reviews?: Array<{ decision: string; comment?: string; decided_at: string }>;
+}
+
+export interface PlacementLogsResponse {
+  items: DailyLogItem[];
+  total: number;
+  page?: number;
+  page_size?: number;
+}
+
+export interface SaveDraftDailyLogPayload {
+  day_type?: "WORKED" | "ABSENT";
+  summary_text?: string;
+  total_minutes?: number;
+  tasks?: Array<{
+    title: string;
+    minutes: number;
+    start_minute?: number;
+    end_minute?: number;
+  }>;
+}
+
+export interface SubmitDailyLogResult {
+  contract_id: string;
+  id: string;
+  placement_id: string;
+  local_date: string;
+  status: "SUBMITTED";
+  [key: string]: unknown;
+}
+
+export async function fetchCandidatePlacements(): Promise<CandidatePlacementsResponse> {
+  const res = await fetch("/api/bff/candidate/placements", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_PLACEMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidatePlacementsResponse;
+}
+
+export async function fetchPlacementLogs(
+  placementId: string,
+  params?: { from_date?: string; to_date?: string; status?: string }
+): Promise<PlacementLogsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.from_date) searchParams.set("from_date", params.from_date);
+  if (params?.to_date) searchParams.set("to_date", params.to_date);
+  if (params?.status) searchParams.set("status", params.status);
+  const qs = searchParams.toString();
+
+  const res = await fetch(`/api/bff/candidate/placements/${encodeURIComponent(placementId)}/logs${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_LOGS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as PlacementLogsResponse;
+}
+
+export async function saveDraftDailyLog(
+  placementId: string,
+  date: string,
+  payload: SaveDraftDailyLogPayload
+): Promise<DailyLogItem> {
+  const res = await fetch(`/api/bff/candidate/placements/${encodeURIComponent(placementId)}/logs/${encodeURIComponent(date)}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "SAVE_DRAFT_LOG_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as DailyLogItem;
+}
+
+export async function submitDailyLog(logId: string): Promise<SubmitDailyLogResult> {
+  const res = await fetch(`/api/bff/candidate/logs/${encodeURIComponent(logId)}/submit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.message || data.error || "SUBMIT_DAILY_LOG_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as SubmitDailyLogResult;
+}
