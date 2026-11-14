@@ -1,18 +1,30 @@
 export interface Opportunity {
   id: string;
+  organization_id: string;
+  organization_name: string;
+  organization_region: string | null;
   title: string;
-  company_name: string;
-  company_code: string;
-  accreditation_number: string;
-  location: string;
-  salary_range: string;
-  shift_time: string;
-  compatibility_score: number;
-  available_seats: number;
-  target_universities: string;
-  work_mode: "0.5 stavka" | "Akademik amaliyot" | "Gibrid" | "Remote";
-  verified: boolean;
-  tags: string[];
+  description: string | null;
+  region: string | null;
+  kind: string;
+  work_mode: string | null;
+  contract_type: string | null;
+  is_paid: boolean;
+  salary_min: number | null;
+  salary_max: number | null;
+  currency: string;
+  schedule_policy: string | null;
+  capacity: number;
+  occupied_count: number;
+  vacancies_available: number;
+  published_at: string | null;
+  expires_at: string | null;
+}
+
+export interface OpportunityPage {
+  items: Opportunity[];
+  has_more: boolean;
+  next_after: string | null;
 }
 
 export interface CandidateApplication {
@@ -61,91 +73,83 @@ export interface SecurityAuditEvent {
   status_badge: "warning" | "verified" | "danger" | "info" | "neutral";
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+type OpportunitySearch = {
+  query?: string;
+  region?: string;
+  is_paid?: boolean;
+  after?: string;
+  signal?: AbortSignal;
+};
 
-export async function fetchOpportunities(params?: { q?: string; region?: string }): Promise<Opportunity[]> {
-  try {
-    const url = new URL(`${API_BASE_URL}/opportunities`);
-    if (params?.q) url.searchParams.append("q", params.q);
-    const res = await fetch(url.toString(), {
-      headers: { "Content-Type": "application/json" },
-      next: { revalidate: 30 },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.items) && data.items.length > 0) {
-        return data.items;
-      }
-    }
-  } catch {
-    // Graceful fallback to verified canonical mock
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNullableString(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
+function isNullableNumber(value: unknown): value is number | null {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+function isOpportunity(value: unknown): value is Opportunity {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.organization_id === "string" &&
+    typeof value.title === "string" &&
+    typeof value.organization_name === "string" &&
+    isNullableString(value.organization_region) &&
+    isNullableString(value.description) &&
+    isNullableString(value.region) &&
+    typeof value.kind === "string" &&
+    isNullableString(value.work_mode) &&
+    isNullableString(value.contract_type) &&
+    typeof value.is_paid === "boolean" &&
+    isNullableNumber(value.salary_min) &&
+    isNullableNumber(value.salary_max) &&
+    typeof value.currency === "string" &&
+    isNullableString(value.schedule_policy) &&
+    Number.isInteger(value.capacity) &&
+    Number.isInteger(value.occupied_count) &&
+    Number.isInteger(value.vacancies_available) &&
+    (value.vacancies_available as number) >= 0 &&
+    isNullableString(value.published_at) &&
+    isNullableString(value.expires_at)
+  );
+}
+
+export async function fetchOpportunities(params: OpportunitySearch = {}): Promise<OpportunityPage> {
+  const query = new URLSearchParams({ limit: "12" });
+  if (params.query) query.set("query", params.query);
+  if (params.region) query.set("region", params.region);
+  if (params.is_paid !== undefined) query.set("is_paid", String(params.is_paid));
+  if (params.after) query.set("after", params.after);
+
+  const response = await fetch(`/api/backend/opportunities?${query}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    signal: params.signal,
+  });
+  if (!response.ok) throw new Error("OPPORTUNITIES_REQUEST_FAILED");
+
+  const data: unknown = await response.json();
+  if (
+    !isRecord(data) ||
+    data.contract_id !== "API-001" ||
+    !Array.isArray(data.items) ||
+    !data.items.every(isOpportunity) ||
+    typeof data.has_more !== "boolean" ||
+    (data.next_after !== null && typeof data.next_after !== "string") ||
+    (data.has_more && !data.next_after)
+  ) {
+    throw new Error("OPPORTUNITIES_RESPONSE_INVALID");
   }
-
-  // Canonical FlexBridge Opportunities
-  return [
-    {
-      id: "opp-001",
-      title: "Junior Frontend Developer (Vue / React)",
-      company_name: "Uzum Technologies",
-      company_code: "UZ",
-      accreditation_number: "UZ-448",
-      location: "Toshkent sh. (Yashnobod)",
-      salary_range: "4,500,000 - 6,000,000 UZS",
-      shift_time: "14:30 - 18:30 (Darsdan keyin)",
-      compatibility_score: 98,
-      available_seats: 2,
-      target_universities: "TATU, Inha, Amity 3-4 kurslar uchun tasdiqlangan kvota",
-      work_mode: "0.5 stavka",
-      verified: true,
-      tags: ["React", "TypeScript", "Tailwind CSS", "Git"],
-    },
-    {
-      id: "opp-002",
-      title: "SMM & Kontent Kopirayter",
-      company_name: "Korzinka Bosh Ofisi",
-      company_code: "KZ",
-      accreditation_number: "KZ-102",
-      location: "Toshkent sh. (Mirobod tumani)",
-      salary_range: "3,200,000 UZS / oy",
-      shift_time: "Moslashuvchan 20 soat / hafta",
-      compatibility_score: 92,
-      available_seats: 4,
-      target_universities: "O'zDJTU, O'zMU talabalari uchun tasdiqlangan",
-      work_mode: "Gibrid",
-      verified: true,
-      tags: ["Kopirayting", "SMM", "Kreativ", "Gibrid"],
-    },
-    {
-      id: "opp-003",
-      title: "Moliya va Audit Amaliyotchisi (Intern)",
-      company_name: "Kapitalbank ATB",
-      company_code: "KB",
-      accreditation_number: "KB-771",
-      location: "Toshkent sh. (Sayilgoh filiali)",
-      salary_range: "3,800,000 UZS / oy",
-      shift_time: "09:00 - 13:00 (Ertalabki smena)",
-      compatibility_score: 89,
-      available_seats: 1,
-      target_universities: "TDIU, Jahon Iqtisodiyoti 3-4 kurs talabalari uchun",
-      work_mode: "Akademik amaliyot",
-      verified: true,
-      tags: ["Audit", "IFRS", "Excel", "Bank ishi"],
-    },
-    {
-      id: "opp-004",
-      title: "Data Analyst Intern (SQL & Python)",
-      company_name: "Payme (Inspire Group)",
-      company_code: "PM",
-      accreditation_number: "PM-314",
-      location: "Masofaviy / Toshkent",
-      salary_range: "5,000,000 UZS / oy",
-      shift_time: "Masofaviy (Remote) • Erkin grafik (20s/hafta)",
-      compatibility_score: 95,
-      available_seats: 3,
-      target_universities: "Barcha IT va Matematika yo'nalishlari talabalari",
-      work_mode: "Remote",
-      verified: true,
-      tags: ["Python", "PostgreSQL", "Pandas", "Metabase"],
-    },
-  ];
+  return {
+    items: data.items,
+    has_more: data.has_more,
+    next_after: data.next_after,
+  };
 }
