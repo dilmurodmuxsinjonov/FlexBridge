@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/server/session";
 
 const backendInternalUrl = (process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getSessionFromCookie();
     if (!session || !session.access_token) {

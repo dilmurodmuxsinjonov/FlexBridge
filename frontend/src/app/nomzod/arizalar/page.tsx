@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   FileText,
@@ -122,20 +122,50 @@ export default function CandidateApplicationsPage() {
   const [isReapplying, setIsReapplying] = useState(false);
   const [reapplyError, setReapplyError] = useState<string | null>(null);
 
-  const [, startTransition] = useTransition();
-
-  // Check authentication on mount
+  // Synchronize authentication and application data
   useEffect(() => {
-    fetchAuthMe()
-      .then((curr: AuthUser | null) => {
+    let active = true;
+
+    async function init() {
+      try {
+        const curr = await fetchAuthMe();
+        if (!active) return;
         setUser(curr);
         setAuthChecked(true);
-      })
-      .catch(() => {
+
+        if (curr) {
+          try {
+            const [sumData, listData] = await Promise.all([
+              fetchCandidateApplicationsSummary(),
+              fetchCandidateApplications(activeTab !== "ALL" ? { status: activeTab } : undefined),
+            ]);
+            if (active) {
+              setSummary(sumData);
+              setApplications(listData.items || []);
+            }
+          } catch (err: unknown) {
+            if (active) {
+              setError(err instanceof Error ? err.message : "Ma'lumotlarni yuklashda xatolik");
+            }
+          }
+        }
+      } catch {
+        if (!active) return;
         setUser(null);
         setAuthChecked(true);
-      });
-  }, []);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    init();
+
+    return () => {
+      active = false;
+    };
+  }, [activeTab]);
 
   const loadData = async (filterStatus?: string) => {
     setIsLoading(true);
@@ -154,14 +184,6 @@ export default function CandidateApplicationsPage() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (authChecked && user) {
-      loadData(activeTab);
-    } else if (authChecked && !user) {
-      setIsLoading(false);
-    }
-  }, [authChecked, user, activeTab]);
 
   const handleTabChange = (tab: FilterTab) => {
     setActiveTab(tab);
