@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building2,
   Lock,
+  FileText,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -14,6 +15,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "E’lonlar", icon: Search },
+    { href: "/nomzod/arizalar", label: "Arizalarim", icon: FileText },
     { href: "/employer", label: "Ish beruvchi", icon: Briefcase },
     { href: "/university", label: "Universitet", icon: Building2 },
     { href: "/operator", label: "Operator", icon: Lock },
