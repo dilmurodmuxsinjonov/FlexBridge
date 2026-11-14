@@ -138,6 +138,65 @@ export interface AcademicReviewQueueItem {
   student_name: string;
 }
 
+export interface AcademicLogTaskEntry {
+  id: string;
+  plan_task_id: string | null;
+  result_text: string;
+  minutes: number;
+  code: string | null;
+  title: string | null;
+}
+
+export interface AcademicLogRevisionDetail {
+  id: string;
+  revision: number;
+  terms_id: string;
+  day_type: string;
+  summary: string;
+  total_minutes: number;
+  submitted_at: string;
+  daily_log_id: string;
+  local_date: string;
+  placement_id: string;
+  placement_status: string;
+  is_current_revision: boolean;
+  institution_id: string;
+  purpose: string;
+  terms_version: number;
+  tasks: AcademicLogTaskEntry[];
+  workplace_reviews: Array<{
+    id: string;
+    mentor_assignment_id?: string;
+    decision: string;
+    comment: string;
+    decided_at: string;
+  }>;
+  academic_reviews: Array<{
+    id: string;
+    academic_assignment_id?: string;
+    decision: string;
+    comment: string;
+    decided_at: string;
+  }>;
+}
+
+export interface SubmitAcademicReviewPayload {
+  academic_assignment_id?: string;
+  decision: "REVIEWED" | "NEEDS_REVISION";
+  comment?: string;
+  idempotency_key?: string;
+}
+
+export interface AcademicReviewResult {
+  id: string;
+  revision_id: string;
+  placement_id: string;
+  academic_assignment_id: string;
+  decision: string;
+  comment: string;
+  decided_at: string;
+}
+
 export interface OperatorAuditEventItem {
   id: string;
   occurred_at: string;
@@ -880,4 +939,41 @@ export async function issueApplicationOffer(
     throw err;
   }
   return data as IssueOfferResult;
+}
+
+export async function fetchAcademicLogRevision(revisionId: string): Promise<AcademicLogRevisionDetail> {
+  const res = await fetch(`/api/bff/university/log-revisions/${encodeURIComponent(revisionId)}/academic`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.detail || data.message || data.error || "FETCH_REVISION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as AcademicLogRevisionDetail;
+}
+
+export async function submitAcademicLogReview(
+  revisionId: string,
+  payload: SubmitAcademicReviewPayload
+): Promise<AcademicReviewResult> {
+  const res = await fetch(`/api/bff/university/log-revisions/${encodeURIComponent(revisionId)}/academic-reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.detail?.message || data.detail || data.message || data.error || "SUBMIT_ACADEMIC_REVIEW_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as AcademicReviewResult;
 }

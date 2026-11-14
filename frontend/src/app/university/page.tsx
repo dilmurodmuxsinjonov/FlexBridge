@@ -8,9 +8,11 @@ import {
   Loader2,
   LogIn,
   LogOut,
+  FileCheck,
 } from "lucide-react";
 import { fetchAuthMe, fetchUniversityReviewQueue, logoutUser, AuthUser, AcademicReviewQueueItem } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import AcademicReviewModal from "@/components/AcademicReviewModal";
 
 export default function UniversityPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -20,6 +22,9 @@ export default function UniversityPortal() {
   const [queueItems, setQueueItems] = useState<AcademicReviewQueueItem[]>([]);
   const [isLoadingQueue, setIsLoadingQueue] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
+
+  const [selectedReviewItem, setSelectedReviewItem] = useState<AcademicReviewQueueItem | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const loadQueue = useCallback(async () => {
     setIsLoadingQueue(true);
@@ -55,6 +60,13 @@ export default function UniversityPortal() {
     setCurrentUser(null);
     setQueueItems([]);
     setQueueError(null);
+    setIsReviewModalOpen(false);
+    setSelectedReviewItem(null);
+  };
+
+  const handleOpenReview = (item: AcademicReviewQueueItem) => {
+    setSelectedReviewItem(item);
+    setIsReviewModalOpen(true);
   };
 
   const handleLoginSuccess = (user: AuthUser) => {
@@ -208,10 +220,18 @@ export default function UniversityPortal() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
                         Ko‘rib chiqish kutilmoqda
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReview(item)}
+                        className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20"
+                      >
+                        <FileCheck className="w-3.5 h-3.5" />
+                        <span>Ko‘rib chiqish</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -220,6 +240,21 @@ export default function UniversityPortal() {
           )}
         </div>
       )}
+
+      {/* ACADEMIC REVIEW MODAL */}
+      <AcademicReviewModal
+        key={selectedReviewItem?.id || "empty-review-modal"}
+        isOpen={isReviewModalOpen}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setSelectedReviewItem(null);
+        }}
+        revisionId={selectedReviewItem?.id || null}
+        studentName={selectedReviewItem?.student_name}
+        onSuccess={() => {
+          loadQueue();
+        }}
+      />
 
       {/* LOGIN MODAL */}
       <AuthModal
