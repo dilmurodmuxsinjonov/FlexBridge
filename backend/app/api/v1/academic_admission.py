@@ -9,6 +9,7 @@ from app.services.academic_views import academic_view_service as views
 from app.services.academic_records import academic_record_service as records
 from app.services.academic_reviews import academic_review_service as reviews
 from app.services.university_directory import university_directory_service
+from app.services.university_timetable import university_timetable_service
 from app.api.v1.placement_admission import TermsRequest
 
 router=APIRouter(prefix='/api/v1',tags=['academic-admission'])
@@ -169,4 +170,64 @@ def put_institution_directory_profile(inst:UUID,payload:InstitutionDirectoryInpu
 @router.post('/institutions/{inst}/academic-agreements',status_code=201)
 def create_institution_agreement(inst:UUID,payload:PartnerAgreementCreateInput,actor:ActorContext=Depends(require_actor_context)):
     return university_directory_service.create_partner_agreement(actor,str(inst),payload.model_dump())
+
+
+class TimetableManualSaveInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    mode:Literal['REPLACE','APPEND','DELETE_SLOT','MERGE_GROUP']='REPLACE'
+    slots:list[dict]|None=None
+    slot:dict|None=None
+    slot_id:str|None=None
+    group_code:str|None=None
+    academic_semester:str|None=None
+    commute_buffer_minutes:int|None=Field(default=30,ge=0,le=120)
+    sync_student_availability:bool=True
+
+
+class TimetableTemplateImportInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    format:Literal['CSV','JSON']='CSV'
+    content:str|None=Field(default=None,max_length=5_000_000)
+    content_base64:str|None=Field(default=None,max_length=7_000_000)
+    replace_existing:bool=True
+    academic_semester:str|None=None
+    commute_buffer_minutes:int|None=Field(default=30,ge=0,le=120)
+    sync_student_availability:bool=True
+
+
+@router.get('/institutions/{inst}/timetables')
+def get_institution_timetable(
+    inst:UUID,
+    group_code:str|None=Query(default=None,max_length=60),
+    actor:ActorContext=Depends(require_actor_context),
+):
+    return university_timetable_service.get_timetable(actor,str(inst),group_code=group_code)
+
+
+@router.put('/institutions/{inst}/timetables')
+def put_institution_timetable(
+    inst:UUID,
+    payload:TimetableManualSaveInput,
+    actor:ActorContext=Depends(require_actor_context),
+):
+    return university_timetable_service.save_manual_timetable(actor,str(inst),payload.model_dump(exclude_unset=True))
+
+
+@router.get('/institutions/{inst}/timetables/template')
+def get_institution_timetable_template(
+    inst:UUID,
+    format:Literal['CSV','JSON']=Query(default='CSV'),
+    actor:ActorContext=Depends(require_actor_context),
+):
+    return university_timetable_service.get_template_specification(actor,str(inst),template_format=format)
+
+
+@router.post('/institutions/{inst}/timetables/import',status_code=201)
+def import_institution_timetable(
+    inst:UUID,
+    payload:TimetableTemplateImportInput,
+    actor:ActorContext=Depends(require_actor_context),
+):
+    return university_timetable_service.import_timetable_from_template(actor,str(inst),payload.model_dump(exclude_unset=True))
+
 
