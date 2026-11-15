@@ -31,8 +31,10 @@ import {
   fetchPlacementLogs,
   saveDraftDailyLog,
   submitDailyLog,
+  saveStandardizedDiary,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 
 export default function CandidateKundalikPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -52,6 +54,15 @@ export default function CandidateKundalikPage() {
   const [tasks, setTasks] = useState<Array<{ title: string; minutes: number }>>([
     { title: "Kafedra va amaliyot rejasi bo'yicha vazifalar", minutes: 240 },
   ]);
+
+  // Standardized Uzbek OTM daily entry fields
+  const [workStartTime, setWorkStartTime] = useState("09:00");
+  const [workEndTime, setWorkEndTime] = useState("18:00");
+  const [departmentUnit, setDepartmentUnit] = useState("");
+  const [toolsUsed, setToolsUsed] = useState("");
+  const [skillsPracticed, setSkillsPracticed] = useState("");
+  const [outcomeArtifact, setOutcomeArtifact] = useState("");
+  const [safetyInstructed, setSafetyInstructed] = useState(true);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -179,7 +190,7 @@ export default function CandidateKundalikPage() {
         return;
       }
 
-      await saveDraftDailyLog(selectedPlacement.id, selectedDate, {
+      const savedDraft = await saveDraftDailyLog(selectedPlacement.id, selectedDate, {
         day_type: dayType,
         summary_text: summaryText,
         total_minutes: totalCalculatedMinutes,
@@ -188,6 +199,20 @@ export default function CandidateKundalikPage() {
           minutes: t.minutes,
         })),
       });
+
+      await saveStandardizedDiary(selectedPlacement.id, {
+        daily_entry: {
+          daily_log_id: savedDraft?.id,
+          log_date: selectedDate,
+          work_start_time: workStartTime,
+          work_end_time: workEndTime,
+          department_unit: departmentUnit,
+          tools_used: toolsUsed,
+          skills_practiced: skillsPracticed,
+          outcome_artifact: outcomeArtifact,
+          safety_instructed: safetyInstructed,
+        },
+      }).catch(() => null);
 
       setNotification({
         type: "success",
@@ -219,6 +244,20 @@ export default function CandidateKundalikPage() {
           minutes: t.minutes,
         })),
       });
+
+      await saveStandardizedDiary(selectedPlacement.id, {
+        daily_entry: {
+          daily_log_id: draftResult?.id,
+          log_date: selectedDate,
+          work_start_time: workStartTime,
+          work_end_time: workEndTime,
+          department_unit: departmentUnit,
+          tools_used: toolsUsed,
+          skills_practiced: skillsPracticed,
+          outcome_artifact: outcomeArtifact,
+          safety_instructed: safetyInstructed,
+        },
+      }).catch(() => null);
 
       // Submit
       const logIdToSubmit = draftResult.id || activeLogForDate?.id;
@@ -573,6 +612,85 @@ export default function CandidateKundalikPage() {
                 />
               </div>
 
+              {/* Standardized Diary Entry Details */}
+              <div className="mb-5 p-3.5 rounded-xl bg-[#09090b] border border-white/5 space-y-3">
+                <div className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">
+                  Standart Amaliyot Kundaligi Maydonlari
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 mb-1">Kelish / Ketish vaqti</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="time"
+                        value={workStartTime}
+                        onChange={(e) => setWorkStartTime(e.target.value)}
+                        className="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs font-mono"
+                      />
+                      <span className="text-zinc-500">-</span>
+                      <input
+                        type="time"
+                        value={workEndTime}
+                        onChange={(e) => setWorkEndTime(e.target.value)}
+                        className="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 mb-1">Ish joyi / Bo&apos;lim</label>
+                    <input
+                      type="text"
+                      value={departmentUnit}
+                      onChange={(e) => setDepartmentUnit(e.target.value)}
+                      placeholder="Masalan: Dasturiy ta'minot bo'limi"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 mb-1">Ishlatilgan uskunalar / Texnologiyalar</label>
+                    <input
+                      type="text"
+                      value={toolsUsed}
+                      onChange={(e) => setToolsUsed(e.target.value)}
+                      placeholder="Python, PostgreSQL, Docker..."
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 mb-1">Egallangan amaliy ko&apos;nikmalar</label>
+                    <input
+                      type="text"
+                      value={skillsPracticed}
+                      onChange={(e) => setSkillsPracticed(e.target.value)}
+                      placeholder="REST API integratsiyasi..."
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 mb-1">Natija / Hujjat (Artifact)</label>
+                    <input
+                      type="text"
+                      value={outcomeArtifact}
+                      onChange={(e) => setOutcomeArtifact(e.target.value)}
+                      placeholder="PR #42 yoki laboratoriya moduli"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-4">
+                    <input
+                      id="safety-instructed"
+                      type="checkbox"
+                      checked={safetyInstructed}
+                      onChange={(e) => setSafetyInstructed(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/10 bg-zinc-900"
+                    />
+                    <label htmlFor="safety-instructed" className="text-[11px] text-zinc-300 cursor-pointer">
+                      Texnika xavfsizligi yo&apos;riqnomasi o&apos;tildi
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               {/* Tasks Breakdown */}
               {dayType === "WORKED" && (
                 <div className="mb-6">
@@ -818,6 +936,13 @@ export default function CandidateKundalikPage() {
             </div>
           </div>
         </div>
+
+        {/* 1-Hujjat (Standart Kundalik) va 2-Hujjat (Yakuniy Xulosa) E-Imzo & PDF Yuklash Markazi */}
+        {selectedPlacement && (
+          <div className="mt-8">
+            <InternshipDocumentsHub party="CANDIDATE" placementId={selectedPlacement.id} />
+          </div>
+        )}
       </main>
 
       {/* Auth Modal */}

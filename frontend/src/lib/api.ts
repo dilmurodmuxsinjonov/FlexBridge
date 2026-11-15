@@ -5226,4 +5226,288 @@ export async function importInstitutionTimetable(
   return data as UniversityTimetableResponse;
 }
 
+// =========================================================================
+// FB-204: 3-Party Separate E-Imzo, Standardized Diary & Final Conclusion
+// =========================================================================
+
+export type EImzoParty = "CANDIDATE" | "EMPLOYER" | "UNIVERSITY";
+
+export interface EImzoCertificateItem {
+  party: EImzoParty;
+  user_id: string;
+  active: boolean;
+  full_name: string;
+  position_title: string;
+  organization_or_university: string;
+  stir_or_pinfl: string;
+  certificate_serial: string;
+  key_fingerprint: string;
+  status: string;
+  issued_at: string | null;
+  valid_until: string | null;
+  updated_at: string | null;
+}
+
+export interface EImzoCertificatesResponse {
+  user_id: string;
+  eligible_parties: EImzoParty[];
+  requested_parties: EImzoParty[];
+  certificates: Record<EImzoParty, EImzoCertificateItem>;
+}
+
+export interface EImzoSignatureStamp {
+  verification_code: string;
+  document_kind: "DIARY" | "CONCLUSION";
+  party: EImzoParty;
+  signer_user_id: string;
+  signer_name: string;
+  signer_position: string;
+  organization_name: string;
+  stir_or_pinfl: string;
+  certificate_serial: string;
+  key_fingerprint: string;
+  payload_sha256: string;
+  signature_hmac: string;
+  algorithm: string;
+  confirmation_note: string;
+  signed_at: string;
+  scope?: string;
+  daily_log_id?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
+}
+
+export interface DiaryPassport {
+  placement_id: string;
+  candidate_id: string;
+  organization_id: string;
+  student_full_name: string;
+  student_phone: string;
+  otm_name: string;
+  faculty_name: string;
+  department_name: string;
+  education_direction: string;
+  academic_group: string;
+  course_year: string;
+  internship_type: "ISHLAB_CHIQARISH" | "MALAKA" | "DIPLOM_OLDI" | "TANISHUV";
+  host_org_name: string;
+  host_org_stir: string;
+  host_department: string;
+  contract_number: string;
+  period_start: string;
+  period_end: string;
+  normative_hours: number;
+  employer_mentor_name: string;
+  university_supervisor_name: string;
+  safety_briefing_date: string;
+  placement_status: string;
+}
+
+export interface StandardDiaryEntryFields {
+  work_start_time: string;
+  work_end_time: string;
+  department_unit: string;
+  tools_used: string;
+  skills_practiced: string;
+  outcome_artifact: string;
+  safety_instructed: boolean;
+}
+
+export interface StandardizedDiaryLogItem {
+  id: string;
+  log_date: string;
+  day_type: string;
+  summary: string;
+  status: string;
+  total_minutes: number;
+  total_hours: number;
+  standard_entry: StandardDiaryEntryFields;
+  party_signatures: Partial<Record<EImzoParty, EImzoSignatureStamp>>;
+}
+
+export interface StandardizedDiaryWorkspace {
+  document_kind: "DIARY";
+  document_title: string;
+  placement_id: string;
+  authorized_parties: EImzoParty[];
+  diary_passport: DiaryPassport;
+  stats: {
+    total_entries: number;
+    total_hours: number;
+    approved_hours: number;
+    normative_hours: number;
+  };
+  entries: StandardizedDiaryLogItem[];
+  signatures: Record<EImzoParty, EImzoSignatureStamp | null>;
+  signature_history: EImzoSignatureStamp[];
+}
+
+export interface EmployerConclusionSection {
+  overall_score: number;
+  competency_ratings: {
+    discipline: number;
+    technical_skills: number;
+    teamwork: number;
+    initiative: number;
+    communication: number;
+  };
+  employer_verdict: "RECOMMENDED_FOR_HIRE" | "SUCCESSFULLY_COMPLETED" | "CONDITIONAL" | "NOT_RECOMMENDED";
+  hire_recommendation: boolean;
+  characterization_summary: string;
+  updated_at: string;
+}
+
+export interface UniversityConclusionSection {
+  academic_score: number;
+  letter_grade: "A" | "B" | "C" | "D" | "F";
+  ects_credits: number;
+  defense_date: string;
+  academic_verdict: "APPROVED_CREDIT" | "REVISION_REQUIRED" | "FAILED";
+  academic_summary: string;
+  updated_at: string;
+}
+
+export interface CandidateConclusionSection {
+  student_reflection: string;
+  achievements_highlight: string;
+  recommended_improvements: string;
+  updated_at: string;
+}
+
+export interface FinalConclusionDocument {
+  document_kind: "CONCLUSION";
+  document_title: string;
+  placement_id: string;
+  authorized_parties: EImzoParty[];
+  passport: DiaryPassport;
+  diary_stats: StandardizedDiaryWorkspace["stats"];
+  overall_status: "DRAFT" | "PARTIALLY_SIGNED" | "TRI_PARTY_SIGNED";
+  signed_parties_count: number;
+  signed_parties: EImzoParty[];
+  unsigned_parties: EImzoParty[];
+  is_fully_signed: boolean;
+  employer_section: EmployerConclusionSection | null;
+  university_section: UniversityConclusionSection | null;
+  candidate_section: CandidateConclusionSection | null;
+  signatures: Record<EImzoParty, EImzoSignatureStamp | null>;
+}
+
+export interface DocumentDownloadReceipt {
+  contract_id: string;
+  placement_id: string;
+  document_kind: "DIARY" | "CONCLUSION";
+  export_format: "PDF" | "JSON";
+  file_id: string;
+  filename: string;
+  mime_type: string;
+  byte_size: number;
+  sha256: string;
+  download_url: string;
+  bff_download_url: string;
+  created_at: string;
+}
+
+async function fetchBffJson<T>(url: string, init?: RequestInit, fallbackErr = "REQUEST_FAILED"): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+      ...(init?.headers || {}),
+    },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detailMsg = typeof data?.detail === "object" ? data.detail?.message || data.detail?.code : data?.detail;
+    throw new Error(detailMsg || data?.message || data?.error || fallbackErr);
+  }
+  return data as T;
+}
+
+export function fetchMyEImzo(party?: EImzoParty): Promise<EImzoCertificatesResponse> {
+  const qs = party ? `?party=${encodeURIComponent(party)}` : "";
+  return fetchBffJson(`/api/bff/me/e-imzo${qs}`, { method: "GET" }, "EIMZO_FETCH_FAILED");
+}
+
+export function saveMyEImzo(payload: {
+  party: EImzoParty;
+  full_name: string;
+  position_title: string;
+  organization_or_university: string;
+  stir_or_pinfl?: string;
+}): Promise<EImzoCertificateItem> {
+  return fetchBffJson("/api/bff/me/e-imzo", { method: "PUT", body: JSON.stringify(payload) }, "EIMZO_SAVE_FAILED");
+}
+
+export function fetchStandardizedDiary(placementId: string): Promise<StandardizedDiaryWorkspace> {
+  return fetchBffJson(`/api/bff/placements/${encodeURIComponent(placementId)}/diary/standard`, { method: "GET" }, "DIARY_STANDARD_FETCH_FAILED");
+}
+
+export function saveStandardizedDiary(
+  placementId: string,
+  payload: {
+    diary_passport?: Partial<DiaryPassport>;
+    daily_entry?: Partial<StandardDiaryEntryFields> & { daily_log_id?: string; log_date?: string };
+  }
+): Promise<StandardizedDiaryWorkspace> {
+  return fetchBffJson(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/diary/standard`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    "DIARY_STANDARD_SAVE_FAILED"
+  );
+}
+
+export function signInternshipDiary(
+  placementId: string,
+  payload: {
+    party?: EImzoParty;
+    scope?: "PERIOD" | "LOG";
+    daily_log_id?: string;
+    date_from?: string;
+    date_to?: string;
+    confirmation_note?: string;
+  }
+): Promise<{ status: string; party: EImzoParty; stamp: EImzoSignatureStamp; workspace: StandardizedDiaryWorkspace }> {
+  return fetchBffJson(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/diary/sign`,
+    { method: "POST", body: JSON.stringify(payload) },
+    "DIARY_SIGN_FAILED"
+  );
+}
+
+export function fetchFinalConclusionDocument(placementId: string): Promise<FinalConclusionDocument> {
+  return fetchBffJson(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/conclusion-document`,
+    { method: "GET" },
+    "CONCLUSION_DOC_FETCH_FAILED"
+  );
+}
+
+export function signFinalConclusionDocument(
+  placementId: string,
+  payload: Record<string, unknown>
+): Promise<{ status: string; party: EImzoParty; stamp: EImzoSignatureStamp; document: FinalConclusionDocument }> {
+  return fetchBffJson(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/conclusion-document/sign`,
+    { method: "POST", body: JSON.stringify(payload) },
+    "CONCLUSION_DOC_SIGN_FAILED"
+  );
+}
+
+export function requestOfficialDocumentDownload(
+  placementId: string,
+  documentType: "DIARY" | "CONCLUSION",
+  exportFormat: "PDF" | "JSON" = "PDF"
+): Promise<DocumentDownloadReceipt> {
+  return fetchBffJson(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/documents/download`,
+    { method: "POST", body: JSON.stringify({ document_type: documentType, export_format: exportFormat }) },
+    "DOCUMENT_EXPORT_FAILED"
+  );
+}
+
+export function verifyEImzoCode(code: string): Promise<{ valid: boolean; verification_code: string; stamp: EImzoSignatureStamp }> {
+  return fetchBffJson(`/api/bff/internship-documents/verify/${encodeURIComponent(code)}`, { method: "GET" }, "EIMZO_VERIFY_FAILED");
+}
 

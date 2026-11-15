@@ -69,6 +69,7 @@ import {
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
+import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   1: { start: "08:30", end: "09:50" },
@@ -85,8 +86,9 @@ export default function UniversityPortal() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Active Tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable"
-  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable">("queue");
+  // Active Tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable" | "documents"
+  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable" | "documents">("queue");
+  const [selectedDocPlacementId, setSelectedDocPlacementId] = useState<string>("");
 
   // TAB 1: Daily Log Review Queue (API-105)
   const [queueItems, setQueueItems] = useState<AcademicReviewQueueItem[]>([]);
@@ -887,6 +889,25 @@ export default function UniversityPortal() {
             >
               <Calendar className="w-4 h-4" />
               <span>Dars Jadvali (Qo&apos;lda & Shablon)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("documents");
+                loadAssignments();
+                if (institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                }
+              }}
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "documents"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Hujjatlar & E-Imzo</span>
             </button>
           </div>
         )}
@@ -2835,6 +2856,45 @@ export default function UniversityPortal() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 7: 3-PARTY E-IMZO & STANDARDIZED DOCUMENTS (FB-204) */}
+      {currentUser && activeTab === "documents" && (
+        <div className="flex flex-col gap-5">
+          <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-primary" />
+                <span>Standart Amaliyot Kundaligi va Yakuniy Xulosa (OTM E-Imzo)</span>
+              </h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Universitet o&apos;qituvchisi/rahbari sifatida talabaning 1-Hujjati (Kundalik) va 2-Hujjatini (Yakuniy Xulosa) tasdiqlang hamda PDF yuklab oling.
+              </p>
+            </div>
+            <select
+              value={selectedDocPlacementId || assignments[0]?.placement_id || ""}
+              onChange={(e) => setSelectedDocPlacementId(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white min-w-[260px]"
+            >
+              {assignments.map((a) => (
+                <option key={`ua-${a.placement_id}`} value={a.placement_id}>
+                  {a.student_name || "Talaba"} (#{a.placement_id.slice(0, 8)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(selectedDocPlacementId || assignments[0]?.placement_id) ? (
+            <InternshipDocumentsHub
+              party="UNIVERSITY"
+              placementId={selectedDocPlacementId || assignments[0]?.placement_id || ""}
+            />
+          ) : (
+            <div className="p-10 text-center text-xs text-zinc-400 border border-dashed border-white/[0.08] rounded-xl bg-surface-card/40">
+              E-Imzo va hujjat yuklab olish uchun biriktirilgan talaba amaliyoti topilmadi.
+            </div>
+          )}
         </div>
       )}
 

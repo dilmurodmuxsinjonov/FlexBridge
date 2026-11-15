@@ -1274,5 +1274,13 @@ Keyingi kichik qadam:
   * Universitet Portali 6-tabi `timetable` ("Dars Jadvali (Qo'lda & Shablon)") — OTM xodimi tomonidan dars jadvalini qo'lda kiritish, rasmiy `.CSV` va `.JSON` shablonlarni yuklab olish hamda to'ldirilgan shablonni yuklash orqali guruhlar jadvalini va talabalarning darsdan bo'sh ish vaqtlarini (`flexbridge.availability_rules`) avtomatik sinxronlash.
   * 7-bosqichli `scripts/test_university_timetable_staging.py` (7/7 PASS) va barcha **30/30 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (0 regressiya)**.
 
+- **FB-204 (Standart Amaliyot Kundaligi, Yakuniy Amaliyot Xulosasi & 3-Tomonlama Alohida E-Imzo Tizimi)**:
+  * **Eslatma**: `/nomzod` sahifasiga `Verified Skill Badge (1.1)` va `AI Job Match Coach (1.2)` qo'shilmadi (foydalanuvchi talabiga binoan).
+  * **3-Tomonlama Alohida E-Imzo (`/api/bff/me/e-imzo`)**: Universitet (`UNIVERSITY`), Talaba (`CANDIDATE`) va Korxona (`EMPLOYER`) uchun alohida E-Imzo sertifikat kalitlari va `HMAC-SHA256` imzo muhrlari (`403 SIGNATURE_PARTY_FORBIDDEN` soxtalashtirish himoyasi bilan).
+  * **1-Hujjat (Standart Amaliyot Kundaligi)**: Pasport rekvizitlari + standartlashtirilgan kunlik maydonlar + amaliyot davomida doimiy 3-tomonlama E-Imzo tasdig'i + PDF/JSON yuklab olish (`/nomzod/kundalik`, `/employer`, `/university`).
+  * **2-Hujjat (Yakuniy Amaliyot Xulosasi)**: Amaliyot yakunida Korxona (ball/kompetensiya/tavsifnoma), Universitet (ball/A-F/ECTS/qaror) va Talaba (yakuniy hisobot) tomonidan alohida tasdiqlanadigan va `TRI_PARTY_SIGNED` bo'ladigan hujjat + PDF/JSON yuklab olish.
+  * **To'liq Tekshiruv**: `scripts/test_internship_documents_eimzo_staging.py` (9 bosqich, jumladan `pypdf` PDF ichki matn tahlili) va barcha **31/31 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (77.09s, 0 regressiya)**.
+
+
 
 

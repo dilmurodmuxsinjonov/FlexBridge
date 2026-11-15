@@ -34,6 +34,7 @@ from app.api.v1.canonical_routes import register_remaining_canonical_model_route
 from app.api.v1.files import router as files_router
 from app.api.v1.governance import router as governance_router
 from app.api.v1.internship_logs import router as internship_logs_router
+from app.api.v1.internship_documents import router as internship_documents_router
 from app.api.v1.operations import router as operations_router
 from app.api.v1.moderation_appeals import router as moderation_appeals_router
 from app.api.v1.owner_additions import router as owner_additions_router
@@ -171,6 +172,7 @@ app.include_router(academic_admission_router)
 app.include_router(academic_decisions_router)
 app.include_router(feature_flags_router)
 app.include_router(internship_logs_router)
+app.include_router(internship_documents_router)
 app.include_router(files_router)
 app.include_router(billing_router)
 app.include_router(operations_router)

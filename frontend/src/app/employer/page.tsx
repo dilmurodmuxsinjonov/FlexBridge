@@ -90,6 +90,7 @@ import {
   OrganizationDirectoryProfile,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 
 export default function EmployerPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -158,7 +159,8 @@ export default function EmployerPortal() {
   // FB-162, FB-168 & FB-174: Workspace Tabs & Hub States
   // -------------------------------------------------------------------------
   const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB">("KANBAN");
-  const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS">("QUEUE");
+  const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS" | "DOCUMENTS">("QUEUE");
+  const [selectedDocPlacementId, setSelectedDocPlacementId] = useState<string>("");
 
   // -------------------------------------------------------------------------
   // FB-174: Billing Overview, Entitlements, Orders & Refunds (API-070, 093, 094, 095)
@@ -1792,6 +1794,21 @@ export default function EmployerPortal() {
                     <GraduationCap className="w-3.5 h-3.5" />
                     <span>Amaliyotchilar</span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMentorSubTab("DOCUMENTS");
+                      loadPlacements();
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      mentorSubTab === "DOCUMENTS"
+                        ? "bg-primary text-white shadow"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Hujjatlar & E-Imzo</span>
+                  </button>
                 </div>
               </div>
 
@@ -2045,6 +2062,48 @@ export default function EmployerPortal() {
                         ))}
                       </div>
                     )
+                  )}
+                </div>
+              )}
+
+              {/* Sub-tab 3: DOCUMENTS & E-IMZO (FB-204) */}
+              {mentorSubTab === "DOCUMENTS" && (
+                <div className="flex flex-col gap-4">
+                  <div className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-semibold text-white">
+                        Amaliyotchini tanlang (Standart Kundalik & Yakuniy Xulosa)
+                      </div>
+                      <div className="text-[11px] text-zinc-400">
+                        Korxona E-Imzosi bilan doimiy kundalikni va yakuniy xulosani alohida tasdiqlash
+                      </div>
+                    </div>
+                    <select
+                      value={selectedDocPlacementId || mentorAssignments[0]?.placement_id || orgPlacements[0]?.id || ""}
+                      onChange={(e) => setSelectedDocPlacementId(e.target.value)}
+                      className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white min-w-[260px]"
+                    >
+                      {mentorAssignments.map((asg) => (
+                        <option key={`m-${asg.placement_id}`} value={asg.placement_id}>
+                          Mentorlik: #{asg.placement_id.slice(0, 8)}
+                        </option>
+                      ))}
+                      {orgPlacements.map((plc) => (
+                        <option key={`o-${plc.id}`} value={plc.id}>
+                          Amaliyot: #{plc.id.slice(0, 8)} ({plc.start_date} ~ {plc.end_date})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {(selectedDocPlacementId || mentorAssignments[0]?.placement_id || orgPlacements[0]?.id) ? (
+                    <InternshipDocumentsHub
+                      party="EMPLOYER"
+                      placementId={selectedDocPlacementId || mentorAssignments[0]?.placement_id || orgPlacements[0]?.id || ""}
+                    />
+                  ) : (
+                    <div className="p-8 text-center text-xs text-zinc-400 border border-dashed border-white/[0.08] rounded-xl">
+                      Hujjatlarni tasdiqlash uchun faol amaliyot topilmadi.
+                    </div>
                   )}
                 </div>
               )}
