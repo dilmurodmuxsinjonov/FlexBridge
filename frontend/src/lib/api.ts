@@ -4715,6 +4715,330 @@ export async function fetchUniversityAnalytics(
   return data as UniversityAnalyticsResponse;
 }
 
+// ---------------------------------------------------------------------------
+// FB-200: Full Candidate Resume Builder, Direct PDF Upload, Employer & University Directories
+// ---------------------------------------------------------------------------
+
+export interface CandidateAchievementItem {
+  id?: string;
+  title: string;
+  category: string;
+  issuer: string;
+  awarded_date?: string | null;
+  description?: string;
+  url?: string | null;
+}
+
+export interface CandidateWorkExperienceItem {
+  id?: string;
+  company_name: string;
+  role_title: string;
+  employment_type: string;
+  location: string;
+  start_date: string;
+  end_date?: string | null;
+  is_current?: boolean;
+  description?: string;
+  accomplishments?: string[];
+  technologies?: string[];
+}
+
+export interface CandidateLanguageItem {
+  id?: string;
+  language: string;
+  proficiency: string;
+  certificate_name?: string | null;
+  score?: string | null;
+}
+
+export interface CandidateEducationDetails {
+  university_name: string;
+  faculty: string;
+  major: string;
+  degree_level: string;
+  study_year: number;
+  gpa: string;
+  graduation_year: number;
+  thesis_or_research_topic: string;
+}
+
+export interface CandidateCareerPreferences {
+  desired_roles: string[];
+  work_mode: string;
+  preferred_weekly_hours: number;
+  expected_stipend_uzs: number;
+  career_objective: string;
+  linkedin_url: string;
+  telegram_username: string;
+  github_username: string;
+}
+
+export interface CandidateResumeDetailsResponse {
+  ok: boolean;
+  contract_id: string;
+  candidate_id: string;
+  achievements: CandidateAchievementItem[];
+  work_experiences: CandidateWorkExperienceItem[];
+  languages: CandidateLanguageItem[];
+  education_details: CandidateEducationDetails;
+  career_preferences: CandidateCareerPreferences;
+  updated_at?: string | null;
+}
+
+export async function fetchCandidateResumeDetails(): Promise<CandidateResumeDetailsResponse> {
+  const res = await fetch("/api/bff/candidate/resume-details", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "RESUME_DETAILS_FETCH_FAILED");
+  }
+  return data as CandidateResumeDetailsResponse;
+}
+
+export async function saveCandidateResumeDetails(
+  payload: Partial<{
+    achievements: CandidateAchievementItem[];
+    work_experiences: CandidateWorkExperienceItem[];
+    languages: CandidateLanguageItem[];
+    education_details: Partial<CandidateEducationDetails>;
+    career_preferences: Partial<CandidateCareerPreferences>;
+  }>
+): Promise<CandidateResumeDetailsResponse> {
+  const res = await fetch("/api/bff/candidate/resume-details", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "RESUME_DETAILS_UPDATE_FAILED");
+  }
+  return data as CandidateResumeDetailsResponse;
+}
+
+export interface CandidatePdfUploadResponse {
+  ok: boolean;
+  contract_id: string;
+  file_id: string;
+  filename: string;
+  purpose: "CERTIFICATE" | "CV" | "PORTFOLIO";
+  mime_type: string;
+  byte_size: number;
+  sha256: string;
+  scan_status: string;
+  linked_as_cv: boolean;
+}
+
+export async function uploadCandidatePdfFile(payload: {
+  filename: string;
+  purpose: "CERTIFICATE" | "CV" | "PORTFOLIO";
+  title?: string;
+  content_base64?: string;
+}): Promise<CandidatePdfUploadResponse> {
+  const res = await fetch("/api/bff/candidate/files/upload", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "CANDIDATE_FILE_UPLOAD_FAILED");
+  }
+  return data as CandidatePdfUploadResponse;
+}
+
+export interface OrganizationDirectoryProfile {
+  ok?: boolean;
+  contract_id?: string;
+  organization_id: string;
+  status: string;
+  official_name: string;
+  brand_name: string;
+  tax_id: string;
+  industry: string;
+  region: string;
+  legal_address: string;
+  company_size: string;
+  founded_year: number;
+  website_url: string;
+  hr_contact_name: string;
+  hr_contact_phone: string;
+  hr_contact_email: string;
+  director_name: string;
+  bank_name: string;
+  bank_mfo: string;
+  bank_account: string;
+  about_company: string;
+  internship_conditions: string;
+  student_perks: string[];
+  completion_percent: number;
+  updated_at?: string | null;
+}
+
+export async function fetchOrganizationDirectoryProfile(
+  orgId: string
+): Promise<OrganizationDirectoryProfile> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/directory-profile`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "ORG_DIRECTORY_FETCH_FAILED");
+  }
+  return data as OrganizationDirectoryProfile;
+}
+
+export async function saveOrganizationDirectoryProfile(
+  orgId: string,
+  payload: Partial<OrganizationDirectoryProfile>
+): Promise<OrganizationDirectoryProfile> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/directory-profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "ORG_DIRECTORY_UPDATE_FAILED");
+  }
+  return data as OrganizationDirectoryProfile;
+}
+
+export interface UniversityFacultyItem {
+  id?: string;
+  name: string;
+  dean_name: string;
+  programs_count: number;
+  students_count: number;
+}
+
+export interface UniversityProgramItem {
+  id?: string;
+  code: string;
+  name: string;
+  degree_level: string;
+  duration_years: number;
+}
+
+export interface UniversityPartnerAgreementItem {
+  id: string;
+  version: number;
+  status: string;
+  valid_from: string;
+  valid_to?: string | null;
+  purposes: string[];
+  partner_organization_name: string;
+  agreement_number: string;
+  quota_slots: number;
+  coordinator_note?: string;
+}
+
+export interface InstitutionDirectoryProfile {
+  ok?: boolean;
+  contract_id?: string;
+  institution_id: string;
+  status: string;
+  official_name: string;
+  short_name: string;
+  registry_code: string;
+  institution_type: string;
+  region: string;
+  address: string;
+  rector_name: string;
+  career_center_head: string;
+  contact_phone: string;
+  contact_email: string;
+  website_url: string;
+  faculties: UniversityFacultyItem[];
+  programs: UniversityProgramItem[];
+  annual_intern_quota: number;
+  internship_policy_summary: string;
+  partner_agreements: UniversityPartnerAgreementItem[];
+  completion_percent: number;
+  updated_at?: string | null;
+}
+
+export async function fetchInstitutionDirectoryProfile(
+  institutionId: string
+): Promise<InstitutionDirectoryProfile> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/directory-profile`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "INSTITUTION_DIRECTORY_FETCH_FAILED");
+  }
+  return data as InstitutionDirectoryProfile;
+}
+
+export async function saveInstitutionDirectoryProfile(
+  institutionId: string,
+  payload: Partial<InstitutionDirectoryProfile>
+): Promise<InstitutionDirectoryProfile> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/directory-profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "INSTITUTION_DIRECTORY_UPDATE_FAILED");
+  }
+  return data as InstitutionDirectoryProfile;
+}
+
+export async function createInstitutionPartnerAgreement(
+  institutionId: string,
+  payload: {
+    partner_organization_name: string;
+    agreement_number?: string;
+    valid_from?: string;
+    valid_to?: string;
+    purposes?: string[];
+    quota_slots?: number;
+    coordinator_note?: string;
+  }
+): Promise<UniversityPartnerAgreementItem> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/agreements`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "CREATE_AGREEMENT_FAILED");
+  }
+  return data as UniversityPartnerAgreementItem;
+}
+
+
 
 
 

@@ -1257,10 +1257,16 @@ Keyingi kichik qadam:
   * Vakansiya sahifasida (`/ishlar/[id]`) "Saqlab qo'yish" tugmasi va Navbar navigatsiya integratsiyasi (`Saqlanganlar`, `Xabarlar`).
   * 20 ta staging test to'plami bo'yicha 195+/195+ test 100% Yashil (0 regressiya, 36.51s umumiy vaqt). Staging suite `scripts/test_candidate_saved_notifications_staging.py` 10/10 faza 100% GREEN.
 
+- **FB-196 (Telegram Bot Phone Verification & OTP Delivery Choice)**:
+  * Ro'yxatdan o'tishda (`/royxatdan-otish`) SMS yoki Telegram Bot orqali tasdiqlash kodi olish tanlovi, Telegram Botda foydalanuvchi telefon raqamini tekshirish (`request_contact=True`, `contact.user_id == from.id`, saytdagi raqam bilan 100% moslik sharti). PR #197 birlashtirildi (`9455c48`).
 
+- **FB-198 (Full Project File & Documentation Directory Organization)**:
+  * `frontend/` va `backend/` papkalarini faqat ilova kodlari uchun tozalash, barcha `.md`, `.pdf`, `.pptx` hujjatlarni `docs/{journals,protocols,presentations,backend/*}` ichki papkalariga tartiblash. PR #199 birlashtirildi (`a6caf66`).
 
-
-
-
+- **FB-200 (Candidate Full Resume Builder & Direct PDF Upload, Employer Corporate Directory & University OTM Directory Hub)**:
+  * **Bosqich 1 (Nomzod Portali)**: `GET/PUT /api/bff/candidate/resume-details` (`achievements`, `work_experiences`, `languages`, `education_details`, `career_preferences`), `POST /api/bff/candidate/files/upload` (CV va Sertifikat PDF fayllarini bevosita yuklash va ClamAV tekshiruvi), hamda boyitilgan PDF/JSON rezyume eksporti (`/nomzod`).
+  * **Bosqich 2 (Korxona Portali)**: `GET/PUT /api/bff/employer/organization/[org]/directory-profile` — korxona rasmiy ma'lumotnomasi, bank rekvizitlari (MFO, hisob raqami, direktor, HR aloqa) va talabalar uchun sharoitlar (`/employer`).
+  * **Bosqich 3 (Universitet Portali)**: `GET/PUT /api/bff/university/institutions/[inst]/directory-profile` va `POST /api/bff/university/institutions/[inst]/agreements` — OTM pasporti, rektor, karera markazi, fakultetlar, ta'lim yo'nalishlari shifrlari va yangi hamkorlik shartnomalari tuzish (`/university`).
+  * **Bosqich 4 (To'liq Miqyosdagi Tekshiruv)**: 12 bosqichli `scripts/test_full_resume_org_univ_directory_staging.py` (12/12 PASS) va barcha **29/29 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (69.43s, 0 regressiya)**.
 
 

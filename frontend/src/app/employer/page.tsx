@@ -85,6 +85,9 @@ import {
   CandidateSearchItem,
   CandidateSearchParams,
   CandidateSearchResponse,
+  fetchOrganizationDirectoryProfile,
+  saveOrganizationDirectoryProfile,
+  OrganizationDirectoryProfile,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -722,7 +725,75 @@ export default function EmployerPortal() {
     } finally {
       setIsLoadingVerification(false);
     }
+
+    setIsLoadingOrgDirectory(true);
+    try {
+      const dir = await fetchOrganizationDirectoryProfile(tid);
+      setOrgDirectoryProfile(dir);
+      setOrgStudentPerksInput((dir.student_perks || []).join(", "));
+    } catch {
+      // Non-blocking if initial directory is empty
+    } finally {
+      setIsLoadingOrgDirectory(false);
+    }
   }, []);
+
+  const [orgDirectoryProfile, setOrgDirectoryProfile] = useState<OrganizationDirectoryProfile>({
+    organization_id: "",
+    status: "VERIFIED",
+    official_name: "",
+    brand_name: "",
+    tax_id: "",
+    industry: "Axborot texnologiyalari va FinTech",
+    region: "Toshkent shahri",
+    legal_address: "",
+    company_size: "50-200 xodim",
+    founded_year: 2020,
+    website_url: "",
+    hr_contact_name: "",
+    hr_contact_phone: "",
+    hr_contact_email: "",
+    director_name: "",
+    bank_name: "",
+    bank_mfo: "",
+    bank_account: "",
+    about_company: "",
+    internship_conditions: "",
+    student_perks: [],
+    completion_percent: 0,
+  });
+  const [orgStudentPerksInput, setOrgStudentPerksInput] = useState("");
+  const [isLoadingOrgDirectory, setIsLoadingOrgDirectory] = useState(false);
+  const [isSavingOrgDirectory, setIsSavingOrgDirectory] = useState(false);
+  const [orgDirectorySuccessMsg, setOrgDirectorySuccessMsg] = useState<string | null>(null);
+  const [orgDirectoryErrorMsg, setOrgDirectoryErrorMsg] = useState<string | null>(null);
+
+  const handleSaveOrgDirectory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orgId.trim()) return;
+    setIsSavingOrgDirectory(true);
+    setOrgDirectorySuccessMsg(null);
+    setOrgDirectoryErrorMsg(null);
+    try {
+      const perks = orgStudentPerksInput
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
+      const saved = await saveOrganizationDirectoryProfile(orgId.trim(), {
+        ...orgDirectoryProfile,
+        student_perks: perks,
+      });
+      setOrgDirectoryProfile(saved);
+      setOrgDirectorySuccessMsg(
+        `Korxona ma'lumotnomasi va rekvizitlari muvaffaqiyatli saqlandi! To'ldirilganlik: ${saved.completion_percent}% (API-067-DIRECTORY)`
+      );
+      setTimeout(() => setOrgDirectorySuccessMsg(null), 5000);
+    } catch (err: unknown) {
+      setOrgDirectoryErrorMsg(err instanceof Error ? err.message : "Ma'lumotnomani saqlashda xatolik");
+    } finally {
+      setIsSavingOrgDirectory(false);
+    }
+  };
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2356,6 +2427,231 @@ export default function EmployerPortal() {
                     </button>
                   </form>
                 </div>
+              </div>
+
+              {/* SECTION 3: KORXONA MA'LUMOTNOMASI, REKVIZITLARI VA AMALIYOT SHAROITLARI (API-067-DIRECTORY) */}
+              <div className="p-5 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Building className="w-4 h-4 text-emerald-400" />
+                      <span>Korxona Rasmiy Ma&apos;lumotnomasi, Bank Rekvizitlari va Talabalar Sharoiti</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      OTM hamkorlik shartnomalari, uch tomonlama amaliyot bitimlari va talabalar uchun korxona pasporti.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-semibold">
+                    To&apos;ldirilganlik: {orgDirectoryProfile.completion_percent || 0}% • API-067-DIRECTORY
+                  </span>
+                </div>
+
+                {orgDirectorySuccessMsg && (
+                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{orgDirectorySuccessMsg}</span>
+                  </div>
+                )}
+
+                {orgDirectoryErrorMsg && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {orgDirectoryErrorMsg}
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveOrgDirectory} className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Yuridik nomi (Masalan: &quot;FlexTech Solutions&quot; MChJ)</label>
+                      <input
+                        type="text"
+                        value={orgDirectoryProfile.official_name}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, official_name: e.target.value })}
+                        placeholder="Rasmiy yuridik nomi"
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Brend / Ommaviy nomi</label>
+                      <input
+                        type="text"
+                        value={orgDirectoryProfile.brand_name}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, brand_name: e.target.value })}
+                        placeholder="Brend nomi"
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">STIR (INN) va Sohasi</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.tax_id}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, tax_id: e.target.value })}
+                          placeholder="STIR: 309123456"
+                          className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white font-mono"
+                        />
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.industry}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, industry: e.target.value })}
+                          placeholder="IT / FinTech / Sanoat"
+                          className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Yuridik manzil va Hudud</label>
+                      <input
+                        type="text"
+                        value={orgDirectoryProfile.legal_address}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, legal_address: e.target.value })}
+                        placeholder="Toshkent sh., Yunusobod tumani, Amir Temur shoh ko'chasi..."
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Korxona rahbari (Direktor F.I.Sh.)</label>
+                      <input
+                        type="text"
+                        value={orgDirectoryProfile.director_name}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, director_name: e.target.value })}
+                        placeholder="Masalan: Karimov Bobur Rustamovich"
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Xodimlar soni va Rasmiy Veb-sayt</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          value={orgDirectoryProfile.company_size}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, company_size: e.target.value })}
+                          className="px-2.5 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                        >
+                          <option value="1-15 xodim">1-15 xodim</option>
+                          <option value="15-50 xodim">15-50 xodim</option>
+                          <option value="50-200 xodim">50-200 xodim</option>
+                          <option value="200+ xodim">200+ xodim</option>
+                        </select>
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.website_url}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, website_url: e.target.value })}
+                          placeholder="https://company.uz"
+                          className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">HR Mas&apos;ul shaxs F.I.Sh.</label>
+                      <input
+                        type="text"
+                        value={orgDirectoryProfile.hr_contact_name}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, hr_contact_name: e.target.value })}
+                        placeholder="HR rahbari / Amaliyot koordinatori"
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">HR Aloqa Telefoni va Email</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.hr_contact_phone}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, hr_contact_phone: e.target.value })}
+                          placeholder="+998901234567"
+                          className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white font-mono"
+                        />
+                        <input
+                          type="email"
+                          value={orgDirectoryProfile.hr_contact_email}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, hr_contact_email: e.target.value })}
+                          placeholder="hr@company.uz"
+                          className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Xizmat ko&apos;rsatuvchi Bank, MFO va Hisob raqami</label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.bank_name}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, bank_name: e.target.value })}
+                          placeholder="Bank nomi"
+                          className="px-2.5 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.bank_mfo}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, bank_mfo: e.target.value })}
+                          placeholder="MFO: 00401"
+                          className="px-2.5 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white font-mono"
+                        />
+                        <input
+                          type="text"
+                          value={orgDirectoryProfile.bank_account}
+                          onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, bank_account: e.target.value })}
+                          placeholder="20208000..."
+                          className="px-2.5 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Korxona faoliyati haqida batafsil ma&apos;lumotnoma</label>
+                      <textarea
+                        rows={2}
+                        value={orgDirectoryProfile.about_company}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, about_company: e.target.value })}
+                        placeholder="Korxona yo'nalishi, asosiy loyihalar va texnologik stek..."
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white resize-y"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">Talabalar uchun amaliyot sharoitlari va imtiyozlar</label>
+                      <textarea
+                        rows={2}
+                        value={orgDirectoryProfile.internship_conditions}
+                        onChange={(e) => setOrgDirectoryProfile({ ...orgDirectoryProfile, internship_conditions: e.target.value })}
+                        placeholder="Mentorlik dasturi, moslashuvchan grafik, tushlik va stipendiya shartlari..."
+                        className="px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white resize-y"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.06]">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={orgStudentPerksInput}
+                        onChange={(e) => setOrgStudentPerksInput(e.target.value)}
+                        placeholder="Talaba imtiyozlari (vergul bilan: Bepul tushlik, Mentor, Stipendiya, MacBook)"
+                        className="w-full px-3 py-2 rounded-lg bg-surface-lowest border border-white/[0.1] text-xs text-white"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isSavingOrgDirectory || isLoadingOrgDirectory}
+                      className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-2 shrink-0 shadow-md shadow-emerald-600/20"
+                    >
+                      {isSavingOrgDirectory ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>Korxona Ma&apos;lumotnomasini Saqlash</span>
+                    </button>
+                  </div>
+                </form>
               </div>
             </section>
           )}
