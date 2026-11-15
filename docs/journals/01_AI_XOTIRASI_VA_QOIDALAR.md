@@ -1603,17 +1603,38 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Master 27-suite regression runner `scripts/run_all_staging_tests.py`: ALL 27/27 TEST SUITES PASSED 100% GREEN in 66.16s (zero regressions).
   - Forensic audit report documented at `reviews/2026-11-15/multi_portal_expansion/MULTI_PORTAL_EXPANSION_REPORT.md`.
 
+## LOG-150 / Telegram Bot Phone Verification & OTP Delivery Choice (FB-196, VICTORY CONFIRMED)
 
+- **Issue / Branch**: Issue #196, PR #197 (`9455c48`), target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Service & Implementation**:
+  - Implemented `backend/app/services/telegram_bot.py` (`TelegramBotVerificationService`), extended `backend/app/services/identity.py` (`SMS` vs `TELEGRAM` delivery channel), exposed `GET /api/v1/auth/challenges/{id}/status` and `POST /api/v1/auth/telegram/webhook`, created Next.js BFF routes, and upgraded `/royxatdan-otish` Step 2 with SMS vs Telegram Bot selector and native contact verification check.
+  - 10-phase staging suite `scripts/test_telegram_phone_verification_staging.py`: 10/10 PASSED 100% GREEN.
 
+## LOG-151 / Full Project File & Documentation Directory Organization (FB-198, VICTORY CONFIRMED)
 
+- **Issue / Branch**: Issue #198, PR #199 (`a6caf66`), target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Service & Implementation**:
+  - Reorganized project root and `backend/` so `frontend/` and `backend/` strictly contain application code (`backend/FlexBridge_1_4_schema.sql`), while all 40+ markdown, PDF, and presentation files are organized under `docs/{journals,protocols,presentations,backend/{academic,candidate,organization,security_iam,platform_ops}}`.
 
+## LOG-152 / Candidate Full Resume Builder & Direct PDF Upload, Employer Corporate Directory & University OTM Directory Hub (FB-200, VICTORY CONFIRMED)
 
-
-
-
-
-
-
-
-
+- **Issue / Branch**: Issue #200, Branch `feature/200-full-resume-and-portal-directories`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - **Bosqich 1 (Candidate Full Resume Builder & Direct PDF Upload)**:
+    - Implemented `backend/app/services/candidate_resume_builder.py` (`API-026-RESUME-DETAILS` & `API-026-DIRECT-UPLOAD`) supporting structured multi-section resume authoring (`achievements`, `work_experiences`, `languages`, `education_details`, `career_preferences`) with `completion_percent` scoring and direct PDF upload (`POST /api/v1/me/candidate/files/upload`) with pypdf validation, ClamAV/EICAR malware rejection (`422 MALWARE_DETECTED_QUARANTINED`), MinIO storage, `flexbridge.files` registration (`CLEAN`), and automatic `cv_file_id` linking.
+    - Enriched `backend/app/services/candidate_resume_export.py` (`API-026-RESUME-EXPORT`) so exported JSON/PDF resumes include all achievements, work experiences, languages, education details, and career preferences.
+    - Mounted Next.js 16 BFF routes `/api/bff/candidate/resume-details` (`GET`, `PUT`) and `/api/bff/candidate/files/upload` (`POST`), and built Tab 3 `"FULL_RESUME"` (**To‘liq Rezyume: Yutuqlar & Qilingan Ishlar**) plus direct PDF file upload controls for CV and Certificates in `/nomzod` (`frontend/src/app/nomzod/page.tsx`).
+  - **Bosqich 2 (Employer Corporate Directory & Requisites)**:
+    - Implemented `backend/app/services/employer_directory.py` (`API-067-DIRECTORY`), mounted `GET/PUT /api/v1/organizations/{org}/directory-profile` and Next.js BFF `/api/bff/employer/organization/[org]/directory-profile`, and added the interactive **Korxona Rasmiy Ma'lumotnomasi, Bank Rekvizitlari va Talabalar Sharoiti** form in `/employer` (`frontend/src/app/employer/page.tsx`).
+  - **Bosqich 3 (University OTM Directory, Faculties/Programs & Partnership Agreements Creation)**:
+    - Implemented `backend/app/services/university_directory.py` (`API-098-DIRECTORY` & `API-101-CREATE`), mounted `GET/PUT /api/v1/institutions/{inst}/directory-profile` and `POST /api/v1/institutions/{inst}/academic-agreements`, wired Next.js BFF routes `/api/bff/university/institutions/[inst]/directory-profile` and `/api/bff/university/institutions/[inst]/agreements`, and built the interactive **OTM Pasporti, Fakultetlar & Ta'lim Yo'nalishlari va Hamkorlik Shartnomalari** builder in `/university` (`frontend/src/app/university/page.tsx`).
+  - **Bosqich 4 (Full-Scale Multi-Portal & BFF Verification)**:
+    - Rebuilt `flexbridge-r1-backend-1` and `flexbridge-r1-frontend-1` Docker containers (73 Next.js routes compiled, 0 TypeScript errors, all 8 containers healthy).
+    - Executed 12-phase staging suite `scripts/test_full_resume_org_univ_directory_staging.py`: **12/12 PHASES PASSED 100% GREEN**.
+    - Executed master 29-suite regression runner `scripts/run_all_staging_tests.py`: **ALL 29/29 TEST SUITES PASSED 100% GREEN in 69.43s (zero regressions)**.
+    - Forensic audit report documented at `reviews/2026-11-15/full_resume_and_portal_directories/FULL_RESUME_PORTAL_DIRECTORIES_REPORT.md`.
 

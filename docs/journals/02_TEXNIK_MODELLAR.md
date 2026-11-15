@@ -420,3 +420,15 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
     - `outerjoin` on `outbox_events` prevents notification dropping when background events are processed or deleted.
     - Exposes entity scope IDs (`opportunity_id`, `application_id`, `ticket_id`, `placement_id`) and computed `is_read` boolean flag alongside `read_at`.
     - Protected Payload Policy: arbitrary outbox payload content is never disclosed; structured details are only computed for validated domain notification templates.
+
+
+## FULL-RESUME-PORTAL-DIRECTORIES-FB200 — Candidate Full Resume Builder, Direct PDF Upload, Employer & University Directories (2026-11-15)
+
+- **Contracts**: `API-026-RESUME-DETAILS`, `API-026-DIRECT-UPLOAD`, `API-067-DIRECTORY`, `API-098-DIRECTORY`, `API-101-CREATE` (Issue #200), branch `feature/200-full-resume-and-portal-directories`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `GET/PUT /api/v1/me/candidate/resume-details`: Manage structured candidate resume sections (`achievements`, `work_experiences`, `languages`, `education_details`, `career_preferences`) with `completion_percent` calculation.
+  - `POST /api/v1/me/candidate/files/upload`: Direct PDF upload for `CV`, `CERTIFICATE`, and `PORTFOLIO` with `pypdf` validation, EICAR/ClamAV malware rejection (`422 MALWARE_DETECTED_QUARANTINED`), MinIO storage, `flexbridge.files` registration (`CLEAN`), and automatic `cv_file_id` linking on `candidate_profiles`.
+  - `GET/PUT /api/v1/organizations/{org}/directory-profile`: Complete Employer Organization Directory Profile (legal details, HR contacts, director, bank name/MFO/account, internship conditions, student perks) with `ORG_SCOPE_FORBIDDEN` (403) cross-org IDOR guard.
+  - `GET/PUT /api/v1/institutions/{inst}/directory-profile`: Complete University OTM Directory Profile (official name, HEMIS registry code, rector, career center head, faculties, educational programs, annual intern quota) with `INSTITUTION_SCOPE_FORBIDDEN` (403) cross-institution IDOR guard.
+  - `POST /api/v1/institutions/{inst}/academic-agreements`: Create versioned Academic Partnership Agreement (`institution_agreements` + partner organization metadata).
+

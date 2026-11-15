@@ -52,6 +52,10 @@ import {
   AcademicAgreementItem,
   UniversityAnalyticsResponse,
   StudentAttendanceItem,
+  fetchInstitutionDirectoryProfile,
+  saveInstitutionDirectoryProfile,
+  createInstitutionPartnerAgreement,
+  InstitutionDirectoryProfile,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
@@ -200,7 +204,138 @@ export default function UniversityPortal() {
     } finally {
       setIsLoadingAgreements(false);
     }
+
+    setIsLoadingInstDirectory(true);
+    try {
+      const dir = await fetchInstitutionDirectoryProfile(targetInstId);
+      setInstDirectoryProfile(dir);
+    } catch {
+      // Non-blocking if initial directory is empty
+    } finally {
+      setIsLoadingInstDirectory(false);
+    }
   }, []);
+
+  const [instDirectoryProfile, setInstDirectoryProfile] = useState<InstitutionDirectoryProfile>({
+    institution_id: "",
+    status: "VERIFIED",
+    official_name: "",
+    short_name: "",
+    registry_code: "",
+    institution_type: "Davlat oliy ta'lim muassasasi",
+    region: "Toshkent shahri",
+    address: "",
+    rector_name: "",
+    career_center_head: "",
+    contact_phone: "",
+    contact_email: "",
+    website_url: "",
+    faculties: [],
+    programs: [],
+    annual_intern_quota: 500,
+    internship_policy_summary: "",
+    partner_agreements: [],
+    completion_percent: 0,
+  });
+  const [isLoadingInstDirectory, setIsLoadingInstDirectory] = useState(false);
+  const [isSavingInstDirectory, setIsSavingInstDirectory] = useState(false);
+  const [instDirectorySuccessMsg, setInstDirectorySuccessMsg] = useState<string | null>(null);
+  const [instDirectoryErrorMsg, setInstDirectoryErrorMsg] = useState<string | null>(null);
+
+  const [newFacultyName, setNewFacultyName] = useState("");
+  const [newFacultyDean, setNewFacultyDean] = useState("");
+  const [newFacultyStudents, setNewFacultyStudents] = useState("450");
+
+  const [newProgramCode, setNewProgramCode] = useState("60610100");
+  const [newProgramName, setNewProgramName] = useState("");
+  const [newProgramDegree, setNewProgramDegree] = useState("BAKALAVR");
+
+  const [newAgrPartnerName, setNewAgrPartnerName] = useState("");
+  const [newAgrNumber, setNewAgrNumber] = useState("");
+  const [newAgrQuota, setNewAgrQuota] = useState("30");
+  const [newAgrValidTo, setNewAgrValidTo] = useState("2028-06-30");
+  const [isCreatingAgreement, setIsCreatingAgreement] = useState(false);
+
+  const handleAddFaculty = () => {
+    if (newFacultyName.trim().length < 2) return;
+    setInstDirectoryProfile((prev) => ({
+      ...prev,
+      faculties: [
+        ...(prev.faculties || []),
+        {
+          id: crypto.randomUUID(),
+          name: newFacultyName.trim(),
+          dean_name: newFacultyDean.trim(),
+          programs_count: 4,
+          students_count: Number(newFacultyStudents) || 0,
+        },
+      ],
+    }));
+    setNewFacultyName("");
+    setNewFacultyDean("");
+  };
+
+  const handleAddProgram = () => {
+    if (newProgramName.trim().length < 2) return;
+    setInstDirectoryProfile((prev) => ({
+      ...prev,
+      programs: [
+        ...(prev.programs || []),
+        {
+          id: crypto.randomUUID(),
+          code: newProgramCode.trim() || "60610100",
+          name: newProgramName.trim(),
+          degree_level: newProgramDegree,
+          duration_years: newProgramDegree === "MAGISTRATURA" ? 2 : 4,
+        },
+      ],
+    }));
+    setNewProgramName("");
+  };
+
+  const handleSaveInstDirectory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!institutionId) return;
+    setIsSavingInstDirectory(true);
+    setInstDirectorySuccessMsg(null);
+    setInstDirectoryErrorMsg(null);
+    try {
+      const saved = await saveInstitutionDirectoryProfile(institutionId, instDirectoryProfile);
+      setInstDirectoryProfile(saved);
+      setInstDirectorySuccessMsg(
+        `OTM pasporti va ma'lumotnomasi muvaffaqiyatli saqlandi! To'ldirilganlik: ${saved.completion_percent}% (API-098-DIRECTORY)`
+      );
+      setTimeout(() => setInstDirectorySuccessMsg(null), 5000);
+    } catch (err: unknown) {
+      setInstDirectoryErrorMsg(err instanceof Error ? err.message : "OTM ma'lumotnomasini saqlashda xatolik");
+    } finally {
+      setIsSavingInstDirectory(false);
+    }
+  };
+
+  const handleCreatePartnerAgreement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!institutionId || newAgrPartnerName.trim().length < 2) return;
+    setIsCreatingAgreement(true);
+    setInstDirectoryErrorMsg(null);
+    try {
+      await createInstitutionPartnerAgreement(institutionId, {
+        partner_organization_name: newAgrPartnerName.trim(),
+        agreement_number: newAgrNumber.trim() || undefined,
+        quota_slots: Number(newAgrQuota) || 25,
+        valid_to: newAgrValidTo || undefined,
+        purposes: ["ACADEMIC_VIEW", "INTERNSHIP_SUPERVISION"],
+      });
+      setNewAgrPartnerName("");
+      setNewAgrNumber("");
+      setInstDirectorySuccessMsg("Yangi hamkorlik shartnomasi muvaffaqiyatli ro'yxatdan o'tkazildi! (API-101-CREATE)");
+      await loadReportsAndAgreements(institutionId);
+    } catch (err: unknown) {
+      setInstDirectoryErrorMsg(err instanceof Error ? err.message : "Shartnoma yaratishda xatolik");
+    } finally {
+      setIsCreatingAgreement(false);
+    }
+  };
 
   const loadAnalytics = useCallback(
     async (targetInstId?: string, customFilters?: typeof analyticsFilters) => {
@@ -658,293 +793,6 @@ export default function UniversityPortal() {
         </div>
       )}
 
-      {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
-      {currentUser && activeTab === "exports" && (
-        <div className="flex flex-col gap-6">
-          {/* Header Card */}
-          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Hisobot & Shartnomalar Hub
-                </span>
-                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
-              </div>
-              <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
-              </h2>
-              <p className="text-xs text-zinc-400">
-                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
-              </p>
-            </div>
-
-            {institutionId && (
-              <button
-                type="button"
-                disabled={isLoadingSupervisions || isLoadingAgreements}
-                onClick={() => loadReportsAndAgreements(institutionId)}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 self-start md:self-center disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSupervisions || isLoadingAgreements ? "animate-spin" : ""}`} />
-                <span>Yangilash</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Columns: Report Generator & Generated Receipt */}
-            <div className="lg:col-span-2 flex flex-col gap-5">
-              {/* Generator Form */}
-              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <FileSpreadsheet className="w-4 h-4 text-primary" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
-                </div>
-
-                <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
-                  {exportError && (
-                    <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                      <span>{exportError}</span>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-semibold text-zinc-300">
-                      Hujjat formati:
-                    </label>
-                    <div className="grid grid-cols-2 gap-3 max-w-xs">
-                      <button
-                        type="button"
-                        onClick={() => setExportFormat("PDF")}
-                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
-                          exportFormat === "PDF"
-                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
-                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
-                        }`}
-                      >
-                        <FileCheck className="w-3.5 h-3.5" />
-                        <span>PDF Format</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExportFormat("JSON")}
-                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
-                          exportFormat === "JSON"
-                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
-                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
-                        }`}
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>JSON Ma&apos;lumot</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      id="include-details"
-                      type="checkbox"
-                      checked={includeDetails}
-                      onChange={(e) => setIncludeDetails(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/[0.1] bg-surface text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="include-details" className="text-xs text-zinc-300 cursor-pointer">
-                      Barcha talabalar amaliyot va kundalik detallarini hisobotga qo&apos;shish
-                    </label>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-surface-container border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
-                    * Rasmiy ogohlantirish: Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi.
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isGeneratingExport}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/25"
-                  >
-                    {isGeneratingExport ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Hisobot shakllantirilmoqda...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Rasmiy Hisobotni Shakllantirish ({exportFormat})</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-
-              {/* Export Receipt Preview (when available) */}
-              {exportReceipt && (
-                <div className="p-5 rounded-xl bg-surface-card border border-emerald-500/20 flex flex-col gap-4 shadow-sm animate-in fade-in duration-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <div>
-                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                          Hisobot Tayyor (Kvitansiya #{exportReceipt.export_id.slice(0, 8)})
-                        </h4>
-                        <span className="text-[11px] text-zinc-400">
-                          Yaratilgan: {new Date(exportReceipt.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <a
-                      href={exportReceipt.download_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Yuklab Olish ({exportReceipt.export_format})</span>
-                    </a>
-                  </div>
-
-                  {/* Summary KPI Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-white/[0.06]">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Biriktirilgan Talabalar</span>
-                      <span className="text-xl font-bold font-mono text-white tabular-nums">
-                        {exportReceipt.summary.total_students_enrolled}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Superviziyalar</span>
-                      <span className="text-xl font-bold font-mono text-emerald-400 tabular-nums">
-                        {exportReceipt.summary.total_supervisions}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Amaliyotlar</span>
-                      <span className="text-xl font-bold font-mono text-blue-400 tabular-nums">
-                        {exportReceipt.summary.total_placements}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Ish Soatlari</span>
-                      <span className="text-xl font-bold font-mono text-amber-300 tabular-nums">
-                        {exportReceipt.summary.total_logged_hours} soat
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right 1 Column: Supervisions & Academic Agreements */}
-            <div className="flex flex-col gap-5">
-              {/* Student Supervisions Card (API-098) */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Superviziyalar ({supervisions.length})
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
-                </div>
-
-                {supervisionsError && (
-                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-                    {supervisionsError}
-                  </div>
-                )}
-
-                {isLoadingSupervisions ? (
-                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Yuklanmoqda...</span>
-                  </div>
-                ) : supervisions.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
-                    Superviziyalar mavjud emas.
-                  </div>
-                ) : (
-                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                    {supervisions.map((sup) => (
-                      <div
-                        key={sup.id}
-                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{sup.purpose}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            {sup.status || "ACTIVE"}
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Academic Agreements Card (API-101) */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Hamkorlik Shartnomalari ({academicAgreements.length})
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
-                </div>
-
-                {agreementsError && (
-                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-                    {agreementsError}
-                  </div>
-                )}
-
-                {isLoadingAgreements ? (
-                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Yuklanmoqda...</span>
-                  </div>
-                ) : academicAgreements.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
-                    Faol shartnomalar topilmadi.
-                  </div>
-                ) : (
-                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                    {academicAgreements.map((agr) => (
-                      <div
-                        key={agr.id}
-                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {agr.status}
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Shartnoma ID: #{agr.id.slice(0, 8)}...
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* TAB 2: TEACHER ASSIGNED PLACEMENTS & CONCLUSIONS */}
       {currentUser && activeTab === "assignments" && (
         <div className="flex flex-col gap-6">
@@ -1024,293 +872,6 @@ export default function UniversityPortal() {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
-      {currentUser && activeTab === "exports" && (
-        <div className="flex flex-col gap-6">
-          {/* Header Card */}
-          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Hisobot & Shartnomalar Hub
-                </span>
-                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
-              </div>
-              <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
-              </h2>
-              <p className="text-xs text-zinc-400">
-                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
-              </p>
-            </div>
-
-            {institutionId && (
-              <button
-                type="button"
-                disabled={isLoadingSupervisions || isLoadingAgreements}
-                onClick={() => loadReportsAndAgreements(institutionId)}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 self-start md:self-center disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSupervisions || isLoadingAgreements ? "animate-spin" : ""}`} />
-                <span>Yangilash</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Columns: Report Generator & Generated Receipt */}
-            <div className="lg:col-span-2 flex flex-col gap-5">
-              {/* Generator Form */}
-              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <FileSpreadsheet className="w-4 h-4 text-primary" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
-                </div>
-
-                <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
-                  {exportError && (
-                    <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                      <span>{exportError}</span>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-semibold text-zinc-300">
-                      Hujjat formati:
-                    </label>
-                    <div className="grid grid-cols-2 gap-3 max-w-xs">
-                      <button
-                        type="button"
-                        onClick={() => setExportFormat("PDF")}
-                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
-                          exportFormat === "PDF"
-                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
-                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
-                        }`}
-                      >
-                        <FileCheck className="w-3.5 h-3.5" />
-                        <span>PDF Format</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExportFormat("JSON")}
-                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
-                          exportFormat === "JSON"
-                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
-                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
-                        }`}
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>JSON Ma&apos;lumot</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      id="include-details"
-                      type="checkbox"
-                      checked={includeDetails}
-                      onChange={(e) => setIncludeDetails(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/[0.1] bg-surface text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="include-details" className="text-xs text-zinc-300 cursor-pointer">
-                      Barcha talabalar amaliyot va kundalik detallarini hisobotga qo&apos;shish
-                    </label>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-surface-container border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
-                    * Rasmiy ogohlantirish: Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi.
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isGeneratingExport}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/25"
-                  >
-                    {isGeneratingExport ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Hisobot shakllantirilmoqda...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Rasmiy Hisobotni Shakllantirish ({exportFormat})</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-
-              {/* Export Receipt Preview (when available) */}
-              {exportReceipt && (
-                <div className="p-5 rounded-xl bg-surface-card border border-emerald-500/20 flex flex-col gap-4 shadow-sm animate-in fade-in duration-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <div>
-                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                          Hisobot Tayyor (Kvitansiya #{exportReceipt.export_id.slice(0, 8)})
-                        </h4>
-                        <span className="text-[11px] text-zinc-400">
-                          Yaratilgan: {new Date(exportReceipt.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <a
-                      href={exportReceipt.download_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Yuklab Olish ({exportReceipt.export_format})</span>
-                    </a>
-                  </div>
-
-                  {/* Summary KPI Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-white/[0.06]">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Biriktirilgan Talabalar</span>
-                      <span className="text-xl font-bold font-mono text-white tabular-nums">
-                        {exportReceipt.summary.total_students_enrolled}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Superviziyalar</span>
-                      <span className="text-xl font-bold font-mono text-emerald-400 tabular-nums">
-                        {exportReceipt.summary.total_supervisions}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Amaliyotlar</span>
-                      <span className="text-xl font-bold font-mono text-blue-400 tabular-nums">
-                        {exportReceipt.summary.total_placements}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Ish Soatlari</span>
-                      <span className="text-xl font-bold font-mono text-amber-300 tabular-nums">
-                        {exportReceipt.summary.total_logged_hours} soat
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right 1 Column: Supervisions & Academic Agreements */}
-            <div className="flex flex-col gap-5">
-              {/* Student Supervisions Card (API-098) */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Superviziyalar ({supervisions.length})
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
-                </div>
-
-                {supervisionsError && (
-                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-                    {supervisionsError}
-                  </div>
-                )}
-
-                {isLoadingSupervisions ? (
-                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Yuklanmoqda...</span>
-                  </div>
-                ) : supervisions.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
-                    Superviziyalar mavjud emas.
-                  </div>
-                ) : (
-                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                    {supervisions.map((sup) => (
-                      <div
-                        key={sup.id}
-                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{sup.purpose}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            {sup.status || "ACTIVE"}
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Academic Agreements Card (API-101) */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Hamkorlik Shartnomalari ({academicAgreements.length})
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
-                </div>
-
-                {agreementsError && (
-                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-                    {agreementsError}
-                  </div>
-                )}
-
-                {isLoadingAgreements ? (
-                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Yuklanmoqda...</span>
-                  </div>
-                ) : academicAgreements.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
-                    Faol shartnomalar topilmadi.
-                  </div>
-                ) : (
-                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                    {academicAgreements.map((agr) => (
-                      <div
-                        key={agr.id}
-                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {agr.status}
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Shartnoma ID: #{agr.id.slice(0, 8)}...
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -1683,6 +1244,299 @@ export default function UniversityPortal() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* SECTION 2: OTM RASMIY MA'LUMOTNOMASI, FAKULTETLAR VA HAMKORLIK SHARTNOMALARINI QO'SHISH (API-098-DIRECTORY & API-101-CREATE) */}
+          <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-primary" />
+                  <span>OTM Pasporti, Fakultetlar & Ta&apos;lim Yo&apos;nalishlari va Hamkorlik Shartnomalari</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Universitet rekvizitlari, Karera markazi mas&apos;ullari, fakultetlar tarkibi va korxonalar bilan tuzilgan amaliyot shartnomalari.
+                </p>
+              </div>
+              <span className="px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-mono font-semibold">
+                To&apos;ldirilganlik: {instDirectoryProfile.completion_percent || 0}% • API-098-DIRECTORY
+              </span>
+            </div>
+
+            {instDirectorySuccessMsg && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <span>{instDirectorySuccessMsg}</span>
+              </div>
+            )}
+
+            {instDirectoryErrorMsg && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                {instDirectoryErrorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveInstDirectory} className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">OTM to&apos;liq rasmiy nomi</label>
+                  <input
+                    type="text"
+                    value={instDirectoryProfile.official_name}
+                    onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, official_name: e.target.value })}
+                    placeholder="Toshkent Axborot Texnologiyalari Universiteti"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">Qisqacha nomi va HEMIS / Reyestr kodi</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.short_name}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, short_name: e.target.value })}
+                      placeholder="TATU / TUIT"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                    />
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.registry_code}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, registry_code: e.target.value })}
+                      placeholder="OTM-380"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">Rektor F.I.Sh. va Karera markazi rahbari</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.rector_name}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, rector_name: e.target.value })}
+                      placeholder="Rektor F.I.Sh."
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                    />
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.career_center_head}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, career_center_head: e.target.value })}
+                      placeholder="Karera markazi rahbari"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">Yuridik manzil va Hudud</label>
+                  <input
+                    type="text"
+                    value={instDirectoryProfile.address}
+                    onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, address: e.target.value })}
+                    placeholder="Toshkent sh., Amir Temur shoh ko'chasi, 108-uy"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">Aloqa Telefoni va Rasmiy Email</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.contact_phone}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, contact_phone: e.target.value })}
+                      placeholder="+998712386415"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white font-mono"
+                    />
+                    <input
+                      type="email"
+                      value={instDirectoryProfile.contact_email}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, contact_email: e.target.value })}
+                      placeholder="info@tuit.uz"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-zinc-300">Yillik amaliyot kvotasi va Veb-sayt</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      value={instDirectoryProfile.annual_intern_quota}
+                      onChange={(e) =>
+                        setInstDirectoryProfile({ ...instDirectoryProfile, annual_intern_quota: Number(e.target.value) })
+                      }
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={instDirectoryProfile.website_url}
+                      onChange={(e) => setInstDirectoryProfile({ ...instDirectoryProfile, website_url: e.target.value })}
+                      placeholder="https://tuit.uz"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* FACULTIES & PROGRAMS BUILDER */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3">
+                  <span className="text-xs font-bold text-white">
+                    Fakultetlar tarkibi ({instDirectoryProfile.faculties?.length || 0})
+                  </span>
+                  {instDirectoryProfile.faculties && instDirectoryProfile.faculties.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {instDirectoryProfile.faculties.map((f, idx) => (
+                        <span
+                          key={f.id || idx}
+                          className="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-xs text-zinc-200 flex items-center gap-1.5"
+                        >
+                          <strong>{f.name}</strong>
+                          {f.dean_name ? `(${f.dean_name})` : ""}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={newFacultyName}
+                      onChange={(e) => setNewFacultyName(e.target.value)}
+                      placeholder="Fakultet nomi"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                    />
+                    <input
+                      type="text"
+                      value={newFacultyDean}
+                      onChange={(e) => setNewFacultyDean(e.target.value)}
+                      placeholder="Dekan F.I.Sh."
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddFaculty}
+                      className="px-3 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-xs font-semibold"
+                    >
+                      + Fakultet qo&apos;shish
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3">
+                  <span className="text-xs font-bold text-white">
+                    Ta&apos;lim yo&apos;nalishlari / Mutaxassisliklar ({instDirectoryProfile.programs?.length || 0})
+                  </span>
+                  {instDirectoryProfile.programs && instDirectoryProfile.programs.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {instDirectoryProfile.programs.map((p, idx) => (
+                        <span
+                          key={p.id || idx}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 font-mono"
+                        >
+                          {p.code} — {p.name} ({p.degree_level})
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={newProgramCode}
+                      onChange={(e) => setNewProgramCode(e.target.value)}
+                      placeholder="Shifr: 60610100"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={newProgramName}
+                      onChange={(e) => setNewProgramName(e.target.value)}
+                      placeholder="Yo'nalish nomi"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddProgram}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold"
+                    >
+                      + Yo&apos;nalish qo&apos;shish
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.06]">
+                <input
+                  type="text"
+                  value={instDirectoryProfile.internship_policy_summary}
+                  onChange={(e) =>
+                    setInstDirectoryProfile({ ...instDirectoryProfile, internship_policy_summary: e.target.value })
+                  }
+                  placeholder="OTM dual ta'lim va ishlab chiqarish amaliyoti nizomi qisqacha mazmuni..."
+                  className="flex-1 px-3 py-2 rounded-lg bg-surface border border-white/[0.1] text-xs text-white"
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingInstDirectory || isLoadingInstDirectory}
+                  className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-2 shrink-0 shadow-md shadow-primary/20"
+                >
+                  {isSavingInstDirectory ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  )}
+                  <span>OTM Ma&apos;lumotnomasini Saqlash</span>
+                </button>
+              </div>
+            </form>
+
+            {/* CREATE NEW PARTNER AGREEMENT FORM (API-101-CREATE) */}
+            <form
+              onSubmit={handleCreatePartnerAgreement}
+              className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col md:flex-row md:items-end gap-3"
+            >
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-emerald-400">
+                  + Yangi Hamkor Korxona bilan Amaliyot Shartnomasi Tuzish (API-101-CREATE)
+                </label>
+                <input
+                  type="text"
+                  value={newAgrPartnerName}
+                  onChange={(e) => setNewAgrPartnerName(e.target.value)}
+                  placeholder="Hamkor korxona nomi (Masalan: Uzinfocom MChJ)"
+                  className="px-3 py-2 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                />
+              </div>
+              <div className="w-full md:w-40 flex flex-col gap-1">
+                <label className="text-[11px] text-zinc-400">Shartnoma raqami</label>
+                <input
+                  type="text"
+                  value={newAgrNumber}
+                  onChange={(e) => setNewAgrNumber(e.target.value)}
+                  placeholder="AGR-2026-09"
+                  className="px-3 py-2 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
+                />
+              </div>
+              <div className="w-full md:w-28 flex flex-col gap-1">
+                <label className="text-[11px] text-zinc-400">Kvota o&apos;rni</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={newAgrQuota}
+                  onChange={(e) => setNewAgrQuota(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isCreatingAgreement || newAgrPartnerName.trim().length < 2}
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-semibold text-white shrink-0"
+              >
+                {isCreatingAgreement ? "Yaratilmoqda..." : "Shartnoma Qo'shish"}
+              </button>
+            </form>
           </div>
         </div>
       )}

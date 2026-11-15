@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.adapters import storage
 from app.api.dependencies import ActorContext, candidate_id_for
 from app.core.audit import AppendOnlyAuditStore
-from app.db.storage import files_table, now, table, transaction
+from app.db.storage import files_table, load_domain_record, now, table, transaction
 from app.services.auth import AuthError
 from app.services.authority import account_authority
 
@@ -179,6 +179,14 @@ class CandidateResumeExportService:
                 else 'Nomzod'
             )
 
+            # Extended resume sections (achievements, work_experiences, languages, education, preferences)
+            resume_details = load_domain_record('candidate_resume_details', str(cand_id)) or {}
+            achievements_list = resume_details.get('achievements', [])
+            work_experiences_list = resume_details.get('work_experiences', [])
+            languages_list = resume_details.get('languages', [])
+            education_details = resume_details.get('education_details', {})
+            career_preferences = resume_details.get('career_preferences', {})
+
             summary = {
                 'candidate_id': str(cand_id),
                 'candidate_name': candidate_name,
@@ -190,6 +198,9 @@ class CandidateResumeExportService:
                 'portfolios_count': len(portfolios_list),
                 'certificates_count': len(certificates_list),
                 'enrollments_count': len(enrollments_list),
+                'achievements_count': len(achievements_list),
+                'work_experiences_count': len(work_experiences_list),
+                'languages_count': len(languages_list),
                 'export_format': export_format,
                 'generated_at': now().isoformat(),
                 'disclaimer': RESUME_DISCLAIMER,
@@ -203,6 +214,11 @@ class CandidateResumeExportService:
                     'enrollments': enrollments_list,
                     'portfolios': portfolios_list,
                     'certificates': certificates_list,
+                    'achievements': achievements_list,
+                    'work_experiences': work_experiences_list,
+                    'languages': languages_list,
+                    'education_details': education_details,
+                    'career_preferences': career_preferences,
                 }
                 raw_bytes = json.dumps(full_export_data, indent=2, ensure_ascii=False).encode('utf-8')
                 mime_type = 'application/json'
@@ -215,6 +231,11 @@ class CandidateResumeExportService:
                     '/Author': 'FlexBridge Platform',
                     '/Subject': RESUME_DISCLAIMER,
                     '/Creator': 'FlexBridge R1 Candidate Portal Resume Engine',
+                    '/Keywords': (
+                        f"skills={len(skills_list)},portfolios={len(portfolios_list)},"
+                        f"certs={len(certificates_list)},achievements={len(achievements_list)},"
+                        f"work_experiences={len(work_experiences_list)},languages={len(languages_list)}"
+                    ),
                 })
                 buf = io.BytesIO()
                 writer.write(buf)

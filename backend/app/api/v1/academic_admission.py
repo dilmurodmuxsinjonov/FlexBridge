@@ -8,6 +8,7 @@ from app.services.academic_admission import academic_service as service
 from app.services.academic_views import academic_view_service as views
 from app.services.academic_records import academic_record_service as records
 from app.services.academic_reviews import academic_review_service as reviews
+from app.services.university_directory import university_directory_service
 from app.api.v1.placement_admission import TermsRequest
 
 router=APIRouter(prefix='/api/v1',tags=['academic-admission'])
@@ -122,3 +123,50 @@ class AcademicReviewRequest(BaseModel):
 def review_revision(revision:UUID,payload:AcademicReviewRequest,actor:ActorContext=Depends(require_actor_context)):
     return reviews.review(actor=actor,revision_id=str(revision),assignment_id=str(payload.academic_assignment_id),
         decision=payload.decision,comment=payload.comment,idempotency_key=payload.idempotency_key)
+
+
+class InstitutionDirectoryInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    official_name:str|None=None
+    short_name:str|None=None
+    registry_code:str|None=None
+    institution_type:str|None=None
+    region:str|None=None
+    address:str|None=None
+    rector_name:str|None=None
+    career_center_head:str|None=None
+    contact_phone:str|None=None
+    contact_email:str|None=None
+    website_url:str|None=None
+    faculties:list[dict]|None=None
+    programs:list[dict]|None=None
+    annual_intern_quota:int|None=None
+    internship_policy_summary:str|None=None
+
+
+class PartnerAgreementCreateInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    partner_organization_name:str=Field(min_length=2,max_length=200)
+    agreement_number:str|None=Field(default=None,max_length=80)
+    valid_from:str|None=None
+    valid_to:str|None=None
+    purposes:list[str]=Field(default_factory=lambda:['ACADEMIC_VIEW','INTERNSHIP_SUPERVISION'])
+    quota_slots:int=Field(default=25,ge=1,le=5000)
+    coordinator_note:str|None=Field(default=None,max_length=1000)
+    signed_file_id:UUID|None=None
+
+
+@router.get('/institutions/{inst}/directory-profile')
+def get_institution_directory_profile(inst:UUID,actor:ActorContext=Depends(require_actor_context)):
+    return university_directory_service.get_directory_profile(actor,str(inst))
+
+
+@router.put('/institutions/{inst}/directory-profile')
+def put_institution_directory_profile(inst:UUID,payload:InstitutionDirectoryInput,actor:ActorContext=Depends(require_actor_context)):
+    return university_directory_service.update_directory_profile(actor,str(inst),payload.model_dump(exclude_unset=True))
+
+
+@router.post('/institutions/{inst}/academic-agreements',status_code=201)
+def create_institution_agreement(inst:UUID,payload:PartnerAgreementCreateInput,actor:ActorContext=Depends(require_actor_context)):
+    return university_directory_service.create_partner_agreement(actor,str(inst),payload.model_dump())
+

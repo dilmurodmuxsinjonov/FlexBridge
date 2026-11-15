@@ -13,6 +13,7 @@ from app.services.schedule import local_today
 from app.services.candidate_portfolio import candidate_portfolio_service
 from app.services.candidate_certificates import candidate_certificates_service
 from app.services.candidate_resume_export import candidate_resume_export_service
+from app.services.candidate_resume_builder import candidate_resume_builder_service
 
 router = APIRouter(prefix='/api/v1', tags=['candidate'])
 
@@ -269,4 +270,52 @@ def export_resume(
         idempotency_key=payload.idempotency_key,
         export_format=payload.export_format,
     )
+
+
+class ResumeDetailsPayload(BaseModel):
+    model_config = ConfigDict(extra='allow')
+    achievements: list[dict] | None = None
+    work_experiences: list[dict] | None = None
+    languages: list[dict] | None = None
+    education_details: dict | None = None
+    career_preferences: dict | None = None
+
+
+class CandidatePdfUploadInput(Input):
+    filename: str = Field(default='document.pdf', min_length=1, max_length=240)
+    purpose: Literal['CERTIFICATE', 'CV', 'PORTFOLIO'] = 'CERTIFICATE'
+    title: str | None = Field(default=None, max_length=240)
+    content_base64: str | None = Field(default=None, max_length=15_000_000)
+
+
+# Candidate Full Resume Details (API-026-RESUME-DETAILS)
+@router.get('/me/candidate/resume-details')
+def get_resume_details(
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.get_resume_details(actor)
+
+
+@router.put('/me/candidate/resume-details')
+def update_resume_details(
+    payload: ResumeDetailsPayload,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.update_resume_details(
+        actor,
+        payload.model_dump(exclude_unset=True),
+    )
+
+
+# Candidate Direct PDF File Upload (API-026-DIRECT-UPLOAD)
+@router.post('/me/candidate/files/upload', status_code=201)
+def upload_candidate_pdf_file(
+    payload: CandidatePdfUploadInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.upload_candidate_pdf_file(
+        actor,
+        payload.model_dump(),
+    )
+
 
