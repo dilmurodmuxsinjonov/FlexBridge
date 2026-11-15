@@ -1220,6 +1220,12 @@ Keyingi kichik qadam:
   * Foydalanuvchi Markazi `/nomzod/yordam` sahifasi (Texnik yordam tiketlari, suhbat modali, GDPR EXPORT/DELETE/RECTIFY huquqlari va Bildirishnomalar matritsasi).
   * 18 ta staging test to'plami bo'yicha 175+/175+ test 100% Yashil (0 regressiya, 32.36s umumiy vaqt). Staging suite `scripts/test_user_support_privacy_staging.py` 10/10 faza 100% GREEN.
 
+- **FB-180 (Vacancy Lifecycle & Candidate Interview Responses Hub)**:
+  * 3 Next.js BFF marshruti: `/api/bff/employer/opportunities/[id]/publish`, `/api/bff/employer/opportunities/[id]/transition`, `/api/bff/candidate/interviews/[id]/responses` (API-081, API-082, API-042).
+  * Ish beruvchi panelida (`/employer`) vakansiyalarni nashr qilish, to'xtatish va yopish amallari.
+  * Nomzod arizalari bo'limida (`/nomzod/arizalar`) belgilangan suhbatlarga javob berish (qabul qilish, rad etish, vaqtini ko'chirish) interaktiv amallari.
+  * 19 ta staging test to'plami bo'yicha 185+/185+ test 100% Yashil (0 regressiya, 34.54s umumiy vaqt). Staging suite `scripts/test_vacancy_lifecycle_interviews_staging.py` 10/10 faza 100% GREEN.
+
 
 
 

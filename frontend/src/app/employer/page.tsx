@@ -68,6 +68,8 @@ import {
   fetchOrgBillingOverview,
   createOrgOrder,
   requestOrderRefund,
+  publishEmployerOpportunity,
+  transitionOpportunityStatus,
   AuthUser,
   EmployerDashboardMetrics,
   EmployerOpportunityApplicationItem,
@@ -117,6 +119,11 @@ export default function EmployerPortal() {
   const [appsError, setAppsError] = useState<string | null>(null);
   const [activeActionAppId, setActiveActionAppId] = useState<string | null>(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // FB-180: Opportunity Lifecycle State (API-081 & API-082)
+  const [isPublishingOpp, setIsPublishingOpp] = useState(false);
+  const [isTransitioningOpp, setIsTransitioningOpp] = useState(false);
+  const [oppLifecycleMsg, setOppLifecycleMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Modals for candidate actions
   const [interviewModalApp, setInterviewModalApp] = useState<EmployerOpportunityApplicationItem | null>(null);
@@ -347,6 +354,54 @@ export default function EmployerPortal() {
       setAppsError(err instanceof Error ? err.message : "Bosqichni o'zgartirishda xatolik");
     } finally {
       setActiveActionAppId(null);
+    }
+  };
+
+  // FB-180: Publish Opportunity (API-081)
+  const handlePublishOpportunity = async (oppId: string) => {
+    if (!oppId.trim()) return;
+    setIsPublishingOpp(true);
+    setOppLifecycleMsg(null);
+    try {
+      const res = await publishEmployerOpportunity(oppId.trim());
+      setOppLifecycleMsg({
+        type: "success",
+        text: `Vakansiya (${oppId.slice(0, 8)}...) muvaffaqiyatli nashr qilindi (API-081)! Holat: ${res.status || 'PUBLISHED'}`,
+      });
+      if (orgId.trim()) {
+        loadDashboard(orgId.trim());
+      }
+    } catch (err: unknown) {
+      setOppLifecycleMsg({
+        type: "error",
+        text: err instanceof Error ? err.message : "Vakansiyani nashr qilishda xatolik yuz berdi",
+      });
+    } finally {
+      setIsPublishingOpp(false);
+    }
+  };
+
+  // FB-180: Transition Opportunity Status (API-082)
+  const handleTransitionOpportunity = async (oppId: string, status: "PAUSED" | "CLOSED") => {
+    if (!oppId.trim()) return;
+    setIsTransitioningOpp(true);
+    setOppLifecycleMsg(null);
+    try {
+      await transitionOpportunityStatus(oppId.trim(), status);
+      setOppLifecycleMsg({
+        type: "success",
+        text: `Vakansiya holati '${status}' ga muvaffaqiyatli o'zgartirildi (API-082)!`,
+      });
+      if (orgId.trim()) {
+        loadDashboard(orgId.trim());
+      }
+    } catch (err: unknown) {
+      setOppLifecycleMsg({
+        type: "error",
+        text: err instanceof Error ? err.message : "Vakansiya holatini o'zgartirishda xatolik",
+      });
+    } finally {
+      setIsTransitioningOpp(false);
     }
   };
 
@@ -1175,8 +1230,67 @@ export default function EmployerPortal() {
                     </>
                   )}
                 </button>
+
+                {/* FB-180: Lifecycle Action Buttons */}
+                <button
+                  type="button"
+                  disabled={isPublishingOpp || !targetOppId.trim()}
+                  onClick={() => handlePublishOpportunity(targetOppId)}
+                  title="Qoralama vakansiyani nashr qilish (API-081)"
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+                >
+                  {isPublishingOpp ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                  <span>Nashr qilish</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isTransitioningOpp || !targetOppId.trim()}
+                  onClick={() => handleTransitionOpportunity(targetOppId, "PAUSED")}
+                  title="Vakansiyani vaqtincha to'xtatish (API-082)"
+                  className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span>To'xtatish</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isTransitioningOpp || !targetOppId.trim()}
+                  onClick={() => handleTransitionOpportunity(targetOppId, "CLOSED")}
+                  title="Vakansiyani yopish (API-082)"
+                  className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span>Yopish</span>
+                </button>
               </div>
             </div>
+
+            {/* Opportunity Lifecycle feedback message */}
+            {oppLifecycleMsg && (
+              <div
+                className={`p-3 rounded-lg text-xs flex items-center justify-between gap-2 border ${
+                  oppLifecycleMsg.type === "success"
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                    : "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {oppLifecycleMsg.type === "success" ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  )}
+                  <span>{oppLifecycleMsg.text}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOppLifecycleMsg(null)}
+                  className="text-zinc-400 hover:text-white text-xs font-bold p-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Action success message */}
             {actionSuccessMsg && (

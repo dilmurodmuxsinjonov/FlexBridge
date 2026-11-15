@@ -3398,6 +3398,101 @@ export async function updateMyNotificationPreferences(
   return data as NotificationPreferencesResponse;
 }
 
+// ---------------------------------------------------------------------------
+// FB-180: Opportunity Lifecycle & Interview Responses (API-081, API-082, API-042)
+// ---------------------------------------------------------------------------
+
+export interface PublishOpportunityResponse {
+  ok: boolean;
+  contract_id: "API-081";
+  opportunity_id?: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+export interface TransitionOpportunityResponse {
+  ok: boolean;
+  contract_id: "API-082";
+  opportunity_id?: string;
+  status: "PAUSED" | "CLOSED" | string;
+  [key: string]: unknown;
+}
+
+export interface InterviewResponsePayload {
+  response: "ACCEPTED" | "DECLINED" | "RESCHEDULE_REQUESTED" | "COMPLETED" | "NO_SHOW";
+  note?: string | null;
+}
+
+export interface InterviewResponseResult {
+  ok: boolean;
+  contract_id: "API-042";
+  interview_id?: string;
+  response?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export async function publishEmployerOpportunity(
+  opportunityId: string
+): Promise<PublishOpportunityResponse> {
+  const res = await fetch(`/api/bff/employer/opportunities/${encodeURIComponent(opportunityId)}/publish`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "PUBLISH_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as PublishOpportunityResponse;
+}
+
+export async function transitionOpportunityStatus(
+  opportunityId: string,
+  status: "PAUSED" | "CLOSED"
+): Promise<TransitionOpportunityResponse> {
+  const res = await fetch(`/api/bff/employer/opportunities/${encodeURIComponent(opportunityId)}/transition`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "TRANSITION_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as TransitionOpportunityResponse;
+}
+
+export async function respondToInterview(
+  interviewId: string,
+  payload: InterviewResponsePayload
+): Promise<InterviewResponseResult> {
+  const res = await fetch(`/api/bff/candidate/interviews/${encodeURIComponent(interviewId)}/responses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "RESPOND_INTERVIEW_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as InterviewResponseResult;
+}
+
+
 
 
 
