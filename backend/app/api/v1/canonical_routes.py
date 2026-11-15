@@ -75,6 +75,7 @@ from app.services.opportunities import OpportunityConstraintError, opportunity_s
 from app.services.moderation_cases import ModerationCaseError, moderation_cases_service
 from app.services.placements import PlacementScopeError, placement_service
 from app.services.workplace_reviews import WorkplaceReviewError, workplace_review_service
+from app.services.employer_search import EmployerSearchError, employer_candidate_search_service
 
 router = APIRouter(prefix="/api/v1", tags=["canonical-v1.4"])
 
@@ -1314,6 +1315,35 @@ def api_100_export_institution(
         ) from exc
 
 
+@router.get("/institutions/{inst}/analytics")
+def api_125_institution_analytics(
+    inst: UUID,
+    program: str | None = Query(default=None),
+    organization_id: UUID | None = Query(default=None),
+    status: str | None = Query(default=None),
+    from_date: date | None = Query(default=None),
+    to_date: date | None = Query(default=None),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-125: University Portal Analytics (attendance, weekly hours, internship outcomes)."""
+    try:
+        from app.services.university_analytics import university_analytics_service, UniversityAnalyticsError
+        return university_analytics_service.get_institution_analytics(
+            actor=actor,
+            institution_id=inst,
+            program=program,
+            organization_id=organization_id,
+            status=status,
+            from_date=from_date,
+            to_date=to_date,
+        )
+    except UniversityAnalyticsError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
 @router.get("/operator/support-tickets")
 def api_112_operator_support_tickets(
     status: str | None = None,
@@ -1652,6 +1682,68 @@ def api_unimplemented_contract_test(actor: ActorContext = Depends(require_actor_
             "actor_id": actor.user_id,
         },
     )
+
+
+@router.get("/employer/candidates/search")
+def api_087_employer_candidate_search(
+    q: str | None = Query(default=None),
+    skills: list[str] = Query(default_factory=list),
+    skill_match_mode: str = Query(default="ANY", pattern="^(ANY|ALL)$"),
+    min_skill_level: str | None = Query(default=None),
+    verified_skills_only: bool = Query(default=False),
+    region: str | None = Query(default=None),
+    experience_min_months: int | None = Query(default=None, ge=0, le=1200),
+    experience_max_months: int | None = Query(default=None, ge=0, le=1200),
+    shift: str | None = Query(default=None),
+    weekdays: list[int] = Query(default_factory=list),
+    opportunity_id: UUID | None = Query(default=None),
+    verified_student_only: bool = Query(default=False),
+    limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-087: Smart candidate talent search for authorized employers."""
+    try:
+        return employer_candidate_search_service.search_candidates(
+            actor,
+            q=q,
+            skills=skills,
+            skill_match_mode=skill_match_mode,
+            min_skill_level=min_skill_level,
+            verified_skills_only=verified_skills_only,
+            region=region,
+            experience_min_months=experience_min_months,
+            experience_max_months=experience_max_months,
+            shift=shift,
+            weekdays=weekdays,
+            opportunity_id=str(opportunity_id) if opportunity_id else None,
+            verified_student_only=verified_student_only,
+            limit=limit,
+            cursor=cursor,
+        )
+    except EmployerSearchError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
+
+
+@router.get("/employer/candidates/{candidate_id}")
+def api_087_employer_candidate_detail(
+    candidate_id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Canonical API-087-DETAIL: Candidate profile detail for authorized employers."""
+    try:
+        return employer_candidate_search_service.get_candidate_detail(
+            actor,
+            candidate_id=str(candidate_id),
+        )
+    except EmployerSearchError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
 
 
 
