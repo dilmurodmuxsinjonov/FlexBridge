@@ -4,7 +4,9 @@ from typing import Literal,Any
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header,Request
 from pydantic import BaseModel,ConfigDict,Field
+from sqlalchemy import select
 from app.api.dependencies import ActorContext,require_actor_context
+from app.db.storage import table,transaction
 from app.services.identity import identity_service
 from app.services.passkeys import passkey_service
 
@@ -80,6 +82,26 @@ def consume(id:UUID,payload:ConsumeInput,request:Request):
 @router.post('/auth/mfa/verify')
 def verify_mfa(payload:MFAInput,request:Request):
     return identity_service.verify_mfa(**payload.model_dump(),ip=ip(request))
+
+@router.get('/me/contacts')
+def list_contacts(actor:ActorContext=Depends(require_actor_context)):
+    contacts=table('user_contacts')
+    with transaction() as conn:
+        rows=conn.execute(select(contacts.c.id,contacts.c.channel,contacts.c.normalized_value,contacts.c.is_primary,contacts.c.verified_at)
+            .where(contacts.c.user_id==actor.user_id,contacts.c.verified_at.is_not(None),contacts.c.revoked_at.is_(None))
+            .order_by(contacts.c.is_primary.desc(),contacts.c.created_at.desc())).mappings().all()
+        items=[]
+        for r in rows:
+            val=str(r['normalized_value'] or '')
+            if '@' in val:
+                local,domain=val.split('@',1)
+                masked=(local[:2]+'***@'+domain) if len(local)>2 else ('***@'+domain)
+            elif len(val)>=7:
+                masked=val[:6]+'***'+val[-4:]
+            else:
+                masked='***'
+            items.append({'id':str(r['id']),'channel':r['channel'],'masked_destination':masked,'is_primary':bool(r['is_primary']),'verified_at':r['verified_at']})
+        return {'items':items}
 
 @router.post('/me/contacts',status_code=201)
 def bind_contact(payload:ContactInput,actor:ActorContext=Depends(require_actor_context)):

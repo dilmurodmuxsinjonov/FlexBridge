@@ -1298,3 +1298,11 @@ Keyingi kichik qadam:
   * **Ommaviy Katalog (`/`) & Auth (`/kirish`, `/royxatdan-otish`)**: 2 ustunli assimetrik qidiruv + 3 ta rol kirish kartasi (`/`), hamda rolga xos tushuntirish panelli 2 ustunli kirish/ro‘yxatdan o‘tish dizayni.
   * **Korxona (`/employer`), Universitet (`/university`), Operator (`/operator`)**: Har biri uchun mustaqil rang identifikatsiyasi (`Emerald`, `Indigo`, `Amber/SOC`), chap vertikal boshqaruv paneli va rolga xos sarlavha panellari yaratildi.
   * **To'liq Tekshiruv**: `npx tsc --noEmit`, Docker production build (18 ta sahifa SSR HTTP 200) va barcha **31/31 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (78.94s)**.
+
+
+### 2026-11-15 | LOG-158 | Issue #212 (`feature/212-university-isolated-login`) -> Universitet / OTM (`ACADEMIC`) alohida kirish, rol chegarasi va tayinlov roziligi
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (ALL 34/34 STAGING TEST SUITES GREEN)**.
+- **Nima Qilindi**:
+  * **OTM Alohida Kirish & Ulanish (`/universitet/kirish`, `/universitet/royxatdan-otish`)**: Faqat `ACADEMIC` portaliga ruxsat beruvchi parol + 2FA TOTP kirish hamda SMS/Telegram orqali hisob ochib tayinlov roziligini (`ACCEPT`/`DECLINE`) rasmiylashtiruvchi 3 bosqichli oqim yaratildi (`GET /api/v1/me/contacts` va `/api/bff/university/appointments*`).
+  * **Rol Chegarasi & Scoped UI**: `university/layout.tsx`, `university/page.tsx`, `AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `/` va `/kirish` sahifalarida Universitet / OTM menyu va kirish nuqtalari izolyatsiya qilindi (boshqa rollar 403 / Role Boundary bilan bloklandi; `main` muzlatilgan holda saqlandi).
+  * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` (0 xato), Docker `backend`/`frontend` build, `test_university_isolated_login_staging.py` (4/4 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**34/34 to'plam 100% YASHIL, 91.4s**).

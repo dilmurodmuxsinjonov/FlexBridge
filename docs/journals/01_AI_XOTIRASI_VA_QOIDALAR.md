@@ -1699,3 +1699,11 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - `npx tsc --noEmit`: 0 errors.
   - Docker `frontend` production build & container startup succeeded cleanly; all 18 frontend routes returned SSR HTTP 200.
   - Master 31-suite regression runner `scripts/run_all_staging_tests.py`: **ALL 31/31 TEST SUITES PASSED 100% GREEN in 78.94s (zero regressions)**.
+
+
+## 2026-11-15 — Universitet / OTM Alohida Kirishi va Vakolat Qabul Qilishi (`LOG-158` / Issue `#212`)
+- **Isolated Academic Portal Auth & Role Boundary**:
+  - Dedicated Indigo OTM auth pages `/universitet/kirish` (`portal="ACADEMIC"`) and `/universitet/royxatdan-otish` (SMS/Telegram + institution appointment consent via `/api/bff/university/appointments` and `/api/bff/university/appointments/[id]/consent` + `/api/v1/me/contacts`).
+  - Wrapped `/university` with `frontend/src/app/university/layout.tsx` (blocking non-academic authenticated sessions with Role Boundary guard), passed `requiredPortal="ACADEMIC"` into `/university/page.tsx` `<AuthModal>`, and scoped `Navbar.tsx` + `Footer.tsx` + `AuthModal.tsx` + `/` + `/kirish` to isolate OTM navigation without cross-role leakage.
+  - `main`/`master` remains strictly frozen; work targets `integration/r1-agent-collaboration` only.
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on touched/new files (0 errors), Docker `backend` + `frontend` rebuild, `scripts/test_university_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**34/34 suites PASSED in 91.4s**).

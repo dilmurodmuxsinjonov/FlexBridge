@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import {
   CheckCircle2,
@@ -579,8 +580,9 @@ export default function UniversityPortal() {
 
   useEffect(() => {
     let isMounted = true;
-    fetchAuthMe().then((user) => {
-      if (isMounted) {
+    const syncAuthAndQueues = () => {
+      fetchAuthMe().then((user) => {
+        if (!isMounted) return;
         setCurrentUser(user);
         setIsAuthLoading(false);
         if (user) {
@@ -588,10 +590,13 @@ export default function UniversityPortal() {
           loadAssignments();
           loadCoordinatorQueue();
         }
-      }
-    });
+      });
+    };
+    syncAuthAndQueues();
+    window.addEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     return () => {
       isMounted = false;
+      window.removeEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     };
   }, [loadQueue, loadAssignments, loadCoordinatorQueue]);
 
@@ -608,6 +613,7 @@ export default function UniversityPortal() {
     setSelectedReviewItem(null);
     setIsConclusionModalOpen(false);
     setIsNominateModalOpen(false);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
   };
 
   const handleOpenReview = (item: AcademicReviewQueueItem) => {
@@ -788,14 +794,13 @@ export default function UniversityPortal() {
                 <span>Chiqish</span>
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => setIsLoginModalOpen(true)}
+              <Link
+                href="/universitet/kirish"
                 className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>O‘qituvchi sifatida kirish</span>
-              </button>
+              </Link>
             )}
           </div>
         </div>
@@ -815,14 +820,28 @@ export default function UniversityPortal() {
               Talabalarning amaliyot kundaliklarini baholash, yakuniy akademik xulosalarni rasmiylashtirish yoki o‘qituvchilarni biriktirish uchun tizimga kiring.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
-          >
-            <LogIn className="w-4 h-4" />
-            <span>Tizimga kirish</span>
-          </button>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/universitet/kirish"
+              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>OTM alohida kirishi</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsLoginModalOpen(true)}
+              className="px-4 py-2.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-semibold text-indigo-300 transition-all"
+            >
+              Tezkor oyna orqali kirish
+            </button>
+            <Link
+              href="/universitet/royxatdan-otish"
+              className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-xs font-semibold text-zinc-300 transition-all"
+            >
+              OTM vakili ulanishi
+            </Link>
+          </div>
         </section>
       )}
 
@@ -3218,6 +3237,7 @@ export default function UniversityPortal() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
+        requiredPortal="ACADEMIC"
         title="Universitet O‘qituvchisi Kirishi"
         subtitle="Kafedra o‘qituvchisi yoki koordinator hisob ma’lumotlaringizni kiriting"
       />

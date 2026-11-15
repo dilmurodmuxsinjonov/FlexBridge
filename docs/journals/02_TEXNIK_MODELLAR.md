@@ -468,3 +468,12 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - `UNIVERSITY` (`/university`): Indigo (`indigo-400`/`indigo-500`) Academic Deanery workspace rail & live semester counters.
   - `OPERATOR` (`/operator`): Amber/Rose (`amber-400`/`amber-500`) SOC Audit Terminal monospace left module rail.
 - **Verification**: `npx tsc --noEmit` (0 errors), Docker Next.js production build & 18-route SSR HTTP 200 check, and `scripts/run_all_staging_tests.py` (**31/31 PASS in 78.94s**).
+
+
+## UNIV-ISO-FB212 — University / OTM Isolated Login, Role Boundary & Appointment Consent (2026-11-15)
+
+- **Scope**: `backend/app/api/v1/iam.py`, `backend/app/main.py`, `frontend/src/lib/roles.ts`, `frontend/src/app/api/bff/university/appointments/route.ts`, `frontend/src/app/api/bff/university/appointments/[id]/consent/route.ts`, `frontend/src/app/university/layout.tsx`, `frontend/src/app/university/page.tsx`, `frontend/src/app/universitet/kirish/page.tsx`, `frontend/src/app/universitet/royxatdan-otish/page.tsx`, `frontend/src/components/AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/kirish/page.tsx`, `scripts/test_university_isolated_login_staging.py`, `scripts/run_all_staging_tests.py`.
+- **Technical Architecture**:
+  - Added read-only `GET /api/v1/me/contacts` (allowlisted in `self_service`) and Next.js BFF routes for institution appointment inbox (`GET /api/bff/university/appointments`) and revision-checked consent (`POST /api/bff/university/appointments/[id]/consent`) with session cookie role refresh (`TEACHER`/`COORDINATOR`).
+  - Enforced `portal="ACADEMIC"` on `/universitet/kirish` and `/university` `<AuthModal>` alongside `isAcademicRoles` boundary checking in `university/layout.tsx` and Indigo-scoped `Navbar.tsx`/`Footer.tsx`.
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors), Docker `backend`/`frontend` build, `scripts/test_university_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**34/34 PASSED in 91.4s**). Frozen-main constraint preserved (`integration/r1-agent-collaboration`).
