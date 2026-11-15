@@ -3471,7 +3471,7 @@ export interface NotificationItem {
   application_id?: string | null;
   ticket_id?: string | null;
   is_read: boolean;
-  notice?: any;
+  notice?: Record<string, unknown> | null;
 }
 
 export interface NotificationsResponse {

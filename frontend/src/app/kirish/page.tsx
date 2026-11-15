@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -36,6 +36,25 @@ function KirishForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const handleRedirectAfterLogin = useCallback(
+    (roles: string[]) => {
+      if (redirectParam && redirectParam.startsWith("/")) {
+        router.push(redirectParam);
+        return;
+      }
+      if (roles.includes("OPERATOR")) {
+        router.push("/operator");
+      } else if (roles.includes("EMPLOYER") || roles.includes("ORGANIZATION")) {
+        router.push("/employer");
+      } else if (roles.includes("ACADEMIC") || roles.includes("TEACHER")) {
+        router.push("/university");
+      } else {
+        router.push("/nomzod");
+      }
+    },
+    [redirectParam, router]
+  );
+
   // Auto-redirect if already logged in
   useEffect(() => {
     let isMounted = true;
@@ -47,23 +66,7 @@ function KirishForm() {
     return () => {
       isMounted = false;
     };
-  }, []);
-
-  const handleRedirectAfterLogin = (roles: string[]) => {
-    if (redirectParam && redirectParam.startsWith("/")) {
-      router.push(redirectParam);
-      return;
-    }
-    if (roles.includes("OPERATOR")) {
-      router.push("/operator");
-    } else if (roles.includes("EMPLOYER") || roles.includes("ORGANIZATION")) {
-      router.push("/employer");
-    } else if (roles.includes("ACADEMIC") || roles.includes("TEACHER")) {
-      router.push("/university");
-    } else {
-      router.push("/nomzod");
-    }
-  };
+  }, [handleRedirectAfterLogin]);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -12,13 +12,11 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
-  Lock,
   Smartphone,
   Eye,
   EyeOff,
   Shield,
   KeyRound,
-  FileText,
   User,
 } from "lucide-react";
 import {
@@ -34,10 +32,24 @@ type RoleOption = "CANDIDATE" | "EMPLOYER" | "ACADEMIC";
 function RoyxatdanOtishWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const roleParam = searchParams.get("role");
 
   // Wizard Step: 1 = Role, 2 = Contact & OTP, 3 = Profile & Password
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedRole, setSelectedRole] = useState<RoleOption>("CANDIDATE");
+
+  useEffect(() => {
+    if (roleParam) {
+      const upper = roleParam.toUpperCase();
+      if (upper === "EMPLOYER" || upper === "ORGANIZATION") {
+        setSelectedRole("EMPLOYER");
+      } else if (upper === "ACADEMIC" || upper === "UNIVERSITY" || upper === "TEACHER") {
+        setSelectedRole("ACADEMIC");
+      } else if (upper === "CANDIDATE" || upper === "NOMZOD") {
+        setSelectedRole("CANDIDATE");
+      }
+    }
+  }, [roleParam]);
 
   // Step 2 State
   const [channel] = useState<"PHONE" | "EMAIL">("PHONE");

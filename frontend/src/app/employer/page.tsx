@@ -25,9 +25,7 @@ import {
   MapPin,
   ArrowRight,
   Award,
-  BookOpen,
   CheckSquare,
-  MessageSquare,
   ExternalLink,
   ShieldAlert,
   FileCheck,
@@ -37,7 +35,6 @@ import {
   Mail,
   Phone,
   Trash2,
-  Key,
   CreditCard,
   Receipt,
   Coins,
@@ -84,7 +81,6 @@ import {
   OrgEntitlementsResponse,
   OrgBillingOverviewResponse,
   OrgOrderItem,
-  OrgInvoiceItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
