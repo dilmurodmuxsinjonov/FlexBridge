@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   GraduationCap,
   Building2,
   School,
+  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -32,30 +33,69 @@ import {
   registerCandidateUser,
   fetchAuthMe,
 } from "@/lib/api";
+import { isOperatorRoles, resolvePortalDashboard } from "@/lib/roles";
 
-type RoleOption = "CANDIDATE" | "EMPLOYER" | "ACADEMIC";
+type RoleOption = "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR";
 type DeliveryMethodOption = "SMS" | "TELEGRAM";
+
+interface InvitePreview {
+  organization_id: string;
+  organization_name?: string;
+  role_code: string;
+  channel: string;
+  masked_destination: string;
+  expires_at: string;
+  status: string;
+}
+
+interface PendingAppointmentItem {
+  id: string;
+  institution_id: string;
+  status: string;
+  case_status: string;
+  current_revision: number;
+}
+
+interface VerifiedContactItem {
+  id: string;
+  channel: string;
+  masked_destination: string;
+  is_primary: boolean;
+}
+
+function normalizeRoleParam(param: string | null): RoleOption {
+  if (!param) return "CANDIDATE";
+  const upper = param.trim().toUpperCase();
+  if (upper === "EMPLOYER" || upper === "ORGANIZATION" || upper === "HR") return "EMPLOYER";
+  if (upper === "ACADEMIC" || upper === "UNIVERSITY" || upper === "TEACHER" || upper === "COORDINATOR") {
+    return "ACADEMIC";
+  }
+  if (upper === "OPERATOR" || upper === "MODERATOR" || upper === "AUDITOR" || upper === "SOC") {
+    return "OPERATOR";
+  }
+  return "CANDIDATE";
+}
 
 function RoyxatdanOtishWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roleParam = searchParams.get("role");
+  const inviteParam = searchParams.get("invite") || "";
 
-  // Wizard Step: 1 = Role, 2 = Contact & OTP, 3 = Profile & Password
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedRole, setSelectedRole] = useState<RoleOption>("CANDIDATE");
+  // Wizard Step: 1 = Role, 2 = Contact & OTP, 3 = Profile & Password, 4 = Role Activation
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [selectedRole, setSelectedRole] = useState<RoleOption>(() => normalizeRoleParam(roleParam));
+  const [inviteToken, setInviteToken] = useState(inviteParam);
+  const [invitePreview, setInvitePreview] = useState<InvitePreview | null>(null);
+  const [pendingAppointments, setPendingAppointments] = useState<PendingAppointmentItem[]>([]);
+  const [verifiedContacts, setVerifiedContacts] = useState<VerifiedContactItem[]>([]);
+  const [activationBusy, setActivationBusy] = useState(false);
 
   useEffect(() => {
-    if (roleParam) {
-      const upper = roleParam.toUpperCase();
-      if (upper === "EMPLOYER" || upper === "ORGANIZATION") {
-        setSelectedRole("EMPLOYER");
-      } else if (upper === "ACADEMIC" || upper === "UNIVERSITY" || upper === "TEACHER") {
-        setSelectedRole("ACADEMIC");
-      } else if (upper === "CANDIDATE" || upper === "NOMZOD") {
-        setSelectedRole("CANDIDATE");
-      }
-    }
+    if (!roleParam) return;
+    const mapped = normalizeRoleParam(roleParam);
+    const id = setTimeout(() => setSelectedRole(mapped), 0);
+    return () => clearTimeout(id);
   }, [roleParam]);
 
   // Step 2 State
@@ -110,9 +150,8 @@ function RoyxatdanOtishWizard() {
 
     fetchAuthMe().then((user) => {
       if (isMounted && user) {
-        if (user.roles.includes("EMPLOYER")) router.push("/employer");
-        else if (user.roles.includes("ACADEMIC")) router.push("/university");
-        else router.push("/nomzod");
+        const dash = resolvePortalDashboard(user.roles);
+        router.push(dash.href);
       }
     });
 
@@ -120,6 +159,144 @@ function RoyxatdanOtishWizard() {
       isMounted = false;
     };
   }, [router]);
+
+  const loadAppointmentInbox = useCallback(async () => {
+    setActivationBusy(true);
+    try {
+      const res = await fetch("/api/bff/university/appointments", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setPendingAppointments(Array.isArray(data.items) ? data.items : []);
+        setVerifiedContacts(Array.isArray(data.contacts) ? data.contacts : []);
+      }
+    } catch {
+      // Non-fatal while polling/loading appointment inbox
+    } finally {
+      setActivationBusy(false);
+    }
+  }, []);
+
+  const handlePreviewInvite = async () => {
+    if (!inviteToken.trim()) {
+      setErrorMessage("Korxona taklif tokenini kiriting.");
+      return;
+    }
+    setActivationBusy(true);
+    setErrorMessage(null);
+    try {
+      const res = await fetch(`/api/bff/invitations/${encodeURIComponent(inviteToken.trim())}`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setInvitePreview(null);
+        setErrorMessage(data.error || data.detail?.code || "Taklif tokeni topilmadi yoki muddati o‘tgan.");
+      } else {
+        setInvitePreview(data as InvitePreview);
+      }
+    } catch {
+      setErrorMessage("Taklifni tekshirishda tarmoq xatosi yuz berdi.");
+    } finally {
+      setActivationBusy(false);
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    if (!inviteToken.trim()) return;
+    setActivationBusy(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await fetch(`/api/bff/invitations/${encodeURIComponent(inviteToken.trim())}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        if (data.error === "MFA_REQUIRED" || data.detail?.code === "MFA_REQUIRED") {
+          setErrorMessage(
+            "Korxona taklifini qabul qilish uchun avval 2FA (TOTP) ni yoqing va qayta tizimga kiring (/nomzod/xavfsizlik)."
+          );
+        } else {
+          setErrorMessage(data.message || data.error || data.detail?.code || "Taklifni qabul qilib bo‘lmadi.");
+        }
+      } else {
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        const dash = resolvePortalDashboard(Array.isArray(data.roles) ? data.roles : ["HR"]);
+        setSuccessMessage(`Korxona vakolati faollashtirildi! ${dash.label}ga yo‘naltirilmoqda...`);
+        setTimeout(() => {
+          router.push(dash.href);
+          router.refresh();
+        }, 450);
+      }
+    } catch {
+      setErrorMessage("Taklifni qabul qilishda tarmoq xatosi yuz berdi.");
+    } finally {
+      setActivationBusy(false);
+    }
+  };
+
+  const handleAppointmentConsent = async (appt: PendingAppointmentItem, decision: "ACCEPT" | "DECLINE") => {
+    const contactId = verifiedContacts[0]?.id;
+    if (decision === "ACCEPT" && !contactId) {
+      setErrorMessage("Rozilik berish uchun tasdiqlangan telefon/email kontaktingiz topilmadi.");
+      return;
+    }
+    setActivationBusy(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await fetch(`/api/bff/university/appointments/${encodeURIComponent(appt.id)}/consent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expected_revision: appt.current_revision,
+          decision,
+          ...(decision === "ACCEPT" && contactId ? { contact_id: contactId } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setErrorMessage(data.error || data.detail?.code || "Tayinlov qarorini yuborib bo‘lmadi.");
+        await loadAppointmentInbox();
+      } else if (decision === "ACCEPT") {
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        const dash = resolvePortalDashboard(Array.isArray(data.roles) ? data.roles : ["TEACHER"]);
+        setSuccessMessage(`OTM vakolatingiz faollashtirildi! ${dash.label}ga yo‘naltirilmoqda...`);
+        setTimeout(() => {
+          router.push(dash.href);
+          router.refresh();
+        }, 450);
+      } else {
+        setSuccessMessage("Tayinlov rad etildi.");
+        await loadAppointmentInbox();
+      }
+    } catch {
+      setErrorMessage("Tayinlov roziligini yuborishda tarmoq xatosi yuz berdi.");
+    } finally {
+      setActivationBusy(false);
+    }
+  };
+
+  const handleRecheckOperatorRoles = async () => {
+    setActivationBusy(true);
+    setErrorMessage(null);
+    try {
+      const user = await fetchAuthMe();
+      if (user && isOperatorRoles(user.roles)) {
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        router.push("/operator");
+        router.refresh();
+      } else {
+        setErrorMessage(
+          "Hozircha platforma granti (OPERATOR/MODERATOR/AUDITOR) faollashmagan. Vakolat tasdiqlangach /operator/kirish orqali kiring."
+        );
+      }
+    } finally {
+      setActivationBusy(false);
+    }
+  };
 
   // Resend Countdown
   useEffect(() => {
@@ -339,16 +516,42 @@ function RoyxatdanOtishWizard() {
         adult_confirmed: adultConfirmed,
         terms_version: termsVersion,
         privacy_version: privacyVersion,
-        roles: [selectedRole],
+        roles: ["CANDIDATE"],
       });
 
       if (res.ok) {
-        setSuccessMessage("Hisobingiz muvaffaqiyatli yaratildi! Kabinetga yo‘naltirilmoqda...");
-        setTimeout(() => {
-          if (selectedRole === "EMPLOYER") router.push("/employer");
-          else if (selectedRole === "ACADEMIC") router.push("/university");
-          else router.push("/nomzod");
-        }, 800);
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        const me = await fetchAuthMe();
+        const userRoles = me?.roles || ["CANDIDATE"];
+        const dash = resolvePortalDashboard(userRoles);
+
+        if (selectedRole === "CANDIDATE" || dash.portal === selectedRole) {
+          setSuccessMessage(`Hisobingiz yaratildi! ${dash.label}ga yo‘naltirilmoqda...`);
+          setTimeout(() => {
+            router.push(dash.href);
+            router.refresh();
+          }, 600);
+          return;
+        }
+
+        if (selectedRole === "EMPLOYER") {
+          setSuccessMessage("Hisob yaratildi! Korxona taklif tokeni bo‘lsa quyida faollashtiring.");
+          if (inviteToken.trim()) {
+            await handlePreviewInvite();
+          }
+          setStep(4);
+          return;
+        }
+
+        if (selectedRole === "ACADEMIC") {
+          setSuccessMessage("Hisob yaratildi! OTM tayinlov roziligingizni quyida tasdiqlang.");
+          await loadAppointmentInbox();
+          setStep(4);
+          return;
+        }
+
+        setSuccessMessage("Bazaviy hisob yaratildi! Operator SOC vakolati protokolini ko‘ring.");
+        setStep(4);
       } else {
         setErrorMessage("Ro‘yxatdan o‘tishda xatolik yuz berdi.");
       }
@@ -386,7 +589,7 @@ function RoyxatdanOtishWizard() {
           Ro‘yxatdan O‘tish
         </h1>
         <p className="text-xs text-zinc-400">
-          Dars jadvaliga mos smenali ishlar va rasmiy amaliyot platformasi
+          Talaba, Korxona, Universitet va Operator uchun yagona ro‘yxatdan o‘tish va rolga yo‘naltirish
         </p>
       </div>
 
@@ -401,10 +604,10 @@ function RoyxatdanOtishWizard() {
             1
           </div>
           <span className={`text-xs ${step >= 1 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
-            Rolni tanlash
+            Rol
           </span>
         </div>
-        <div className="w-8 h-[1px] bg-zinc-800" />
+        <div className="w-6 h-[1px] bg-zinc-800" />
         <div className="flex items-center gap-2">
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
@@ -417,7 +620,7 @@ function RoyxatdanOtishWizard() {
             Telefon
           </span>
         </div>
-        <div className="w-8 h-[1px] bg-zinc-800" />
+        <div className="w-6 h-[1px] bg-zinc-800" />
         <div className="flex items-center gap-2">
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
@@ -428,6 +631,19 @@ function RoyxatdanOtishWizard() {
           </div>
           <span className={`text-xs ${step >= 3 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
             Profil
+          </span>
+        </div>
+        <div className="w-6 h-[1px] bg-zinc-800" />
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
+              step >= 4 ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-500"
+            }`}
+          >
+            4
+          </div>
+          <span className={`text-xs ${step >= 4 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
+            Kabinet
           </span>
         </div>
       </div>
@@ -456,10 +672,10 @@ function RoyxatdanOtishWizard() {
           <div className="space-y-4">
             <div className="space-y-1">
               <h2 className="text-sm font-semibold text-zinc-200">
-                Platformadagi faoliyat turini tanlang
+                Platformadagi faoliyat turini tanlang (4 portal)
               </h2>
               <p className="text-xs text-zinc-400">
-                Har bir rol uchun moslashtirilgan xizmatlar va vositalar taqdim etiladi
+                Ro‘yxatdan o‘tgach hisobingiz roliga qarab avtomatik o‘z kabinetingizga o‘tkazilasiz
               </p>
             </div>
 
@@ -469,28 +685,28 @@ function RoyxatdanOtishWizard() {
                 onClick={() => setSelectedRole("CANDIDATE")}
                 className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
                   selectedRole === "CANDIDATE"
-                    ? "bg-indigo-950/20 border-indigo-500/80 ring-1 ring-indigo-500/40"
+                    ? "bg-sky-950/25 border-sky-500/80 ring-1 ring-sky-500/40"
                     : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
                 }`}
               >
                 <div
                   className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "CANDIDATE" ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-400"
+                    selectedRole === "CANDIDATE" ? "bg-sky-600 text-white" : "bg-zinc-800 text-zinc-400"
                   }`}
                 >
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-zinc-100">
-                      Talaba / Ish Izlovchi (Nomzod)
+                      1. Talaba / Nomzod
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Faol
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                      /nomzod
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                    Dars jadvaliga mos amaliyot, smenali ishlar va rasmiy shartnomalar
+                    Dars jadvaliga mos amaliyot, rezyume, smenali ishlar va e-imzoli kundalik
                   </p>
                 </div>
               </div>
@@ -500,28 +716,28 @@ function RoyxatdanOtishWizard() {
                 onClick={() => setSelectedRole("EMPLOYER")}
                 className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
                   selectedRole === "EMPLOYER"
-                    ? "bg-indigo-950/20 border-indigo-500/80 ring-1 ring-indigo-500/40"
+                    ? "bg-emerald-950/25 border-emerald-500/80 ring-1 ring-emerald-500/40"
                     : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
                 }`}
               >
                 <div
                   className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "EMPLOYER" ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-400"
+                    selectedRole === "EMPLOYER" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"
                   }`}
                 >
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-zinc-100">
-                      Ish Beruvchi / Tashkilot
+                      2. Korxona / HR Vakili
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                      Korxona
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      /employer
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                    Vakansiya e’lon berish, talaba-amaliyotchilar va jamoa mentorligi
+                    Tashkilot taklifini qabul qilish, vakansiyalar, nomzod Kanban va mentorlik
                   </p>
                 </div>
               </div>
@@ -531,7 +747,7 @@ function RoyxatdanOtishWizard() {
                 onClick={() => setSelectedRole("ACADEMIC")}
                 className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
                   selectedRole === "ACADEMIC"
-                    ? "bg-indigo-950/20 border-indigo-500/80 ring-1 ring-indigo-500/40"
+                    ? "bg-indigo-950/25 border-indigo-500/80 ring-1 ring-indigo-500/40"
                     : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
                 }`}
               >
@@ -543,16 +759,47 @@ function RoyxatdanOtishWizard() {
                   <School className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-zinc-100">
-                      OTM / Ta'lim Muassasasi
+                      3. OTM / Universitet Vakili
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      Akademik
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                      /university
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                    Kafedra o‘qituvchilari biriktiruvi va raqamli amaliyot xulosalari
+                    Kafedra tayinlovini tasdiqlash, dars jadvali va yakuniy akademik xulosalar
+                  </p>
+                </div>
+              </div>
+
+              {/* Option 4: Platform Operator */}
+              <div
+                onClick={() => setSelectedRole("OPERATOR")}
+                className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
+                  selectedRole === "OPERATOR"
+                    ? "bg-amber-950/25 border-amber-500/80 ring-1 ring-amber-500/40"
+                    : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
+                }`}
+              >
+                <div
+                  className={`p-2.5 rounded-lg shrink-0 ${
+                    selectedRole === "OPERATOR" ? "bg-amber-600 text-zinc-950" : "bg-zinc-800 text-zinc-400"
+                  }`}
+                >
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-zinc-100">
+                      4. Platforma Operatori / SOC
+                    </span>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      /operator
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    Dual-control platforma vakolati tayyorlash, moderatsiya va SOC audit nazorati
                   </p>
                 </div>
               </div>
@@ -569,6 +816,33 @@ function RoyxatdanOtishWizard() {
               <span>Davom etish</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/80 text-[11px]">
+              <Link
+                href="/talaba/royxatdan-otish"
+                className="rounded-lg border border-sky-500/20 bg-sky-500/[0.05] px-2.5 py-1.5 text-sky-300 hover:bg-sky-500/10 text-center font-medium transition-colors"
+              >
+                Alohida Talaba ulanishi
+              </Link>
+              <Link
+                href="/korxona/royxatdan-otish"
+                className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2.5 py-1.5 text-emerald-300 hover:bg-emerald-500/10 text-center font-medium transition-colors"
+              >
+                Alohida Korxona ulanishi
+              </Link>
+              <Link
+                href="/universitet/royxatdan-otish"
+                className="rounded-lg border border-indigo-500/20 bg-indigo-500/[0.05] px-2.5 py-1.5 text-indigo-300 hover:bg-indigo-500/10 text-center font-medium transition-colors"
+              >
+                Alohida OTM ulanishi
+              </Link>
+              <Link
+                href="/operator/kirish"
+                className="rounded-lg border border-amber-500/20 bg-amber-500/[0.05] px-2.5 py-1.5 text-amber-300 hover:bg-amber-500/10 text-center font-medium transition-colors"
+              >
+                Operator SOC kirishi
+              </Link>
+            </div>
           </div>
         )}
 
@@ -965,7 +1239,7 @@ function RoyxatdanOtishWizard() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <h2 className="text-sm font-semibold text-zinc-200">
-                  Profil va xavfsizlik ma'lumotlari
+                  Profil va xavfsizlik ma&apos;lumotlari
                 </h2>
                 <p className="text-xs text-zinc-400">
                   Ismingiz va kamida 12 belgidan iborat kuchli parol kiriting
@@ -1100,6 +1374,237 @@ function RoyxatdanOtishWizard() {
           </form>
         )}
 
+        {/* Step 4: Role Activation (Employer Invite / Academic Consent / Operator 2FA & Dual-Control) */}
+        {step === 4 && (
+          <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-xs text-emerald-200 space-y-1">
+              <div className="font-semibold text-emerald-100">
+                Asosiy hisob yaratildi va tizimga ulandi
+              </div>
+              <p className="text-emerald-200/80 leading-relaxed">
+                Endi tanlangan rol bo‘yicha kabinet vakolatini shu yerning o‘zida faollashtiring yoki asosiy nomzod kabinetiga o‘ting.
+              </p>
+            </div>
+
+            {selectedRole === "EMPLOYER" && (
+              <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-white">
+                    Korxona / HR taklif tokenini faollashtirish
+                  </h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Korxona rahbari (Owner) yoki HR administratoridan olingan taklif tokenini kiriting. Tekshiruvdan so‘ng bevosita /employer kabinetiga o‘tasiz.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="invite-token-input" className="block text-xs font-medium text-zinc-300">
+                    Taklif tokeni
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      id="invite-token-input"
+                      type="text"
+                      value={inviteToken}
+                      onChange={(e) => setInviteToken(e.target.value)}
+                      placeholder="Masalan: fb_inv_..."
+                      className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900/80 px-3.5 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:border-indigo-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={activationBusy || !inviteToken.trim()}
+                      onClick={() => void handlePreviewInvite()}
+                      className="rounded-xl border border-indigo-500/40 bg-indigo-500/15 px-4 py-2.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 disabled:opacity-50 transition"
+                    >
+                      {activationBusy ? "Tekshirilmoqda..." : "Tokenni tekshirish"}
+                    </button>
+                  </div>
+                </div>
+
+                {invitePreview && (
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-zinc-300">
+                      <div>
+                        <span className="block text-[11px] text-zinc-400">Korxona</span>
+                        <span className="font-semibold text-white">{invitePreview.organization_name}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-zinc-400">Rol</span>
+                        <span className="font-semibold text-emerald-300">{invitePreview.role_code}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-zinc-400">Manzil</span>
+                        <span className="text-zinc-200">{invitePreview.masked_destination}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-zinc-400">Holat</span>
+                        <span className="text-zinc-200">{invitePreview.status}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={activationBusy}
+                      onClick={() => void handleAcceptInvite()}
+                      className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
+                    >
+                      {activationBusy ? "Faollashtirilmoqda..." : "Taklifni qabul qilish va /employer kabinetiga o‘tish"}
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-800/80 text-xs">
+                  <Link href="/nomzod/xavfsizlik" className="text-amber-300 hover:text-amber-200 transition">
+                    2FA (TOTP) ni sozlash
+                  </Link>
+                  <Link href="/korxona/kirish" className="text-indigo-400 hover:text-indigo-300 transition">
+                    Korxona kirish sahifasi
+                  </Link>
+                  <Link href="/nomzod" className="text-zinc-400 hover:text-white transition">
+                    /nomzod kabinetiga o‘tish
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {selectedRole === "ACADEMIC" && (
+              <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-white">
+                      Universitet / OTM tayinlovini tasdiqlash
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      OTM koordinatori yoki rektorati tomonidan yuborilgan tayinlovga rozilik bildiring. Tasdiqlangach /university kabineti ochiladi.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={activationBusy}
+                    onClick={() => void loadAppointmentInbox()}
+                    className="shrink-0 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] font-medium text-zinc-200 hover:border-zinc-500 disabled:opacity-50 transition"
+                  >
+                    {activationBusy ? "Yuklanmoqda..." : "Yangilash"}
+                  </button>
+                </div>
+
+                {verifiedContacts.length > 0 && (
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5 text-[11px] text-zinc-300">
+                    Tasdiqlangan aloqa:{" "}
+                    {verifiedContacts.map((c) => `${c.channel}: ${c.masked_destination}`).join(", ")}
+                  </div>
+                )}
+
+                {pendingAppointments.length === 0 ? (
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3.5 text-xs text-zinc-400 space-y-2">
+                    <p>
+                      Hozircha sizning tasdiqlangan telefoningiz yoki Telegram hisobingizga biriktirilgan faol OTM tayinlovi topilmadi.
+                    </p>
+                    <p>
+                      OTM mas’ul xodimi tayinlov yaratgach «Yangilash» tugmasini bosing.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingAppointments.map((appt) => (
+                      <div
+                        key={appt.id}
+                        className="rounded-xl border border-indigo-500/25 bg-indigo-500/5 p-3.5 space-y-3 text-xs"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <div className="font-semibold text-white">OTM ID: {appt.institution_id}</div>
+                            <div className="text-[11px] text-zinc-400">
+                              Holat: {appt.status} ({appt.case_status}) • rev {appt.current_revision}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={activationBusy}
+                            onClick={() => void handleAppointmentConsent(appt, "ACCEPT")}
+                            className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
+                          >
+                            Qabul qilish va /university ga o‘tish
+                          </button>
+                          <button
+                            type="button"
+                            disabled={activationBusy}
+                            onClick={() => void handleAppointmentConsent(appt, "DECLINE")}
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-red-500/40 hover:text-red-300 disabled:opacity-50 transition"
+                          >
+                            Rad etish
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-800/80 text-xs">
+                  <Link href="/universitet/kirish" className="text-indigo-400 hover:text-indigo-300 transition">
+                    OTM kirish sahifasi
+                  </Link>
+                  <Link href="/nomzod" className="text-zinc-400 hover:text-white transition">
+                    Hozircha /nomzod kabinetiga o‘tish
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {selectedRole === "OPERATOR" && (
+              <div className="space-y-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-amber-200">
+                    Platforma Operatori / SOC faollashtiruvi
+                  </h3>
+                  <p className="text-xs text-zinc-300 leading-relaxed">
+                    Xavfsizlik siyosatiga ko‘ra operator rollari (OPERATOR, MODERATOR, AUDITOR, SECURITY_LEAD, ADMIN) ikki tomonlama tasdiq (dual-control) va majburiy 2FA (TOTP) orqali beriladi.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    disabled={activationBusy}
+                    onClick={() => void handleRecheckOperatorRoles()}
+                    className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-amber-500 disabled:opacity-50 transition"
+                  >
+                    {activationBusy ? "Tekshirilmoqda..." : "Operator ruxsatini qayta tekshirish"}
+                  </button>
+                  <Link
+                    href="/nomzod/xavfsizlik"
+                    className="w-full text-center rounded-xl border border-amber-500/35 bg-zinc-900/80 px-4 py-2.5 text-xs font-semibold text-amber-200 hover:bg-zinc-900 transition"
+                  >
+                    2FA (TOTP) ni sozlash (/nomzod/xavfsizlik)
+                  </Link>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-amber-500/20 text-xs">
+                  <Link href="/operator/kirish" className="text-amber-300 hover:text-amber-200 transition">
+                    SOC kirish sahifasi (/operator/kirish)
+                  </Link>
+                  <Link href="/nomzod" className="text-zinc-400 hover:text-white transition">
+                    Hozircha /nomzod kabinetiga o‘tish
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {selectedRole === "CANDIDATE" && (
+              <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 text-xs">
+                <p className="text-zinc-300">Talaba / Nomzod kabinetingiz tayyor.</p>
+                <Link
+                  href="/nomzod"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-500 transition"
+                >
+                  /nomzod kabinetiga o‘tish
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Existing User Login Divider */}
         <div className="pt-4 border-t border-zinc-800/80 text-center space-y-3">
           <p className="text-xs text-zinc-400">
@@ -1131,7 +1636,7 @@ function RoyxatdanOtishWizard() {
       {/* Security Footer Note */}
       <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-500">
         <Shield className="w-3.5 h-3.5 text-zinc-600" />
-        <span>Shaxsiy ma'lumotlar O'zR qonunchiligi bo'yicha himoyalangan</span>
+        <span>Shaxsiy ma&apos;lumotlar O&apos;zR qonunchiligi bo&apos;yicha himoyalangan</span>
       </div>
     </div>
   );
@@ -1153,20 +1658,20 @@ export default function RoyxatdanOtishPage() {
           {/* Left Onboarding Guide Column */}
           <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-white/[0.08] bg-surface-card p-7">
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
-              3 bosqichli onboarding
+              4 bosqichli onboarding
             </div>
             <div>
               <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
-                Mos hisob turini tanlang va boshlang
+                Mos hisob turini tanlang va kabinetga kiring
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                SMS yoki rasmiy Telegram bot orqali bir martalik tasdiqlash kodi bilan xavfsiz hisob yarating.
+                SMS yoki rasmiy Telegram bot orqali xavfsiz hisob yarating va rol bo‘yicha kabinetni (taklif tokeni, OTM tayinlovi yoki operator 2FA) shu yerning o‘zida faollashtiring.
               </p>
             </div>
             <ol className="space-y-3 pt-2 border-t border-white/[0.06] text-xs text-zinc-300">
               <li className="flex items-start gap-2.5">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">1</span>
-                <span><strong className="text-white">Rolni tanlash:</strong> Talaba, Korxona HR yoki Universitet vakili sifatida kirish.</span>
+                <span><strong className="text-white">Rolni tanlash:</strong> Talaba, Korxona HR, Universitet yoki Operator sifatida ro‘yxatdan o‘tish.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">2</span>

@@ -850,3 +850,6 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 
 
 - Joriy topshiriq (FB-214 / Issue #214 / `LOG-159`): Platforma Operatori (`OPERATOR`, `MODERATOR`, `AUDITOR`, `SUPPORT`, `FINANCE`) uchun alohida `/operator/kirish` (`portal="OPERATOR"`), `/operator/layout.tsx` SOC Rol Chegarasi, `operator/page.tsx` va `Navbar`/`Footer` izolyatsiyasi yakunlandi (`main` muzlatilgan, PR `integration/r1-agent-collaboration` ga). **35/35 staging test to'plamlari 100% yashil (`97.82s`)**. Keyingi yakuniy qadam: barcha 4 foydalanuvchi turi uchun yagona birlashtirilgan bosh `/kirish` va `/royxatdan-otish` sahifalarini qurish hamda kirgan foydalanuvchini roliga qarab avtomatik o'z kabinetiga yo'naltirish.
+
+
+- Joriy topshiriq (FB-216 / Issue #216 / `LOG-160`): Barcha 4 foydalanuvchi turi (`CANDIDATE`, `EMPLOYER`, `ACADEMIC`, `OPERATOR`) uchun alohida izolyatsiyalangan kirish nuqtalarini saqlagan holda yagona bosh `/kirish` (kirgan foydalanuvchi roliga qarab `/nomzod`, `/employer`, `/university` yoki `/operator` kabinetiga avtomatik yo‘naltirish) va 4-bosqichli `/royxatdan-otish` (korxona taklifi, OTM tayinlov roziligi va operator dual-control/2FA tekshiruvi bilan) yakunlandi (`main` `764fb98496fa40857acb07844fd09fcafa99b7d6` muzlatilgan, PR `integration/r1-agent-collaboration` ga). **36/36 staging test to‘plamlari 100% yashil (`116.69s`)**.

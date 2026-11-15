@@ -486,3 +486,12 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Added `isOperatorOnlyRoles(roles)` in `roles.ts` and Amber/SOC `OperatorLayout` guard rejecting non-platform roles on `/operator/*`.
   - Enforced `portal="OPERATOR"` across password & TOTP MFA steps on `/operator/kirish` and `/operator/page.tsx` `<AuthModal>`, plus SOC-scoped `Navbar.tsx` & `Footer.tsx`.
 - **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on new/shared files (0 errors), Docker `frontend` rebuild, `scripts/test_operator_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**35/35 PASSED in 97.82s**). Frozen-main constraint retained.
+
+
+## UNIFIED-AUTH-FB216 — Unified Main Sign-In & Sign-Up Across All 4 Roles (2026-11-15)
+
+- **Scope**: `frontend/src/app/kirish/page.tsx`, `frontend/src/app/royxatdan-otish/page.tsx`, `scripts/test_unified_auth_all_roles_staging.py`, `scripts/run_all_staging_tests.py`.
+- **Technical Architecture**:
+  - Replaced literal `"EMPLOYER"`/`"ACADEMIC"` array lookups on `/kirish` and `/royxatdan-otish` with shared `resolvePortalDashboard(roles)` and `isRoleAllowedForPortal(roles, redirectPortal)` from `frontend/src/lib/roles.ts`, plus `flexbridge:auth-changed` window event propagation on password, MFA, registration, invite accept, and OTM appointment consent transitions.
+  - Corrected `/royxatdan-otish` public `/api/bff/auth/register` payload to baseline `roles: ["CANDIDATE"]` and added Step 4 role activation (`EMPLOYER` invite token preview/accept with `MFA_REQUIRED` -> `/nomzod/xavfsizlik` 2FA guidance, `ACADEMIC` appointment consent, `OPERATOR` dual-control grant re-check).
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on modified pages (0 errors), `python -m py_compile` (0 errors), Docker `frontend` rebuild, `scripts/test_unified_auth_all_roles_staging.py` (3/3 phases PASS), `scripts/run_all_staging_tests.py` (**36/36 PASSED in 116.69s**). Frozen-main constraint retained (`764fb98496fa40857acb07844fd09fcafa99b7d6`, integration branch `integration/r1-agent-collaboration`).

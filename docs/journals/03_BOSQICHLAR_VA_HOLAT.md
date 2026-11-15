@@ -1314,3 +1314,11 @@ Keyingi kichik qadam:
   * **SOC Alohida Kirish (`/operator/kirish`)**: Faqat `OPERATOR`, `MODERATOR`, `AUDITOR`, `SUPPORT`, `FINANCE`, `ADMIN`, `SECURITY_LEAD` rollari uchun `portal="OPERATOR"` parol + 2FA TOTP terminal kirishi yaratildi (ochiq o'z-o'zidan ro'yxatdan o'tishsiz, Dual-Control talabi bilan).
   * **Rol Chegarasi & Scoped UI**: `operator/layout.tsx`, `operator/page.tsx` (`requiredPortal="OPERATOR"` + auth sync), `AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `/kirish` va `/` da Operator / SOC chegarasi ajratildi (`main` muzlatilgan holda saqlandi).
   * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` yangi/umumiy fayllarda (0 xato), Docker `frontend` build, `test_operator_isolated_login_staging.py` (4/4 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**35/35 to'plam 100% YASHIL, 97.82s**).
+
+
+### 2026-11-15 | LOG-160 | Issue #216 (`feature/216-unified-auth-role-routing`) -> Barcha 4 rol uchun birlashtirilgan bosh `/kirish` va `/royxatdan-otish`
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (ALL 36/36 STAGING TEST SUITES GREEN)**.
+- **Nima Qilindi**:
+  * **Yagona `/kirish` va Rolga Qarab Avto-Yo‘naltirish**: `frontend/src/app/kirish/page.tsx` barcha 4 foydalanuvchi turini (`CANDIDATE` -> `/nomzod`, `OWNER`/`HR`/`HOST_COORDINATOR`/`MENTOR`/`BILLING` -> `/employer`, `COORDINATOR`/`TEACHER` -> `/university`, `OPERATOR`/`MODERATOR`/`AUDITOR`/`FINANCE`/`SUPPORT`/`SECURITY_LEAD`/`ADMIN` -> `/operator`) `resolvePortalDashboard` orqali o‘z kabinetiga yo‘naltiradigan qilib yangilandi (`redirect` parametri esa `isRoleAllowedForPortal` bilan tekshirildi).
+  * **Yagona 4-Bosqichli `/royxatdan-otish`**: `frontend/src/app/royxatdan-otish/page.tsx` da baza `roles: ["CANDIDATE"]` ro‘yxatdan o‘tish tuzatildi hamda 4-bosqich rol faollashtirish UI qo‘shildi (`EMPLOYER` taklif tokeni + `MFA_REQUIRED` uchun `/nomzod/xavfsizlik` yo‘riqnomasi, `ACADEMIC` OTM tayinlovi roziligi, `OPERATOR` 2FA/dual-control tekshiruvi). `main`/`master` muzlatilgan holda saqlandi (`integration/r1-agent-collaboration`).
+  * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` (0 xato), `py_compile` (0 xato), Docker `frontend` build, `scripts/test_unified_auth_all_roles_staging.py` (3/3 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**36/36 to‘plam 100% YASHIL, 116.69s**).
