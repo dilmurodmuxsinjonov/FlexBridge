@@ -1139,9 +1139,8 @@ function RoyxatdanOtishWizard() {
 
 export default function RoyxatdanOtishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Back button */}
-      <div className="w-full max-w-lg mb-6">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="w-full max-w-5xl space-y-6">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
@@ -1149,18 +1148,52 @@ export default function RoyxatdanOtishPage() {
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>
         </Link>
-      </div>
 
-      <Suspense
-        fallback={
-          <div className="p-8 text-center text-zinc-400 flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Yuklanmoqda...</span>
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] items-start">
+          {/* Left Onboarding Guide Column */}
+          <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-white/[0.08] bg-surface-card p-7">
+            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
+              3 bosqichli onboarding
+            </div>
+            <div>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
+                Mos hisob turini tanlang va boshlang
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+                SMS yoki rasmiy Telegram bot orqali bir martalik tasdiqlash kodi bilan xavfsiz hisob yarating.
+              </p>
+            </div>
+            <ol className="space-y-3 pt-2 border-t border-white/[0.06] text-xs text-zinc-300">
+              <li className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">1</span>
+                <span><strong className="text-white">Rolni tanlash:</strong> Talaba, Korxona HR yoki Universitet vakili sifatida kirish.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">2</span>
+                <span><strong className="text-white">Kontakt tasdig‘i:</strong> SMS yoki Telegram botda raqam mosligini tasdiqlash.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">3</span>
+                <span><strong className="text-white">Shaxsiy kabinet:</strong> Rolingizga mos alohida boshqaruv paneliga o‘tish.</span>
+              </li>
+            </ol>
+          </aside>
+
+          {/* Right Registration Wizard */}
+          <div className="flex justify-center">
+            <Suspense
+              fallback={
+                <div className="p-8 text-center text-zinc-400 flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Yuklanmoqda...</span>
+                </div>
+              }
+            >
+              <RoyxatdanOtishWizard />
+            </Suspense>
           </div>
-        }
-      >
-        <RoyxatdanOtishWizard />
-      </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

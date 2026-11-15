@@ -278,54 +278,8 @@ export default function CandidateHelpPrivacyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 space-y-6">
-      {/* Sub-Navigation Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/[0.08] text-xs">
-        <Link
-          href="/nomzod"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Mening Profilim
-        </Link>
-        <Link
-          href="/nomzod/arizalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Mening Arizalarim
-        </Link>
-        <Link
-          href="/nomzod/shartnomalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Shartnomalar & Amaliyot
-        </Link>
-        <Link
-          href="/nomzod/kundalik"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Amaliyot Kundaligi
-        </Link>
-        <Link
-          href="/nomzod/baholar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Baholar & Sharhlar
-        </Link>
-        <Link
-          href="/nomzod/saqlanganlar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Saqlangan E&apos;lonlar
-        </Link>
-        <Link
-          href="/nomzod/yordam"
-          className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800/80 text-zinc-100 font-medium transition-colors whitespace-nowrap"
-        >
-          Yordam & Maxfiylik
-        </Link>
-      </div>
-
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full text-zinc-100 space-y-6">
+      <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

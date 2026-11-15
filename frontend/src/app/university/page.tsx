@@ -727,13 +727,13 @@ export default function UniversityPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* HEADER BAR */}
-      <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-6 shadow-sm">
+      {/* ACADEMIC DEANERY HEADER BAR */}
+      <section className="w-full bg-surface-card border border-white/[0.08] border-t-2 border-t-indigo-500 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                Universitet Portali
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/25">
+                Universitet Akademik Dekanati
               </span>
               <span className="text-zinc-500 text-xs font-mono">• API-105 / API-108 / API-103</span>
               {currentUser ? (
@@ -747,17 +747,35 @@ export default function UniversityPortal() {
               )}
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-zinc-100">
-              Akademik Nazorat, Amaliyotlar & Xulosalar Markazi
+              Akademik Nazorat, Amaliyotlar &amp; Xulosalar Markazi
             </h1>
             <p className="text-xs text-zinc-400">
               Kafedra o‘qituvchilari va mas’ul koordinatorlar uchun talabalar amaliyotini to‘liq ilmiy-akademik boshqarish.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
+            {currentUser && (
+              <div className="hidden sm:flex items-center gap-3 rounded-lg border border-indigo-500/20 bg-surface-lowest px-3.5 py-2 text-xs">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Navbat</span>
+                  <span className="font-mono font-bold text-indigo-300 tabular-nums">{queueItems.length}</span>
+                </div>
+                <div className="h-6 w-px bg-white/[0.08]" />
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Amaliyotlar</span>
+                  <span className="font-mono font-bold text-zinc-100 tabular-nums">{assignments.length}</span>
+                </div>
+                <div className="h-6 w-px bg-white/[0.08]" />
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Taqsimot</span>
+                  <span className="font-mono font-bold text-zinc-100 tabular-nums">{coordinatorQueue.length}</span>
+                </div>
+              </div>
+            )}
             {isAuthLoading ? (
               <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
@@ -773,7 +791,7 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
+                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>O‘qituvchi sifatida kirish</span>
@@ -781,142 +799,12 @@ export default function UniversityPortal() {
             )}
           </div>
         </div>
-
-        {/* NAVIGATION TABS */}
-        {currentUser && (
-          <div className="mt-6 flex border-b border-white/[0.08] gap-1 overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab("queue")}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "queue"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <FileCheck className="w-4 h-4" />
-              <span>Kundaliklar Navbati</span>
-              <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
-                {queueItems.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("assignments")}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "assignments"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Biriktirilgan Amaliyotlar & Xulosalar</span>
-              <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
-                {assignments.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("coordinator")}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "coordinator"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Kafedra Taqsimot Navbati</span>
-              <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
-                {coordinatorQueue.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("exports");
-                if (institutionId) {
-                  loadReportsAndAgreements(institutionId);
-                }
-              }}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "exports"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Yig&apos;ma Hisobotlar & Shartnomalar</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("analytics");
-                if (institutionId) {
-                  loadAnalytics(institutionId);
-                } else {
-                  loadCoordinatorQueue();
-                }
-              }}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "analytics"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Analitika & Monitoring</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("timetable");
-                if (institutionId) {
-                  loadTimetable(institutionId);
-                } else {
-                  loadCoordinatorQueue();
-                }
-              }}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "timetable"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Dars Jadvali (Qo&apos;lda & Shablon)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("documents");
-                loadAssignments();
-                if (institutionId) {
-                  loadReportsAndAgreements(institutionId);
-                }
-              }}
-              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "documents"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Hujjatlar & E-Imzo</span>
-            </button>
-          </div>
-        )}
       </section>
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-surface-card/60 border border-white/[0.08] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+        <section className="w-full bg-surface-card/60 border border-indigo-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
             <GraduationCap className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">
@@ -930,13 +818,163 @@ export default function UniversityPortal() {
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg shadow-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
           >
             <LogIn className="w-4 h-4" />
             <span>Tizimga kirish</span>
           </button>
         </section>
       )}
+
+      {/* ACADEMIC WORKSPACE: LEFT REGISTRY RAIL + ACTIVE TAB */}
+      {currentUser && (
+        <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
+          <aside
+            aria-label="Akademik bo‘limlar"
+            className="rounded-xl border border-indigo-500/20 bg-surface-card p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+          >
+            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-400/80">
+              Amaliyot Nazorati
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("queue")}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "queue"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <FileCheck className="w-4 h-4 shrink-0" />
+                <span>Kundaliklar Navbati</span>
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                {queueItems.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("assignments")}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "assignments"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 shrink-0" />
+                <span>Biriktirilganlar</span>
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                {assignments.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("documents");
+                loadAssignments();
+                if (institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                }
+              }}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "documents"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span>Hujjatlar &amp; E-Imzo</span>
+            </button>
+
+            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              Kafedra &amp; Jadval
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("coordinator")}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "coordinator"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Kafedra Taqsimoti</span>
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                {coordinatorQueue.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("timetable");
+                if (institutionId) {
+                  loadTimetable(institutionId);
+                } else {
+                  loadCoordinatorQueue();
+                }
+              }}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "timetable"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <Calendar className="w-4 h-4 shrink-0" />
+              <span>Dars Jadvali</span>
+            </button>
+
+            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              Hisobotlar &amp; Tahlil
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("exports");
+                if (institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                }
+              }}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "exports"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 shrink-0" />
+              <span>Yig&apos;ma Hisobotlar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("analytics");
+                if (institutionId) {
+                  loadAnalytics(institutionId);
+                } else {
+                  loadCoordinatorQueue();
+                }
+              }}
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                activeTab === "analytics"
+                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 shrink-0" />
+              <span>Analitika &amp; Monitoring</span>
+            </button>
+          </aside>
+
+          <div className="min-w-0 flex flex-col gap-6">
 
       {/* TAB 1: DAILY LOGS REVIEW QUEUE */}
       {currentUser && activeTab === "queue" && (
@@ -2895,6 +2933,9 @@ export default function UniversityPortal() {
               E-Imzo va hujjat yuklab olish uchun biriktirilgan talaba amaliyoti topilmadi.
             </div>
           )}
+        </div>
+      )}
+          </div>
         </div>
       )}
 

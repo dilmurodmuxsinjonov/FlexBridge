@@ -838,3 +838,5 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 
 
 
+
+- Joriy topshiriq (FB-206 / Issue #206): Barcha sahifalarni alohida ko'rib chiqib, har bir foydalanuvchi turi (`PUBLIC`, `CANDIDATE` `/nomzod/*`, `EMPLOYER` `/employer`, `UNIVERSITY` `/university`, `OPERATOR` `/operator`, `/kirish`, `/royxatdan-otish`) uchun rolga xos dizayn, rang identifikatsiyasi, `Navbar.tsx` moslashuvi va chap yon boshqaruv panellari bilan qayta qurish yakunlandi (`1.1`/`1.2` qo'shilmadi). Barcha 18 sahifa SSR HTTP 200 va **31/31 staging test to'plamlari 100% yashil (`78.94s`)**.

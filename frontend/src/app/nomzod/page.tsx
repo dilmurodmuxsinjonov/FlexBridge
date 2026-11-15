@@ -1024,14 +1024,14 @@ export default function CandidateProfileHub() {
   };
 
   return (
-    <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
+    <main className="w-full flex flex-col gap-6">
       {/* HEADER SECTION */}
-      <section className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-5 shadow-sm">
+      <section className="w-full bg-[#121214] border border-sky-500/20 rounded-xl p-5 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                Nomzod Kabineti
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                Talaba & Nomzod Kabineti
               </span>
               <span className="text-zinc-500 text-xs">• API-026 / API-027 / API-028 / API-032 / API-034 / API-035 / API-036</span>
               {currentUser ? (
@@ -1108,61 +1108,6 @@ export default function CandidateProfileHub() {
           <span>{exportErrorMsg}</span>
         </div>
       )}
-
-      {/* Sub-Navigation between Candidate Pages */}
-      <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
-        <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
-          Kasbiy Profil & Ta&apos;lim
-        </span>
-        <Link
-          href="/nomzod/arizalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Mening Arizalarim
-        </Link>
-        <Link
-          href="/nomzod/shartnomalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Shartnomalar & Amaliyot
-        </Link>
-        <Link
-          href="/nomzod/kundalik"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Amaliyot Kundaligi
-        </Link>
-        <Link
-          href="/nomzod/baholar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Baholar & Sharhlar
-        </Link>
-        <Link
-          href="/nomzod/saqlanganlar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Saqlangan E&apos;lonlar
-        </Link>
-        <Link
-          href="/nomzod/bildirishnomalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Bildirishnomalar
-        </Link>
-        <Link
-          href="/nomzod/yordam"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Yordam & Maxfiylik
-        </Link>
-        <Link
-          href="/nomzod/xavfsizlik"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Xavfsizlik & Sessiyalar
-        </Link>
-      </div>
 
       {/* LOGIN REQUIRED GATE */}
       {!currentUser && !isAuthLoading && (

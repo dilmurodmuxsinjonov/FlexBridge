@@ -222,7 +222,7 @@ function KirishForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 mt-2"
+              className="w-full py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm mt-2"
             >
               {isLoading ? (
                 <>
@@ -282,7 +282,7 @@ function KirishForm() {
               <button
                 type="submit"
                 disabled={isLoading || totpCode.length !== 6}
-                className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25"
+                className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm"
               >
                 {isLoading ? (
                   <>
@@ -339,9 +339,8 @@ function KirishForm() {
 
 export default function KirishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Back button */}
-      <div className="w-full max-w-md mb-6">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="w-full max-w-5xl space-y-6">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
@@ -349,18 +348,52 @@ export default function KirishPage() {
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>
         </Link>
-      </div>
 
-      <Suspense
-        fallback={
-          <div className="p-8 text-center text-zinc-400 flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Yuklanmoqda...</span>
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] items-start">
+          {/* Left Architectural Context Panel */}
+          <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-white/[0.08] bg-surface-card p-7">
+            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+              Yagona autentifikatsiya
+            </div>
+            <div>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
+                Har bir rol uchun alohida xavfsiz ish muhiti
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+                Kirishingiz bilan tizim sizni tegishli kabinetga yo‘naltiradi: Talaba, Korxona HR, OTM Dekanat yoki Operator SOC.
+              </p>
+            </div>
+            <div className="space-y-2.5 pt-2 border-t border-white/[0.06] text-xs">
+              <div className="rounded-xl border border-sky-500/20 bg-sky-500/[0.04] p-3">
+                <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
+                <p className="text-zinc-400 text-[11px] mt-0.5">HEMIS jadvali, rezyume, arizalar va ikki tomonlama e-imzoli kundalik.</p>
+              </div>
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3">
+                <p className="font-semibold text-emerald-300">Ish Beruvchi / Korxona</p>
+                <p className="text-zinc-400 text-[11px] mt-0.5">Nomzod Kanban, mentorlik tasdig‘i, jamoa va kvota boshqaruvi.</p>
+              </div>
+              <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-3">
+                <p className="font-semibold text-indigo-300">Universitet / OTM</p>
+                <p className="text-zinc-400 text-[11px] mt-0.5">Kafedra taqsimoti, dars jadvali integratsiyasi va yakuniy xulosalar.</p>
+              </div>
+            </div>
+          </aside>
+
+          {/* Right Auth Form Card */}
+          <div className="flex justify-center">
+            <Suspense
+              fallback={
+                <div className="p-8 text-center text-zinc-400 flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Yuklanmoqda...</span>
+                </div>
+              }
+            >
+              <KirishForm />
+            </Suspense>
           </div>
-        }
-      >
-        <KirishForm />
-      </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

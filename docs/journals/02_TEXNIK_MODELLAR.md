@@ -452,3 +452,15 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 
 
 
+
+
+## ROLE-UI-FB206 — Role-Differentiated Portal Shells & Adaptive Navigation (2026-11-15)
+
+- **Scope**: `frontend/src/components/Navbar.tsx`, `frontend/src/app/nomzod/layout.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/kirish/page.tsx`, `frontend/src/app/royxatdan-otish/page.tsx`, `frontend/src/app/employer/page.tsx`, `frontend/src/app/university/page.tsx`, `frontend/src/app/operator/page.tsx`, plus `/nomzod/*` inner page layout alignment.
+- **Persona Design System**:
+  - `PUBLIC`: Career Discovery Marketplace storefront with asymmetric hero, quick filter chips, 3-role portal entry matrix, and compact `Portallar` switcher.
+  - `CANDIDATE` (`/nomzod/*`): Sky Blue (`sky-400`/`sky-500`) persistent left workspace sidebar (`NomzodLayout`).
+  - `EMPLOYER` (`/employer`): Emerald (`emerald-400`/`emerald-500`) corporate B2B HR workspace rail.
+  - `UNIVERSITY` (`/university`): Indigo (`indigo-400`/`indigo-500`) Academic Deanery workspace rail & live semester counters.
+  - `OPERATOR` (`/operator`): Amber/Rose (`amber-400`/`amber-500`) SOC Audit Terminal monospace left module rail.
+- **Verification**: `npx tsc --noEmit` (0 errors), Docker Next.js production build & 18-route SSR HTTP 200 check, and `scripts/run_all_staging_tests.py` (**31/31 PASS in 78.94s**).

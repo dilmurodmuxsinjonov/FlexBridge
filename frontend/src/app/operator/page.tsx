@@ -530,22 +530,22 @@ export default function OperatorPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* HEADER BAR */}
-      <section className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-5 shadow-sm">
+      {/* SOC COMMAND TERMINAL HEADER */}
+      <section className="w-full bg-[#121214] border border-white/[0.08] border-t-2 border-t-amber-500 rounded-xl p-5 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                Operator SOC Hub
+              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                SOC // SECURITY OPERATIONS HUB
               </span>
-              <span className="text-zinc-500 text-xs">• API-109 / API-110 / API-118 / API-119 / API-120</span>
+              <span className="text-zinc-500 text-xs font-mono">• API-109..124 / AUDIT_APPEND_ONLY</span>
               {currentUser ? (
                 <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Kirilgan: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
+                  CLEARANCE: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
                 </span>
               ) : (
                 <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  Avtorizatsiyadan o‘tilmagan
+                  LOCKED // Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
@@ -560,7 +560,7 @@ export default function OperatorPortal() {
           <div className="flex flex-wrap items-center gap-2.5">
             {isAuthLoading ? (
               <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
@@ -576,7 +576,7 @@ export default function OperatorPortal() {
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                className="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Operator sifatida kirish</span>
@@ -588,8 +588,8 @@ export default function OperatorPortal() {
 
       {/* UNAUTHENTICATED NOTICE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-[#121214]/60 border border-white/[0.08] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+        <section className="w-full bg-[#121214]/80 border border-amber-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
             <Lock className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">
@@ -603,7 +603,7 @@ export default function OperatorPortal() {
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg shadow-primary/25"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-2 shadow-sm"
           >
             <LogIn className="w-4 h-4" />
             <span>Auditor / Operator hisobi bilan kirish</span>
@@ -611,85 +611,101 @@ export default function OperatorPortal() {
         </section>
       )}
 
-      {/* AUTHENTICATED OPERATOR TABS */}
+      {/* AUTHENTICATED SOC COMMAND CONSOLE */}
       {currentUser && (
-        <div className="flex flex-col gap-6">
-          {/* TAB NAVIGATION */}
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto">
+        <div className="grid gap-6 lg:grid-cols-[276px_minmax(0,1fr)] lg:items-start">
+          {/* Left SOC Telemetry Navigation Rail */}
+          <aside
+            aria-label="SOC Terminal modullari"
+            className="rounded-xl border border-amber-500/20 bg-[#121214] p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+          >
+            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-400/80">
+              SOC // SECURITY MODULES
+            </div>
             <button
               onClick={() => setActiveTab("AUDIT")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "AUDIT"
-                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "border-amber-400 bg-amber-500/10 text-amber-200"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
-              <FileCheck2 className="w-4 h-4 text-primary" />
-              <span>Audit Voqealari (API-118)</span>
-              <span className="px-1.5 py-0.2 rounded bg-white/[0.08] text-[10px] font-mono">
+              <span className="flex items-center gap-2">
+                <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="font-mono text-[11px]">01 // AUDIT (API-118)</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] font-mono">
                 {auditEvents.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("VERIFICATION")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "VERIFICATION"
-                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
-              <ClipboardCheck className="w-4 h-4 text-emerald-400" />
-              <span>Tasdiqlash Navbati (API-109 / API-110)</span>
-              <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
+              <span className="flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="font-mono text-[11px]">02 // KYC NAVBAT (109)</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
                 {cases.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("BREAK_GLASS")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "BREAK_GLASS"
-                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "border-rose-400 bg-rose-500/10 text-rose-200"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
-              <span>Favqulodda Nazorat & Break-Glass (API-119 / API-120)</span>
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+              <span className="font-mono text-[11px]">03 // BREAK-GLASS</span>
             </button>
 
             <button
               onClick={() => setActiveTab("SUPPORT_OPS")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "SUPPORT_OPS"
-                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "border-sky-400 bg-sky-500/10 text-sky-200"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
-              <LifeBuoy className="w-4 h-4 text-sky-400" />
-              <span>Texnik Yordam & Operatsion SLA (API-112 / 122 / 123 / 124)</span>
-              <span className="px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
+              <span className="flex items-center gap-2">
+                <LifeBuoy className="w-4 h-4 text-sky-400 shrink-0" />
+                <span className="font-mono text-[11px]">04 // SUPPORT SLA</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
                 {tickets.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("FINANCE")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "FINANCE"
-                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
-              <CreditCard className="w-4 h-4 text-emerald-400" />
-              <span>Moliya & Solishtiruv (API-117 / API-115 / API-078)</span>
+              <span className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="font-mono text-[11px]">05 // MOLIYA &amp; LEDGER</span>
+              </span>
               {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
-                <span className="px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
-                  {reconciliationSummary.total_discrepancies} tafovut
+                <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
+                  {reconciliationSummary.total_discrepancies}
                 </span>
               ) : null}
             </button>
-          </div>
+          </aside>
+
+          <div className="min-w-0 flex flex-col gap-6">
 
           {/* TAB 1: AUDIT EVENTS */}
           {activeTab === "AUDIT" && (
@@ -1730,6 +1746,7 @@ export default function OperatorPortal() {
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
 

@@ -295,6 +295,12 @@ export async function fetchOpportunities(params: OpportunitySearch = {}): Promis
 // Client BFF Methods
 // ---------------------------------------------------------------------------
 
+function notifyAuthChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+  }
+}
+
 export async function loginUser(
   destination: string,
   password: string,
@@ -317,6 +323,7 @@ export async function loginUser(
   if (!res.ok) {
     return { ok: false, error: data.error || "LOGIN_FAILED" };
   }
+  notifyAuthChanged();
   return {
     ok: true,
     user_id: data.user_id,
@@ -334,6 +341,7 @@ export async function verifyMfa(mfa_ticket: string, code: string): Promise<Login
   if (!res.ok) {
     return { ok: false, error: data.error || "MFA_VERIFICATION_FAILED" };
   }
+  notifyAuthChanged();
   return {
     ok: true,
     user_id: data.user_id,
@@ -346,6 +354,7 @@ export async function logoutUser(): Promise<void> {
     method: "POST",
     headers: { Accept: "application/json" },
   }).catch(() => {});
+  notifyAuthChanged();
 }
 
 export async function fetchAuthMe(): Promise<AuthUser | null> {
@@ -4431,6 +4440,7 @@ export async function registerCandidateUser(
   if (!res.ok) {
     throw new Error(data.message || data.error || "REGISTRATION_FAILED");
   }
+  notifyAuthChanged();
   return data as RegisterUserResponse;
 }
 
