@@ -25,6 +25,7 @@ from botocore.exceptions import BotoCoreError,ClientError
 
 from app.api.v1.auth import router as auth_router
 from app.api.v1.workspaces import router as workspaces_router
+from app.api.v1.institution_enrollments import router as institution_enrollments_router
 from app.api.v1.iam import router as iam_router
 from app.api.v1.candidates import router as candidates_router
 from app.api.v1.organizations import router as organizations_router
@@ -160,6 +161,7 @@ async def finance_circuit_open_exception_handler(
 
 app.include_router(auth_router)
 app.include_router(workspaces_router)
+app.include_router(institution_enrollments_router)
 app.include_router(iam_router)
 app.include_router(candidates_router)
 app.include_router(organizations_router)

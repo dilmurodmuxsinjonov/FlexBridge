@@ -561,7 +561,7 @@ def test_populated_0017_to_0018_upgrade_rollback_and_host_decision_compatibility
 
         migrate('head')
         with engine.begin() as conn:
-            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one() == '0021_candidate_portal_extension'
+            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one() == '0022_enrollment_institution_review'
             after_rows = [
                 dict(r)
                 for r in conn.execute(
