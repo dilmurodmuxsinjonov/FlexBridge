@@ -434,10 +434,12 @@ export default function Navbar() {
             <span className="font-display font-semibold tracking-tight text-white">
               {theme.label}
             </span>
-            <span className="text-zinc-500">•</span>
-            <span className="font-mono text-[11px] text-zinc-400">
-              {currentUser ? "FAOL KABINET" : "JONLI TIZIM"}
-            </span>
+            {!currentUser && (
+              <>
+                <span className="text-zinc-500">•</span>
+                <span className="text-[11px] text-zinc-400">Ochiq katalog</span>
+              </>
+            )}
             {!isAuthPage && !hidePortalSwitcher && (
               <div className="relative pl-2 border-l border-white/10" ref={dropdownRef}>
                 <motion.button
@@ -609,54 +611,11 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* 2. Detached Left Vertical Obsidian Tool Dock (Video Chrome Part 2) */}
-      {!isAuthPage && (
-        <aside
-          aria-label="Tezkor asboblar paneli"
-          data-skeuo-dark="true"
-          className="hidden lg:flex fixed left-3.5 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-1.5 p-2 rounded-[28px] skeuo-obsidian"
-        >
-            {theme.dockTools.map((tool) => {
-            const Icon = tool.icon;
-            const active = isNavItemActive(tool);
-            return (
-              <motion.button
-                key={tool.id}
-                type="button"
-                whileHover={{ scale: 1.07 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => handleNavAction(tool)}
-                title={tool.label}
-                aria-label={tool.label}
-                className={`group relative w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  active ? "text-[#161618]" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                {active && (
-                  <motion.span
-                    layoutId={`leftDockActive-${personaKey}`}
-                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                    className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
-                  />
-                )}
-                <Icon className="relative z-10 w-4 h-4" />
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full bg-[#151518] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg border border-white/15 -translate-x-1 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-150"
-                >
-                  {tool.shortLabel}
-                </span>
-              </motion.button>
-            );
-          })}
-        </aside>
-      )}
-
-      {/* 3. Centered Floating Bottom Obsidian Capsule Dock (Video Chrome Part 3) */}
+      {/* Bottom navigation capsule: phones and tablets only. Desktop portals use their own sidebar. */}
       {!isAuthPage && (
         <nav
-          aria-label="Asosiy suzuvchi navigatsiya"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 max-w-[98vw] pointer-events-auto"
+          aria-label="Asosiy navigatsiya"
+          className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 max-w-[98vw] pointer-events-auto"
         >
           <div
             data-skeuo-dark="true"
@@ -668,11 +627,7 @@ export default function Navbar() {
               const content = (
                 <>
                   {active && (
-                    <motion.span
-                      layoutId={`bottomCapsuleActive-${personaKey}`}
-                      transition={{ type: "spring", stiffness: 430, damping: 34 }}
-                      className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.28)]"
-                    />
+                    <span className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.28)]" />
                   )}
                   <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
                   <span className="relative z-10 whitespace-nowrap">{item.shortLabel}</span>
@@ -709,10 +664,8 @@ export default function Navbar() {
           </div>
 
           {/* Detached Circular Utility Button (Matches Video Bottom-Right Obsidian Orb) */}
-          <motion.button
+          <button
             type="button"
-            whileHover={{ y: -2, scale: 1.06 }}
-            whileTap={{ scale: 0.91 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             title="Sahifa yuqorisiga chiqish"
             aria-label="Yuqoriga chiqish"
@@ -720,7 +673,7 @@ export default function Navbar() {
             className="w-10 h-10 sm:w-11 sm:h-11 rounded-full skeuo-obsidian flex items-center justify-center text-white shrink-0"
           >
             <ArrowUp className="w-4 h-4 text-white" />
-          </motion.button>
+          </button>
         </nav>
       )}
     </>

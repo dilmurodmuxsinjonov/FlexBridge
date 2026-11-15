@@ -72,7 +72,6 @@ import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 import {
   SkeuoStatCard,
   SkeuoVerticalMeter,
-  SkeuoSegmented,
   SkeuoAreaChart,
 } from "@/components/skeuo/SkeuoPrimitives";
 
@@ -773,6 +772,23 @@ export default function UniversityPortal() {
     loadAnalytics,
   ]);
 
+  // Switch the workspace section and load what it needs (sidebar + mobile dock).
+  const switchTab = (tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable" | "documents") => {
+    setActiveTab(tab);
+    if (tab === "documents") {
+      loadAssignments();
+      if (institutionId) loadReportsAndAgreements(institutionId);
+    } else if (tab === "timetable") {
+      if (institutionId) loadTimetable(institutionId);
+      else loadCoordinatorQueue();
+    } else if (tab === "exports" && institutionId) {
+      loadReportsAndAgreements(institutionId);
+    } else if (tab === "analytics") {
+      if (institutionId) loadAnalytics(institutionId);
+      else loadCoordinatorQueue();
+    }
+  };
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* ACADEMIC DEANERY HEADER BAR */}
@@ -896,7 +912,7 @@ export default function UniversityPortal() {
                 icon={FileCheck}
                 tone="orange"
                 active={activeTab === "queue"}
-                onClick={() => setActiveTab("queue")}
+                onClick={() => switchTab("queue")}
               />
               <SkeuoStatCard
                 title="Biriktirilgan amaliyotlar"
@@ -905,7 +921,7 @@ export default function UniversityPortal() {
                 icon={BookOpen}
                 tone="indigo"
                 active={activeTab === "assignments"}
-                onClick={() => setActiveTab("assignments")}
+                onClick={() => switchTab("assignments")}
               />
               <SkeuoStatCard
                 title="Kafedra taqsimoti"
@@ -914,7 +930,7 @@ export default function UniversityPortal() {
                 icon={Users}
                 tone="sky"
                 active={activeTab === "coordinator"}
-                onClick={() => setActiveTab("coordinator")}
+                onClick={() => switchTab("coordinator")}
               />
             </section>
             <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
@@ -939,42 +955,6 @@ export default function UniversityPortal() {
               />
             </section>
 
-            <SkeuoSegmented
-              layoutName="universityWorkspaceTabs"
-              value={activeTab}
-              onChange={(next) => {
-                const tab = next as
-                  | "queue"
-                  | "assignments"
-                  | "coordinator"
-                  | "exports"
-                  | "analytics"
-                  | "timetable"
-                  | "documents";
-                setActiveTab(tab);
-                if (tab === "documents") {
-                  loadAssignments();
-                  if (institutionId) loadReportsAndAgreements(institutionId);
-                } else if (tab === "timetable") {
-                  if (institutionId) loadTimetable(institutionId);
-                  else loadCoordinatorQueue();
-                } else if (tab === "exports" && institutionId) {
-                  loadReportsAndAgreements(institutionId);
-                } else if (tab === "analytics") {
-                  if (institutionId) loadAnalytics(institutionId);
-                  else loadCoordinatorQueue();
-                }
-              }}
-              options={[
-                { id: "queue", label: "Navbat", icon: FileCheck, badge: queueItems.length || undefined },
-                { id: "assignments", label: "Biriktirilganlar", icon: BookOpen, badge: assignments.length || undefined },
-                { id: "documents", label: "E-Imzo", icon: ShieldCheck },
-                { id: "coordinator", label: "Kafedra", icon: Users, badge: coordinatorQueue.length || undefined },
-                { id: "timetable", label: "Dars Jadvali", icon: Calendar },
-                { id: "exports", label: "Hisobotlar", icon: FileSpreadsheet },
-                { id: "analytics", label: "Analitika", icon: BarChart3 },
-              ]}
-            />
           </div>
         );
       })()}
@@ -991,7 +971,7 @@ export default function UniversityPortal() {
             </div>
             <button
               type="button"
-              onClick={() => setActiveTab("queue")}
+              onClick={() => switchTab("queue")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
                 activeTab === "queue"
                   ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
@@ -1009,7 +989,7 @@ export default function UniversityPortal() {
 
             <button
               type="button"
-              onClick={() => setActiveTab("assignments")}
+              onClick={() => switchTab("assignments")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
                 activeTab === "assignments"
                   ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
@@ -1049,7 +1029,7 @@ export default function UniversityPortal() {
             </div>
             <button
               type="button"
-              onClick={() => setActiveTab("coordinator")}
+              onClick={() => switchTab("coordinator")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
                 activeTab === "coordinator"
                   ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"

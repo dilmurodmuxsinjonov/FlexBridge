@@ -100,7 +100,7 @@ export default function Footer() {
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               <span>Tasdiqlangan milliy ekotizim</span>
             </div>
           </div>

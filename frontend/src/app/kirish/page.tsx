@@ -166,49 +166,6 @@ function KirishForm() {
 
       {/* Main Card */}
       <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <Link
-            href="/talaba/kirish"
-            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-sky-500/25 px-3.5 py-2.5 text-xs hover:border-sky-500/50 transition-colors"
-          >
-            <div>
-              <p className="font-bold text-sky-700 dark:text-sky-300">Talaba / Nomzod</p>
-              <p className="text-[11px] text-[var(--fb-ink-muted)]">Talaba kirishi</p>
-            </div>
-            <span className="shrink-0 font-bold text-sky-700 dark:text-sky-400">Kirish &rarr;</span>
-          </Link>
-          <Link
-            href="/korxona/kirish"
-            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-emerald-500/25 px-3.5 py-2.5 text-xs hover:border-emerald-500/50 transition-colors"
-          >
-            <div>
-              <p className="font-bold text-emerald-700 dark:text-emerald-300">Korxona / HR</p>
-              <p className="text-[11px] text-[var(--fb-ink-muted)]">Korxona kirishi</p>
-            </div>
-            <span className="shrink-0 font-bold text-emerald-700 dark:text-emerald-400">Kirish &rarr;</span>
-          </Link>
-          <Link
-            href="/universitet/kirish"
-            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-indigo-500/25 px-3.5 py-2.5 text-xs hover:border-indigo-500/50 transition-colors"
-          >
-            <div>
-              <p className="font-bold text-indigo-700 dark:text-indigo-300">Universitet / OTM</p>
-              <p className="text-[11px] text-[var(--fb-ink-muted)]">OTM kirishi</p>
-            </div>
-            <span className="shrink-0 font-bold text-indigo-700 dark:text-indigo-400">Kirish &rarr;</span>
-          </Link>
-          <Link
-            href="/operator/kirish"
-            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-amber-500/25 px-3.5 py-2.5 text-xs hover:border-amber-500/50 transition-colors"
-          >
-            <div>
-              <p className="font-bold text-amber-800 dark:text-amber-300">Operator / SOC</p>
-              <p className="text-[11px] text-[var(--fb-ink-muted)]">Operator kirishi</p>
-            </div>
-            <span className="shrink-0 font-bold text-amber-800 dark:text-amber-400">Kirish &rarr;</span>
-          </Link>
-        </div>
-
         {/* Status Alerts */}
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-xs text-rose-400">

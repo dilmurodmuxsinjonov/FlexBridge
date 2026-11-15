@@ -96,7 +96,6 @@ import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 import {
   SkeuoStatCard,
   SkeuoVerticalMeter,
-  SkeuoSegmented,
   SkeuoLiveFeed,
 } from "@/components/skeuo/SkeuoPrimitives";
 
@@ -919,6 +918,22 @@ export default function EmployerPortal() {
     }
   }, []);
 
+  // One place that switches the workspace section and loads its data (sidebar + mobile dock).
+  const switchMainTab = (tab: "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB") => {
+    setActiveMainTab(tab);
+    if (tab === "SEARCH_HUB" && searchResults.length === 0 && !isLoadingSearch) {
+      handleSearch();
+    } else if (tab === "MENTOR_HUB") {
+      if (reviewQueue.length === 0 && !isLoadingQueue) loadMentorQueue();
+      if (mentorAssignments.length === 0 && !isLoadingPlacements) loadPlacements();
+    } else if (tab === "ORG_HUB" && orgId.trim()) {
+      loadOrgHubData(orgId.trim());
+    } else if (tab === "BILLING_HUB" && orgId.trim()) {
+      loadBillingHubData(orgId.trim());
+    }
+  };
+
+
   const handleCreateOrder = async (planCode: "ORG_PLAN_30D" | "SINGLE_POST_30D") => {
     if (!orgId.trim()) {
       setOrderError("Tashkilot ID tanlanmagan.");
@@ -1327,7 +1342,7 @@ export default function EmployerPortal() {
                     subtitle={`${dashboard.metrics.opportunities.draft} qoralama`}
                     icon={Briefcase}
                     tone="orange"
-                    onClick={() => setActiveMainTab("KANBAN")}
+                    onClick={() => switchMainTab("KANBAN")}
                     active={activeMainTab === "KANBAN"}
                   />
                   <SkeuoStatCard
@@ -1337,7 +1352,7 @@ export default function EmployerPortal() {
                     subtitle={`${dashboard.metrics.applications.offered} taklif qilingan`}
                     icon={Users}
                     tone="emerald"
-                    onClick={() => setActiveMainTab("SEARCH_HUB")}
+                    onClick={() => switchMainTab("SEARCH_HUB")}
                     active={activeMainTab === "SEARCH_HUB"}
                   />
                   <SkeuoStatCard
@@ -1355,7 +1370,7 @@ export default function EmployerPortal() {
                     subtitle={`${dashboard.metrics.engagements.completed} yakunlangan`}
                     icon={GraduationCap}
                     tone="indigo"
-                    onClick={() => setActiveMainTab("MENTOR_HUB")}
+                    onClick={() => switchMainTab("MENTOR_HUB")}
                     active={activeMainTab === "MENTOR_HUB"}
                   />
                 </div>
@@ -1377,33 +1392,6 @@ export default function EmployerPortal() {
             );
           })()}
 
-          {/* TOP SEGMENTED BAR FOR RAPID WORKSPACE SWITCHING */}
-          <SkeuoSegmented
-            layoutName="employerWorkspaceTabs"
-            value={activeMainTab}
-            onChange={(next) => {
-              const tab = next as "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB";
-              setActiveMainTab(tab);
-              if (tab === "SEARCH_HUB" && searchResults.length === 0 && !isLoadingSearch) {
-                handleSearch();
-              } else if (tab === "MENTOR_HUB") {
-                if (reviewQueue.length === 0 && !isLoadingQueue) loadMentorQueue();
-                if (mentorAssignments.length === 0 && !isLoadingPlacements) loadPlacements();
-              } else if (tab === "ORG_HUB" && orgId.trim()) {
-                loadOrgHubData(orgId.trim());
-              } else if (tab === "BILLING_HUB" && orgId.trim()) {
-                loadBillingHubData(orgId.trim());
-              }
-            }}
-            options={[
-              { id: "KANBAN", label: "Kanban & Nomzodlar", icon: Users },
-              { id: "SEARCH_HUB", label: "Qidiruv", icon: Search, badge: searchTotal || undefined },
-              { id: "MENTOR_HUB", label: "Mentorlik", icon: Award, badge: reviewQueue.length || undefined },
-              { id: "ORG_HUB", label: "Tashkilot", icon: Building },
-              { id: "BILLING_HUB", label: "Moliya", icon: CreditCard },
-            ]}
-          />
-
           {/* PRIMARY WORKSPACE: CORPORATE LEFT HR RAIL + CONTENT PANEL */}
           <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
             <aside
@@ -1415,7 +1403,7 @@ export default function EmployerPortal() {
               </div>
               <button
                 type="button"
-                onClick={() => setActiveMainTab("KANBAN")}
+                onClick={() => switchMainTab("KANBAN")}
                 className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
                   activeMainTab === "KANBAN"
                     ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"

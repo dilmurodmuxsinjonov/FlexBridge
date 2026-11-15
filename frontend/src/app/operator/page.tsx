@@ -60,7 +60,6 @@ import AuthModal from "@/components/AuthModal";
 import {
   SkeuoStatCard,
   SkeuoVerticalMeter,
-  SkeuoSegmented,
   SkeuoLiveFeed,
 } from "@/components/skeuo/SkeuoPrimitives";
 
@@ -590,7 +589,7 @@ export default function OperatorPortal() {
             ) : currentUser ? (
               <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                SOC konsol faol
+                Tizim ishlamoqda
               </span>
             ) : (
               <Link
@@ -698,18 +697,6 @@ export default function OperatorPortal() {
               />
             </section>
 
-            <SkeuoSegmented
-              layoutName="operatorWorkspaceTabs"
-              value={activeTab}
-              onChange={(next) => setActiveTab(next as ActiveTab)}
-              options={[
-                { id: "AUDIT", label: "Audit Jurnali", icon: FileCheck2, badge: auditEvents.length || undefined },
-                { id: "VERIFICATION", label: "KYB Tekshiruvi", icon: ClipboardCheck, badge: cases.length || undefined },
-                { id: "BREAK_GLASS", label: "Favqulodda Ruxsat", icon: ShieldAlert },
-                { id: "SUPPORT_OPS", label: "Murojaatlar", icon: LifeBuoy, badge: tickets.length || undefined },
-                { id: "FINANCE", label: "Moliya Markazi", icon: CreditCard },
-              ]}
-            />
           </div>
         );
       })()}
@@ -735,7 +722,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="font-mono text-[11px]">01 // Audit Jurnali</span>
+                <span className="text-xs">Audit jurnali</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] font-mono">
                 {auditEvents.length}
@@ -752,7 +739,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <ClipboardCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-[11px]">02 // KYC NAVBAT (109)</span>
+                <span className="text-xs">Tashkilotlarni tekshirish</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
                 {cases.length}
@@ -768,7 +755,7 @@ export default function OperatorPortal() {
               }`}
             >
               <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-              <span className="font-mono text-[11px]">03 // BREAK-GLASS</span>
+              <span className="text-xs">Favqulodda ruxsat</span>
             </button>
 
             <button
@@ -781,7 +768,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <LifeBuoy className="w-4 h-4 text-sky-400 shrink-0" />
-                <span className="font-mono text-[11px]">04 // SUPPORT SLA</span>
+                <span className="text-xs">Murojaatlar</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
                 {tickets.length}
@@ -798,7 +785,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-[11px]">05 // MOLIYA &amp; LEDGER</span>
+                <span className="text-xs">Moliya</span>
               </span>
               {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
                 <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
