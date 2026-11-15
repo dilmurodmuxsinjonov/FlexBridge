@@ -34,6 +34,7 @@ import {
   withdrawCandidateApplication,
   reapplyCandidateApplication,
   respondToCandidateOffer,
+  respondToInterview,
   fetchAuthMe,
   logoutUser,
   AuthUser,
@@ -122,6 +123,13 @@ export default function CandidateApplicationsPage() {
   const [reapplyReason, setReapplyReason] = useState("");
   const [isReapplying, setIsReapplying] = useState(false);
   const [reapplyError, setReapplyError] = useState<string | null>(null);
+
+  // FB-180: Interview Response State (API-042)
+  const [isRespondingInterview, setIsRespondingInterview] = useState(false);
+  const [interviewActionError, setInterviewActionError] = useState<string | null>(null);
+  const [interviewActionSuccess, setInterviewActionSuccess] = useState<string | null>(null);
+  const [showRescheduleInput, setShowRescheduleInput] = useState(false);
+  const [rescheduleNote, setRescheduleNote] = useState("");
 
   // Synchronize authentication and application data
   useEffect(() => {
@@ -276,6 +284,43 @@ export default function CandidateApplicationsPage() {
       });
     } finally {
       setIsRespondingOffer(false);
+    }
+  };
+
+  // Interview Response Handler (API-042 / FB-180)
+  const handleInterviewResponse = async (
+    interviewId: string,
+    response: "ACCEPTED" | "DECLINED" | "RESCHEDULE_REQUESTED",
+    note?: string
+  ) => {
+    setIsRespondingInterview(true);
+    setInterviewActionError(null);
+    setInterviewActionSuccess(null);
+    try {
+      await respondToInterview(interviewId, {
+        response,
+        note: note?.trim() || null,
+      });
+      setInterviewActionSuccess(
+        response === "ACCEPTED"
+          ? "Suhbat taklifi muvaffaqiyatli qabul qilindi!"
+          : response === "DECLINED"
+          ? "Suhbat taklifi rad etildi."
+          : "Suhbatni qayta rejalashtirish so'rovi yuborildi."
+      );
+      setShowRescheduleInput(false);
+      setRescheduleNote("");
+      // Refresh list and detail
+      await loadData(activeTab);
+      if (selectedAppId) {
+        await openDetail(selectedAppId);
+      }
+    } catch (err: unknown) {
+      setInterviewActionError(
+        err instanceof Error ? err.message : "Suhbatga javob berishda xatolik yuz berdi"
+      );
+    } finally {
+      setIsRespondingInterview(false);
     }
   };
 
@@ -685,13 +730,29 @@ export default function CandidateApplicationsPage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5">
-                  {/* Active Interview Notice if scheduled */}
+                  {/* Active Interview Notice & Response (API-042 / FB-180) */}
                   {detail.interview && (
-                    <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-4">
-                      <div className="flex items-center gap-2 text-violet-400 font-semibold text-xs mb-2">
-                        <Video className="h-4 w-4" />
-                        <span>Suhbat taklifi belgilangan</span>
+                    <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-4 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-violet-400 font-semibold text-xs">
+                          <Video className="h-4 w-4" />
+                          <span>Suhbat taklifi (Interview - API-042)</span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            detail.interview.status === "ACCEPTED"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                              : detail.interview.status === "DECLINED"
+                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                              : detail.interview.status === "RESCHEDULE_REQUESTED"
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                              : "bg-violet-500/20 text-violet-300 border border-violet-500/30"
+                          }`}
+                        >
+                          {detail.interview.status}
+                        </span>
                       </div>
+
                       <div className="grid grid-cols-2 gap-2 text-xs text-zinc-300">
                         <div>
                           <span className="text-zinc-500 block">Boshlanish vaqti:</span>
@@ -710,6 +771,87 @@ export default function CandidateApplicationsPage() {
                           </div>
                         )}
                       </div>
+
+                      {/* Feedback messages */}
+                      {interviewActionSuccess && (
+                        <div className="p-2.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{interviewActionSuccess}</span>
+                        </div>
+                      )}
+                      {interviewActionError && (
+                        <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                          <span>{interviewActionError}</span>
+                        </div>
+                      )}
+
+                      {/* Interactive candidate action buttons if status is SCHEDULED */}
+                      {detail.interview.status === "SCHEDULED" && (
+                        <div className="flex flex-col gap-2 pt-2 border-t border-violet-500/20">
+                          {showRescheduleInput && (
+                            <div className="flex flex-col gap-1.5 p-2.5 rounded bg-black/40 border border-white/[0.08]">
+                              <label className="text-[11px] text-zinc-400 font-medium">
+                                Qayta rejalashtirish sababi va taklif etilayotgan vaqt:
+                              </label>
+                              <textarea
+                                value={rescheduleNote}
+                                onChange={(e) => setRescheduleNote(e.target.value)}
+                                placeholder="Masalan: Darsim borligi sababli suhbatni soat 16:00 ga ko'chirishni so'rayman."
+                                rows={2}
+                                className="w-full rounded bg-surface border border-white/[0.1] px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+                              />
+                              <div className="flex items-center justify-end gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowRescheduleInput(false)}
+                                  className="px-2.5 py-1 text-xs text-zinc-400 hover:text-white"
+                                >
+                                  Bekor qilish
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isRespondingInterview || !rescheduleNote.trim()}
+                                  onClick={() => handleInterviewResponse(detail.interview!.id, "RESCHEDULE_REQUESTED", rescheduleNote)}
+                                  className="px-3 py-1 rounded bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold disabled:opacity-50"
+                                >
+                                  {isRespondingInterview ? "Yuborilmoqda..." : "So'rovni yuborish"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {!showRescheduleInput && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={isRespondingInterview}
+                                onClick={() => handleInterviewResponse(detail.interview!.id, "ACCEPTED")}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow transition-all disabled:opacity-50"
+                              >
+                                {isRespondingInterview ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                <span>Qabul qilish (Accept)</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isRespondingInterview}
+                                onClick={() => setShowRescheduleInput(true)}
+                                className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50"
+                              >
+                                <span>Qayta vaqt so'rash</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isRespondingInterview}
+                                onClick={() => handleInterviewResponse(detail.interview!.id, "DECLINED")}
+                                className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-medium transition-all disabled:opacity-50"
+                              >
+                                <span>Rad etish (Decline)</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 

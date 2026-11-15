@@ -53,6 +53,7 @@ TEST_SCRIPTS = [
     "scripts/test_university_exports_staging.py",
     "scripts/test_university_placements_staging.py",
     "scripts/test_user_support_privacy_staging.py",
+    "scripts/test_vacancy_lifecycle_interviews_staging.py",
 ]
 
 def main():

@@ -1464,6 +1464,20 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 18-suite regression runner `scripts/run_all_staging_tests.py`: 18/18 passed 100% GREEN in 32.36s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/user_support_privacy_hub/USER_SUPPORT_PRIVACY_REPORT.md`.
 
+## LOG-142 / Vacancy Lifecycle & Candidate Interview Responses Hub (FB-180, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #180, Branch `feature/180-vacancy-lifecycle-interview-responses-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 3 Next.js 16 BFF endpoints (`/api/bff/employer/opportunities/[id]/publish`, `/api/bff/employer/opportunities/[id]/transition`, `/api/bff/candidate/interviews/[id]/responses`) proxying backend canonical contracts API-081, API-082, API-042 under CAP-027 and CAP-009 with HttpOnly session validation, MFA assurance elevation, and CSRF origin defense.
+  - Employer Dashboard (`frontend/src/app/employer/page.tsx`): Added interactive vacancy lifecycle action buttons (Nashr qilish, To'xtatish, Yopish) with real-time feedback banners and auto dashboard refresh.
+  - Candidate Applications (`frontend/src/app/nomzod/arizalar/page.tsx`): Added interactive interview response action buttons (Qabul qilish -> CONFIRMED, Vaqtini ko'chirish -> RESCHEDULE_REQUESTED, Rad etish -> CANCELLED) with inline reason inputs and real-time status updates.
+  - Extended TypeScript SDK in `frontend/src/lib/api.ts` with `publishEmployerOpportunity()`, `transitionOpportunityStatus()`, and `respondToInterview()`.
+  - Dedicated staging suite `scripts/test_vacancy_lifecycle_interviews_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer.
+  - Comprehensive 19-suite regression runner `scripts/run_all_staging_tests.py`: 19/19 passed 100% GREEN in 34.54s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/vacancy_lifecycle_interviews/VACANCY_LIFECYCLE_INTERVIEWS_REPORT.md`.
+
 
 
 
