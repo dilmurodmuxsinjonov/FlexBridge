@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useTransition } from "react";
-import Link from "next/link";
 import {
   Star,
   ShieldCheck,
@@ -12,8 +11,6 @@ import {
   Lock,
   MessageSquare,
   Send,
-  FileText,
-  ChevronRight,
   X,
   Building2,
   Award,
@@ -27,7 +24,6 @@ import {
   RubricVersion,
   EligibleRelationItem,
   ReceivedRatingItem,
-  GivenRatingItem,
 } from "@/lib/api";
 
 export default function CandidateRatingsPage() {

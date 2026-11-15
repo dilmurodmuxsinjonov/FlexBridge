@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import {
   LifeBuoy,
   ShieldCheck,
@@ -9,19 +8,15 @@ import {
   Send,
   Plus,
   RefreshCw,
-  Clock,
   AlertCircle,
   CheckCircle2,
   Loader2,
-  FileText,
-  User,
   Trash2,
   Download,
   Edit3,
   X,
   MessageSquare,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import {
   fetchMySupportTickets,
@@ -513,6 +508,12 @@ export default function CandidateHelpPrivacyPage() {
               <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 Maxfiylik So‘rovlari Tarixi ({privacyRequests.length})
               </h4>
+              {privacyError && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{privacyError}</span>
+                </div>
+              )}
               {isLoadingPrivacy ? (
                 <div className="p-8 text-center text-xs text-zinc-400 flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
@@ -816,6 +817,12 @@ export default function CandidateHelpPrivacyPage() {
 
             {/* Messages Body */}
             <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#0d0d0f]">
+              {messagesError && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{messagesError}</span>
+                </div>
+              )}
               {isLoadingMessages ? (
                 <div className="p-8 text-center text-xs text-zinc-400 flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-sky-400" />

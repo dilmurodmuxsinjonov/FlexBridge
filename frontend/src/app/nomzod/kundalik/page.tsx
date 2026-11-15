@@ -15,7 +15,6 @@ import {
   Send,
   RefreshCw,
   LogOut,
-  ChevronRight,
   ShieldCheck,
   FileCheck,
   Award,

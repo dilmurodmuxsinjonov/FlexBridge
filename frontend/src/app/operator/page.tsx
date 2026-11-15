@@ -14,7 +14,6 @@ import {
   UserX,
   KeyRound,
   RefreshCw,
-  Search,
   Clock,
   Send,
   X,
@@ -24,13 +23,10 @@ import {
   Flame,
   Activity,
   Server,
-  Plus,
   CreditCard,
   Receipt,
   Coins,
-  DollarSign,
   Filter,
-  ArrowUpRight,
   CheckCheck,
 } from "lucide-react";
 import {
@@ -58,8 +54,6 @@ import {
   OperatorPlatformAnalytics,
   OperatorFinanceSummaryResponse,
   OperatorReconciliationItem,
-  OperatorReconciliationResponse,
-  ApproveOperatorRefundResult,
   BreakGlassAccessResult,
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
@@ -1139,6 +1133,12 @@ export default function OperatorPortal() {
                   </div>
                 </div>
 
+                {analyticsError && (
+                  <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{analyticsError}</span>
+                  </div>
+                )}
                 {/* 4 KPI TELEMETRY CARDS */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
@@ -1639,6 +1639,12 @@ export default function OperatorPortal() {
                   </div>
                 )}
 
+                {reconciliationError && (
+                  <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{reconciliationError}</span>
+                  </div>
+                )}
                 {/* RECONCILIATION ITEMS TABLE */}
                 {isLoadingReconciliation ? (
                   <div className="p-8 flex items-center justify-center gap-2 text-xs text-zinc-400">

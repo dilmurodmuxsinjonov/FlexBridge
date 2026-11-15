@@ -7,8 +7,6 @@ import {
   Trash2,
   ExternalLink,
   Briefcase,
-  MapPin,
-  Calendar,
   AlertCircle,
   Clock,
   CheckCircle2,

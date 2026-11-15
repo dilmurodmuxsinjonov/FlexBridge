@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Shield,
   ShieldCheck,
-  ShieldAlert,
   KeyRound,
   Smartphone,
   Laptop,
@@ -20,9 +20,7 @@ import {
   Download,
   AlertTriangle,
   X,
-  FileText,
   User,
-  Clock,
   ArrowRight,
 } from "lucide-react";
 import {
@@ -37,6 +35,7 @@ import {
 } from "@/lib/api";
 
 export default function CandidateSecurityPage() {
+  const router = useRouter();
   const [securityData, setSecurityData] = useState<UserSecurityOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -237,7 +236,10 @@ export default function CandidateSecurityPage() {
     try {
       await revokeUserSession(sessionId);
       if (isCurrent) {
-        window.location.assign("/");
+        // BFF cleared the session cookie; resync shared chrome like the Navbar logout does.
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        router.push("/");
+        router.refresh();
         return;
       }
       setSuccessMessage("Sessiya muvaffaqiyatli yakunlandi.");
