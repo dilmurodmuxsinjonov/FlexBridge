@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Star,
   ShieldCheck,
@@ -25,11 +25,14 @@ import {
   EligibleRelationItem,
   ReceivedRatingItem,
 } from "@/lib/api";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
 
 export default function CandidateRatingsPage() {
-  const [data, setData] = useState<CandidateRatingsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const ratings = useAsyncData<CandidateRatingsResponse>("candidate-ratings", fetchCandidateRatings);
+  const data = ratings.data ?? null;
+  const loading = ratings.isLoading;
+  const error = ratings.error ? describeRequestError(ratings.error, "Baholarni yuklashda xatolik") : null;
   const [isPending, startTransition] = useTransition();
 
   // Active view tab: "received" | "given" | "evaluate"
@@ -37,7 +40,8 @@ export default function CandidateRatingsPage() {
 
   // Rating submission form state
   const [selectedRelation, setSelectedRelation] = useState<EligibleRelationItem | null>(null);
-  const [selectedRubric, setSelectedRubric] = useState<RubricVersion | null>(null);
+  // The active rubric is the first one the backend offers for this candidate.
+  const selectedRubric: RubricVersion | null = data?.available_rubrics?.[0] ?? null;
   const [criterionScores, setCriterionScores] = useState<Record<string, number>>({});
   const [ratingComment, setRatingComment] = useState("");
   const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string | null>(null);
@@ -51,27 +55,7 @@ export default function CandidateRatingsPage() {
   const [appealSuccessMsg, setAppealSuccessMsg] = useState<string | null>(null);
   const [appealErrorMsg, setAppealErrorMsg] = useState<string | null>(null);
 
-  const loadRatings = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchCandidateRatings();
-      setData(res);
-      if (res.available_rubrics && res.available_rubrics.length > 0) {
-        setSelectedRubric(res.available_rubrics[0]);
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Baholarni yuklashda xatolik";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadRatings();
-  }, []);
+  const loadRatings = ratings.reload;
 
   // Handle score change for a criterion
   const handleScoreChange = (criterionId: string, score: number) => {

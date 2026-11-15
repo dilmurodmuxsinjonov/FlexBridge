@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -19,52 +19,48 @@ import {
   markNotificationRead,
   NotificationItem,
 } from "@/lib/api";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
+
+async function loadNotifications(unreadOnly: boolean): Promise<NotificationItem[]> {
+  const res = await fetchMyNotifications(unreadOnly, 50);
+  return res.items || [];
+}
 
 export default function NotificationsInboxPage() {
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState<boolean>(false);
+  const notifications = useAsyncData(unreadOnly ? "unread" : "all", () => loadNotifications(unreadOnly));
+  const items = notifications.data ?? [];
+  const loading = notifications.isLoading;
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [markingId, setMarkingId] = useState<string | null>(null);
 
-  const loadNotifications = async (isUnread: boolean) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchMyNotifications(isUnread, 50);
-      setItems(res.items || []);
-    } catch (caught: unknown) {
-      const err = caught as Error & { status?: number };
-      if (err.status === 401) {
-        setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
-      } else {
-        setError(err.message || "Bildirishnomalarni yuklashda xatolik yuz berdi");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error =
+    actionError ??
+    (notifications.error
+      ? describeRequestError(notifications.error, "Bildirishnomalarni yuklashda xatolik yuz berdi")
+      : null);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadNotifications(unreadOnly);
-  }, [unreadOnly]);
+  const refresh = () => {
+    setActionError(null);
+    void notifications.reload();
+  };
 
   const handleMarkRead = async (id: string) => {
     try {
       setMarkingId(id);
+      setActionError(null);
       await markNotificationRead(id);
-      setItems((prev) =>
-        prev.map((item) =>
+      notifications.mutate((prev) =>
+        prev?.map((item) =>
           item.id === id ? { ...item, is_read: true, read_at: new Date().toISOString() } : item
         )
       );
       setActionSuccess("Xabar o'qilgan deb belgilandi.");
       setTimeout(() => setActionSuccess(null), 3000);
     } catch (caught: unknown) {
-      const err = caught as Error & { status?: number };
-      setError(err.message || "Xabarni yangilashda xatolik yuz berdi");
+      setActionError(describeRequestError(caught, "Xabarni yangilashda xatolik yuz berdi"));
     } finally {
       setMarkingId(null);
     }
@@ -93,6 +89,8 @@ export default function NotificationsInboxPage() {
           {/* Unread Filter Toggle */}
           <div className="flex items-center p-0.5 rounded bg-white/[0.04] border border-white/[0.08] text-xs">
             <button
+              type="button"
+              aria-pressed={!unreadOnly}
               onClick={() => setUnreadOnly(false)}
               className={`px-3 py-1.5 rounded transition-colors ${
                 !unreadOnly
@@ -103,6 +101,8 @@ export default function NotificationsInboxPage() {
               Barchasi
             </button>
             <button
+              type="button"
+              aria-pressed={unreadOnly}
               onClick={() => setUnreadOnly(true)}
               className={`px-3 py-1.5 rounded transition-colors ${
                 unreadOnly
@@ -115,7 +115,8 @@ export default function NotificationsInboxPage() {
           </div>
 
           <button
-            onClick={() => loadNotifications(unreadOnly)}
+            type="button"
+            onClick={refresh}
             disabled={loading}
             className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded transition-colors disabled:opacity-50"
           >
