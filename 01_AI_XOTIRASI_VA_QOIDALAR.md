@@ -1478,6 +1478,24 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 19-suite regression runner `scripts/run_all_staging_tests.py`: 19/19 passed 100% GREEN in 34.54s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/vacancy_lifecycle_interviews/VACANCY_LIFECYCLE_INTERVIEWS_REPORT.md`.
 
+## LOG-143 / Candidate Center: Saved Opportunities (Bookmarks), Notifications Inbox & Read Receipts Hub (FB-182, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #182, Branch `feature/182-candidate-saved-opportunities-notifications-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/me/saved-opportunities`, `/api/bff/me/saved-opportunities/[id]`, `/api/bff/candidate/saved-opportunities/[id]`, `/api/bff/me/notifications`, `/api/bff/me/notifications/[id]/read`) proxying backend canonical contracts API-004, API-037, API-038, API-031 under CAP-006 and CAP-030 with HttpOnly session validation, CSRF origin defense, and structured JSON responses.
+  - Candidate Saved Opportunities Dashboard (`frontend/src/app/nomzod/saqlanganlar/page.tsx`): Built full bookmark hub with telemetry cards (Jami Saqlanganlar, Faol E'lonlar, To'xtatilgan/Yopilganlar), direct links to `/ishlar/[id]`, active/closed vacancy status badges, and single-click unsave actions with optimistic UI removal.
+  - Candidate Notifications Inbox (`frontend/src/app/nomzod/bildirishnomalar/page.tsx`): Built notifications hub with All vs Unread tabs, template category badges (APPLICATION_STATUS_CHANGED, INTERVIEW_INVITATION, etc.), formatted local timestamps, unread indicators, and single-click "O'qildi deb belgilash" actions updating counts in real-time.
+  - Vacancy Detail Integration (`frontend/src/app/ishlar/[id]/page.tsx`): Added interactive "Saqlab qo'yish" (Bookmark toggle) button with state persistence and immediate UI feedback.
+  - Navbar Integration (`frontend/src/components/Navbar.tsx`): Added "Saqlanganlar" (Bookmark) and "Xabarlar" (Bell) navigation links with active routing indicators.
+  - TypeScript SDK (`frontend/src/lib/api.ts`): Exported types `SavedOpportunityItem`, `SavedOpportunitiesResponse`, `SaveOpportunityResult`, `NotificationItem`, `NotificationsResponse` and helper methods `fetchMySavedOpportunities`, `saveOpportunity`, `deleteSavedOpportunity`, `fetchMyNotifications`, `markNotificationRead`.
+  - Next.js Turbopack build verified clean (`npm run build`: 48 routes compiled, 0 errors). Docker container `flexbridge-r1-frontend-1` rebuilt and healthy on port 3000.
+  - Dedicated staging suite `scripts/test_candidate_saved_notifications_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer.
+  - Comprehensive 20-suite regression runner `scripts/run_all_staging_tests.py`: 20/20 passed 100% GREEN in 36.51s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/candidate_saved_notifications_hub/CANDIDATE_SAVED_NOTIFICATIONS_REPORT.md`.
+
+
 
 
 

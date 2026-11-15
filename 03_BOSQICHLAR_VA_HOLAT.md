@@ -1224,7 +1224,15 @@ Keyingi kichik qadam:
   * 3 Next.js BFF marshruti: `/api/bff/employer/opportunities/[id]/publish`, `/api/bff/employer/opportunities/[id]/transition`, `/api/bff/candidate/interviews/[id]/responses` (API-081, API-082, API-042).
   * Ish beruvchi panelida (`/employer`) vakansiyalarni nashr qilish, to'xtatish va yopish amallari.
   * Nomzod arizalari bo'limida (`/nomzod/arizalar`) belgilangan suhbatlarga javob berish (qabul qilish, rad etish, vaqtini ko'chirish) interaktiv amallari.
-  * 19 ta staging test to'plami bo'yicha 185+/185+ test 100% Yashil (0 regressiya, 34.54s umumiy vaqt). Staging suite `scripts/test_vacancy_lifecycle_interviews_staging.py` 10/10 faza 100% GREEN.
+  * 19 ta staging test to'plami bo'yicha 185+/185+ test 100% Yashil (0 regressiya, 34.54s umumiy vaqt). Staging suite `scripts/test_vacancy_lifecycle_interviews_staging.py` 10/10 faza 100% GREEN. PR #181 birlashtirildi (`08dbe60`).
+
+- **FB-182 (Candidate Saved Opportunities Bookmarks, Notifications Inbox & Read Receipts Hub)**:
+  * 5 Next.js BFF marshruti: `/api/bff/me/saved-opportunities`, `/api/bff/me/saved-opportunities/[id]`, `/api/bff/candidate/saved-opportunities/[id]`, `/api/bff/me/notifications`, `/api/bff/me/notifications/[id]/read` (API-004, API-037, API-038, API-031).
+  * Nomzod Saqlangan Vakansiyalar Markazi (`/nomzod/saqlanganlar`) — telemetriya kartalari, faol/yopiq holat nishonlari, yagona tugma bilan saqlashdan chiqarish.
+  * Nomzod Bildirishnomalar Inboksi (`/nomzod/bildirishnomalar`) — Barchasi / O'qilmaganlar filtrlari, voqea toifalari, bir bosish bilan o'qildi deb belgilash.
+  * Vakansiya sahifasida (`/ishlar/[id]`) "Saqlab qo'yish" tugmasi va Navbar navigatsiya integratsiyasi (`Saqlanganlar`, `Xabarlar`).
+  * 20 ta staging test to'plami bo'yicha 195+/195+ test 100% Yashil (0 regressiya, 36.51s umumiy vaqt). Staging suite `scripts/test_candidate_saved_notifications_staging.py` 10/10 faza 100% GREEN.
+
 
 
 
