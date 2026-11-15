@@ -186,7 +186,7 @@ function UniversitetKirishForm() {
         </p>
       </div>
 
-      <div className="bg-[#121214] border border-indigo-500/20 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-xs text-rose-400">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
@@ -345,9 +345,9 @@ function UniversitetKirishForm() {
 
 export default function UniversitetKirishPage() {
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#09090b] text-zinc-100 flex items-center justify-center px-4 py-10">
+    <div className="min-h-[calc(100vh-3.5rem)] text-[var(--fb-ink)] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-4xl grid gap-8 lg:grid-cols-[1.05fr_1fr] items-center">
-        <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-indigo-500/20 bg-[#121214] p-7">
+        <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-500/25 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold text-indigo-300">
             <GraduationCap className="h-3.5 w-3.5" />
             <span>OTM Akademik Ekotizimi</span>

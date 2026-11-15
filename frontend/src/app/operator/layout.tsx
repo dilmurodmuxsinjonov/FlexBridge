@@ -57,9 +57,9 @@ export default function OperatorLayout({
   if (authLoaded && currentUser && !isOperatorRoles(currentUser.roles)) {
     const targetDashboard = resolvePortalDashboard(currentUser.roles);
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-background text-zinc-100 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-lg rounded-2xl border border-amber-500/30 bg-[#121214] p-7 space-y-5 shadow-2xl">
-          <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono font-semibold text-amber-300">
+      <div className="min-h-[calc(100vh-4rem)] text-[var(--fb-ink)] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-lg rounded-3xl skeuo-card p-7 space-y-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-3 py-1 text-xs font-mono font-semibold text-amber-700 dark:text-amber-300">
             <ShieldAlert className="w-4 h-4" />
             <span>SOC Rol Chegarasi (Role Boundary)</span>
           </div>
@@ -102,12 +102,12 @@ export default function OperatorLayout({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background text-zinc-100">
+    <div className="min-h-[calc(100vh-4rem)] text-[var(--fb-ink)]">
       {authLoaded && !currentUser && (
-        <div className="border-b border-amber-500/20 bg-amber-500/[0.06] px-4 py-2.5 text-xs">
-          <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-amber-200">
-              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="max-w-[1440px] mx-auto px-4 pt-2 md:px-8 text-xs">
+          <div className="skeuo-card rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-200">
+              <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>
                 <strong>Operator SOC Terminal:</strong> Dual-control vakolat va 2FA (TOTP) asosidagi xavfsiz kirish.
               </span>
@@ -115,7 +115,7 @@ export default function OperatorLayout({
             <div className="flex items-center gap-2">
               <Link
                 href="/operator/kirish"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-[11px] font-semibold text-zinc-950 hover:bg-amber-500 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full skeuo-btn-obsidian px-3.5 py-1.5 text-[11px] font-semibold"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Operator alohida kirishi</span>

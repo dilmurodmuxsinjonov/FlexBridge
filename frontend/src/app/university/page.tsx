@@ -71,6 +71,12 @@ import {
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+  SkeuoAreaChart,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   1: { start: "08:30", end: "09:50" },
@@ -731,10 +737,55 @@ export default function UniversityPortal() {
     loadCoordinatorQueue();
   };
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flexbridge:portal-tab-changed", {
+        detail: { tab: activeTab },
+      })
+    );
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onDockTab = (ev: Event) => {
+      const next = (ev as CustomEvent<{ tab?: string }>).detail?.tab as
+        | "queue"
+        | "assignments"
+        | "coordinator"
+        | "exports"
+        | "analytics"
+        | "timetable"
+        | "documents"
+        | undefined;
+      if (!next) return;
+      setActiveTab(next);
+      if (next === "documents") {
+        loadAssignments();
+        if (institutionId) loadReportsAndAgreements(institutionId);
+      } else if (next === "timetable") {
+        if (institutionId) loadTimetable(institutionId);
+        else loadCoordinatorQueue();
+      } else if (next === "exports" && institutionId) {
+        loadReportsAndAgreements(institutionId);
+      } else if (next === "analytics") {
+        if (institutionId) loadAnalytics(institutionId);
+        else loadCoordinatorQueue();
+      }
+    };
+    window.addEventListener("flexbridge:dock-tab", onDockTab);
+    return () => window.removeEventListener("flexbridge:dock-tab", onDockTab);
+  }, [
+    institutionId,
+    loadAssignments,
+    loadReportsAndAgreements,
+    loadTimetable,
+    loadCoordinatorQueue,
+    loadAnalytics,
+  ]);
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* ACADEMIC DEANERY HEADER BAR */}
-      <section className="w-full bg-surface-card border border-white/[0.08] border-t-2 border-t-indigo-500 rounded-xl p-6 shadow-sm">
+      <section className="w-full skeuo-card rounded-[28px] p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -845,12 +896,109 @@ export default function UniversityPortal() {
         </section>
       )}
 
+      {/* ACADEMIC SKEUOMORPHIC EXECUTIVE STRIP & WORKSPACE SWITCHER */}
+      {currentUser && (() => {
+        const totalTrackable = Math.max(assignments.length + coordinatorQueue.length, 1);
+        const assignedPct = Math.round((assignments.length / totalTrackable) * 100);
+        return (
+          <div className="flex flex-col gap-5">
+            <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_320px]">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <SkeuoStatCard
+                  title="Kundaliklar navbati"
+                  value={queueItems.length}
+                  subtitle="Akademik ko‘rik kutilmoqda"
+                  icon={FileCheck}
+                  tone="orange"
+                  active={activeTab === "queue"}
+                  onClick={() => setActiveTab("queue")}
+                />
+                <SkeuoStatCard
+                  title="Biriktirilgan amaliyotlar"
+                  value={assignments.length}
+                  subtitle="O‘qituvchi nazorati ostida"
+                  icon={BookOpen}
+                  tone="indigo"
+                  active={activeTab === "assignments"}
+                  onClick={() => setActiveTab("assignments")}
+                />
+                <SkeuoStatCard
+                  title="Kafedra taqsimoti"
+                  value={coordinatorQueue.length}
+                  subtitle="Rahbar tayinlovi kutilmoqda"
+                  icon={Users}
+                  tone="sky"
+                  active={activeTab === "coordinator"}
+                  onClick={() => setActiveTab("coordinator")}
+                />
+              </div>
+              <SkeuoVerticalMeter
+                title="Biriktiruv qamrovi"
+                percentage={assignedPct}
+                amountLabel={`${assignments.length} / ${assignments.length + coordinatorQueue.length}`}
+                subtitle="Kafedra taqsimot ulushi"
+                tone="indigo"
+              />
+              <SkeuoAreaChart
+                title="Dekanat nazorat dinamikasi"
+                subtitle="Jonli modullar kesimida"
+                accentHex="#6366F1"
+                series={[
+                  { label: "Navbat", value: queueItems.length },
+                  { label: "Amaliyot", value: assignments.length },
+                  { label: "Taqsimot", value: coordinatorQueue.length },
+                  { label: "Shartnoma", value: academicAgreements.length },
+                  { label: "Rahbarlik", value: supervisions.length },
+                ]}
+              />
+            </section>
+
+            <SkeuoSegmented
+              layoutName="universityWorkspaceTabs"
+              value={activeTab}
+              onChange={(next) => {
+                const tab = next as
+                  | "queue"
+                  | "assignments"
+                  | "coordinator"
+                  | "exports"
+                  | "analytics"
+                  | "timetable"
+                  | "documents";
+                setActiveTab(tab);
+                if (tab === "documents") {
+                  loadAssignments();
+                  if (institutionId) loadReportsAndAgreements(institutionId);
+                } else if (tab === "timetable") {
+                  if (institutionId) loadTimetable(institutionId);
+                  else loadCoordinatorQueue();
+                } else if (tab === "exports" && institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                } else if (tab === "analytics") {
+                  if (institutionId) loadAnalytics(institutionId);
+                  else loadCoordinatorQueue();
+                }
+              }}
+              options={[
+                { id: "queue", label: "Navbat", icon: FileCheck, badge: queueItems.length || undefined },
+                { id: "assignments", label: "Biriktirilganlar", icon: BookOpen, badge: assignments.length || undefined },
+                { id: "documents", label: "E-Imzo", icon: ShieldCheck },
+                { id: "coordinator", label: "Kafedra", icon: Users, badge: coordinatorQueue.length || undefined },
+                { id: "timetable", label: "Dars Jadvali", icon: Calendar },
+                { id: "exports", label: "Hisobotlar", icon: FileSpreadsheet },
+                { id: "analytics", label: "Analitika", icon: BarChart3 },
+              ]}
+            />
+          </div>
+        );
+      })()}
+
       {/* ACADEMIC WORKSPACE: LEFT REGISTRY RAIL + ACTIVE TAB */}
       {currentUser && (
         <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
           <aside
             aria-label="Akademik bo‘limlar"
-            className="rounded-xl border border-indigo-500/20 bg-surface-card p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
           >
             <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-400/80">
               Amaliyot Nazorati

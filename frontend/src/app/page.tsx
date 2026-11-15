@@ -17,6 +17,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { fetchOpportunities, Opportunity, OpportunityPage } from "@/lib/api";
+import { SkeuoStatCard, SkeuoVerticalMeter } from "@/components/skeuo/SkeuoPrimitives";
 
 type Filters = { query: string; region: string; paid: "" | "true" | "false" };
 type FeedStatus = "loading" | "ready" | "error";
@@ -51,24 +52,24 @@ function VacancyCard({ job }: { job: Opportunity }) {
     : null;
 
   return (
-    <article className="rounded-xl border border-white/[0.08] bg-surface-card p-5 transition-colors hover:border-primary/35">
+    <article className="rounded-3xl skeuo-card p-5 sm:p-6 transition-transform hover:-translate-y-0.5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+        <div className="flex min-w-0 gap-3.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl skeuo-well text-[#D95F2B]">
             <Building2 className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold text-zinc-200">{job.organization_name}</span>
-              <span className="inline-flex items-center gap-1 rounded border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-emerald-300">
+              <span className="text-xs font-semibold text-[var(--fb-ink)]">{job.organization_name}</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/12 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
                 <ShieldCheck className="h-3 w-3" aria-hidden="true" />
                 Tasdiqlangan tashkilot
               </span>
             </div>
-            <h2 className="font-heading text-base font-bold text-white transition-colors hover:text-primary">
+            <h2 className="font-display text-base font-bold text-[var(--fb-ink)] transition-colors hover:text-[#D95F2B]">
               <Link href={`/ishlar/${job.id}`}>{job.title}</Link>
             </h2>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--fb-ink-muted)]">
               {place && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" aria-hidden="true" />{place}
@@ -87,7 +88,7 @@ function VacancyCard({ job }: { job: Opportunity }) {
             </div>
           </div>
         </div>
-        <span className="shrink-0 self-start rounded border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs text-zinc-300">
+        <span className="shrink-0 self-start rounded-full skeuo-well-sm px-3 py-1 text-xs font-semibold text-[var(--fb-ink)]">
           {job.kind === "PART_TIME" ? "Yarim stavka" : job.kind === "INTERNSHIP" ? "Amaliyot" : job.kind}
         </span>
       </div>
@@ -104,10 +105,10 @@ function VacancyCard({ job }: { job: Opportunity }) {
           </p>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--fb-border)] pt-3.5">
         {job.description ? (
-          <details className="group text-xs text-zinc-400">
-            <summary className="flex cursor-pointer list-none items-center gap-1 font-semibold text-zinc-300 hover:text-primary">
+          <details className="group text-xs text-[var(--fb-ink-muted)]">
+            <summary className="flex cursor-pointer list-none items-center gap-1 font-semibold text-[var(--fb-ink)] hover:text-[#D95F2B]">
               Tavsifni ko‘rish <ArrowRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" aria-hidden="true" />
             </summary>
             <p className="mt-2 whitespace-pre-wrap leading-relaxed">{job.description}</p>
@@ -115,7 +116,7 @@ function VacancyCard({ job }: { job: Opportunity }) {
         ) : <div />}
         <Link
           href={`/ishlar/${job.id}`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-1.5 text-xs font-semibold"
         >
           Batafsil / Ariza <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </Link>
@@ -190,39 +191,46 @@ export default function StudentPortal() {
     setHistory((current) => current.slice(0, -1));
   }
 
+  const catalogItems = page?.items ?? [];
+  const totalOpenSlots = catalogItems.reduce((sum, item) => sum + (item.vacancies_available || 0), 0);
+  const verifiedOrgCount = new Set(catalogItems.map((item) => item.organization_id)).size;
+  const paidPercent = catalogItems.length
+    ? Math.round((catalogItems.filter((item) => item.is_paid).length / catalogItems.length) * 100)
+    : 0;
+
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-8">
-      <section className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 md:p-7">
+    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-8">
+      <section className="rounded-[32px] skeuo-stage p-5 md:p-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-center">
           {/* Left: Discovery Search Column */}
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <div className="inline-flex items-center gap-2 rounded-full skeuo-well-sm px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#D95F2B]">
               <BriefcaseBusiness className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Ommaviy katalog</span>
             </div>
-            <h1 className="mt-3 font-heading text-2xl font-bold tracking-tight text-white md:text-4xl">
+            <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--fb-ink)] md:text-4xl">
               Ish va amaliyot imkoniyatlari
             </h1>
-            <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-zinc-400">
+            <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-[var(--fb-ink-muted)]">
               Dars jadvalingizga mos smenali ishlar va rasmiy dual ta’lim amaliyotlarini toping. Faqat tasdiqlangan tashkilotlar e’lonlari ko‘rsatiladi.
             </p>
 
             <form onSubmit={submitFilters} className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_150px_auto]">
               <label className="relative block">
                 <span className="sr-only">Lavozim yoki ko‘nikma</span>
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fb-ink-muted)]" aria-hidden="true" />
                 <input
                   id="opportunity-query"
                   type="search"
                   value={draftQuery}
                   onChange={(event) => setDraftQuery(event.target.value)}
                   placeholder="Lavozim yoki ko‘nikma"
-                  className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                  className="w-full rounded-2xl skeuo-input py-2.5 pl-10 pr-3 text-sm"
                 />
               </label>
               <label>
                 <span className="sr-only">Hudud</span>
-                <select id="opportunity-region" value={draftRegion} onChange={(event) => setDraftRegion(event.target.value)} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
+                <select id="opportunity-region" value={draftRegion} onChange={(event) => setDraftRegion(event.target.value)} className="w-full rounded-2xl skeuo-input px-3 py-2.5 text-sm">
                   <option value="">Barcha hududlar</option>
                   <option value="Toshkent">Toshkent</option>
                   <option value="Samarqand">Samarqand</option>
@@ -232,20 +240,20 @@ export default function StudentPortal() {
               </label>
               <label>
                 <span className="sr-only">To‘lov turi</span>
-                <select id="opportunity-payment" value={draftPaid} onChange={(event) => setDraftPaid(event.target.value as Filters["paid"])} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
+                <select id="opportunity-payment" value={draftPaid} onChange={(event) => setDraftPaid(event.target.value as Filters["paid"])} className="w-full rounded-2xl skeuo-input px-3 py-2.5 text-sm">
                   <option value="">Barcha to‘lovlar</option>
                   <option value="true">To‘lovli</option>
                   <option value="false">To‘lovsiz</option>
                 </select>
               </label>
-              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary">
+              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-2xl skeuo-btn-obsidian px-5 py-2.5 text-sm font-semibold">
                 <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Qidirish
               </button>
             </form>
 
             {/* Quick Preset Chips */}
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-zinc-500">Tezkor tanlov:</span>
+              <span className="text-[var(--fb-ink-muted)] font-medium">Tezkor tanlov:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -255,7 +263,7 @@ export default function StudentPortal() {
                   setFilters((f) => ({ ...f, region: "Toshkent" }));
                   setReload((v) => v + 1);
                 }}
-                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-300 hover:border-primary/40 hover:text-white transition-colors"
+                className="rounded-full skeuo-btn-secondary px-3 py-1.5 font-semibold"
               >
                 Toshkent sh.
               </button>
@@ -268,22 +276,22 @@ export default function StudentPortal() {
                   setFilters((f) => ({ ...f, paid: "true" }));
                   setReload((v) => v + 1);
                 }}
-                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+                className="rounded-full skeuo-btn-secondary px-3 py-1.5 font-semibold"
               >
                 Faqat to‘lovli
               </button>
               <button
                 type="button"
                 onClick={clearFilters}
-                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-400 hover:text-white transition-colors"
+                className="rounded-full skeuo-btn-secondary px-3 py-1.5 font-semibold"
               >
                 Barcha e’lonlar
               </button>
             </div>
           </div>
 
-          {/* Right: 3-Portal Role Entry Matrix */}
-          <div className="grid gap-2.5 rounded-xl border border-white/[0.08] bg-surface-lowest/70 p-3.5">
+          {/* Right: 4-Portal Role Entry Matrix */}
+          <div className="grid gap-2.5 rounded-3xl skeuo-well p-4">
             <div className="px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Rolingiz bo‘yicha kabinetni tanlang
             </div>
@@ -387,6 +395,40 @@ export default function StudentPortal() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Signature Video Skeuomorphic KPI & Vertical Liquid Meter Row */}
+      <section aria-label="Katalog ko‘rsatkichlari" className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SkeuoStatCard
+            title="Faol e’lonlar"
+            value={status === "ready" ? catalogItems.length : "—"}
+            subtitle="Joriy qidiruv natijasi"
+            icon={BriefcaseBusiness}
+            tone="orange"
+          />
+          <SkeuoStatCard
+            title="Bo‘sh ish o‘rinlari"
+            value={status === "ready" ? totalOpenSlots : "—"}
+            subtitle="Server kvotasi bo‘yicha"
+            icon={MapPin}
+            tone="sky"
+          />
+          <SkeuoStatCard
+            title="Tasdiqlangan korxonalar"
+            value={status === "ready" ? verifiedOrgCount : "—"}
+            subtitle="KYB & Audit o‘tgan"
+            icon={ShieldCheck}
+            tone="emerald"
+          />
+        </div>
+        <SkeuoVerticalMeter
+          title="To‘lovli e’lonlar ulushi"
+          percentage={paidPercent}
+          amountLabel={`${catalogItems.filter((item) => item.is_paid).length} / ${catalogItems.length || 0}`}
+          subtitle="Maoshli stajirovka & ish"
+          tone="orange"
+        />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">

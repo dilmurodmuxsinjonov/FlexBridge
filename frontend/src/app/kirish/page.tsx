@@ -161,7 +161,7 @@ function KirishForm() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <Link
             href="/talaba/kirish"
@@ -274,7 +274,7 @@ function KirishForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm mt-2"
+              className="w-full py-3 skeuo-btn-obsidian rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
             >
               {isLoading ? (
                 <>
@@ -391,11 +391,11 @@ function KirishForm() {
 
 export default function KirishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-5xl space-y-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>
@@ -403,7 +403,7 @@ export default function KirishPage() {
 
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] items-start">
           {/* Left Architectural Context Panel */}
-          <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-white/[0.08] bg-surface-card p-7">
+          <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
               Yagona autentifikatsiya
             </div>

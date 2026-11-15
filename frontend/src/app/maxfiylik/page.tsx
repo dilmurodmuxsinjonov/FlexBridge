@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen text-[var(--fb-ink)] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-zinc-400">

@@ -77,6 +77,11 @@ import {
   CandidateCareerPreferences,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 const UZBEKISTAN_REGIONS = [
   "Toshkent shahri",
@@ -1026,7 +1031,7 @@ export default function CandidateProfileHub() {
   return (
     <main className="w-full flex flex-col gap-6">
       {/* HEADER SECTION */}
-      <section className="w-full bg-[#121214] border border-sky-500/20 rounded-xl p-5 shadow-sm">
+      <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -1130,10 +1135,105 @@ export default function CandidateProfileHub() {
       )}
 
       {/* AUTHENTICATED TABS & PANELS */}
-      {currentUser && (
+      {currentUser && (() => {
+        const profileChecklist = [
+          Boolean(profileHeadline.trim()),
+          Boolean(profileBio.trim()),
+          mySkills.length > 0,
+          rules.length > 0,
+          enrollments.length > 0,
+          portfolios.length > 0,
+          workExperiences.length + achievements.length + certificates.length > 0,
+        ];
+        const doneCount = profileChecklist.filter(Boolean).length;
+        const completionPct = Math.round((doneCount / profileChecklist.length) * 100);
+        return (
         <div className="flex flex-col gap-6">
-          {/* TAB NAVIGATION */}
-          <div className="flex border-b border-white/[0.08] gap-1 overflow-x-auto pb-px">
+          {/* SKEUOMORPHIC EXECUTIVE KPI & LIQUID METER STRIP */}
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <SkeuoStatCard
+                title="Ko‘nikmalar"
+                value={mySkills.length}
+                subtitle="Tasdiqlangan katalog"
+                icon={Sparkles}
+                tone="emerald"
+                active={activeTab === "SKILLS"}
+                onClick={() => setActiveTab("SKILLS")}
+              />
+              <SkeuoStatCard
+                title="Jadval qoidalari"
+                value={rules.length}
+                subtitle="MK 118-modda mosligi"
+                icon={Calendar}
+                tone="orange"
+                active={activeTab === "AVAILABILITY"}
+                onClick={() => setActiveTab("AVAILABILITY")}
+              />
+              <SkeuoStatCard
+                title="OTM / HEMIS"
+                value={enrollments.length}
+                subtitle="Akademik biriktiruv"
+                icon={GraduationCap}
+                tone="sky"
+                active={activeTab === "ENROLLMENTS"}
+                onClick={() => setActiveTab("ENROLLMENTS")}
+              />
+              <SkeuoStatCard
+                title="Loyiha & Yutuqlar"
+                value={portfolios.length + workExperiences.length + certificates.length}
+                subtitle="Portfolio va sertifikat"
+                icon={Award}
+                tone="indigo"
+                active={activeTab === "PORTFOLIO"}
+                onClick={() => setActiveTab("PORTFOLIO")}
+              />
+            </div>
+            <SkeuoVerticalMeter
+              title="Rezyume to‘liqligi"
+              percentage={completionPct}
+              amountLabel={`${doneCount} / ${profileChecklist.length}`}
+              subtitle="HR qidiruv reytingi"
+              tone="sky"
+              onAction={() => setActiveTab("PROFILE")}
+              actionLabel="To‘ldirish"
+            />
+          </section>
+
+          {/* SKEUOMORPHIC SLIDING SEGMENTED TABS */}
+          <SkeuoSegmented
+            layoutName="candidateWorkspaceTabs"
+            value={activeTab}
+            onChange={(next) =>
+              setActiveTab(
+                next as
+                  | "PROFILE"
+                  | "FULL_RESUME"
+                  | "SKILLS"
+                  | "AVAILABILITY"
+                  | "ENROLLMENTS"
+                  | "PORTFOLIO"
+                  | "CERTIFICATES"
+              )
+            }
+            options={[
+              { id: "PROFILE", label: "Kasbiy Profil", icon: User },
+              {
+                id: "FULL_RESUME",
+                label: "To‘liq Rezyume",
+                icon: Briefcase,
+                badge: workExperiences.length + achievements.length || undefined,
+              },
+              { id: "SKILLS", label: "Ko‘nikmalar", icon: Sparkles, badge: mySkills.length || undefined },
+              { id: "AVAILABILITY", label: "Jadval", icon: Calendar, badge: rules.length || undefined },
+              { id: "ENROLLMENTS", label: "HEMIS", icon: GraduationCap, badge: enrollments.length || undefined },
+              { id: "PORTFOLIO", label: "Portfolio", icon: FolderGit2, badge: portfolios.length || undefined },
+              { id: "CERTIFICATES", label: "Sertifikatlar", icon: Award, badge: certificates.length || undefined },
+            ]}
+          />
+
+          {/* LEGACY HIDDEN ACCESSIBLE BUTTONS ANCHOR END */}
+          <div className="hidden" aria-hidden="true">
             <button
               type="button"
               onClick={() => setActiveTab("PROFILE")}
@@ -2858,7 +2958,8 @@ export default function CandidateProfileHub() {
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* PORTFOLIO MODAL */}
       {isPortfolioModalOpen && (

@@ -64,6 +64,12 @@ import {
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+  SkeuoLiveFeed,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
@@ -534,10 +540,28 @@ export default function OperatorPortal() {
     }
   };
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flexbridge:portal-tab-changed", {
+        detail: { tab: activeTab },
+      })
+    );
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onDockTab = (ev: Event) => {
+      const next = (ev as CustomEvent<{ tab?: string }>).detail?.tab as ActiveTab | undefined;
+      if (!next) return;
+      setActiveTab(next);
+    };
+    window.addEventListener("flexbridge:dock-tab", onDockTab);
+    return () => window.removeEventListener("flexbridge:dock-tab", onDockTab);
+  }, []);
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* SOC COMMAND TERMINAL HEADER */}
-      <section className="w-full bg-[#121214] border border-white/[0.08] border-t-2 border-t-amber-500 rounded-xl p-5 shadow-sm">
+      <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -624,13 +648,89 @@ export default function OperatorPortal() {
         </section>
       )}
 
+      {/* AUTHENTICATED SOC TELEMETRY ROW + MODULE SWITCHER */}
+      {currentUser && (() => {
+        const verifiedCount = cases.filter((c) => c.status === "APPROVED" || c.status === "CLOSED").length;
+        const kybPct = cases.length ? Math.round((verifiedCount / cases.length) * 100) : 100;
+        const auditFeed = auditEvents.slice(0, 5).map((evt) => ({
+          id: evt.id,
+          title: evt.action,
+          meta: `${evt.object_type || "Tizim"}${evt.actor_id ? ` • ${evt.actor_id.slice(0, 8)}...` : ""}`,
+          time: evt.occurred_at ? new Date(evt.occurred_at).toLocaleTimeString("uz-UZ") : "Yaqinda",
+          status:
+            evt.action.includes("REVOKE") || evt.action.includes("REJECT") || evt.action.includes("BREAK")
+              ? ("warn" as const)
+              : ("ok" as const),
+        }));
+        return (
+          <div className="flex flex-col gap-5">
+            <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_320px]">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <SkeuoStatCard
+                  title="Audit hodisalari"
+                  value={auditEvents.length}
+                  subtitle="O‘zgarmas hash-zanjir"
+                  icon={FileCheck2}
+                  tone="amber"
+                  active={activeTab === "AUDIT"}
+                  onClick={() => setActiveTab("AUDIT")}
+                />
+                <SkeuoStatCard
+                  title="KYC / KYB navbati"
+                  value={cases.length}
+                  subtitle={`${verifiedCount} ta ko‘rib chiqilgan`}
+                  icon={ClipboardCheck}
+                  tone="emerald"
+                  active={activeTab === "VERIFICATION"}
+                  onClick={() => setActiveTab("VERIFICATION")}
+                />
+                <SkeuoStatCard
+                  title="Support & SLA"
+                  value={tickets.length}
+                  subtitle="Ochiq operator murojaatlari"
+                  icon={LifeBuoy}
+                  tone="sky"
+                  active={activeTab === "SUPPORT_OPS"}
+                  onClick={() => setActiveTab("SUPPORT_OPS")}
+                />
+              </div>
+              <SkeuoVerticalMeter
+                title="KYB tekshiruv ulushi"
+                percentage={kybPct}
+                amountLabel={`${verifiedCount} / ${cases.length || 0}`}
+                subtitle="Navbat bajarilishi"
+                tone="amber"
+              />
+              <SkeuoLiveFeed
+                title="Jonli SOC Audit Oqimi"
+                items={auditFeed}
+                emptyText="Audit hodisalari yuklanmagan."
+              />
+            </section>
+
+            <SkeuoSegmented
+              layoutName="operatorWorkspaceTabs"
+              value={activeTab}
+              onChange={(next) => setActiveTab(next as ActiveTab)}
+              options={[
+                { id: "AUDIT", label: "Audit Log", icon: FileCheck2, badge: auditEvents.length || undefined },
+                { id: "VERIFICATION", label: "KYC Navbat", icon: ClipboardCheck, badge: cases.length || undefined },
+                { id: "BREAK_GLASS", label: "Break-Glass", icon: ShieldAlert },
+                { id: "SUPPORT_OPS", label: "Support Ops", icon: LifeBuoy, badge: tickets.length || undefined },
+                { id: "FINANCE", label: "Moliya Hub", icon: CreditCard },
+              ]}
+            />
+          </div>
+        );
+      })()}
+
       {/* AUTHENTICATED SOC COMMAND CONSOLE */}
       {currentUser && (
         <div className="grid gap-6 lg:grid-cols-[276px_minmax(0,1fr)] lg:items-start">
           {/* Left SOC Telemetry Navigation Rail */}
           <aside
             aria-label="SOC Terminal modullari"
-            className="rounded-xl border border-amber-500/20 bg-[#121214] p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
           >
             <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-400/80">
               SOC // SECURITY MODULES

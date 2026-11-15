@@ -183,7 +183,7 @@ function OperatorKirishForm() {
         </p>
       </div>
 
-      <div className="bg-[#121214] border border-amber-500/25 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-xl flex items-start gap-3 text-xs text-rose-400">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
@@ -302,18 +302,18 @@ function OperatorKirishForm() {
 
 export default function OperatorKirishPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background text-zinc-100 py-10 px-4">
+    <div className="min-h-[calc(100vh-4rem)] text-[var(--fb-ink)] py-10 px-4">
       <div className="max-w-5xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-amber-300 transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink-muted)] hover:text-amber-600 dark:hover:text-amber-300 transition-colors mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>
         </Link>
 
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] items-start">
-          <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-amber-500/20 bg-[#121214] p-7">
+          <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-300">
               SOC Xavfsizlik Terminal
             </div>

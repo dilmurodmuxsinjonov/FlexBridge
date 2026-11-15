@@ -35,6 +35,7 @@ import {
   UserSecurityOverview,
   ActiveSessionItem,
 } from "@/lib/api";
+import { SkeuoStatCard } from "@/components/skeuo/SkeuoPrimitives";
 
 export default function CandidateSecurityPage() {
   const [securityData, setSecurityData] = useState<UserSecurityOverview | null>(null);
@@ -319,61 +320,34 @@ export default function CandidateSecurityPage() {
         {/* TELEMETRY CARDS */}
         {/* ------------------------------------------------------------------- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Ikki Bosqichli Himoya (MFA)</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                  securityData?.totp_enabled
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                }`}>
-                  {securityData?.totp_enabled ? "FAOL (TOTP)" : "YOQILMAGAN"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Assurance Darajasi</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-bold font-mono text-white">
-                  {securityData?.totp_enabled ? "A2 (MFA-LEVEL)" : "A1 (PASSWORD)"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
-              <KeyRound className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Zaxira Tiklash Kodlari</p>
-              <p className="text-base font-bold font-mono text-white mt-1 tabular-nums">
-                {securityData?.recovery_codes_count ?? 0} <span className="text-xs text-zinc-500 font-normal">ta faol</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
-              <Laptop className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Faol Sessiyalar</p>
-              <p className="text-base font-bold font-mono text-white mt-1 tabular-nums">
-                {securityData?.sessions?.length ?? 0} <span className="text-xs text-zinc-500 font-normal">ta qurilma</span>
-              </p>
-            </div>
-          </div>
+          <SkeuoStatCard
+            title="Ikki bosqichli himoya (MFA)"
+            value={securityData?.totp_enabled ? "FAOL" : "YOQILMAGAN"}
+            subtitle="TOTP autentifikator holati"
+            icon={ShieldCheck}
+            tone={securityData?.totp_enabled ? "emerald" : "amber"}
+          />
+          <SkeuoStatCard
+            title="Assurance darajasi"
+            value={securityData?.totp_enabled ? "A2" : "A1"}
+            subtitle={securityData?.totp_enabled ? "MFA-LEVEL himoya" : "Faqat parol darajasi"}
+            icon={Lock}
+            tone="sky"
+          />
+          <SkeuoStatCard
+            title="Zaxira tiklash kodlari"
+            value={securityData?.recovery_codes_count ?? 0}
+            subtitle="Faol tiklash kalitlari"
+            icon={KeyRound}
+            tone="amber"
+          />
+          <SkeuoStatCard
+            title="Faol sessiyalar"
+            value={securityData?.sessions?.length ?? 0}
+            subtitle="Ulangan qurilmalar"
+            icon={Laptop}
+            tone="indigo"
+          />
         </div>
 
         {/* ------------------------------------------------------------------- */}

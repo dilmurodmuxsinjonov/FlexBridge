@@ -806,7 +806,7 @@ function UniversitetRegistrationContent() {
 
 export default function UniversitetRoyxatdanOtishPage() {
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#09090b] text-zinc-100 flex items-center justify-center px-4 py-10">
+    <div className="min-h-[calc(100vh-3.5rem)] text-[var(--fb-ink)] flex items-center justify-center px-4 py-10">
       <Suspense
         fallback={
           <div className="p-8 text-center text-zinc-400 flex items-center justify-center gap-2">

@@ -649,7 +649,7 @@ function RoyxatdanOtishWizard() {
       </div>
 
       {/* Main Wizard Card */}
-      <div className="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
         {/* Error / Success Alerts */}
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-xs text-rose-400">
@@ -1644,11 +1644,11 @@ function RoyxatdanOtishWizard() {
 
 export default function RoyxatdanOtishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-5xl space-y-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>
@@ -1656,7 +1656,7 @@ export default function RoyxatdanOtishPage() {
 
         <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] items-start">
           {/* Left Onboarding Guide Column */}
-          <aside className="hidden lg:flex flex-col gap-5 rounded-2xl border border-white/[0.08] bg-surface-card p-7">
+          <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
               4 bosqichli onboarding
             </div>

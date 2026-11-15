@@ -72,9 +72,10 @@ export default function Footer() {
     (Boolean(pathname?.startsWith("/operator")) ||
       Boolean(currentUser && isOperatorOnlyRoles(currentUser.roles)));
   return (
-    <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
+    <footer className="mt-auto w-full px-3 sm:px-6 pb-24 pt-6 text-[var(--fb-ink-muted)] text-xs">
+      <div className="max-w-[1440px] mx-auto skeuo-card rounded-[28px] overflow-hidden">
       {/* Main Directory Links */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div className="px-5 sm:px-8 lg:px-10 py-10 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Column 1: Brand & Mission */}
           <div className="space-y-3">
@@ -392,8 +393,8 @@ export default function Footer() {
       </div>
 
       {/* Bottom Legal Bar */}
-      <div className="border-t border-white/[0.06] bg-[#09090b] py-5 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] text-zinc-500 font-mono">
+      <div className="border-t border-[var(--fb-border)] skeuo-well rounded-none border-x-0 border-b-0 py-5 px-5 sm:px-8 lg:px-10">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] text-[var(--fb-ink-muted)] font-mono">
           <div className="flex flex-wrap items-center gap-4">
             <p>© 2026 FlexBridge Inc. Barcha huquqlar himoyalangan.</p>
             <span className="hidden sm:inline text-zinc-700">|</span>
@@ -409,6 +410,7 @@ export default function Footer() {
             <span>SHA-256 Kriptografik Audit</span>
           </div>
         </div>
+      </div>
       </div>
     </footer>
   );

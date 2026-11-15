@@ -115,15 +115,15 @@ export default function NomzodLayout({ children }: { children: React.ReactNode }
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-8 lg:flex-row lg:items-start">
+    <div className="min-h-screen text-[var(--fb-ink)]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-5 md:px-8 lg:flex-row lg:items-start">
         {/* Desktop Student Workspace Rail */}
         <aside
           aria-label="Talaba kabineti navigatsiyasi"
-          className="hidden lg:flex lg:w-[250px] shrink-0 flex-col gap-4 sticky top-20"
+          className="hidden lg:flex lg:w-[252px] shrink-0 flex-col gap-4 sticky top-20"
         >
           {/* Student Persona Identity Card */}
-          <div className="rounded-xl border border-sky-500/20 bg-surface-card p-4">
+          <div className="rounded-3xl skeuo-card p-4">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 border border-sky-500/25 text-sky-400">
                 <GraduationCap className="h-4 w-4" />
@@ -179,7 +179,7 @@ export default function NomzodLayout({ children }: { children: React.ReactNode }
           </div>
 
           {/* Grouped Vertical Navigation */}
-          <nav className="rounded-xl border border-white/[0.08] bg-surface-card p-2.5 space-y-4">
+          <nav className="rounded-3xl skeuo-card p-3 space-y-4">
             {STUDENT_NAV_GROUPS.map((group) => (
               <div key={group.title} className="space-y-1">
                 <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -246,12 +246,12 @@ export default function NomzodLayout({ children }: { children: React.ReactNode }
         {/* Main Workspace Content */}
         <div className="min-w-0 flex-1">
           {isWrongRoleUser && currentUser ? (
-            <div className="rounded-2xl border border-amber-500/25 bg-[#121214] p-8 max-w-xl mx-auto my-8 space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+            <div className="rounded-3xl skeuo-card p-8 max-w-xl mx-auto my-8 space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 <ShieldAlert className="h-4 w-4" />
                 <span>Rol chegarasi</span>
               </div>
-              <h1 className="font-heading text-xl font-bold text-white">
+              <h1 className="font-display text-xl font-bold text-[var(--fb-ink)]">
                 Bu bo‘lim faqat Talaba / Nomzodlar uchun ajratilgan
               </h1>
               <p className="text-xs leading-relaxed text-zinc-400">

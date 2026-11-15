@@ -371,7 +371,7 @@ function KorxonaRegistrationContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-2xl space-y-6">
         <div className="flex items-center justify-between gap-3">
           <Link

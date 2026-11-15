@@ -51,13 +51,13 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   if (isWrongRoleUser && currentUser) {
     const dash = resolvePortalDashboard(currentUser.roles);
     return (
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 px-4 py-12">
-        <div className="rounded-2xl border border-amber-500/25 bg-[#121214] p-8 max-w-xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+      <div className="min-h-screen text-[var(--fb-ink)] px-4 py-12">
+        <div className="rounded-3xl skeuo-card p-8 max-w-xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
             <ShieldAlert className="h-4 w-4" />
             <span>Rol chegarasi</span>
           </div>
-          <h1 className="font-heading text-xl font-bold text-white">
+          <h1 className="font-display text-xl font-bold text-[var(--fb-ink)]">
             Bu bo‘lim faqat Korxona / Ish beruvchi vakillari uchun ajratilgan
           </h1>
           <p className="text-xs leading-relaxed text-zinc-400">
@@ -88,32 +88,32 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100">
-      <div className="border-b border-emerald-500/15 bg-surface/60">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 md:px-8 text-xs">
-          <div className="flex items-center gap-2 text-emerald-300 font-medium">
-            <Building2 className="h-3.5 w-3.5 text-emerald-400" />
+    <div className="min-h-screen text-[var(--fb-ink)]">
+      <div className="mx-auto max-w-[1440px] px-4 pt-2 md:px-8">
+        <div className="skeuo-card rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-semibold">
+            <Building2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <span>Korxona / HR & Mentorlik Kabineti</span>
           </div>
           {authResolved && (
             <div className="flex items-center gap-3">
               {currentUser && isEmployer ? (
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
                   <span>Korxona sessiyasi faol</span>
                 </span>
               ) : !currentUser ? (
                 <div className="flex items-center gap-2">
                   <Link
                     href="/korxona/kirish"
-                    className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-500 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-full skeuo-btn-obsidian px-3 py-1.5 text-[11px] font-semibold"
                   >
                     <Lock className="h-3 w-3" />
                     <span>Korxona kirishi</span>
                   </Link>
                   <Link
                     href="/korxona/royxatdan-otish"
-                    className="inline-flex items-center rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                    className="inline-flex items-center rounded-full skeuo-btn-secondary px-3 py-1.5 text-[11px] font-semibold"
                   >
                     Vakil ulanishi
                   </Link>

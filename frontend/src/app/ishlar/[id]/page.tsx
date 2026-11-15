@@ -204,10 +204,10 @@ export default function OpportunityDetailPage({
       </nav>
 
       {/* Main Header Card */}
-      <section className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 lg:p-8">
+      <section className="rounded-[28px] skeuo-card p-6 lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl skeuo-well text-[#D95F2B]">
               <Building2 className="h-7 w-7" aria-hidden="true" />
             </div>
             <div>
@@ -385,7 +385,7 @@ export default function OpportunityDetailPage({
                 type="button"
                 onClick={handleApplyClick}
                 disabled={opportunity.vacancies_available <= 0}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl skeuo-btn-obsidian py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
                 {opportunity.vacancies_available > 0
@@ -397,7 +397,7 @@ export default function OpportunityDetailPage({
                 type="button"
                 onClick={handleToggleSave}
                 disabled={saving}
-                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] py-2.5 text-xs font-semibold text-zinc-300 transition-all hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-2xl skeuo-btn-secondary py-2.5 text-xs font-semibold disabled:opacity-50"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />

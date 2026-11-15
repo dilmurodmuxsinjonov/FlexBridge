@@ -92,6 +92,12 @@ import {
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+  SkeuoLiveFeed,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 export default function EmployerPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -1032,10 +1038,57 @@ export default function EmployerPortal() {
     ];
   }, [applications]);
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flexbridge:portal-tab-changed", {
+        detail: { tab: activeMainTab },
+      })
+    );
+  }, [activeMainTab]);
+
+  useEffect(() => {
+    const onDockTab = (ev: Event) => {
+      const next = (ev as CustomEvent<{ tab?: string }>).detail?.tab as
+        | "KANBAN"
+        | "MENTOR_HUB"
+        | "ORG_HUB"
+        | "BILLING_HUB"
+        | "SEARCH_HUB"
+        | undefined;
+      if (!next) return;
+      setActiveMainTab(next);
+      if (next === "SEARCH_HUB" && searchResults.length === 0 && !isLoadingSearch) {
+        handleSearch();
+      } else if (next === "MENTOR_HUB") {
+        if (reviewQueue.length === 0 && !isLoadingQueue) loadMentorQueue();
+        if (mentorAssignments.length === 0 && !isLoadingPlacements) loadPlacements();
+      } else if (next === "ORG_HUB" && orgId.trim()) {
+        loadOrgHubData(orgId.trim());
+      } else if (next === "BILLING_HUB" && orgId.trim()) {
+        loadBillingHubData(orgId.trim());
+      }
+    };
+    window.addEventListener("flexbridge:dock-tab", onDockTab);
+    return () => window.removeEventListener("flexbridge:dock-tab", onDockTab);
+  }, [
+    searchResults.length,
+    isLoadingSearch,
+    handleSearch,
+    reviewQueue.length,
+    isLoadingQueue,
+    loadMentorQueue,
+    mentorAssignments.length,
+    isLoadingPlacements,
+    loadPlacements,
+    orgId,
+    loadOrgHubData,
+    loadBillingHubData,
+  ]);
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* AUTH STATUS & CORPORATE HR HEADER BAR */}
-      <section className="w-full bg-surface-card border border-white/[0.08] border-t-2 border-t-emerald-500 rounded-xl p-5 shadow-lg">
+      <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -1194,89 +1247,114 @@ export default function EmployerPortal() {
           )}
 
           {/* METRICS DISPLAY */}
-          {dashboard?.metrics && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* VACANCIES / OPPORTUNITIES */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-2">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-xs font-medium">Vakansiyalar</span>
-                  <Briefcase className="w-4 h-4 text-primary" />
+          {dashboard?.metrics && (() => {
+            const totalOpps = Math.max(dashboard.metrics.opportunities.total, 1);
+            const activeOppPct = Math.round((dashboard.metrics.opportunities.published / totalOpps) * 100);
+            const feedItems = applications.slice(0, 5).map((app) => ({
+              id: app.application_id,
+              title: app.headline || `Nomzod #${app.candidate_id.slice(0, 8)}`,
+              meta: `${app.status}${app.region ? ` • ${app.region}` : ""}`,
+              time: app.submitted_at
+                ? new Date(app.submitted_at).toLocaleDateString("uz-UZ")
+                : "Yaqinda",
+              status:
+                app.status === "ACCEPTED" || app.status === "OFFERED"
+                  ? ("ok" as const)
+                  : app.status === "REJECTED"
+                    ? ("warn" as const)
+                    : ("info" as const),
+            }));
+            return (
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_300px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <SkeuoStatCard
+                    title="Vakansiyalar"
+                    value={dashboard.metrics.opportunities.total}
+                    delta={`${dashboard.metrics.opportunities.published} faol`}
+                    deltaPositive={dashboard.metrics.opportunities.published > 0}
+                    subtitle={`${dashboard.metrics.opportunities.draft} qoralama`}
+                    icon={Briefcase}
+                    tone="orange"
+                    onClick={() => setActiveMainTab("KANBAN")}
+                    active={activeMainTab === "KANBAN"}
+                  />
+                  <SkeuoStatCard
+                    title="Nomzodlar arizalari"
+                    value={dashboard.metrics.applications.total}
+                    delta={`${dashboard.metrics.applications.pending} kutilmoqda`}
+                    subtitle={`${dashboard.metrics.applications.offered} taklif qilingan`}
+                    icon={Users}
+                    tone="emerald"
+                    onClick={() => setActiveMainTab("SEARCH_HUB")}
+                    active={activeMainTab === "SEARCH_HUB"}
+                  />
+                  <SkeuoStatCard
+                    title="Suhbatlar"
+                    value={dashboard.metrics.interviews.total}
+                    subtitle={`${dashboard.metrics.interviews.scheduled} rejalashtirilgan • ${dashboard.metrics.interviews.completed} yakun`}
+                    icon={Calendar}
+                    tone="amber"
+                  />
+                  <SkeuoStatCard
+                    title="Dual ta’lim & Stajirovka"
+                    value={dashboard.metrics.engagements.total}
+                    delta={`${dashboard.metrics.engagements.active} faol`}
+                    deltaPositive
+                    subtitle={`${dashboard.metrics.engagements.completed} yakunlangan`}
+                    icon={GraduationCap}
+                    tone="indigo"
+                    onClick={() => setActiveMainTab("MENTOR_HUB")}
+                    active={activeMainTab === "MENTOR_HUB"}
+                  />
                 </div>
-                <div className="text-2xl font-bold font-mono text-white">
-                  {dashboard.metrics.opportunities.total}
-                </div>
-                <div className="text-[11px] text-zinc-400 flex flex-wrap gap-2">
-                  <span className="text-emerald-400 font-medium">
-                    {dashboard.metrics.opportunities.published} faol
-                  </span>
-                  <span>•</span>
-                  <span>{dashboard.metrics.opportunities.draft} qoralama</span>
-                </div>
+                <SkeuoVerticalMeter
+                  title="Faol vakansiyalar"
+                  percentage={activeOppPct}
+                  amountLabel={`${dashboard.metrics.opportunities.published} / ${dashboard.metrics.opportunities.total}`}
+                  subtitle="Nashr etilgan ulush"
+                  tone="emerald"
+                />
+                <SkeuoLiveFeed
+                  title="Oxirgi arizalar oqimi"
+                  items={feedItems}
+                  emptyText="Arizalarni ko‘rish uchun e’lon tanlang."
+                />
               </div>
+            );
+          })()}
 
-              {/* APPLICATIONS */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-2">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-xs font-medium">Nomzodlar arizalari</span>
-                  <Users className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-white">
-                  {dashboard.metrics.applications.total}
-                </div>
-                <div className="text-[11px] text-zinc-400 flex flex-wrap gap-2">
-                  <span className="text-amber-400 font-medium">
-                    {dashboard.metrics.applications.pending} kutilmoqda
-                  </span>
-                  <span>•</span>
-                  <span className="text-emerald-400 font-medium">
-                    {dashboard.metrics.applications.offered} taklif qilingan
-                  </span>
-                </div>
-              </div>
-
-              {/* INTERVIEWS */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-2">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-xs font-medium">Suhbatlar</span>
-                  <Calendar className="w-4 h-4 text-amber-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-white">
-                  {dashboard.metrics.interviews.total}
-                </div>
-                <div className="text-[11px] text-zinc-400 flex flex-wrap gap-2">
-                  <span className="text-blue-400 font-medium">
-                    {dashboard.metrics.interviews.scheduled} rejalashtirilgan
-                  </span>
-                  <span>•</span>
-                  <span>{dashboard.metrics.interviews.completed} yakunlangan</span>
-                </div>
-              </div>
-
-              {/* ENGAGEMENTS */}
-              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-2">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-xs font-medium">Stajirovkalar (Dual ta&apos;lim)</span>
-                  <GraduationCap className="w-4 h-4 text-purple-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-white">
-                  {dashboard.metrics.engagements.total}
-                </div>
-                <div className="text-[11px] text-zinc-400 flex flex-wrap gap-2">
-                  <span className="text-emerald-400 font-medium">
-                    {dashboard.metrics.engagements.active} faol
-                  </span>
-                  <span>•</span>
-                  <span>{dashboard.metrics.engagements.completed} yakunlangan</span>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* TOP SEGMENTED BAR FOR RAPID WORKSPACE SWITCHING */}
+          <SkeuoSegmented
+            layoutName="employerWorkspaceTabs"
+            value={activeMainTab}
+            onChange={(next) => {
+              const tab = next as "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB";
+              setActiveMainTab(tab);
+              if (tab === "SEARCH_HUB" && searchResults.length === 0 && !isLoadingSearch) {
+                handleSearch();
+              } else if (tab === "MENTOR_HUB") {
+                if (reviewQueue.length === 0 && !isLoadingQueue) loadMentorQueue();
+                if (mentorAssignments.length === 0 && !isLoadingPlacements) loadPlacements();
+              } else if (tab === "ORG_HUB" && orgId.trim()) {
+                loadOrgHubData(orgId.trim());
+              } else if (tab === "BILLING_HUB" && orgId.trim()) {
+                loadBillingHubData(orgId.trim());
+              }
+            }}
+            options={[
+              { id: "KANBAN", label: "Kanban & Nomzodlar", icon: Users },
+              { id: "SEARCH_HUB", label: "Qidiruv", icon: Search, badge: searchTotal || undefined },
+              { id: "MENTOR_HUB", label: "Mentorlik", icon: Award, badge: reviewQueue.length || undefined },
+              { id: "ORG_HUB", label: "Tashkilot", icon: Building },
+              { id: "BILLING_HUB", label: "Moliya", icon: CreditCard },
+            ]}
+          />
 
           {/* PRIMARY WORKSPACE: CORPORATE LEFT HR RAIL + CONTENT PANEL */}
           <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
             <aside
               aria-label="Korxona boshqaruv menyusi"
-              className="rounded-xl border border-emerald-500/20 bg-surface-card p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+              className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
             >
               <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">
                 Rekruting &amp; Qabul

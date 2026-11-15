@@ -29,6 +29,7 @@ import {
   ReceivedRatingItem,
   GivenRatingItem,
 } from "@/lib/api";
+import { SkeuoVerticalMeter } from "@/components/skeuo/SkeuoPrimitives";
 
 export default function CandidateRatingsPage() {
   const [data, setData] = useState<CandidateRatingsResponse | null>(null);
@@ -205,8 +206,8 @@ export default function CandidateRatingsPage() {
 
         {/* Section 1: Candidate Aggregated Score & Privacy Badge (AC-023) */}
         {agg && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 p-6 rounded-2xl bg-[#121214] border border-zinc-800 shadow-xl relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="md:col-span-2 p-6 rounded-[28px] skeuo-card relative overflow-hidden">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -276,7 +277,7 @@ export default function CandidateRatingsPage() {
             </div>
 
             {/* Double-Blind Protection Card (AC-024) */}
-            <div className="p-6 rounded-2xl bg-[#121214] border border-zinc-800 shadow-xl flex flex-col justify-between">
+            <div className="p-6 rounded-[28px] skeuo-card flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 text-zinc-300 font-semibold text-sm">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -305,6 +306,14 @@ export default function CandidateRatingsPage() {
                 E&apos;tiroz bildirish oynasi: nashr etilgan kundan boshlab 14 kun (AC-025).
               </div>
             </div>
+
+            <SkeuoVerticalMeter
+              title="Umumiy reyting darajasi"
+              percentage={agg.score !== null ? Math.round((agg.score / 5) * 100) : 0}
+              amountLabel={agg.score !== null ? `${agg.score.toFixed(1)} / 5.0` : "0.0 / 5.0"}
+              subtitle={`${agg.sample_size} / 5 minimal baho`}
+              tone="emerald"
+            />
           </div>
         )}
 
