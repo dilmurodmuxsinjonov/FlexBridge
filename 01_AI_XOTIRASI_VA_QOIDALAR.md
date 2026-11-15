@@ -1451,6 +1451,21 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Forensic audit report: `reviews/2026-11-15/operator_finance_hub/OPERATOR_FINANCE_REPORT.md`.
 
 
+## LOG-141 / Candidate & User Center: Support Tickets, Privacy Rights (GDPR) & Notification Preferences Hub (FB-178, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #178, Branch `feature/178-user-support-privacy-notifications-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/me/support-tickets`, `/api/bff/support-tickets/[id]/messages`, `/api/bff/me/privacy-requests`, `/api/bff/operator/privacy-requests/[id]/resolve`, `/api/bff/me/notification-preferences`) proxying backend canonical contracts API-063, API-064, API-062, API-114, API-059 under CAP-033, CAP-032, CAP-035, CAP-031 with HttpOnly session validation, MFA assurance elevation, and CSRF origin defense.
+  - Constructed dedicated Candidate & User Hub (`frontend/src/app/nomzod/yordam/page.tsx`) with 3 interactive sections: 1) Texnik va umumiy yordam (Support Tickets & Messages modal chat); 2) Maxfiylik va Shaxsiy ma'lumotlar (GDPR/APPI EXPORT, DELETE, RECTIFY with 30-day SLA due date); 3) Bildirishnoma sozlamalari (Channel-Purpose Matrix with transactional delivery safety guarantees).
+  - Added full TypeScript SDK support in `frontend/src/lib/api.ts` for all support, privacy, and preference contracts.
+  - Staging suite `scripts/test_user_support_privacy_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer.
+  - Comprehensive 18-suite regression runner `scripts/run_all_staging_tests.py`: 18/18 passed 100% GREEN in 32.36s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/user_support_privacy_hub/USER_SUPPORT_PRIVACY_REPORT.md`.
+
+
+
 
 
 

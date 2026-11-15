@@ -3114,6 +3114,291 @@ export async function approveOperatorRefund(
   return data as ApproveOperatorRefundResult;
 }
 
+// ---------------------------------------------------------------------------
+// FB-178: Customer Support, Privacy Rights & Notification Preferences
+// ---------------------------------------------------------------------------
+
+export interface CustomerSupportTicketItem {
+  id: string;
+  ticket_number?: string;
+  subject: string;
+  category: string;
+  priority: string;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+  messages_count?: number;
+}
+
+export interface CustomerSupportMessageItem {
+  id: string;
+  ticket_id: string;
+  sender_user_id: string;
+  body: string;
+  file_id?: string | null;
+  internal?: boolean;
+  created_at: string;
+}
+
+export interface CreateSupportTicketPayload {
+  subject: string;
+  body: string;
+  category?: string;
+  priority?: string;
+  file_id?: string | null;
+}
+
+export interface CustomerSupportTicketsResponse {
+  ok: boolean;
+  contract_id: "API-063";
+  items: CustomerSupportTicketItem[];
+  page: number;
+  page_size: number;
+  total?: number;
+}
+
+export interface CustomerSupportMessagesResponse {
+  ok: boolean;
+  contract_id: "API-064";
+  items: CustomerSupportMessageItem[];
+  messages?: CustomerSupportMessageItem[];
+  total_messages?: number;
+  page?: number;
+  page_size?: number;
+  total?: number;
+}
+
+export interface CustomerPrivacyRequestItem {
+  id: string;
+  user_id: string;
+  kind: "EXPORT" | "DELETE" | "RECTIFY" | string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "RESOLVED" | "REJECTED" | string;
+  reason?: string | null;
+  resolution_reason?: string | null;
+  result_file_id?: string | null;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string | null;
+}
+
+export interface CustomerPrivacyRequestsResponse {
+  ok: boolean;
+  contract_id: "API-062";
+  items: CustomerPrivacyRequestItem[];
+  page?: number;
+  page_size?: number;
+  total?: number;
+}
+
+export interface NotificationPreferenceItem {
+  id?: string;
+  channel: "EMAIL" | "SMS" | "PUSH" | string;
+  purpose: "SECURITY" | "TRANSACTIONAL" | "MARKETING" | "OPPORTUNITIES" | string;
+  enabled: boolean;
+  updated_at?: string;
+}
+
+export interface NotificationPreferencesResponse {
+  ok: boolean;
+  contract_id: "API-059";
+  preferences: NotificationPreferenceItem[];
+  user_id?: string;
+}
+
+export async function fetchMySupportTickets(params?: {
+  status?: string;
+  category?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<CustomerSupportTicketsResponse> {
+  const search = new URLSearchParams();
+  if (params?.status) search.set("status", params.status);
+  if (params?.category) search.set("category", params.category);
+  if (params?.page) search.set("page", String(params.page));
+  if (params?.page_size) search.set("page_size", String(params.page_size));
+
+  const res = await fetch(`/api/bff/me/support-tickets?${search.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_MY_TICKETS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CustomerSupportTicketsResponse;
+}
+
+export async function createSupportTicket(
+  payload: CreateSupportTicketPayload
+): Promise<{ ok: boolean; contract_id: string; ticket_id: string; status: string }> {
+  const res = await fetch(`/api/bff/me/support-tickets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CREATE_TICKET_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchSupportTicketMessages(
+  ticketId: string,
+  params?: { page?: number; page_size?: number }
+): Promise<CustomerSupportMessagesResponse> {
+  const search = new URLSearchParams();
+  if (params?.page) search.set("page", String(params.page));
+  if (params?.page_size) search.set("page_size", String(params.page_size));
+
+  const res = await fetch(`/api/bff/support-tickets/${encodeURIComponent(ticketId)}/messages?${search.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_MESSAGES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CustomerSupportMessagesResponse;
+}
+
+export async function postCustomerSupportMessage(
+  ticketId: string,
+  payload: { body: string; file_id?: string | null }
+): Promise<{ ok: boolean; contract_id: string; message_id: string }> {
+  const res = await fetch(`/api/bff/support-tickets/${encodeURIComponent(ticketId)}/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "POST_MESSAGE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchMyPrivacyRequests(params?: {
+  kind?: string;
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<CustomerPrivacyRequestsResponse> {
+  const search = new URLSearchParams();
+  if (params?.kind) search.set("kind", params.kind);
+  if (params?.status) search.set("status", params.status);
+  if (params?.page) search.set("page", String(params.page));
+  if (params?.page_size) search.set("page_size", String(params.page_size));
+
+  const res = await fetch(`/api/bff/me/privacy-requests?${search.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_PRIVACY_REQUESTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CustomerPrivacyRequestsResponse;
+}
+
+export async function createPrivacyRequest(payload: {
+  kind: "EXPORT" | "DELETE" | "RECTIFY";
+  reason?: string;
+  details?: Record<string, unknown>;
+}): Promise<{ ok: boolean; contract_id: string; request_id: string; status: string }> {
+  const res = await fetch(`/api/bff/me/privacy-requests`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CREATE_PRIVACY_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function resolveOperatorPrivacyRequest(
+  requestId: string,
+  payload: { status: "RESOLVED" | "COMPLETED" | "REJECTED"; reason: string; result_file_id?: string | null }
+): Promise<{ ok: boolean; contract_id: string; request_id: string; status: string }> {
+  const res = await fetch(`/api/bff/operator/privacy-requests/${encodeURIComponent(requestId)}/resolve`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "RESOLVE_PRIVACY_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchMyNotificationPreferences(): Promise<NotificationPreferencesResponse> {
+  const res = await fetch(`/api/bff/me/notification-preferences`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_PREFERENCES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as NotificationPreferencesResponse;
+}
+
+export async function updateMyNotificationPreferences(
+  preferences: NotificationPreferenceItem[]
+): Promise<NotificationPreferencesResponse> {
+  const res = await fetch(`/api/bff/me/notification-preferences`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ preferences }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "UPDATE_PREFERENCES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as NotificationPreferencesResponse;
+}
+
+
 
 
 

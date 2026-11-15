@@ -1,9 +1,38 @@
 #!/usr/bin/env python3
 """Run all staging verification test suites sequentially and summarize results."""
 
+import os
 import subprocess
 import sys
 import time
+from pathlib import Path
+from dotenv import dotenv_values
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL
+from sqlalchemy.pool import NullPool
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def reset_rate_limits():
+    """Reset rate limit buckets between regression runs to avoid false positives."""
+    try:
+        values = dotenv_values(Path(REPO_ROOT) / "infra" / ".env")
+        password = values.get("POSTGRES_PASSWORD")
+        if not password:
+            return
+        url = URL.create(
+            "postgresql+psycopg",
+            username=values.get("POSTGRES_USER") or "flexbridge_owner",
+            password=password,
+            host="127.0.0.1",
+            port=5432,
+            database=values.get("POSTGRES_DB") or "flexbridge",
+        )
+        engine = create_engine(url, poolclass=NullPool, connect_args={"prepare_threshold": None})
+        with engine.begin() as conn:
+            conn.execute(text("TRUNCATE TABLE flexbridge.auth_rate_limits"))
+    except Exception:
+        pass
 
 TEST_SCRIPTS = [
     "scripts/test_bff_staging.py",
@@ -23,6 +52,7 @@ TEST_SCRIPTS = [
     "scripts/test_university_academic_reviews_staging.py",
     "scripts/test_university_exports_staging.py",
     "scripts/test_university_placements_staging.py",
+    "scripts/test_user_support_privacy_staging.py",
 ]
 
 def main():
@@ -36,6 +66,7 @@ def main():
 
     for i, script in enumerate(TEST_SCRIPTS, 1):
         print(f"\n[{i}/{len(TEST_SCRIPTS)}] Running {script}...")
+        reset_rate_limits()
         start_suite = time.time()
         res = subprocess.run([sys.executable, script], capture_output=True, text=True)
         duration = round(time.time() - start_suite, 2)
