@@ -73,6 +73,7 @@ export default function CandidateRatingsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadRatings();
   }, []);
 

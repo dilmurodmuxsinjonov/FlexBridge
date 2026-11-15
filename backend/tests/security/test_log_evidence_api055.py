@@ -22,7 +22,7 @@ Verifies:
    - Teacher/coordinator views HOST_AND_ACADEMIC and ACADEMIC_ONLY, excluded from HOST_ONLY
 6. Candidate draft confidentiality: non-candidate query for draft task evidence returns empty list
 7. End-to-end synergy: API-053 placement logs reflects evidence_count correctly
-8. 130 tables migration schema regression
+8. 133 tables migration schema regression
 """
 from datetime import date, timedelta
 from uuid import uuid4
@@ -475,10 +475,10 @@ def test_api053_reflects_evidence_count(client, identities, organization):
 
 
 def test_migration_schema_integrity():
-    """Verify 130 tables migration schema baseline remains intact (DB-058 log_evidence)."""
+    """Verify 133 tables migration schema baseline remains intact (DB-058 log_evidence)."""
     with transaction() as conn:
         tables_res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'flexbridge'")).scalar_one()
-        assert tables_res == 130
+        assert tables_res == 133
         col_res = conn.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_schema = 'flexbridge' AND table_name = 'log_evidence' ORDER BY ordinal_position"
         )).fetchall()

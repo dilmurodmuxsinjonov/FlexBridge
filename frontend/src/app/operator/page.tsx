@@ -337,12 +337,14 @@ export default function OperatorPortal() {
 
   useEffect(() => {
     if (currentUser && activeTab === "SUPPORT_OPS") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
       loadSupportOps();
     }
   }, [currentUser, activeTab, loadSupportOps]);
 
   useEffect(() => {
     if (currentUser && activeTab === "FINANCE") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
       loadFinanceHub();
     }
   }, [currentUser, activeTab, loadFinanceHub]);
@@ -1132,7 +1134,7 @@ export default function OperatorPortal() {
                       className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-rose-600/20"
                     >
                       <Flame className="w-3.5 h-3.5" />
-                      <span>Insident E'lon Qilish (P1..P4)</span>
+                      <span>Insident E&apos;lon Qilish (P1..P4)</span>
                     </button>
                   </div>
                 </div>
@@ -1219,7 +1221,7 @@ export default function OperatorPortal() {
                       <thead>
                         <tr className="border-b border-white/[0.06] text-zinc-500 text-[11px]">
                           <th className="py-2 px-3 font-semibold">Sinov ID</th>
-                          <th className="py-2 px-3 font-semibold">Ma'lumotlar Bazasi</th>
+                          <th className="py-2 px-3 font-semibold">Ma&apos;lumotlar Bazasi</th>
                           <th className="py-2 px-3 font-semibold">RPO / RTO</th>
                           <th className="py-2 px-3 font-semibold">SLA Holati</th>
                           <th className="py-2 px-3 font-semibold">Sana & Tasdiq</th>
@@ -1931,7 +1933,7 @@ export default function OperatorPortal() {
                     onChange={(e) => setIsInternalNote(e.target.checked)}
                     className="rounded bg-[#18181b] border-white/[0.1] text-primary focus:ring-primary/20 w-4 h-4"
                   />
-                  <span>Ichki Eslatma (faqat operatorlar ko'radi)</span>
+                  <span>Ichki Eslatma (faqat operatorlar ko&apos;radi)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -1941,7 +1943,7 @@ export default function OperatorPortal() {
                     onChange={(e) => setReplyStatus(e.target.value)}
                     className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
                   >
-                    <option value="">O'zgarishsiz</option>
+                    <option value="">O&apos;zgarishsiz</option>
                     <option value="IN_PROGRESS">IN_PROGRESS (Jarayonda)</option>
                     <option value="RESOLVED">RESOLVED (Hal qilindi)</option>
                     <option value="CLOSED">CLOSED (Yopildi)</option>
@@ -1983,7 +1985,7 @@ export default function OperatorPortal() {
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-rose-500" />
                 <h3 className="text-sm font-semibold text-white">
-                  Favqulodda Operatsion Insident E'lon Qilish (API-122)
+                  Favqulodda Operatsion Insident E&apos;lon Qilish (API-122)
                 </h3>
               </div>
               <button
@@ -2051,7 +2053,7 @@ export default function OperatorPortal() {
 
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Qisqacha Tavsif / Dastlabki Ta'sir
+                  Qisqacha Tavsif / Dastlabki Ta&apos;sir
                 </label>
                 <textarea
                   rows={3}
@@ -2080,7 +2082,7 @@ export default function OperatorPortal() {
                   ) : (
                     <Flame className="w-3.5 h-3.5" />
                   )}
-                  <span>Insidentni E'lon Qilish</span>
+                  <span>Insidentni E&apos;lon Qilish</span>
                 </button>
               </div>
             </form>

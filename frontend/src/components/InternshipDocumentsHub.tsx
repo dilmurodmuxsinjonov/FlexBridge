@@ -218,6 +218,7 @@ export default function InternshipDocumentsHub({ party, placementId }: Internshi
   }, [party, placementId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadAll();
   }, [loadAll]);
 

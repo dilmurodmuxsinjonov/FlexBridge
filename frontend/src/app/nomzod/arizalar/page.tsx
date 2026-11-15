@@ -801,7 +801,7 @@ export default function CandidateApplicationsPage() {
                                 onClick={() => setShowRescheduleInput(true)}
                                 className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50"
                               >
-                                <span>Qayta vaqt so'rash</span>
+                                <span>Qayta vaqt so&apos;rash</span>
                               </button>
                               <button
                                 type="button"
@@ -898,7 +898,7 @@ export default function CandidateApplicationsPage() {
                               href={`/nomzod/shartnomalar?engagement_id=${offerResponseFeedback.engagementId}`}
                               className="inline-flex items-center gap-1.5 mt-2 text-primary hover:underline font-semibold"
                             >
-                              <span>Ish munosabatini tasdiqlash sahifasiga o'tish</span>
+                              <span>Ish munosabatini tasdiqlash sahifasiga o&apos;tish</span>
                               <ArrowRight className="h-3 w-3" />
                             </Link>
                           )}

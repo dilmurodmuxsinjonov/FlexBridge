@@ -153,6 +153,7 @@ export default function CandidateHelpPrivacyPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     if (activeTab === "TICKETS") loadTickets();
     if (activeTab === "PRIVACY") loadPrivacyRequests();
     if (activeTab === "NOTIFICATIONS") loadPreferences();

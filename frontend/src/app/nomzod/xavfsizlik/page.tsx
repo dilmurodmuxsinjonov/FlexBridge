@@ -96,6 +96,7 @@ export default function CandidateSecurityPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadSecurityOverview();
   }, [loadSecurityOverview]);
 
@@ -236,7 +237,7 @@ export default function CandidateSecurityPage() {
     try {
       await revokeUserSession(sessionId);
       if (isCurrent) {
-        window.location.href = "/";
+        window.location.assign("/");
         return;
       }
       setSuccessMessage("Sessiya muvaffaqiyatli yakunlandi.");

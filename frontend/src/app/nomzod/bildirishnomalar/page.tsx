@@ -37,7 +37,8 @@ export default function NotificationsInboxPage() {
       setError(null);
       const res = await fetchMyNotifications(isUnread, 50);
       setItems(res.items || []);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as Error & { status?: number };
       if (err.status === 401) {
         setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
       } else {
@@ -49,6 +50,7 @@ export default function NotificationsInboxPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadNotifications(unreadOnly);
   }, [unreadOnly]);
 
@@ -63,7 +65,8 @@ export default function NotificationsInboxPage() {
       );
       setActionSuccess("Xabar o'qilgan deb belgilandi.");
       setTimeout(() => setActionSuccess(null), 3000);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as Error & { status?: number };
       setError(err.message || "Xabarni yangilashda xatolik yuz berdi");
     } finally {
       setMarkingId(null);
@@ -85,7 +88,7 @@ export default function NotificationsInboxPage() {
             Bildirishnomalar va Xabarlar
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Platforma yangiliklari, suhbatlar, arizalar va amaliyot bo'yicha xabarlar qutisi.
+            Platforma yangiliklari, suhbatlar, arizalar va amaliyot bo&apos;yicha xabarlar qutisi.
           </p>
         </div>
 
@@ -110,7 +113,7 @@ export default function NotificationsInboxPage() {
                   : "text-zinc-400 hover:text-white"
               }`}
             >
-              Faqat o'qilmagan
+              Faqat o&apos;qilmagan
             </button>
           </div>
 
@@ -147,7 +150,7 @@ export default function NotificationsInboxPage() {
           <span className="text-2xl font-bold text-white mt-1 block font-mono">{items.length}</span>
         </div>
         <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
-          <span className="text-xs text-zinc-400 uppercase tracking-wider block">O'qilmagan Xabarlar</span>
+          <span className="text-xs text-zinc-400 uppercase tracking-wider block">O&apos;qilmagan Xabarlar</span>
           <span className="text-2xl font-bold text-amber-400 mt-1 block font-mono">{unreadCount}</span>
         </div>
       </div>
@@ -163,7 +166,7 @@ export default function NotificationsInboxPage() {
           <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4 text-zinc-500">
             <Bell className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-semibold text-white">Hozircha xabarlar yo'q</h3>
+          <h3 className="text-base font-semibold text-white">Hozircha xabarlar yo&apos;q</h3>
           <p className="text-xs text-zinc-400 mt-1">
             {unreadOnly
               ? "Barcha bildirishnomalar o'qilgan. Barcha xabarlarni ko'rish uchun filtrni o'zgartiring."
@@ -193,11 +196,11 @@ export default function NotificationsInboxPage() {
 
                       {isUnread ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          O'qilmagan
+                          O&apos;qilmagan
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] text-zinc-500 border border-white/[0.08]">
-                          O'qilgan
+                          O&apos;qilgan
                         </span>
                       )}
                     </div>
@@ -216,7 +219,7 @@ export default function NotificationsInboxPage() {
                           className="flex items-center gap-1 text-primary hover:underline"
                         >
                           <FileText className="w-3 h-3" />
-                          Ariza bo'yicha
+                          Ariza bo&apos;yicha
                         </Link>
                       )}
 
@@ -253,7 +256,7 @@ export default function NotificationsInboxPage() {
                       ) : (
                         <Check className="w-3.5 h-3.5" />
                       )}
-                      O'qilgan deb belgilash
+                      O&apos;qilgan deb belgilash
                     </button>
                   )}
                 </div>

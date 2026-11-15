@@ -34,7 +34,8 @@ export default function SavedOpportunitiesPage() {
       setError(null);
       const res = await fetchMySavedOpportunities(1, 50);
       setItems(res.items || []);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as Error & { status?: number };
       if (err.status === 401) {
         setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
       } else {
@@ -46,6 +47,7 @@ export default function SavedOpportunitiesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadSaved();
   }, []);
 
@@ -56,7 +58,8 @@ export default function SavedOpportunitiesPage() {
       setItems((prev) => prev.filter((i) => i.id !== savedId));
       setActionSuccess(`"${title}" muvaffaqiyatli saqlanganlardan olib tashlandi.`);
       setTimeout(() => setActionSuccess(null), 4000);
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = caught as Error & { status?: number };
       setError(err.message || "E'lonni o'chirishda xatolik yuz berdi");
     } finally {
       setRemovingId(null);
@@ -76,10 +79,10 @@ export default function SavedOpportunitiesPage() {
             <span>Nomzod Markazi</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold font-heading text-white">
-            Saqlangan Vakansiyalar va E'lonlar
+            Saqlangan Vakansiyalar va E&apos;lonlar
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Siz saqlab qo'ygan qiziqarli amaliyot va ish o'rinlari to'plami.
+            Siz saqlab qo&apos;ygan qiziqarli amaliyot va ish o&apos;rinlari to&apos;plami.
           </p>
         </div>
 
@@ -115,7 +118,7 @@ export default function SavedOpportunitiesPage() {
           <span className="text-2xl font-bold text-white mt-1 block font-mono">{items.length}</span>
         </div>
         <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
-          <span className="text-xs text-zinc-400 uppercase tracking-wider block">Faol E'lonlar</span>
+          <span className="text-xs text-zinc-400 uppercase tracking-wider block">Faol E&apos;lonlar</span>
           <span className="text-2xl font-bold text-emerald-400 mt-1 block font-mono">{activeCount}</span>
         </div>
         <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
@@ -135,16 +138,16 @@ export default function SavedOpportunitiesPage() {
           <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4 text-zinc-500">
             <Bookmark className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-semibold text-white">Hozircha saqlangan e'lonlar yo'q</h3>
+          <h3 className="text-base font-semibold text-white">Hozircha saqlangan e&apos;lonlar yo&apos;q</h3>
           <p className="text-xs text-zinc-400 mt-1 mb-6">
-            Bo'sh ish o'rinlari sahifasidan o'zingizga yoqqan vakansiyalarni saqlab qo'yishingiz mumkin.
+            Bo&apos;sh ish o&apos;rinlari sahifasidan o&apos;zingizga yoqqan vakansiyalarni saqlab qo&apos;yishingiz mumkin.
           </p>
           <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded text-xs font-medium transition-colors"
           >
             <Briefcase className="w-3.5 h-3.5" />
-            E'lonlarni ko'rish
+            E&apos;lonlarni ko&apos;rish
           </Link>
         </div>
       ) : (
@@ -217,7 +220,7 @@ export default function SavedOpportunitiesPage() {
                       ) : (
                         <Trash2 className="w-3.5 h-3.5" />
                       )}
-                      O'chirish
+                      O&apos;chirish
                     </button>
                   </div>
                 </div>

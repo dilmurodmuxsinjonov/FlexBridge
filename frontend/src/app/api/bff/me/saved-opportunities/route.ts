@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
       page: data.page ?? Number(page),
       page_size: data.page_size ?? Number(pageSize),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { ok: false, error: "PROXY_ERROR", message: err?.message || "Ichki tarmoq xatoligi" },
+      { ok: false, error: "PROXY_ERROR", message: (err instanceof Error && err.message) || "Ichki tarmoq xatoligi" },
       { status: 502 }
     );
   }
@@ -124,9 +124,9 @@ export async function POST(req: NextRequest) {
       },
       { status: res.status === 201 ? 201 : 200 }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { ok: false, error: "PROXY_ERROR", message: err?.message || "Ichki tarmoq xatoligi" },
+      { ok: false, error: "PROXY_ERROR", message: (err instanceof Error && err.message) || "Ichki tarmoq xatoligi" },
       { status: 502 }
     );
   }

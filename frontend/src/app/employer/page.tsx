@@ -693,6 +693,36 @@ export default function EmployerPortal() {
   // -------------------------------------------------------------------------
   // FB-168: Org Hub Data Loaders & Action Handlers (API-072..075, 067)
   // -------------------------------------------------------------------------
+  const [orgDirectoryProfile, setOrgDirectoryProfile] = useState<OrganizationDirectoryProfile>({
+    organization_id: "",
+    status: "VERIFIED",
+    official_name: "",
+    brand_name: "",
+    tax_id: "",
+    industry: "Axborot texnologiyalari va FinTech",
+    region: "Toshkent shahri",
+    legal_address: "",
+    company_size: "50-200 xodim",
+    founded_year: 2020,
+    website_url: "",
+    hr_contact_name: "",
+    hr_contact_phone: "",
+    hr_contact_email: "",
+    director_name: "",
+    bank_name: "",
+    bank_mfo: "",
+    bank_account: "",
+    about_company: "",
+    internship_conditions: "",
+    student_perks: [],
+    completion_percent: 0,
+  });
+  const [orgStudentPerksInput, setOrgStudentPerksInput] = useState("");
+  const [isLoadingOrgDirectory, setIsLoadingOrgDirectory] = useState(false);
+  const [isSavingOrgDirectory, setIsSavingOrgDirectory] = useState(false);
+  const [orgDirectorySuccessMsg, setOrgDirectorySuccessMsg] = useState<string | null>(null);
+  const [orgDirectoryErrorMsg, setOrgDirectoryErrorMsg] = useState<string | null>(null);
+
   const loadOrgHubData = useCallback(async (targetOrgId: string) => {
     if (!targetOrgId.trim()) return;
     const tid = targetOrgId.trim();
@@ -745,36 +775,6 @@ export default function EmployerPortal() {
       setIsLoadingOrgDirectory(false);
     }
   }, []);
-
-  const [orgDirectoryProfile, setOrgDirectoryProfile] = useState<OrganizationDirectoryProfile>({
-    organization_id: "",
-    status: "VERIFIED",
-    official_name: "",
-    brand_name: "",
-    tax_id: "",
-    industry: "Axborot texnologiyalari va FinTech",
-    region: "Toshkent shahri",
-    legal_address: "",
-    company_size: "50-200 xodim",
-    founded_year: 2020,
-    website_url: "",
-    hr_contact_name: "",
-    hr_contact_phone: "",
-    hr_contact_email: "",
-    director_name: "",
-    bank_name: "",
-    bank_mfo: "",
-    bank_account: "",
-    about_company: "",
-    internship_conditions: "",
-    student_perks: [],
-    completion_percent: 0,
-  });
-  const [orgStudentPerksInput, setOrgStudentPerksInput] = useState("");
-  const [isLoadingOrgDirectory, setIsLoadingOrgDirectory] = useState(false);
-  const [isSavingOrgDirectory, setIsSavingOrgDirectory] = useState(false);
-  const [orgDirectorySuccessMsg, setOrgDirectorySuccessMsg] = useState<string | null>(null);
-  const [orgDirectoryErrorMsg, setOrgDirectoryErrorMsg] = useState<string | null>(null);
 
   const handleSaveOrgDirectory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1460,7 +1460,7 @@ export default function EmployerPortal() {
                   title="Vakansiyani vaqtincha to'xtatish (API-082)"
                   className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span>To'xtatish</span>
+                  <span>To&apos;xtatish</span>
                 </button>
 
                 <button
@@ -3429,7 +3429,7 @@ export default function EmployerPortal() {
                       <select
                         id="min-skill-level"
                         value={minSkillLevel}
-                        onChange={(e) => setMinSkillLevel(e.target.value as any)}
+                        onChange={(e) => setMinSkillLevel(e.target.value as typeof minSkillLevel)}
                         className="px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-zinc-300 focus:outline-none focus:border-primary"
                       >
                         <option value="">Barchasi</option>
@@ -3508,7 +3508,7 @@ export default function EmployerPortal() {
                         <button
                           key={sh.id}
                           type="button"
-                          onClick={() => setSelectedShift(isSelected ? "" : (sh.id as any))}
+                          onClick={() => setSelectedShift(isSelected ? "" : (sh.id as typeof selectedShift))}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                             isSelected
                               ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
