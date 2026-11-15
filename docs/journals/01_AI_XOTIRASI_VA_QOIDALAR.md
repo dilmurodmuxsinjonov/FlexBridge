@@ -1707,3 +1707,11 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Wrapped `/university` with `frontend/src/app/university/layout.tsx` (blocking non-academic authenticated sessions with Role Boundary guard), passed `requiredPortal="ACADEMIC"` into `/university/page.tsx` `<AuthModal>`, and scoped `Navbar.tsx` + `Footer.tsx` + `AuthModal.tsx` + `/` + `/kirish` to isolate OTM navigation without cross-role leakage.
   - `main`/`master` remains strictly frozen; work targets `integration/r1-agent-collaboration` only.
 - **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on touched/new files (0 errors), Docker `backend` + `frontend` rebuild, `scripts/test_university_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**34/34 suites PASSED in 91.4s**).
+
+
+## 2026-11-15 — Platforma Operatori (`OPERATOR` / SOC) Alohida Kirishi va Rol Chegarasi (`LOG-159` / Issue `#214`)
+- **Isolated Operator Portal Auth & SOC Role Boundary**:
+  - Dedicated Amber/SOC login page `/operator/kirish` (`portal="OPERATOR"`, password + 2FA TOTP verification, Dual-Control Platform Access governance notice without public operator registration).
+  - Created `frontend/src/app/operator/layout.tsx` (Role Boundary guard checking `isOperatorRoles(user.roles)` and blocking Student/Employer/University sessions with safe dashboard redirect & logout switch), added `isOperatorOnlyRoles` in `frontend/src/lib/roles.ts`, passed `requiredPortal="OPERATOR"` to `/operator/page.tsx` `<AuthModal>`, and scoped `Navbar.tsx` + `Footer.tsx` + `AuthModal.tsx` + `/kirish` + `/`.
+  - `main`/`master` remains strictly frozen; PR targets `integration/r1-agent-collaboration` only.
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on new/shared files (0 errors), Docker `frontend` rebuild, `scripts/test_operator_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**35/35 PASSED in 97.82s**).

@@ -1306,3 +1306,11 @@ Keyingi kichik qadam:
   * **OTM Alohida Kirish & Ulanish (`/universitet/kirish`, `/universitet/royxatdan-otish`)**: Faqat `ACADEMIC` portaliga ruxsat beruvchi parol + 2FA TOTP kirish hamda SMS/Telegram orqali hisob ochib tayinlov roziligini (`ACCEPT`/`DECLINE`) rasmiylashtiruvchi 3 bosqichli oqim yaratildi (`GET /api/v1/me/contacts` va `/api/bff/university/appointments*`).
   * **Rol Chegarasi & Scoped UI**: `university/layout.tsx`, `university/page.tsx`, `AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `/` va `/kirish` sahifalarida Universitet / OTM menyu va kirish nuqtalari izolyatsiya qilindi (boshqa rollar 403 / Role Boundary bilan bloklandi; `main` muzlatilgan holda saqlandi).
   * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` (0 xato), Docker `backend`/`frontend` build, `test_university_isolated_login_staging.py` (4/4 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**34/34 to'plam 100% YASHIL, 91.4s**).
+
+
+### 2026-11-15 | LOG-159 | Issue #214 (`feature/214-operator-isolated-login`) -> Platforma Operatori (`OPERATOR` / SOC) alohida kirish va rol chegarasi
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (ALL 35/35 STAGING TEST SUITES GREEN)**.
+- **Nima Qilindi**:
+  * **SOC Alohida Kirish (`/operator/kirish`)**: Faqat `OPERATOR`, `MODERATOR`, `AUDITOR`, `SUPPORT`, `FINANCE`, `ADMIN`, `SECURITY_LEAD` rollari uchun `portal="OPERATOR"` parol + 2FA TOTP terminal kirishi yaratildi (ochiq o'z-o'zidan ro'yxatdan o'tishsiz, Dual-Control talabi bilan).
+  * **Rol Chegarasi & Scoped UI**: `operator/layout.tsx`, `operator/page.tsx` (`requiredPortal="OPERATOR"` + auth sync), `AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `/kirish` va `/` da Operator / SOC chegarasi ajratildi (`main` muzlatilgan holda saqlandi).
+  * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` yangi/umumiy fayllarda (0 xato), Docker `frontend` build, `test_operator_isolated_login_staging.py` (4/4 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**35/35 to'plam 100% YASHIL, 97.82s**).

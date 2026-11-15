@@ -20,7 +20,13 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
-import { isAcademicOnlyRoles, isEmployerOnlyRoles, isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
+import {
+  isAcademicOnlyRoles,
+  isEmployerOnlyRoles,
+  isOperatorOnlyRoles,
+  isStudentOnlyRoles,
+  resolvePortalDashboard,
+} from "@/lib/roles";
 
 type WorkspacePersona = "PUBLIC" | "CANDIDATE" | "EMPLOYER" | "UNIVERSITY" | "OPERATOR";
 
@@ -191,7 +197,8 @@ export default function Navbar() {
     pathname === "/royxatdan-otish" ||
     Boolean(pathname?.startsWith("/talaba/")) ||
     Boolean(pathname?.startsWith("/korxona/")) ||
-    Boolean(pathname?.startsWith("/universitet/"));
+    Boolean(pathname?.startsWith("/universitet/")) ||
+    Boolean(pathname?.startsWith("/operator/"));
   const personaKey = resolvePersonaFromRouteAndUser(pathname, currentUser);
   const theme = PERSONA_THEMES[personaKey];
   const userDashboard = currentUser ? getDashboardForRoles(currentUser.roles) : null;
@@ -201,7 +208,9 @@ export default function Navbar() {
     personaKey === "EMPLOYER" ||
     Boolean(currentUser && isEmployerOnlyRoles(currentUser.roles)) ||
     personaKey === "UNIVERSITY" ||
-    Boolean(currentUser && isAcademicOnlyRoles(currentUser.roles));
+    Boolean(currentUser && isAcademicOnlyRoles(currentUser.roles)) ||
+    personaKey === "OPERATOR" ||
+    Boolean(currentUser && isOperatorOnlyRoles(currentUser.roles));
   const loginHref =
     personaKey === "CANDIDATE"
       ? "/talaba/kirish"
@@ -209,7 +218,9 @@ export default function Navbar() {
         ? "/korxona/kirish"
         : personaKey === "UNIVERSITY"
           ? "/universitet/kirish"
-          : "/kirish";
+          : personaKey === "OPERATOR"
+            ? "/operator/kirish"
+            : "/kirish";
   const registerHref =
     personaKey === "CANDIDATE"
       ? "/talaba/royxatdan-otish"
@@ -404,12 +415,14 @@ export default function Navbar() {
               <Lock className="h-3.5 w-3.5" />
               <span>Kirish</span>
             </Link>
-            <Link
-              href={registerHref}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-hover transition-colors shadow-sm"
-            >
-              <span>Ro‘yxatdan o‘tish</span>
-            </Link>
+            {personaKey !== "OPERATOR" && (
+              <Link
+                href={registerHref}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-hover transition-colors shadow-sm"
+              >
+                <span>Ro‘yxatdan o‘tish</span>
+              </Link>
+            )}
           </>
         )}
       </div>
