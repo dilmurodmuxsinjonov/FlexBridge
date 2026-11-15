@@ -1365,6 +1365,23 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Forensic audit report: `reviews/2026-11-15/employer_mentor_hub/EMPLOYER_MENTOR_REPORT.md`.
 
 
+## LOG-135 / Candidate Portal: Offer Acceptance, Dual-Confirmed Job Engagements & Placement Onboarding Hub (FB-164, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #164, Branch `feature/164-candidate-offers-engagements-placements`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/candidate/offers/[id]/respond`, `/api/bff/candidate/engagements/[id]`, `/api/bff/candidate/engagements/[id]/confirmations`, `/api/bff/candidate/placements/[id]/plan`, `/api/bff/candidate/placements/[id]/accept`) proxying backend canonical contracts API-043, API-045, API-046, API-050, API-048 with HttpOnly session validation, CSRF origin defense, and strict Pydantic extra-forbidden payload sanitization.
+  - Updated TypeScript client `frontend/src/lib/api.ts` with all types and API caller methods.
+  - Upgraded Candidate Applications page (`frontend/src/app/nomzod/arizalar/page.tsx`) with interactive offer acceptance and decline actions.
+  - Created brand new dedicated Hub page `frontend/src/app/nomzod/shartnomalar/page.tsx` featuring Placements & Training Plan inspection/acceptance and Dual-Party Confirmation workflow (AC-014).
+  - Unified candidate sub-navigation across `/nomzod`, `/nomzod/arizalar`, `/nomzod/shartnomalar`, and `/nomzod/kundalik`.
+  - Implemented and executed `scripts/test_candidate_offers_engagements_staging.py` with 10 comprehensive phases: 100% GREEN (10/10 passed).
+  - Executed full regression suite across all 11 staging test suites: 95/95 tests passed 100% GREEN (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/candidate_offers_engagements_hub/CANDIDATE_OFFERS_ENGAGEMENTS_REPORT.md`.
+
+
+
 
 
 

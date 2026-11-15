@@ -321,6 +321,31 @@ export default function CandidateKundalikPage() {
       </div>
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {/* Sub-Navigation between Candidate Pages */}
+        <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 mb-6 text-xs overflow-x-auto">
+          <Link
+            href="/nomzod"
+            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+          >
+            Kasbiy Profil
+          </Link>
+          <Link
+            href="/nomzod/arizalar"
+            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+          >
+            Mening Arizalarim
+          </Link>
+          <Link
+            href="/nomzod/shartnomalar"
+            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+          >
+            Shartnomalar & Amaliyot
+          </Link>
+          <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
+            Amaliyot Kundaligi
+          </span>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
