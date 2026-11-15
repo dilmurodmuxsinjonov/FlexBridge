@@ -2471,59 +2471,7 @@ export interface SavedOpportunitiesListResponse {
   page_size: number;
 }
 
-export async function fetchSavedOpportunities(
-  page: number = 1,
-  pageSize: number = 20
-): Promise<SavedOpportunitiesListResponse> {
-  const res = await fetch(`/api/bff/candidate/saved-opportunities?page=${page}&page_size=${pageSize}`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_SAVED_OPPORTUNITIES_FAILED");
-    (err as unknown as { status: number }).status = res.status;
-    throw err;
-  }
-  return data as SavedOpportunitiesListResponse;
-}
-
-export async function saveOpportunity(
-  opportunityId: string,
-  toggle: boolean = false
-): Promise<Record<string, unknown>> {
-  const res = await fetch("/api/bff/candidate/saved-opportunities", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ opportunity_id: opportunityId, toggle }),
-    cache: "no-store",
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const err = new Error(data.message || data.error || "SAVE_OPPORTUNITY_FAILED");
-    (err as unknown as { status: number }).status = res.status;
-    throw err;
-  }
-  return data as Record<string, unknown>;
-}
-
-export async function deleteSavedOpportunity(id: string): Promise<void> {
-  const res = await fetch(`/api/bff/candidate/saved-opportunities/${encodeURIComponent(id)}`, {
-    method: "DELETE",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
-  if (!res.ok && res.status !== 204) {
-    const data = await res.json().catch(() => ({}));
-    const err = new Error(data.message || data.error || "DELETE_SAVED_OPPORTUNITY_FAILED");
-    (err as unknown as { status: number }).status = res.status;
-    throw err;
-  }
-}
+export const fetchSavedOpportunities = fetchMySavedOpportunities;
 
 // ---------------------------------------------------------------------------
 // Employer Organization, Team & Verification Types & Methods (API-072, API-073, API-074, API-075, API-067)
@@ -3491,6 +3439,138 @@ export async function respondToInterview(
   }
   return data as InterviewResponseResult;
 }
+
+// -------------------------------------------------------------------------
+// Candidate Saved Opportunities (API-004, API-037, API-038) & Notifications (API-031)
+// -------------------------------------------------------------------------
+
+export interface SavedOpportunitiesResponse {
+  ok: boolean;
+  contract_id: string;
+  items: SavedOpportunityItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface SaveOpportunityResult {
+  ok: boolean;
+  contract_id: string;
+  saved: boolean;
+  opportunity_id: string;
+  id?: string | null;
+}
+
+export interface NotificationItem {
+  id: string;
+  created_at: string;
+  template_code: string;
+  placement_id?: string | null;
+  read_at?: string | null;
+  opportunity_id?: string | null;
+  application_id?: string | null;
+  ticket_id?: string | null;
+  is_read: boolean;
+  notice?: any;
+}
+
+export interface NotificationsResponse {
+  ok: boolean;
+  contract_id: string;
+  items: NotificationItem[];
+  next_after?: string | null;
+}
+
+export async function fetchMySavedOpportunities(
+  page: number = 1,
+  pageSize: number = 20
+): Promise<SavedOpportunitiesResponse> {
+  const res = await fetch(`/api/bff/me/saved-opportunities?page=${page}&page_size=${pageSize}`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SAVED_OPPORTUNITIES_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as SavedOpportunitiesResponse;
+}
+
+export async function saveOpportunity(
+  opportunityId: string,
+  toggle: boolean = false
+): Promise<SaveOpportunityResult> {
+  const res = await fetch("/api/bff/me/saved-opportunities", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ opportunity_id: opportunityId, toggle }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SAVE_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as SaveOpportunityResult;
+}
+
+export async function deleteSavedOpportunity(
+  identifier: string
+): Promise<{ ok: boolean; contract_id: string; deleted_id: string }> {
+  const res = await fetch(`/api/bff/me/saved-opportunities/${encodeURIComponent(identifier)}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "DELETE_SAVED_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchMyNotifications(
+  unreadOnly: boolean = false,
+  limit: number = 50,
+  after?: string
+): Promise<NotificationsResponse> {
+  let query = `limit=${limit}&unread_only=${unreadOnly}`;
+  if (after) query += `&after=${encodeURIComponent(after)}`;
+  const res = await fetch(`/api/bff/me/notifications?${query}`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "NOTIFICATIONS_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as NotificationsResponse;
+}
+
+export async function markNotificationRead(
+  notificationId: string
+): Promise<{ ok: boolean; contract_id: string; id: string; read_at: string }> {
+  const res = await fetch(`/api/bff/me/notifications/${encodeURIComponent(notificationId)}/read`, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "MARK_NOTIFICATION_READ_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
 
 
 

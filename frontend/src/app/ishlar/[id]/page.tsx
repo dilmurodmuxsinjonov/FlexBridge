@@ -17,11 +17,13 @@ import {
   Loader2,
   FileText,
   UserCheck,
+  Bookmark,
 } from "lucide-react";
 import {
   fetchOpportunityDetail,
   submitOpportunityApplication,
   fetchAuthMe,
+  saveOpportunity,
   OpportunityDetail,
   AuthUser,
 } from "@/lib/api";
@@ -63,6 +65,8 @@ export default function OpportunityDetailPage({
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<{ id: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -100,6 +104,23 @@ export default function OpportunityDetailPage({
       setAuthModalOpen(true);
     } else {
       setApplicationModalOpen(true);
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    if (!opportunity) return;
+    try {
+      setSaving(true);
+      const res = await saveOpportunity(opportunity.id, true);
+      setIsSaved(res.saved);
+    } catch (err: unknown) {
+      console.error("Save error:", err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -370,6 +391,20 @@ export default function OpportunityDetailPage({
                 {opportunity.vacancies_available > 0
                   ? "Ariza topshirish"
                   : "Bo‘sh o‘rinlar qolmagan"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleSave}
+                disabled={saving}
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] py-2.5 text-xs font-semibold text-zinc-300 transition-all hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : (
+                  <Bookmark className={`h-4 w-4 ${isSaved ? "fill-primary text-primary" : "text-zinc-400"}`} />
+                )}
+                {isSaved ? "Saqlangan (Olib tashlash)" : "Saqlab qo‘yish"}
               </button>
             </div>
 
