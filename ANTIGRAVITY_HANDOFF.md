@@ -796,6 +796,8 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 - `main` branch: Strictly muzlatilgan (`764fb98496fa40857acb07844fd09fcafa99b7d6`). Barcha o'zgarishlar va PRlar faqat `integration/r1-agent-collaboration` bazasiga yo'naltiriladi.
 - Alembic head: `0020_placement_exports` (130 runtime tables).
 - So'nggi topshiriq (FB-152 / Issue #152): Universitet portali talabalar amaliyot kundaliklarini ko'rib chiqish va baholash tizimi (`feature/152-university-academic-reviews`). API-105, API-106, API-107 Next.js BFF endpoints, AcademicReviewModal.tsx, va 8-bosqichli staging test paketi (`scripts/test_university_academic_reviews_staging.py`) muvaffaqiyatli topshirildi va 100% yashil o'tdi.
+- So'nggi topshiriq (FB-166 / Issue #166): Nomzod portali baholash, 14 kunlik Double-Blind himoyasi, rubrika mezonlari, e'tiroz bildirish va saqlangan e'lonlar tizimi (`feature/166-candidate-ratings-reviews-appeals`). API-057, API-047, API-058, API-004, API-037, API-038 Next.js BFF endpoints, `/nomzod/baholar`, `/nomzod/saqlanganlar`, va 10-bosqichli staging test paketi (`scripts/test_candidate_ratings_appeals_staging.py`) 100% yashil o'tdi. Barcha 12 ta staging test to'plami bo'yicha 105/105 test 100% yashil (0 regressiya).
+
 
 
 

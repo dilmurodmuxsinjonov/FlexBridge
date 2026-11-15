@@ -2068,4 +2068,245 @@ export async function acceptCandidatePlacementTerms(
   return data as Record<string, unknown>;
 }
 
+// ---------------------------------------------------------------------------
+// Candidate Ratings, Reviews, Double-Blind & Appeals Types & Methods (API-057, API-047, API-058)
+// ---------------------------------------------------------------------------
+
+export interface RatingAggregate {
+  sample_size: number;
+  score: number | null;
+  score_status: "UNRATED" | "WITHHELD_INSUFFICIENT_SAMPLE" | "PUBLISHED" | "COMPUTATION_PENDING" | string;
+  explanation: string;
+  window_start?: string | null;
+  window_end?: string | null;
+  computed_at?: string | null;
+  rubric_id?: string | null;
+}
+
+export interface RatingCriterion {
+  id: string;
+  code: string;
+  title: string;
+  weight: number;
+  required: boolean;
+}
+
+export interface RubricVersion {
+  id: string;
+  family: string;
+  version: number;
+  scale_min: number;
+  scale_max: number;
+  criteria: RatingCriterion[];
+}
+
+export interface ReceivedRatingItem {
+  id: string;
+  rubric_id: string;
+  status: string;
+  blind_window_active: boolean;
+  publish_after?: string | null;
+  comment?: string | null;
+  rater_id?: string | null;
+  message?: string;
+  submitted_at?: string | null;
+  placement_id?: string | null;
+  engagement_id?: string | null;
+}
+
+export interface GivenRatingItem {
+  id: string;
+  rubric_id: string;
+  placement_id?: string | null;
+  engagement_id?: string | null;
+  target_user_id?: string | null;
+  target_org_id?: string | null;
+  version?: number;
+  status: string;
+  comment?: string | null;
+  submitted_at?: string | null;
+  publish_after?: string | null;
+}
+
+export interface EligibleRelationItem {
+  relation_type: "PLACEMENT" | "ENGAGEMENT" | string;
+  relation_id: string;
+  role: string;
+  status: string;
+  organization_id?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+}
+
+export interface CandidateRatingsResponse {
+  contract_id: string;
+  target_user_id: string;
+  feature_enabled: boolean;
+  feature_flag: string;
+  aggregate: RatingAggregate;
+  submissions_received: ReceivedRatingItem[];
+  submissions_given: GivenRatingItem[];
+  eligible_relations: EligibleRelationItem[];
+  available_rubrics: RubricVersion[];
+}
+
+export interface SubmitRatingPayload {
+  scores: { criterion_id: string; score: number }[];
+  rubric_id?: string;
+  comment?: string;
+  idempotency_key?: string;
+}
+
+export interface RatingAppealPayload {
+  reason: string;
+  category?: string;
+  evidence_notes?: string;
+}
+
+export async function fetchCandidateRatings(): Promise<CandidateRatingsResponse> {
+  const res = await fetch("/api/bff/candidate/ratings", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_RATINGS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateRatingsResponse;
+}
+
+export async function submitEngagementRating(
+  engagementId: string,
+  payload: SubmitRatingPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/candidate/engagements/${encodeURIComponent(engagementId)}/ratings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUBMIT_RATING_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+export async function submitRatingAppeal(
+  ratingId: string,
+  payload: RatingAppealPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/candidate/ratings/${encodeURIComponent(ratingId)}/appeals`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUBMIT_APPEAL_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Candidate Saved Opportunities Types & Methods (API-004, API-037, API-038)
+// ---------------------------------------------------------------------------
+
+export interface SavedOpportunityItem {
+  id: string;
+  candidate_id: string;
+  opportunity_id: string;
+  created_at?: string | null;
+  opportunity: {
+    id: string;
+    organization_id?: string;
+    kind: string;
+    status: string;
+    is_closed: boolean;
+    closed_at?: string | null;
+    published_at?: string | null;
+    current_revision_id?: string;
+    title?: string;
+    work_mode?: string;
+    contract_type?: string;
+    is_paid?: boolean;
+  };
+}
+
+export interface SavedOpportunitiesListResponse {
+  items: SavedOpportunityItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export async function fetchSavedOpportunities(
+  page: number = 1,
+  pageSize: number = 20
+): Promise<SavedOpportunitiesListResponse> {
+  const res = await fetch(`/api/bff/candidate/saved-opportunities?page=${page}&page_size=${pageSize}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_SAVED_OPPORTUNITIES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as SavedOpportunitiesListResponse;
+}
+
+export async function saveOpportunity(
+  opportunityId: string,
+  toggle: boolean = false
+): Promise<Record<string, unknown>> {
+  const res = await fetch("/api/bff/candidate/saved-opportunities", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ opportunity_id: opportunityId, toggle }),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SAVE_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+export async function deleteSavedOpportunity(id: string): Promise<void> {
+  const res = await fetch(`/api/bff/candidate/saved-opportunities/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok && res.status !== 204) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.message || data.error || "DELETE_SAVED_OPPORTUNITY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+}
+
+
 

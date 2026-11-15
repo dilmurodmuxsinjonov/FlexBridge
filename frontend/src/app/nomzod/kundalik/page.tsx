@@ -344,6 +344,18 @@ export default function CandidateKundalikPage() {
           <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
             Amaliyot Kundaligi
           </span>
+          <Link
+            href="/nomzod/baholar"
+            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+          >
+            Baholar & Sharhlar
+          </Link>
+          <Link
+            href="/nomzod/saqlanganlar"
+            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+          >
+            Saqlangan E&apos;lonlar
+          </Link>
         </div>
 
         {/* Header */}

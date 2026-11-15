@@ -338,6 +338,18 @@ function ShartnomalarHubContent() {
         >
           Amaliyot Kundaligi
         </Link>
+        <Link
+          href="/nomzod/baholar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Baholar & Sharhlar
+        </Link>
+        <Link
+          href="/nomzod/saqlanganlar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Saqlangan E&apos;lonlar
+        </Link>
       </div>
 
       {/* Unauthenticated View */}

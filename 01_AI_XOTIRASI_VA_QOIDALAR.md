@@ -1381,6 +1381,23 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Forensic audit report: `reviews/2026-11-15/candidate_offers_engagements_hub/CANDIDATE_OFFERS_ENGAGEMENTS_REPORT.md`.
 
 
+## LOG-136 / Candidate Portal: Ratings, Double-Blind Reviews, Rubrics & Appeals Hub (FB-166, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #166, Branch `feature/166-candidate-ratings-reviews-appeals`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/candidate/ratings`, `/api/bff/candidate/engagements/[id]/ratings`, `/api/bff/candidate/ratings/[id]/appeals`, `/api/bff/candidate/saved-opportunities`, `/api/bff/candidate/saved-opportunities/[id]`) proxying backend canonical contracts API-057, API-047, API-058, API-004, API-037, API-038 with HttpOnly session validation, CSRF origin defense, and strict Pydantic extra-forbidden payload sanitization.
+  - Updated TypeScript client `frontend/src/lib/api.ts` with all types (`RatingAggregate`, `RubricVersion`, `RatingCriterion`, `ReceivedRatingItem`, `GivenRatingItem`, `EligibleRelationItem`, `SavedOpportunityItem`) and API caller methods.
+  - Created brand new dedicated Hub page `frontend/src/app/nomzod/baholar/page.tsx` featuring Candidate Aggregated Score & Privacy Badge (AC-023: $n < 5$ withheld explanation / distinct UNRATED status), 14-day Bilateral Double-Blind Protection Visualizer (AC-024), Completed Engagement Evaluation Form with multi-criteria rubric scoring (API-047), and Rating Appeal Modal (API-058 / AC-025).
+  - Created brand new dedicated Hub page `frontend/src/app/nomzod/saqlanganlar/page.tsx` for saved opportunities bookmarks with preserved status, work mode badges, and one-click unsave/apply actions (API-004, API-037, API-038).
+  - Synchronized sub-navigation across all 6 candidate pages (`/nomzod`, `/nomzod/arizalar`, `/nomzod/shartnomalar`, `/nomzod/kundalik`, `/nomzod/baholar`, `/nomzod/saqlanganlar`).
+  - Implemented and executed `scripts/test_candidate_ratings_appeals_staging.py` with 10 comprehensive phases: 100% GREEN (10/10 passed).
+  - Executed full regression suite across all 12 staging test suites: 105/105 tests passed 100% GREEN (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/candidate_ratings_appeals_hub/CANDIDATE_RATINGS_APPEALS_REPORT.md`.
+
+
+
 
 
 
