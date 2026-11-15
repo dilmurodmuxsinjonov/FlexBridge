@@ -56,6 +56,7 @@ TEST_SCRIPTS = [
     "scripts/test_vacancy_lifecycle_interviews_staging.py",
     "scripts/test_candidate_saved_notifications_staging.py",
     "scripts/test_candidate_enrollments_exceptions_staging.py",
+    "scripts/test_user_security_sessions_staging.py",
 ]
 
 def main():

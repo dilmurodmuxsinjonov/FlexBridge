@@ -1511,6 +1511,25 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 21-suite regression runner `scripts/run_all_staging_tests.py`: 21/21 passed 100% GREEN in 38.14s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/candidate_enrollments_exceptions/CANDIDATE_ENROLLMENTS_EXCEPTIONS_REPORT.md`.
 
+## LOG-145 / Candidate & User Center: Password Change, TOTP Two-Factor Authentication (MFA), Emergency Recovery Codes & Active Sessions Hub (FB-186, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #186, Branch `feature/186-user-security-mfa-sessions-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 4 Next.js 16 BFF endpoints (`/api/bff/me/security`, `/api/bff/me/security/totp/confirm`, `/api/bff/me/security/recovery-codes`, `/api/bff/me/sessions/[id]`) and backend routes (`GET /api/v1/me/security`, `GET /api/v1/me/sessions`) proxying canonical contracts API-060, API-061 under CAP-002 / AUTH_SELF with HttpOnly session validation, CSRF origin defense, and typed payloads.
+  - Constructed dedicated User Security Hub (`frontend/src/app/nomzod/xavfsizlik/page.tsx`) adhering strictly to anti-slop guidelines (#09090b canvas, #121214 cards, Lucide SVG icons, zero emojis) featuring 4 operational sections:
+    1. *Xavfsizlik Telemetriyasi & Ko'rsatkichlar Bar*: MFA holati (FAOL / YOQILMAGAN), Assurance darajasi (A2 / A1), zaxira kodlari soni, faol qurilmalar soni.
+    2. *Ikki Bosqichli Autentifikatsiya (2FA / TOTP) Hub (API-060)*: Step-up password verification modal, 32-char base32 secret key display with instant copy, 6-digit confirmation code input with auto-formatting, and MFA disable modal with step-up verification.
+    3. *Favqulodda Zaxira Tiklash Kodlari*: Explanation panel and step-up modal generating 8 one-time emergency backup recovery codes rendered in a clean 2x4 grid with "Nusxa olish" and "Fayl sifatida yuklab olish (TXT)".
+    4. *Faol Qurilmalar & Sessiyalar Boshqaruvi (API-061)*: Dynamic list of active user sessions with device icons, assurance indicators, `Joriy Qurilma` badge, timestamps, and single-click session revocation with automatic current logout clearing `flexbridge_session` cookie.
+  - Extended TypeScript SDK (`frontend/src/lib/api.ts`) with `fetchUserSecurityOverview`, `requestTotpEnrollment`, `confirmTotpEnrollment`, `disableTotp`, `generateRecoveryCodes`, and `revokeUserSession`.
+  - Next.js Turbopack build verified clean (`npm run build`: 55 routes compiled, 0 errors). Docker container `flexbridge-r1-frontend-1` rebuilt and healthy on port 3000.
+  - Dedicated staging suite `scripts/test_user_security_sessions_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer.
+  - Comprehensive 22-suite regression runner `scripts/run_all_staging_tests.py`: ALL 22/22 TEST SUITES PASSED 100% GREEN in 40.17s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/user_security_mfa_sessions/USER_SECURITY_MFA_SESSIONS_REPORT.md`.
+
+
 
 
 

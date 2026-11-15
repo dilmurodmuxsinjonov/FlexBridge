@@ -3750,6 +3750,195 @@ export async function saveCandidateAvailabilityExceptions(
   return data;
 }
 
+// ---------------------------------------------------------------------------
+// Candidate & User Security, MFA & Sessions Hub (API-060, API-061)
+// ---------------------------------------------------------------------------
+
+export interface ActiveSessionItem {
+  id: string;
+  created_at: string;
+  expires_at: string;
+  last_seen_at?: string;
+  assurance: string; // 'PASSWORD' | 'MFA'
+  is_current: boolean;
+}
+
+export interface UserSecurityOverview {
+  ok: boolean;
+  user_id: string;
+  totp_enabled: boolean;
+  recovery_codes_count: number;
+  current_session_id: string;
+  sessions: ActiveSessionItem[];
+  contract_id?: string;
+}
+
+export interface EnableTotpResult {
+  ok: boolean;
+  totp_enabled: boolean;
+  enrollment_pending: boolean;
+  secret: string;
+  contract_id?: string;
+}
+
+export interface DisableTotpResult {
+  ok: boolean;
+  totp_enabled: boolean;
+  step_up_verified: boolean;
+  reauthentication_required: boolean;
+  contract_id?: string;
+}
+
+export interface ConfirmTotpResult {
+  ok: boolean;
+  totp_enabled: boolean;
+  reauthentication_required: boolean;
+  contract_id?: string;
+}
+
+export interface RecoveryCodesResult {
+  ok: boolean;
+  recovery_codes: string[];
+  show_once: boolean;
+  contract_id?: string;
+}
+
+export interface RevokeSessionResult {
+  ok: boolean;
+  session_id: string;
+  status: string;
+  revoked_at: string;
+  contract_id?: string;
+}
+
+export async function fetchUserSecurityOverview(): Promise<UserSecurityOverview> {
+  const res = await fetch("/api/bff/me/security", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SECURITY_OVERVIEW_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as UserSecurityOverview;
+}
+
+export async function requestTotpEnrollment(
+  currentPassword: string,
+  stepUpTotpCode?: string
+): Promise<EnableTotpResult> {
+  const payload: Record<string, unknown> = {
+    enable_totp: true,
+    current_password: currentPassword,
+  };
+  if (stepUpTotpCode) payload.step_up_totp_code = stepUpTotpCode;
+
+  const res = await fetch("/api/bff/me/security", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "TOTP_ENROLLMENT_REQUEST_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as EnableTotpResult;
+}
+
+export async function confirmTotpEnrollment(code: string): Promise<ConfirmTotpResult> {
+  const res = await fetch("/api/bff/me/security/totp/confirm", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "TOTP_CONFIRMATION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ConfirmTotpResult;
+}
+
+export async function disableTotp(
+  currentPassword: string,
+  stepUpTotpCode?: string
+): Promise<DisableTotpResult> {
+  const payload: Record<string, unknown> = {
+    enable_totp: false,
+    current_password: currentPassword,
+  };
+  if (stepUpTotpCode) payload.step_up_totp_code = stepUpTotpCode;
+
+  const res = await fetch("/api/bff/me/security", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "TOTP_DISABLE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as DisableTotpResult;
+}
+
+export async function generateRecoveryCodes(
+  currentPassword: string,
+  totpCode?: string
+): Promise<RecoveryCodesResult> {
+  const payload: Record<string, unknown> = {
+    current_password: currentPassword,
+  };
+  if (totpCode) payload.totp_code = totpCode;
+
+  const res = await fetch("/api/bff/me/security/recovery-codes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "RECOVERY_CODES_GENERATION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as RecoveryCodesResult;
+}
+
+export async function revokeUserSession(sessionId: string): Promise<RevokeSessionResult> {
+  const res = await fetch(`/api/bff/me/sessions/${encodeURIComponent(sessionId)}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "REVOKE_SESSION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as RevokeSessionResult;
+}
+
+
 
 
 
