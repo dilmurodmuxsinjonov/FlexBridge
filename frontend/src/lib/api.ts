@@ -1314,6 +1314,223 @@ export async function emergencyRevokeUserSessions(
 }
 
 // ============================================================================
+// Operator Support Tickets, Incidents, DR SLA & Analytics (FB-172)
+// ============================================================================
+
+export interface OperatorSupportTicketItem {
+  id: string;
+  category: string;
+  status: string;
+  priority: string;
+  subject?: string;
+  description?: string;
+  creator_user_id?: string;
+  assigned_to_id?: string | null;
+  created_at: string;
+  updated_at?: string;
+  due_at?: string | null;
+  messages_count?: number;
+}
+
+export interface PostOperatorTicketMessagePayload {
+  body: string;
+  internal?: boolean;
+  status?: string;
+  file_id?: string;
+}
+
+export interface OperatorTicketMessageResult {
+  ok: boolean;
+  contract_id: string;
+  message_id?: string;
+  ticket_id?: string;
+  body?: string;
+  internal?: boolean;
+  status?: string;
+  created_at?: string;
+}
+
+export interface DeclareOperatorIncidentPayload {
+  severity: "P1" | "P2" | "P3" | "P4";
+  title: string;
+  summary?: string;
+  commander_id?: string;
+  commander_user_id?: string;
+  postmortem_ref?: string;
+}
+
+export interface OperatorDeclareIncidentResult {
+  ok: boolean;
+  contract_id: string;
+  incident_id: string;
+  severity: string;
+  title: string;
+  status?: string;
+  commander_user_id?: string;
+  declared_at?: string;
+}
+
+export interface OperatorRestoreRunItem {
+  id: string;
+  target_db?: string;
+  backup_snapshot_time?: string;
+  completed_at?: string;
+  rpo_minutes?: number;
+  rto_minutes?: number;
+  sla_met?: boolean;
+  status?: string;
+  verified_by?: string;
+}
+
+export interface OperatorRestoreRunsResponse {
+  ok: boolean;
+  contract_id: string;
+  items: OperatorRestoreRunItem[];
+  summary?: {
+    rpo_sla_target_minutes?: number;
+    rto_sla_target_minutes?: number;
+    total_runs_evaluated?: number;
+    all_sla_met?: boolean;
+  };
+}
+
+export interface OperatorPlatformAnalytics {
+  ok: boolean;
+  contract_id: string;
+  deduplication_effectiveness_pct?: number;
+  mutual_start_rate_pct?: number;
+  outbox_backlog_count?: number;
+  active_circuits?: Record<string, string>;
+  total_events_processed?: number;
+  period?: {
+    start_date?: string;
+    end_date?: string;
+  };
+}
+
+export async function fetchOperatorSupportTickets(params?: {
+  status?: string;
+  category?: string;
+  priority?: string;
+  assignee_id?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<{ ok: boolean; contract_id: string; items: OperatorSupportTicketItem[]; next_cursor: string | null; total?: number }> {
+  const search = new URLSearchParams();
+  if (params?.status) search.set("status", params.status);
+  if (params?.category) search.set("category", params.category);
+  if (params?.priority) search.set("priority", params.priority);
+  if (params?.assignee_id) search.set("assignee_id", params.assignee_id);
+  if (params?.limit) search.set("limit", String(params.limit));
+  if (params?.cursor) search.set("cursor", params.cursor);
+
+  const qs = search.toString();
+  const res = await fetch(`/api/bff/operator/support-tickets${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_TICKETS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function postOperatorTicketMessage(
+  ticketId: string,
+  payload: PostOperatorTicketMessagePayload
+): Promise<OperatorTicketMessageResult> {
+  const res = await fetch(`/api/bff/operator/support-tickets/${encodeURIComponent(ticketId)}/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "POST_MESSAGE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorTicketMessageResult;
+}
+
+export async function declareOperatorIncident(
+  payload: DeclareOperatorIncidentPayload
+): Promise<OperatorDeclareIncidentResult> {
+  const res = await fetch(`/api/bff/operator/incidents`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "DECLARE_INCIDENT_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorDeclareIncidentResult;
+}
+
+export async function fetchOperatorRestoreRuns(params?: {
+  limit?: number;
+  status?: string;
+}): Promise<OperatorRestoreRunsResponse> {
+  const search = new URLSearchParams();
+  if (params?.limit) search.set("limit", String(params.limit));
+  if (params?.status) search.set("status", params.status);
+
+  const qs = search.toString();
+  const res = await fetch(`/api/bff/operator/restore-runs${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_RESTORE_RUNS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorRestoreRunsResponse;
+}
+
+export async function fetchOperatorAnalytics(params?: {
+  start_date?: string;
+  end_date?: string;
+  cohort?: string;
+}): Promise<OperatorPlatformAnalytics> {
+  const search = new URLSearchParams();
+  if (params?.start_date) search.set("start_date", params.start_date);
+  if (params?.end_date) search.set("end_date", params.end_date);
+  if (params?.cohort) search.set("cohort", params.cohort);
+
+  const qs = search.toString();
+  const res = await fetch(`/api/bff/operator/analytics${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ANALYTICS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorPlatformAnalytics;
+}
+
+// ============================================================================
 // Candidate Profile, Skills & Availability Management (FB-158)
 // ============================================================================
 

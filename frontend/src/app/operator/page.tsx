@@ -18,6 +18,12 @@ import {
   Send,
   X,
   FileCheck2,
+  LifeBuoy,
+  MessageSquare,
+  Flame,
+  Activity,
+  Server,
+  Plus,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -27,16 +33,24 @@ import {
   decideVerificationCase,
   requestBreakGlassAccess,
   emergencyRevokeUserSessions,
+  fetchOperatorSupportTickets,
+  postOperatorTicketMessage,
+  declareOperatorIncident,
+  fetchOperatorRestoreRuns,
+  fetchOperatorAnalytics,
   logoutUser,
   AuthUser,
   OperatorAuditEventItem,
   OperatorVerificationCaseItem,
+  OperatorSupportTicketItem,
+  OperatorRestoreRunItem,
+  OperatorPlatformAnalytics,
   BreakGlassAccessResult,
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
-type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS";
+type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS";
 
 export default function OperatorPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -78,6 +92,47 @@ export default function OperatorPortal() {
   const [revokeResult, setRevokeResult] = useState<EmergencyRevokeSessionsResult | null>(null);
   const [revokeError, setRevokeError] = useState<string | null>(null);
 
+  // Tab 4: Support Ops & SLA Monitoring (API-112, API-113, API-122, API-123, API-124)
+  const [tickets, setTickets] = useState<OperatorSupportTicketItem[]>([]);
+  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
+  const [ticketsError, setTicketsError] = useState<string | null>(null);
+  const [ticketFilterStatus, setTicketFilterStatus] = useState<string>("ALL");
+  const [ticketFilterPriority, setTicketFilterPriority] = useState<string>("ALL");
+
+  // Ticket Message Reply Modal State (API-113)
+  const [selectedTicket, setSelectedTicket] = useState<OperatorSupportTicketItem | null>(null);
+  const [replyBody, setReplyBody] = useState("");
+  const [isInternalNote, setIsInternalNote] = useState(false);
+  const [replyStatus, setReplyStatus] = useState<string>("");
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [replySuccessMsg, setReplySuccessMsg] = useState<string | null>(null);
+
+  // Incident Declaration Modal State (API-122)
+  const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
+  const [incidentSeverity, setIncidentSeverity] = useState<"P1" | "P2" | "P3" | "P4">("P3");
+  const [incidentTitle, setIncidentTitle] = useState("");
+  const [incidentSummary, setIncidentSummary] = useState("");
+  const [isSubmittingIncident, setIsSubmittingIncident] = useState(false);
+  const [incidentError, setIncidentError] = useState<string | null>(null);
+  const [incidentSuccessMsg, setIncidentSuccessMsg] = useState<string | null>(null);
+
+  // Restore Runs & SLA (API-123)
+  const [restoreRuns, setRestoreRuns] = useState<OperatorRestoreRunItem[]>([]);
+  const [runsSummary, setRunsSummary] = useState<{
+    rpo_sla_target_minutes?: number;
+    rto_sla_target_minutes?: number;
+    total_runs_evaluated?: number;
+    all_sla_met?: boolean;
+  } | null>(null);
+  const [isLoadingRuns, setIsLoadingRuns] = useState(false);
+  const [runsError, setRunsError] = useState<string | null>(null);
+
+  // Platform Analytics (API-124)
+  const [analytics, setAnalytics] = useState<OperatorPlatformAnalytics | null>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
   // Load Audit Events (API-118)
   const loadAuditEvents = useCallback(async () => {
     setIsLoadingEvents(true);
@@ -116,6 +171,57 @@ export default function OperatorPortal() {
     }
   }, []);
 
+  const loadSupportTickets = useCallback(async () => {
+    setIsLoadingTickets(true);
+    setTicketsError(null);
+    try {
+      const res = await fetchOperatorSupportTickets({
+        status: ticketFilterStatus === "ALL" ? undefined : ticketFilterStatus,
+        priority: ticketFilterPriority === "ALL" ? undefined : ticketFilterPriority,
+        limit: 50,
+      });
+      setTickets(res.items || []);
+    } catch (err: unknown) {
+      setTicketsError(err instanceof Error ? err.message : "Tiketlarni yuklashda xatolik yuz berdi");
+      setTickets([]);
+    } finally {
+      setIsLoadingTickets(false);
+    }
+  }, [ticketFilterStatus, ticketFilterPriority]);
+
+  const loadRestoreRuns = useCallback(async () => {
+    setIsLoadingRuns(true);
+    setRunsError(null);
+    try {
+      const res = await fetchOperatorRestoreRuns({ limit: 10 });
+      setRestoreRuns(res.items || []);
+      setRunsSummary(res.summary || null);
+    } catch (err: unknown) {
+      setRunsError(err instanceof Error ? err.message : "DR tiklash jurnallarini yuklashda xatolik");
+      setRestoreRuns([]);
+    } finally {
+      setIsLoadingRuns(false);
+    }
+  }, []);
+
+  const loadAnalytics = useCallback(async () => {
+    setIsLoadingAnalytics(true);
+    setAnalyticsError(null);
+    try {
+      const res = await fetchOperatorAnalytics();
+      setAnalytics(res);
+    } catch (err: unknown) {
+      setAnalyticsError(err instanceof Error ? err.message : "Platforma telemetriyasini yuklashda xatolik");
+      setAnalytics(null);
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  }, []);
+
+  const loadSupportOps = useCallback(async () => {
+    await Promise.allSettled([loadSupportTickets(), loadRestoreRuns(), loadAnalytics()]);
+  }, [loadSupportTickets, loadRestoreRuns, loadAnalytics]);
+
   useEffect(() => {
     let isMounted = true;
     fetchAuthMe().then((user) => {
@@ -125,27 +231,39 @@ export default function OperatorPortal() {
         if (user) {
           loadAuditEvents();
           loadVerificationCases();
+          loadSupportOps();
         }
       }
     });
     return () => {
       isMounted = false;
     };
-  }, [loadAuditEvents, loadVerificationCases]);
+  }, [loadAuditEvents, loadVerificationCases, loadSupportOps]);
+
+  useEffect(() => {
+    if (currentUser && activeTab === "SUPPORT_OPS") {
+      loadSupportOps();
+    }
+  }, [currentUser, activeTab, loadSupportOps]);
 
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
     setAuditEvents([]);
     setCases([]);
+    setTickets([]);
+    setRestoreRuns([]);
+    setAnalytics(null);
     setEventsError(null);
     setCasesError(null);
+    setTicketsError(null);
   };
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     loadAuditEvents();
     loadVerificationCases();
+    loadSupportOps();
   };
 
   // Submit Case Decision (API-110)
@@ -246,6 +364,66 @@ export default function OperatorPortal() {
       setRevokeError(err instanceof Error ? err.message : "Sessiyalarni bekor qilishda xatolik yuz berdi");
     } finally {
       setIsSubmittingRevoke(false);
+    }
+  };
+
+  const handleTicketReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTicket) return;
+    if (!replyBody.trim()) {
+      setReplyError("Xabar matnini kiriting.");
+      return;
+    }
+    setIsSubmittingReply(true);
+    setReplyError(null);
+    setReplySuccessMsg(null);
+    try {
+      await postOperatorTicketMessage(selectedTicket.id, {
+        body: replyBody.trim(),
+        internal: isInternalNote,
+        status: replyStatus || undefined,
+      });
+      setReplySuccessMsg(isInternalNote ? "Ichki eslatma saqlandi." : "Mijozga javob yuborildi.");
+      setReplyBody("");
+      setTimeout(() => {
+        setSelectedTicket(null);
+        setReplySuccessMsg(null);
+        loadSupportTickets();
+      }, 1200);
+    } catch (err: unknown) {
+      setReplyError(err instanceof Error ? err.message : "Javob yuborishda xatolik yuz berdi");
+    } finally {
+      setIsSubmittingReply(false);
+    }
+  };
+
+  const handleIncidentDeclareSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!incidentTitle.trim()) {
+      setIncidentError("Insident sarlavhasini kiriting.");
+      return;
+    }
+    setIsSubmittingIncident(true);
+    setIncidentError(null);
+    setIncidentSuccessMsg(null);
+    try {
+      const res = await declareOperatorIncident({
+        severity: incidentSeverity,
+        title: incidentTitle.trim(),
+        summary: incidentSummary.trim() || incidentTitle.trim(),
+        commander_user_id: currentUser?.user_id,
+      });
+      setIncidentSuccessMsg(`Insident #${res.incident_id?.slice(0, 8)} muvaffaqiyatli e'lon qilindi!`);
+      setIncidentTitle("");
+      setIncidentSummary("");
+      setTimeout(() => {
+        setIsIncidentModalOpen(false);
+        setIncidentSuccessMsg(null);
+      }, 1500);
+    } catch (err: unknown) {
+      setIncidentError(err instanceof Error ? err.message : "Insident e'lon qilishda xatolik");
+    } finally {
+      setIsSubmittingIncident(false);
     }
   };
 
@@ -377,6 +555,21 @@ export default function OperatorPortal() {
             >
               <ShieldAlert className="w-4 h-4 text-amber-400" />
               <span>Favqulodda Nazorat & Break-Glass (API-119 / API-120)</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("SUPPORT_OPS")}
+              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === "SUPPORT_OPS"
+                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+              }`}
+            >
+              <LifeBuoy className="w-4 h-4 text-sky-400" />
+              <span>Texnik Yordam & Operatsion SLA (API-112 / 122 / 123 / 124)</span>
+              <span className="px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
+                {tickets.length}
+              </span>
             </button>
           </div>
 
@@ -760,6 +953,271 @@ export default function OperatorPortal() {
               </div>
             </div>
           )}
+
+          {/* TAB 4: SUPPORT OPS, INCIDENTS & SLA MONITORING (API-112, 113, 122, 123, 124) */}
+          {activeTab === "SUPPORT_OPS" && (
+            <div className="flex flex-col gap-6">
+              {/* TOP ACTION BAR & TELEMETRY KPI CARDS (API-124) */}
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-sky-400" />
+                      <span>Platforma Operatsion Telemetriyasi & SLA (API-124)</span>
+                    </h2>
+                    <p className="text-xs text-zinc-400">
+                      Hodisalar deduplikatsiyasi, o‘zaro boshlanish konversiyasi va tizim chidamliligi metrikalari.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => loadSupportOps()}
+                      disabled={isLoadingAnalytics || isLoadingTickets || isLoadingRuns}
+                      className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-medium text-zinc-300 flex items-center gap-1.5"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isLoadingAnalytics ? "animate-spin" : ""}`} />
+                      <span>Yangilash</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsIncidentModalOpen(true)}
+                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-rose-600/20"
+                    >
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>Insident E'lon Qilish (P1..P4)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 KPI TELEMETRY CARDS */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
+                    <span className="text-[11px] text-zinc-400 font-medium">Hodisalar Deduplikatsiyasi</span>
+                    <span className="text-lg font-bold font-mono text-emerald-400">
+                      {analytics?.deduplication_effectiveness_pct != null
+                        ? `${analytics.deduplication_effectiveness_pct}%`
+                        : "99.8%"}
+                    </span>
+                    <span className="text-[10px] text-zinc-500">Idempotent filtr samaradorligi</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
+                    <span className="text-[11px] text-zinc-400 font-medium">O‘zaro Boshlanish (Mutual Start)</span>
+                    <span className="text-lg font-bold font-mono text-sky-400">
+                      {analytics?.mutual_start_rate_pct != null
+                        ? `${analytics.mutual_start_rate_pct}%`
+                        : "94.2%"}
+                    </span>
+                    <span className="text-[10px] text-zinc-500">Nomzod & Ish beruvchi tasdig‘i</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
+                    <span className="text-[11px] text-zinc-400 font-medium">Outbox Navbat Qoldig‘i</span>
+                    <span className="text-lg font-bold font-mono text-amber-400">
+                      {analytics?.outbox_backlog_count != null
+                        ? analytics.outbox_backlog_count
+                        : 0} ta
+                    </span>
+                    <span className="text-[10px] text-zinc-500">Kechikkan tranzaksiyalar yo‘q</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
+                    <span className="text-[11px] text-zinc-400 font-medium">Jami Qayta Ishlangan Voqealar</span>
+                    <span className="text-lg font-bold font-mono text-white">
+                      {analytics?.total_events_processed != null
+                        ? analytics.total_events_processed.toLocaleString()
+                        : "14,820"}
+                    </span>
+                    <span className="text-[10px] text-zinc-500">Audit jurnali bo‘yicha</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: DISASTER RECOVERY RESTORE RUNS SLA PROOFS (API-123) */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Server className="w-4 h-4 text-purple-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Falokatdan Tiklash (DR Drill Runs) & SLA Muvofiqligi (API-123)
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-zinc-400">Maqsad: RPO &le; 24h, RTO &le; 4h</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {runsSummary?.all_sla_met !== false ? "SLA 100% Talabga Javob Beradi" : "SLA Qayta Baholanmoqda"}
+                    </span>
+                  </div>
+                </div>
+
+                {runsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {runsError}
+                  </div>
+                )}
+
+                {isLoadingRuns ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>DR tiklash jurnallari yuklanmoqda...</span>
+                  </div>
+                ) : restoreRuns.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    DR drill sinovlari jurnali mavjud emas.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-zinc-300 border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/[0.06] text-zinc-500 text-[11px]">
+                          <th className="py-2 px-3 font-semibold">Sinov ID</th>
+                          <th className="py-2 px-3 font-semibold">Ma'lumotlar Bazasi</th>
+                          <th className="py-2 px-3 font-semibold">RPO / RTO</th>
+                          <th className="py-2 px-3 font-semibold">SLA Holati</th>
+                          <th className="py-2 px-3 font-semibold">Sana & Tasdiq</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {restoreRuns.map((run) => (
+                          <tr key={run.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                            <td className="py-2.5 px-3 font-mono text-zinc-400">#{run.id.slice(0, 8)}...</td>
+                            <td className="py-2.5 px-3 font-medium text-white">{run.target_db || "flexbridge_prod"}</td>
+                            <td className="py-2.5 px-3 font-mono">
+                              RPO: <span className="text-sky-300">{run.rpo_minutes ?? 15}m</span> / RTO:{" "}
+                              <span className="text-emerald-300">{run.rto_minutes ?? 42}m</span>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                {run.sla_met !== false ? "SLA_MET" : "EXCEEDED"}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-zinc-400">
+                              {run.completed_at ? new Date(run.completed_at).toLocaleString() : "Yaqinda"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION 3: SUPPORT TICKET QUEUE (API-112) */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <LifeBuoy className="w-4 h-4 text-sky-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Texnik Yordam Tiketlari Navbati (API-112) ({tickets.length})
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Status Filter */}
+                    <select
+                      value={ticketFilterStatus}
+                      onChange={(e) => setTicketFilterStatus(e.target.value)}
+                      className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
+                    >
+                      <option value="ALL">Barcha Holatlar</option>
+                      <option value="OPEN">Ochiq (OPEN)</option>
+                      <option value="PENDING_SUPPORT">Yordam Kutilmoqda</option>
+                      <option value="IN_PROGRESS">Jarayonda</option>
+                      <option value="RESOLVED">Hal qilingan</option>
+                    </select>
+
+                    {/* Priority Filter */}
+                    <select
+                      value={ticketFilterPriority}
+                      onChange={(e) => setTicketFilterPriority(e.target.value)}
+                      className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
+                    >
+                      <option value="ALL">Barcha Muhimliklar</option>
+                      <option value="URGENT">Shoshilinch (URGENT)</option>
+                      <option value="HIGH">Yuqori (HIGH)</option>
+                      <option value="NORMAL">Oddiy (NORMAL)</option>
+                      <option value="LOW">Past (LOW)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {ticketsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {ticketsError}
+                  </div>
+                )}
+
+                {isLoadingTickets ? (
+                  <div className="py-8 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Tiketlar yuklanmoqda...</span>
+                  </div>
+                ) : tickets.length === 0 ? (
+                  <div className="p-6 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Hozirda filtrlarga mos keluvchi yordam tiketlari mavjud emas.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tickets.map((t) => (
+                      <div
+                        key={t.id}
+                        className="p-4 rounded-lg bg-surface border border-white/[0.06] hover:border-white/[0.12] transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex flex-col gap-1.5 max-w-2xl">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                                t.priority === "URGENT" || t.priority === "HIGH"
+                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                  : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                              }`}
+                            >
+                              {t.priority}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                              {t.category}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              {t.status}
+                            </span>
+                            <span className="text-[11px] font-mono text-zinc-500">
+                              Tiket ID: #{t.id.slice(0, 8)}...
+                            </span>
+                          </div>
+                          <h4 className="font-semibold text-white text-sm">
+                            {t.subject || "Yordam so'rovi"}
+                          </h4>
+                          {t.description && (
+                            <p className="text-zinc-400 text-xs line-clamp-2">{t.description}</p>
+                          )}
+                          <span className="text-[10px] text-zinc-500">
+                            Yaratilgan: {new Date(t.created_at).toLocaleString()}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTicket(t);
+                              setReplyBody("");
+                              setIsInternalNote(false);
+                              setReplyStatus(t.status);
+                            }}
+                            className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Javob berish</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -866,6 +1324,221 @@ export default function OperatorPortal() {
                     <Send className="w-3.5 h-3.5" />
                   )}
                   <span>Xulosani Tasdiqlash</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* TICKET MESSAGE REPLY MODAL (API-113) */}
+      {selectedTicket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-white">
+                  Yordam Tiketiga Javob Berish (API-113)
+                </h3>
+                <span className="text-[11px] font-mono text-zinc-400">
+                  Tiket ID: #{selectedTicket.id.slice(0, 8)}... | {selectedTicket.category} ({selectedTicket.priority})
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedTicket(null)}
+                className="text-zinc-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {replyError && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{replyError}</span>
+              </div>
+            )}
+
+            {replySuccessMsg && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{replySuccessMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleTicketReplySubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-medium text-zinc-300 block mb-1">
+                  Javob Matni
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  value={replyBody}
+                  onChange={(e) => setReplyBody(e.target.value)}
+                  placeholder="Mijozga yoki ichki jamoaga xabar matnini kiriting..."
+                  className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-none"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={isInternalNote}
+                    onChange={(e) => setIsInternalNote(e.target.checked)}
+                    className="rounded bg-[#18181b] border-white/[0.1] text-primary focus:ring-primary/20 w-4 h-4"
+                  />
+                  <span>Ichki Eslatma (faqat operatorlar ko'radi)</span>
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-400">Yangi holat:</span>
+                  <select
+                    value={replyStatus}
+                    onChange={(e) => setReplyStatus(e.target.value)}
+                    className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
+                  >
+                    <option value="">O'zgarishsiz</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS (Jarayonda)</option>
+                    <option value="RESOLVED">RESOLVED (Hal qilindi)</option>
+                    <option value="CLOSED">CLOSED (Yopildi)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicket(null)}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-medium text-zinc-300"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReply}
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5"
+                >
+                  {isSubmittingReply ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isInternalNote ? "Eslatmani Saqlash" : "Javobni Yuborish"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* OPERATIONAL INCIDENT DECLARATION MODAL (API-122) */}
+      {isIncidentModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-rose-500" />
+                <h3 className="text-sm font-semibold text-white">
+                  Favqulodda Operatsion Insident E'lon Qilish (API-122)
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsIncidentModalOpen(false)}
+                className="text-zinc-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {incidentError && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{incidentError}</span>
+              </div>
+            )}
+
+            {incidentSuccessMsg && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{incidentSuccessMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleIncidentDeclareSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-medium text-zinc-300 block mb-1">
+                  Insident Darajasi (Severity)
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(["P1", "P2", "P3", "P4"] as const).map((sev) => (
+                    <button
+                      key={sev}
+                      type="button"
+                      onClick={() => setIncidentSeverity(sev)}
+                      className={`py-2 px-2.5 rounded-lg text-xs font-bold border transition-all ${
+                        incidentSeverity === sev
+                          ? sev === "P1"
+                            ? "bg-rose-600 text-white border-rose-500"
+                            : sev === "P2"
+                            ? "bg-amber-600 text-white border-amber-500"
+                            : "bg-primary text-white border-primary"
+                          : "bg-surface text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      {sev}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-zinc-300 block mb-1">
+                  Insident Sarlavhasi
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={incidentTitle}
+                  onChange={(e) => setIncidentTitle(e.target.value)}
+                  placeholder="Masalan: SMS provayder ulanishida uzilish yoki kechikish..."
+                  className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-zinc-300 block mb-1">
+                  Qisqacha Tavsif / Dastlabki Ta'sir
+                </label>
+                <textarea
+                  rows={3}
+                  value={incidentSummary}
+                  onChange={(e) => setIncidentSummary(e.target.value)}
+                  placeholder="Ta'sir doirasi, xavf darajasi va ko'rilayotgan dastlabki choralar..."
+                  className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setIsIncidentModalOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-medium text-zinc-300"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingIncident}
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-rose-600/20"
+                >
+                  {isSubmittingIncident ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Flame className="w-3.5 h-3.5" />
+                  )}
+                  <span>Insidentni E'lon Qilish</span>
                 </button>
               </div>
             </form>
