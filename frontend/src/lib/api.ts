@@ -1,3 +1,4 @@
+import { fromBackendResume, toBackendResume } from "./resumeContract";
 export interface Opportunity {
   id: string;
   organization_id: string;
@@ -4811,7 +4812,7 @@ export async function fetchCandidateResumeDetails(): Promise<CandidateResumeDeta
   if (!res.ok) {
     throw new Error(data.message || data.error || "RESUME_DETAILS_FETCH_FAILED");
   }
-  return data as CandidateResumeDetailsResponse;
+  return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
 
 export async function saveCandidateResumeDetails(
@@ -4829,14 +4830,14 @@ export async function saveCandidateResumeDetails(
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(toBackendResume(payload)),
     cache: "no-store",
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.message || data.error || "RESUME_DETAILS_UPDATE_FAILED");
   }
-  return data as CandidateResumeDetailsResponse;
+  return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
 
 export interface CandidatePdfUploadResponse {

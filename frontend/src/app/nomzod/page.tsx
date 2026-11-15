@@ -254,7 +254,7 @@ export default function CandidateProfileHub() {
   // New work experience item draft
   const [newWorkCompany, setNewWorkCompany] = useState("");
   const [newWorkRole, setNewWorkRole] = useState("");
-  const [newWorkType, setNewWorkType] = useState("AMALIYOT");
+  const [newWorkType, setNewWorkType] = useState("INTERNSHIP");
   const [newWorkLocation, setNewWorkLocation] = useState("Toshkent");
   const [newWorkStartDate, setNewWorkStartDate] = useState("2025-09-01");
   const [newWorkEndDate, setNewWorkEndDate] = useState("");
@@ -263,7 +263,7 @@ export default function CandidateProfileHub() {
 
   // New achievement item draft
   const [newAchTitle, setNewAchTitle] = useState("");
-  const [newAchCategory, setNewAchCategory] = useState("OLIMPIADA");
+  const [newAchCategory, setNewAchCategory] = useState("OLYMPIAD");
   const [newAchIssuer, setNewAchIssuer] = useState("");
   const [newAchDate, setNewAchDate] = useState("2026-05-01");
   const [newAchDesc, setNewAchDesc] = useState("");
@@ -1722,10 +1722,10 @@ export default function CandidateProfileHub() {
                         onChange={(e) => setNewWorkType(e.target.value)}
                         className="px-2.5 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
                       >
-                        <option value="AMALIYOT">Amaliyot</option>
+                        <option value="INTERNSHIP">Amaliyot</option>
                         <option value="PART_TIME">Part-Time</option>
-                        <option value="LOYIHA">Shartnoma / Loyiha</option>
-                        <option value="FRILANS">Frilans</option>
+                        <option value="PROJECT">Shartnoma / Loyiha</option>
+                        <option value="FREELANCE">Frilans</option>
                       </select>
                       <input
                         type="date"
@@ -1828,11 +1828,11 @@ export default function CandidateProfileHub() {
                         onChange={(e) => setNewAchCategory(e.target.value)}
                         className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
                       >
-                        <option value="OLIMPIADA">Fan Olimpiadasi / ICPC</option>
+                        <option value="OLYMPIAD">Fan Olimpiadasi / ICPC</option>
                         <option value="HACKATHON">Hackathon / IT Tanlov</option>
-                        <option value="STIPENDIYA">Davlat Stipendiyasi / Grant</option>
-                        <option value="ILMIY_MAQOLA">Ilmiy Maqola / Patent</option>
-                        <option value="MUKOFOT">Faxriy Yorliq / Mukofot</option>
+                        <option value="SCHOLARSHIP">Davlat Stipendiyasi / Grant</option>
+                        <option value="PUBLICATION">Ilmiy Maqola / Patent</option>
+                        <option value="AWARD">Faxriy Yorliq / Mukofot</option>
                       </select>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
@@ -1923,7 +1923,7 @@ export default function CandidateProfileHub() {
                       onChange={(e) => setNewLangLevel(e.target.value)}
                       className="px-2.5 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
                     >
-                      <option value="ONA_TILI">Ona tili</option>
+                      <option value="NATIVE">Ona tili</option>
                       <option value="C2">C2 (Mukammal)</option>
                       <option value="C1">C1 (Ilg&apos;or)</option>
                       <option value="B2">B2 (Mustaqil)</option>
