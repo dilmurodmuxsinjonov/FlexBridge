@@ -7,6 +7,7 @@ export interface SessionData {
   user_id: string;
   roles: string[];
   expires_at: number;
+  session_id?: string;
 }
 
 const COOKIE_NAME = "flexbridge_session";
