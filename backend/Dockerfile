@@ -5,7 +5,7 @@ COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt \
     && useradd --uid 10001 --create-home app
 COPY --chown=app:app backend/ /workspace/backend/
-COPY --chown=app:app FlexBridge_1_4_schema.sql /workspace/FlexBridge_1_4_schema.sql
+COPY --chown=app:app backend/FlexBridge_1_4_schema.sql /workspace/FlexBridge_1_4_schema.sql
 COPY --chown=app:app specs/ /workspace/specs/
 USER app
 EXPOSE 8000

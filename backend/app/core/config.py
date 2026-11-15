@@ -58,7 +58,7 @@ class Settings:
     rto_hours: int = 4
 
     # Canonical specification paths
-    schema_sql_path: Path = REPO_ROOT / "FlexBridge_1_4_schema.sql"
+    schema_sql_path: Path = REPO_ROOT / "backend" / "FlexBridge_1_4_schema.sql"
     model_json_path: Path = SPECS_V1_4_DIR / "FlexBridge_model_1_4.json"
     verifier_script_path: Path = SPECS_V1_4_DIR / "verify_v1_4_schema.mjs"
     verification_report_path: Path = SPECS_V1_4_DIR / "v1_4_schema_verification.json"

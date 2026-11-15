@@ -66,7 +66,9 @@ def preflight():
             time.sleep(attempt+1)
     assert main_sha==FREEZE,'MAIN_FREEZE_CHANGED'
     assert git('branch','--show-current') not in ('main','master'),'REFUSE_MAIN_WORKSPACE'
-    protocol=ROOT/'ANTIGRAVITY_MASTER_PROTOCOL.md';assert protocol.is_file()
+    protocol=ROOT/'docs/protocols/ANTIGRAVITY_MASTER_PROTOCOL.md'
+    if not protocol.is_file():protocol=ROOT/'ANTIGRAVITY_MASTER_PROTOCOL.md'
+    assert protocol.is_file()
     assert (BASE/'CURRENT_HANDOFF.json').is_file(),'HANDOFF_SNAPSHOT_REQUIRED'
     result=subprocess.run([AGY,'models'],cwd=ROOT,capture_output=True,text=True,encoding='utf8',check=True)
     listed={line.split('\t',1)[0] for line in result.stdout.splitlines() if '\t' in line}
