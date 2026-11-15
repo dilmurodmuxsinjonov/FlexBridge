@@ -20,7 +20,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
-import { isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
+import { isEmployerOnlyRoles, isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
 
 type WorkspacePersona = "PUBLIC" | "CANDIDATE" | "EMPLOYER" | "UNIVERSITY" | "OPERATOR";
 
@@ -133,7 +133,7 @@ function resolvePersonaFromRouteAndUser(
   user: AuthUser | null
 ): WorkspacePersona {
   if (pathname?.startsWith("/nomzod") || pathname?.startsWith("/talaba")) return "CANDIDATE";
-  if (pathname?.startsWith("/employer")) return "EMPLOYER";
+  if (pathname?.startsWith("/employer") || pathname?.startsWith("/korxona")) return "EMPLOYER";
   if (pathname?.startsWith("/university")) return "UNIVERSITY";
   if (pathname?.startsWith("/operator")) return "OPERATOR";
 
@@ -189,14 +189,28 @@ export default function Navbar() {
   const isAuthPage =
     pathname === "/kirish" ||
     pathname === "/royxatdan-otish" ||
-    Boolean(pathname?.startsWith("/talaba/"));
+    Boolean(pathname?.startsWith("/talaba/")) ||
+    Boolean(pathname?.startsWith("/korxona/"));
   const personaKey = resolvePersonaFromRouteAndUser(pathname, currentUser);
   const theme = PERSONA_THEMES[personaKey];
   const userDashboard = currentUser ? getDashboardForRoles(currentUser.roles) : null;
-  const hidePortalSwitcher = personaKey === "CANDIDATE" || isStudentOnlyUser(currentUser);
-  const loginHref = personaKey === "CANDIDATE" ? "/talaba/kirish" : "/kirish";
+  const hidePortalSwitcher =
+    personaKey === "CANDIDATE" ||
+    isStudentOnlyUser(currentUser) ||
+    personaKey === "EMPLOYER" ||
+    Boolean(currentUser && isEmployerOnlyRoles(currentUser.roles));
+  const loginHref =
+    personaKey === "CANDIDATE"
+      ? "/talaba/kirish"
+      : personaKey === "EMPLOYER"
+        ? "/korxona/kirish"
+        : "/kirish";
   const registerHref =
-    personaKey === "CANDIDATE" ? "/talaba/royxatdan-otish" : "/royxatdan-otish";
+    personaKey === "CANDIDATE"
+      ? "/talaba/royxatdan-otish"
+      : personaKey === "EMPLOYER"
+        ? "/korxona/royxatdan-otish"
+        : "/royxatdan-otish";
 
   const handleLogout = async () => {
     await logoutUser();

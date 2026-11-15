@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import {
   Users,
   Briefcase,
@@ -359,17 +360,22 @@ export default function EmployerPortal() {
     }
   }, []);
 
-  // Load session on mount
+  // Load session on mount and sync across portals
   useEffect(() => {
     let isMounted = true;
-    fetchAuthMe().then((user) => {
-      if (isMounted) {
-        setCurrentUser(user);
-        setIsAuthLoading(false);
-      }
-    });
+    const syncSession = () => {
+      fetchAuthMe().then((user) => {
+        if (isMounted) {
+          setCurrentUser(user);
+          setIsAuthLoading(false);
+        }
+      });
+    };
+    syncSession();
+    window.addEventListener("flexbridge:auth-changed", syncSession);
     return () => {
       isMounted = false;
+      window.removeEventListener("flexbridge:auth-changed", syncSession);
     };
   }, []);
 
@@ -1113,14 +1119,28 @@ export default function EmployerPortal() {
               Ushbu bo‘lim tashkilot HR vakillari va rahbarlari uchun mo‘ljallangan. Tashkilotingiz tahlillari va nomzodlarini boshqarish uchun tizimga kiring.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm"
-          >
-            <LogIn className="w-4 h-4" />
-            <span>HR hisobi bilan kirish</span>
-          </button>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsLoginModalOpen(true)}
+              className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>HR hisobi bilan kirish</span>
+            </button>
+            <Link
+              href="/korxona/kirish"
+              className="px-4 py-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-300 transition-all"
+            >
+              Korxona alohida kirishi
+            </Link>
+            <Link
+              href="/korxona/royxatdan-otish"
+              className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-xs font-semibold text-zinc-200 transition-all"
+            >
+              Korxona vakili ro‘yxatdan o‘tish
+            </Link>
+          </div>
         </section>
       )}
 
@@ -4034,8 +4054,9 @@ export default function EmployerPortal() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
-        title="Ish Beruvchi Tizimiga Kirish"
-        subtitle="Tashkilot HR yoki Rahbar hisob ma’lumotlaringizni kiriting"
+        requiredPortal="EMPLOYER"
+        title="Korxona va HR Tizimiga Kirish"
+        subtitle="Faqat ish beruvchi (OWNER, HR, Mentor, Billing) hisoblari uchun ajratilgan kirish"
       />
 
       {/* CREATE OPPORTUNITY MODAL */}

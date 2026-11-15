@@ -67,6 +67,7 @@ TEST_SCRIPTS = [
     "scripts/test_university_timetable_staging.py",
     "scripts/test_internship_documents_eimzo_staging.py",
     "scripts/test_student_isolated_login_staging.py",
+    "scripts/test_employer_isolated_login_staging.py",
 ]
 
 def main():

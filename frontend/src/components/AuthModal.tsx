@@ -206,6 +206,18 @@ export default function AuthModal({
             </Link>
           </div>
         )}
+        {requiredPortal === "EMPLOYER" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>Korxona vakili hisobingiz yo‘qmi?</span>
+            <Link
+              href="/korxona/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Korxona vakili sifatida ulanish →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
