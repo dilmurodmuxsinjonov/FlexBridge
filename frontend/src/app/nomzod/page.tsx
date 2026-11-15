@@ -172,6 +172,8 @@ export default function CandidateProfileHub() {
   const [enrEndDate, setEnrEndDate] = useState<string>("2027-06-30");
   const [enrStudentRef, setEnrStudentRef] = useState<string>("");
   const [enrEvidenceNote, setEnrEvidenceNote] = useState<string>("");
+  // Proof of studies (dean-office reference PDF) - without it the request never reaches the university.
+  const [enrEvidenceFile, setEnrEvidenceFile] = useState<File | null>(null);
   const [isSubmittingEnrollment, setIsSubmittingEnrollment] = useState(false);
   const [enrSuccessMsg, setEnrSuccessMsg] = useState<string | null>(null);
   const [enrErrorMsg, setEnrErrorMsg] = useState<string | null>(null);
@@ -599,26 +601,48 @@ export default function CandidateProfileHub() {
       setEnrErrorMsg("OTM, mutaxassislik/yo‘nalish va boshlanish sanasi to‘ldirilishi shart.");
       return;
     }
+    if (!enrEvidenceFile) {
+      setEnrErrorMsg("Talabalik ma’lumotnomasini (PDF) biriktiring — OTM xodimi shu hujjat bo‘yicha tasdiqlaydi.");
+      return;
+    }
+    if (enrEvidenceFile.size > 10 * 1024 * 1024) {
+      setEnrErrorMsg("PDF hajmi 10 MB dan oshmasligi kerak.");
+      return;
+    }
 
     setIsSubmittingEnrollment(true);
     setEnrSuccessMsg(null);
     setEnrErrorMsg(null);
 
     try {
+      const contentBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Faylni o‘qib bo‘lmadi."));
+        reader.readAsDataURL(enrEvidenceFile);
+      });
+      const uploaded = await uploadCandidatePdfFile({
+        filename: enrEvidenceFile.name,
+        purpose: "CERTIFICATE",
+        title: "Talabalik ma’lumotnomasi",
+        content_base64: contentBase64,
+      });
+      const note = enrEvidenceNote.trim();
       await createCandidateEnrollment({
         institution_id: instId,
         program: enrProgram.trim(),
         start_date: enrStartDate,
         end_date: enrEndDate || null,
         student_ref: enrStudentRef.trim() || null,
-        evidence_note: enrEvidenceNote.trim() || "Talabalik arizasi",
-        file_ids: [],
+        evidence_note: note.length >= 15 ? note : "Talabalik ma’lumotnomasi ilova qilindi (dekanat tomonidan berilgan).",
+        file_ids: [uploaded.file_id],
       });
 
-      setEnrSuccessMsg("Talabalik arizasi muvaffaqiyatli topshirildi va tekshiruv navbatiga kiritildi!");
+      setEnrSuccessMsg("Ariza yuborildi. OTM xodimi ma’lumotnomangizni tekshirib, talabaligingizni tasdiqlaydi.");
       setEnrProgram("");
       setEnrStudentRef("");
       setEnrEvidenceNote("");
+      setEnrEvidenceFile(null);
       await loadEnrollmentsData();
       setTimeout(() => setEnrSuccessMsg(null), 5000);
     } catch (err: unknown) {
@@ -2762,6 +2786,22 @@ export default function CandidateProfileHub() {
                         placeholder="Masalan: 3912011005"
                         className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-primary/50"
                       />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="enr-evidence" className="text-xs font-medium text-zinc-300">
+                        Talabalik ma’lumotnomasi (PDF, majburiy)
+                      </label>
+                      <input
+                        id="enr-evidence"
+                        type="file"
+                        accept=".pdf,application/pdf"
+                        onChange={(e) => setEnrEvidenceFile(e.target.files?.[0] ?? null)}
+                        className="text-xs text-zinc-300 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-white/[0.08] file:text-zinc-200"
+                      />
+                      <span className="text-[11px] text-zinc-500">
+                        Dekanatdan olingan ma’lumotnoma yoki talaba guvohnomasi nusxasi. OTM xodimi shu hujjat bo‘yicha tasdiqlaydi.
+                      </span>
                     </div>
 
                     <div className="flex flex-col gap-1">
