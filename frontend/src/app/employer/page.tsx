@@ -81,6 +81,10 @@ import {
   OrgEntitlementsResponse,
   OrgBillingOverviewResponse,
   OrgOrderItem,
+  searchEmployerCandidates,
+  CandidateSearchItem,
+  CandidateSearchParams,
+  CandidateSearchResponse,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -150,7 +154,7 @@ export default function EmployerPortal() {
   // -------------------------------------------------------------------------
   // FB-162, FB-168 & FB-174: Workspace Tabs & Hub States
   // -------------------------------------------------------------------------
-  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB">("KANBAN");
+  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB">("KANBAN");
   const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS">("QUEUE");
 
   // -------------------------------------------------------------------------
@@ -227,6 +231,80 @@ export default function EmployerPortal() {
   const [isSubmittingRevoke, setIsSubmittingRevoke] = useState(false);
   const [revokeError, setRevokeError] = useState<string | null>(null);
   const [revokeSuccess, setRevokeSuccess] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // Milestone 2: Nomzodlar Qidiruv Markazi (Search Hub - API-087)
+  // -------------------------------------------------------------------------
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState("");
+  const [skillMatchMode, setSkillMatchMode] = useState<"ANY" | "ALL">("ANY");
+  const [minSkillLevel, setMinSkillLevel] = useState<"" | "BEGINNER" | "INTERMEDIATE" | "ADVANCED">("");
+  const [verifiedSkillsOnly, setVerifiedSkillsOnly] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [experienceMinMonths, setExperienceMinMonths] = useState<number | "">("");
+  const [selectedShift, setSelectedShift] = useState<"" | "MORNING" | "AFTERNOON" | "EVENING" | "FULL_DAY" | "FLEXIBLE">("");
+  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>([]);
+  const [selectedOpportunityId, setSelectedOpportunityId] = useState("");
+  const [verifiedStudentOnly, setVerifiedStudentOnly] = useState(false);
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<CandidateSearchItem[]>([]);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [searchFacets, setSearchFacets] = useState<CandidateSearchResponse["facets"] | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [selectedCandidateDetail, setSelectedCandidateDetail] = useState<CandidateSearchItem | null>(null);
+  const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
+
+  const handleSearch = useCallback(
+    async (cursor?: string) => {
+      setIsLoadingSearch(true);
+      setSearchError(null);
+      try {
+        const res = await searchEmployerCandidates({
+          q: searchQuery.trim() || undefined,
+          skills: selectedSkills.length > 0 ? selectedSkills : undefined,
+          skill_match_mode: skillMatchMode,
+          min_skill_level: minSkillLevel || undefined,
+          verified_skills_only: verifiedSkillsOnly,
+          region: selectedRegion || undefined,
+          experience_min_months: experienceMinMonths !== "" ? Number(experienceMinMonths) : undefined,
+          shift: selectedShift || undefined,
+          weekdays: selectedWeekdays.length > 0 ? selectedWeekdays : undefined,
+          opportunity_id: selectedOpportunityId.trim() || undefined,
+          verified_student_only: verifiedStudentOnly,
+          limit: 20,
+          cursor: cursor || undefined,
+        });
+
+        if (cursor) {
+          setSearchResults((prev) => [...prev, ...res.items]);
+        } else {
+          setSearchResults(res.items);
+        }
+        setSearchTotal(res.total);
+        setSearchFacets(res.facets);
+        setNextCursor(res.next_cursor || null);
+      } catch (err: unknown) {
+        setSearchError(err instanceof Error ? err.message : "Nomzodlarni qidirishda xatolik yuz berdi");
+      } finally {
+        setIsLoadingSearch(false);
+      }
+    },
+    [
+      searchQuery,
+      selectedSkills,
+      skillMatchMode,
+      minSkillLevel,
+      verifiedSkillsOnly,
+      selectedRegion,
+      experienceMinMonths,
+      selectedShift,
+      selectedWeekdays,
+      selectedOpportunityId,
+      verifiedStudentOnly,
+    ]
+  );
 
   const loadDashboard = useCallback(async (targetOrgIdInput: string) => {
     if (!targetOrgIdInput.trim()) return;
@@ -1173,6 +1251,28 @@ export default function EmployerPortal() {
             >
               <CreditCard className="w-4 h-4" />
               <span>To‘lovlar, Tariflar & Kvotalar</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMainTab("SEARCH_HUB");
+                if (searchResults.length === 0 && !isLoadingSearch) {
+                  handleSearch();
+                }
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                activeMainTab === "SEARCH_HUB"
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Search className="w-4 h-4" />
+              <span>Nomzodlar Qidiruv Markazi</span>
+              {searchTotal > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-muted text-primary-light">
+                  {searchTotal}
+                </span>
+              )}
             </button>
           </div>
 
@@ -2635,6 +2735,918 @@ export default function EmployerPortal() {
                 )}
               </div>
             </section>
+          )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* Milestone 2: NOMZODLAR QIDIRUV MARKAZI (API-087) */}
+          {/* ----------------------------------------------------------------- */}
+          {activeMainTab === "SEARCH_HUB" && (
+            <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-6 shadow-lg">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      Nomzodlar Qidiruv Markazi
+                    </span>
+                    <span className="text-zinc-500 text-xs font-mono">• API-087 • O‘zR MK 118-modda</span>
+                  </div>
+                  <h2 className="text-lg font-bold text-white font-heading">
+                    Iste’dodlar Bazasi & Aqlli Moslashtirish
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Ko‘nikmalar (ANY/ALL), hududlar va talabalarning dars jadvali bo‘sh vaqtlari bo‘yicha aqlli saralash.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSearch()}
+                    disabled={isLoadingSearch}
+                    className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-primary/20 transition-all disabled:opacity-50"
+                  >
+                    {isLoadingSearch ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    <span>Qidirish</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Telemetry Metric Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl bg-surface-lowest border border-white/[0.06] flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-zinc-400 text-xs">
+                    <span>Jami topilganlar</span>
+                    <Users className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <div className="text-xl font-bold text-white font-mono">{searchTotal}</div>
+                  <div className="text-[10px] text-zinc-500">Filtrlarga mos keluvchi nomzodlar</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-surface-lowest border border-white/[0.06] flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-zinc-400 text-xs">
+                    <span>Ko‘nikma bo‘yicha mos</span>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="text-xl font-bold text-amber-400 font-mono">
+                    {searchResults.filter((c) => c.skills.length >= (selectedSkills.length || 1)).length}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">Talab qilingan ko‘nikmalarga ega</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-surface-lowest border border-white/[0.06] flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-zinc-400 text-xs">
+                    <span>100% Jadval mosligi</span>
+                    <Clock className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="text-xl font-bold text-emerald-400 font-mono">
+                    {searchResults.filter((c) => c.schedule_match?.score_percent === 100).length}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">Smena va kunlari to‘liq mos</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-surface-lowest border border-white/[0.06] flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-zinc-400 text-xs">
+                    <span>HEMIS Tasdiqlangan</span>
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <div className="text-xl font-bold text-purple-400 font-mono">
+                    {searchResults.filter((c) => c.university?.status === "VERIFIED").length}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">OTM talabasi maqomi tasdiqlangan</div>
+                </div>
+              </div>
+
+              {/* Filter Controls Panel */}
+              <div className="p-4 rounded-xl bg-surface-lowest border border-white/[0.08] flex flex-col gap-4">
+                {/* Search Text Row */}
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSearch();
+                      }}
+                      placeholder="Lavozim, sohasi, kalit so‘zlar yoki nomzod ismi..."
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-card border border-white/[0.08] text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+
+                  {/* Region Select */}
+                  <div className="w-full md:w-56">
+                    <select
+                      value={selectedRegion}
+                      onChange={(e) => setSelectedRegion(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-surface-card border border-white/[0.08] text-xs text-zinc-300 focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="">Barcha hududlar</option>
+                      {[
+                        "Toshkent shahri",
+                        "Toshkent viloyati",
+                        "Samarqand",
+                        "Buxoro",
+                        "Andijon",
+                        "Farg'ona",
+                        "Namangan",
+                        "Qashqadaryo",
+                        "Surxondaryo",
+                        "Jizzax",
+                        "Sirdaryo",
+                        "Navoiy",
+                        "Xorazm",
+                        "Qoraqalpog'iston Respublikasi",
+                      ].map((reg) => (
+                        <option key={reg} value={reg}>
+                          {reg}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Reset Filters Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedSkills([]);
+                      setSkillInput("");
+                      setSkillMatchMode("ANY");
+                      setMinSkillLevel("");
+                      setVerifiedSkillsOnly(false);
+                      setSelectedRegion("");
+                      setExperienceMinMonths("");
+                      setSelectedShift("");
+                      setSelectedWeekdays([]);
+                      setSelectedOpportunityId("");
+                      setVerifiedStudentOnly(false);
+                      setSearchResults([]);
+                      setSearchTotal(0);
+                    }}
+                    className="px-3 py-2.5 rounded-xl bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white text-xs font-semibold transition-all"
+                  >
+                    Tozalash
+                  </button>
+                </div>
+
+                {/* Skills Filter Row */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.06]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      Ko‘nikmalar bo‘yicha filtrlash:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-zinc-400">Moslik rejimi:</span>
+                      <div className="inline-flex rounded-lg p-0.5 bg-surface-card border border-white/[0.08]">
+                        <button
+                          type="button"
+                          onClick={() => setSkillMatchMode("ANY")}
+                          className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                            skillMatchMode === "ANY"
+                              ? "bg-primary text-white"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          Kamida bittasi (ANY)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSkillMatchMode("ALL")}
+                          className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                            skillMatchMode === "ALL"
+                              ? "bg-primary text-white"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          Barchasi (ALL)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Selected Skill Tags */}
+                  {selectedSkills.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {selectedSkills.map((sk) => (
+                        <span
+                          key={sk}
+                          className="px-2.5 py-1 rounded-lg bg-primary/20 border border-primary/30 text-primary-light text-xs font-medium flex items-center gap-1.5"
+                        >
+                          <span>{sk}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSkills((prev) => prev.filter((s) => s !== sk))}
+                            className="text-primary-light/70 hover:text-white"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Popular Skill Chips & Add Input */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      "python",
+                      "fastapi",
+                      "react",
+                      "typescript",
+                      "postgresql",
+                      "docker",
+                      "django",
+                      "node.js",
+                      "android",
+                      "flutter",
+                      "sql",
+                      "figma",
+                    ].map((ps) => {
+                      const isSelected = selectedSkills.includes(ps);
+                      return (
+                        <button
+                          key={ps}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSkills((prev) =>
+                              isSelected ? prev.filter((s) => s !== ps) : [...prev, ps]
+                            );
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                            isSelected
+                              ? "bg-primary text-white border border-primary"
+                              : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          {isSelected ? `✓ ${ps}` : `+ ${ps}`}
+                        </button>
+                      );
+                    })}
+
+                    <div className="flex items-center gap-1 ml-auto">
+                      <input
+                        type="text"
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && skillInput.trim()) {
+                            const val = skillInput.trim().toLowerCase();
+                            if (!selectedSkills.includes(val)) {
+                              setSelectedSkills((prev) => [...prev, val]);
+                            }
+                            setSkillInput("");
+                          }
+                        }}
+                        placeholder="Yangi ko‘nikma..."
+                        className="px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary w-32"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (skillInput.trim()) {
+                            const val = skillInput.trim().toLowerCase();
+                            if (!selectedSkills.includes(val)) {
+                              setSelectedSkills((prev) => [...prev, val]);
+                            }
+                            setSkillInput("");
+                          }
+                        }}
+                        className="px-2 py-1 rounded-lg bg-surface-card hover:bg-surface border border-white/[0.08] text-xs text-zinc-300 font-semibold"
+                      >
+                        Qo‘shish
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Level & Verification checkboxes */}
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="min-skill-level" className="text-xs text-zinc-400">
+                        Minimal daraja:
+                      </label>
+                      <select
+                        id="min-skill-level"
+                        value={minSkillLevel}
+                        onChange={(e) => setMinSkillLevel(e.target.value as any)}
+                        className="px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-zinc-300 focus:outline-none focus:border-primary"
+                      >
+                        <option value="">Barchasi</option>
+                        <option value="BEGINNER">Boshlang‘ich (BEGINNER)</option>
+                        <option value="INTERMEDIATE">O‘rta (INTERMEDIATE)</option>
+                        <option value="ADVANCED">Ilg‘or (ADVANCED)</option>
+                      </select>
+                    </div>
+
+                    <label className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={verifiedSkillsOnly}
+                        onChange={(e) => setVerifiedSkillsOnly(e.target.checked)}
+                        className="rounded border-white/[0.2] bg-surface-card text-primary focus:ring-0"
+                      />
+                      <span>Faqat tasdiqlangan ko‘nikmalar</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={verifiedStudentOnly}
+                        onChange={(e) => setVerifiedStudentOnly(e.target.checked)}
+                        className="rounded border-white/[0.2] bg-surface-card text-primary focus:ring-0"
+                      />
+                      <span>Faqat HEMIS tasdiqlangan talabalar</span>
+                    </label>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      <label htmlFor="exp-min" className="text-xs text-zinc-400">
+                        Minimal tajriba (oy):
+                      </label>
+                      <input
+                        id="exp-min"
+                        type="number"
+                        min="0"
+                        max="240"
+                        value={experienceMinMonths}
+                        onChange={(e) =>
+                          setExperienceMinMonths(e.target.value ? Number(e.target.value) : "")
+                        }
+                        placeholder="0"
+                        className="w-16 px-2 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white text-center focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Smart Schedule Matching Section */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.06]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                      Dars Jadvali & Smena bo‘yicha saralash (O‘zR MK 118):
+                    </span>
+                    {selectedShift && (
+                      <span className="text-[11px] text-emerald-400 font-mono">
+                        Tanlangan smena: {selectedShift}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Shift Presets */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-zinc-500">Smena:</span>
+                    {[
+                      { id: "MORNING", label: "Ertalabki (08:00 - 13:00)" },
+                      { id: "AFTERNOON", label: "Tushdan keyingi (13:00 - 18:00)" },
+                      { id: "EVENING", label: "Kechki (18:00 - 22:00)" },
+                      { id: "FULL_DAY", label: "To‘liq kun (09:00 - 18:00)" },
+                      { id: "FLEXIBLE", label: "Moslashuvchan" },
+                    ].map((sh) => {
+                      const isSelected = selectedShift === sh.id;
+                      return (
+                        <button
+                          key={sh.id}
+                          type="button"
+                          onClick={() => setSelectedShift(isSelected ? "" : (sh.id as any))}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                            isSelected
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                              : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          {isSelected ? `✓ ${sh.label}` : sh.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Weekday Selector & Vacancy ID matcher */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <span className="text-xs text-zinc-500">Bo‘sh kunlar:</span>
+                    {[
+                      { id: 1, name: "Dushanba" },
+                      { id: 2, name: "Seshanba" },
+                      { id: 3, name: "Chorshanba" },
+                      { id: 4, name: "Payshanba" },
+                      { id: 5, name: "Juma" },
+                      { id: 6, name: "Shanba" },
+                      { id: 7, name: "Yakshanba" },
+                    ].map((w) => {
+                      const isSelected = selectedWeekdays.includes(w.id);
+                      return (
+                        <button
+                          key={w.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedWeekdays((prev) =>
+                              isSelected ? prev.filter((d) => d !== w.id) : [...prev, w.id]
+                            )
+                          }
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                            isSelected
+                              ? "bg-primary text-white border border-primary"
+                              : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          {w.name}
+                        </button>
+                      );
+                    })}
+
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <label htmlFor="match-opp" className="text-xs text-zinc-400">
+                        Vakansiya ID:
+                      </label>
+                      <input
+                        id="match-opp"
+                        type="text"
+                        value={selectedOpportunityId}
+                        onChange={(e) => setSelectedOpportunityId(e.target.value)}
+                        placeholder="Vakansiya UUID (ixtiyoriy)..."
+                        className="w-48 px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {searchError && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{searchError}</span>
+                </div>
+              )}
+
+              {/* Results Section */}
+              {isLoadingSearch ? (
+                <div className="py-16 flex flex-col items-center justify-center gap-3 text-zinc-500 text-xs">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <span>Iste’dodlar bazasi va jadval muvofiqligi tahlil qilinmoqda...</span>
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="py-16 text-center text-zinc-500 flex flex-col items-center gap-3">
+                  <Search className="w-10 h-10 text-zinc-600" />
+                  <p className="text-sm font-semibold text-zinc-300">
+                    {searchTotal === 0 && !searchQuery && selectedSkills.length === 0
+                      ? "Qidiruvni boshlash uchun yuqoridagi 'Qidirish' tugmasini bosing yoki filtrlarni tanlang."
+                      : "Ko‘rsatilgan filtrlarga mos keluvchi nomzodlar topilmadi."}
+                  </p>
+                  <p className="text-xs text-zinc-500 max-w-md">
+                    Ko‘nikmalar sonini kamaytirish yoki hudud/smena bo‘yicha kengroq parametrlarni tanlab ko‘ring.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span>
+                      Topilgan nomzodlar: <strong className="text-white">{searchTotal}</strong> ta
+                    </span>
+                    {searchFacets?.regions && Object.keys(searchFacets.regions).length > 0 && (
+                      <span className="text-zinc-500">
+                        Hududlar:{" "}
+                        {Object.entries(searchFacets.regions)
+                          .map(([r, c]) => `${r} (${c})`)
+                          .slice(0, 3)
+                          .join(", ")}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Candidate Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {searchResults.map((cand) => {
+                      const matchScore = cand.schedule_match?.score_percent ?? 100;
+                      return (
+                        <div
+                          key={cand.candidate_id}
+                          className="p-5 rounded-2xl bg-surface-lowest border border-white/[0.08] hover:border-white/[0.16] transition-all flex flex-col justify-between gap-4 group"
+                        >
+                          <div className="flex flex-col gap-3">
+                            {/* Candidate Header */}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-primary/30 to-blue-500/30 border border-white/[0.1] flex items-center justify-center text-white font-bold text-sm">
+                                  {cand.display_name.slice(0, 2).toUpperCase()}
+                                </div>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-white text-sm">
+                                      {cand.display_name}
+                                    </h3>
+                                    {cand.university?.status === "VERIFIED" && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                        <ShieldCheck className="w-3 h-3" />
+                                        HEMIS
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-primary-light font-medium">
+                                    {cand.headline || "Dasturchi / Mutaxassis"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Schedule Match Badge */}
+                              <div className="flex flex-col items-end">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 ${
+                                    matchScore === 100
+                                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                      : matchScore >= 70
+                                      ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                  }`}
+                                >
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  {matchScore}% Mos
+                                </span>
+                                <span className="text-[9px] text-zinc-500 mt-0.5">O‘zR MK 118</span>
+                              </div>
+                            </div>
+
+                            {/* Meta info: Region, Experience, University */}
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
+                              {cand.region && (
+                                <span className="flex items-center gap-1 text-zinc-300">
+                                  <MapPin className="w-3.5 h-3.5 text-zinc-500" />
+                                  {cand.region}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 text-zinc-300">
+                                <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                                {cand.experience_months > 0
+                                  ? `${cand.experience_months} oy tajriba`
+                                  : "Tajribasiz / Yangi"}
+                              </span>
+                              {cand.university && (
+                                <span className="flex items-center gap-1 text-purple-300 truncate max-w-xs">
+                                  <GraduationCap className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                                  <span className="truncate">
+                                    {cand.university.institution_name} ({cand.university.program})
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Bio excerpt */}
+                            {cand.bio && (
+                              <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                                {cand.bio}
+                              </p>
+                            )}
+
+                            {/* Skills Pills */}
+                            {cand.skills && cand.skills.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                {cand.skills.slice(0, 6).map((sk) => (
+                                  <span
+                                    key={sk.skill_id}
+                                    className={`px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 ${
+                                      sk.verified
+                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        : "bg-surface-card text-zinc-300 border border-white/[0.08]"
+                                    }`}
+                                  >
+                                    <span>{sk.name_uz || sk.code}</span>
+                                    {sk.level && (
+                                      <span className="text-[9px] text-zinc-500 uppercase">
+                                        • {sk.level.slice(0, 3)}
+                                      </span>
+                                    )}
+                                    {sk.verified && <CheckCircle2 className="w-2.5 h-2.5" />}
+                                  </span>
+                                ))}
+                                {cand.skills.length > 6 && (
+                                  <span className="text-[10px] text-zinc-500">
+                                    +{cand.skills.length - 6} ta ko‘nikma
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Schedule Summary Bar */}
+                            <div className="p-2.5 rounded-xl bg-surface-card/60 border border-white/[0.06] flex flex-col gap-1.5 text-xs">
+                              <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                                <span className="flex items-center gap-1 text-zinc-300">
+                                  <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                                  Haftalik bo‘sh vaqt:
+                                </span>
+                                <span className="font-mono text-emerald-400 font-semibold">
+                                  {cand.schedule_summary.total_weekly_hours} soat/hafta
+                                </span>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-1">
+                                {cand.schedule_summary.free_weekdays.map((w) => (
+                                  <span
+                                    key={w}
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] text-zinc-300 border border-white/[0.06]"
+                                  >
+                                    {
+                                      {
+                                        1: "Dush",
+                                        2: "Sesh",
+                                        3: "Chor",
+                                        4: "Pay",
+                                        5: "Jum",
+                                        6: "Shan",
+                                        7: "Yak",
+                                      }[w]
+                                    }
+                                  </span>
+                                ))}
+                                {cand.schedule_summary.available_shifts.map((sh) => (
+                                  <span
+                                    key={sh}
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  >
+                                    {sh}
+                                  </span>
+                                ))}
+                              </div>
+
+                              {cand.schedule_match?.details && (
+                                <span className="text-[10px] text-zinc-400 italic">
+                                  {cand.schedule_match.details}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedCandidateDetail(cand);
+                                setIsCandidateModalOpen(true);
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Batafsil ma’lumot</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCreateModalOpen(true);
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-primary/20"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              <span>Vakansiyaga taklif qilish</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Keyset Pagination Load More */}
+                  {nextCursor && (
+                    <div className="py-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleSearch(nextCursor)}
+                        disabled={isLoadingSearch}
+                        className="px-5 py-2.5 rounded-xl bg-surface-card hover:bg-surface border border-white/[0.08] text-xs font-semibold text-white transition-all disabled:opacity-50"
+                      >
+                        {isLoadingSearch ? "Yuklanmoqda..." : "Keyingi nomzodlarni yuklash"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* CANDIDATE DETAIL MODAL */}
+          {isCandidateModalOpen && selectedCandidateDetail && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            >
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/[0.1] bg-[#121214] p-6 shadow-2xl flex flex-col gap-5">
+                {/* Modal Header */}
+                <div className="flex items-start justify-between border-b border-white/[0.08] pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary/30 to-blue-500/30 border border-white/[0.1] flex items-center justify-center text-white font-bold text-base">
+                      {selectedCandidateDetail.display_name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base font-bold text-white font-heading">
+                          {selectedCandidateDetail.display_name}
+                        </h2>
+                        {selectedCandidateDetail.university?.status === "VERIFIED" && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            HEMIS Tasdiqlangan
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-primary-light">
+                        {selectedCandidateDetail.headline}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCandidateModalOpen(false);
+                      setSelectedCandidateDetail(null);
+                    }}
+                    className="rounded-lg p-1 text-zinc-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Profile Overview */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06]">
+                    <span className="text-zinc-500 block">Hudud:</span>
+                    <span className="text-white font-semibold mt-0.5 block">
+                      {selectedCandidateDetail.region || "Ko‘rsatilmagan"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06]">
+                    <span className="text-zinc-500 block">Ish tajribasi:</span>
+                    <span className="text-white font-semibold mt-0.5 block">
+                      {selectedCandidateDetail.experience_months} oy
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06]">
+                    <span className="text-zinc-500 block">Rezyume (CV):</span>
+                    <span className="text-white font-semibold mt-0.5 block">
+                      {selectedCandidateDetail.has_cv ? "Mavjud" : "Yuklanmagan"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* University Education */}
+                {selectedCandidateDetail.university && (
+                  <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/15 flex flex-col gap-1 text-xs">
+                    <span className="text-purple-400 font-semibold flex items-center gap-1.5">
+                      <GraduationCap className="w-4 h-4" />
+                      Oliy Ta’lim Muassasasi & Ta’lim Yo‘nalishi:
+                    </span>
+                    <div className="text-white font-semibold mt-1">
+                      {selectedCandidateDetail.university.institution_name}
+                    </div>
+                    <div className="text-zinc-400">
+                      Yo‘nalish: {selectedCandidateDetail.university.program} • Maqom:{" "}
+                      <span className="text-emerald-400 font-medium">
+                        {selectedCandidateDetail.university.status}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bio */}
+                {selectedCandidateDetail.bio && (
+                  <div className="flex flex-col gap-1.5 text-xs">
+                    <span className="font-semibold text-zinc-300">Nomzod haqida:</span>
+                    <p className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06] text-zinc-400 leading-relaxed">
+                      {selectedCandidateDetail.bio}
+                    </p>
+                  </div>
+                )}
+
+                {/* Skills Matrix */}
+                <div className="flex flex-col gap-2 text-xs">
+                  <span className="font-semibold text-zinc-300">Ko‘nikmalar & Sertifikatlar:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCandidateDetail.skills.map((sk) => (
+                      <div
+                        key={sk.skill_id}
+                        className={`p-2 rounded-xl flex items-center justify-between gap-2 border ${
+                          sk.verified
+                            ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                            : "bg-surface-lowest text-zinc-300 border-white/[0.06]"
+                        }`}
+                      >
+                        <span className="font-semibold">{sk.name_uz || sk.code}</span>
+                        <span className="text-[10px] text-zinc-400 uppercase">({sk.level})</span>
+                        {sk.verified && (
+                          <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Tasdiqlangan
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Weekly Availability Schedule Table */}
+                <div className="flex flex-col gap-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-zinc-300 flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-emerald-400" />
+                      Haftalik Bo‘sh Vaqt Jadvali (Darsdan bo‘sh soatlar):
+                    </span>
+                    <span className="text-emerald-400 font-mono font-semibold">
+                      Jami: {selectedCandidateDetail.schedule_summary.total_weekly_hours} soat/hafta
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-surface-lowest text-zinc-400 border-b border-white/[0.06]">
+                        <tr>
+                          <th className="py-2 px-3">Hafta kuni</th>
+                          <th className="py-2 px-3">Boshlanish vaqti</th>
+                          <th className="py-2 px-3">Tugash vaqti</th>
+                          <th className="py-2 px-3">Davomiyligi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.06] text-zinc-300">
+                        {selectedCandidateDetail.schedule_summary.rules.length > 0 ? (
+                          selectedCandidateDetail.schedule_summary.rules.map((rule, idx) => {
+                            const dayName =
+                              {
+                                1: "Dushanba",
+                                2: "Seshanba",
+                                3: "Chorshanba",
+                                4: "Payshanba",
+                                5: "Juma",
+                                6: "Shanba",
+                                7: "Yakshanba",
+                              }[rule.weekday] || `Kun ${rule.weekday}`;
+                            const startH = Math.floor(rule.start_minute / 60)
+                              .toString()
+                              .padStart(2, "0");
+                            const startM = (rule.start_minute % 60).toString().padStart(2, "0");
+                            const endH = Math.floor(rule.end_minute / 60)
+                              .toString()
+                              .padStart(2, "0");
+                            const endM = (rule.end_minute % 60).toString().padStart(2, "0");
+                            const durationH = (
+                              Math.round(((rule.end_minute - rule.start_minute) / 60) * 10) / 10
+                            ).toFixed(1);
+
+                            return (
+                              <tr key={idx} className="hover:bg-white/[0.02]">
+                                <td className="py-2 px-3 font-semibold text-white">{dayName}</td>
+                                <td className="py-2 px-3 font-mono">
+                                  {startH}:{startM}
+                                </td>
+                                <td className="py-2 px-3 font-mono">
+                                  {endH}:{endM}
+                                </td>
+                                <td className="py-2 px-3 text-emerald-400 font-medium">
+                                  {durationH} soat
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className="py-4 text-center text-zinc-500">
+                              Hozircha aniq soatlar kiritilmagan (Moslashuvchan grafik).
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Footer Modal Actions */}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/[0.08]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCandidateModalOpen(false);
+                      setSelectedCandidateDetail(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-surface-card hover:bg-surface border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                  >
+                    Yopish
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCandidateModalOpen(false);
+                      setIsCreateModalOpen(true);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-primary/20"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Vakansiyaga taklif qilish</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}

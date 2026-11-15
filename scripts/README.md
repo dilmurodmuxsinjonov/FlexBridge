@@ -1,12 +1,12 @@
 # FlexBridge 1.4: Avtomatlashtirilgan Staging Testlari Katalogi
 
-Ushbu katalog FlexBridge 1.4 platformasining barcha 24 ta mustaqil staging test to‘plamlarini o‘z ichiga oladi. Barcha testlar Docker konteynerlaridagi haqiqiy backend (`127.0.0.1:8000`), PgBouncer (`127.0.0.1:5432/flexbridge`), va Next.js 16 BFF (`127.0.0.1:3000`) stekiga qarshi to‘g‘ridan-to‘g‘ri ishlaydi.
+Ushbu katalog FlexBridge 1.4 platformasining barcha 27 ta mustaqil staging test to‘plamlarini o‘z ichiga oladi. Barcha testlar Docker konteynerlaridagi haqiqiy backend (`127.0.0.1:8000`), PgBouncer (`127.0.0.1:5432/flexbridge`), va Next.js 16 BFF (`127.0.0.1:3000`) stekiga qarshi to‘g‘ridan-to‘g‘ri ishlaydi.
 
 ---
 
 ## 1. Yagona Master Runner
 
-Barcha 24 ta test to‘plamini ketma-ket yurgazish, avtomatik rate-limit tozalash va umumiy ijro xulosasini olish uchun:
+Barcha 27 ta test to‘plamini ketma-ket yurgazish, avtomatik rate-limit tozalash va umumiy ijro xulosasini olish uchun:
 
 ```powershell
 python scripts/run_all_staging_tests.py
@@ -26,11 +26,13 @@ python scripts/run_all_staging_tests.py
 | `test_candidate_offers_engagements_staging.py` | Ish taklifiga javob (Accept/Decline), ikki tomonlama boshlanish tasdig‘i va o‘quv rejasi (`API-043`, `API-045`, `API-046`, `API-048`, `API-050`). |
 | `test_candidate_ratings_appeals_staging.py` | Ikki tomonlama maxfiy baholash (Double-Blind), sharhlar va apellyatsiya shikoyati (`API-047`, `API-057`, `API-058`). |
 | `test_candidate_enrollments_exceptions_staging.py`| OTM talabalik hujjati (HEMIS), biriktiruvni yakunlash va sana bo‘yicha istisnolar (`API-027`, `API-034`, `API-036`). |
+| `test_candidate_portfolio_certificates_staging.py`| Portfolio namoyishi, sertifikatlar yuklash (ClamAV antivirus bilan) va PDF rezyumeni generatsiya qilish (`API-026-PORTFOLIO`, `API-026-CERT`, `API-026-RESUME`). |
 
 ### B. Ish Beruvchi Tashkilotlar Bo‘limi (Employer Workflows)
 | Skript | Tekshiriladigan Xizmatlar & Shartnomalar |
 | :--- | :--- |
 | `test_employer_kanban_staging.py` | HR arizalar voronkasi (Kanban), nomzodlar saralash, intervyu tayinlash va taklif berish (`API-068`, `API-083`, `API-084`, `API-085`). |
+| `test_employer_search_staging.py` | Nomzodlarni ko‘nikmalar (`ANY`/`ALL`), hududlar, tajriba va dars jadvali muvofiqligi bo‘yicha aqlli filtrlash (`API-087`). |
 | `test_vacancy_lifecycle_interviews_staging.py` | Vakansiya nashr qilish, to‘xtatish, yopish va nomzod intervyu javoblari (`API-042`, `API-081`, `API-082`). |
 | `test_employer_mentor_staging.py` | Korxona mentori kundaliklar navbati, shoshilinch eskalatsiya va kundalikni baholash (`API-089`, `API-090`, `API-091`, `API-092`). |
 | `test_employer_organization_staging.py` | Tashkilot verifikatsiyasi (STIR), imkoniyatlar (Capabilities), jamoa a’zolari va taklifnomalar (`API-067`, `API-072`, `API-073`, `API-074`, `API-075`). |
@@ -42,6 +44,7 @@ python scripts/run_all_staging_tests.py
 | `test_university_academic_reviews_staging.py` | OTM kafedra nazoratchisi kundaliklar navbati va akademik baholash xulosasi (`API-105`, `API-106`, `API-107`). |
 | `test_university_placements_staging.py` | Biriktirilgan amaliyotlar, butun amaliyot bo‘yicha yakuniy akademik xulosa va taqsimot (`API-102`, `API-103`, `API-104`, `API-108`). |
 | `test_university_exports_staging.py` | Rasmiy amaliyot hisobotlari eksporti (PDF/JSON), superviziyalar va hamkorlik shartnomalari (`API-098`, `API-100`, `API-101`). |
+| `test_university_analytics_staging.py` | Talabalar davomati, haftalik soatlar monitoringi va amaliyot natijalari tahlili (`API-125`). |
 
 ### D. Tizim Operatori & SOC Bo‘limi (Operator Workflows)
 | Skript | Tekshiriladigan Xizmatlar & Shartnomalar |

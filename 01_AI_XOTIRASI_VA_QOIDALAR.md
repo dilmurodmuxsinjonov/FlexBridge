@@ -1583,6 +1583,21 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 24-suite regression runner `scripts/run_all_staging_tests.py`: ALL 24/24 TEST SUITES PASSED 100% GREEN in 51.05s (zero regressions).
   - Forensic audit report documented at `reviews/2026-11-15/repository_file_organization/REPOSITORY_FILE_ORGANIZATION_REPORT.md`.
 
+## LOG-149 / Multi-Portal Expansion: Candidate Portfolio/Certificates/PDF Resume, Employer Smart Search Hub & University Analytics (FB-194, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #194, Branch `feature/194-multi-portal-expansion`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Multi-Agent Teamwork (`b113a0ad-0fc0-4098-b96a-0156aa4bff69`) & Antigravity Master Integration.
+- **Service & Implementation**:
+  - **M1 (Candidate Portal Extension)**: Added Alembic migration `0021_candidate_portal_extension.py` (`candidate_portfolios`, `candidate_certificates`, `candidate_resume_exports`), backend services (`candidate_portfolio.py` / `API-026-PORTFOLIO`, `candidate_certificates.py` / `API-026-CERT` with ClamAV `CLEAN` validation, `candidate_resume_export.py` / `API-026-RESUME` with `pypdf` generation & MinIO 24h presigned URLs), BFF routes (`/api/bff/candidate/portfolio/*`, `/api/bff/candidate/certificates/*`, `/api/bff/candidate/resume/export`), and interactive Portfolio, Certificates, and PDF Resume Export UI in `/nomzod` (`frontend/src/app/nomzod/page.tsx`) + `Kabinetim` link in `Navbar.tsx`.
+  - **M2 (Employer Smart Search Hub)**: Added `backend/app/services/employer_search.py` (`API-087`) supporting multi-criteria SQLAlchemy Core filtering by skills (`ANY`/`ALL` + min proficiency), 14 regions, experience months, and O'zR MK 118 class schedule & shift compatibility with PII masking and keyset pagination; wired BFF route `/api/bff/employer/candidates/search` and Candidate Search Hub tab in `/employer` (`frontend/src/app/employer/page.tsx`).
+  - **M3 (University Portal Analytics)**: Added `backend/app/services/university_analytics.py` (`API-125`) computing Pillar 1 (Talabalar Davomati), Pillar 2 (Haftalik Soatlar Monitoringi & MK 118 overtime alerts), and Pillar 3 (Amaliyot Natijalari Tahlili) with dynamic filters (`program`, `status`, `date_from`, `date_to`); wired BFF route `/api/bff/university/institutions/[inst]/analytics` and Analytics tab in `/university` (`frontend/src/app/university/page.tsx`).
+  - Rebuilt and restarted `flexbridge-r1-backend-1` and `flexbridge-r1-frontend-1` Docker containers (70 Next.js routes compiled, 0 errors, all containers healthy).
+  - Dedicated 10-phase staging suites (`test_candidate_portfolio_certificates_staging.py`, `test_employer_search_staging.py`, `test_university_analytics_staging.py`): ALL 30/30 PHASES PASSED 100% GREEN.
+  - Master 27-suite regression runner `scripts/run_all_staging_tests.py`: ALL 27/27 TEST SUITES PASSED 100% GREEN in 66.16s (zero regressions).
+  - Forensic audit report documented at `reviews/2026-11-15/multi_portal_expansion/MULTI_PORTAL_EXPANSION_REPORT.md`.
+
+
 
 
 

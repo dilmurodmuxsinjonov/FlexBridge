@@ -59,6 +59,9 @@ TEST_SCRIPTS = [
     "scripts/test_user_security_sessions_staging.py",
     "scripts/test_public_cms_footer_staging.py",
     "scripts/test_standalone_auth_pages_staging.py",
+    "scripts/test_candidate_portfolio_certificates_staging.py",
+    "scripts/test_employer_search_staging.py",
+    "scripts/test_university_analytics_staging.py",
 ]
 
 def main():

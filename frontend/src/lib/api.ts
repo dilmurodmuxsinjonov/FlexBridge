@@ -3751,6 +3751,240 @@ export async function saveCandidateAvailabilityExceptions(
 }
 
 // ---------------------------------------------------------------------------
+// Candidate Portfolio, Certificates & Resume Export (API-026 Extension)
+// ---------------------------------------------------------------------------
+
+export interface PortfolioItem {
+  id: string;
+  candidate_id: string;
+  title: string;
+  description: string;
+  project_url?: string | null;
+  github_url?: string | null;
+  skills: string[];
+  start_date?: string | null;
+  end_date?: string | null;
+  file_id?: string | null;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CreatePortfolioPayload {
+  title: string;
+  description: string;
+  project_url?: string | null;
+  github_url?: string | null;
+  skills?: string[];
+  start_date?: string | null;
+  end_date?: string | null;
+  file_id?: string | null;
+}
+
+export interface CertificateItem {
+  id: string;
+  candidate_id: string;
+  title: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date?: string | null;
+  credential_id?: string | null;
+  credential_url?: string | null;
+  file_id?: string | null;
+  file_name?: string | null;
+  file_scan_status?: string | null;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CreateCertificatePayload {
+  title: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date?: string | null;
+  credential_id?: string | null;
+  credential_url?: string | null;
+  file_id?: string | null;
+  verification_case_id?: string | null;
+}
+
+export interface ResumeExportResponse {
+  contract_id: string;
+  export_id: string;
+  candidate_id: string;
+  file_id: string;
+  export_format: string;
+  created_at: string;
+  expires_at: string;
+  download_url: string;
+  disclaimer: string;
+  summary: {
+    candidate_id?: string;
+    candidate_name?: string;
+    headline?: string;
+    region?: string;
+    bio?: string;
+    experience_months?: number;
+    skills_count?: number;
+    portfolios_count?: number;
+    certificates_count?: number;
+    enrollments_count?: number;
+    export_format?: string;
+    generated_at?: string;
+    disclaimer?: string;
+    [key: string]: unknown;
+  };
+}
+
+export async function fetchCandidatePortfolios(limit = 50, afterId?: string): Promise<PortfolioItem[]> {
+  const sp = new URLSearchParams();
+  sp.set("limit", limit.toString());
+  if (afterId) sp.set("after_id", afterId);
+
+  const res = await fetch(`/api/bff/candidate/portfolio?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "PORTFOLIO_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as PortfolioItem[];
+}
+
+export async function createCandidatePortfolio(payload: CreatePortfolioPayload): Promise<PortfolioItem> {
+  const res = await fetch("/api/bff/candidate/portfolio", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "PORTFOLIO_CREATE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.item || data) as PortfolioItem;
+}
+
+export async function updateCandidatePortfolio(id: string, payload: Partial<CreatePortfolioPayload>): Promise<PortfolioItem> {
+  const res = await fetch(`/api/bff/candidate/portfolio/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "PORTFOLIO_UPDATE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.item || data) as PortfolioItem;
+}
+
+export async function deleteCandidatePortfolio(id: string): Promise<void> {
+  const res = await fetch(`/api/bff/candidate/portfolio/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.message || data.error || "PORTFOLIO_DELETE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+}
+
+export async function fetchCandidateCertificates(limit = 50, afterId?: string): Promise<CertificateItem[]> {
+  const sp = new URLSearchParams();
+  sp.set("limit", limit.toString());
+  if (afterId) sp.set("after_id", afterId);
+
+  const res = await fetch(`/api/bff/candidate/certificates?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CERTIFICATES_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as CertificateItem[];
+}
+
+export async function createCandidateCertificate(payload: CreateCertificatePayload): Promise<CertificateItem> {
+  const res = await fetch("/api/bff/candidate/certificates", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CERTIFICATE_CREATE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.item || data) as CertificateItem;
+}
+
+export async function deleteCandidateCertificate(id: string): Promise<void> {
+  const res = await fetch(`/api/bff/candidate/certificates/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.message || data.error || "CERTIFICATE_DELETE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+}
+
+export async function exportCandidateResume(
+  format: "PDF" | "JSON" = "PDF",
+  idempotencyKey?: string
+): Promise<ResumeExportResponse> {
+  const finalIdemKey = idempotencyKey || `resume-${crypto.randomUUID()}`;
+  const res = await fetch("/api/bff/candidate/resume/export", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      idempotency_key: finalIdemKey,
+      export_format: format,
+    }),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "RESUME_EXPORT_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ResumeExportResponse;
+}
+
+// ---------------------------------------------------------------------------
 // Candidate & User Security, MFA & Sessions Hub (API-060, API-061)
 // ---------------------------------------------------------------------------
 
@@ -4115,6 +4349,289 @@ export async function registerCandidateUser(
   }
   return data as RegisterUserResponse;
 }
+
+// ============================================================================
+// Milestone 2: Ish Beruvchi Portali Qidiruv Markazi (API-087)
+// ============================================================================
+
+export interface CandidateSearchParams {
+  q?: string;
+  skills?: string[];
+  skill_match_mode?: "ANY" | "ALL";
+  min_skill_level?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+  verified_skills_only?: boolean;
+  region?: string;
+  experience_min_months?: number;
+  experience_max_months?: number;
+  shift?: "MORNING" | "AFTERNOON" | "EVENING" | "FULL_DAY" | "FLEXIBLE";
+  weekdays?: number[];
+  opportunity_id?: string;
+  verified_student_only?: boolean;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface CandidateSearchSkill {
+  skill_id: string;
+  code: string;
+  name_uz: string;
+  name_ru: string;
+  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | string;
+  verified: boolean;
+}
+
+export interface CandidateSearchUniversity {
+  institution_id: string;
+  institution_name: string;
+  program: string;
+  status: "VERIFIED" | "PENDING" | "IN_REVIEW" | "ENDED" | string;
+}
+
+export interface CandidateScheduleSummary {
+  free_weekdays: number[];
+  available_shifts: string[];
+  total_weekly_hours: number;
+  rules: Array<{
+    weekday: number;
+    start_minute: number;
+    end_minute: number;
+  }>;
+}
+
+export interface CandidateScheduleMatch {
+  is_matched: boolean;
+  score_percent: number;
+  shift_group_covered: boolean;
+  labor_code_compliant: boolean;
+  details: string;
+}
+
+export interface CandidateSearchItem {
+  candidate_id: string;
+  user_id: string;
+  display_name: string;
+  headline: string;
+  region: string;
+  bio: string;
+  experience_months: number;
+  has_cv: boolean;
+  cv_file_id?: string | null;
+  university?: CandidateSearchUniversity | null;
+  skills: CandidateSearchSkill[];
+  schedule_summary: CandidateScheduleSummary;
+  schedule_match: CandidateScheduleMatch;
+}
+
+export interface CandidateSearchResponse {
+  ok: boolean;
+  contract_id: string;
+  total: number;
+  items: CandidateSearchItem[];
+  next_cursor?: string | null;
+  facets: {
+    regions: Record<string, number>;
+    skills: Record<string, number>;
+    shifts: Record<string, number>;
+  };
+}
+
+export async function searchEmployerCandidates(
+  params: CandidateSearchParams = {}
+): Promise<CandidateSearchResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.q) searchParams.set("q", params.q);
+  if (params.skills && params.skills.length > 0) {
+    params.skills.forEach((s) => searchParams.append("skills", s));
+  }
+  if (params.skill_match_mode) searchParams.set("skill_match_mode", params.skill_match_mode);
+  if (params.min_skill_level) searchParams.set("min_skill_level", params.min_skill_level);
+  if (params.verified_skills_only) searchParams.set("verified_skills_only", "true");
+  if (params.region) searchParams.set("region", params.region);
+  if (params.experience_min_months !== undefined) {
+    searchParams.set("experience_min_months", String(params.experience_min_months));
+  }
+  if (params.experience_max_months !== undefined) {
+    searchParams.set("experience_max_months", String(params.experience_max_months));
+  }
+  if (params.shift) searchParams.set("shift", params.shift);
+  if (params.weekdays && params.weekdays.length > 0) {
+    params.weekdays.forEach((w) => searchParams.append("weekdays", String(w)));
+  }
+  if (params.opportunity_id) searchParams.set("opportunity_id", params.opportunity_id);
+  if (params.verified_student_only) searchParams.set("verified_student_only", "true");
+  if (params.limit !== undefined) searchParams.set("limit", String(params.limit));
+  if (params.cursor) searchParams.set("cursor", params.cursor);
+
+  const qs = searchParams.toString();
+  const res = await fetch(`/api/bff/employer/candidates/search${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SEARCH_CANDIDATES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateSearchResponse;
+}
+
+// ============================================================================
+// Milestone 3: Universitet Portali Analitikasi (API-125)
+// ============================================================================
+
+export interface UniversityAnalyticsFilters {
+  program?: string;
+  organization_id?: string;
+  status?: string;
+  from_date?: string;
+  to_date?: string;
+}
+
+export interface UniversityAnalyticsSummary {
+  total_students: number;
+  active_interns: number;
+  completed_interns: number;
+  overall_attendance_rate: number;
+  total_logged_hours: number;
+  avg_weekly_hours_per_student: number;
+  completion_rate: number;
+  pending_teacher_reviews: number;
+  academic_conclusions_count: number;
+}
+
+export interface StudentAttendanceItem {
+  student_id: string;
+  student_name: string;
+  program: string;
+  organization_name: string;
+  placement_id: string;
+  expected_days: number;
+  attended_days: number;
+  absent_days: number;
+  sick_days: number;
+  attendance_rate: number;
+  attendance_status: "GOOD" | "WARNING" | "CRITICAL";
+}
+
+export interface AttendanceMetrics {
+  overall_rate: number;
+  by_status_distribution: {
+    good: number;
+    warning: number;
+    critical: number;
+  };
+  by_day_type: {
+    work: number;
+    remote_work: number;
+    sick_leave: number;
+    absence: number;
+    holiday: number;
+  };
+  late_submissions_count: number;
+  students: StudentAttendanceItem[];
+}
+
+export interface WeeklyTrendItem {
+  week: string;
+  logged_hours: number;
+  active_students: number;
+}
+
+export interface ProgramHoursItem {
+  program: string;
+  total_hours: number;
+  student_count: number;
+  avg_hours: number;
+}
+
+export interface OrganizationHoursItem {
+  organization_name: string;
+  total_hours: number;
+  intern_count: number;
+}
+
+export interface WeeklyHoursMonitoring {
+  current_week_hours: number;
+  avg_weekly_hours: number;
+  weekly_trend: WeeklyTrendItem[];
+  by_program: ProgramHoursItem[];
+  by_organization: OrganizationHoursItem[];
+  compliance_alerts: {
+    overtime_students: number;
+    zero_hours_this_week: number;
+  };
+}
+
+export interface ProgramPerformanceItem {
+  program: string;
+  enrolled: number;
+  completed: number;
+  active: number;
+  completion_rate: number;
+}
+
+export interface InternshipResults {
+  total_placements: number;
+  by_status: Record<string, number>;
+  completion_rate: number;
+  academic_conclusions: {
+    total: number;
+    complete: number;
+    revision_required: number;
+    pending: number;
+  };
+  workplace_evaluations: {
+    approved_rate: number;
+    approved_count: number;
+    changes_requested_count: number;
+    rejected_count: number;
+  };
+  program_performance: ProgramPerformanceItem[];
+}
+
+export interface UniversityAnalyticsResponse {
+  ok: boolean;
+  contract_id: string;
+  institution_id: string;
+  institution_name: string;
+  registry_code?: string | null;
+  summary: UniversityAnalyticsSummary;
+  attendance_metrics: AttendanceMetrics;
+  weekly_hours_monitoring: WeeklyHoursMonitoring;
+  internship_results: InternshipResults;
+}
+
+export async function fetchUniversityAnalytics(
+  institutionId: string,
+  filters: UniversityAnalyticsFilters = {}
+): Promise<UniversityAnalyticsResponse> {
+  const searchParams = new URLSearchParams();
+  if (filters.program) searchParams.set("program", filters.program);
+  if (filters.organization_id) searchParams.set("organization_id", filters.organization_id);
+  if (filters.status) searchParams.set("status", filters.status);
+  if (filters.from_date) searchParams.set("from_date", filters.from_date);
+  if (filters.to_date) searchParams.set("to_date", filters.to_date);
+
+  const qs = searchParams.toString();
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/analytics${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ANALYTICS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as UniversityAnalyticsResponse;
+}
+
+
 
 
 

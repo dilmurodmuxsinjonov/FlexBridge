@@ -28,6 +28,11 @@ import {
   XCircle,
   Award,
   ExternalLink,
+  FolderGit2,
+  Download,
+  Edit3,
+  Globe,
+  Github,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -42,6 +47,14 @@ import {
   createCandidateEnrollment,
   endCandidateEnrollment,
   fetchVerifiedInstitutions,
+  fetchCandidatePortfolios,
+  createCandidatePortfolio,
+  updateCandidatePortfolio,
+  deleteCandidatePortfolio,
+  fetchCandidateCertificates,
+  createCandidateCertificate,
+  deleteCandidateCertificate,
+  exportCandidateResume,
   logoutUser,
   AuthUser,
   CandidateProfileData,
@@ -51,6 +64,9 @@ import {
   AvailabilityExceptionItem,
   CandidateEnrollmentItem,
   VerifiedInstitutionItem,
+  PortfolioItem,
+  CertificateItem,
+  ResumeExportResponse,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -97,8 +113,8 @@ export default function CandidateProfileHub() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Active Tab: PROFILE, SKILLS, AVAILABILITY, ENROLLMENTS
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS">("PROFILE");
+  // Active Tab: PROFILE, SKILLS, AVAILABILITY, ENROLLMENTS, PORTFOLIO, CERTIFICATES
+  const [activeTab, setActiveTab] = useState<"PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES">("PROFILE");
 
   // Tab 1: Profile state
   const [profile, setProfile] = useState<CandidateProfileData | null>(null);
@@ -159,6 +175,42 @@ export default function CandidateProfileHub() {
   const [endEffectiveDate, setEndEffectiveDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [isSubmittingEnd, setIsSubmittingEnd] = useState(false);
   const [endErrorMsg, setEndErrorMsg] = useState<string | null>(null);
+
+  // Tab 5: Portfolio state (API-026-PORTFOLIO)
+  const [portfolios, setPortfolios] = useState<PortfolioItem[]>([]);
+  const [isLoadingPortfolios, setIsLoadingPortfolios] = useState(false);
+  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
+  const [editingPortfolioId, setEditingPortfolioId] = useState<string | null>(null);
+  const [portTitle, setPortTitle] = useState("");
+  const [portDesc, setPortDesc] = useState("");
+  const [portProjUrl, setPortProjUrl] = useState("");
+  const [portGithubUrl, setPortGithubUrl] = useState("");
+  const [portSkillsInput, setPortSkillsInput] = useState("");
+  const [portStartDate, setPortStartDate] = useState("");
+  const [portEndDate, setPortEndDate] = useState("");
+  const [isSavingPortfolio, setIsSavingPortfolio] = useState(false);
+  const [portfolioSuccessMsg, setPortfolioSuccessMsg] = useState<string | null>(null);
+  const [portfolioErrorMsg, setPortfolioErrorMsg] = useState<string | null>(null);
+
+  // Tab 6: Certificates state (API-026-CERT)
+  const [certificates, setCertificates] = useState<CertificateItem[]>([]);
+  const [isLoadingCertificates, setIsLoadingCertificates] = useState(false);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [certTitle, setCertTitle] = useState("");
+  const [certIssuer, setCertIssuer] = useState("");
+  const [certIssueDate, setCertIssueDate] = useState("");
+  const [certExpiryDate, setCertExpiryDate] = useState("");
+  const [certCredId, setCertCredId] = useState("");
+  const [certCredUrl, setCertCredUrl] = useState("");
+  const [certFileId, setCertFileId] = useState("");
+  const [isSavingCert, setIsSavingCert] = useState(false);
+  const [certSuccessMsg, setCertSuccessMsg] = useState<string | null>(null);
+  const [certErrorMsg, setCertErrorMsg] = useState<string | null>(null);
+
+  // Header Action: Resume PDF Export state (API-026-RESUME)
+  const [isExportingResume, setIsExportingResume] = useState(false);
+  const [exportSuccessMsg, setExportSuccessMsg] = useState<string | null>(null);
+  const [exportErrorMsg, setExportErrorMsg] = useState<string | null>(null);
 
   // Load Profile & Skills
   const loadProfileData = useCallback(async () => {
@@ -227,6 +279,34 @@ export default function CandidateProfileHub() {
     }
   }, [selectedInstId]);
 
+  // Load Portfolios (API-026-PORTFOLIO)
+  const loadPortfoliosData = useCallback(async () => {
+    setIsLoadingPortfolios(true);
+    setPortfolioErrorMsg(null);
+    try {
+      const items = await fetchCandidatePortfolios();
+      setPortfolios(items);
+    } catch (err: unknown) {
+      setPortfolioErrorMsg(err instanceof Error ? err.message : "Portfolio loyihalarini yuklashda xatolik");
+    } finally {
+      setIsLoadingPortfolios(false);
+    }
+  }, []);
+
+  // Load Certificates (API-026-CERT)
+  const loadCertificatesData = useCallback(async () => {
+    setIsLoadingCertificates(true);
+    setCertErrorMsg(null);
+    try {
+      const items = await fetchCandidateCertificates();
+      setCertificates(items);
+    } catch (err: unknown) {
+      setCertErrorMsg(err instanceof Error ? err.message : "Sertifikatlarni yuklashda xatolik");
+    } finally {
+      setIsLoadingCertificates(false);
+    }
+  }, []);
+
   // Auth Initialization
   useEffect(() => {
     let isMounted = true;
@@ -240,6 +320,8 @@ export default function CandidateProfileHub() {
             loadCatalog();
             loadAvailabilityData();
             loadEnrollmentsData();
+            loadPortfoliosData();
+            loadCertificatesData();
           }
         }
       } catch {
@@ -252,7 +334,7 @@ export default function CandidateProfileHub() {
     return () => {
       isMounted = false;
     };
-  }, [loadProfileData, loadCatalog, loadAvailabilityData, loadEnrollmentsData]);
+  }, [loadProfileData, loadCatalog, loadAvailabilityData, loadEnrollmentsData, loadPortfoliosData, loadCertificatesData]);
 
   // Debounced skill search
   useEffect(() => {
@@ -498,6 +580,180 @@ export default function CandidateProfileHub() {
     return enrollments.find((e) => e.current_student && e.status !== "ENDED") || enrollments[0] || null;
   }, [enrollments]);
 
+  // Portfolio Action Handlers (API-026-PORTFOLIO)
+  const handleOpenAddPortfolio = () => {
+    setEditingPortfolioId(null);
+    setPortTitle("");
+    setPortDesc("");
+    setPortProjUrl("");
+    setPortGithubUrl("");
+    setPortSkillsInput("");
+    setPortStartDate("");
+    setPortEndDate("");
+    setPortfolioErrorMsg(null);
+    setIsPortfolioModalOpen(true);
+  };
+
+  const handleOpenEditPortfolio = (item: PortfolioItem) => {
+    setEditingPortfolioId(item.id);
+    setPortTitle(item.title);
+    setPortDesc(item.description);
+    setPortProjUrl(item.project_url || "");
+    setPortGithubUrl(item.github_url || "");
+    setPortSkillsInput((item.skills || []).join(", "));
+    setPortStartDate(item.start_date || "");
+    setPortEndDate(item.end_date || "");
+    setPortfolioErrorMsg(null);
+    setIsPortfolioModalOpen(true);
+  };
+
+  const handleSavePortfolio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (portTitle.trim().length < 2 || portDesc.trim().length < 2) {
+      setPortfolioErrorMsg("Loyiha nomi va tavsifi kamida 2 ta belgidan iborat bo'lishi shart.");
+      return;
+    }
+
+    if (portStartDate && portEndDate && portEndDate < portStartDate) {
+      setPortfolioErrorMsg("Yakunlanish sanasi boshlanish sanasidan keyin yoki teng bo'lishi shart.");
+      return;
+    }
+
+    setIsSavingPortfolio(true);
+    setPortfolioErrorMsg(null);
+
+    const skillsArray = portSkillsInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    try {
+      if (editingPortfolioId) {
+        await updateCandidatePortfolio(editingPortfolioId, {
+          title: portTitle.trim(),
+          description: portDesc.trim(),
+          project_url: portProjUrl.trim() || null,
+          github_url: portGithubUrl.trim() || null,
+          skills: skillsArray,
+          start_date: portStartDate || null,
+          end_date: portEndDate || null,
+        });
+        setPortfolioSuccessMsg("Loyiha muvaffaqiyatli yangilandi!");
+      } else {
+        await createCandidatePortfolio({
+          title: portTitle.trim(),
+          description: portDesc.trim(),
+          project_url: portProjUrl.trim() || null,
+          github_url: portGithubUrl.trim() || null,
+          skills: skillsArray,
+          start_date: portStartDate || null,
+          end_date: portEndDate || null,
+        });
+        setPortfolioSuccessMsg("Yangi loyiha muvaffaqiyatli qo'shildi!");
+      }
+      setIsPortfolioModalOpen(false);
+      await loadPortfoliosData();
+      setTimeout(() => setPortfolioSuccessMsg(null), 4000);
+    } catch (err: unknown) {
+      setPortfolioErrorMsg(err instanceof Error ? err.message : "Loyihani saqlashda xatolik");
+    } finally {
+      setIsSavingPortfolio(false);
+    }
+  };
+
+  const handleDeletePortfolio = async (id: string) => {
+    if (!confirm("Haqiqatan ham bu loyihani o'chirmoqchimisiz?")) return;
+    try {
+      await deleteCandidatePortfolio(id);
+      await loadPortfoliosData();
+      setPortfolioSuccessMsg("Loyiha muvaffaqiyatli o'chirildi.");
+      setTimeout(() => setPortfolioSuccessMsg(null), 3000);
+    } catch (err: unknown) {
+      setPortfolioErrorMsg(err instanceof Error ? err.message : "Loyihani o'chirishda xatolik");
+    }
+  };
+
+  // Certificate Action Handlers (API-026-CERT)
+  const handleOpenAddCert = () => {
+    setCertTitle("");
+    setCertIssuer("");
+    setCertIssueDate(new Date().toISOString().split("T")[0]);
+    setCertExpiryDate("");
+    setCertCredId("");
+    setCertCredUrl("");
+    setCertFileId("");
+    setCertErrorMsg(null);
+    setIsCertModalOpen(true);
+  };
+
+  const handleSaveCert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (certTitle.trim().length < 2 || certIssuer.trim().length < 2 || !certIssueDate) {
+      setCertErrorMsg("Sertifikat nomi, beruvchi tashkilot va berilgan sana kiritilishi shart.");
+      return;
+    }
+
+    if (certExpiryDate && certExpiryDate < certIssueDate) {
+      setCertErrorMsg("Amal qilish muddati berilgan sanadan keyin bo'lishi shart.");
+      return;
+    }
+
+    setIsSavingCert(true);
+    setCertErrorMsg(null);
+
+    try {
+      await createCandidateCertificate({
+        title: certTitle.trim(),
+        issuer: certIssuer.trim(),
+        issue_date: certIssueDate,
+        expiry_date: certExpiryDate || null,
+        credential_id: certCredId.trim() || null,
+        credential_url: certCredUrl.trim() || null,
+        file_id: certFileId.trim() || null,
+      });
+      setIsCertModalOpen(false);
+      setCertSuccessMsg("Sertifikat muvaffaqiyatli biriktirildi!");
+      await loadCertificatesData();
+      setTimeout(() => setCertSuccessMsg(null), 4000);
+    } catch (err: unknown) {
+      setCertErrorMsg(err instanceof Error ? err.message : "Sertifikatni saqlashda xatolik");
+    } finally {
+      setIsSavingCert(false);
+    }
+  };
+
+  const handleDeleteCert = async (id: string) => {
+    if (!confirm("Haqiqatan ham bu sertifikatni o'chirmoqchimisiz?")) return;
+    try {
+      await deleteCandidateCertificate(id);
+      await loadCertificatesData();
+      setCertSuccessMsg("Sertifikat muvaffaqiyatli o'chirildi.");
+      setTimeout(() => setCertSuccessMsg(null), 3000);
+    } catch (err: unknown) {
+      setCertErrorMsg(err instanceof Error ? err.message : "Sertifikatni o'chirishda xatolik");
+    }
+  };
+
+  // Resume Export Handler (API-026-RESUME)
+  const handleExportResume = async () => {
+    setIsExportingResume(true);
+    setExportSuccessMsg(null);
+    setExportErrorMsg(null);
+
+    try {
+      const res = await exportCandidateResume("PDF");
+      setExportSuccessMsg(`Rezyume PDF shakllantirildi! (${res.summary?.skills_count || 0} ta ko'nikma, ${res.summary?.portfolios_count || 0} ta loyiha, ${res.summary?.certificates_count || 0} ta sertifikat).`);
+      if (res.download_url) {
+        window.open(res.download_url, "_blank");
+      }
+      setTimeout(() => setExportSuccessMsg(null), 6000);
+    } catch (err: unknown) {
+      setExportErrorMsg(err instanceof Error ? err.message : "Rezyume PDF shakllantirishda xatolik");
+    } finally {
+      setIsExportingResume(false);
+    }
+  };
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* HEADER SECTION */}
@@ -534,14 +790,29 @@ export default function CandidateProfileHub() {
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportResume}
+                  disabled={isExportingResume}
+                  className="px-3.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-semibold text-emerald-300 hover:text-emerald-200 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                >
+                  {isExportingResume ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  )}
+                  <span>Rezyumeni PDF formatida yuklab olish</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Chiqish</span>
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
@@ -555,6 +826,19 @@ export default function CandidateProfileHub() {
           </div>
         </div>
       </section>
+
+      {exportSuccessMsg && (
+        <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <span>{exportSuccessMsg}</span>
+        </div>
+      )}
+      {exportErrorMsg && (
+        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <span>{exportErrorMsg}</span>
+        </div>
+      )}
 
       {/* Sub-Navigation between Candidate Pages */}
       <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
@@ -699,6 +983,42 @@ export default function CandidateProfileHub() {
               {enrollments.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-400">
                   {enrollments.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("PORTFOLIO")}
+              className={`px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "PORTFOLIO"
+                  ? "border-primary text-white bg-primary/5"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <FolderGit2 className="w-4 h-4 text-purple-400" />
+              <span>Portfolio & Loyihalar (API-026-PORTFOLIO)</span>
+              {portfolios.length > 0 && (
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-purple-500/20 text-purple-400">
+                  {portfolios.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("CERTIFICATES")}
+              className={`px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "CERTIFICATES"
+                  ? "border-primary text-white bg-primary/5"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <Award className="w-4 h-4 text-yellow-400" />
+              <span>Sertifikatlar (API-026-CERT)</span>
+              {certificates.length > 0 && (
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-yellow-500/20 text-yellow-400">
+                  {certificates.length}
                 </span>
               )}
             </button>
@@ -1588,6 +1908,518 @@ export default function CandidateProfileHub() {
               </div>
             </div>
           )}
+
+          {/* TAB 5: PORTFOLIO SHOWCASE (API-026-PORTFOLIO) */}
+          {activeTab === "PORTFOLIO" && (
+            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <FolderGit2 className="w-4 h-4 text-purple-400" />
+                    <span>Portfolio & Loyihalar Namoyishi</span>
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Amalga oshirgan loyihalaringiz, havola va ko&apos;nikmalaringizni ish beruvchilarga taqdim eting.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenAddPortfolio}
+                  className="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-purple-600/20 shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Yangi loyiha qo&apos;shish</span>
+                </button>
+              </div>
+
+              {portfolioSuccessMsg && (
+                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{portfolioSuccessMsg}</span>
+                </div>
+              )}
+
+              {portfolioErrorMsg && (
+                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{portfolioErrorMsg}</span>
+                </div>
+              )}
+
+              {isLoadingPortfolios ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                  <span className="text-xs">Portfolio loyihalari yuklanmoqda...</span>
+                </div>
+              ) : portfolios.length === 0 ? (
+                <div className="py-12 px-4 rounded-xl border border-dashed border-white/[0.08] flex flex-col items-center justify-center text-center gap-2">
+                  <FolderGit2 className="w-8 h-8 text-zinc-500" />
+                  <span className="text-xs font-semibold text-zinc-300">Hozircha loyihalar mavjud emas</span>
+                  <p className="text-xs text-zinc-500 max-w-sm">
+                    Rezyumengizni boyitish uchun bajargan amaliy ishlaringiz yoki mustaqil loyihalaringizni qo&apos;shing.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {portfolios.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-surface border border-white/[0.06] hover:border-purple-500/30 rounded-xl p-4 flex flex-col justify-between gap-3 transition-colors"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-xs font-bold text-white line-clamp-1">{item.title}</h4>
+                          <span className="text-[10px] text-zinc-500 font-mono shrink-0">
+                            {item.start_date || "—"} {item.end_date ? `— ${item.end_date}` : "— Hozir"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-400 line-clamp-3 whitespace-pre-line">{item.description}</p>
+                        {item.skills && item.skills.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {item.skills.map((s, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] text-xs">
+                        <div className="flex items-center gap-2">
+                          {item.project_url && (
+                            <a
+                              href={item.project_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-primary hover:underline text-[11px] flex items-center gap-1"
+                            >
+                              <Globe className="w-3 h-3" />
+                              <span>Demo</span>
+                              <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                            </a>
+                          )}
+                          {item.github_url && (
+                            <a
+                              href={item.github_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-zinc-300 hover:text-white text-[11px] flex items-center gap-1"
+                            >
+                              <Github className="w-3 h-3" />
+                              <span>Kod</span>
+                              <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                            </a>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditPortfolio(item)}
+                            className="p-1.5 rounded hover:bg-white/[0.06] text-zinc-400 hover:text-zinc-200 transition-colors"
+                            title="Tahrirlash"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePortfolio(item.id)}
+                            className="p-1.5 rounded hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
+                            title="O'chirish"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 6: CERTIFICATES (API-026-CERT) */}
+          {activeTab === "CERTIFICATES" && (
+            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Award className="w-4 h-4 text-yellow-400" />
+                    <span>Sertifikatlar & Malaka Hujjatlari</span>
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Kasbiy sertifikatlar, litsenziyalar va xalqaro imtihon natijalari.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenAddCert}
+                  className="px-3.5 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-yellow-600/20 shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Sertifikat qo&apos;shish</span>
+                </button>
+              </div>
+
+              {certSuccessMsg && (
+                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{certSuccessMsg}</span>
+                </div>
+              )}
+
+              {certErrorMsg && (
+                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{certErrorMsg}</span>
+                </div>
+              )}
+
+              {isLoadingCertificates ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
+                  <Loader2 className="w-6 h-6 animate-spin text-yellow-400" />
+                  <span className="text-xs">Sertifikatlar yuklanmoqda...</span>
+                </div>
+              ) : certificates.length === 0 ? (
+                <div className="py-12 px-4 rounded-xl border border-dashed border-white/[0.08] flex flex-col items-center justify-center text-center gap-2">
+                  <Award className="w-8 h-8 text-zinc-500" />
+                  <span className="text-xs font-semibold text-zinc-300">Hozircha sertifikatlar mavjud emas</span>
+                  <p className="text-xs text-zinc-500 max-w-sm">
+                    Kasbiy malaka yoki til sertifikatlaringizni yuklab, profilda aks ettiring.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {certificates.map((cert) => (
+                    <div
+                      key={cert.id}
+                      className="bg-surface border border-white/[0.06] hover:border-yellow-500/30 rounded-xl p-4 flex flex-col justify-between gap-3 transition-colors"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-xs font-bold text-white line-clamp-1">{cert.title}</h4>
+                          <span className="text-[10px] text-zinc-500 font-mono shrink-0">
+                            {cert.issue_date} {cert.expiry_date ? `(Amal qiladi: ${cert.expiry_date})` : "(Muddatsiz)"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-zinc-400 flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                          <span>Beruvchi: {cert.issuer}</span>
+                        </div>
+                        {cert.credential_id && (
+                          <div className="text-[11px] text-zinc-500 font-mono">
+                            ID: {cert.credential_id}
+                          </div>
+                        )}
+                        {cert.file_id && (
+                          <div className="pt-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <ShieldCheck className="w-3 h-3" />
+                              <span>Toza hujjat biriktirilgan {cert.file_name ? `(${cert.file_name})` : ""}</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] text-xs">
+                        <div>
+                          {cert.credential_url ? (
+                            <a
+                              href={cert.credential_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-yellow-400 hover:underline text-[11px] flex items-center gap-1"
+                            >
+                              <span>Tekshirish havolasi</span>
+                              <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-zinc-600">Tekshiruv havolasi yo&apos;q</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCert(cert.id)}
+                          className="p-1.5 rounded hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
+                          title="O'chirish"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* PORTFOLIO MODAL */}
+      {isPortfolioModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#121214] border border-white/[0.1] rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <FolderGit2 className="w-4 h-4 text-purple-400" />
+                <span>{editingPortfolioId ? "Portfolio Loyihasini Tahrirlash" : "Yangi Portfolio Loyihasi"}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsPortfolioModalOpen(false)}
+                className="text-zinc-500 hover:text-zinc-300 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {portfolioErrorMsg && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{portfolioErrorMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSavePortfolio} className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Loyiha Nomi *</label>
+                <input
+                  type="text"
+                  value={portTitle}
+                  onChange={(e) => setPortTitle(e.target.value)}
+                  placeholder="Masalan: FlexBridge Talent Exchange"
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Loyiha Tavsifi *</label>
+                <textarea
+                  rows={3}
+                  value={portDesc}
+                  onChange={(e) => setPortDesc(e.target.value)}
+                  placeholder="Loyiha maqsadi, arxitekturasi va sizning hissangiz..."
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50 resize-y"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Demo Havolasi (Ixtiyoriy)</label>
+                  <input
+                    type="url"
+                    value={portProjUrl}
+                    onChange={(e) => setPortProjUrl(e.target.value)}
+                    placeholder="https://demo.example.com"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">GitHub Havolasi (Ixtiyoriy)</label>
+                  <input
+                    type="url"
+                    value={portGithubUrl}
+                    onChange={(e) => setPortGithubUrl(e.target.value)}
+                    placeholder="https://github.com/..."
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Ko&apos;nikmalar (Vergul bilan ajrating)</label>
+                <input
+                  type="text"
+                  value={portSkillsInput}
+                  onChange={(e) => setPortSkillsInput(e.target.value)}
+                  placeholder="Masalan: Python, FastAPI, Next.js, PostgreSQL"
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Boshlanish Sanasi</label>
+                  <input
+                    type="date"
+                    value={portStartDate}
+                    onChange={(e) => setPortStartDate(e.target.value)}
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Yakunlanish Sanasi</label>
+                  <input
+                    type="date"
+                    value={portEndDate}
+                    onChange={(e) => setPortEndDate(e.target.value)}
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/[0.06]">
+                <button
+                  type="button"
+                  onClick={() => setIsPortfolioModalOpen(false)}
+                  disabled={isSavingPortfolio}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 transition-all"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingPortfolio}
+                  className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-purple-600/20"
+                >
+                  {isSavingPortfolio ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
+                  <span>{editingPortfolioId ? "Saqlash" : "Qo'shish"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CERTIFICATE MODAL */}
+      {isCertModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#121214] border border-white/[0.1] rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Award className="w-4 h-4 text-yellow-400" />
+                <span>Yangi Sertifikat Qo&apos;shish</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsCertModalOpen(false)}
+                className="text-zinc-500 hover:text-zinc-300 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {certErrorMsg && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{certErrorMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveCert} className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Sertifikat Nomi *</label>
+                <input
+                  type="text"
+                  value={certTitle}
+                  onChange={(e) => setCertTitle(e.target.value)}
+                  placeholder="Masalan: AWS Certified Solutions Architect"
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Beruvchi Tashkilot / Muassasa *</label>
+                <input
+                  type="text"
+                  value={certIssuer}
+                  onChange={(e) => setCertIssuer(e.target.value)}
+                  placeholder="Masalan: Amazon Web Services, Coursera, IELTS"
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Berilgan Sana *</label>
+                  <input
+                    type="date"
+                    value={certIssueDate}
+                    onChange={(e) => setCertIssueDate(e.target.value)}
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Amal Qilish Muddati (Ixtiyoriy)</label>
+                  <input
+                    type="date"
+                    value={certExpiryDate}
+                    onChange={(e) => setCertExpiryDate(e.target.value)}
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Sertifikat ID / Litsenziya raqami</label>
+                  <input
+                    type="text"
+                    value={certCredId}
+                    onChange={(e) => setCertCredId(e.target.value)}
+                    placeholder="Masalan: AWS-0098124"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-zinc-300">Onlayn Tekshiruv Havolasi</label>
+                  <input
+                    type="url"
+                    value={certCredUrl}
+                    onChange={(e) => setCertCredUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">Yuklangan Fayl ID (Ixtiyoriy, toza fayl)</label>
+                <input
+                  type="text"
+                  value={certFileId}
+                  onChange={(e) => setCertFileId(e.target.value)}
+                  placeholder="Masalan: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/[0.06]">
+                <button
+                  type="button"
+                  onClick={() => setIsCertModalOpen(false)}
+                  disabled={isSavingCert}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 transition-all"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingCert}
+                  className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-yellow-600/20"
+                >
+                  {isSavingCert ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
+                  <span>Biriktirish</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -1691,6 +2523,8 @@ export default function CandidateProfileHub() {
           loadCatalog();
           loadAvailabilityData();
           loadEnrollmentsData();
+          loadPortfoliosData();
+          loadCertificatesData();
         }}
       />
     </main>

@@ -11,6 +11,7 @@ import {
   BookOpen,
   Bookmark,
   Bell,
+  User,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -18,6 +19,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "E’lonlar", icon: Search },
+    { href: "/nomzod", label: "Kabinetim", icon: User },
     { href: "/nomzod/arizalar", label: "Arizalarim", icon: FileText },
     { href: "/nomzod/saqlanganlar", label: "Saqlanganlar", icon: Bookmark },
     { href: "/nomzod/bildirishnomalar", label: "Xabarlar", icon: Bell },
@@ -46,7 +48,7 @@ export default function Navbar() {
 
       <nav aria-label="Asosiy bo‘limlar" className="order-3 flex w-full items-center gap-1 overflow-x-auto md:order-none md:w-auto">
         {navLinks.map((item) => {
-          const isActive = item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
+          const isActive = item.href === "/" || item.href === "/nomzod" ? pathname === item.href : pathname?.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link key={item.href} href={item.href} aria-current={isActive ? "page" : undefined}
