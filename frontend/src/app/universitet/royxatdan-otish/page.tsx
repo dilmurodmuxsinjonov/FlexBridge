@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useEffectEvent } from "react";
 import Link from "next/link";
+import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -17,7 +18,6 @@ import {
   Lock,
   Phone,
   RefreshCw,
-  Send,
   ShieldCheck,
   UserCheck,
 } from "lucide-react";
@@ -28,7 +28,6 @@ import {
   fetchAuthOptions,
   issueAuthChallenge,
   registerCandidateUser,
-  sendTelegramBotUpdate,
 } from "@/lib/api";
 import { isAcademicRoles } from "@/lib/roles";
 
@@ -60,13 +59,9 @@ function UniversitetRegistrationContent() {
   const [resendTimer, setResendTimer] = useState(0);
 
   const [telegramBotUsername, setTelegramBotUsername] = useState("FlexBridgeAuthBot");
+  const [telegramMode, setTelegramMode] = useState<TelegramMode>("LIVE");
   const [telegramDeepLink, setTelegramDeepLink] = useState<string | null>(null);
   const [telegramVerified, setTelegramVerified] = useState(false);
-  const [botStarted, setBotStarted] = useState(false);
-  const [botContactPhone, setBotContactPhone] = useState("");
-  const [botDeliveredOtp, setBotDeliveredOtp] = useState<string | null>(null);
-  const [botMessage, setBotMessage] = useState<string | null>(null);
-  const [telegramUserId] = useState(() => Math.floor(100000000 + Math.random() * 899999999));
 
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
@@ -119,6 +114,7 @@ function UniversitetRegistrationContent() {
         if (opts.terms_version) setTermsVersion(opts.terms_version);
         if (opts.privacy_version) setPrivacyVersion(opts.privacy_version);
         if (opts.telegram_bot_username) setTelegramBotUsername(opts.telegram_bot_username);
+        if (opts.telegram_mode) setTelegramMode(opts.telegram_mode);
       })
       .catch(() => {});
 
@@ -173,10 +169,6 @@ function UniversitetRegistrationContent() {
     setErrorMessage(null);
     setSuccessMessage(null);
     setTelegramVerified(false);
-    setBotStarted(false);
-    setBotMessage(null);
-    setBotDeliveredOtp(null);
-    setBotContactPhone(phone.trim());
 
     try {
       const res = await issueAuthChallenge("PHONE", phone.trim(), "REGISTER", deliveryMethod);
@@ -196,66 +188,6 @@ function UniversitetRegistrationContent() {
       }
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : "Xatolik yuz berdi.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBotStart = async () => {
-    if (!challengeId) return;
-    setIsLoading(true);
-    setErrorMessage(null);
-    setBotMessage(null);
-    try {
-      const res = await sendTelegramBotUpdate({
-        challenge_id: challengeId,
-        message: {
-          from: { id: telegramUserId, first_name: displayName || "OTM vakili" },
-          chat: { id: telegramUserId, type: "private" },
-          text: `/start ${challengeId}`,
-        },
-      });
-      setBotStarted(true);
-      setBotMessage(res.bot_message || "Bot ishga tushdi. Endi telefon raqamingizni yuboring.");
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Botni ishga tushirishda xatolik.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBotShareContact = async () => {
-    if (!challengeId) return;
-    setIsLoading(true);
-    setErrorMessage(null);
-    setBotMessage(null);
-    try {
-      const res = await sendTelegramBotUpdate({
-        challenge_id: challengeId,
-        message: {
-          from: { id: telegramUserId, first_name: displayName || "OTM vakili" },
-          chat: { id: telegramUserId, type: "private" },
-          contact: {
-            phone_number: botContactPhone.trim() || phone.trim(),
-            first_name: displayName || "OTM vakili",
-            user_id: telegramUserId,
-          },
-        },
-      });
-      if (res.telegram_verified) {
-        setTelegramVerified(true);
-      }
-      if (res.otp_code) {
-        setBotDeliveredOtp(res.otp_code);
-        setOtpCode(res.otp_code);
-      }
-      setBotMessage(
-        res.bot_message || "Raqam mos keldi va tasdiqlandi! Endi quyidagi tasdiqlash kodini kiriting."
-      );
-    } catch (err: unknown) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Telegram raqamini tasdiqlashda xatolik."
-      );
     } finally {
       setIsLoading(false);
     }
@@ -471,6 +403,8 @@ function UniversitetRegistrationContent() {
               </button>
               <button
                 type="button"
+                disabled={telegramMode === "DISABLED"}
+                title={telegramMode === "DISABLED" ? "Telegram bot hozircha ulanmagan — SMS orqali davom eting" : undefined}
                 onClick={() => {
                   setDeliveryMethod("TELEGRAM");
                   setChallengeId(null);
@@ -519,48 +453,19 @@ function UniversitetRegistrationContent() {
               </form>
             ) : (
               <div className="space-y-4">
-                {deliveryMethod === "TELEGRAM" && !telegramVerified && (
-                  <div className="rounded-xl border border-indigo-500/25 bg-indigo-500/[0.06] p-4 space-y-3 text-xs">
-                    <p className="font-semibold text-indigo-300">
-                      Telegram Bot orqali raqam mosligini tasdiqlash
-                    </p>
-                    {telegramDeepLink && (
-                      <a
-                        href={telegramDeepLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-indigo-400 hover:underline font-medium"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Botni ochish (@{telegramBotUsername})</span>
-                      </a>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={handleBotStart}
-                        disabled={isLoading || botStarted}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium disabled:opacity-50"
-                      >
-                        {botStarted ? "Bot ishga tushgan" : "1. Botni ishga tushirish (/start)"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleBotShareContact}
-                        disabled={isLoading || !botStarted}
-                        className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold disabled:opacity-50"
-                      >
-                        2. Telegram raqamini ulashish
-                      </button>
-                    </div>
-                    {botMessage && <p className="text-[11px] text-zinc-300">{botMessage}</p>}
-                  </div>
-                )}
-
-                {botDeliveredOtp && (
-                  <div className="rounded-lg border border-indigo-500/25 bg-indigo-500/10 px-3 py-2 text-xs text-indigo-300">
-                    Bot kodi: <span className="font-mono font-bold">{botDeliveredOtp}</span>
-                  </div>
+                {challengeId && deliveryMethod === "TELEGRAM" && (
+                  <TelegramVerification
+                    mode={telegramMode}
+                    challengeId={challengeId}
+                    phone={phone}
+                    botUsername={telegramBotUsername}
+                    deepLink={telegramDeepLink}
+                    verified={telegramVerified}
+                    onSimulatedCode={(code) => {
+                      setOtpCode(code);
+                      setTelegramVerified(true);
+                    }}
+                  />
                 )}
 
                 <form onSubmit={handleVerifyOtp} className="space-y-3">

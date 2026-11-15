@@ -34,8 +34,52 @@ audit = AppendOnlyAuditStore()
 TELEGRAM_SESSION_NAMESPACE = "telegram_bot_session"
 
 
+_RESOLVED_USERNAME: dict[str, str] = {}
+
+
 def get_bot_username() -> str:
-    return os.environ.get("TELEGRAM_BOT_USERNAME", "FlexBridgeAuthBot").lstrip("@")
+    """Bot @username for deep links: TELEGRAM_BOT_USERNAME, else resolved once via getMe."""
+    configured = os.environ.get("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@")
+    if configured:
+        return configured
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    if token:
+        if token not in _RESOLVED_USERNAME:
+            api_base = os.environ.get("TELEGRAM_API_BASE_URL", "https://api.telegram.org").rstrip("/")
+            try:
+                with httpx.Client(timeout=5.0, follow_redirects=False) as client:
+                    data = client.get(f"{api_base}/bot{token}/getMe").json()
+                username = (data.get("result") or {}).get("username") if data.get("ok") else None
+            except Exception as exc:
+                logger.warning("Telegram getMe failed (%s)", type(exc).__name__)
+                username = None
+            if not username:
+                return "FlexBridgeAuthBot"
+            _RESOLVED_USERNAME[token] = str(username)
+        return _RESOLVED_USERNAME[token]
+    return "FlexBridgeAuthBot"
+
+
+def telegram_mode() -> str:
+    """LIVE when a bot token is configured; SIMULATION only when explicitly enabled
+    for local staging tests (and never alongside a real token); otherwise DISABLED.
+
+    In SIMULATION the webhook is unauthenticated and echoes the OTP so scripted
+    tests can run without Telegram. It must never be enabled on a public host.
+    """
+    if os.environ.get("TELEGRAM_BOT_TOKEN", "").strip():
+        return "LIVE"
+    if os.environ.get("TELEGRAM_SIMULATION_MODE", "").strip().lower() in ("1", "true", "yes"):
+        return "SIMULATION"
+    return "DISABLED"
+
+
+# Fields that may leave the backend in LIVE mode: never the OTP or the bot text that contains it.
+PUBLIC_RESULT_FIELDS = ("ok", "step", "telegram_verified", "delivery_status")
+
+
+def public_result(result: dict[str, Any]) -> dict[str, Any]:
+    return {key: result[key] for key in PUBLIC_RESULT_FIELDS if key in result}
 
 
 def _normalize_telegram_phone(raw_phone: str) -> str:

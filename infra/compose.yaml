@@ -25,6 +25,14 @@ x-app: &app
     PAYMENT_GATEWAY_URL: ${PAYMENT_GATEWAY_URL:-}
     PAYMENT_GATEWAY_TOKEN: ${PAYMENT_GATEWAY_TOKEN:-}
     FLEXBRIDGE_ENV: production
+    # Telegram phone verification. Put TELEGRAM_BOT_TOKEN (from @BotFather) in infra/.env
+    # to switch to the real bot (LIVE); the telegram-bot service then polls Telegram.
+    # Without a token this local staging stack keeps the scripted SIMULATION mode
+    # (unauthenticated webhook that echoes the OTP) - never enable that on a public host.
+    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+    TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+    TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    TELEGRAM_SIMULATION_MODE: ${TELEGRAM_SIMULATION_MODE:-true}
 
 services:
   postgres:
@@ -155,6 +163,18 @@ services:
       OUTBOX_WORKER_KEY: identity
     mem_limit: 256m
     cpus: 0.5
+    depends_on:
+      pgbouncer: {condition: service_started}
+      migrate: {condition: service_completed_successfully}
+
+  telegram-bot:
+    <<: *app
+    restart: unless-stopped
+    command: ["python", "-m", "app.workers.telegram_bot_poller"]
+    environment:
+      <<: *app-env
+    mem_limit: 256m
+    cpus: 0.25
     depends_on:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
