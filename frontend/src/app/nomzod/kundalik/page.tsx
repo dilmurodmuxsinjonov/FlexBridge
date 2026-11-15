@@ -312,120 +312,63 @@ export default function CandidateKundalikPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans">
-      {/* Top Banner / Breadcrumb */}
-      <div className="border-b border-white/5 bg-[#121214]/50 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-zinc-400">
-            <Link href="/" className="hover:text-zinc-200 transition-colors">
-              Bosh sahifa
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-            <Link href="/nomzod/arizalar" className="hover:text-zinc-200 transition-colors">
-              Mening arizalarim
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-zinc-100 font-medium">Amaliyot Kundaligi</span>
+    <div className="w-full flex flex-col gap-6 font-sans text-zinc-100">
+      {/* Page Status Bar */}
+      <section className="rounded-xl border border-sky-500/20 bg-surface-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-sky-400 font-semibold uppercase tracking-wider mb-1">
+            <FileCheck className="w-3.5 h-3.5" />
+            <span>Amaliyot Kundaligi & E-Imzo</span>
           </div>
-
-          <div className="flex items-center gap-3">
-            {authLoading ? (
-              <div className="w-20 h-7 bg-zinc-800 animate-pulse rounded" />
-            ) : user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-zinc-400 font-mono">
-                  ID: {user.user_id.slice(0, 8)}...
-                </span>
-                <button
-                  onClick={async () => {
-                    await logoutUser();
-                    setUser(null);
-                  }}
-                  className="text-xs text-zinc-500 hover:text-red-400 transition-colors flex items-center gap-1"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  Chiqish
-                </button>
+          <h1 className="font-heading text-lg md:text-xl font-bold text-white tracking-tight">
+            Elektron Amaliyot Kundaligi
+          </h1>
+          <p className="text-xs text-zinc-400 mt-1">
+            Kunlik bajarilgan vazifalar hisoboti, mentor bahosi va universitet akademik tasdig‘i
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {selectedPlacement && (
+            <div className="flex items-center gap-2.5 bg-surface-lowest border border-sky-500/20 rounded-xl px-3.5 py-2">
+              <Clock className="w-4 h-4 text-sky-400" />
+              <div>
+                <div className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">Bajarilgan soat</div>
+                <div className="text-sm font-bold text-white tabular-nums">
+                  {totalCompletedHours} <span className="text-xs text-zinc-500 font-normal">/ 200 soat</span>
+                </div>
               </div>
-            ) : (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
-              >
-                Kirish
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        {/* Sub-Navigation between Candidate Pages */}
-        <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 mb-6 text-xs overflow-x-auto">
-          <Link
-            href="/nomzod"
-            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-          >
-            Kasbiy Profil
-          </Link>
-          <Link
-            href="/nomzod/arizalar"
-            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-          >
-            Mening Arizalarim
-          </Link>
-          <Link
-            href="/nomzod/shartnomalar"
-            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-          >
-            Shartnomalar & Amaliyot
-          </Link>
-          <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
-            Amaliyot Kundaligi
-          </span>
-          <Link
-            href="/nomzod/baholar"
-            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-          >
-            Baholar & Sharhlar
-          </Link>
-          <Link
-            href="/nomzod/saqlanganlar"
-            className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-          >
-            Saqlangan E&apos;lonlar
-          </Link>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white flex items-center gap-3">
-                <Calendar className="w-7 h-7 text-blue-500" />
-                Elektron Amaliyot Kundaligi
-              </h1>
-              <p className="text-sm text-zinc-400 mt-1">
-                Kunlik bajarilgan vazifalar hisoboti, mentor bahosi va universitet akademik tasdig‘i
-              </p>
             </div>
-
-            {selectedPlacement && (
-              <div className="flex items-center gap-3 bg-[#121214] border border-white/5 rounded-xl px-4 py-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-zinc-400 uppercase tracking-wider font-mono">Bajarilgan soat</div>
-                  <div className="text-lg font-bold text-white tabular-nums">
-                    {totalCompletedHours} <span className="text-xs text-zinc-500 font-normal">/ 200 soat</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
+          {authLoading ? (
+            <div className="w-20 h-7 bg-zinc-800 animate-pulse rounded" />
+          ) : user ? (
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs text-zinc-400 font-mono">
+                ID: {user.user_id.slice(0, 8)}...
+              </span>
+              <button
+                onClick={async () => {
+                  await logoutUser();
+                  setUser(null);
+                }}
+                className="text-xs text-zinc-400 hover:text-rose-400 transition-colors flex items-center gap-1"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Chiqish
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="text-xs px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors"
+            >
+              Kirish
+            </button>
+          )}
         </div>
+      </section>
 
+      <div className="w-full">
         {/* Notifications */}
         {notification && (
           <div
@@ -943,7 +886,7 @@ export default function CandidateKundalikPage() {
             <InternshipDocumentsHub party="CANDIDATE" placementId={selectedPlacement.id} />
           </div>
         )}
-      </main>
+      </div>
 
       {/* Auth Modal */}
       <AuthModal

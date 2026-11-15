@@ -1677,3 +1677,21 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
 
 
 
+
+
+## LOG-155 / Role-Differentiated Portal UI, Role-Aware Navigation & Workspace Layouts (FB-206, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #206, Branch `feature/206-role-based-portal-ui-redesign`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **Explicit Exclusions Preserved**: Verified Skill Badge (`1.1`) and AI Job Match Coach (`1.2`) remain excluded from `/nomzod`.
+- **Role-Based Frontend Architecture Implemented**:
+  - **Role-Adaptive Global Header (`frontend/src/components/Navbar.tsx`) & Auth Event Sync (`frontend/src/lib/api.ts`)**: Replaced mixed all-role navigation with dynamic persona themes (`PUBLIC`, `CANDIDATE` Sky Blue, `EMPLOYER` Emerald, `UNIVERSITY` Indigo, `OPERATOR` Amber/SOC), compact `Portallar` cross-role switcher, and live session status + `Chiqish` action synced via `flexbridge:auth-changed` custom event.
+  - **Talaba / Nomzod Workspace Shell (`frontend/src/app/nomzod/layout.tsx` + 8 inner `/nomzod/*` routes)**: Unified Sky-Blue student sidebar (`lg:w-[250px]` grouped vertical rail + mobile compact pill bar) across `/nomzod`, `/nomzod/arizalar`, `/nomzod/saqlanganlar`, `/nomzod/shartnomalar`, `/nomzod/kundalik`, `/nomzod/baholar`, `/nomzod/bildirishnomalar`, `/nomzod/xavfsizlik`, and `/nomzod/yordam`; removed duplicate inline subnav bars cleanly.
+  - **Public Storefront (`frontend/src/app/page.tsx`) & Split Onboarding (`/kirish`, `/royxatdan-otish`)**: Asymmetric 2-column marketplace hero with quick filter presets and 3-portal role entry matrix on `/`, plus clean architectural 2-column role showcase layout on auth pages.
+  - **Korxona HR (`frontend/src/app/employer/page.tsx`)**: Emerald corporate accent header (`border-t-emerald-500`) + grouped left vertical HR navigation rail (`Nomzodlar Kanbani`, `Nomzod Qidiruv`, `Mentorlik & Kundaliklar`, `Tashkilot & Jamoa`, `To‘lovlar & Kvotalar`).
+  - **Universitet / OTM (`frontend/src/app/university/page.tsx`)**: Indigo Academic Deanery crest header (`border-t-indigo-500`) with semester queue/assignment telemetry + grouped academic registry sidebar (`queue`, `assignments`, `documents`, `coordinator`, `timetable`, `exports`, `analytics`).
+  - **Operator SOC (`frontend/src/app/operator/page.tsx`)**: Amber/Rose high-contrast SOC terminal header (`border-t-amber-500`) + numbered monospace left security command rail (`01 // AUDIT` .. `05 // MOLIYA & LEDGER`).
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - Docker `frontend` production build & container startup succeeded cleanly; all 18 frontend routes returned SSR HTTP 200.
+  - Master 31-suite regression runner `scripts/run_all_staging_tests.py`: **ALL 31/31 TEST SUITES PASSED 100% GREEN in 78.94s (zero regressions)**.

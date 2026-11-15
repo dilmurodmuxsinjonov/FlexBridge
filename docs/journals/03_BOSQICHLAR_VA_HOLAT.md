@@ -1284,3 +1284,13 @@ Keyingi kichik qadam:
 
 
 
+
+
+### 2026-11-15 | LOG-155 | Issue #206 (`feature/206-role-based-portal-ui-redesign`) -> Har bir foydalanuvchi turi uchun alohida rol-asosli ko‘rinish va kabinet arxitekturasi
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (ALL 31/31 STAGING TEST SUITES GREEN)**.
+- **Nima Qilindi**:
+  * **Rolga Mos Global Navigatsiya (`Navbar.tsx`)**: Barcha 9 linkni hammaga ko‘rsatish o‘rniga joriy rol/hududga (`PUBLIC`, `CANDIDATE` Sky Blue, `EMPLOYER` Emerald, `UNIVERSITY` Indigo, `OPERATOR` Amber/SOC) mos menyu, jonli sessiya indikatori va `Portallar` almashtirgichi joriy etildi.
+  * **Talaba / Nomzod Kabineti (`/nomzod/*`, `app/nomzod/layout.tsx`)**: Barcha 9 talaba sahifasini birlashtiruvchi chap Yon Panel (Sky Blue) qo‘shildi, takroriy ichki menyular tozalandi (`1.1` va `1.2` qo‘shilmadi).
+  * **Ommaviy Katalog (`/`) & Auth (`/kirish`, `/royxatdan-otish`)**: 2 ustunli assimetrik qidiruv + 3 ta rol kirish kartasi (`/`), hamda rolga xos tushuntirish panelli 2 ustunli kirish/ro‘yxatdan o‘tish dizayni.
+  * **Korxona (`/employer`), Universitet (`/university`), Operator (`/operator`)**: Har biri uchun mustaqil rang identifikatsiyasi (`Emerald`, `Indigo`, `Amber/SOC`), chap vertikal boshqaruv paneli va rolga xos sarlavha panellari yaratildi.
+  * **To'liq Tekshiruv**: `npx tsc --noEmit`, Docker production build (18 ta sahifa SSR HTTP 200) va barcha **31/31 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (78.94s)**.

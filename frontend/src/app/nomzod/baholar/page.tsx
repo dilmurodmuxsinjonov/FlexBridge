@@ -170,48 +170,8 @@ export default function CandidateRatingsPage() {
   const agg = data?.aggregate;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-6 md:p-10 font-sans">
-      {/* Sub-Navigation */}
-      <div className="max-w-6xl mx-auto mb-8 flex items-center space-x-2 border-b border-zinc-800 pb-4 overflow-x-auto text-sm">
-        <Link
-          href="/nomzod"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Mening Profilim
-        </Link>
-        <Link
-          href="/nomzod/arizalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Mening Arizalarim
-        </Link>
-        <Link
-          href="/nomzod/shartnomalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Shartnomalar & Amaliyot
-        </Link>
-        <Link
-          href="/nomzod/kundalik"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Amaliyot Kundaligi
-        </Link>
-        <Link
-          href="/nomzod/baholar"
-          className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800/80 text-zinc-100 font-medium transition-colors whitespace-nowrap"
-        >
-          Baholar & Sharhlar
-        </Link>
-        <Link
-          href="/nomzod/saqlanganlar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Saqlangan E&apos;lonlar
-        </Link>
-      </div>
-
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="w-full text-zinc-100 font-sans">
+      <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

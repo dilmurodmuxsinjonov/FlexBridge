@@ -73,7 +73,7 @@ export default function NotificationsInboxPage() {
   const unreadCount = items.filter((i) => !i.is_read).length;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 px-4 py-8 md:px-8 max-w-6xl mx-auto">
+    <div className="w-full text-zinc-100">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.08] pb-6 mb-8">
         <div>

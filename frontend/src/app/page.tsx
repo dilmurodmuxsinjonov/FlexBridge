@@ -192,49 +192,150 @@ export default function StudentPortal() {
 
   return (
     <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-8">
-      <section className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-surface-card p-5 md:p-7">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Ommaviy katalog</p>
-          <h1 className="font-heading text-2xl font-bold text-white md:text-3xl">Ish va amaliyot imkoniyatlari</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
-            Tasdiqlangan tashkilotlarning e’lonlarini qidiring. Natijalar ommaviy katalogdan olinadi.
-          </p>
-          <form onSubmit={submitFilters} className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_170px_170px_auto]">
-            <label className="relative block">
-              <span className="sr-only">Lavozim yoki ko‘nikma</span>
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
-              <input
-                id="opportunity-query"
-                type="search"
-                value={draftQuery}
-                onChange={(event) => setDraftQuery(event.target.value)}
-                placeholder="Lavozim yoki ko‘nikma"
-                className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
-              />
-            </label>
-            <label>
-              <span className="sr-only">Hudud</span>
-              <select id="opportunity-region" value={draftRegion} onChange={(event) => setDraftRegion(event.target.value)} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
-                <option value="">Barcha hududlar</option>
-                <option value="Toshkent">Toshkent</option>
-                <option value="Samarqand">Samarqand</option>
-                <option value="Farg">Farg‘ona</option>
-                <option value="Buxoro">Buxoro</option>
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">To‘lov turi</span>
-              <select id="opportunity-payment" value={draftPaid} onChange={(event) => setDraftPaid(event.target.value as Filters["paid"])} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
-                <option value="">Barcha to‘lovlar</option>
-                <option value="true">To‘lovli</option>
-                <option value="false">To‘lovsiz</option>
-              </select>
-            </label>
-            <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary">
-              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Qidirish
-            </button>
-          </form>
+      <section className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 md:p-7">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-center">
+          {/* Left: Discovery Search Column */}
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+              <BriefcaseBusiness className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Ommaviy katalog</span>
+            </div>
+            <h1 className="mt-3 font-heading text-2xl font-bold tracking-tight text-white md:text-4xl">
+              Ish va amaliyot imkoniyatlari
+            </h1>
+            <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-zinc-400">
+              Dars jadvalingizga mos smenali ishlar va rasmiy dual ta’lim amaliyotlarini toping. Faqat tasdiqlangan tashkilotlar e’lonlari ko‘rsatiladi.
+            </p>
+
+            <form onSubmit={submitFilters} className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_150px_auto]">
+              <label className="relative block">
+                <span className="sr-only">Lavozim yoki ko‘nikma</span>
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
+                <input
+                  id="opportunity-query"
+                  type="search"
+                  value={draftQuery}
+                  onChange={(event) => setDraftQuery(event.target.value)}
+                  placeholder="Lavozim yoki ko‘nikma"
+                  className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                />
+              </label>
+              <label>
+                <span className="sr-only">Hudud</span>
+                <select id="opportunity-region" value={draftRegion} onChange={(event) => setDraftRegion(event.target.value)} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
+                  <option value="">Barcha hududlar</option>
+                  <option value="Toshkent">Toshkent</option>
+                  <option value="Samarqand">Samarqand</option>
+                  <option value="Farg">Farg‘ona</option>
+                  <option value="Buxoro">Buxoro</option>
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">To‘lov turi</span>
+                <select id="opportunity-payment" value={draftPaid} onChange={(event) => setDraftPaid(event.target.value as Filters["paid"])} className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2.5 text-sm text-zinc-200 focus:border-primary focus:outline-none">
+                  <option value="">Barcha to‘lovlar</option>
+                  <option value="true">To‘lovli</option>
+                  <option value="false">To‘lovsiz</option>
+                </select>
+              </label>
+              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary">
+                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Qidirish
+              </button>
+            </form>
+
+            {/* Quick Preset Chips */}
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-zinc-500">Tezkor tanlov:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftRegion("Toshkent");
+                  setHistory([]);
+                  setCursor(null);
+                  setFilters((f) => ({ ...f, region: "Toshkent" }));
+                  setReload((v) => v + 1);
+                }}
+                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-300 hover:border-primary/40 hover:text-white transition-colors"
+              >
+                Toshkent sh.
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftPaid("true");
+                  setHistory([]);
+                  setCursor(null);
+                  setFilters((f) => ({ ...f, paid: "true" }));
+                  setReload((v) => v + 1);
+                }}
+                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+              >
+                Faqat to‘lovli
+              </button>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-zinc-400 hover:text-white transition-colors"
+              >
+                Barcha e’lonlar
+              </button>
+            </div>
+          </div>
+
+          {/* Right: 3-Portal Role Entry Matrix */}
+          <div className="grid gap-2.5 rounded-xl border border-white/[0.08] bg-surface-lowest/70 p-3.5">
+            <div className="px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+              Rolingiz bo‘yicha kabinetni tanlang
+            </div>
+            <Link
+              href="/nomzod"
+              className="group flex items-center justify-between rounded-xl border border-sky-500/20 bg-surface-card px-4 py-3 hover:border-sky-400/50 hover:bg-sky-500/[0.06] transition-colors"
+            >
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-sky-300 transition-colors">
+                  Talaba / Nomzod Kabineti
+                </p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Rezyume, HEMIS jadvali, arizalar va kundalik e-imzo
+                </p>
+              </div>
+              <span className="shrink-0 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold text-sky-400">
+                Talaba
+              </span>
+            </Link>
+            <Link
+              href="/employer"
+              className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-surface-card px-4 py-3 hover:border-emerald-400/50 hover:bg-emerald-500/[0.06] transition-colors"
+            >
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+                  Korxona & HR Markazi
+                </p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Vakansiya joylash, Kanban saralash va mentor tasdig‘i
+                </p>
+              </div>
+              <span className="shrink-0 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
+                Korxona
+              </span>
+            </Link>
+            <Link
+              href="/university"
+              className="group flex items-center justify-between rounded-xl border border-indigo-500/20 bg-surface-card px-4 py-3 hover:border-indigo-400/50 hover:bg-indigo-500/[0.06] transition-colors"
+            >
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">
+                  Universitet / OTM Portali
+                </p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Dekanat nazorati, dars jadvali va yig‘ma hisobotlar
+                </p>
+              </div>
+              <span className="shrink-0 rounded-md border border-indigo-500/25 bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-400">
+                OTM
+              </span>
+            </Link>
+          </div>
         </div>
       </section>
 

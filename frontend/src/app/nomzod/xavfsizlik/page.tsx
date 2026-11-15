@@ -257,8 +257,8 @@ export default function CandidateSecurityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full text-zinc-100">
+      <div className="w-full space-y-6">
         {/* Navigation Breadcrumb */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
           <Link href="/nomzod" className="hover:text-white transition flex items-center gap-1">

@@ -332,9 +332,9 @@ export default function CandidateApplicationsPage() {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-8">
+    <main className="w-full flex flex-col gap-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/[0.08] pb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-sky-500/15 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <Link href="/" className="text-xs text-zinc-400 hover:text-primary transition-colors">
@@ -384,43 +384,6 @@ export default function CandidateApplicationsPage() {
             </button>
           )}
         </div>
-      </div>
-
-      {/* Sub-Navigation between Candidate Pages */}
-      <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
-        <Link
-          href="/nomzod"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Kasbiy Profil
-        </Link>
-        <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
-          Mening Arizalarim
-        </span>
-        <Link
-          href="/nomzod/shartnomalar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Shartnomalar & Amaliyot
-        </Link>
-        <Link
-          href="/nomzod/kundalik"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Amaliyot Kundaligi
-        </Link>
-        <Link
-          href="/nomzod/baholar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Baholar & Sharhlar
-        </Link>
-        <Link
-          href="/nomzod/saqlanganlar"
-          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
-        >
-          Saqlangan E&apos;lonlar
-        </Link>
       </div>
 
       {/* Unauthenticated View */}

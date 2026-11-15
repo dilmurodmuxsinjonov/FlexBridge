@@ -1028,13 +1028,13 @@ export default function EmployerPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* AUTH STATUS & HEADER BAR */}
-      <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 shadow-lg">
+      {/* AUTH STATUS & CORPORATE HR HEADER BAR */}
+      <section className="w-full bg-surface-card border border-white/[0.08] border-t-2 border-t-emerald-500 rounded-xl p-5 shadow-lg">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                Ish Beruvchi Portali
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                Korxona HR &amp; Mentorlik Markazi
               </span>
               <span className="text-zinc-500 text-xs">• API-068 / API-082-086 / CAP-015</span>
               {currentUser ? (
@@ -1059,7 +1059,7 @@ export default function EmployerPortal() {
           <div className="flex flex-wrap items-center gap-2.5">
             {isAuthLoading ? (
               <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
@@ -1071,7 +1071,7 @@ export default function EmployerPortal() {
                     setCreateSuccess(null);
                     setCreateError(null);
                   }}
-                  className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                  className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Yangi e’lon joylash</span>
@@ -1089,7 +1089,7 @@ export default function EmployerPortal() {
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Tizimga kirish</span>
@@ -1101,8 +1101,8 @@ export default function EmployerPortal() {
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-surface-card/60 border border-white/[0.08] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+        <section className="w-full bg-surface-card/60 border border-emerald-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
             <Building className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">
@@ -1116,7 +1116,7 @@ export default function EmployerPortal() {
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg shadow-primary/25"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm"
           >
             <LogIn className="w-4 h-4" />
             <span>HR hisobi bilan kirish</span>
@@ -1252,102 +1252,123 @@ export default function EmployerPortal() {
             </div>
           )}
 
-          {/* PRIMARY WORKSPACE TABS */}
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
-            <button
-              type="button"
-              onClick={() => setActiveMainTab("KANBAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-                activeMainTab === "KANBAN"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
-              }`}
+          {/* PRIMARY WORKSPACE: CORPORATE LEFT HR RAIL + CONTENT PANEL */}
+          <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
+            <aside
+              aria-label="Korxona boshqaruv menyusi"
+              className="rounded-xl border border-emerald-500/20 bg-surface-card p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
             >
-              <Users className="w-4 h-4" />
-              <span>Nomzodlar Kanbani & Suhbatlar</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMainTab("MENTOR_HUB");
-                if (reviewQueue.length === 0 && !isLoadingQueue) {
-                  loadMentorQueue();
-                }
-                if (mentorAssignments.length === 0 && !isLoadingPlacements) {
-                  loadPlacements();
-                }
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-                activeMainTab === "MENTOR_HUB"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
-              }`}
-            >
-              <Award className="w-4 h-4" />
-              <span>Mentorlik & Amaliyot Kundaliklari</span>
-              {reviewQueue.filter((q) => q.is_escalated).length > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">
-                  {reviewQueue.filter((q) => q.is_escalated).length}
+              <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">
+                Rekruting &amp; Qabul
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveMainTab("KANBAN")}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                  activeMainTab === "KANBAN"
+                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Nomzodlar Kanbani</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("SEARCH_HUB");
+                  if (searchResults.length === 0 && !isLoadingSearch) {
+                    handleSearch();
+                  }
+                }}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all text-left whitespace-nowrap ${
+                  activeMainTab === "SEARCH_HUB"
+                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  <Search className="w-4 h-4 shrink-0" />
+                  <span>Nomzod Qidiruv</span>
                 </span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMainTab("ORG_HUB");
-                if (orgId.trim()) {
-                  loadOrgHubData(orgId.trim());
-                }
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-                activeMainTab === "ORG_HUB"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
-              }`}
-            >
-              <Building className="w-4 h-4" />
-              <span>Tashkilot & Jamoa Boshqaruvi</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMainTab("BILLING_HUB");
-                if (orgId.trim()) {
-                  loadBillingHubData(orgId.trim());
-                }
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-                activeMainTab === "BILLING_HUB"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
-              }`}
-            >
-              <CreditCard className="w-4 h-4" />
-              <span>To‘lovlar, Tariflar & Kvotalar</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMainTab("SEARCH_HUB");
-                if (searchResults.length === 0 && !isLoadingSearch) {
-                  handleSearch();
-                }
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-                activeMainTab === "SEARCH_HUB"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
-              }`}
-            >
-              <Search className="w-4 h-4" />
-              <span>Nomzodlar Qidiruv Markazi</span>
-              {searchTotal > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-muted text-primary-light">
-                  {searchTotal}
+                {searchTotal > 0 && (
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-[10px] font-mono text-emerald-300">
+                    {searchTotal}
+                  </span>
+                )}
+              </button>
+
+              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                Amaliyot &amp; E-Imzo
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("MENTOR_HUB");
+                  if (reviewQueue.length === 0 && !isLoadingQueue) {
+                    loadMentorQueue();
+                  }
+                  if (mentorAssignments.length === 0 && !isLoadingPlacements) {
+                    loadPlacements();
+                  }
+                }}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all text-left whitespace-nowrap ${
+                  activeMainTab === "MENTOR_HUB"
+                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  <Award className="w-4 h-4 shrink-0" />
+                  <span>Mentorlik &amp; Kundaliklar</span>
                 </span>
-              )}
-            </button>
-          </div>
+                {reviewQueue.filter((q) => q.is_escalated).length > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">
+                    {reviewQueue.filter((q) => q.is_escalated).length}
+                  </span>
+                )}
+              </button>
+
+              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                Korxona &amp; Moliya
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("ORG_HUB");
+                  if (orgId.trim()) {
+                    loadOrgHubData(orgId.trim());
+                  }
+                }}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                  activeMainTab === "ORG_HUB"
+                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <Building className="w-4 h-4 shrink-0" />
+                <span>Tashkilot &amp; Jamoa</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("BILLING_HUB");
+                  if (orgId.trim()) {
+                    loadBillingHubData(orgId.trim());
+                  }
+                }}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                  activeMainTab === "BILLING_HUB"
+                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <CreditCard className="w-4 h-4 shrink-0" />
+                <span>To‘lovlar &amp; Kvotalar</span>
+              </button>
+            </aside>
+
+            <div className="min-w-0 flex flex-col gap-6">
 
           {/* ----------------------------------------------------------------- */}
           {/* FB-150: NOMZODLAR BOSQICHLARI VA KANBAN BOSHQARUVI */}
@@ -4003,6 +4024,8 @@ export default function EmployerPortal() {
               </div>
             </div>
           )}
+            </div>
+          </div>
         </div>
       )}
 
