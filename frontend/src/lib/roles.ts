@@ -155,3 +155,26 @@ export function resolvePortalDashboard(roles?: string[] | null): {
     badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20",
   };
 }
+
+/**
+ * Operator console modules each platform role may open. Mirrors the backend
+ * guards (operator_security ADMIN_AUDIT_ROLES / ADMIN_OPS_ROLES / ADMIN_ONLY_ROLES,
+ * operator_finance FINANCE_ROLES, support_tickets STAFF_ROLES, moderation
+ * require_platform('MODERATOR')) so the UI neither fetches nor shows modules
+ * that would only answer 403. The backend remains the authority.
+ */
+export type OperatorModule = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_TICKETS" | "PLATFORM_HEALTH" | "FINANCE";
+
+const OPERATOR_MODULE_ROLES: Record<OperatorModule, readonly string[]> = {
+  AUDIT: ["ADMIN", "AUDITOR"],
+  VERIFICATION: ["MODERATOR"],
+  BREAK_GLASS: ["ADMIN", "SECURITY_LEAD", "OPERATIONS"],
+  SUPPORT_TICKETS: ["SUPPORT", "ADMIN", "MODERATOR"],
+  PLATFORM_HEALTH: ["ADMIN", "OPERATIONS", "SECURITY_LEAD", "AUDITOR"],
+  FINANCE: ["FINANCE", "ADMIN"],
+};
+
+export function canUseOperatorModule(roles: string[] | null | undefined, module: OperatorModule): boolean {
+  const upper = normalizeRoles(roles);
+  return upper.some((role) => OPERATOR_MODULE_ROLES[module].includes(role));
+}

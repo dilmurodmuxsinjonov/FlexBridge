@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canUseOperatorModule,
   isAcademicOnlyRoles,
   isEmployerOnlyRoles,
   isOperatorOnlyRoles,
@@ -78,5 +79,28 @@ describe("resolvePortalDashboard", () => {
 
   it("prefers the operator workspace over employer and academic grants", () => {
     expect(resolvePortalDashboard(["OWNER", "TEACHER", "ADMIN"]).portal).toBe("OPERATOR");
+  });
+});
+
+describe("canUseOperatorModule", () => {
+  it("lets a moderator open verification and support tickets only", () => {
+    const roles = ["CANDIDATE", "MODERATOR"];
+    expect(canUseOperatorModule(roles, "VERIFICATION")).toBe(true);
+    expect(canUseOperatorModule(roles, "SUPPORT_TICKETS")).toBe(true);
+    expect(canUseOperatorModule(roles, "AUDIT")).toBe(false);
+    expect(canUseOperatorModule(roles, "FINANCE")).toBe(false);
+    expect(canUseOperatorModule(roles, "PLATFORM_HEALTH")).toBe(false);
+  });
+
+  it("gives finance staff the finance module", () => {
+    expect(canUseOperatorModule(["FINANCE"], "FINANCE")).toBe(true);
+    expect(canUseOperatorModule(["FINANCE"], "AUDIT")).toBe(false);
+  });
+
+  it("gives admins every module except moderator-only verification", () => {
+    for (const m of ["AUDIT", "BREAK_GLASS", "SUPPORT_TICKETS", "PLATFORM_HEALTH", "FINANCE"] as const) {
+      expect(canUseOperatorModule(["admin"], m)).toBe(true);
+    }
+    expect(canUseOperatorModule(["ADMIN"], "VERIFICATION")).toBe(false);
   });
 });

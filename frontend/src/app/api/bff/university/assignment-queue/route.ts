@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get("limit") || "50";
     const after = searchParams.get("after");
 
-    // Auto-discover institution if omitted
+    // Auto-discover the coordinator's institution from GET /me/workspaces.
     if (!institutionId) {
-      const meRes = await fetch(`${backendInternalUrl}/api/v1/me`, {
+      const wsRes = await fetch(`${backendInternalUrl}/api/v1/me/workspaces`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -28,24 +28,17 @@ export async function GET(request: NextRequest) {
         },
         cache: "no-store",
       });
-
-      if (meRes.ok) {
-        const meData = await meRes.json();
-        // check institutions or scopes in meData
-        if (Array.isArray(meData.institutions) && meData.institutions.length > 0) {
-          institutionId = meData.institutions[0].id || meData.institutions[0].institution_id;
-        } else if (Array.isArray(meData.memberships)) {
-          const instMem = meData.memberships.find((m: { institution_id?: string }) => m.institution_id);
-          if (instMem) institutionId = instMem.institution_id;
-        }
+      if (wsRes.ok) {
+        const ws = await wsRes.json();
+        const institutions: Array<{ id: string; roles?: string[] }> = Array.isArray(ws.institutions) ? ws.institutions : [];
+        const coordinated = institutions.find((i) => (i.roles || []).includes("COORDINATOR"));
+        institutionId = (coordinated ?? institutions[0])?.id ?? null;
       }
     }
 
     if (!institutionId) {
-      return NextResponse.json(
-        { ok: false, error: "INSTITUTION_REQUIRED", message: "Muassasa identifikatori topilmadi yoki ko'rsatilmagan." },
-        { status: 400 }
-      );
+      // Not attached to any institution yet: an empty queue, not an error.
+      return NextResponse.json({ ok: true, contract_id: "API-103", institution_id: null, items: [], teachers: [], has_more: false });
     }
 
     const query = new URLSearchParams({ limit });

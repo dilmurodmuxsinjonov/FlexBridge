@@ -42,7 +42,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-background text-on-surface antialiased bg-grid-pattern selection:bg-[#D95F2B]/20 selection:text-[#D95F2B]">
         <ThemeProvider>
           <Navbar />
-          <div className="flex-1 w-full pb-28 lg:pl-16 2xl:pl-10">{children}</div>
+          <div className="flex-1 w-full pb-28 lg:pb-10">{children}</div>
           <Footer />
         </ThemeProvider>
       </body>

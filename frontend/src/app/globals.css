@@ -498,3 +498,51 @@ html:not(.dark) textarea {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Calm motion (2026-11-16 user request: fewer fast/"liquid" effects).
+   Buttons and cards no longer lift, bounce or sweep a glossy sheen on hover;
+   feedback is a short colour/brightness change and a 1px press.
+   --------------------------------------------------------------------------- */
+.skeuo-btn-obsidian::after,
+.skeuo-btn-accent::after,
+.skeuo-btn-secondary::after {
+  display: none;
+}
+
+.skeuo-btn-obsidian,
+.skeuo-btn-accent,
+.skeuo-btn-secondary {
+  transition: filter 160ms ease-out, box-shadow 160ms ease-out, transform 120ms ease-out;
+}
+
+.skeuo-btn-obsidian:hover,
+.skeuo-btn-accent:hover,
+.skeuo-btn-secondary:hover {
+  transform: none;
+}
+
+.skeuo-btn-obsidian:active,
+.skeuo-btn-accent:active,
+.skeuo-btn-secondary:active {
+  transform: translateY(1px);
+}
+
+.skeuo-card-interactive {
+  transition: border-color 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+.skeuo-card-interactive:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

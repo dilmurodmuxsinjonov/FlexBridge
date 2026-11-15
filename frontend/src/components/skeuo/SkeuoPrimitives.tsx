@@ -44,9 +44,8 @@ export function SkeuoButton({
 
   return (
     <motion.button
-      whileHover={prefersReduced || disabled ? undefined : { y: -1.5 }}
-      whileTap={prefersReduced || disabled ? undefined : { y: 2, scale: 0.982 }}
-      transition={{ type: "spring", stiffness: 540, damping: 32 }}
+      whileTap={prefersReduced || disabled ? undefined : { y: 1 }}
+      transition={{ duration: 0.12, ease: "easeOut" }}
       disabled={disabled}
       className={`group inline-flex items-center justify-center font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fb-accent)] disabled:opacity-50 disabled:pointer-events-none ${BUTTON_VARIANT_CLASS[variant]} ${BUTTON_SIZE_CLASS[size]} ${className}`}
       {...rest}
@@ -66,7 +65,7 @@ export function SkeuoButton({
 export function SkeuoRevealGrid({
   children,
   className = "",
-  stagger = 0.055,
+  stagger = 0.02,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -109,11 +108,10 @@ export function SkeuoRevealItem({
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 12 },
+        hidden: { opacity: 0 },
         visible: {
           opacity: 1,
-          y: 0,
-          transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+          transition: { duration: 0.2, ease: "easeOut" },
         },
       }}
       className={className}
@@ -228,9 +226,8 @@ export function SkeuoStatCard({
     <Wrapper
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      whileHover={prefersReduced ? undefined : { y: -2.5 }}
-      whileTap={prefersReduced || !onClick ? undefined : { y: 1.5, scale: 0.985 }}
-      transition={{ type: "spring", stiffness: 460, damping: 30 }}
+      whileTap={prefersReduced || !onClick ? undefined : { y: 1 }}
+      transition={{ duration: 0.12, ease: "easeOut" }}
       className={`skeuo-card skeuo-card-interactive relative overflow-hidden w-full rounded-[22px] p-4 text-left flex flex-col justify-between gap-2.5 transition-all ${
         active ? "ring-2 ring-[var(--fb-accent)]" : ""
       } ${onClick ? "cursor-pointer" : ""}`}
@@ -238,7 +235,7 @@ export function SkeuoStatCard({
       {active && (
         <span
           aria-hidden="true"
-          className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[var(--fb-accent)] shadow-[0_0_8px_rgba(217,95,43,0.75)] animate-pulse"
+          className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[var(--fb-accent)]"
         />
       )}
       <div className="flex items-start justify-between gap-3">
@@ -344,8 +341,7 @@ export function SkeuoToggle({
       >
         <motion.span
           layout
-          whileHover={{ scale: 1.06 }}
-          transition={{ type: "spring", stiffness: 540, damping: 32 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
           className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-white to-stone-200 ring-1 ring-black/10 shadow-[0_2px_6px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,1)] ${
             checked ? "ml-auto" : "mr-auto"
           }`}
@@ -372,6 +368,10 @@ export interface SkeuoVerticalMeterProps {
   compact?: boolean;
 }
 
+/**
+ * Progress summary card. Formerly a 3D "liquid glass flask"; replaced by a flat
+ * bar (same props) because the animated liquid effect was distracting.
+ */
 export function SkeuoVerticalMeter({
   title,
   percentage,
@@ -384,78 +384,27 @@ export function SkeuoVerticalMeter({
 }: SkeuoVerticalMeterProps) {
   const clamped = Math.max(0, Math.min(100, Math.round(percentage)));
   const palette = TONE_MAP[tone];
-  // Position the frosted percentage badge cleanly near liquid level without ever clipping the bottom rim
-  const badgeBottomPct = Math.min(64, Math.max(12, clamped - 14));
 
   return (
-    <div
-      className={`skeuo-card rounded-[22px] flex flex-col items-center text-center ${
-        compact ? "p-3 gap-2.5" : "p-4 gap-3"
-      }`}
-    >
-      {/* 3D Brushed Glass Cylindrical Vessel with Glossy Specular Highlight */}
-      <div
-        className={`relative rounded-full p-1.5 skeuo-well overflow-hidden flex items-end justify-center ${
-          compact ? "h-28 w-12" : "h-36 w-14"
-        }`}
-      >
-        {/* Convex Glass Cylinder Specular Reflection */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full z-20"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 36%, rgba(0,0,0,0.08) 100%)",
-          }}
-        />
-        {/* Laser-Etched Gauge Calibration Ticks */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-2 inset-y-3 z-20 flex flex-col justify-between"
-        >
-          <span className="h-[1px] w-2 bg-black/15 dark:bg-white/20 rounded-full" />
-          <span className="h-[1px] w-3 bg-black/20 dark:bg-white/25 rounded-full" />
-          <span className="h-[1px] w-2 bg-black/15 dark:bg-white/20 rounded-full" />
-        </div>
-        {clamped > 0 && (
-          <motion.div
-            initial={{ height: "0%" }}
-            animate={{ height: `${Math.max(14, clamped)}%` }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className={`w-full rounded-full bg-gradient-to-b ${palette.barFill} shadow-[0_2px_10px_rgba(0,0,0,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.5)] relative overflow-hidden`}
-          >
-            {/* Luminous Surface Meniscus */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-1 top-0.5 h-1 rounded-full bg-white/55 blur-[0.5px]"
-            />
-          </motion.div>
-        )}
-        {/* Floating Frosted Percentage Medallion */}
-        <motion.div
-          initial={false}
-          animate={{ bottom: `${badgeBottomPct}%` }}
-          transition={{ type: "spring", stiffness: 140, damping: 20 }}
-          className={`absolute left-1/2 -translate-x-1/2 z-30 rounded-full skeuo-card flex items-center justify-center shadow-[0_4px_12px_rgba(24,20,14,0.22)] ${
-            compact ? "h-8 w-8" : "h-9 w-9"
-          }`}
-        >
-          <span className="font-mono text-[10px] sm:text-[11px] font-bold text-[var(--fb-ink)] tabular-nums">
-            {clamped}%
-          </span>
-        </motion.div>
-      </div>
-
-      <div className="space-y-0.5 w-full min-w-0">
+    <div className={`skeuo-card rounded-[22px] flex flex-col text-left ${compact ? "p-3 gap-2" : "p-4 gap-3"}`}>
+      <div className="flex items-baseline justify-between gap-2 min-w-0">
         <div className="text-xs font-bold text-[var(--fb-ink)] truncate">{title}</div>
-        <div className="font-mono text-[11px] font-semibold text-[var(--fb-ink-secondary)] tabular-nums truncate">
-          {amountLabel}
-        </div>
-        {subtitle && (
-          <div className="text-[10px] text-[var(--fb-ink-muted)] truncate">{subtitle}</div>
-        )}
+        <div className="text-sm font-bold text-[var(--fb-ink)] tabular-nums shrink-0">{clamped}%</div>
       </div>
-
+      <div
+        className="h-2 w-full rounded-full bg-[var(--fb-well-deep)] overflow-hidden"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={clamped}
+        aria-label={title}
+      >
+        <div className={`h-full rounded-full ${palette.accentLine}`} style={{ width: `${clamped}%` }} />
+      </div>
+      <div className="flex items-center justify-between gap-2 text-[11px] min-w-0">
+        <span className="font-semibold text-[var(--fb-ink-secondary)] tabular-nums truncate">{amountLabel}</span>
+        {subtitle && <span className="text-[var(--fb-ink-muted)] truncate">{subtitle}</span>}
+      </div>
       {onAction && actionLabel && (
         <button
           type="button"
@@ -555,7 +504,7 @@ export function SkeuoLiveFeed({
     <div className="skeuo-card rounded-[22px] p-5 flex flex-col gap-3.5">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.75)] animate-pulse" />
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <h3 className="font-heading text-sm font-bold text-[var(--fb-ink)]">{title}</h3>
         </div>
         <span className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
@@ -659,6 +608,21 @@ export function SkeuoAreaChart({
   const linePath = buildSmoothSpline(points);
   const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${(padY + plotH).toFixed(1)} L ${points[0].x.toFixed(1)} ${(padY + plotH).toFixed(1)} Z`;
 
+  // A flat line of zeros says nothing; show a plain empty state instead.
+  if (safeSeries.every((item) => item.value === 0)) {
+    return (
+      <div className="skeuo-card rounded-[22px] p-5 space-y-3">
+        <div>
+          <h3 className="font-heading text-sm font-bold text-[var(--fb-ink)]">{title}</h3>
+          {subtitle && <p className="text-[11px] text-[var(--fb-ink-muted)]">{subtitle}</p>}
+        </div>
+        <div className="rounded-2xl skeuo-well px-4 py-8 text-center text-xs text-[var(--fb-ink-secondary)]">
+          Hozircha ko‘rsatish uchun ma’lumot yo‘q. Faoliyat boshlangach bu yerda o‘zgarishlar grafigi paydo bo‘ladi.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="skeuo-card rounded-[22px] p-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -677,7 +641,7 @@ export function SkeuoAreaChart({
           </div>
         ) : (
           <div className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 font-mono text-[10px] tabular-nums">
-            Dinamika • {safeSeries.length} nuqta
+            {safeSeries.length} ta ko‘rsatkich
           </div>
         )}
       </div>

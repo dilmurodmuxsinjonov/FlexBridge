@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { canUseOperatorModule, type OperatorModule } from "@/lib/roles";
 import {
   Lock,
   CheckCircle2,
@@ -59,14 +60,25 @@ import AuthModal from "@/components/AuthModal";
 import {
   SkeuoStatCard,
   SkeuoVerticalMeter,
-  SkeuoSegmented,
   SkeuoLiveFeed,
 } from "@/components/skeuo/SkeuoPrimitives";
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
+// Which permission each console tab needs (any one of them opens the tab).
+const TAB_MODULES: Array<[ActiveTab, OperatorModule[]]> = [
+  ["AUDIT", ["AUDIT"]],
+  ["VERIFICATION", ["VERIFICATION"]],
+  ["BREAK_GLASS", ["BREAK_GLASS"]],
+  ["SUPPORT_OPS", ["SUPPORT_TICKETS", "PLATFORM_HEALTH"]],
+  ["FINANCE", ["FINANCE"]],
+];
+
 export default function OperatorPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  // Roles of the signed-in operator, read by loaders so they skip modules that would answer 403.
+  const rolesRef = useRef<string[]>([]);
+  const allowed = useCallback((module: OperatorModule) => canUseOperatorModule(rolesRef.current, module), []);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("AUDIT");
@@ -169,6 +181,7 @@ export default function OperatorPortal() {
 
   // Load Audit Events (API-118)
   const loadAuditEvents = useCallback(async () => {
+    if (!allowed("AUDIT")) return;
     setIsLoadingEvents(true);
     setEventsError(null);
     try {
@@ -184,10 +197,11 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingEvents(false);
     }
-  }, []);
+  }, [allowed]);
 
   // Load Verification Cases (API-109)
   const loadVerificationCases = useCallback(async () => {
+    if (!allowed("VERIFICATION")) return;
     setIsLoadingCases(true);
     setCasesError(null);
     try {
@@ -203,9 +217,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingCases(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadSupportTickets = useCallback(async () => {
+    if (!allowed("SUPPORT_TICKETS")) return;
     setIsLoadingTickets(true);
     setTicketsError(null);
     try {
@@ -221,9 +236,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingTickets(false);
     }
-  }, [ticketFilterStatus, ticketFilterPriority]);
+  }, [allowed, ticketFilterStatus, ticketFilterPriority]);
 
   const loadRestoreRuns = useCallback(async () => {
+    if (!allowed("PLATFORM_HEALTH")) return;
     setIsLoadingRuns(true);
     setRunsError(null);
     try {
@@ -236,9 +252,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingRuns(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadAnalytics = useCallback(async () => {
+    if (!allowed("PLATFORM_HEALTH")) return;
     setIsLoadingAnalytics(true);
     setAnalyticsError(null);
     try {
@@ -250,13 +267,14 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingAnalytics(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadSupportOps = useCallback(async () => {
     await Promise.allSettled([loadSupportTickets(), loadRestoreRuns(), loadAnalytics()]);
   }, [loadSupportTickets, loadRestoreRuns, loadAnalytics]);
 
   const loadFinanceSummary = useCallback(async () => {
+    if (!allowed("FINANCE")) return;
     setIsLoadingFinance(true);
     setFinanceError(null);
     try {
@@ -268,9 +286,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingFinance(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadReconciliation = useCallback(async () => {
+    if (!allowed("FINANCE")) return;
     setIsLoadingReconciliation(true);
     setReconciliationError(null);
     try {
@@ -287,7 +306,7 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingReconciliation(false);
     }
-  }, [reconciliationProvider, reconciliationDiscrepancyOnly]);
+  }, [allowed, reconciliationProvider, reconciliationDiscrepancyOnly]);
 
   const loadFinanceHub = useCallback(async () => {
     await Promise.allSettled([loadFinanceSummary(), loadReconciliation()]);
@@ -317,7 +336,10 @@ export default function OperatorPortal() {
         if (!isMounted) return;
         setCurrentUser(user);
         setIsAuthLoading(false);
+        rolesRef.current = user?.roles ?? [];
         if (user) {
+          const firstTab = TAB_MODULES.find(([, mods]) => mods.some((m) => allowed(m)));
+          if (firstTab) setActiveTab((tab) => (TAB_MODULES.find(([t]) => t === tab)?.[1].some((m) => allowed(m)) ? tab : firstTab[0]));
           loadAuditEvents();
           loadVerificationCases();
           loadSupportOps();
@@ -331,7 +353,7 @@ export default function OperatorPortal() {
       isMounted = false;
       window.removeEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     };
-  }, [loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
+  }, [allowed, loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
 
   // Opening the support or finance tab refreshes it. Sign-in (auth sync above)
   // already loads every queue, so no effect is needed for user changes.
@@ -345,6 +367,7 @@ export default function OperatorPortal() {
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
+    rolesRef.current = user.roles ?? [];
     loadAuditEvents();
     loadVerificationCases();
     loadSupportOps();
@@ -566,7 +589,7 @@ export default function OperatorPortal() {
             ) : currentUser ? (
               <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                SOC konsol faol
+                Tizim ishlamoqda
               </span>
             ) : (
               <Link
@@ -674,18 +697,6 @@ export default function OperatorPortal() {
               />
             </section>
 
-            <SkeuoSegmented
-              layoutName="operatorWorkspaceTabs"
-              value={activeTab}
-              onChange={(next) => setActiveTab(next as ActiveTab)}
-              options={[
-                { id: "AUDIT", label: "Audit Jurnali", icon: FileCheck2, badge: auditEvents.length || undefined },
-                { id: "VERIFICATION", label: "KYB Tekshiruvi", icon: ClipboardCheck, badge: cases.length || undefined },
-                { id: "BREAK_GLASS", label: "Favqulodda Ruxsat", icon: ShieldAlert },
-                { id: "SUPPORT_OPS", label: "Murojaatlar", icon: LifeBuoy, badge: tickets.length || undefined },
-                { id: "FINANCE", label: "Moliya Markazi", icon: CreditCard },
-              ]}
-            />
           </div>
         );
       })()}
@@ -711,7 +722,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="font-mono text-[11px]">01 // Audit Jurnali</span>
+                <span className="text-xs">Audit jurnali</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] font-mono">
                 {auditEvents.length}
@@ -728,7 +739,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <ClipboardCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-[11px]">02 // KYC NAVBAT (109)</span>
+                <span className="text-xs">Tashkilotlarni tekshirish</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
                 {cases.length}
@@ -744,7 +755,7 @@ export default function OperatorPortal() {
               }`}
             >
               <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-              <span className="font-mono text-[11px]">03 // BREAK-GLASS</span>
+              <span className="text-xs">Favqulodda ruxsat</span>
             </button>
 
             <button
@@ -757,7 +768,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <LifeBuoy className="w-4 h-4 text-sky-400 shrink-0" />
-                <span className="font-mono text-[11px]">04 // SUPPORT SLA</span>
+                <span className="text-xs">Murojaatlar</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
                 {tickets.length}
@@ -774,7 +785,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-[11px]">05 // MOLIYA &amp; LEDGER</span>
+                <span className="text-xs">Moliya</span>
               </span>
               {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
                 <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
