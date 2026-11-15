@@ -15,11 +15,15 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Telegram calls this URL with the setWebhook secret_token; forward it so the
+    // backend can authenticate the update (LIVE mode). Browsers cannot supply it.
+    const telegramSecret = request.headers.get("x-telegram-bot-api-secret-token");
     const backendRes = await fetch(`${backendInternalUrl}/api/v1/auth/telegram/webhook`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...(telegramSecret ? { "X-Telegram-Bot-Api-Secret-Token": telegramSecret } : {}),
       },
       body: JSON.stringify(body || {}),
     });

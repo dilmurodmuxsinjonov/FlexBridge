@@ -1,4 +1,5 @@
 """IAM challenge, recovery and WebAuthn contracts. Secrets never enter URL parameters."""
+import hmac
 import os
 from typing import Literal,Any
 from uuid import UUID
@@ -7,6 +8,7 @@ from pydantic import BaseModel,ConfigDict,Field
 from sqlalchemy import select
 from app.api.dependencies import ActorContext,require_actor_context
 from app.db.storage import table,transaction
+from app.services.auth import AuthError
 from app.services.identity import identity_service
 from app.services.passkeys import passkey_service
 
@@ -49,8 +51,10 @@ def ip(request):return request.client.host if request.client else 'unknown'
 
 @router.get('/auth/options')
 def options():
-    from app.services.telegram_bot import get_bot_username
-    return {'channels':['PHONE','EMAIL'],'delivery_methods':['SMS','TELEGRAM'],
+    from app.services.telegram_bot import get_bot_username, telegram_mode
+    mode=telegram_mode()
+    return {'channels':['PHONE','EMAIL'],'delivery_methods':['SMS','TELEGRAM'] if mode!='DISABLED' else ['SMS'],
+        'telegram_mode':mode,
         'telegram_bot_username':get_bot_username(),'otp_expires_in':300,'otp_max_attempts':5,'resend_after':60,
         'terms_version':os.environ.get('TERMS_POLICY_VERSION'),'privacy_version':os.environ.get('PRIVACY_POLICY_VERSION')}
 
@@ -64,11 +68,34 @@ def challenge_status(id:UUID,request:Request):
     return identity_service.challenge_status(challenge_id=str(id),ip=ip(request))
 
 @router.post('/auth/telegram/webhook')
-def telegram_webhook(payload:TelegramWebhookInput,request:Request):
-    from app.services.telegram_bot import telegram_bot_service
+def telegram_webhook(payload:TelegramWebhookInput,request:Request,
+        x_telegram_bot_api_secret_token:str|None=Header(default=None)):
+    """Telegram Bot API webhook.
+
+    LIVE: only Telegram may call it (setWebhook secret_token checked in constant
+    time); the OTP is sent to the user's chat and never returned; errors answer
+    200 so Telegram does not retry (the bot already told the user what to do).
+    SIMULATION (local staging tests only): legacy unauthenticated echo.
+    """
+    from app.services.telegram_bot import public_result, telegram_bot_service, telegram_mode
+    mode=telegram_mode()
+    if mode=='DISABLED':
+        raise AuthError('TELEGRAM_DISABLED','Telegram verification is not configured',503)
     raw_update=payload.update if isinstance(payload.update,dict) else payload.model_dump(exclude={'update','challenge_id'},exclude_none=True)
-    return telegram_bot_service.handle_update(update=raw_update,ip=ip(request),
-        explicit_challenge_id=str(payload.challenge_id) if payload.challenge_id else None)
+    if mode=='SIMULATION':
+        return telegram_bot_service.handle_update(update=raw_update,ip=ip(request),
+            explicit_challenge_id=str(payload.challenge_id) if payload.challenge_id else None)
+    secret=os.environ.get('TELEGRAM_WEBHOOK_SECRET','')
+    if not secret:
+        raise AuthError('TELEGRAM_WEBHOOK_NOT_CONFIGURED','Set TELEGRAM_WEBHOOK_SECRET or use the polling worker',503)
+    if not x_telegram_bot_api_secret_token or not hmac.compare_digest(x_telegram_bot_api_secret_token,secret):
+        raise AuthError('TELEGRAM_WEBHOOK_FORBIDDEN','Invalid Telegram webhook secret',403)
+    sender=((raw_update.get('message') or {}).get('from') or {}).get('id')
+    try:
+        result=telegram_bot_service.handle_update(update=raw_update,ip=f'tg:{sender}' if sender else ip(request))
+    except AuthError as exc:
+        return {'ok':False,'code':exc.code}
+    return public_result(result)
 
 @router.post('/auth/challenges/{id}/resend',status_code=202)
 def resend(id:UUID,payload:ResendInput,request:Request,authorization:str|None=Header(default=None)):

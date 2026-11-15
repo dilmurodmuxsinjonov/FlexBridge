@@ -4260,6 +4260,7 @@ export interface AuthOptionsResponse {
   ok: boolean;
   channels: string[];
   delivery_methods?: string[];
+  telegram_mode?: "LIVE" | "SIMULATION" | "DISABLED";
   telegram_bot_username?: string;
   otp_expires_in: number;
   otp_max_attempts: number;

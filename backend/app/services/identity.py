@@ -46,6 +46,9 @@ class IdentityService:
             method=(delivery_method or 'EMAIL').upper()
             if method!='EMAIL':raise AuthError('INVALID_DELIVERY_METHOD','Use EMAIL delivery method for EMAIL channel',422)
         if method!='TELEGRAM':configuration()
+        else:
+            from app.services.telegram_bot import telegram_mode
+            if telegram_mode()=='DISABLED':raise AuthError('TELEGRAM_UNAVAILABLE','Telegram verification is not available; use SMS',503)
         digest('configuration','check');encrypt({})
         rate_limit('otp-ip',ip,20,600);rate_limit('otp-target',channel+':'+value,5,600)
         with transaction() as conn:
