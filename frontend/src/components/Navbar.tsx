@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
+import { isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
 
 type WorkspacePersona = "PUBLIC" | "CANDIDATE" | "EMPLOYER" | "UNIVERSITY" | "OPERATOR";
 
@@ -123,11 +124,15 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
   },
 };
 
+function isStudentOnlyUser(user: AuthUser | null): boolean {
+  return Boolean(user && isStudentOnlyRoles(user.roles));
+}
+
 function resolvePersonaFromRouteAndUser(
   pathname: string | null,
   user: AuthUser | null
 ): WorkspacePersona {
-  if (pathname?.startsWith("/nomzod")) return "CANDIDATE";
+  if (pathname?.startsWith("/nomzod") || pathname?.startsWith("/talaba")) return "CANDIDATE";
   if (pathname?.startsWith("/employer")) return "EMPLOYER";
   if (pathname?.startsWith("/university")) return "UNIVERSITY";
   if (pathname?.startsWith("/operator")) return "OPERATOR";
@@ -139,32 +144,7 @@ function resolvePersonaFromRouteAndUser(
 }
 
 function getDashboardForRoles(roles: string[]): { href: string; label: string; badgeClass: string } {
-  if (roles.includes("OPERATOR") || roles.includes("ADMIN") || roles.includes("AUDITOR")) {
-    return {
-      href: "/operator",
-      label: "SOC Terminal",
-      badgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20",
-    };
-  }
-  if (roles.includes("EMPLOYER") || roles.includes("ORGANIZATION") || roles.includes("HOST")) {
-    return {
-      href: "/employer",
-      label: "Korxona Kabineti",
-      badgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
-    };
-  }
-  if (roles.includes("ACADEMIC") || roles.includes("TEACHER") || roles.includes("UNIVERSITY")) {
-    return {
-      href: "/university",
-      label: "OTM Portali",
-      badgeClass: "border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20",
-    };
-  }
-  return {
-    href: "/nomzod",
-    label: "Talaba Kabineti",
-    badgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20",
-  };
+  return resolvePortalDashboard(roles);
 }
 
 export default function Navbar() {
@@ -206,14 +186,22 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const isAuthPage = pathname === "/kirish" || pathname === "/royxatdan-otish";
+  const isAuthPage =
+    pathname === "/kirish" ||
+    pathname === "/royxatdan-otish" ||
+    Boolean(pathname?.startsWith("/talaba/"));
   const personaKey = resolvePersonaFromRouteAndUser(pathname, currentUser);
   const theme = PERSONA_THEMES[personaKey];
   const userDashboard = currentUser ? getDashboardForRoles(currentUser.roles) : null;
+  const hidePortalSwitcher = personaKey === "CANDIDATE" || isStudentOnlyUser(currentUser);
+  const loginHref = personaKey === "CANDIDATE" ? "/talaba/kirish" : "/kirish";
+  const registerHref =
+    personaKey === "CANDIDATE" ? "/talaba/royxatdan-otish" : "/royxatdan-otish";
 
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
     router.refresh();
   };
 
@@ -268,7 +256,8 @@ export default function Navbar() {
             );
           })}
 
-          {/* Portal Switcher Dropdown for quick cross-role navigation */}
+          {/* Portal Switcher Dropdown for non-student & public visitors */}
+          {!hidePortalSwitcher && (
           <div className="relative shrink-0" ref={dropdownRef}>
             <button
               type="button"
@@ -339,6 +328,7 @@ export default function Navbar() {
               </div>
             )}
           </div>
+          )}
         </nav>
       ) : (
         <nav aria-label="Avtorizatsiya havolalari" className="hidden md:flex items-center gap-2">
@@ -387,14 +377,14 @@ export default function Navbar() {
         ) : (
           <>
             <Link
-              href="/kirish"
+              href={loginHref}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
             >
               <Lock className="h-3.5 w-3.5" />
               <span>Kirish</span>
             </Link>
             <Link
-              href="/royxatdan-otish"
+              href={registerHref}
               className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-hover transition-colors shadow-sm"
             >
               <span>Ro‘yxatdan o‘tish</span>

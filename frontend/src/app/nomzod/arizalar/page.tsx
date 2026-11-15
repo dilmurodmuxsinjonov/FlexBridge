@@ -1111,6 +1111,7 @@ export default function CandidateApplicationsPage() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        requiredPortal="CANDIDATE"
         onSuccess={(newUser) => {
           setUser(newUser);
           setShowAuthModal(false);

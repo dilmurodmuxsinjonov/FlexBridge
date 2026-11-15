@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch, setSessionCookie, verifyCsrfOrigin } from "@/lib/server/session";
+import { backendFetch, completeAuthenticatedSession, verifyCsrfOrigin } from "@/lib/server/session";
 
 export async function POST(request: Request) {
   if (!verifyCsrfOrigin(request)) {
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { mfa_ticket, code } = body || {};
+    const { mfa_ticket, code, portal } = body || {};
 
     if (!mfa_ticket || !code) {
       return NextResponse.json(
@@ -28,32 +28,23 @@ export async function POST(request: Request) {
 
     if (backendRes.ok && token) {
       const expiresIn = typeof data.expires_in === "number" ? data.expires_in : 43200;
-
-      let resolvedUserId = "";
-      let resolvedRoles: string[] = [];
-
-      try {
-        const meRes = await backendFetch("/api/v1/auth/me", { method: "GET" }, token);
-        if (meRes.ok) {
-          const meData = await meRes.json();
-          resolvedUserId = String(meData.user_id || "");
-          resolvedRoles = Array.isArray(meData.roles) ? meData.roles : [];
-        }
-      } catch {
-        // Fallback
-      }
-
-      await setSessionCookie({
-        token: token,
-        user_id: resolvedUserId,
-        roles: resolvedRoles,
-        expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+      const result = await completeAuthenticatedSession({
+        token,
+        expiresIn,
+        portal: typeof portal === "string" ? portal : undefined,
       });
+
+      if (!result.ok) {
+        return NextResponse.json(
+          { ok: false, error: result.error, message: result.message },
+          { status: result.status }
+        );
+      }
 
       return NextResponse.json({
         ok: true,
-        user_id: resolvedUserId,
-        roles: resolvedRoles,
+        user_id: result.user_id,
+        roles: result.roles,
       });
     }
 

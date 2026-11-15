@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Lock, Mail, KeyRound, AlertCircle, Loader2, X, ShieldCheck } from "lucide-react";
 import { loginUser, verifyMfa, AuthUser } from "@/lib/api";
 
@@ -10,6 +11,7 @@ interface AuthModalProps {
   onSuccess: (user: AuthUser) => void;
   title?: string;
   subtitle?: string;
+  requiredPortal?: "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR";
 }
 
 export default function AuthModal({
@@ -18,6 +20,7 @@ export default function AuthModal({
   onSuccess,
   title = "Tizimga kirish",
   subtitle = "Hisobingiz orqali FlexBridge xizmatlaridan foydalaning",
+  requiredPortal,
 }: AuthModalProps) {
   const [destination, setDestination] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +39,7 @@ export default function AuthModal({
     try {
       if (mfaTicket) {
         // MFA Verification step
-        const result = await verifyMfa(mfaTicket, mfaCode);
+        const result = await verifyMfa(mfaTicket, mfaCode, requiredPortal);
         if (result.ok && !result.mfa_required) {
           onSuccess({
             user_id: result.user_id,
@@ -49,7 +52,7 @@ export default function AuthModal({
         }
       } else {
         // Initial Login step
-        const result = await loginUser(destination.trim(), password);
+        const result = await loginUser(destination.trim(), password, undefined, requiredPortal);
         if (result.ok) {
           if (result.mfa_required) {
             setMfaTicket(result.mfa_ticket);
@@ -190,6 +193,19 @@ export default function AuthModal({
             )}
           </button>
         </form>
+
+        {requiredPortal === "CANDIDATE" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>Hisobingiz yo‘qmi?</span>
+            <Link
+              href="/talaba/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              Talaba sifatida ro‘yxatdan o‘tish →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

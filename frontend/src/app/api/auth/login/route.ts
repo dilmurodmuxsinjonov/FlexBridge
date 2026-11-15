@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { backendFetch, setSessionCookie, verifyCsrfOrigin } from "@/lib/server/session";
+import { backendFetch, completeAuthenticatedSession, verifyCsrfOrigin } from "@/lib/server/session";
 
 export async function POST(request: Request) {
   if (!verifyCsrfOrigin(request)) {
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { destination, password, channel, totp_code } = body || {};
+    const { destination, password, channel, totp_code, portal } = body || {};
 
     if (!password || (!destination && !body.user_id)) {
       return NextResponse.json(
@@ -59,33 +59,24 @@ export async function POST(request: Request) {
     // Handle 200: Successful Login
     if (backendRes.ok && token) {
       const expiresIn = typeof data.expires_in === "number" ? data.expires_in : 43200;
-
-      // Resolve user_id and roles from backend /api/v1/auth/me
-      let resolvedUserId = body.user_id ? String(body.user_id) : "";
-      let resolvedRoles: string[] = [];
-
-      try {
-        const meRes = await backendFetch("/api/v1/auth/me", { method: "GET" }, token);
-        if (meRes.ok) {
-          const meData = await meRes.json();
-          resolvedUserId = String(meData.user_id || resolvedUserId);
-          resolvedRoles = Array.isArray(meData.roles) ? meData.roles : [];
-        }
-      } catch {
-        // Fallback to basic fields
-      }
-
-      await setSessionCookie({
-        token: token,
-        user_id: resolvedUserId,
-        roles: resolvedRoles,
-        expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+      const result = await completeAuthenticatedSession({
+        token,
+        expiresIn,
+        fallbackUserId: body.user_id,
+        portal: typeof portal === "string" ? portal : undefined,
       });
+
+      if (!result.ok) {
+        return NextResponse.json(
+          { ok: false, error: result.error, message: result.message },
+          { status: result.status }
+        );
+      }
 
       return NextResponse.json({
         ok: true,
-        user_id: resolvedUserId,
-        roles: resolvedRoles,
+        user_id: result.user_id,
+        roles: result.roles,
       });
     }
 

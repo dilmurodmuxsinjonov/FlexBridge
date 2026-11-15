@@ -153,6 +153,17 @@ function KirishForm() {
 
       {/* Main Card */}
       <div className="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <Link
+          href="/talaba/kirish"
+          className="flex items-center justify-between gap-3 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] px-3.5 py-2.5 text-xs hover:bg-sky-500/10 transition-colors"
+        >
+          <div>
+            <p className="font-semibold text-sky-300">Talaba / Nomzodmisiz?</p>
+            <p className="text-[11px] text-zinc-400">Faqat talabalar uchun ajratilgan alohida kirish</p>
+          </div>
+          <span className="shrink-0 font-semibold text-sky-400">Talaba kirishi &rarr;</span>
+        </Link>
+
         {/* Status Alerts */}
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-xs text-rose-400">
@@ -364,10 +375,16 @@ export default function KirishPage() {
               </p>
             </div>
             <div className="space-y-2.5 pt-2 border-t border-white/[0.06] text-xs">
-              <div className="rounded-xl border border-sky-500/20 bg-sky-500/[0.04] p-3">
-                <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
+              <Link
+                href="/talaba/kirish"
+                className="block rounded-xl border border-sky-500/25 bg-sky-500/[0.06] p-3 hover:border-sky-400/50 hover:bg-sky-500/10 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
+                  <span className="text-[10px] font-semibold text-sky-400">Alohida kirish &rarr;</span>
+                </div>
                 <p className="text-zinc-400 text-[11px] mt-0.5">HEMIS jadvali, rezyume, arizalar va ikki tomonlama e-imzoli kundalik.</p>
-              </div>
+              </Link>
               <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3">
                 <p className="font-semibold text-emerald-300">Ish Beruvchi / Korxona</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">Nomzod Kanban, mentorlik tasdig‘i, jamoa va kvota boshqaruvi.</p>

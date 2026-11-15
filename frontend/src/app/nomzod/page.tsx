@@ -3248,6 +3248,9 @@ export default function CandidateProfileHub() {
       <AuthModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        requiredPortal="CANDIDATE"
+        title="Talaba / Nomzod kirishi"
+        subtitle="Faqat talaba kabineti va funksiyalari uchun hisobingizga kiring"
         onSuccess={(user) => {
           setCurrentUser(user);
           loadProfileData();
