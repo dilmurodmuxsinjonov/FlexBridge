@@ -1,18 +1,179 @@
-import { CircleHelp } from "lucide-react";
+import Link from "next/link";
+import {
+  ShieldCheck,
+  CheckCircle2,
+  FileText,
+  Lock,
+  Compass,
+  Briefcase,
+  Building2,
+  User,
+  Search,
+} from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="mt-auto w-full border-t border-white/[0.08] bg-surface-lowest px-4 py-6 text-xs text-zinc-400 md:px-8">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="font-heading font-semibold text-zinc-200">FlexBridge v1.4</p>
-          <p className="mt-1">Ommaviy e’lonlar sahifasi backend javobini ko‘rsatadi.</p>
+    <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
+      {/* Main Directory Links */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Column 1: Brand & Mission */}
+          <div className="space-y-3">
+            <Link href="/" className="inline-flex items-center gap-2 select-none group">
+              <div className="w-7 h-7 rounded bg-primary flex items-center justify-center text-white shadow-sm font-bold text-sm tracking-wider">
+                FB
+              </div>
+              <span className="font-heading font-bold text-base tracking-tight text-white group-hover:text-primary transition-colors">
+                FlexBridge
+              </span>
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-white/[0.06] text-primary border border-primary/20 tracking-wider">
+                v1.4
+              </span>
+            </Link>
+
+            <p className="text-[11px] text-zinc-400 leading-relaxed max-w-xs">
+              O&apos;zbekiston talabalari uchun moslashuvchan ish va amaliyot imkoniyatlarini taqdim etuvchi
+              yagona rasmiy ekotizim.
+            </p>
+
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>100% Tirik Staging Integratsiya</span>
+            </div>
+          </div>
+
+          {/* Column 2: Core Portals */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+              Platforma Portallari
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li>
+                <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
+                  <Search className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Bo‘sh Ish O‘rinlari Katalogi</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod" className="hover:text-white transition flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Nomzod & Talaba Kabineti</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Ish Beruvchi HR Kabineti</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Universitet Koordinatori</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Platforma Operatori SOC</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Candidate Services */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+              Nomzod Xizmatlari
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li>
+                <Link href="/nomzod/arizalar" className="hover:text-white transition">
+                  Arizalarim & Suhbatlar
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/shartnomalar" className="hover:text-white transition">
+                  Amaliyot Shartnomalari (API-030/050)
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/kundalik" className="hover:text-white transition">
+                  Kunlik Amaliyot Kundaligi
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/saqlanganlar" className="hover:text-white transition">
+                  Saqlangan E‘lonlar (Bookmarks)
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/baholar" className="hover:text-white transition">
+                  Reytinglar & Sharhlar
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/xavfsizlik" className="hover:text-white transition">
+                  Xavfsizlik, 2FA & Sessiyalar
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Legal & CMS */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+              Qonuniy & Yordam (CMS)
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li>
+                <Link href="/shartlar" className="hover:text-white transition flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-primary" />
+                  <span>Foydalanish Shartlari (Terms)</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/maxfiylik" className="hover:text-white transition flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Maxfiylik Siyosati (Privacy)</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/haqida" className="hover:text-white transition flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Platforma Haqida & Qo‘llanmalar</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/nomzod/yordam" className="hover:text-white transition">
+                  Texnik Qo‘llab-Quvvatlash & Chiptalar
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
-        <p className="inline-flex items-center gap-2 text-zinc-400">
-          <CircleHelp className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          Ish beruvchi, universitet va operator bo‘limlari hozircha maket.
-        </p>
+      </div>
+
+      {/* Bottom Legal Bar */}
+      <div className="border-t border-white/[0.06] bg-[#09090b] py-5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] text-zinc-500 font-mono">
+          <div className="flex flex-wrap items-center gap-4">
+            <p>© 2026 FlexBridge Inc. Barcha huquqlar himoyalangan.</p>
+            <span className="hidden sm:inline text-zinc-700">|</span>
+            <span className="flex items-center gap-1 text-zinc-400">
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+              O‘zR Mehnat Kodeksi 118-modda (kunlik 8-soatlik chegara)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span>HEMIS v3.2 Integratsiyasi</span>
+            <span className="text-zinc-700">•</span>
+            <span>SHA-256 Kriptografik Audit</span>
+          </div>
+        </div>
       </div>
     </footer>
   );
 }
+

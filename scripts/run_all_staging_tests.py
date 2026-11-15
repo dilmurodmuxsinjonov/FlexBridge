@@ -57,6 +57,7 @@ TEST_SCRIPTS = [
     "scripts/test_candidate_saved_notifications_staging.py",
     "scripts/test_candidate_enrollments_exceptions_staging.py",
     "scripts/test_user_security_sessions_staging.py",
+    "scripts/test_public_cms_footer_staging.py",
 ]
 
 def main():
