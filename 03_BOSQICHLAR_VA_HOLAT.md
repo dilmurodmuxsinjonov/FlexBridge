@@ -1213,7 +1213,13 @@ Keyingi kichik qadam:
 - **FB-176 (Operator Financial Summary, Gateway Reconciliation & Dual-Control Refund Approvals Hub)**:
   * 3 Next.js BFF marshruti: `/api/bff/operator/finance-summary`, `/api/bff/operator/reconciliation`, `/api/bff/operator/refunds/[id]/approve` (API-117, API-115, API-078).
   * Operator Portali 5-tabi `FINANCE` ("Moliya & Solishtiruv"), 4 ta KPI kartasi, rejalar taqsimoti, 4-ko‘z tamoyilidagi qaytarishlar va Zero-PII solishtiruvi.
-  * 17 ta staging test to'plami bo'yicha 160+/160+ test 100% Yashil (0 regressiya, 28.98s umumiy vaqt). PR #177 ochildi va birlashtirilmoqda.
+  * 17 ta staging test to'plami bo'yicha 160+/160+ test 100% Yashil (0 regressiya, 28.98s umumiy vaqt). PR #177 muvaffaqiyatli birlashtirildi (`3358723`).
+
+- **FB-178 (Candidate & User Center: Support Tickets, Privacy Rights & Notification Preferences Hub)**:
+  * 5 Next.js BFF marshruti: `/api/bff/me/support-tickets`, `/api/bff/support-tickets/[id]/messages`, `/api/bff/me/privacy-requests`, `/api/bff/operator/privacy-requests/[id]/resolve`, `/api/bff/me/notification-preferences` (API-063, API-064, API-062, API-114, API-059).
+  * Foydalanuvchi Markazi `/nomzod/yordam` sahifasi (Texnik yordam tiketlari, suhbat modali, GDPR EXPORT/DELETE/RECTIFY huquqlari va Bildirishnomalar matritsasi).
+  * 18 ta staging test to'plami bo'yicha 175+/175+ test 100% Yashil (0 regressiya, 32.36s umumiy vaqt). Staging suite `scripts/test_user_support_privacy_staging.py` 10/10 faza 100% GREEN.
+
 
 
 
