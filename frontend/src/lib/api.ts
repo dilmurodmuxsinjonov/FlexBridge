@@ -2308,5 +2308,155 @@ export async function deleteSavedOpportunity(id: string): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Employer Organization, Team & Verification Types & Methods (API-072, API-073, API-074, API-075, API-067)
+// ---------------------------------------------------------------------------
+
+export interface OrgCapabilityItem {
+  id?: string;
+  capability: "JOB_EMPLOYER" | "INTERNSHIP_HOST" | string;
+  status: "ACTIVE" | "VERIFIED" | "PENDING" | "NOT_REQUESTED" | string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface OrgMembershipItem {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  status: "ACTIVE" | "PENDING_APPROVAL" | "REVOKED" | string;
+  created_at?: string;
+  updated_at?: string;
+  accepted_at?: string | null;
+  revoked_at?: string | null;
+  role?: string;
+}
+
+export interface OrgVerificationCaseItem {
+  id: string;
+  kind: string;
+  status: string;
+  created_at?: string;
+  due_at?: string;
+  decision_reason?: string | null;
+}
+
+export interface OrgVerificationStatusResponse {
+  contract_id: string;
+  organization_id: string;
+  membership_id: string;
+  membership_status: string;
+  status?: string;
+  cases: OrgVerificationCaseItem[];
+  capabilities: OrgCapabilityItem[];
+}
+
+export interface InviteMemberPayload {
+  channel: "EMAIL" | "PHONE";
+  destination: string;
+  role_code: "HR" | "HOST_COORDINATOR" | "MENTOR" | "BILLING";
+}
+
+export interface RevokeMembershipPayload {
+  reason: string;
+}
+
+export async function fetchOrgCapabilities(
+  orgId: string
+): Promise<{ contract_id: string; items: OrgCapabilityItem[] }> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/capabilities`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ORG_CAPABILITIES_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { contract_id: string; items: OrgCapabilityItem[] };
+}
+
+export async function fetchOrgMemberships(
+  orgId: string
+): Promise<{ contract_id: string; organization_id: string; items: OrgMembershipItem[] }> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/memberships`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ORG_MEMBERSHIPS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { contract_id: string; organization_id: string; items: OrgMembershipItem[] };
+}
+
+export async function inviteOrgMember(
+  orgId: string,
+  payload: InviteMemberPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/invitations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "INVITE_ORG_MEMBER_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+export async function revokeOrgMembership(
+  orgId: string,
+  membershipId: string,
+  payload: RevokeMembershipPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/memberships/${encodeURIComponent(membershipId)}/revoke`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "REVOKE_ORG_MEMBERSHIP_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+export async function fetchOrgVerificationStatus(
+  orgId: string
+): Promise<OrgVerificationStatusResponse> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(orgId)}/verification`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ORG_VERIFICATION_STATUS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OrgVerificationStatusResponse;
+}
+
+
 
 
