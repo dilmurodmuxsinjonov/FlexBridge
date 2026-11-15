@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import {
   Lock,
@@ -313,8 +314,9 @@ export default function OperatorPortal() {
 
   useEffect(() => {
     let isMounted = true;
-    fetchAuthMe().then((user) => {
-      if (isMounted) {
+    const syncAuthAndQueues = () => {
+      fetchAuthMe().then((user) => {
+        if (!isMounted) return;
         setCurrentUser(user);
         setIsAuthLoading(false);
         if (user) {
@@ -323,10 +325,13 @@ export default function OperatorPortal() {
           loadSupportOps();
           loadFinanceHub();
         }
-      }
-    });
+      });
+    };
+    syncAuthAndQueues();
+    window.addEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     return () => {
       isMounted = false;
+      window.removeEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     };
   }, [loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
 
@@ -358,6 +363,7 @@ export default function OperatorPortal() {
     setTicketsError(null);
     setFinanceError(null);
     setReconciliationError(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
   };
 
   const handleLoginSuccess = (user: AuthUser) => {
@@ -573,14 +579,13 @@ export default function OperatorPortal() {
                 <span>Chiqish</span>
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => setIsLoginModalOpen(true)}
+              <Link
+                href="/operator/kirish"
                 className="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Operator sifatida kirish</span>
-              </button>
+              </Link>
             )}
           </div>
         </div>
@@ -600,14 +605,22 @@ export default function OperatorPortal() {
               Ushbu bo‘lim faqat vakolatli xavfsizlik auditorlari va tizim ma’murlari (ADMIN, AUDITOR, OPERATOR) uchun mo‘ljallangan.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-2 shadow-sm"
-          >
-            <LogIn className="w-4 h-4" />
-            <span>Auditor / Operator hisobi bilan kirish</span>
-          </button>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/operator/kirish"
+              className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-2 shadow-sm"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>SOC alohida kirishi</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsLoginModalOpen(true)}
+              className="px-4 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-300 transition-all"
+            >
+              Tezkor terminal kirishi
+            </button>
+          </div>
         </section>
       )}
 
@@ -2080,6 +2093,7 @@ export default function OperatorPortal() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
+        requiredPortal="OPERATOR"
         title="Operator Tizimiga Kirish"
         subtitle="Platforma xavfsizlik auditori yoki ma’muri hisob ma’lumotlarini kiriting"
       />

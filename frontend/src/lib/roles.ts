@@ -97,6 +97,14 @@ export function isOperatorRoles(roles?: string[] | null): boolean {
   return normalizeRoles(roles).some((role) => OPERATOR_ROLE_SET.has(role));
 }
 
+export function isOperatorOnlyRoles(roles?: string[] | null): boolean {
+  const upper = normalizeRoles(roles);
+  return (
+    upper.some((role) => OPERATOR_ROLE_SET.has(role)) &&
+    !upper.some((role) => EMPLOYER_ROLE_SET.has(role) || ACADEMIC_ROLE_SET.has(role))
+  );
+}
+
 export function isRoleAllowedForPortal(roles: string[], portal?: string): boolean {
   if (!portal) return true;
   const normalized = portal.trim().toUpperCase() as PortalScope;

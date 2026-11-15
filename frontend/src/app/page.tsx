@@ -372,6 +372,19 @@ export default function StudentPortal() {
                 </Link>
               </div>
             </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-surface-card/70 px-4 py-2.5">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-amber-300">Platforma Operatori & SOC</p>
+                <p className="text-[10px] text-zinc-500 truncate">Audit, moderatsiya va moliya nazorati</p>
+              </div>
+              <Link
+                href="/operator/kirish"
+                className="shrink-0 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors"
+              >
+                SOC kirishi →
+              </Link>
+            </div>
           </div>
         </div>
       </section>

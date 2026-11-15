@@ -230,6 +230,18 @@ export default function AuthModal({
             </Link>
           </div>
         )}
+        {requiredPortal === "OPERATOR" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>SOC maxsus kirish sahifasi:</span>
+            <Link
+              href="/operator/kirish"
+              onClick={onClose}
+              className="font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Operator alohida kirishi →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

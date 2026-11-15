@@ -153,7 +153,7 @@ function KirishForm() {
 
       {/* Main Card */}
       <div className="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <Link
             href="/talaba/kirish"
             className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] px-3 py-2.5 text-xs hover:bg-sky-500/10 transition-colors"
@@ -183,6 +183,16 @@ function KirishForm() {
               <p className="text-[11px] text-zinc-400">OTM kirishi</p>
             </div>
             <span className="shrink-0 font-semibold text-indigo-400">Kirish &rarr;</span>
+          </Link>
+          <Link
+            href="/operator/kirish"
+            className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-3 py-2.5 text-xs hover:bg-amber-500/10 transition-colors"
+          >
+            <div>
+              <p className="font-semibold text-amber-300">Operator / SOC</p>
+              <p className="text-[11px] text-zinc-400">Operator kirishi</p>
+            </div>
+            <span className="shrink-0 font-semibold text-amber-400">Kirish &rarr;</span>
           </Link>
         </div>
 
@@ -420,6 +430,13 @@ export default function KirishPage() {
               >
                 <p className="font-semibold text-indigo-300">Universitet / OTM &rarr;</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">Kafedra taqsimoti, dars jadvali integratsiyasi va yakuniy xulosalar.</p>
+              </Link>
+              <Link
+                href="/operator/kirish"
+                className="block rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-3 hover:border-amber-400/50 transition-colors"
+              >
+                <p className="font-semibold text-amber-300">Platforma Operatori (SOC) &rarr;</p>
+                <p className="text-zinc-400 text-[11px] mt-0.5">Hash-chain audit, KYB/OTM moderatsiyasi, moliya va xavfsizlik nazorati.</p>
               </Link>
             </div>
           </aside>

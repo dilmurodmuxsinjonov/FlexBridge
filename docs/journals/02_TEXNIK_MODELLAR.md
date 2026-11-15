@@ -477,3 +477,12 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - Added read-only `GET /api/v1/me/contacts` (allowlisted in `self_service`) and Next.js BFF routes for institution appointment inbox (`GET /api/bff/university/appointments`) and revision-checked consent (`POST /api/bff/university/appointments/[id]/consent`) with session cookie role refresh (`TEACHER`/`COORDINATOR`).
   - Enforced `portal="ACADEMIC"` on `/universitet/kirish` and `/university` `<AuthModal>` alongside `isAcademicRoles` boundary checking in `university/layout.tsx` and Indigo-scoped `Navbar.tsx`/`Footer.tsx`.
 - **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors), Docker `backend`/`frontend` build, `scripts/test_university_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**34/34 PASSED in 91.4s**). Frozen-main constraint preserved (`integration/r1-agent-collaboration`).
+
+
+## OP-ISO-FB214 — Platform Operator Isolated Login & SOC Role Boundary (2026-11-15)
+
+- **Scope**: `frontend/src/lib/roles.ts`, `frontend/src/app/operator/layout.tsx`, `frontend/src/app/operator/kirish/page.tsx`, `frontend/src/app/operator/page.tsx`, `frontend/src/components/AuthModal.tsx`, `Navbar.tsx`, `Footer.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/kirish/page.tsx`, `scripts/test_operator_isolated_login_staging.py`, `scripts/run_all_staging_tests.py`.
+- **Technical Architecture**:
+  - Added `isOperatorOnlyRoles(roles)` in `roles.ts` and Amber/SOC `OperatorLayout` guard rejecting non-platform roles on `/operator/*`.
+  - Enforced `portal="OPERATOR"` across password & TOTP MFA steps on `/operator/kirish` and `/operator/page.tsx` `<AuthModal>`, plus SOC-scoped `Navbar.tsx` & `Footer.tsx`.
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on new/shared files (0 errors), Docker `frontend` rebuild, `scripts/test_operator_isolated_login_staging.py` (4/4 phases PASS), `scripts/run_all_staging_tests.py` (**35/35 PASSED in 97.82s**). Frozen-main constraint retained.

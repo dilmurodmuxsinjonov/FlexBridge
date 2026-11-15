@@ -16,7 +16,12 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { fetchAuthMe, type AuthUser } from "@/lib/api";
-import { isAcademicOnlyRoles, isEmployerOnlyRoles, isStudentOnlyRoles } from "@/lib/roles";
+import {
+  isAcademicOnlyRoles,
+  isEmployerOnlyRoles,
+  isOperatorOnlyRoles,
+  isStudentOnlyRoles,
+} from "@/lib/roles";
 
 function isStudentOnlyUser(user: AuthUser | null): boolean {
   return Boolean(user && isStudentOnlyRoles(user.roles));
@@ -60,6 +65,12 @@ export default function Footer() {
     (Boolean(pathname?.startsWith("/university")) ||
       Boolean(pathname?.startsWith("/universitet")) ||
       Boolean(currentUser && isAcademicOnlyRoles(currentUser.roles)));
+  const isOperatorScope =
+    !isStudentScope &&
+    !isEmployerScope &&
+    !isUniversityScope &&
+    (Boolean(pathname?.startsWith("/operator")) ||
+      Boolean(currentUser && isOperatorOnlyRoles(currentUser.roles)));
   return (
     <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
       {/* Main Directory Links */}
@@ -99,10 +110,33 @@ export default function Footer() {
                   ? "Korxona Bo‘limlari"
                   : isUniversityScope
                     ? "OTM Bo‘limlari"
-                    : "Platforma Portallari"}
+                    : isOperatorScope
+                      ? "SOC Terminal Bo‘limlari"
+                      : "Platforma Portallari"}
             </h4>
             <ul className="space-y-2 text-[11px]">
-              {isUniversityScope ? (
+              {isOperatorScope ? (
+                <>
+                  <li>
+                    <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Operator SOC Terminali</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/operator/kirish" className="hover:text-white transition flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>SOC Alohida Kirishi</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
+                      <Search className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Bosh Sahifa & Katalog</span>
+                    </Link>
+                  </li>
+                </>
+              ) : isUniversityScope ? (
                 <>
                   <li>
                     <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
@@ -210,13 +244,38 @@ export default function Footer() {
           {/* Column 3: Services */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              {isUniversityScope
-                ? "OTM Xizmatlari"
-                : isEmployerScope
-                  ? "Korxona Xizmatlari"
-                  : "Nomzod Xizmatlari"}
+              {isOperatorScope
+                ? "SOC Xizmatlari"
+                : isUniversityScope
+                  ? "OTM Xizmatlari"
+                  : isEmployerScope
+                    ? "Korxona Xizmatlari"
+                    : "Nomzod Xizmatlari"}
             </h4>
-            {isUniversityScope ? (
+            {isOperatorScope ? (
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <Link href="/operator" className="hover:text-white transition">
+                    Hash-Chain Audit & Tizim Hodisalari
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/operator" className="hover:text-white transition">
+                    KYB, OTM & Talaba Moderatsiya Navbati
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/operator" className="hover:text-white transition">
+                    Moliya, Ledger & Qaytarish Nazorati
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/operator" className="hover:text-white transition">
+                    Yordam Tiketlari & Insidentlar
+                  </Link>
+                </li>
+              </ul>
+            ) : isUniversityScope ? (
               <ul className="space-y-2 text-[11px]">
                 <li>
                   <Link href="/university" className="hover:text-white transition">
