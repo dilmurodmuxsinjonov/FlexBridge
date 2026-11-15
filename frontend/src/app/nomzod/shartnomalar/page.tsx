@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useTransition, Suspense } from "react";
+import React, { useEffect, useEffectEvent, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   Briefcase,
-  Award,
   CheckCircle2,
   XCircle,
   AlertTriangle,
@@ -15,11 +14,9 @@ import {
   ChevronRight,
   ArrowRight,
   ShieldCheck,
-  Layers,
   RefreshCw,
   Search,
   Check,
-  User,
   LogOut,
   Building2,
   BookOpen,
@@ -100,9 +97,12 @@ function ShartnomalarHubContent() {
   }, [currentUser, activeTab]);
 
   // Load Initial Engagement if query param provided
+  const onInitialEngagement = useEffectEvent((engagementId: string) => {
+    loadEngagement(engagementId);
+  });
   useEffect(() => {
     if (currentUser && initialEngagementId) {
-      loadEngagement(initialEngagementId);
+      onInitialEngagement(initialEngagementId);
     }
   }, [currentUser, initialEngagementId]);
 

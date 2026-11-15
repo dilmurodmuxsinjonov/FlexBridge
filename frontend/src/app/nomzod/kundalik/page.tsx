@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -15,7 +15,6 @@ import {
   Send,
   RefreshCw,
   LogOut,
-  ChevronRight,
   ShieldCheck,
   FileCheck,
   Award,
@@ -34,17 +33,61 @@ import {
   saveStandardizedDiary,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import { useAsyncData } from "@/lib/useAsyncData";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 
+// Stable empty values: the form sync below compares `logs` by identity.
+const EMPTY_PLACEMENTS: CandidatePlacementItem[] = [];
+const EMPTY_LOGS: DailyLogItem[] = [];
+
+async function loadCurrentUser(): Promise<AuthUser | null> {
+  try {
+    return await fetchAuthMe();
+  } catch {
+    return null;
+  }
+}
+
+async function loadPlacementItems(): Promise<CandidatePlacementItem[]> {
+  try {
+    const res = await fetchCandidatePlacements();
+    return res.items || [];
+  } catch (err: unknown) {
+    console.error("Failed to load placements:", err);
+    throw err;
+  }
+}
+
+async function loadPlacementLogItems(placementId: string): Promise<DailyLogItem[]> {
+  try {
+    const res = await fetchPlacementLogs(placementId);
+    return res.items || [];
+  } catch (err: unknown) {
+    console.error("Failed to load logs:", err);
+    throw err;
+  }
+}
+
 export default function CandidateKundalikPage() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const auth = useAsyncData("auth-me", loadCurrentUser);
+  const user = auth.data ?? null;
+  const authLoading = auth.isLoading;
+  const loadUser = auth.reload;
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const [placements, setPlacements] = useState<CandidatePlacementItem[]>([]);
-  const [selectedPlacement, setSelectedPlacement] = useState<CandidatePlacementItem | null>(null);
-  const [logs, setLogs] = useState<DailyLogItem[]>([]);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const placementsQuery = useAsyncData(user ? `placements:${user.user_id}` : null, loadPlacementItems);
+  const placements = placementsQuery.data ?? EMPTY_PLACEMENTS;
+  // Explicit choice wins; otherwise default to the first placement.
+  const [chosenPlacement, setSelectedPlacement] = useState<CandidatePlacementItem | null>(null);
+  const selectedPlacement = chosenPlacement ?? placements[0] ?? null;
+
+  const selectedPlacementId = selectedPlacement?.id ?? null;
+  const logsQuery = useAsyncData(selectedPlacementId ? `logs:${selectedPlacementId}` : null, () =>
+    loadPlacementLogItems(selectedPlacementId ?? "")
+  );
+  const logs = logsQuery.data ?? EMPTY_LOGS;
+  const isLoadingLogs = logsQuery.isLoading;
+  const reloadLogs = logsQuery.reload;
 
   // Form state
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -68,63 +111,12 @@ export default function CandidateKundalikPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // Load current user
-  const loadUser = useCallback(async () => {
-    try {
-      setAuthLoading(true);
-      const auth = await fetchAuthMe();
-      setUser(auth);
-    } catch {
-      setUser(null);
-    } finally {
-      setAuthLoading(false);
-    }
-  }, []);
 
-  // Load placements
-  const loadPlacements = useCallback(async () => {
-    try {
-      const res = await fetchCandidatePlacements();
-      setPlacements(res.items || []);
-      if (res.items && res.items.length > 0) {
-        setSelectedPlacement((prev) => prev || res.items[0]);
-      }
-    } catch (err: unknown) {
-      console.error("Failed to load placements:", err);
-    }
-  }, []);
-
-  // Load logs for selected placement
-  const loadLogs = useCallback(async (placementId: string) => {
-    try {
-      setIsLoadingLogs(true);
-      const res = await fetchPlacementLogs(placementId);
-      setLogs(res.items || []);
-    } catch (err: unknown) {
-      console.error("Failed to load logs:", err);
-    } finally {
-      setIsLoadingLogs(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
-
-  useEffect(() => {
-    if (user) {
-      loadPlacements();
-    }
-  }, [user, loadPlacements]);
-
-  useEffect(() => {
-    if (selectedPlacement) {
-      loadLogs(selectedPlacement.id);
-    }
-  }, [selectedPlacement, loadLogs]);
-
-  // Synchronize form when selectedDate or logs change
-  useEffect(() => {
+  // Synchronize form when selectedDate or logs change. Adjusted during render
+  // (react.dev "You Might Not Need an Effect") instead of a cascading effect.
+  const [formSyncSource, setFormSyncSource] = useState<{ date: string; logs: DailyLogItem[] } | null>(null);
+  if (formSyncSource === null || formSyncSource.date !== selectedDate || formSyncSource.logs !== logs) {
+    setFormSyncSource({ date: selectedDate, logs });
     const existingLog = logs.find((l) => l.local_date === selectedDate);
     if (existingLog) {
       setDayType(existingLog.day_type || "WORKED");
@@ -139,7 +131,7 @@ export default function CandidateKundalikPage() {
       setSummaryText("");
       setTasks([{ title: "Kafedra va amaliyot rejasi bo'yicha vazifalar", minutes: 240 }]);
     }
-  }, [selectedDate, logs]);
+  }
 
   const activeLogForDate = useMemo(() => {
     return logs.find((l) => l.local_date === selectedDate);
@@ -219,7 +211,7 @@ export default function CandidateKundalikPage() {
         message: `${selectedDate} sanasi uchun qoralama kundalik muvaffaqiyatli saqlandi.`,
       });
 
-      await loadLogs(selectedPlacement.id);
+      await reloadLogs();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Qoralamani saqlashda xatolik yuz berdi";
       setNotification({ type: "error", message: msg });
@@ -272,7 +264,7 @@ export default function CandidateKundalikPage() {
         message: `${selectedDate} sanasidagi kundalik o'qituvchi va mentor tekshiruviga muvaffaqiyatli topshirildi.`,
       });
 
-      await loadLogs(selectedPlacement.id);
+      await reloadLogs();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Kundalikni topshirishda xatolik yuz berdi";
       setNotification({ type: "error", message: msg });
@@ -349,7 +341,7 @@ export default function CandidateKundalikPage() {
               <button
                 onClick={async () => {
                   await logoutUser();
-                  setUser(null);
+                  auth.mutate(() => null);
                 }}
                 className="text-xs text-zinc-400 hover:text-rose-400 transition-colors flex items-center gap-1"
               >
@@ -696,7 +688,7 @@ export default function CandidateKundalikPage() {
                         totalCalculatedMinutes > 480 ? "text-red-400 font-bold" : "text-white"
                       }`}
                     >
-                      {totalCalculatedMinutes} daqiqa ({(totalCalculatedMinutes / 60).toFixed(1)} soat) / 480 daq me'yor
+                      {totalCalculatedMinutes} daqiqa ({(totalCalculatedMinutes / 60).toFixed(1)} soat) / 480 daq me&apos;yor
                     </span>
                   </div>
                 </div>
@@ -735,7 +727,7 @@ export default function CandidateKundalikPage() {
               {(activeLogForDate?.status === "SUBMITTED" || activeLogForDate?.status === "REVIEWED") && (
                 <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl flex items-center gap-2 text-xs text-blue-300">
                   <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  Ushbu kundalik allaqachon tekshiruvga topshirilgan. O'zgarmaslik (immutability) qoidasiga ko'ra tahrirlash cheklangan.
+                  Ushbu kundalik allaqachon tekshiruvga topshirilgan. O&apos;zgarmaslik (immutability) qoidasiga ko&apos;ra tahrirlash cheklangan.
                 </div>
               )}
             </div>
@@ -761,7 +753,7 @@ export default function CandidateKundalikPage() {
                     </div>
                     {activeLogForDate.workplace_reviews[0].comment && (
                       <p className="text-xs text-zinc-400 mt-1 italic">
-                        "{activeLogForDate.workplace_reviews[0].comment}"
+                        &quot;{activeLogForDate.workplace_reviews[0].comment}&quot;
                       </p>
                     )}
                   </div>
@@ -774,7 +766,7 @@ export default function CandidateKundalikPage() {
                 {activeLogForDate.academic_reviews && activeLogForDate.academic_reviews.length > 0 ? (
                   <div className="p-3.5 bg-[#09090b] border border-white/5 rounded-xl">
                     <div className="text-xs font-medium text-zinc-300 flex items-center justify-between mb-1">
-                      <span>Universitet o'qituvchisi taqrizi:</span>
+                      <span>Universitet o&apos;qituvchisi taqrizi:</span>
                       <span className="text-[11px] text-zinc-500">
                         {activeLogForDate.academic_reviews[0].decided_at}
                       </span>
@@ -784,13 +776,13 @@ export default function CandidateKundalikPage() {
                     </div>
                     {activeLogForDate.academic_reviews[0].comment && (
                       <p className="text-xs text-zinc-400 mt-1 italic">
-                        "{activeLogForDate.academic_reviews[0].comment}"
+                        &quot;{activeLogForDate.academic_reviews[0].comment}&quot;
                       </p>
                     )}
                   </div>
                 ) : (
                   <div className="text-xs text-zinc-500 italic">
-                    O'qituvchi taqrizi hali kiritilmagan
+                    O&apos;qituvchi taqrizi hali kiritilmagan
                   </div>
                 )}
               </div>
@@ -812,7 +804,7 @@ export default function CandidateKundalikPage() {
                 </div>
 
                 <button
-                  onClick={() => selectedPlacement && loadLogs(selectedPlacement.id)}
+                  onClick={() => void reloadLogs()}
                   disabled={isLoadingLogs}
                   className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-800"
                 >

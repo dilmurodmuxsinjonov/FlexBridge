@@ -25,10 +25,15 @@ export default function PrivacyPolicyPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const selectTab = (tab: PrivacyTab) => {
+    if (tab === activeTab) return;
     setIsLoading(true);
     setErrorMessage(null);
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    let isMounted = true;
 
     fetchPublicPolicy(activeTab)
       .then((data) => {
@@ -76,7 +81,7 @@ export default function PrivacyPolicyPage() {
         {/* Document Selector Tabs */}
         <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto text-xs">
           <button
-            onClick={() => setActiveTab("privacy")}
+            onClick={() => selectTab("privacy")}
             className={`px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "privacy"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -88,7 +93,7 @@ export default function PrivacyPolicyPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("cookies")}
+            onClick={() => selectTab("cookies")}
             className={`px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "cookies"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"

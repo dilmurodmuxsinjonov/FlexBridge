@@ -24,10 +24,15 @@ export default function TermsAndPoliciesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const selectTab = (tab: PolicyTab) => {
+    if (tab === activeTab) return;
     setIsLoading(true);
     setErrorMessage(null);
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    let isMounted = true;
 
     fetchPublicPolicy(activeTab)
       .then((data) => {
@@ -76,7 +81,7 @@ export default function TermsAndPoliciesPage() {
         {/* Document Selector Tabs */}
         <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto text-xs">
           <button
-            onClick={() => setActiveTab("terms")}
+            onClick={() => selectTab("terms")}
             className={`px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "terms"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -88,7 +93,7 @@ export default function TermsAndPoliciesPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("acceptable-use")}
+            onClick={() => selectTab("acceptable-use")}
             className={`px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "acceptable-use"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -100,7 +105,7 @@ export default function TermsAndPoliciesPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("rating-guidelines")}
+            onClick={() => selectTab("rating-guidelines")}
             className={`px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "rating-guidelines"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"

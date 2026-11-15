@@ -62,9 +62,9 @@ export async function POST(
       id: data.id,
       read_at: data.read_at,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { ok: false, error: "PROXY_ERROR", message: err?.message || "Ichki tarmoq xatoligi" },
+      { ok: false, error: "PROXY_ERROR", message: (err instanceof Error && err.message) || "Ichki tarmoq xatoligi" },
       { status: 502 }
     );
   }

@@ -13,10 +13,42 @@ export interface SessionData {
 
 const COOKIE_NAME = "flexbridge_session";
 
-// Server-side encryption key derived deterministically via SHA-256
-function getEncryptionKey(): Buffer {
-  const secret = process.env.BFF_SESSION_SECRET || "flexbridge-staging-bff-session-secret-at-least-32-chars-long-2026";
-  return crypto.createHash("sha256").update(secret).digest();
+const MIN_SECRET_LENGTH = 32;
+// Local `next dev` convenience only; never used when NODE_ENV=production.
+const DEV_ONLY_FALLBACK_SECRET = "flexbridge-local-dev-only-bff-session-secret-not-for-deploy";
+
+type EphemeralKeyHolder = typeof globalThis & { __flexbridgeEphemeralSessionKey?: Buffer };
+
+/**
+ * Resolves the AES-256-GCM session key.
+ *
+ * A configured BFF_SESSION_SECRET (>= 32 chars) is hashed with SHA-256. In
+ * production without a secret we must never fall back to a constant that is
+ * public in the repository (anyone could mint a cookie with arbitrary roles),
+ * so a random per-process key is used instead: sessions stay unforgeable but
+ * end when the process restarts. The key lives on globalThis so every route
+ * bundle in the process shares it.
+ */
+export function getEncryptionKey(env: NodeJS.ProcessEnv = process.env): Buffer {
+  const secret = env.BFF_SESSION_SECRET?.trim();
+  if (secret) {
+    if (secret.length < MIN_SECRET_LENGTH) {
+      throw new Error(`BFF_SESSION_SECRET must be at least ${MIN_SECRET_LENGTH} characters`);
+    }
+    return crypto.createHash("sha256").update(secret).digest();
+  }
+  if (env.NODE_ENV !== "production") {
+    return crypto.createHash("sha256").update(DEV_ONLY_FALLBACK_SECRET).digest();
+  }
+  const holder = globalThis as EphemeralKeyHolder;
+  if (!holder.__flexbridgeEphemeralSessionKey) {
+    holder.__flexbridgeEphemeralSessionKey = crypto.randomBytes(32);
+    console.warn(
+      "[flexbridge-bff] BFF_SESSION_SECRET is not set; using a random per-process session key. " +
+        "Sessions will end when this process restarts."
+    );
+  }
+  return holder.__flexbridgeEphemeralSessionKey;
 }
 
 /**

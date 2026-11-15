@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Bookmark,
   Trash2,
   ExternalLink,
   Briefcase,
-  MapPin,
-  Calendar,
   AlertCircle,
   Clock,
   CheckCircle2,
@@ -20,44 +18,41 @@ import {
   deleteSavedOpportunity,
   SavedOpportunityItem,
 } from "@/lib/api";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
+
+async function loadSavedItems(): Promise<SavedOpportunityItem[]> {
+  const res = await fetchMySavedOpportunities(1, 50);
+  return res.items || [];
+}
 
 export default function SavedOpportunitiesPage() {
-  const [items, setItems] = useState<SavedOpportunityItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const saved = useAsyncData("saved-opportunities", loadSavedItems);
+  const items = saved.data ?? [];
+  const loading = saved.isLoading;
+  const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  const loadSaved = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchMySavedOpportunities(1, 50);
-      setItems(res.items || []);
-    } catch (err: any) {
-      if (err.status === 401) {
-        setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
-      } else {
-        setError(err.message || "Saqlangan e'lonlarni yuklashda xatolik yuz berdi");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error =
+    actionError ??
+    (saved.error ? describeRequestError(saved.error, "Saqlangan e'lonlarni yuklashda xatolik yuz berdi") : null);
 
-  useEffect(() => {
-    loadSaved();
-  }, []);
+  const loadSaved = () => {
+    setActionError(null);
+    void saved.reload();
+  };
 
   const handleRemove = async (savedId: string, title: string) => {
     try {
       setRemovingId(savedId);
+      setActionError(null);
       await deleteSavedOpportunity(savedId);
-      setItems((prev) => prev.filter((i) => i.id !== savedId));
+      saved.mutate((prev) => prev?.filter((i) => i.id !== savedId));
       setActionSuccess(`"${title}" muvaffaqiyatli saqlanganlardan olib tashlandi.`);
       setTimeout(() => setActionSuccess(null), 4000);
-    } catch (err: any) {
-      setError(err.message || "E'lonni o'chirishda xatolik yuz berdi");
+    } catch (caught: unknown) {
+      setActionError(describeRequestError(caught, "E'lonni o'chirishda xatolik yuz berdi"));
     } finally {
       setRemovingId(null);
     }
@@ -76,10 +71,10 @@ export default function SavedOpportunitiesPage() {
             <span>Nomzod Markazi</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold font-heading text-white">
-            Saqlangan Vakansiyalar va E'lonlar
+            Saqlangan Vakansiyalar va E&apos;lonlar
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Siz saqlab qo'ygan qiziqarli amaliyot va ish o'rinlari to'plami.
+            Siz saqlab qo&apos;ygan qiziqarli amaliyot va ish o&apos;rinlari to&apos;plami.
           </p>
         </div>
 
@@ -115,7 +110,7 @@ export default function SavedOpportunitiesPage() {
           <span className="text-2xl font-bold text-white mt-1 block font-mono">{items.length}</span>
         </div>
         <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
-          <span className="text-xs text-zinc-400 uppercase tracking-wider block">Faol E'lonlar</span>
+          <span className="text-xs text-zinc-400 uppercase tracking-wider block">Faol E&apos;lonlar</span>
           <span className="text-2xl font-bold text-emerald-400 mt-1 block font-mono">{activeCount}</span>
         </div>
         <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
@@ -135,16 +130,16 @@ export default function SavedOpportunitiesPage() {
           <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4 text-zinc-500">
             <Bookmark className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-semibold text-white">Hozircha saqlangan e'lonlar yo'q</h3>
+          <h3 className="text-base font-semibold text-white">Hozircha saqlangan e&apos;lonlar yo&apos;q</h3>
           <p className="text-xs text-zinc-400 mt-1 mb-6">
-            Bo'sh ish o'rinlari sahifasidan o'zingizga yoqqan vakansiyalarni saqlab qo'yishingiz mumkin.
+            Bo&apos;sh ish o&apos;rinlari sahifasidan o&apos;zingizga yoqqan vakansiyalarni saqlab qo&apos;yishingiz mumkin.
           </p>
           <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded text-xs font-medium transition-colors"
           >
             <Briefcase className="w-3.5 h-3.5" />
-            E'lonlarni ko'rish
+            E&apos;lonlarni ko&apos;rish
           </Link>
         </div>
       ) : (
@@ -217,7 +212,7 @@ export default function SavedOpportunitiesPage() {
                       ) : (
                         <Trash2 className="w-3.5 h-3.5" />
                       )}
-                      O'chirish
+                      O&apos;chirish
                     </button>
                   </div>
                 </div>

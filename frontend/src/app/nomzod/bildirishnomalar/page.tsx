@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Bell,
   CheckCircle2,
   AlertCircle,
   Clock,
-  Eye,
   Check,
   RefreshCw,
   Loader2,
-  Filter,
   FileText,
   Calendar,
-  Briefcase,
   HelpCircle,
 } from "lucide-react";
 import {
@@ -23,49 +20,48 @@ import {
   NotificationItem,
 } from "@/lib/api";
 import { SkeuoStatCard, SkeuoToggle } from "@/components/skeuo/SkeuoPrimitives";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
+
+async function loadNotifications(unreadOnly: boolean): Promise<NotificationItem[]> {
+  const res = await fetchMyNotifications(unreadOnly, 50);
+  return res.items || [];
+}
 
 export default function NotificationsInboxPage() {
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState<boolean>(false);
+  const notifications = useAsyncData(unreadOnly ? "unread" : "all", () => loadNotifications(unreadOnly));
+  const items = notifications.data ?? [];
+  const loading = notifications.isLoading;
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [markingId, setMarkingId] = useState<string | null>(null);
 
-  const loadNotifications = async (isUnread: boolean) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchMyNotifications(isUnread, 50);
-      setItems(res.items || []);
-    } catch (err: any) {
-      if (err.status === 401) {
-        setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
-      } else {
-        setError(err.message || "Bildirishnomalarni yuklashda xatolik yuz berdi");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error =
+    actionError ??
+    (notifications.error
+      ? describeRequestError(notifications.error, "Bildirishnomalarni yuklashda xatolik yuz berdi")
+      : null);
 
-  useEffect(() => {
-    loadNotifications(unreadOnly);
-  }, [unreadOnly]);
+  const refresh = () => {
+    setActionError(null);
+    void notifications.reload();
+  };
 
   const handleMarkRead = async (id: string) => {
     try {
       setMarkingId(id);
+      setActionError(null);
       await markNotificationRead(id);
-      setItems((prev) =>
-        prev.map((item) =>
+      notifications.mutate((prev) =>
+        prev?.map((item) =>
           item.id === id ? { ...item, is_read: true, read_at: new Date().toISOString() } : item
         )
       );
       setActionSuccess("Xabar o'qilgan deb belgilandi.");
       setTimeout(() => setActionSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err.message || "Xabarni yangilashda xatolik yuz berdi");
+    } catch (caught: unknown) {
+      setActionError(describeRequestError(caught, "Xabarni yangilashda xatolik yuz berdi"));
     } finally {
       setMarkingId(null);
     }
@@ -86,7 +82,7 @@ export default function NotificationsInboxPage() {
             Bildirishnomalar va Xabarlar
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Platforma yangiliklari, suhbatlar, arizalar va amaliyot bo'yicha xabarlar qutisi.
+            Platforma yangiliklari, suhbatlar, arizalar va amaliyot bo&apos;yicha xabarlar qutisi.
           </p>
         </div>
 
@@ -99,7 +95,8 @@ export default function NotificationsInboxPage() {
           />
 
           <button
-            onClick={() => loadNotifications(unreadOnly)}
+            type="button"
+            onClick={refresh}
             disabled={loading}
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold skeuo-btn-secondary rounded-full disabled:opacity-50"
           >
@@ -153,7 +150,7 @@ export default function NotificationsInboxPage() {
           <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4 text-zinc-500">
             <Bell className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-semibold text-white">Hozircha xabarlar yo'q</h3>
+          <h3 className="text-base font-semibold text-white">Hozircha xabarlar yo&apos;q</h3>
           <p className="text-xs text-zinc-400 mt-1">
             {unreadOnly
               ? "Barcha bildirishnomalar o'qilgan. Barcha xabarlarni ko'rish uchun filtrni o'zgartiring."
@@ -183,11 +180,11 @@ export default function NotificationsInboxPage() {
 
                       {isUnread ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          O'qilmagan
+                          O&apos;qilmagan
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] text-zinc-500 border border-white/[0.08]">
-                          O'qilgan
+                          O&apos;qilgan
                         </span>
                       )}
                     </div>
@@ -206,7 +203,7 @@ export default function NotificationsInboxPage() {
                           className="flex items-center gap-1 text-primary hover:underline"
                         >
                           <FileText className="w-3 h-3" />
-                          Ariza bo'yicha
+                          Ariza bo&apos;yicha
                         </Link>
                       )}
 
@@ -243,7 +240,7 @@ export default function NotificationsInboxPage() {
                       ) : (
                         <Check className="w-3.5 h-3.5" />
                       )}
-                      O'qilgan deb belgilash
+                      O&apos;qilgan deb belgilash
                     </button>
                   )}
                 </div>

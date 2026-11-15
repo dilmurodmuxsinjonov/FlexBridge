@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   User,
@@ -58,7 +57,6 @@ import {
   saveCandidateResumeDetails,
   uploadCandidatePdfFile,
   AuthUser,
-  CandidateProfileData,
   CandidateProfileSkill,
   CatalogSkillItem,
   AvailabilityRuleItem,
@@ -67,7 +65,6 @@ import {
   VerifiedInstitutionItem,
   PortfolioItem,
   CertificateItem,
-  ResumeExportResponse,
   CandidateAchievementItem,
   CandidateWorkExperienceItem,
   CandidateLanguageItem,
@@ -128,7 +125,6 @@ export default function CandidateProfileHub() {
   const [activeTab, setActiveTab] = useState<"PROFILE" | "FULL_RESUME" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES">("PROFILE");
 
   // Tab 1: Profile state
-  const [profile, setProfile] = useState<CandidateProfileData | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [profileHeadline, setProfileHeadline] = useState("");
   const [profileRegion, setProfileRegion] = useState("Toshkent shahri");
@@ -288,7 +284,6 @@ export default function CandidateProfileHub() {
     setProfileErrorMsg(null);
     try {
       const data = await fetchCandidateProfile();
-      setProfile(data);
       setProfileHeadline(data.headline || "");
       setProfileRegion(data.region || "Toshkent shahri");
       setProfileBio(data.bio || "");
@@ -445,13 +440,12 @@ export default function CandidateProfileHub() {
     setProfileSuccessMsg(null);
     setProfileErrorMsg(null);
     try {
-      const updated = await updateCandidateProfile({
+      await updateCandidateProfile({
         headline: profileHeadline,
         region: profileRegion,
         bio: profileBio,
         experience_months: Number(profileExpMonths),
       });
-      setProfile(updated);
       setProfileSuccessMsg("Profil ma’lumotlari muvaffaqiyatli saqlandi!");
       setTimeout(() => setProfileSuccessMsg(null), 4000);
     } catch (err: unknown) {
@@ -611,7 +605,7 @@ export default function CandidateProfileHub() {
     setEnrErrorMsg(null);
 
     try {
-      const res = await createCandidateEnrollment({
+      await createCandidateEnrollment({
         institution_id: instId,
         program: enrProgram.trim(),
         start_date: enrStartDate,
@@ -1674,7 +1668,7 @@ export default function CandidateProfileHub() {
 
                   <div className="p-4 rounded-xl bg-surface/60 border border-white/[0.06] flex flex-col gap-3">
                     <span className="text-xs font-semibold text-zinc-200">+ Yangi ish joyi / bajarilgan ish qo&apos;shish</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <input
                         type="text"
                         value={newWorkCompany}
@@ -1687,6 +1681,14 @@ export default function CandidateProfileHub() {
                         value={newWorkRole}
                         onChange={(e) => setNewWorkRole(e.target.value)}
                         placeholder="Lavozim / Vazifa *"
+                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
+                      />
+                      <input
+                        type="text"
+                        value={newWorkLocation}
+                        onChange={(e) => setNewWorkLocation(e.target.value)}
+                        placeholder="Joylashuv (Toshkent)"
+                        aria-label="Ish joyi joylashuvi"
                         className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
                       />
                     </div>
@@ -1884,7 +1886,7 @@ export default function CandidateProfileHub() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     <input
                       type="text"
                       value={newLangName}
@@ -1909,6 +1911,15 @@ export default function CandidateProfileHub() {
                       value={newLangCert}
                       onChange={(e) => setNewLangCert(e.target.value)}
                       placeholder="Sertifikat (IELTS)"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                    />
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={newLangScore}
+                      onChange={(e) => setNewLangScore(e.target.value)}
+                      placeholder="Ball (7.0)"
+                      aria-label="Sertifikat bali"
                       className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
                     />
                     <button
