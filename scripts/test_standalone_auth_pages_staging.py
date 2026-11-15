@@ -202,7 +202,7 @@ def run_phase_5() -> None:
         method="POST",
         headers={"Content-Type": "application/json", "Origin": FRONTEND_URL},
         data=json.dumps({
-            "verification_token": "some_token_12345678901234567890",
+            "verification_token": "DUMMY_TOKEN_12345678901234567890",
             "display_name": "Aziz Rahimov",
             "password": "short",
             "adult_confirmed": True,
@@ -217,7 +217,7 @@ def run_phase_5() -> None:
         method="POST",
         headers={"Content-Type": "application/json", "Origin": FRONTEND_URL},
         data=json.dumps({
-            "verification_token": "some_token_12345678901234567890",
+            "verification_token": "DUMMY_TOKEN_12345678901234567890",
             "display_name": "Aziz Rahimov",
             "password": "ValidPassword123456!",
             "adult_confirmed": False,

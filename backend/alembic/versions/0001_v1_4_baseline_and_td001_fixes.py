@@ -15,7 +15,7 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-SCHEMA_PATH = Path(__file__).resolve().parents[3] / "FlexBridge_1_4_schema.sql"
+SCHEMA_PATH = Path(__file__).resolve().parents[2] / "FlexBridge_1_4_schema.sql"
 
 TD001_REFINEMENTS_SQL = """
 -- TD-001 Section 11 & 19: Allow files.sha256 to be NULL while PENDING_SCAN, mandatory when CLEAN

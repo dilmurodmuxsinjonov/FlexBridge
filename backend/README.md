@@ -3,41 +3,41 @@
 Run commands from `D:\FlexBridge`. Python 3.11+ and PostgreSQL 17 are required.
 Dependencies have one source: `backend/requirements.txt`, also used by pyproject and Docker.
 The IAM extension (OTP/contact verification, recovery, MFA tickets, passkeys and its separate worker)
-is documented in [IAM.md](IAM.md). Public registration now requires a verified contact proof and
+is documented in [IAM.md](../docs/backend/security_iam/IAM.md). Public registration now requires a verified contact proof and
 the configured published policy versions.
 Candidate profile, self-declared skills, private CV linking and date-aware 28-day matching
-are documented in [CANDIDATE.md](CANDIDATE.md). The CAN package uses the existing migrated
+are documented in [CANDIDATE.md](../docs/backend/candidate/CANDIDATE.md). The CAN package uses the existing migrated
 schema; no additional migration is required.
 Organization onboarding and independent first-owner/capability verification are documented
-in [ORGANIZATIONS.md](ORGANIZATIONS.md). Deployments now require migration
+in [ORGANIZATIONS.md](../docs/backend/organization/ORGANIZATIONS.md). Deployments now require migration
 `0004_org_onboarding` or later; conflicting normalized legacy tax IDs fail without merging data.
 Explicit 24-hour contact-bound staff invitations
-and legacy-token handling are documented in [INVITATIONS.md](INVITATIONS.md).
+and legacy-token handling are documented in [INVITATIONS.md](../docs/backend/organization/INVITATIONS.md).
 Durable, immutable retention dry-run
-records and the retired combined appeal endpoint are documented in [OPERATIONS.md](OPERATIONS.md).
+records and the retired combined appeal endpoint are documented in [OPERATIONS.md](../docs/backend/platform_ops/OPERATIONS.md).
 Separate authenticated opportunity rejection
-appeals and independent assigned review are documented in [MODERATION_APPEALS.md](MODERATION_APPEALS.md).
+appeals and independent assigned review are documented in [MODERATION_APPEALS.md](../docs/backend/platform_ops/MODERATION_APPEALS.md).
 The accepted baseline head is `0013_enrollment_verification` (runtime114 tables),
-merged PR64/Issue63 after final930 CI passed twice; see [ENROLLMENTS.md](ENROLLMENTS.md).
+merged PR64/Issue63 after final930 CI passed twice; see [ENROLLMENTS.md](../docs/backend/academic/ENROLLMENTS.md).
 Issue65 now develops host internship admission; its validation is ongoing and no0014 is accepted;
 canonical v1.4 remains94. Reviewed first-coordinator and named teacher onboarding,
 revision/consent/revocation behavior and bounded validation are documented in
-[INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md). Source eadac11 passed full
+[INSTITUTION_ONBOARDING.md](../docs/backend/academic/INSTITUTION_ONBOARDING.md). Source eadac11 passed full
 732-test CI twice; final evidence-head732 CI also passed twice and PR56 merged12cd307.
 Private retrieval version binding merged in PR58/Issue57, final757 CI passed twice.
-Migration/legacy policy and real S3 tests are documented in [STORAGE_VERSIONS.md](STORAGE_VERSIONS.md).
+Migration/legacy policy and real S3 tests are documented in [STORAGE_VERSIONS.md](../docs/backend/security_iam/STORAGE_VERSIONS.md).
 Owner file session authority merged PR60/Issue59 after final785 CI passed twice;
-see [FILE_AUTHORITY.md](FILE_AUTHORITY.md). Candidate self-service authority merged
-PR62/Issue61 after final895 CI passed twice; see [CANDIDATE_AUTHORITY.md](CANDIDATE_AUTHORITY.md).
+see [FILE_AUTHORITY.md](../docs/backend/security_iam/FILE_AUTHORITY.md). Candidate self-service authority merged
+PR62/Issue61 after final895 CI passed twice; see [CANDIDATE_AUTHORITY.md](../docs/backend/candidate/CANDIDATE_AUTHORITY.md).
 Enrollment backend scope is accepted; host/academic admission and full R1 remain open. Pilot is not ready.
 For the current Windows tool installation status and exact continuation steps, read
-[ANTIGRAVITY_HANDOFF.md](../ANTIGRAVITY_HANDOFF.md). Use the project `.venv` interpreter.
+[ANTIGRAVITY_HANDOFF.md](../docs/protocols/ANTIGRAVITY_HANDOFF.md). Use the project `.venv` interpreter.
 Additional owners require an existing active staff
-membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](OWNER_ADDITIONS.md).
+membership, named-target consent and independent review; see [OWNER_ADDITIONS.md](../docs/backend/organization/OWNER_ADDITIONS.md).
 Reviewed departure to an existing OWNER successor preserves other staff roles; see
-[OWNER_TRANSFERS.md](OWNER_TRANSFERS.md). Inaccessible-owner recovery remains open.
+[OWNER_TRANSFERS.md](../docs/backend/organization/OWNER_TRANSFERS.md). Inaccessible-owner recovery remains open.
 Existing-staff continuity through two independent reviewers is described in
-[OWNER_CONTINUITY.md](OWNER_CONTINUITY.md); manual same-account/zero-owner recovery remains open.
+[OWNER_CONTINUITY.md](../docs/backend/organization/OWNER_CONTINUITY.md); manual same-account/zero-owner recovery remains open.
 
 ```powershell
 python -m pip install -r backend/requirements.txt

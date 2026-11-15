@@ -1,7 +1,7 @@
 # FlexBridge v1.4 — Milliy Talabalar va Yosh Mutaxassislar Smenali Bandlik Platformasi
 
 ![FlexBridge Architecture](https://img.shields.io/badge/Architecture-v1.4_PDF-blue?style=flat-square)
-![Staging Suites](https://img.shields.io/badge/Staging_Suites-24%2F24_GREEN-emerald?style=flat-square)
+![Staging Suites](https://img.shields.io/badge/Staging_Suites-28%2F28_GREEN-emerald?style=flat-square)
 ![Frontend](https://img.shields.io/badge/Frontend-Next.js_16.4.6-black?style=flat-square)
 ![Backend](https://img.shields.io/badge/Backend-FastAPI_Python_3.12-teal?style=flat-square)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL_17_+_PgBouncer-indigo?style=flat-square)
@@ -13,60 +13,64 @@ FlexBridge — oliy ta'lim muassasalari talabalari va yosh mutaxassislarni dars 
 
 ## 1. Loyiha Mundarijasi & Fayllar Xaritasi
 
-Loyiha qat'iy modulli arxitektura va mustaqil jurnallashtirish qoidalariga asoslanadi:
+Loyiha qat'iy modulli arxitekturaga ega bo‘lib, **kod (`frontend/` va `backend/`)** hamda **hujjatlar (`docs/`)** to‘liq alohida papkalarga ajratilgan:
 
 ```
 FlexBridge/
-├── 01_AI_XOTIRASI_VA_QOIDALAR.md           # Tizim xotirasi, qoidalar, arxitektura qarorlari va to'liq loglar (LOG-001..LOG-147)
-├── 02_TEXNIK_MODELLAR.md                   # 1.4 texnik topshiriq va rasmiy kanonik domen modellari
-├── 03_BOSQICHLAR_VA_HOLAT.md               # Barcha bosqichlar ijrosi, tarixiy rivojlanish va joriy operatsion holat
-├── 04_TAKLIFLAR_VA_TANLOVLAR.md            # Texnologik stek tanlovlari, benchmarklar va tahliliy hisobotlar
-├── 05_S1_1_TALABLAR_VA_MANBALAR_XARITASI.md# Manbalar, normativ hujjatlar va yuridik talablar xaritasi
-├── AGENTS.md                               # Multi-agent hamkorlik protokoli va muzlatilgan main qoidasi
-├── ANTIGRAVITY_HANDOFF.md                  # Antigravity avtonom ijro va topshirish protokollari
-├── ANTIGRAVITY_MASTER_PROTOCOL.md          # Favqulodda ketma-ketlik va boshqaruv vorisligi shartnomasi
-├── FlexBridge_1_4_schema.sql               # Kanonik DDL sxemasi (PostgreSQL 17, 8 ta retention policy)
 ├── README.md                               # Asosiy repository qo'llanmasi (ushbu fayl)
+├── AGENTS.md                               # Multi-agent hamkorlik protokoli va muzlatilgan main qoidasi
 │
-├── frontend/                               # Next.js 16.4.6 App Router frontend & Server-Side BFF
-│   ├── src/app/                            # 63 ta to'liq ishlab chiquvchi sahifalar va BFF API yo'nalishlari
+├── frontend/                               # Next.js 16.4.6 App Router frontend & Server-Side BFF (Faqat Frontend kodlari)
+│   ├── src/app/                            # 72 ta sahifa va BFF API yo'nalishlari
 │   │   ├── api/auth/                       # Login, logout, me, mfa sessiya boshqaruvi
 │   │   ├── api/bff/                        # Tenant-chegaralangan va ommaviy BFF proxy yo'nalishlari
-│   │   ├── nomzod/                         # Nomzod/Talaba yagona kabineti (8 ta sub-hub)
-│   │   ├── employer/                       # Ish beruvchi tashkilot kabineti (Kanban, billing, jamoa)
-│   │   ├── university/                     # OTM/Kafedra koordinator kabineti (kundaliklar, hisobotlar)
+│   │   ├── nomzod/                         # Nomzod/Talaba yagona kabineti (Portfolio, Sertifikat, Rezyume PDF va b.)
+│   │   ├── employer/                       # Ish beruvchi tashkilot kabineti (Kanban, Aqlli qidiruv, Billing, Jamoa)
+│   │   ├── university/                     # OTM/Kafedra koordinator kabineti (Kundaliklar, Xulosalar, Analitika)
 │   │   ├── operator/                       # Tizim operatori (SOC audit, break-glass, moliya)
 │   │   ├── ishlar/[id]/                    # Vakansiya tafsilotlari va ariza topshirish oqimi
 │   │   ├── kirish/                         # Mustaqil xavfsiz kirish sahifasi (MFA challenge bilan)
-│   │   ├── royxatdan-otish/                # 3-bosqichli onboarding sehrgari
+│   │   ├── royxatdan-otish/                # 3-bosqichli onboarding (SMS va Telegram Bot tasdig'i bilan)
 │   │   ├── shartlar/                       # Foydalanish shartlari va yuridik qoidalar CMS
 │   │   ├── maxfiylik/                      # Maxfiylik va Cookie siyosati CMS (AC-023)
 │   │   └── haqida/                         # Platforma arxitekturasi va matching engine qo'llanmasi
 │   ├── src/components/                     # Qayta ishlatiluvchi UI komponentlar (Navbar, Footer, Modallar)
-│   └── src/lib/                            # TypeScript API SDK va HttpOnly sessiya xavfsizligi
+│   ├── src/lib/                            # TypeScript API SDK va HttpOnly sessiya xavfsizligi
+│   └── README.md                           # Frontend arxitekturasi qo'llanmasi
 │
-├── backend/                                # FastAPI Python 3.12 kanonik backend
-│   ├── app/api/v1/                         # 120+ kanonik REST endpointlar (API-001..API-124)
+├── backend/                                # FastAPI Python 3.12 kanonik backend (Faqat Backend kodlari)
+│   ├── app/api/v1/                         # 132+ kanonik REST endpointlar (API-001..API-125)
 │   ├── app/core/                           # IAM xavfsizligi, AES shifrlash, WAF va tokenlar
 │   ├── app/db/                             # SQLAlchemy 2.0 ombori, tranzaksiyalar va pgbouncer adapter
-│   ├── app/services/                       # Domen xizmatlari (identifikatsiya, jadval, amaliyot, billing)
+│   ├── app/services/                       # Domen xizmatlari (identifikatsiya, Telegram bot, jadval, amaliyot, billing)
 │   ├── app/workers/                        # Tranzaksiyaviy outbox va identity delivery workerlari
-│   └── tests/                              # Backend xavfsizlik va unit testlari
+│   ├── alembic/                            # 21 ta ketma-ket PostgreSQL 17 migratsiyalar
+│   ├── tests/                              # Backend xavfsizlik va unit testlari
+│   ├── FlexBridge_1_4_schema.sql           # Kanonik DDL sxemasi (PostgreSQL 17, 8 ta retention policy)
+│   └── README.md                           # Backend ishga tushirish va validatsiya qo'llanmasi
+│
+├── docs/                                   # Barcha loyiha hujjatlari (.md, .pdf, .pptx, .txt) — ichki papkalarga bo'lingan
+│   ├── journals/                           # 01..05 AI xotirasi, texnik modellar, bosqichlar va qarorlar jurnallari
+│   ├── protocols/                          # ANTIGRAVITY_HANDOFF.md va ANTIGRAVITY_MASTER_PROTOCOL.md
+│   ├── presentations/                      # Texnik topshiriq PDF, Investorlar taqdimoti va Ustoz uchun izohlar
+│   ├── backend/                            # Backend domen hujjatlari (academic, candidate, organization, security_iam, platform_ops)
+│   └── README.md                           # Hujjatlar katalogi xaritasi
 │
 ├── infra/                                  # Docker Staging Orkestratsiyasi
 │   ├── compose.yaml                        # 8 ta konteyner (backend, postgres, pgbouncer, minio, clamav, frontend, outbox, identity)
 │   └── .env                                # Izolyatsiyalangan staging konfiguratsiyasi
 │
 ├── scripts/                                # Avtomatlashtirilgan Staging Testlari & Regressiya
-│   ├── run_all_staging_tests.py            # Barcha 24 ta test to'plamini ketma-ket yurgazuvchi master runner
-│   ├── test_*_staging.py                   # 24 ta domen bo'yicha mustaqil staging test skriptlari
+│   ├── run_all_staging_tests.py            # Barcha 28 ta test to'plamini ketma-ket yurgazuvchi master runner
+│   ├── test_*_staging.py                   # 28 ta domen bo'yicha mustaqil staging test skriptlari
 │   └── README.md                           # Sinov to'plamlari katalogi va yo'riqnomasi
 │
 ├── specs/                                  # Tizim spetsifikatsiyalari va JSON modellari
-│   ├── v1_4/FlexBridge_model_1_4.json      # To'liq mashinada o'qiluvchi 1.4 kanonik modeli
-│   └── r1_api_matrix.csv                   # R1 bosqichi API shartnomalar matritsasi
+│   ├── v1_3/                               # 1.3 texnik atlas va ma'lumotlar lug'ati
+│   └── v1_4/FlexBridge_model_1_4.json      # To'liq mashinada o'qiluvchi 1.4 kanonik modeli
 │
-└── reviews/                                # Sud-tibbiy audit hisobotlari (Forensic Reports)
+├── contracts/                              # R1 API shartnomalar matritsasi (r1_api_matrix.csv)
+└── reviews/                                # Audit va PR tekshiruv hisobotlari
     └── 2026-11-*/                          # Har bir PR va milestone bo'yicha hujjatlashtirilgan auditlar
 ```
 
@@ -119,19 +123,19 @@ Ishlayotgan servislar:
 - **MinIO**: `http://127.0.0.1:9000` (S3 mos ob'ektlar xotirasi)
 - **ClamAV**: `127.0.0.1:3310` (Virus va troyanlarga qarshi skanerlash)
 
-### B. To‘liq Regressiya Testlarini Ishga Tushirish (24/24 Suites)
+### B. To‘liq Regressiya Testlarini Ishga Tushirish (28/28 Suites)
 
 ```powershell
-# Master test runner yordamida barcha 24 ta to'plamni yurgazish:
+# Master test runner yordamida barcha 28 ta to'plamni yurgazish:
 python scripts/run_all_staging_tests.py
 ```
 
 Kutilayotgan natija:
 ```
 ================================================================================
-  REGRESSION RUN SUMMARY (Total Time: ~50s)
+  REGRESSION RUN SUMMARY (Total Time: ~67s)
 ================================================================================
-  SUCCESS: ALL 24 TEST SUITES PASSED 100% GREEN!
+  SUCCESS: ALL 28 TEST SUITES PASSED 100% GREEN!
 ```
 
 ---
