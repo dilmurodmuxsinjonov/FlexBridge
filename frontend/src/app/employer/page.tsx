@@ -24,6 +24,13 @@ import {
   FileText,
   MapPin,
   ArrowRight,
+  Award,
+  BookOpen,
+  CheckSquare,
+  MessageSquare,
+  ExternalLink,
+  ShieldAlert,
+  FileCheck,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -35,10 +42,19 @@ import {
   fetchApplicationHRDetail,
   scheduleApplicationInterview,
   issueApplicationOffer,
+  fetchMentorReviewQueue,
+  fetchWorkplaceRevisionDetail,
+  submitWorkplaceReview,
+  fetchMentorAssignments,
+  fetchOrganizationPlacements,
   AuthUser,
   EmployerDashboardMetrics,
   EmployerOpportunityApplicationItem,
   ApplicationHRDetailResponse,
+  MentorReviewQueueItem,
+  MentorLogRevisionDetail,
+  MentorAssignmentItem,
+  OrganizationPlacementItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -99,6 +115,35 @@ export default function EmployerPortal() {
   const [hrDetail, setHrDetail] = useState<ApplicationHRDetailResponse | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // FB-162: Workplace Mentor & Intern Evaluations Hub State (API-090..092, 089, 069)
+  // -------------------------------------------------------------------------
+  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB">("KANBAN");
+  const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS">("QUEUE");
+
+  // Review Queue State (API-090)
+  const [reviewQueue, setReviewQueue] = useState<MentorReviewQueueItem[]>([]);
+  const [isLoadingQueue, setIsLoadingQueue] = useState(false);
+  const [queueError, setQueueError] = useState<string | null>(null);
+
+  // Review Modal State (API-091 & API-092)
+  const [reviewModalRevisionId, setReviewModalRevisionId] = useState<string | null>(null);
+  const [revisionDetail, setRevisionDetail] = useState<MentorLogRevisionDetail | null>(null);
+  const [isLoadingRevisionDetail, setIsLoadingRevisionDetail] = useState(false);
+  const [revisionDetailError, setRevisionDetailError] = useState<string | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<"APPROVED" | "CHANGES_REQUESTED" | "REJECTED">("APPROVED");
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSubmitError, setReviewSubmitError] = useState<string | null>(null);
+  const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState<string | null>(null);
+
+  // Placements & Assignments State (API-089 & API-069)
+  const [placementsTab, setPlacementsTab] = useState<"MY_MENTEES" | "ORG_PLACEMENTS">("MY_MENTEES");
+  const [mentorAssignments, setMentorAssignments] = useState<MentorAssignmentItem[]>([]);
+  const [orgPlacements, setOrgPlacements] = useState<OrganizationPlacementItem[]>([]);
+  const [isLoadingPlacements, setIsLoadingPlacements] = useState(false);
+  const [placementsError, setPlacementsError] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async (targetOrgIdInput: string) => {
     if (!targetOrgIdInput.trim()) return;
@@ -337,6 +382,91 @@ export default function EmployerPortal() {
       setDetailError(err instanceof Error ? err.message : "HR snapshot ma'lumotlarini yuklashda xatolik.");
     } finally {
       setIsLoadingDetail(false);
+    }
+  };
+
+  // -------------------------------------------------------------------------
+  // FB-162: Mentor Callbacks & Handlers (API-090..092, 089, 069)
+  // -------------------------------------------------------------------------
+  const loadMentorQueue = useCallback(async () => {
+    setIsLoadingQueue(true);
+    setQueueError(null);
+    try {
+      const res = await fetchMentorReviewQueue(50);
+      setReviewQueue(res.items || []);
+    } catch (err: unknown) {
+      setQueueError(err instanceof Error ? err.message : "Kundaliklar navbatini yuklashda xatolik.");
+      setReviewQueue([]);
+    } finally {
+      setIsLoadingQueue(false);
+    }
+  }, []);
+
+  const loadPlacements = useCallback(async () => {
+    setIsLoadingPlacements(true);
+    setPlacementsError(null);
+    try {
+      const [assignments, placements] = await Promise.all([
+        fetchMentorAssignments(50).catch(() => []),
+        orgId.trim() ? fetchOrganizationPlacements(orgId.trim(), 50).catch(() => []) : Promise.resolve([]),
+      ]);
+      setMentorAssignments(assignments);
+      setOrgPlacements(placements);
+    } catch (err: unknown) {
+      setPlacementsError(err instanceof Error ? err.message : "Amaliyotchilar ro'yxatini yuklashda xatolik.");
+    } finally {
+      setIsLoadingPlacements(false);
+    }
+  }, [orgId]);
+
+  const handleOpenReviewModal = async (revisionId: string) => {
+    setReviewModalRevisionId(revisionId);
+    setIsLoadingRevisionDetail(true);
+    setRevisionDetailError(null);
+    setRevisionDetail(null);
+    setReviewDecision("APPROVED");
+    setReviewComment("");
+    setReviewSubmitError(null);
+    setReviewSubmitSuccess(null);
+
+    try {
+      const detail = await fetchWorkplaceRevisionDetail(revisionId);
+      setRevisionDetail(detail);
+      if (detail.existing_review?.decision) {
+        setReviewDecision(detail.existing_review.decision as "APPROVED" | "CHANGES_REQUESTED" | "REJECTED");
+        setReviewComment(detail.existing_review.comment || "");
+      }
+    } catch (err: unknown) {
+      setRevisionDetailError(err instanceof Error ? err.message : "Kundalik tafsilotlarini yuklashda xatolik.");
+    } finally {
+      setIsLoadingRevisionDetail(false);
+    }
+  };
+
+  const handleSubmitReviewDecision = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewModalRevisionId) return;
+    setIsSubmittingReview(true);
+    setReviewSubmitError(null);
+    setReviewSubmitSuccess(null);
+
+    try {
+      await submitWorkplaceReview(reviewModalRevisionId, {
+        decision: reviewDecision,
+        comment: reviewComment.trim() || undefined,
+      });
+      setReviewSubmitSuccess("Kundalik muvaffaqiyatli baholandi va holati yangilandi!");
+      await loadMentorQueue();
+    } catch (err: unknown) {
+      const status = (err as { status?: number })?.status;
+      const msg = err instanceof Error ? err.message : "Bahoni saqlashda xatolik.";
+      if (status === 403 || msg.includes("SELF_REVIEW_FORBIDDEN")) {
+        setReviewSubmitError("O‘zingizning kundaligingizni baholash taqiqlanadi (Anti-self review xavfsizlik qoidasi).");
+      } else {
+        setReviewSubmitError(msg);
+      }
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -650,10 +780,52 @@ export default function EmployerPortal() {
             </div>
           )}
 
+          {/* PRIMARY WORKSPACE TABS */}
+          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveMainTab("KANBAN")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                activeMainTab === "KANBAN"
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Nomzodlar Kanbani & Suhbatlar</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMainTab("MENTOR_HUB");
+                if (reviewQueue.length === 0 && !isLoadingQueue) {
+                  loadMentorQueue();
+                }
+                if (mentorAssignments.length === 0 && !isLoadingPlacements) {
+                  loadPlacements();
+                }
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                activeMainTab === "MENTOR_HUB"
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Award className="w-4 h-4" />
+              <span>Mentorlik & Amaliyot Kundaliklari</span>
+              {reviewQueue.filter((q) => q.is_escalated).length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">
+                  {reviewQueue.filter((q) => q.is_escalated).length}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* ----------------------------------------------------------------- */}
           {/* FB-150: NOMZODLAR BOSQICHLARI VA KANBAN BOSHQARUVI */}
           {/* ----------------------------------------------------------------- */}
-          <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-lg">
+          {activeMainTab === "KANBAN" && (
+            <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-lg">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
@@ -974,6 +1146,325 @@ export default function EmployerPortal() {
               </div>
             )}
           </section>
+          )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* FB-162: WORKPLACE MENTOR HUB & INTERN EVALUATIONS (API-090..092) */}
+          {/* ----------------------------------------------------------------- */}
+          {activeMainTab === "MENTOR_HUB" && (
+            <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-5 shadow-lg">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                      Workplace Mentor Hub
+                    </span>
+                    <span className="text-zinc-500 text-xs">• API-090, API-091, API-092, API-089, API-069</span>
+                  </div>
+                  <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                    Amaliyot Kundaliklarini Baholash va Mentorlik Boshqaruvi
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Amaliyotchi talabalarning kunlik topshiriqlarini tekshirish, tasdiqlash yoki tuzatish talab qilish hamda biriktirilgan amaliyotchilarni kuzatish.
+                  </p>
+                </div>
+
+                {/* Sub-tab navigation */}
+                <div className="flex items-center gap-2 bg-surface p-1 rounded-xl border border-white/[0.08]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMentorSubTab("QUEUE");
+                      loadMentorQueue();
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      mentorSubTab === "QUEUE"
+                        ? "bg-primary text-white shadow"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Kundaliklar Navbati</span>
+                    {reviewQueue.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-white font-mono">
+                        {reviewQueue.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMentorSubTab("PLACEMENTS");
+                      loadPlacements();
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      mentorSubTab === "PLACEMENTS"
+                        ? "bg-primary text-white shadow"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>Amaliyotchilar</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-tab 1: QUEUE (API-090) */}
+              {mentorSubTab === "QUEUE" && (
+                <div className="flex flex-col gap-4">
+                  {/* Urgent escalation warning if any */}
+                  {reviewQueue.some((q) => q.is_escalated) && (
+                    <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-3">
+                      <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-rose-200">
+                          Diqqat: Muddati o&apos;tgan (Escalated) kundaliklar mavjud!
+                        </span>
+                        <span className="text-[11px] text-rose-300/80">
+                          Ushbu kundaliklar 3 kunlik muddatdan oshgan. Iltimos, ularni birinchi navbatda ko&apos;rib chiqing.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Queue error message */}
+                  {queueError && (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{queueError}</span>
+                    </div>
+                  )}
+
+                  {/* Loading or Content */}
+                  {isLoadingQueue ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400 text-xs">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <span>Tekshiruv navbati yuklanmoqda...</span>
+                    </div>
+                  ) : reviewQueue.length === 0 ? (
+                    <div className="py-12 text-center text-zinc-400 text-xs flex flex-col items-center justify-center gap-3 border border-dashed border-white/[0.08] rounded-xl">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-zinc-200">Navbat bo&apos;sh!</span>
+                        <span>Hozircha tekshiruvni kutayotgan amaliyot kundaliklari mavjud emas.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={loadMentorQueue}
+                        className="mt-2 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Yangilash</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between text-xs text-zinc-400 px-1">
+                        <span>Jami navbatda: <strong className="text-white font-mono">{reviewQueue.length}</strong> ta topshiriq</span>
+                        <button
+                          type="button"
+                          onClick={loadMentorQueue}
+                          className="px-2.5 py-1 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs text-zinc-300 flex items-center gap-1"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          <span>Yangilash</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {reviewQueue.map((item) => (
+                          <div
+                            key={item.revision_id}
+                            className={`p-4 rounded-xl border flex flex-col justify-between gap-3 transition-all ${
+                              item.is_escalated
+                                ? "bg-rose-500/[0.03] border-rose-500/30 hover:border-rose-500/50"
+                                : "bg-surface border-white/[0.08] hover:border-white/[0.15]"
+                            }`}
+                          >
+                            <div className="flex flex-col gap-2">
+                              {/* Header & badges */}
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <GraduationCap className="w-3.5 h-3.5 text-primary" />
+                                    {item.candidate?.full_name || "Amaliyotchi talaba"}
+                                  </span>
+                                  {item.candidate?.headline && (
+                                    <span className="text-[11px] text-zinc-400 line-clamp-1">
+                                      {item.candidate.headline}
+                                    </span>
+                                  )}
+                                </div>
+                                {item.is_escalated ? (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
+                                    ESCALATED
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+                                    Kutilmoqda
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Details */}
+                              <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-white/[0.04]">
+                                <div>
+                                  <span className="text-zinc-500 text-[10px] block">Sana:</span>
+                                  <span className="font-mono text-zinc-200">
+                                    {item.log_date || "—"} ({item.day_type})
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-500 text-[10px] block">Bajarilgan vaqt:</span>
+                                  <span className="font-mono text-emerald-400 font-semibold">
+                                    {item.total_minutes} daqiqa ({(item.total_minutes / 60).toFixed(1)} soat)
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Summary */}
+                              <p className="text-xs text-zinc-300 line-clamp-2 bg-surface-lowest p-2 rounded-lg border border-white/[0.04]">
+                                {item.summary || "Bajarilgan vazifalar tavsifi ko‘rsatilmagan."}
+                              </p>
+
+                              {/* Deadline */}
+                              {item.due_at && (
+                                <div className="text-[11px] text-zinc-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>Muddati: {new Date(item.due_at).toLocaleDateString()}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action */}
+                            <button
+                              type="button"
+                              onClick={() => handleOpenReviewModal(item.revision_id)}
+                              className="w-full mt-1 py-2 px-3 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow"
+                            >
+                              <FileCheck className="w-3.5 h-3.5" />
+                              <span>Baholash va Tekshirish</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Sub-tab 2: PLACEMENTS (API-089 & API-069) */}
+              {mentorSubTab === "PLACEMENTS" && (
+                <div className="flex flex-col gap-4">
+                  {/* Selector between My Mentees and All Org Placements */}
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPlacementsTab("MY_MENTEES")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          placementsTab === "MY_MENTEES"
+                            ? "bg-surface-high text-white border border-white/[0.1]"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        Menga biriktirilganlar (API-089)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPlacementsTab("ORG_PLACEMENTS")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          placementsTab === "ORG_PLACEMENTS"
+                            ? "bg-surface-high text-white border border-white/[0.1]"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        Tashkilot amaliyotlari (API-069)
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={loadPlacements}
+                      className="px-2.5 py-1 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs text-zinc-300 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Yangilash</span>
+                    </button>
+                  </div>
+
+                  {placementsError && (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                      {placementsError}
+                    </div>
+                  )}
+
+                  {isLoadingPlacements ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400 text-xs">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <span>Amaliyot ma&apos;lumotlari yuklanmoqda...</span>
+                    </div>
+                  ) : placementsTab === "MY_MENTEES" ? (
+                    mentorAssignments.length === 0 ? (
+                      <div className="py-8 text-center text-zinc-400 text-xs border border-dashed border-white/[0.08] rounded-xl">
+                        Sizga biriktirilgan faol amaliyotchi talabalar topilmadi.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {mentorAssignments.map((asg) => (
+                          <div
+                            key={asg.id}
+                            className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-white">Amaliyot #{asg.placement_id.slice(0, 8)}</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                {asg.revoked_at ? "Tugallangan" : asg.accepted_at ? "Faol Mentorlik" : "Kutilmoqda"}
+                              </span>
+                            </div>
+                            <div className="text-xs text-zinc-400 flex flex-col gap-1 mt-1">
+                              <div>Biriktirilgan: <span className="font-mono text-zinc-300">{new Date(asg.assigned_at).toLocaleDateString()}</span></div>
+                              {asg.accepted_at && (
+                                <div>Qabul qilingan: <span className="font-mono text-zinc-300">{new Date(asg.accepted_at).toLocaleDateString()}</span></div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    orgPlacements.length === 0 ? (
+                      <div className="py-8 text-center text-zinc-400 text-xs border border-dashed border-white/[0.08] rounded-xl">
+                        Tashkilot bo&apos;yicha amaliyotlar topilmadi. Yuqorida to&apos;g&apos;ri Tashkilot ID tanlanganligini tekshiring.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {orgPlacements.map((plc) => (
+                          <div
+                            key={plc.id}
+                            className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-white font-mono">#{plc.id.slice(0, 8)}</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                {plc.status}
+                              </span>
+                            </div>
+                            <div className="text-xs text-zinc-400 flex flex-col gap-1 mt-1">
+                              <div>Nomzod ID: <span className="font-mono text-zinc-300">#{plc.candidate_id.slice(0, 8)}...</span></div>
+                              <div>Davomiyligi: <span className="font-mono text-zinc-300">{plc.start_date} ~ {plc.end_date}</span></div>
+                              <div>Akademik trek: <span className="font-semibold text-zinc-200">{plc.academic_track ? "Mavjud (Dual ta'lim)" : "Yo'q"}</span></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       )}
 
@@ -1573,6 +2064,228 @@ export default function EmployerPortal() {
                 Yopish
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------------------- */}
+      {/* FB-162: WORKPLACE MENTOR LOG REVISION REVIEW MODAL (API-091 & 092) */}
+      {/* ----------------------------------------------------------------- */}
+      {reviewModalRevisionId && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/[0.1] bg-[#121214] p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-primary" />
+                <h3 className="font-heading text-base font-bold text-white">
+                  Kundalikni Tekshirish va Baholash (API-091 / API-092)
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReviewModalRevisionId(null)}
+                className="rounded-lg p-1 text-zinc-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {isLoadingRevisionDetail ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400 text-xs">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <span>Kundalik tafsilotlari yuklanmoqda...</span>
+              </div>
+            ) : revisionDetailError ? (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                {revisionDetailError}
+              </div>
+            ) : revisionDetail ? (
+              <div className="flex flex-col gap-4">
+                {/* Intern and Log Overview */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-surface p-3.5 rounded-xl border border-white/[0.06]">
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Talaba:</span>
+                    <span className="font-semibold text-white">{revisionDetail.candidate?.full_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Sana & Tur:</span>
+                    <span className="font-mono text-zinc-200">{revisionDetail.log_date} ({revisionDetail.day_type})</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Jami daqiqa:</span>
+                    <span className="font-mono text-emerald-400 font-bold">
+                      {revisionDetail.total_minutes} daqiqa ({(revisionDetail.total_minutes / 60).toFixed(1)} s.)
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Holat:</span>
+                    <span className="font-semibold text-primary">{revisionDetail.status}</span>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-zinc-300">Talaba xulosasi:</span>
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06] text-xs text-zinc-300">
+                    {revisionDetail.summary || "Xulosa ko'rsatilmagan."}
+                  </div>
+                </div>
+
+                {/* Task Breakdown */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-zinc-300">
+                    Bajarilgan vazifalar ro&apos;yxati ({revisionDetail.tasks?.length || 0} ta):
+                  </span>
+                  <div className="flex flex-col gap-2 max-h-56 overflow-y-auto">
+                    {!revisionDetail.tasks || revisionDetail.tasks.length === 0 ? (
+                      <span className="text-zinc-500 text-xs italic">Vazifalar qayd etilmagan</span>
+                    ) : (
+                      revisionDetail.tasks.map((task, idx) => (
+                        <div
+                          key={task.task_id || idx}
+                          className="p-3 rounded-xl bg-surface border border-white/[0.04] flex flex-col gap-1.5"
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-medium text-white">{task.title}</span>
+                            <span className="font-mono text-emerald-400 font-semibold">{task.minutes} min</span>
+                          </div>
+                          {task.evidence && task.evidence.length > 0 && (
+                            <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+                              <ExternalLink className="w-3 h-3 text-primary" />
+                              <span>Biriktirilgan dalillar: {task.evidence.length} ta fayl</span>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Existing Review Notice if any */}
+                {revisionDetail.existing_review && (
+                  <div className="p-3 rounded-xl bg-surface-high border border-white/[0.08] text-xs flex flex-col gap-1">
+                    <span className="text-zinc-400 text-[10px]">Avvalgi baholash natijasi:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{revisionDetail.existing_review.decision}</span>
+                      {revisionDetail.existing_review.decided_at && (
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          ({new Date(revisionDetail.existing_review.decided_at).toLocaleString()})
+                        </span>
+                      )}
+                    </div>
+                    {revisionDetail.existing_review.comment && (
+                      <p className="text-zinc-300 italic">{revisionDetail.existing_review.comment}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Success Message */}
+                {reviewSubmitSuccess && (
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{reviewSubmitSuccess}</span>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {reviewSubmitError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                    <span>{reviewSubmitError}</span>
+                  </div>
+                )}
+
+                {/* Evaluation Form */}
+                <form onSubmit={handleSubmitReviewDecision} className="flex flex-col gap-3 pt-2 border-t border-white/[0.08]">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">Mentor Qarori (API-092):</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setReviewDecision("APPROVED")}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border ${
+                          reviewDecision === "APPROVED"
+                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/10"
+                            : "bg-surface border-white/[0.08] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Tasdiqlash</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewDecision("CHANGES_REQUESTED")}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border ${
+                          reviewDecision === "CHANGES_REQUESTED"
+                            ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10"
+                            : "bg-surface border-white/[0.08] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Tuzatish so&apos;rash</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewDecision("REJECTED")}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border ${
+                          reviewDecision === "REJECTED"
+                            ? "bg-rose-500/20 border-rose-500 text-rose-300 shadow-md shadow-rose-500/10"
+                            : "bg-surface border-white/[0.08] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Rad etish</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="review-comment" className="text-xs font-semibold text-zinc-300">
+                      Mentor Izohi / Tavsiyalari:
+                    </label>
+                    <textarea
+                      id="review-comment"
+                      rows={3}
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Talabaga vazifalar bo‘yicha ko‘rsatma yoki fikrlaringizni yozing..."
+                      className="w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setReviewModalRevisionId(null)}
+                      className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                    >
+                      Yopish
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingReview}
+                      className="px-5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+                    >
+                      {isSubmittingReview ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Saqlanmoqda...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Qarorni tasdiqlash</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ) : null}
           </div>
         </div>
       )}
