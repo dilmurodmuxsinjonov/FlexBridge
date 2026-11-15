@@ -31,6 +31,13 @@ import {
   ExternalLink,
   ShieldAlert,
   FileCheck,
+  ShieldCheck,
+  UserPlus,
+  UserMinus,
+  Mail,
+  Phone,
+  Trash2,
+  Key,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -47,6 +54,11 @@ import {
   submitWorkplaceReview,
   fetchMentorAssignments,
   fetchOrganizationPlacements,
+  fetchOrgCapabilities,
+  fetchOrgMemberships,
+  inviteOrgMember,
+  revokeOrgMembership,
+  fetchOrgVerificationStatus,
   AuthUser,
   EmployerDashboardMetrics,
   EmployerOpportunityApplicationItem,
@@ -55,6 +67,9 @@ import {
   MentorLogRevisionDetail,
   MentorAssignmentItem,
   OrganizationPlacementItem,
+  OrgCapabilityItem,
+  OrgMembershipItem,
+  OrgVerificationStatusResponse,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -117,9 +132,9 @@ export default function EmployerPortal() {
   const [detailError, setDetailError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
-  // FB-162: Workplace Mentor & Intern Evaluations Hub State (API-090..092, 089, 069)
+  // FB-162 & FB-168: Workspace Tabs & Hub States
   // -------------------------------------------------------------------------
-  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB">("KANBAN");
+  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB">("KANBAN");
   const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS">("QUEUE");
 
   // Review Queue State (API-090)
@@ -144,6 +159,36 @@ export default function EmployerPortal() {
   const [orgPlacements, setOrgPlacements] = useState<OrganizationPlacementItem[]>([]);
   const [isLoadingPlacements, setIsLoadingPlacements] = useState(false);
   const [placementsError, setPlacementsError] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // FB-168: Organization Settings, Team Management, Capabilities & Verification (API-072..075, 067)
+  // -------------------------------------------------------------------------
+  const [orgCapabilities, setOrgCapabilities] = useState<OrgCapabilityItem[]>([]);
+  const [isLoadingCapabilities, setIsLoadingCapabilities] = useState(false);
+  const [capabilitiesError, setCapabilitiesError] = useState<string | null>(null);
+
+  const [orgMemberships, setOrgMemberships] = useState<OrgMembershipItem[]>([]);
+  const [isLoadingMemberships, setIsLoadingMemberships] = useState(false);
+  const [membershipsError, setMembershipsError] = useState<string | null>(null);
+
+  const [orgVerification, setOrgVerification] = useState<OrgVerificationStatusResponse | null>(null);
+  const [isLoadingVerification, setIsLoadingVerification] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  // Invite Member Form State (API-074)
+  const [inviteChannel, setInviteChannel] = useState<"EMAIL" | "PHONE">("EMAIL");
+  const [inviteDestination, setInviteDestination] = useState("");
+  const [inviteRoleCode, setInviteRoleCode] = useState<"HR" | "HOST_COORDINATOR" | "MENTOR" | "BILLING">("HR");
+  const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+
+  // Revoke Member Modal State (API-075)
+  const [revokeModalMembership, setRevokeModalMembership] = useState<OrgMembershipItem | null>(null);
+  const [revokeReason, setRevokeReason] = useState("");
+  const [isSubmittingRevoke, setIsSubmittingRevoke] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
+  const [revokeSuccess, setRevokeSuccess] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async (targetOrgIdInput: string) => {
     if (!targetOrgIdInput.trim()) return;
@@ -467,6 +512,112 @@ export default function EmployerPortal() {
       }
     } finally {
       setIsSubmittingReview(false);
+    }
+  };
+
+  // -------------------------------------------------------------------------
+  // FB-168: Org Hub Data Loaders & Action Handlers (API-072..075, 067)
+  // -------------------------------------------------------------------------
+  const loadOrgHubData = useCallback(async (targetOrgId: string) => {
+    if (!targetOrgId.trim()) return;
+    const tid = targetOrgId.trim();
+
+    setIsLoadingCapabilities(true);
+    setCapabilitiesError(null);
+    setIsLoadingMemberships(true);
+    setMembershipsError(null);
+    setIsLoadingVerification(true);
+    setVerificationError(null);
+
+    try {
+      const caps = await fetchOrgCapabilities(tid);
+      setOrgCapabilities(caps.items || []);
+    } catch (err: unknown) {
+      setCapabilitiesError(err instanceof Error ? err.message : "Imkoniyatlarni yuklashda xatolik.");
+      setOrgCapabilities([]);
+    } finally {
+      setIsLoadingCapabilities(false);
+    }
+
+    try {
+      const mems = await fetchOrgMemberships(tid);
+      setOrgMemberships(mems.items || []);
+    } catch (err: unknown) {
+      setMembershipsError(err instanceof Error ? err.message : "Jamoa a'zolarini yuklashda xatolik.");
+      setOrgMemberships([]);
+    } finally {
+      setIsLoadingMemberships(false);
+    }
+
+    try {
+      const verif = await fetchOrgVerificationStatus(tid);
+      setOrgVerification(verif);
+    } catch (err: unknown) {
+      setVerificationError(err instanceof Error ? err.message : "Verifikatsiya holatini yuklashda xatolik.");
+      setOrgVerification(null);
+    } finally {
+      setIsLoadingVerification(false);
+    }
+  }, []);
+
+  const handleInviteMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orgId.trim()) {
+      setInviteError("Tashkilot ID tanlanmagan.");
+      return;
+    }
+    if (!inviteDestination.trim()) {
+      setInviteError("Email yoki telefon raqami kiritilishi shart.");
+      return;
+    }
+    setIsSubmittingInvite(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+
+    try {
+      await inviteOrgMember(orgId.trim(), {
+        channel: inviteChannel,
+        destination: inviteDestination.trim(),
+        role_code: inviteRoleCode,
+      });
+      setInviteSuccess(`${inviteDestination.trim()} manziliga 24 soatlik taklifnoma muvaffaqiyatli yuborildi!`);
+      setInviteDestination("");
+      // reload memberships
+      const mems = await fetchOrgMemberships(orgId.trim());
+      setOrgMemberships(mems.items || []);
+    } catch (err: unknown) {
+      setInviteError(err instanceof Error ? err.message : "Taklifnoma yuborishda xatolik yuz berdi.");
+    } finally {
+      setIsSubmittingInvite(false);
+    }
+  };
+
+  const handleRevokeMembership = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!revokeModalMembership || !orgId.trim()) return;
+    if (revokeReason.trim().length < 15) {
+      setRevokeError("Bekor qilish sababi kamida 15 ta belgidan iborat bo‘lishi shart (API-075 qat'iy talabi).");
+      return;
+    }
+
+    setIsSubmittingRevoke(true);
+    setRevokeError(null);
+    setRevokeSuccess(null);
+
+    try {
+      await revokeOrgMembership(orgId.trim(), revokeModalMembership.id, {
+        reason: revokeReason.trim(),
+      });
+      setRevokeSuccess("A'zolik muvaffaqiyatli bekor qilindi.");
+      setRevokeReason("");
+      setRevokeModalMembership(null);
+      // reload memberships
+      const mems = await fetchOrgMemberships(orgId.trim());
+      setOrgMemberships(mems.items || []);
+    } catch (err: unknown) {
+      setRevokeError(err instanceof Error ? err.message : "A'zolikni bekor qilishda xatolik yuz berdi.");
+    } finally {
+      setIsSubmittingRevoke(false);
     }
   };
 
@@ -818,6 +969,23 @@ export default function EmployerPortal() {
                   {reviewQueue.filter((q) => q.is_escalated).length}
                 </span>
               )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMainTab("ORG_HUB");
+                if (orgId.trim()) {
+                  loadOrgHubData(orgId.trim());
+                }
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                activeMainTab === "ORG_HUB"
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Building className="w-4 h-4" />
+              <span>Tashkilot & Jamoa Boshqaruvi</span>
             </button>
           </div>
 
@@ -1463,6 +1631,386 @@ export default function EmployerPortal() {
                   )}
                 </div>
               )}
+            </section>
+          )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* FB-168: TASHKILOT SOZLAMALARI VA JAMOA BOSHQARUVI (API-072..075, 067) */}
+          {/* ----------------------------------------------------------------- */}
+          {activeMainTab === "ORG_HUB" && (
+            <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-6 shadow-lg">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Tashkilot & Jamoa Hub
+                    </span>
+                    <span className="text-zinc-500 text-xs font-mono">• API-072, API-073, API-074, API-075, API-067</span>
+                  </div>
+                  <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                    Tashkilot Huquqlari, Verifikatsiya va Jamoa Boshqaruvi
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Tashkilot faoliyat imkoniyatlari (Capabilities), davlat tekshiruvi holati, a&apos;zolar ro&apos;yxati va 24 soatlik taklifnomalar yuborish.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isLoadingCapabilities || isLoadingMemberships || !orgId.trim()}
+                  onClick={() => loadOrgHubData(orgId.trim())}
+                  className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingCapabilities || isLoadingMemberships ? "animate-spin" : ""}`} />
+                  <span>Yangilash</span>
+                </button>
+              </div>
+
+              {/* CARD 1: Organization Capabilities & Verification Status (API-072 & API-067) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Capabilities Card */}
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        Faoliyat Imkoniyatlari (Capabilities)
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">API-072</span>
+                  </div>
+
+                  {isLoadingCapabilities ? (
+                    <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span>Imkoniyatlar yuklanmoqda...</span>
+                    </div>
+                  ) : capabilitiesError ? (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                      {capabilitiesError}
+                    </div>
+                  ) : orgCapabilities.length === 0 ? (
+                    <div className="p-4 rounded-lg bg-surface-lowest text-center text-zinc-400 text-xs">
+                      Tashkilot uchun biriktirilgan faol huquqlar topilmadi.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {orgCapabilities.map((cap) => (
+                        <div
+                          key={cap.id || cap.capability}
+                          className="p-3 rounded-lg bg-surface-lowest border border-white/[0.04] flex items-center justify-between"
+                        >
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-xs font-bold text-white font-mono">{cap.capability}</span>
+                            <span className="text-[11px] text-zinc-400">
+                              {cap.created_at ? `Berilgan: ${new Date(cap.created_at).toLocaleDateString()}` : "Faoliyat huquqi"}
+                            </span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            cap.status === "ACTIVE" || cap.status === "VERIFIED"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                          }`}>
+                            {cap.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Verification Status Card */}
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building className="w-4 h-4 text-primary" />
+                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        Tashkilot Verifikatsiyasi (STIR / Soliq)
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">API-067</span>
+                  </div>
+
+                  {isLoadingVerification ? (
+                    <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span>Verifikatsiya ma&apos;lumotlari yuklanmoqda...</span>
+                    </div>
+                  ) : verificationError ? (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                      {verificationError}
+                    </div>
+                  ) : orgVerification ? (
+                    <div className="flex flex-col gap-2.5">
+                      <div className="p-3 rounded-lg bg-surface-lowest border border-white/[0.04] flex items-center justify-between">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] text-zinc-400">A&apos;zolik / Tashkilot holati:</span>
+                          <span className="text-xs font-bold text-white font-mono">
+                            {orgVerification.membership_status || orgVerification.status || "VERIFIED"}
+                          </span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                          (orgVerification.membership_status || orgVerification.status) === "ACTIVE" || (orgVerification.membership_status || orgVerification.status) === "VERIFIED"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : (orgVerification.membership_status || orgVerification.status) === "PENDING" || (orgVerification.membership_status || orgVerification.status) === "PENDING_APPROVAL"
+                            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                            : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        }`}>
+                          {orgVerification.membership_status || orgVerification.status || "VERIFIED"}
+                        </span>
+                      </div>
+
+                      {orgVerification.cases && orgVerification.cases.length > 0 && (
+                        <div className="flex flex-col gap-1.5 mt-1">
+                          <span className="text-[11px] font-semibold text-zinc-400">Tekshiruv tarixi:</span>
+                          <div className="max-h-28 overflow-y-auto space-y-1.5 pr-1">
+                            {orgVerification.cases.map((c) => (
+                              <div
+                                key={c.id}
+                                className="p-2 rounded bg-surface-lowest/60 border border-white/[0.04] text-[11px] flex items-center justify-between"
+                              >
+                                <span className="font-mono text-zinc-300">{c.kind}</span>
+                                <span className="text-zinc-500 font-mono">
+                                  {c.created_at ? new Date(c.created_at).toLocaleDateString() : ""}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-lg bg-surface-lowest text-center text-zinc-400 text-xs">
+                      Verifikatsiya holati topilmadi.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* SECTION 2: TEAM MEMBERS & INVITE FORM (API-073 & API-074) */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Team Members List (2 Columns on Desktop) */}
+                <div className="lg:col-span-2 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        Jamoa A&apos;zolari va Rollar ({orgMemberships.length})
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">API-073</span>
+                  </div>
+
+                  {membershipsError && (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                      {membershipsError}
+                    </div>
+                  )}
+
+                  {revokeSuccess && (
+                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{revokeSuccess}</span>
+                    </div>
+                  )}
+
+                  {isLoadingMemberships ? (
+                    <div className="py-12 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span>Jamoa a&apos;zolari yuklanmoqda...</span>
+                    </div>
+                  ) : orgMemberships.length === 0 ? (
+                    <div className="p-8 rounded-xl bg-surface border border-white/[0.08] text-center text-zinc-400 text-xs flex flex-col items-center gap-2">
+                      <Users className="w-8 h-8 text-zinc-600" />
+                      <span>Ushbu tashkilotda biriktirilgan a&apos;zolar mavjud emas.</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      {orgMemberships.map((mem) => {
+                        const isOwner = mem.role === "OWNER";
+                        const isRevoked = mem.status === "REVOKED";
+
+                        return (
+                          <div
+                            key={mem.id}
+                            className="p-3.5 rounded-xl bg-surface border border-white/[0.08] hover:border-white/[0.15] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs uppercase">
+                                {mem.user_id.slice(0, 2)}
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-white">
+                                    Foydalanuvchi #{mem.user_id.slice(0, 8)}
+                                  </span>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                    isOwner
+                                      ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                      : mem.role === "HR"
+                                      ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                                      : mem.role === "MENTOR"
+                                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                      : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                  }`}>
+                                    {mem.role}
+                                  </span>
+                                </div>
+                                <span className="text-[11px] text-zinc-500 font-mono">
+                                  Qo&apos;shilgan: {mem.created_at ? new Date(mem.created_at).toLocaleDateString() : (mem.accepted_at ? new Date(mem.accepted_at).toLocaleDateString() : "Yaqinda")}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-end sm:self-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                                mem.status === "ACTIVE"
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                              }`}>
+                                {mem.status}
+                              </span>
+
+                              {!isOwner && !isRevoked && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRevokeModalMembership(mem);
+                                    setRevokeReason("");
+                                    setRevokeError(null);
+                                    setRevokeSuccess(null);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-[11px] font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1"
+                                >
+                                  <UserMinus className="w-3 h-3" />
+                                  <span>Bekor qilish</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Send Invitation Form (1 Column on Desktop) */}
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="w-4 h-4 text-emerald-400" />
+                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        Yangi A&apos;zo Taklif Qilish
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">API-074</span>
+                  </div>
+
+                  <form onSubmit={handleInviteMember} className="flex flex-col gap-3">
+                    {inviteSuccess && (
+                      <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+                        {inviteSuccess}
+                      </div>
+                    )}
+
+                    {inviteError && (
+                      <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                        {inviteError}
+                      </div>
+                    )}
+
+                    {/* Channel Selector */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-semibold text-zinc-300">
+                        Yuborish kanali:
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setInviteChannel("EMAIL")}
+                          className={`py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                            inviteChannel === "EMAIL"
+                              ? "bg-primary text-white border-primary"
+                              : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                          }`}
+                        >
+                          <Mail className="w-3 h-3" />
+                          <span>Email</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInviteChannel("PHONE")}
+                          className={`py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                            inviteChannel === "PHONE"
+                              ? "bg-primary text-white border-primary"
+                              : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                          }`}
+                        >
+                          <Phone className="w-3 h-3" />
+                          <span>SMS</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Destination Input */}
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="invite-destination" className="text-[11px] font-semibold text-zinc-300">
+                        {inviteChannel === "EMAIL" ? "Elektron pochta manzili:" : "Telefon raqami:"}
+                      </label>
+                      <input
+                        id="invite-destination"
+                        type={inviteChannel === "EMAIL" ? "email" : "text"}
+                        required
+                        value={inviteDestination}
+                        onChange={(e) => setInviteDestination(e.target.value)}
+                        placeholder={inviteChannel === "EMAIL" ? "hr.manager@example.com" : "+998901234567"}
+                        className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Role Selector */}
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="invite-role" className="text-[11px] font-semibold text-zinc-300">
+                        Tayinlanadigan rol:
+                      </label>
+                      <select
+                        id="invite-role"
+                        value={inviteRoleCode}
+                        onChange={(e) => setInviteRoleCode(e.target.value as "HR" | "HOST_COORDINATOR" | "MENTOR" | "BILLING")}
+                        className="w-full rounded-lg border border-white/[0.1] bg-surface-lowest px-3 py-2 text-xs text-zinc-200 focus:border-primary focus:outline-none"
+                      >
+                        <option value="HR">HR (Kadrlar boshqaruvi)</option>
+                        <option value="HOST_COORDINATOR">HOST_COORDINATOR (Amaliyot koordinatori)</option>
+                        <option value="MENTOR">MENTOR (Amaliyot mentori)</option>
+                        <option value="BILLING">BILLING (Moliya boshqaruvi)</option>
+                      </select>
+                    </div>
+
+                    <div className="text-[11px] text-zinc-500 leading-relaxed pt-1">
+                      * Taklifnoma xavfsiz va bir martalik bo&apos;lib, yuborilgan vaqtdan boshlab 24 soat amal qiladi.
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingInvite || !inviteDestination.trim()}
+                      className="mt-2 w-full py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20"
+                    >
+                      {isSubmittingInvite ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Yuborilmoqda...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Taklifnomani yuborish</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
             </section>
           )}
         </div>
@@ -2286,6 +2834,94 @@ export default function EmployerPortal() {
                 </form>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* REVOKE MEMBERSHIP MODAL (API-075) */}
+      {revokeModalMembership && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[#121214] p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2 text-rose-400">
+                <ShieldAlert className="w-5 h-5" />
+                <h3 className="font-heading text-base font-bold text-white">
+                  A&apos;zolikni Bekor Qilish
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRevokeModalMembership(null)}
+                className="rounded-lg p-1 text-zinc-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-400">
+              Siz <span className="font-semibold text-white">Foydalanuvchi #{revokeModalMembership.user_id.slice(0, 8)}</span> ({revokeModalMembership.role}) a&apos;zoligini bekor qilmoqchisiz. Ushbu amal foydalanuvchining tashkilotdagi barcha huquqlarini to&apos;xtatadi.
+            </p>
+
+            <form onSubmit={handleRevokeMembership} className="flex flex-col gap-3">
+              {revokeError && (
+                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                  {revokeError}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="revoke-reason" className="text-xs font-semibold text-zinc-300">
+                    Bekor qilish sababi (kamida 15 ta belgi):
+                  </label>
+                  <span className={`text-[10px] font-mono ${
+                    revokeReason.trim().length >= 15 ? "text-emerald-400" : "text-amber-400"
+                  }`}>
+                    {revokeReason.trim().length} / 15
+                  </span>
+                </div>
+                <textarea
+                  id="revoke-reason"
+                  rows={3}
+                  required
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                  placeholder="Xodim bilan mehnat shartnomasi bekor qilinganligi sababli..."
+                  className="w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-rose-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRevokeModalMembership(null)}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRevoke || revokeReason.trim().length < 15}
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-rose-600/20"
+                >
+                  {isSubmittingRevoke ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Tasdiqlanmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>A&apos;zolikni to&apos;xtatish</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
