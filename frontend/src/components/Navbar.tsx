@@ -57,7 +57,21 @@ export default function Navbar() {
           );
         })}
       </nav>
-      <span className="hidden rounded border border-white/[0.08] px-2.5 py-1 text-[11px] text-zinc-400 lg:inline-flex">R1 sinov interfeysi</span>
+      <div className="flex items-center gap-2">
+        <Link
+          href="/kirish"
+          className="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.04] transition"
+        >
+          <Lock className="h-3.5 w-3.5" />
+          <span>Kirish</span>
+        </Link>
+        <Link
+          href="/royxatdan-otish"
+          className="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition shadow-sm"
+        >
+          <span>Ro‘yxatdan o‘tish</span>
+        </Link>
+      </div>
     </header>
     </>
   );

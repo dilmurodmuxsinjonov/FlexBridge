@@ -17,10 +17,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const inferredChannel =
+      channel ||
+      (destination
+        ? destination.trim().startsWith("+") || /^\d+$/.test(destination.trim())
+          ? "PHONE"
+          : "EMAIL"
+        : undefined);
+
     const payload: Record<string, unknown> = {
       password,
-      destination: destination || undefined,
-      channel: channel || undefined,
+      destination: destination ? destination.trim() : undefined,
+      channel: inferredChannel,
       totp_code: totp_code || undefined,
     };
     if (body.user_id) payload.user_id = body.user_id;
