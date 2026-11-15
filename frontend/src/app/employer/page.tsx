@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -43,6 +43,10 @@ import {
 } from "lucide-react";
 import {
   fetchAuthMe,
+  fetchMyWorkspaces,
+  fetchManagedOpportunities,
+  type ManagedOpportunityItem,
+  type WorkspaceItem,
   fetchEmployerDashboard,
   createEmployerOpportunity,
   fetchEmployerOpportunityApplications,
@@ -96,6 +100,14 @@ import {
   SkeuoLiveFeed,
 } from "@/components/skeuo/SkeuoPrimitives";
 
+const OPPORTUNITY_STATUS_LABELS: Record<string, string> = {
+  DRAFT: "Qoralama",
+  PUBLISHED: "Faol",
+  PAUSED: "To‘xtatilgan",
+  CLOSED: "Yopilgan",
+  EXPIRED: "Muddati o‘tgan",
+};
+
 export default function EmployerPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -103,6 +115,10 @@ export default function EmployerPortal() {
 
   // Organization selection & dashboard data
   const [orgId, setOrgId] = useState("");
+  // Organizations the signed-in user belongs to (GET /me/workspaces); null = not loaded yet.
+  const [workspaceOrgs, setWorkspaceOrgs] = useState<WorkspaceItem[] | null>(null);
+  // Every vacancy of the selected organization (API-076), for the vacancy picker.
+  const [managedOpps, setManagedOpps] = useState<ManagedOpportunityItem[]>([]);
   const [dashboard, setDashboard] = useState<EmployerDashboardMetrics | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
@@ -320,6 +336,9 @@ export default function EmployerPortal() {
     setIsLoadingDashboard(true);
     setDashboardError(null);
 
+    fetchManagedOpportunities(targetOrgIdInput.trim())
+      .then(setManagedOpps)
+      .catch(() => setManagedOpps([]));
     try {
       const data = await fetchEmployerDashboard(targetOrgIdInput.trim());
       setDashboard(data);
@@ -363,6 +382,17 @@ export default function EmployerPortal() {
     }
   }, []);
 
+  // After sign-in, pick the user's organization automatically (first one, or keep the current choice).
+  const onWorkspacesLoaded = useEffectEvent((orgs: WorkspaceItem[]) => {
+    setWorkspaceOrgs(orgs);
+    const keep = orgs.find((o) => o.id === orgId);
+    const next = keep ?? orgs[0];
+    if (next) {
+      setOrgId(next.id);
+      loadDashboard(next.id);
+    }
+  });
+
   // Load session on mount and sync across portals
   useEffect(() => {
     let isMounted = true;
@@ -372,6 +402,14 @@ export default function EmployerPortal() {
           setCurrentUser(user);
           setIsAuthLoading(false);
         }
+        if (!user) return;
+        fetchMyWorkspaces()
+          .then((ws) => {
+            if (isMounted) onWorkspacesLoaded(ws.organizations);
+          })
+          .catch(() => {
+            if (isMounted) setWorkspaceOrgs([]);
+          });
       });
     };
     syncSession();
@@ -384,15 +422,14 @@ export default function EmployerPortal() {
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
-    if (orgId) {
-      loadDashboard(orgId);
-    }
+    // Re-runs the session sync above, which also loads this user's organizations.
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
   };
 
   const handleCreateOpportunity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orgId.trim()) {
-      setCreateError("Tashkilot ID (UUID) kiritilishi shart.");
+      setCreateError("Avval tashkilotni tanlang.");
       return;
     }
     setIsCreating(true);
@@ -1178,39 +1215,76 @@ export default function EmployerPortal() {
       {/* AUTHENTICATED WORKSPACE */}
       {currentUser && (
         <div className="flex flex-col gap-6">
-          {/* ORG ID SELECTOR */}
+          {/* ORGANIZATION PICKER (from GET /me/workspaces; no UUID typing) */}
           <section className="w-full skeuo-card rounded-3xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-1 items-center gap-2">
-              <label htmlFor="orgIdInput" className="text-xs font-semibold text-[var(--fb-ink)] shrink-0">
-                Tashkilot ID (UUID):
-              </label>
-              <input
-                id="orgIdInput"
-                type="text"
-                value={orgId}
-                onChange={(e) => setOrgId(e.target.value)}
-                placeholder="masalan: e1a54054-0eb7-4eb2-a7d1-e63013d39ea3"
-                className="w-full max-w-md px-3.5 py-2 rounded-2xl skeuo-input text-xs font-mono"
-              />
-            </div>
-            <button
-              type="button"
-              disabled={isLoadingDashboard || !orgId.trim()}
-              onClick={() => loadDashboard(orgId)}
-              className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoadingDashboard ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Yuklanmoqda...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Tahlillarni yuklash</span>
-                </>
-              )}
-            </button>
+            {workspaceOrgs === null ? (
+              <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-secondary)]">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Tashkilotlaringiz yuklanmoqda…</span>
+              </div>
+            ) : workspaceOrgs.length === 0 ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-[var(--fb-ink)]">Siz hali hech qaysi tashkilotga biriktirilmagansiz</span>
+                  <span className="text-xs text-[var(--fb-ink-secondary)]">
+                    Korxonangizni ro‘yxatdan o‘tkazing yoki rahbaringiz yuborgan taklif havolasi orqali jamoaga qo‘shiling.
+                  </span>
+                </div>
+                <Link
+                  href="/korxona/royxatdan-otish"
+                  className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold text-center shrink-0"
+                >
+                  Korxonani ro‘yxatdan o‘tkazish
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-1 flex-wrap items-center gap-2">
+                  <label htmlFor="orgPicker" className="text-xs font-semibold text-[var(--fb-ink)] shrink-0">
+                    Tashkilot:
+                  </label>
+                  {workspaceOrgs.length > 1 ? (
+                    <select
+                      id="orgPicker"
+                      value={orgId}
+                      onChange={(e) => {
+                        setOrgId(e.target.value);
+                        setTargetOppId("");
+                        loadDashboard(e.target.value);
+                      }}
+                      className="w-full max-w-sm px-3.5 py-2 rounded-2xl skeuo-input text-sm"
+                    >
+                      {workspaceOrgs.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span id="orgPicker" className="text-sm font-semibold text-[var(--fb-ink)]">
+                      {workspaceOrgs[0].name}
+                    </span>
+                  )}
+                  {(() => {
+                    const current = workspaceOrgs.find((o) => o.id === orgId);
+                    return current ? (
+                      <span className="text-[11px] text-[var(--fb-ink-secondary)]">
+                        {current.region} · Rolingiz: {current.roles.join(", ")}
+                      </span>
+                    ) : null;
+                  })()}
+                </div>
+                <button
+                  type="button"
+                  disabled={isLoadingDashboard || !orgId}
+                  onClick={() => loadDashboard(orgId)}
+                  className="px-4 py-2 rounded-full skeuo-btn-secondary text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoadingDashboard ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  <span>Yangilash</span>
+                </button>
+              </>
+            )}
           </section>
 
           {/* DASHBOARD ERROR MESSAGE */}
@@ -1471,13 +1545,25 @@ export default function EmployerPortal() {
               {/* Opportunity Selector */}
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
-                  <input
-                    type="text"
+                  <label htmlFor="kanbanOppPicker" className="sr-only">Vakansiya</label>
+                  <select
+                    id="kanbanOppPicker"
                     value={targetOppId}
-                    onChange={(e) => setTargetOppId(e.target.value)}
-                    placeholder="Vakansiya identifikatori"
-                    className="w-64 px-3 py-1.5 rounded-xl skeuo-input text-xs font-mono"
-                  />
+                    onChange={(e) => {
+                      setTargetOppId(e.target.value);
+                      if (e.target.value) loadApplications(e.target.value);
+                    }}
+                    className="w-72 max-w-full px-3 py-1.5 rounded-xl skeuo-input text-xs"
+                  >
+                    <option value="">
+                      {managedOpps.length ? "Vakansiyani tanlang…" : "Bu tashkilotda hali vakansiya yo‘q"}
+                    </option>
+                    {managedOpps.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.title} · {OPPORTUNITY_STATUS_LABELS[o.status] ?? o.status} · {o.applications_count} ariza
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   type="button"

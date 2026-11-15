@@ -33,6 +33,7 @@ import {
   Trash2,
 } from "lucide-react";
 import {
+  fetchMyWorkspaces,
   fetchAuthMe,
   fetchUniversityReviewQueue,
   fetchTeacherAcademicAssignments,
@@ -591,7 +592,16 @@ export default function UniversityPortal() {
         if (user) {
           loadQueue();
           loadAssignments();
-          loadCoordinatorQueue();
+          // The department queue is a coordinator tool; teachers would only get 403 here.
+          if ((user.roles || []).includes("COORDINATOR")) loadCoordinatorQueue();
+          fetchMyWorkspaces()
+            .then((ws) => {
+              if (!isMounted) return;
+              const coordinated = ws.institutions.find((i) => i.roles.includes("COORDINATOR"));
+              const chosen = coordinated ?? ws.institutions[0];
+              if (chosen) setInstitutionId((current) => current ?? chosen.id);
+            })
+            .catch(() => {});
         }
       });
     };

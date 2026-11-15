@@ -5526,3 +5526,69 @@ export function verifyEImzoCode(code: string): Promise<{ valid: boolean; verific
   return fetchBffJson(`/api/bff/internship-documents/verify/${encodeURIComponent(code)}`, { method: "GET" }, "EIMZO_VERIFY_FAILED");
 }
 
+
+// ---------------------------------------------------------------------------
+// Workspaces (organizations / institutions the signed-in user can act in)
+// ---------------------------------------------------------------------------
+export interface WorkspaceItem {
+  id: string;
+  name: string;
+  legal_name?: string;
+  region: string;
+  status: string;
+  roles: string[];
+}
+
+export interface MyWorkspaces {
+  organizations: WorkspaceItem[];
+  institutions: WorkspaceItem[];
+}
+
+export async function fetchMyWorkspaces(): Promise<MyWorkspaces> {
+  const res = await fetch("/api/bff/me/workspaces", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "WORKSPACES_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return {
+    organizations: Array.isArray(data.organizations) ? data.organizations : [],
+    institutions: Array.isArray(data.institutions) ? data.institutions : [],
+  };
+}
+
+export interface ManagedOpportunityItem {
+  id: string;
+  title: string;
+  kind: string;
+  status: string;
+  region: string | null;
+  work_mode: string | null;
+  capacity: number;
+  occupied_count: number;
+  applications_count: number;
+  published_at: string | null;
+  expires_at: string | null;
+  created_at: string | null;
+}
+
+export async function fetchManagedOpportunities(organizationId: string, status?: string): Promise<ManagedOpportunityItem[]> {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(organizationId)}/opportunities${qs}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ORG_OPPORTUNITIES_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return Array.isArray(data.items) ? data.items : [];
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { canUseOperatorModule, type OperatorModule } from "@/lib/roles";
 import {
   Lock,
   CheckCircle2,
@@ -65,8 +66,20 @@ import {
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
+// Which permission each console tab needs (any one of them opens the tab).
+const TAB_MODULES: Array<[ActiveTab, OperatorModule[]]> = [
+  ["AUDIT", ["AUDIT"]],
+  ["VERIFICATION", ["VERIFICATION"]],
+  ["BREAK_GLASS", ["BREAK_GLASS"]],
+  ["SUPPORT_OPS", ["SUPPORT_TICKETS", "PLATFORM_HEALTH"]],
+  ["FINANCE", ["FINANCE"]],
+];
+
 export default function OperatorPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  // Roles of the signed-in operator, read by loaders so they skip modules that would answer 403.
+  const rolesRef = useRef<string[]>([]);
+  const allowed = useCallback((module: OperatorModule) => canUseOperatorModule(rolesRef.current, module), []);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("AUDIT");
@@ -169,6 +182,7 @@ export default function OperatorPortal() {
 
   // Load Audit Events (API-118)
   const loadAuditEvents = useCallback(async () => {
+    if (!allowed("AUDIT")) return;
     setIsLoadingEvents(true);
     setEventsError(null);
     try {
@@ -184,10 +198,11 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingEvents(false);
     }
-  }, []);
+  }, [allowed]);
 
   // Load Verification Cases (API-109)
   const loadVerificationCases = useCallback(async () => {
+    if (!allowed("VERIFICATION")) return;
     setIsLoadingCases(true);
     setCasesError(null);
     try {
@@ -203,9 +218,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingCases(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadSupportTickets = useCallback(async () => {
+    if (!allowed("SUPPORT_TICKETS")) return;
     setIsLoadingTickets(true);
     setTicketsError(null);
     try {
@@ -221,9 +237,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingTickets(false);
     }
-  }, [ticketFilterStatus, ticketFilterPriority]);
+  }, [allowed, ticketFilterStatus, ticketFilterPriority]);
 
   const loadRestoreRuns = useCallback(async () => {
+    if (!allowed("PLATFORM_HEALTH")) return;
     setIsLoadingRuns(true);
     setRunsError(null);
     try {
@@ -236,9 +253,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingRuns(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadAnalytics = useCallback(async () => {
+    if (!allowed("PLATFORM_HEALTH")) return;
     setIsLoadingAnalytics(true);
     setAnalyticsError(null);
     try {
@@ -250,13 +268,14 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingAnalytics(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadSupportOps = useCallback(async () => {
     await Promise.allSettled([loadSupportTickets(), loadRestoreRuns(), loadAnalytics()]);
   }, [loadSupportTickets, loadRestoreRuns, loadAnalytics]);
 
   const loadFinanceSummary = useCallback(async () => {
+    if (!allowed("FINANCE")) return;
     setIsLoadingFinance(true);
     setFinanceError(null);
     try {
@@ -268,9 +287,10 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingFinance(false);
     }
-  }, []);
+  }, [allowed]);
 
   const loadReconciliation = useCallback(async () => {
+    if (!allowed("FINANCE")) return;
     setIsLoadingReconciliation(true);
     setReconciliationError(null);
     try {
@@ -287,7 +307,7 @@ export default function OperatorPortal() {
     } finally {
       setIsLoadingReconciliation(false);
     }
-  }, [reconciliationProvider, reconciliationDiscrepancyOnly]);
+  }, [allowed, reconciliationProvider, reconciliationDiscrepancyOnly]);
 
   const loadFinanceHub = useCallback(async () => {
     await Promise.allSettled([loadFinanceSummary(), loadReconciliation()]);
@@ -317,7 +337,10 @@ export default function OperatorPortal() {
         if (!isMounted) return;
         setCurrentUser(user);
         setIsAuthLoading(false);
+        rolesRef.current = user?.roles ?? [];
         if (user) {
+          const firstTab = TAB_MODULES.find(([, mods]) => mods.some((m) => allowed(m)));
+          if (firstTab) setActiveTab((tab) => (TAB_MODULES.find(([t]) => t === tab)?.[1].some((m) => allowed(m)) ? tab : firstTab[0]));
           loadAuditEvents();
           loadVerificationCases();
           loadSupportOps();
@@ -331,7 +354,7 @@ export default function OperatorPortal() {
       isMounted = false;
       window.removeEventListener("flexbridge:auth-changed", syncAuthAndQueues);
     };
-  }, [loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
+  }, [allowed, loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
 
   // Opening the support or finance tab refreshes it. Sign-in (auth sync above)
   // already loads every queue, so no effect is needed for user changes.
@@ -345,6 +368,7 @@ export default function OperatorPortal() {
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
+    rolesRef.current = user.roles ?? [];
     loadAuditEvents();
     loadVerificationCases();
     loadSupportOps();
