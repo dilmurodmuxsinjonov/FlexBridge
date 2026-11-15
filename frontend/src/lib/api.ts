@@ -3571,6 +3571,186 @@ export async function markNotificationRead(
   return data;
 }
 
+// ---------------------------------------------------------------------------
+// FB-184: Student Academic Enrollments (HEMIS) & Availability Exceptions
+// Canonical Contracts: API-027, API-034, API-036
+// ---------------------------------------------------------------------------
+
+export interface CandidateEnrollmentItem {
+  id: string;
+  candidate_id?: string;
+  institution_id: string;
+  institution_name?: string;
+  program: string;
+  start_date: string;
+  end_date?: string | null;
+  student_ref?: string | null;
+  current_student: boolean;
+  reviewed: boolean;
+  status: string;
+  created_at?: string;
+}
+
+export interface CandidateEnrollmentsResponse {
+  ok: boolean;
+  contract_id?: string;
+  items: CandidateEnrollmentItem[];
+  next_cursor?: string | null;
+}
+
+export interface CreateEnrollmentPayload {
+  institution_id: string;
+  program: string;
+  start_date: string;
+  end_date?: string | null;
+  student_ref?: string | null;
+  evidence_note?: string;
+  file_ids?: string[];
+  idempotency_key?: string;
+}
+
+export interface EndEnrollmentPayload {
+  reason: string;
+  effective_end_date?: string | null;
+  idempotency_key?: string;
+}
+
+export interface AvailabilityExceptionItem {
+  local_date: string;
+  kind: "AVAILABLE" | "UNAVAILABLE";
+  start_minute: number;
+  end_minute: number;
+}
+
+export interface SaveAvailabilityExceptionsPayload {
+  from_date: string;
+  to_date: string;
+  exceptions: AvailabilityExceptionItem[];
+}
+
+export interface VerifiedInstitutionItem {
+  id: string;
+  name: string;
+  registry_code: string;
+  region: string;
+}
+
+export async function fetchCandidateEnrollments(
+  limit: number = 50,
+  afterId?: string
+): Promise<CandidateEnrollmentItem[]> {
+  const sp = new URLSearchParams();
+  sp.set("limit", limit.toString());
+  if (afterId) sp.set("after_id", afterId);
+
+  const res = await fetch(`/api/bff/candidate/enrollments?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ENROLLMENTS_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as CandidateEnrollmentItem[];
+}
+
+export async function createCandidateEnrollment(
+  payload: CreateEnrollmentPayload
+): Promise<{ ok: boolean; contract_id?: string; id?: string; enrollment_id?: string; status?: string }> {
+  const res = await fetch("/api/bff/candidate/enrollments", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ENROLLMENT_CREATE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchCandidateEnrollmentDetail(
+  id: string
+): Promise<CandidateEnrollmentItem> {
+  const res = await fetch(`/api/bff/candidate/enrollments/${encodeURIComponent(id)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ENROLLMENT_DETAIL_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateEnrollmentItem;
+}
+
+export async function endCandidateEnrollment(
+  id: string,
+  payload: EndEnrollmentPayload
+): Promise<{ ok: boolean; status?: string }> {
+  const res = await fetch(`/api/bff/candidate/enrollments/${encodeURIComponent(id)}/end`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ENROLLMENT_END_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchVerifiedInstitutions(): Promise<VerifiedInstitutionItem[]> {
+  const res = await fetch("/api/bff/candidate/institutions", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "INSTITUTIONS_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as VerifiedInstitutionItem[];
+}
+
+export async function saveCandidateAvailabilityExceptions(
+  payload: SaveAvailabilityExceptionsPayload
+): Promise<{ ok: boolean; contract_id?: string }> {
+  const res = await fetch("/api/bff/candidate/availability/exceptions", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "AVAILABILITY_EXCEPTIONS_SAVE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+
 
 
 

@@ -21,6 +21,13 @@ import {
   FileText,
   Search,
   Check,
+  GraduationCap,
+  Building2,
+  BookOpen,
+  CalendarDays,
+  XCircle,
+  Award,
+  ExternalLink,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -30,12 +37,20 @@ import {
   updateCandidateSkills,
   fetchCandidateAvailability,
   saveCandidateAvailability,
+  saveCandidateAvailabilityExceptions,
+  fetchCandidateEnrollments,
+  createCandidateEnrollment,
+  endCandidateEnrollment,
+  fetchVerifiedInstitutions,
   logoutUser,
   AuthUser,
   CandidateProfileData,
   CandidateProfileSkill,
   CatalogSkillItem,
   AvailabilityRuleItem,
+  AvailabilityExceptionItem,
+  CandidateEnrollmentItem,
+  VerifiedInstitutionItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -82,8 +97,8 @@ export default function CandidateProfileHub() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Active Tab: PROFILE, SKILLS, AVAILABILITY
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "SKILLS" | "AVAILABILITY">("PROFILE");
+  // Active Tab: PROFILE, SKILLS, AVAILABILITY, ENROLLMENTS
+  const [activeTab, setActiveTab] = useState<"PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS">("PROFILE");
 
   // Tab 1: Profile state
   const [profile, setProfile] = useState<CandidateProfileData | null>(null);
@@ -112,6 +127,38 @@ export default function CandidateProfileHub() {
   const [isSavingAvailability, setIsSavingAvailability] = useState(false);
   const [availSuccessMsg, setAvailSuccessMsg] = useState<string | null>(null);
   const [availErrorMsg, setAvailErrorMsg] = useState<string | null>(null);
+
+  // Tab 3: Availability Exceptions state (API-036)
+  const [exceptions, setExceptions] = useState<AvailabilityExceptionItem[]>([]);
+  const [newExcDate, setNewExcDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [newExcKind, setNewExcKind] = useState<"AVAILABLE" | "UNAVAILABLE">("UNAVAILABLE");
+  const [newExcStart, setNewExcStart] = useState<string>("09:00");
+  const [newExcEnd, setNewExcEnd] = useState<string>("18:00");
+  const [isSavingExceptions, setIsSavingExceptions] = useState(false);
+  const [excSuccessMsg, setExcSuccessMsg] = useState<string | null>(null);
+  const [excErrorMsg, setExcErrorMsg] = useState<string | null>(null);
+
+  // Tab 4: Enrollments state (API-027, API-034)
+  const [enrollments, setEnrollments] = useState<CandidateEnrollmentItem[]>([]);
+  const [isLoadingEnrollments, setIsLoadingEnrollments] = useState(false);
+  const [institutions, setInstitutions] = useState<VerifiedInstitutionItem[]>([]);
+  const [selectedInstId, setSelectedInstId] = useState<string>("");
+  const [customInstId, setCustomInstId] = useState<string>("");
+  const [enrProgram, setEnrProgram] = useState<string>("");
+  const [enrStartDate, setEnrStartDate] = useState<string>("2023-09-01");
+  const [enrEndDate, setEnrEndDate] = useState<string>("2027-06-30");
+  const [enrStudentRef, setEnrStudentRef] = useState<string>("");
+  const [enrEvidenceNote, setEnrEvidenceNote] = useState<string>("");
+  const [isSubmittingEnrollment, setIsSubmittingEnrollment] = useState(false);
+  const [enrSuccessMsg, setEnrSuccessMsg] = useState<string | null>(null);
+  const [enrErrorMsg, setEnrErrorMsg] = useState<string | null>(null);
+
+  // End Enrollment Modal state
+  const [endingEnrollment, setEndingEnrollment] = useState<CandidateEnrollmentItem | null>(null);
+  const [endReason, setEndReason] = useState<string>("");
+  const [endEffectiveDate, setEndEffectiveDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [isSubmittingEnd, setIsSubmittingEnd] = useState(false);
+  const [endErrorMsg, setEndErrorMsg] = useState<string | null>(null);
 
   // Load Profile & Skills
   const loadProfileData = useCallback(async () => {
@@ -159,124 +206,127 @@ export default function CandidateProfileHub() {
     }
   }, []);
 
+  // Load Enrollments & Institutions
+  const loadEnrollmentsData = useCallback(async () => {
+    setIsLoadingEnrollments(true);
+    setEnrErrorMsg(null);
+    try {
+      const [enrs, insts] = await Promise.all([
+        fetchCandidateEnrollments(),
+        fetchVerifiedInstitutions().catch(() => []),
+      ]);
+      setEnrollments(enrs);
+      setInstitutions(insts);
+      if (insts.length > 0 && !selectedInstId) {
+        setSelectedInstId(insts[0].id);
+      }
+    } catch (err: unknown) {
+      setEnrErrorMsg(err instanceof Error ? err.message : "Talabalik ma'lumotlarini yuklashda xatolik");
+    } finally {
+      setIsLoadingEnrollments(false);
+    }
+  }, [selectedInstId]);
+
+  // Auth Initialization
   useEffect(() => {
     let isMounted = true;
-    fetchAuthMe().then((user) => {
-      if (isMounted) {
-        setCurrentUser(user);
-        setIsAuthLoading(false);
-        if (user) {
-          loadProfileData();
-          loadCatalog();
-          loadAvailabilityData();
+    async function initAuth() {
+      try {
+        const user = await fetchAuthMe();
+        if (isMounted) {
+          setCurrentUser(user);
+          if (user) {
+            loadProfileData();
+            loadCatalog();
+            loadAvailabilityData();
+            loadEnrollmentsData();
+          }
         }
+      } catch {
+        if (isMounted) setCurrentUser(null);
+      } finally {
+        if (isMounted) setIsAuthLoading(false);
       }
-    });
+    }
+    initAuth();
     return () => {
       isMounted = false;
     };
-  }, [loadProfileData, loadCatalog, loadAvailabilityData]);
+  }, [loadProfileData, loadCatalog, loadAvailabilityData, loadEnrollmentsData]);
 
-  // Handle Logout
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setProfile(null);
-    setMySkills([]);
-    setRules([]);
-  };
+  // Debounced skill search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadCatalog(skillSearchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [skillSearchQuery, loadCatalog]);
 
-  // Handle Profile Save (API-026)
+  // Save Profile (API-026)
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingProfile(true);
     setProfileSuccessMsg(null);
     setProfileErrorMsg(null);
-
-    if (!profileHeadline.trim()) {
-      setProfileErrorMsg("Kasbiy sarlavha (headline) kiritilishi shart.");
-      setIsSavingProfile(false);
-      return;
-    }
-
     try {
-      await updateCandidateProfile({
-        headline: profileHeadline.trim(),
+      const updated = await updateCandidateProfile({
+        headline: profileHeadline,
         region: profileRegion,
-        bio: profileBio.trim() || null,
-        experience_months: Number(profileExpMonths) || 0,
+        bio: profileBio,
+        experience_months: Number(profileExpMonths),
       });
-      setProfileSuccessMsg("Profil ma'lumotlari muvaffaqiyatli saqlandi.");
-      await loadProfileData();
+      setProfile(updated);
+      setProfileSuccessMsg("Profil ma'lumotlari muvaffaqiyatli saqlandi! (API-026)");
+      setTimeout(() => setProfileSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setProfileErrorMsg(err instanceof Error ? err.message : "Profilni saqlashda xatolik yuz berdi");
+      setProfileErrorMsg(err instanceof Error ? err.message : "Saqlashda xatolik yuz berdi");
     } finally {
       setIsSavingProfile(false);
     }
   };
 
-  // Handle Add Skill to list
-  const handleAddSkill = () => {
+  // Add Skill (API-032)
+  const handleAddSkill = async () => {
     if (!selectedCatalogSkillId) return;
-    const catalogItem = catalogSkills.find((c) => c.id === selectedCatalogSkillId);
-    if (!catalogItem) return;
-
-    if (mySkills.some((s) => s.skill_id === catalogItem.id)) {
-      setSkillsErrorMsg("Ushbu ko‘nikma allaqachon profilingizga qo‘shilgan.");
-      return;
-    }
-
-    setSkillsErrorMsg(null);
-    setMySkills((prev) => [
-      ...prev,
-      {
-        skill_id: catalogItem.id,
-        level: selectedSkillLevel,
-        code: catalogItem.code,
-        name_uz: catalogItem.name_uz,
-        name_ru: catalogItem.name_ru,
-        active: true,
-      },
-    ]);
-  };
-
-  // Handle Remove Skill from list
-  const handleRemoveSkill = (skillId: string) => {
-    setMySkills((prev) => prev.filter((s) => s.skill_id !== skillId));
-  };
-
-  // Handle Save Skills to Backend (API-032)
-  const handleSaveSkills = async () => {
     setIsSavingSkills(true);
     setSkillsSuccessMsg(null);
     setSkillsErrorMsg(null);
-
     try {
-      const skillsPayload = mySkills.map((s) => ({
-        skill_id: s.skill_id,
-        level: s.level,
-      }));
-
-      // Find any removed skills
-      const initialSkillIds = (profile?.skills || []).map((s) => s.skill_id);
-      const currentSkillIds = new Set(mySkills.map((s) => s.skill_id));
-      const removedIds = initialSkillIds.filter((id) => !currentSkillIds.has(id));
-
       await updateCandidateSkills({
-        skills: skillsPayload,
-        remove_skill_ids: removedIds,
+        skills: [{ skill_id: selectedCatalogSkillId, level: selectedSkillLevel }],
+        remove_skill_ids: [],
       });
-
-      setSkillsSuccessMsg("Ko‘nikmalar ro‘yxati muvaffaqiyatli yangilandi.");
       await loadProfileData();
+      setSkillsSuccessMsg("Ko‘nikma ro‘yxatga muvaffaqiyatli qo‘shildi! (API-032)");
+      setTimeout(() => setSkillsSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setSkillsErrorMsg(err instanceof Error ? err.message : "Ko‘nikmalarni saqlashda xatolik yuz berdi");
+      setSkillsErrorMsg(err instanceof Error ? err.message : "Ko‘nikma qo‘shishda xatolik");
     } finally {
       setIsSavingSkills(false);
     }
   };
 
-  // Availability Helpers
+  // Remove Skill (API-032)
+  const handleRemoveSkill = async (skillId: string) => {
+    setIsSavingSkills(true);
+    setSkillsSuccessMsg(null);
+    setSkillsErrorMsg(null);
+    try {
+      await updateCandidateSkills({
+        skills: [],
+        remove_skill_ids: [skillId],
+      });
+      await loadProfileData();
+      setSkillsSuccessMsg("Ko‘nikma olib tashlandi.");
+      setTimeout(() => setSkillsSuccessMsg(null), 3000);
+    } catch (err: unknown) {
+      setSkillsErrorMsg(err instanceof Error ? err.message : "O‘chirishda xatolik");
+    } finally {
+      setIsSavingSkills(false);
+    }
+  };
+
+  // Availability Rule Manipulation (API-028)
   const addAvailabilityRule = (weekday: number) => {
     setRules((prev) => [
       ...prev,
@@ -284,68 +334,169 @@ export default function CandidateProfileHub() {
         weekday,
         start_minute: 540, // 09:00
         end_minute: 1080, // 18:00
-        timezone: "Asia/Tashkent",
       },
     ]);
   };
 
-  const removeAvailabilityRule = (index: number) => {
-    setRules((prev) => prev.filter((_, idx) => idx !== index));
+  const removeAvailabilityRule = (idx: number) => {
+    setRules((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const updateRuleTimes = (index: number, startStr: string, endStr: string) => {
-    const sm = timeStringToMinutes(startStr);
-    const em = timeStringToMinutes(endStr);
+  const updateRuleTimes = (idx: number, startStr: string, endStr: string) => {
+    const s = timeStringToMinutes(startStr);
+    const e = timeStringToMinutes(endStr);
+    if (s >= e) return;
     setRules((prev) =>
-      prev.map((r, idx) => (idx === index ? { ...r, start_minute: sm, end_minute: em } : r))
+      prev.map((r, i) => (i === idx ? { ...r, start_minute: s, end_minute: e } : r))
     );
   };
 
-  // Handle Save Availability to Backend (API-028)
+  // Save Availability (API-028)
   const handleSaveAvailability = async () => {
     setIsSavingAvailability(true);
     setAvailSuccessMsg(null);
     setAvailErrorMsg(null);
-
-    // Validate rules
-    for (const r of rules) {
-      if (r.start_minute >= r.end_minute) {
-        setAvailErrorMsg("Boshlanish vaqti tugash vaqtidan oldin bo'lishi shart.");
-        setIsSavingAvailability(false);
-        return;
-      }
-      const dur = r.end_minute - r.start_minute;
-      if (dur > 480) {
-        setAvailErrorMsg(
-          "O'zR MK 118-moddasi: Bir kunlik ish/amaliyot davomiyligi 8 soatdan (480 daqiqa) oshmasligi shart."
-        );
-        setIsSavingAvailability(false);
-        return;
-      }
-    }
-
     try {
       await saveCandidateAvailability(rules);
-      setAvailSuccessMsg("Haftalik ish va dars jadvali muvaffaqiyatli saqlandi.");
-      await loadAvailabilityData();
+      setAvailSuccessMsg("Haftalik bo‘sh vaqt jadvali muvaffaqiyatli saqlandi! (API-028)");
+      setTimeout(() => setAvailSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setAvailErrorMsg(err instanceof Error ? err.message : "Jadvalni saqlashda xatolik yuz berdi");
+      setAvailErrorMsg(err instanceof Error ? err.message : "Jadvalni saqlashda xatolik");
     } finally {
       setIsSavingAvailability(false);
     }
   };
 
-  // Filter catalog skills by search
-  const filteredCatalogSkills = useMemo(() => {
-    if (!skillSearchQuery.trim()) return catalogSkills;
-    const q = skillSearchQuery.toLowerCase();
-    return catalogSkills.filter(
-      (s) =>
-        s.name_uz.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q) ||
-        s.name_ru.toLowerCase().includes(q)
-    );
-  }, [catalogSkills, skillSearchQuery]);
+  // Add Exception Item locally
+  const handleAddException = () => {
+    const s = timeStringToMinutes(newExcStart);
+    const e = timeStringToMinutes(newExcEnd);
+    if (!newExcDate || s >= e) {
+      setExcErrorMsg("Noto'g'ri sana yoki vaqt oralig'i (Boshlanish tugashdan oldin bo'lishi shart)");
+      return;
+    }
+    setExcErrorMsg(null);
+    setExceptions((prev) => [
+      ...prev,
+      {
+        local_date: newExcDate,
+        kind: newExcKind,
+        start_minute: s,
+        end_minute: e,
+      },
+    ]);
+  };
+
+  const handleRemoveException = (index: number) => {
+    setExceptions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Save Exceptions (API-036)
+  const handleSaveExceptions = async () => {
+    if (exceptions.length === 0) {
+      setExcErrorMsg("Saqlash uchun kamida bitta sana istisnosi kiritilishi kerak.");
+      return;
+    }
+    setIsSavingExceptions(true);
+    setExcSuccessMsg(null);
+    setExcErrorMsg(null);
+
+    try {
+      const dates = exceptions.map((e) => e.local_date).sort();
+      const fromDate = dates[0];
+      const toDate = dates[dates.length - 1];
+
+      await saveCandidateAvailabilityExceptions({
+        from_date: fromDate,
+        to_date: toDate,
+        exceptions,
+      });
+
+      setExcSuccessMsg("Taqvim istisnolari muvaffaqiyatli yangilandi! (API-036)");
+      setTimeout(() => setExcSuccessMsg(null), 4000);
+    } catch (err: unknown) {
+      setExcErrorMsg(err instanceof Error ? err.message : "Istisnolarni saqlashda xatolik");
+    } finally {
+      setIsSavingExceptions(false);
+    }
+  };
+
+  // Submit Enrollment (API-027)
+  const handleSubmitEnrollment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const instId = selectedInstId === "CUSTOM" ? customInstId.trim() : selectedInstId;
+    if (!instId || !enrProgram.trim() || !enrStartDate) {
+      setEnrErrorMsg("OTM, mutaxassislik/yo'nalish va boshlanish sanasi to'ldirilishi shart.");
+      return;
+    }
+
+    setIsSubmittingEnrollment(true);
+    setEnrSuccessMsg(null);
+    setEnrErrorMsg(null);
+
+    try {
+      const res = await createCandidateEnrollment({
+        institution_id: instId,
+        program: enrProgram.trim(),
+        start_date: enrStartDate,
+        end_date: enrEndDate || null,
+        student_ref: enrStudentRef.trim() || null,
+        evidence_note: enrEvidenceNote.trim() || "Talabalik arizasi",
+        file_ids: [],
+      });
+
+      setEnrSuccessMsg("Talabalik arizasi muvaffaqiyatli topshirildi va tekshiruv navbatiga kiritildi! (API-027)");
+      setEnrProgram("");
+      setEnrStudentRef("");
+      setEnrEvidenceNote("");
+      await loadEnrollmentsData();
+      setTimeout(() => setEnrSuccessMsg(null), 5000);
+    } catch (err: unknown) {
+      setEnrErrorMsg(err instanceof Error ? err.message : "Arizani topshirishda xatolik");
+    } finally {
+      setIsSubmittingEnrollment(false);
+    }
+  };
+
+  // End Enrollment (API-027 lifecycle)
+  const handleConfirmEndEnrollment = async () => {
+    if (!endingEnrollment) return;
+    if (!endReason || endReason.trim().length < 15) {
+      setEndErrorMsg("O'qishni yakunlash sababi kamida 15 ta belgidan iborat bo'lishi shart.");
+      return;
+    }
+
+    setIsSubmittingEnd(true);
+    setEndErrorMsg(null);
+
+    try {
+      await endCandidateEnrollment(endingEnrollment.id, {
+        reason: endReason.trim(),
+        effective_end_date: endEffectiveDate || null,
+      });
+
+      setEndingEnrollment(null);
+      setEndReason("");
+      await loadEnrollmentsData();
+    } catch (err: unknown) {
+      setEndErrorMsg(err instanceof Error ? err.message : "Talabalikni yakunlashda xatolik yuz berdi.");
+    } finally {
+      setIsSubmittingEnd(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } finally {
+      setCurrentUser(null);
+    }
+  };
+
+  // Telemetry computation for Enrollments
+  const activeEnrollment = useMemo(() => {
+    return enrollments.find((e) => e.current_student && e.status !== "ENDED") || enrollments[0] || null;
+  }, [enrollments]);
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
@@ -357,7 +508,7 @@ export default function CandidateProfileHub() {
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
                 Nomzod Kabineti
               </span>
-              <span className="text-zinc-500 text-xs">• API-026 / API-028 / API-032 / API-035</span>
+              <span className="text-zinc-500 text-xs">• API-026 / API-027 / API-028 / API-032 / API-034 / API-035 / API-036</span>
               {currentUser ? (
                 <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                   Faol: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
@@ -369,10 +520,10 @@ export default function CandidateProfileHub() {
               )}
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-white tracking-tight">
-              Nomzod Profili va Vaqt Taqsimoti Markazi
+              Nomzod Profili, Ta&apos;lim (HEMIS) va Vaqt Taqsimoti Markazi
             </h1>
             <p className="text-xs text-zinc-400">
-              Kasbiy rezyume ma'lumotlari, tasdiqlangan ko‘nikmalar katalogi va O‘zR MK 118-moddasi bo‘yicha haftalik grafik boshqaruvi.
+              Kasbiy rezyume, tasdiqlangan ko‘nikmalar, OTM talabalik hisobi (HEMIS) va O‘zR MK 118-moddasi bo‘yicha grafik boshqaruvi.
             </p>
           </div>
 
@@ -408,7 +559,7 @@ export default function CandidateProfileHub() {
       {/* Sub-Navigation between Candidate Pages */}
       <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
         <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
-          Kasbiy Profil
+          Kasbiy Profil & Ta&apos;lim
         </span>
         <Link
           href="/nomzod/arizalar"
@@ -440,6 +591,18 @@ export default function CandidateProfileHub() {
         >
           Saqlangan E&apos;lonlar
         </Link>
+        <Link
+          href="/nomzod/bildirishnomalar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Bildirishnomalar
+        </Link>
+        <Link
+          href="/nomzod/yordam"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Yordam & Maxfiylik
+        </Link>
       </div>
 
       {/* LOGIN REQUIRED GATE */}
@@ -450,7 +613,7 @@ export default function CandidateProfileHub() {
           </div>
           <h2 className="text-base font-bold text-white">Profilni boshqarish uchun tizimga kiring</h2>
           <p className="text-xs text-zinc-400 max-w-md">
-            Shaxsiy professional rezyume, ko‘nikmalar ro‘yxati va haftalik bo‘sh vaqt jadvalini sozlash uchun hisobingizga kiring.
+            Shaxsiy rezyume, ko‘nikmalar, OTM talabalik holati (HEMIS) va haftalik bo‘sh vaqt jadvalini sozlash uchun hisobingizga kiring.
           </p>
           <button
             type="button"
@@ -508,10 +671,28 @@ export default function CandidateProfileHub() {
               }`}
             >
               <Calendar className="w-4 h-4 text-amber-400" />
-              <span>Dars & Ish Jadvali (API-028 / API-035)</span>
+              <span>Dars & Ish Jadvali (API-028 / API-035 / API-036)</span>
               {rules.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-400">
                   {rules.length} ta qoida
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("ENROLLMENTS")}
+              className={`px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "ENROLLMENTS"
+                  ? "border-primary text-white bg-primary/5"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <GraduationCap className="w-4 h-4 text-blue-400" />
+              <span>Talabalik & Oliy Ta&apos;lim / HEMIS (API-027 / API-034)</span>
+              {enrollments.length > 0 && (
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-400">
+                  {enrollments.length}
                 </span>
               )}
             </button>
@@ -519,14 +700,14 @@ export default function CandidateProfileHub() {
 
           {/* TAB 1: PROFILE TAB */}
           {activeTab === "PROFILE" && (
-            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm max-w-4xl">
+            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm max-w-3xl">
               <div>
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                   <User className="w-4 h-4 text-primary" />
-                  <span>Asosiy Rezyume Ma'lumotlari</span>
+                  <span>Asosiy Rezyume Ma&apos;lumotlari</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Ish beruvchilar va sun'iy neyro-matching tizimi uchun asosiy mutaxassislik ko'rsatkichlaringiz.
+                  Ushbu ma&apos;lumotlar ish beruvchilarga arizalaringiz bilan birga taqdim etiladi.
                 </p>
               </div>
 
@@ -547,33 +728,34 @@ export default function CandidateProfileHub() {
               {isLoadingProfile ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  <span className="text-xs">Profil ma'lumotlari yuklanmoqda...</span>
+                  <span className="text-xs">Profil ma&apos;lumotlari yuklanmoqda...</span>
                 </div>
               ) : (
                 <form onSubmit={handleSaveProfile} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                      <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Kasbiy Sarlavha / Lavozim yo‘nalishi</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={profileHeadline}
+                      onChange={(e) => setProfileHeadline(e.target.value)}
+                      placeholder="Masalan: Frontend Dasturchi, Node.js Backend Injiniring"
+                      className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-zinc-300">
-                        Kasbiy Sarlavha (Headline) *
+                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>Yashash Hududi</span>
                       </label>
-                      <input
-                        type="text"
-                        value={profileHeadline}
-                        onChange={(e) => setProfileHeadline(e.target.value)}
-                        placeholder="Masalan: Full-stack Python & React Dasturchi"
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
-                        required
-                        maxLength={200}
-                      />
-                      <span className="text-[11px] text-zinc-500">Maksimal 200 ta belgi</span>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-zinc-300">Hudud / Viloyat *</label>
                       <select
                         value={profileRegion}
                         onChange={(e) => setProfileRegion(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
+                        className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
                       >
                         {UZBEKISTAN_REGIONS.map((r) => (
                           <option key={r} value={r} className="bg-surface text-white">
@@ -581,75 +763,53 @@ export default function CandidateProfileHub() {
                           </option>
                         ))}
                       </select>
-                      <span className="text-[11px] text-zinc-500">Amaliyot yoki ish hududi</span>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-zinc-300">
-                        Umumiy Ish Tajribasi (oylar hisobida)
+                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>Umumiy Ish Tajribasi (oyda)</span>
                       </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="number"
-                          min={0}
-                          max={1200}
-                          value={profileExpMonths}
-                          onChange={(e) => setProfileExpMonths(Number(e.target.value))}
-                          className="w-32 px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none focus:border-primary/50"
-                        />
-                        <span className="text-xs text-zinc-400">
-                          {Math.floor(profileExpMonths / 12)} yil {profileExpMonths % 12} oy
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-zinc-300">Rezyume / CV Holati</label>
-                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-                        <FileText className="w-4 h-4 text-primary" />
-                        <span className="text-xs text-zinc-300">
-                          {profile?.cv_file_id
-                            ? `Fayl biriktirilgan (ID: ${profile.cv_file_id.slice(0, 8)}...)`
-                            : "Hozircha CV fayli biriktirilmagan"}
-                        </span>
-                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="600"
+                        value={profileExpMonths}
+                        onChange={(e) => setProfileExpMonths(Number(e.target.value))}
+                        className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none focus:border-primary/50"
+                      />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-zinc-300">
-                      O‘zingiz haqingizda (Bio / Tavsif)
+                    <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Shaxsiy Bio / Qisqacha Tavsif</span>
                     </label>
                     <textarea
                       rows={4}
                       value={profileBio}
                       onChange={(e) => setProfileBio(e.target.value)}
-                      placeholder="Loyihalaringiz, qiziqishlaringiz va amaliyotdan kutayotgan maqsadlaringiz haqida qisqacha yozing..."
-                      className="w-full px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-y"
-                      maxLength={5000}
+                      placeholder="Texnologiyalar, loyihalar va qiziqishlaringiz haqida qisqacha ma'lumot bering..."
+                      className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-y"
                     />
-                    <span className="text-[11px] text-zinc-500">Maksimal 5000 ta belgi</span>
                   </div>
 
-                  <div className="pt-2 flex justify-end">
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-[11px] text-zinc-500 font-mono">
+                      Tajriba: {profileExpMonths} oy | Hudud: {profileRegion}
+                    </span>
                     <button
                       type="submit"
                       disabled={isSavingProfile}
-                      className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-md shadow-primary/20"
+                      className="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-md shadow-primary/20"
                     >
                       {isSavingProfile ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Saqlanmoqda...</span>
-                        </>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <>
-                          <Save className="w-3.5 h-3.5" />
-                          <span>Profilni Saqlash (API-026)</span>
-                        </>
+                        <Save className="w-3.5 h-3.5" />
                       )}
+                      <span>Saqlash (API-026)</span>
                     </button>
                   </div>
                 </form>
@@ -660,89 +820,74 @@ export default function CandidateProfileHub() {
           {/* TAB 2: SKILLS TAB */}
           {activeTab === "SKILLS" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* LEFT 2 COLS: MY ACTIVE SKILLS */}
-              <div className="lg:col-span-2 bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-emerald-400" />
-                      <span>Tanlangan Ko‘nikmalarim ({mySkills.length} ta)</span>
-                    </h3>
-                    <p className="text-xs text-zinc-400">
-                      Ushbu ko‘nikmalar asosida bo‘sh ish o‘rinlari bilan neyro-moslik darajasi hisoblanadi.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleSaveSkills}
-                    disabled={isSavingSkills}
-                    className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-emerald-500/20"
-                  >
-                    {isSavingSkills ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Save className="w-3.5 h-3.5" />
-                    )}
-                    <span>Saqlash (API-032)</span>
-                  </button>
+              {/* CURRENT SKILLS LIST */}
+              <div className="lg:col-span-2 bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm">
+                <div>
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Mening Tasdiqlangan va E&apos;lon Qilingan Ko‘nikmalarim</span>
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Self-declared va verified ko‘nikmalar ajratiladi. Moslik formulasi ushbu ro‘yxat asosida ishlaydi.
+                  </p>
                 </div>
 
                 {skillsSuccessMsg && (
-                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                  <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                     <span>{skillsSuccessMsg}</span>
                   </div>
                 )}
 
                 {skillsErrorMsg && (
-                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                     <span>{skillsErrorMsg}</span>
                   </div>
                 )}
 
                 {mySkills.length === 0 ? (
-                  <div className="py-12 border border-dashed border-white/[0.08] rounded-lg flex flex-col items-center justify-center gap-2 text-center">
-                    <Sparkles className="w-6 h-6 text-zinc-500 mb-1" />
-                    <span className="text-xs font-semibold text-zinc-300">
-                      Hali hech qanday ko‘nikma qo‘shilmagan
-                    </span>
-                    <span className="text-[11px] text-zinc-500 max-w-sm">
-                      O‘ng tomondagi katalogdan texnologiya va darajangizni tanlab, "Qo‘shish" tugmasini bosing.
-                    </span>
+                  <div className="py-12 border border-dashed border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-center p-6 gap-2 text-zinc-500">
+                    <Sparkles className="w-6 h-6 stroke-1 text-zinc-600" />
+                    <p className="text-xs">Hozircha birorta ham ko‘nikma biriktirilmagan.</p>
+                    <p className="text-[11px] text-zinc-600">
+                      O‘ng tomondagi qidiruv orqali katalogdan o‘zingizga mos texnologiyalarni qo‘shing.
+                    </p>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {mySkills.map((s) => (
                       <div
                         key={s.skill_id}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] hover:border-white/20 transition-all text-xs"
+                        className="p-3.5 rounded-xl bg-surface border border-white/[0.06] flex items-center justify-between gap-3 group hover:border-white/[0.12] transition-colors"
                       >
-                        <span className="font-semibold text-white">{s.name_uz || s.code}</span>
-                        <span
-                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                            s.level === "ADVANCED"
-                              ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                              : s.level === "INTERMEDIATE"
-                              ? "bg-primary/20 text-blue-300 border border-primary/30"
-                              : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                          }`}
-                        >
-                          {s.level}
-                        </span>
-                        {s.verified && (
-                          <span
-                            title="Universitet yoki sertifikat bilan tasdiqlangan"
-                            className="text-emerald-400 flex items-center"
-                          >
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-white">
+                              {s.name_uz || s.name_ru || s.code || s.skill_id.slice(0, 8)}
+                            </span>
+                            {s.verified ? (
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3" />
+                                <span>Verified</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
+                                Self-declared
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-zinc-400 font-mono">
+                            Daraja: {s.level}
                           </span>
-                        )}
+                        </div>
+
                         <button
                           type="button"
                           onClick={() => handleRemoveSkill(s.skill_id)}
-                          className="text-zinc-500 hover:text-rose-400 transition-colors ml-1"
+                          disabled={isSavingSkills}
+                          className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                          title="O‘chirish"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -752,50 +897,51 @@ export default function CandidateProfileHub() {
                 )}
               </div>
 
-              {/* RIGHT 1 COL: ADD FROM CATALOG */}
-              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
+              {/* ADD SKILL FORM */}
+              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4 shadow-sm h-fit">
                 <div>
                   <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                     <Plus className="w-4 h-4 text-primary" />
-                    <span>Katalogdan Qo‘shish</span>
+                    <span>Yangi Ko‘nikma Qo‘shish</span>
                   </h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    Platformada tasdiqlangan rasmiy texnologiyalar.
-                  </p>
+                  <p className="text-xs text-zinc-400 mt-0.5">Katalogdagi standart ko‘nikmalar bazasidan qidiring.</p>
                 </div>
 
-                {/* SEARCH CATALOG */}
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-3" />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                    <Search className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Ko‘nikma Nomi bo‘yicha qidiruv</span>
+                  </label>
                   <input
                     type="text"
                     value={skillSearchQuery}
-                    onChange={(e) => {
-                      setSkillSearchQuery(e.target.value);
-                      loadCatalog(e.target.value);
-                    }}
-                    placeholder="Qidirish (Python, React, SQL...)"
-                    className="w-full pl-8 pr-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                    onChange={(e) => setSkillSearchQuery(e.target.value)}
+                    placeholder="Qidiruv: Python, React, SQL..."
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold text-zinc-400">Ko‘nikmani Tanlang</label>
+                  <label className="text-xs font-medium text-zinc-300">Katalogdan tanlang</label>
                   <select
                     value={selectedCatalogSkillId}
                     onChange={(e) => setSelectedCatalogSkillId(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
                   >
-                    {filteredCatalogSkills.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-surface text-white">
-                        {c.name_uz} ({c.code})
-                      </option>
-                    ))}
+                    {catalogSkills.length === 0 ? (
+                      <option value="">Ko‘nikmalar topilmadi</option>
+                    ) : (
+                      catalogSkills.map((sk) => (
+                        <option key={sk.id} value={sk.id} className="bg-surface text-white">
+                          {sk.name_uz || sk.code} ({sk.category || sk.code})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold text-zinc-400">Mahorat Darajasi</label>
+                  <label className="text-xs font-medium text-zinc-300">Bilim Darajangiz</label>
                   <select
                     value={selectedSkillLevel}
                     onChange={(e) => setSelectedSkillLevel(e.target.value)}
@@ -825,160 +971,707 @@ export default function CandidateProfileHub() {
             </div>
           )}
 
-          {/* TAB 3: AVAILABILITY TAB */}
+          {/* TAB 3: AVAILABILITY & EXCEPTIONS TAB */}
           {activeTab === "AVAILABILITY" && (
-            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm max-w-4xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-400" />
-                    <span>Haftalik Dars va Ish Oralig‘i Grafigi</span>
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    O‘zR MK 118-moddasi talabi: dars vaqti bilan amaliyot/ish soatlari to‘qnashmasligi shart.
-                  </p>
+            <div className="flex flex-col gap-6 max-w-4xl">
+              {/* RECURRING WEEKLY SCHEDULE */}
+              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-amber-400" />
+                      <span>Haftalik Dars va Ish Oralig‘i Grafigi (Takrorlanuvchi)</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      O‘zR MK 118-moddasi talabi: dars vaqti bilan amaliyot/ish soatlari to‘qnashmasligi shart (kuniga 8 soatdan oshmasin).
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveAvailability}
+                    disabled={isSavingAvailability}
+                    className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 self-start sm:self-auto"
+                  >
+                    {isSavingAvailability ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    <span>Jadvalni Saqlash (API-028)</span>
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleSaveAvailability}
-                  disabled={isSavingAvailability}
-                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 self-start sm:self-auto"
-                >
-                  {isSavingAvailability ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Save className="w-3.5 h-3.5" />
-                  )}
-                  <span>Jadvalni Saqlash (API-028)</span>
-                </button>
+                {availSuccessMsg && (
+                  <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{availSuccessMsg}</span>
+                  </div>
+                )}
+
+                {availErrorMsg && (
+                  <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{availErrorMsg}</span>
+                  </div>
+                )}
+
+                {isLoadingAvailability ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <span className="text-xs">Jadval ma&apos;lumotlari yuklanmoqda...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {WEEKDAY_NAMES.map((day) => {
+                      const dayRules = rules.map((r, idx) => ({ ...r, originalIndex: idx })).filter((r) => r.weekday === day.id);
+                      const totalDayMinutes = dayRules.reduce((sum, r) => sum + (r.end_minute - r.start_minute), 0);
+                      const isLimitExceeded = totalDayMinutes > 480;
+
+                      return (
+                        <div
+                          key={day.id}
+                          className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">{day.name}</span>
+                              <span
+                                className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                                  totalDayMinutes === 0
+                                    ? "bg-zinc-800 text-zinc-400"
+                                    : isLimitExceeded
+                                    ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                    : "bg-primary/20 text-blue-300 border border-primary/30"
+                                }`}
+                              >
+                                {totalDayMinutes > 0
+                                  ? `${Math.floor(totalDayMinutes / 60)} soat ${totalDayMinutes % 60} daqiqa`
+                                  : "Dam olish kuni"}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => addAvailabilityRule(day.id)}
+                              className="px-2.5 py-1 rounded bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-primary flex items-center gap-1 transition-all"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Vaqt oralig‘i qo‘shish</span>
+                            </button>
+                          </div>
+
+                          {dayRules.length === 0 ? (
+                            <span className="text-[11px] text-zinc-500 italic">
+                              Ushbu kunda ishlash rejalashtirilmagan.
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-2">
+                              {dayRules.map((r) => (
+                                <div
+                                  key={r.originalIndex}
+                                  className="flex flex-wrap items-center gap-3 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                                >
+                                  <div className="flex items-center gap-1.5 text-xs text-zinc-300">
+                                    <Clock className="w-3.5 h-3.5 text-primary" />
+                                    <span>Boshlanish:</span>
+                                    <input
+                                      type="time"
+                                      value={minutesToTimeString(r.start_minute)}
+                                      onChange={(e) =>
+                                        updateRuleTimes(
+                                          r.originalIndex,
+                                          e.target.value,
+                                          minutesToTimeString(r.end_minute)
+                                        )
+                                      }
+                                      className="px-2 py-1 rounded bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
+                                    />
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 text-xs text-zinc-300">
+                                    <span>Tugash:</span>
+                                    <input
+                                      type="time"
+                                      value={minutesToTimeString(r.end_minute)}
+                                      onChange={(e) =>
+                                        updateRuleTimes(
+                                          r.originalIndex,
+                                          minutesToTimeString(r.start_minute),
+                                          e.target.value
+                                        )
+                                      }
+                                      className="px-2 py-1 rounded bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
+                                    />
+                                  </div>
+
+                                  <span className="text-[11px] font-mono text-zinc-400">
+                                    ({r.end_minute - r.start_minute} daqiqa)
+                                  </span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAvailabilityRule(r.originalIndex)}
+                                    className="ml-auto text-zinc-500 hover:text-rose-400 transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
-              {availSuccessMsg && (
-                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span>{availSuccessMsg}</span>
-                </div>
-              )}
+              {/* CALENDAR DATE EXCEPTIONS & EXAMS (API-036) */}
+              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <CalendarDays className="w-4 h-4 text-sky-400" />
+                      <span>Sana Bo&apos;yicha Maxsus Kunlar & Imtihon Istisnolari (API-036)</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Muayyan sanalar uchun maxsus bo&apos;sh (AVAILABLE) yoki band (UNAVAILABLE - imtihon, dam olish) soatlarini belgilang.
+                    </p>
+                  </div>
 
-              {availErrorMsg && (
-                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                  <span>{availErrorMsg}</span>
+                  <button
+                    type="button"
+                    onClick={handleSaveExceptions}
+                    disabled={isSavingExceptions || exceptions.length === 0}
+                    className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-sky-600/20 self-start sm:self-auto"
+                  >
+                    {isSavingExceptions ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    <span>Istisnolarni Saqlash (API-036)</span>
+                  </button>
                 </div>
-              )}
 
-              {isLoadingAvailability ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  <span className="text-xs">Jadval ma'lumotlari yuklanmoqda...</span>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {WEEKDAY_NAMES.map((day) => {
-                    const dayRules = rules.map((r, idx) => ({ ...r, originalIndex: idx })).filter((r) => r.weekday === day.id);
-                    const totalDayMinutes = dayRules.reduce((sum, r) => sum + (r.end_minute - r.start_minute), 0);
-                    const isLimitExceeded = totalDayMinutes > 480;
+                {excSuccessMsg && (
+                  <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{excSuccessMsg}</span>
+                  </div>
+                )}
 
-                    return (
-                      <div
-                        key={day.id}
-                        className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3"
+                {excErrorMsg && (
+                  <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{excErrorMsg}</span>
+                  </div>
+                )}
+
+                {/* ADD NEW EXCEPTION FORM */}
+                <div className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3">
+                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                    <Plus className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Yangi Sana Istisnosi Kiritish</span>
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] text-zinc-400">Sana</label>
+                      <input
+                        type="date"
+                        value={newExcDate}
+                        onChange={(e) => setNewExcDate(e.target.value)}
+                        className="px-3 py-1.5 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] text-zinc-400">Holat turi</label>
+                      <select
+                        value={newExcKind}
+                        onChange={(e) => setNewExcKind(e.target.value as "AVAILABLE" | "UNAVAILABLE")}
+                        className="px-3 py-1.5 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white focus:outline-none"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">{day.name}</span>
-                            <span
-                              className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                                totalDayMinutes === 0
-                                  ? "bg-zinc-800 text-zinc-400"
-                                  : isLimitExceeded
-                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                                  : "bg-primary/20 text-blue-300 border border-primary/30"
-                              }`}
-                            >
-                              {totalDayMinutes > 0
-                                ? `${Math.floor(totalDayMinutes / 60)} soat ${totalDayMinutes % 60} daqiqa`
-                                : "Dam olish kuni"}
+                        <option value="UNAVAILABLE">UNAVAILABLE — Band (Imtihon / Tadbir)</option>
+                        <option value="AVAILABLE">AVAILABLE — Bo&apos;sh (Qo&apos;shimcha smena)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] text-zinc-400">Boshlanish</label>
+                      <input
+                        type="time"
+                        value={newExcStart}
+                        onChange={(e) => setNewExcStart(e.target.value)}
+                        className="px-3 py-1.5 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] text-zinc-400">Tugash</label>
+                      <input
+                        type="time"
+                        value={newExcEnd}
+                        onChange={(e) => setNewExcEnd(e.target.value)}
+                        className="px-3 py-1.5 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddException}
+                    className="self-end px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-xs font-semibold text-white flex items-center gap-1.5 transition-all mt-1"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Ro&apos;yxatga qo&apos;shish</span>
+                  </button>
+                </div>
+
+                {/* CURRENT EXCEPTIONS LIST */}
+                {exceptions.length === 0 ? (
+                  <div className="py-6 border border-dashed border-white/[0.08] rounded-xl flex items-center justify-center text-zinc-500 text-xs">
+                    Hozircha birorta sana istisnosi kiritilmagan.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-medium text-zinc-400">Kiritilgan istisnolar ({exceptions.length} ta):</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {exceptions.map((exc, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 rounded-lg bg-surface border border-white/[0.06] flex items-center justify-between gap-3"
+                        >
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white font-mono">{exc.local_date}</span>
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold ${
+                                  exc.kind === "UNAVAILABLE"
+                                    ? "bg-rose-500/10 text-rose-300 border border-rose-500/20"
+                                    : "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                                }`}
+                              >
+                                {exc.kind}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-zinc-400 font-mono">
+                              {minutesToTimeString(exc.start_minute)} - {minutesToTimeString(exc.end_minute)} ({exc.end_minute - exc.start_minute} daqiqa)
                             </span>
                           </div>
 
                           <button
                             type="button"
-                            onClick={() => addAvailabilityRule(day.id)}
-                            className="px-2.5 py-1 rounded bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-primary flex items-center gap-1 transition-all"
+                            onClick={() => handleRemoveException(idx)}
+                            className="text-zinc-500 hover:text-rose-400 p-1 rounded transition-colors"
+                            title="O'chirish"
                           >
-                            <Plus className="w-3 h-3" />
-                            <span>Vaqt oralig‘i qo‘shish</span>
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-
-                        {dayRules.length === 0 ? (
-                          <span className="text-[11px] text-zinc-500 italic">
-                            Ushbu kunda ishlash rejalashtirilmagan.
-                          </span>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            {dayRules.map((r) => (
-                              <div
-                                key={r.originalIndex}
-                                className="flex flex-wrap items-center gap-3 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]"
-                              >
-                                <div className="flex items-center gap-1.5 text-xs text-zinc-300">
-                                  <Clock className="w-3.5 h-3.5 text-primary" />
-                                  <span>Boshlanish:</span>
-                                  <input
-                                    type="time"
-                                    value={minutesToTimeString(r.start_minute)}
-                                    onChange={(e) =>
-                                      updateRuleTimes(
-                                        r.originalIndex,
-                                        e.target.value,
-                                        minutesToTimeString(r.end_minute)
-                                      )
-                                    }
-                                    className="px-2 py-1 rounded bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
-                                  />
-                                </div>
-
-                                <div className="flex items-center gap-1.5 text-xs text-zinc-300">
-                                  <span>Tugash:</span>
-                                  <input
-                                    type="time"
-                                    value={minutesToTimeString(r.end_minute)}
-                                    onChange={(e) =>
-                                      updateRuleTimes(
-                                        r.originalIndex,
-                                        minutesToTimeString(r.start_minute),
-                                        e.target.value
-                                      )
-                                    }
-                                    className="px-2 py-1 rounded bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none"
-                                  />
-                                </div>
-
-                                <span className="text-[11px] font-mono text-zinc-400">
-                                  ({r.end_minute - r.start_minute} daqiqa)
-                                </span>
-
-                                <button
-                                  type="button"
-                                  onClick={() => removeAvailabilityRule(r.originalIndex)}
-                                  className="ml-auto text-zinc-500 hover:text-rose-400 transition-colors"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
+
+          {/* TAB 4: ENROLLMENTS & HEMIS TAB (API-027, API-034) */}
+          {activeTab === "ENROLLMENTS" && (
+            <div className="flex flex-col gap-6 max-w-5xl">
+              {/* TELEMETRY 4 METRICS CARDS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] flex flex-col gap-1.5">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Talabalik Holati</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold text-white font-mono">
+                      {activeEnrollment ? activeEnrollment.status : "Ro'yxatda yo'q"}
+                    </span>
+                    {activeEnrollment?.current_student && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Faol
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-zinc-500">
+                    {activeEnrollment ? "Davlat ro'yxatidan o'tgan" : "Talaba emasmisiz? Bo'sh qoldiring"}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] flex flex-col gap-1.5">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Biriktirilgan OTM</span>
+                  </span>
+                  <span className="text-sm font-bold text-white truncate" title={activeEnrollment?.institution_name || "Mavjud emas"}>
+                    {activeEnrollment?.institution_name || "Mavjud emas"}
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-500 truncate">
+                    ID: {activeEnrollment ? activeEnrollment.institution_id.slice(0, 8) + "..." : "N/A"}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] flex flex-col gap-1.5">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>HEMIS ID / Talaba Kodi</span>
+                  </span>
+                  <span className="text-base font-bold text-white font-mono">
+                    {activeEnrollment?.student_ref || "Kiritilmagan"}
+                  </span>
+                  <span className="text-[10px] text-zinc-500">
+                    {activeEnrollment?.student_ref ? "HEMIS v3.2 integratsiyasi" : "Talaba ID kiritilishi mumkin"}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] flex flex-col gap-1.5">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Ta&apos;lim Dasturi</span>
+                  </span>
+                  <span className="text-sm font-bold text-white truncate" title={activeEnrollment?.program || "N/A"}>
+                    {activeEnrollment?.program || "Tanlanmagan"}
+                  </span>
+                  <span className="text-[10px] text-zinc-500">
+                    {activeEnrollment ? `${activeEnrollment.start_date} dan` : "Dastur kiritilmagan"}
+                  </span>
+                </div>
+              </div>
+
+              {enrSuccessMsg && (
+                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{enrSuccessMsg}</span>
+                </div>
+              )}
+
+              {enrErrorMsg && (
+                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{enrErrorMsg}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* ENROLLMENTS HISTORY LIST (API-034) */}
+                <div className="lg:col-span-2 bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                        <GraduationCap className="w-4 h-4 text-blue-400" />
+                        <span>Mening Talabalik Hujjatlarim & OTM Birikishlari</span>
+                      </h3>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Oliygoh yoki texnikum bilan tasdiqlangan akademik munosabatlar tarixi (API-034).
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={loadEnrollmentsData}
+                      disabled={isLoadingEnrollments}
+                      className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-xs text-zinc-300 flex items-center gap-1.5 transition-all"
+                    >
+                      <Loader2 className={`w-3.5 h-3.5 ${isLoadingEnrollments ? "animate-spin text-primary" : ""}`} />
+                      <span>Yangilash</span>
+                    </button>
+                  </div>
+
+                  {isLoadingEnrollments ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <span className="text-xs">Ma&apos;lumotlar yuklanmoqda...</span>
+                    </div>
+                  ) : enrollments.length === 0 ? (
+                    <div className="py-12 border border-dashed border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-center p-6 gap-2 text-zinc-500">
+                      <GraduationCap className="w-8 h-8 stroke-1 text-zinc-600" />
+                      <p className="text-xs">Hozircha birorta ham talabalik arizasi yoki OTM birikishi mavjud emas.</p>
+                      <p className="text-[11px] text-zinc-600">
+                        O&apos;ng tomondagi shakl orqali o&apos;z oliygohingizni tanlab, HEMIS ma&apos;lumotlaringizni kiriting.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {enrollments.map((enr) => {
+                        const isVerified = enr.status === "VERIFIED";
+                        const isEnded = enr.status === "ENDED";
+                        const isPending = enr.status === "PENDING" || enr.status === "IN_REVIEW";
+
+                        return (
+                          <div
+                            key={enr.id}
+                            className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col gap-3 hover:border-white/[0.12] transition-colors"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold text-white">
+                                    {enr.institution_name || `Muassasa: ${enr.institution_id.slice(0, 8)}...`}
+                                  </span>
+                                  <span
+                                    className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
+                                      isVerified
+                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        : isEnded
+                                        ? "bg-zinc-800 text-zinc-400"
+                                        : isPending
+                                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                        : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                    }`}
+                                  >
+                                    {enr.status}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-zinc-300 font-medium">
+                                  {enr.program}
+                                </span>
+                              </div>
+
+                              {!isEnded && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEndingEnrollment(enr)}
+                                  className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-300 border border-rose-500/20 transition-all self-start sm:self-auto"
+                                >
+                                  O&apos;qishni yakunlash
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-[11px] text-zinc-400 pt-1 border-t border-white/[0.04]">
+                              {enr.student_ref && (
+                                <span>
+                                  HEMIS ID: <strong className="text-white font-mono">{enr.student_ref}</strong>
+                                </span>
+                              )}
+                              <span>
+                                Davr: <strong className="text-zinc-200">{enr.start_date}</strong> dan {enr.end_date || "Hozirgacha"}
+                              </span>
+                              <span>
+                                Tekshiruv: <strong className={enr.reviewed ? "text-emerald-400" : "text-amber-400"}>
+                                  {enr.reviewed ? "Tasdiqlangan" : "Kutilmoqda"}
+                                </strong>
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* CREATE ENROLLMENT FORM (API-027) */}
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4 shadow-sm h-fit">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <Plus className="w-4 h-4 text-blue-400" />
+                      <span>OTMga Birikish (Yangi Ariza)</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Davlat akkreditatsiyasidan o‘tgan OTMni tanlab talabalik hisobingizni tasdiqlang.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleSubmitEnrollment} className="flex flex-col gap-3.5">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-zinc-300">Oliygoh / Muassasa</label>
+                      <select
+                        value={selectedInstId}
+                        onChange={(e) => setSelectedInstId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
+                      >
+                        {institutions.map((inst) => (
+                          <option key={inst.id} value={inst.id} className="bg-surface text-white">
+                            {inst.name} ({inst.region})
+                          </option>
+                        ))}
+                        <option value="CUSTOM" className="bg-surface text-amber-300">
+                          + Boshqa OTM (Maxsus UUID kiritish)
+                        </option>
+                      </select>
+                    </div>
+
+                    {selectedInstId === "CUSTOM" && (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-zinc-300">Muassasa UUID kodi</label>
+                        <input
+                          type="text"
+                          value={customInstId}
+                          onChange={(e) => setCustomInstId(e.target.value)}
+                          placeholder="masalan: e75f28ed-446e-4d0a-a538-..."
+                          className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-zinc-300">Mutaxassislik / Yo&apos;nalish</label>
+                      <input
+                        type="text"
+                        value={enrProgram}
+                        onChange={(e) => setEnrProgram(e.target.value)}
+                        placeholder="Masalan: Dasturiy Injiniring (Bakalavr)"
+                        className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-zinc-300">Boshlanish</label>
+                        <input
+                          type="date"
+                          value={enrStartDate}
+                          onChange={(e) => setEnrStartDate(e.target.value)}
+                          className="px-2.5 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-zinc-300">Kutilayotgan tugash</label>
+                        <input
+                          type="date"
+                          value={enrEndDate}
+                          onChange={(e) => setEnrEndDate(e.target.value)}
+                          className="px-2.5 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-zinc-300">HEMIS ID / Talaba raqami (Ixtiyoriy)</label>
+                      <input
+                        type="text"
+                        value={enrStudentRef}
+                        onChange={(e) => setEnrStudentRef(e.target.value)}
+                        placeholder="Masalan: 3912011005"
+                        className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-zinc-300">Izoh va Asos</label>
+                      <textarea
+                        rows={2}
+                        value={enrEvidenceNote}
+                        onChange={(e) => setEnrEvidenceNote(e.target.value)}
+                        placeholder="Talabalik hujjati yoki ma'lumotnoma izohi..."
+                        className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-y"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingEnrollment}
+                      className="w-full mt-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-600/20"
+                    >
+                      {isSubmittingEnrollment ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="w-3.5 h-3.5" />
+                      )}
+                      <span>Arizani Yuborish (API-027)</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* END ENROLLMENT MODAL */}
+      {endingEnrollment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#121214] border border-white/[0.1] rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-rose-400" />
+                <span>Talabalikni Yakunlash / Ko&apos;chirish</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEndingEnrollment(null)}
+                className="text-zinc-500 hover:text-zinc-300 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 rounded-lg bg-surface border border-white/[0.06] flex flex-col gap-1 text-xs">
+              <span className="font-semibold text-white">
+                {endingEnrollment.institution_name || `Muassasa: ${endingEnrollment.institution_id.slice(0, 8)}...`}
+              </span>
+              <span className="text-zinc-400">{endingEnrollment.program}</span>
+              <span className="text-zinc-500 font-mono text-[11px]">Boshlangan sana: {endingEnrollment.start_date}</span>
+            </div>
+
+            {endErrorMsg && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{endErrorMsg}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">
+                  Yakunlash Sanasi
+                </label>
+                <input
+                  type="date"
+                  value={endEffectiveDate}
+                  onChange={(e) => setEndEffectiveDate(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-zinc-300">
+                  Yakunlash Sababi (Kamida 15 ta belgi) *
+                </label>
+                <textarea
+                  rows={3}
+                  value={endReason}
+                  onChange={(e) => setEndReason(e.target.value)}
+                  placeholder="Masalan: O'qishni muvaffaqiyatli tamomlaganligi va diplom olganligi sababli..."
+                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 resize-y"
+                />
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  Belgilar soni: {endReason.trim().length} / 15
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/[0.06]">
+              <button
+                type="button"
+                onClick={() => setEndingEnrollment(null)}
+                disabled={isSubmittingEnd}
+                className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 transition-all"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmEndEnrollment}
+                disabled={isSubmittingEnd || endReason.trim().length < 15}
+                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-rose-600/20"
+              >
+                {isSubmittingEnd ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Check className="w-3.5 h-3.5" />
+                )}
+                <span>Yakunlashni Tasdiqlash</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -991,6 +1684,7 @@ export default function CandidateProfileHub() {
           loadProfileData();
           loadCatalog();
           loadAvailabilityData();
+          loadEnrollmentsData();
         }}
       />
     </main>
