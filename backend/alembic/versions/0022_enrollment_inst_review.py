@@ -14,7 +14,7 @@ Each review event records exactly one authority proof:
 """
 from alembic import op
 
-revision = '0022_enrollment_institution_review'
+revision = '0022_enrollment_inst_review'
 down_revision = '0021_candidate_portal_extension'
 branch_labels = depends_on = None
 
@@ -41,7 +41,7 @@ def upgrade():
         AND case_id IS NOT NULL AND revision IS NOT NULL AND idempotency_key IS NULL AND request_fingerprint IS NULL));
 
     CREATE OR REPLACE FUNCTION flexbridge.enrollment_institution_reviewer_current(
-      grant_id uuid, actor uuid, inst uuid) RETURNS boolean
+      p_grant uuid, p_actor uuid, p_inst uuid) RETURNS boolean
     LANGUAGE sql VOLATILE SET search_path=pg_catalog,flexbridge AS $$
       SELECT EXISTS(
         SELECT 1 FROM institution_role_grants g
@@ -50,7 +50,7 @@ def upgrade():
           JOIN institution_appointments a ON a.id=g.appointment_id
           JOIN institutions i ON i.id=m.institution_id
           JOIN users u ON u.id=m.user_id
-        WHERE g.id=grant_id AND m.user_id=actor AND m.institution_id=inst
+        WHERE g.id=p_grant AND m.user_id=p_actor AND m.institution_id=p_inst
           AND u.status='ACTIVE' AND i.status='VERIFIED'
           AND m.status='ACTIVE' AND m.revoked_at IS NULL
           AND m.accepted_at IS NOT NULL AND m.accepted_at<=clock_timestamp()
