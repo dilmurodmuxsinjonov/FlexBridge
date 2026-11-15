@@ -15,6 +15,13 @@ class ChallengeInput(Input):
     channel:Literal['PHONE','EMAIL']
     destination:str=Field(min_length=3,max_length=254)
     purpose:Literal['REGISTER','LOGIN','RECOVERY','CONTACT']
+    delivery_method:Literal['SMS','TELEGRAM','EMAIL']|None=None
+class TelegramWebhookInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    update_id:int|None=None
+    message:dict[str,Any]|None=None
+    update:dict[str,Any]|None=None
+    challenge_id:UUID|None=None
 class ResendInput(Input):purpose:Literal['REGISTER','LOGIN','RECOVERY','CONTACT']
 class ConsumeInput(ResendInput):code:str=Field(pattern=r'^[0-9]{6}$')
 class MFAInput(Input):
@@ -40,13 +47,26 @@ def ip(request):return request.client.host if request.client else 'unknown'
 
 @router.get('/auth/options')
 def options():
-    return {'channels':['PHONE','EMAIL'],'otp_expires_in':300,'otp_max_attempts':5,'resend_after':60,
+    from app.services.telegram_bot import get_bot_username
+    return {'channels':['PHONE','EMAIL'],'delivery_methods':['SMS','TELEGRAM'],
+        'telegram_bot_username':get_bot_username(),'otp_expires_in':300,'otp_max_attempts':5,'resend_after':60,
         'terms_version':os.environ.get('TERMS_POLICY_VERSION'),'privacy_version':os.environ.get('PRIVACY_POLICY_VERSION')}
 
 @router.post('/auth/challenges',status_code=202)
 def challenge(payload:ChallengeInput,request:Request,authorization:str|None=Header(default=None)):
     actor=require_actor_context(authorization) if payload.purpose=='CONTACT' else None
     return identity_service.issue_challenge(**payload.model_dump(),ip=ip(request),bound_user=actor.user_id if actor else None)
+
+@router.get('/auth/challenges/{id}/status')
+def challenge_status(id:UUID,request:Request):
+    return identity_service.challenge_status(challenge_id=str(id),ip=ip(request))
+
+@router.post('/auth/telegram/webhook')
+def telegram_webhook(payload:TelegramWebhookInput,request:Request):
+    from app.services.telegram_bot import telegram_bot_service
+    raw_update=payload.update if isinstance(payload.update,dict) else payload.model_dump(exclude={'update','challenge_id'},exclude_none=True)
+    return telegram_bot_service.handle_update(update=raw_update,ip=ip(request),
+        explicit_challenge_id=str(payload.challenge_id) if payload.challenge_id else None)
 
 @router.post('/auth/challenges/{id}/resend',status_code=202)
 def resend(id:UUID,payload:ResendInput,request:Request,authorization:str|None=Header(default=None)):

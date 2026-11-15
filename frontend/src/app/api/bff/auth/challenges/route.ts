@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { channel, destination, purpose } = body || {};
+    const { channel, destination, purpose, delivery_method } = body || {};
 
     if (!channel || !destination || !purpose) {
       return NextResponse.json(
@@ -23,11 +23,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const payload = {
+    const payload: Record<string, string> = {
       channel: String(channel).toUpperCase(),
       destination: String(destination).trim(),
       purpose: String(purpose).toUpperCase(),
     };
+    if (delivery_method) {
+      payload.delivery_method = String(delivery_method).toUpperCase();
+    }
 
     const backendRes = await fetch(`${backendInternalUrl}/api/v1/auth/challenges`, {
       method: "POST",
