@@ -1495,6 +1495,23 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 20-suite regression runner `scripts/run_all_staging_tests.py`: 20/20 passed 100% GREEN in 36.51s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/candidate_saved_notifications_hub/CANDIDATE_SAVED_NOTIFICATIONS_REPORT.md`.
 
+## LOG-144 / Candidate Center: Student Academic Enrollments (HEMIS), Verification Status & Availability Calendar Exceptions Hub (FB-184, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #184, Branch `feature/184-candidate-enrollments-exceptions-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/candidate/enrollments`, `/api/bff/candidate/enrollments/[id]`, `/api/bff/candidate/enrollments/[id]/end`, `/api/bff/candidate/institutions`, `/api/bff/candidate/availability/exceptions`) proxying backend canonical contracts API-027, API-034, API-036 under CAP-004, CAP-005, CAP-012, CAP-017 with HttpOnly session validation, CSRF origin defense, and typed payloads.
+  - Candidate Portal UI (`frontend/src/app/nomzod/page.tsx`):
+    - Tab 4 `ENROLLMENTS` ("Talabalik & Oliy Ta'lim / HEMIS"): Built student academic hub featuring: 1) 4 Telemetry Metrics Cards (Talabalik Holati, Biriktirilgan OTM, HEMIS ID, Dastur/Yo'nalish); 2) Yangi OTM Birikishi Form (API-027) with verified institutions selector (TATU, SamDU, O'zMU, TDTU, etc.), degree/program input, start/end dates, HEMIS student code, and automatic UUID idempotency key; 3) Mening Talabalik Hujjatlarim & OTM Birikishlari Table (API-034) displaying status badges (`VERIFIED` [Emerald], `PENDING` [Amber], `IN_REVIEW` [Blue], `ENDED` [Zinc]) and end enrollment action trigger; 4) End Enrollment Modal with mandatory >= 15-character justification validation and effective end date selector.
+    - Tab 3 `AVAILABILITY` Upgrade (API-036): Integrated "Sana Bo'yicha Maxsus Kunlar & Imtihon Istisnolari" section with date picker, AVAILABLE vs UNAVAILABLE status selector, time range inputs, dynamic exceptions list, and batch commit to backend.
+  - TypeScript SDK (`frontend/src/lib/api.ts`): Exported types `CandidateEnrollmentItem`, `CandidateEnrollmentsResponse`, `CreateEnrollmentPayload`, `EndEnrollmentPayload`, `AvailabilityExceptionItem`, `SaveAvailabilityExceptionsPayload`, `VerifiedInstitutionItem` and helper methods `fetchCandidateEnrollments`, `createCandidateEnrollment`, `fetchCandidateEnrollmentDetail`, `endCandidateEnrollment`, `fetchVerifiedInstitutions`, `saveCandidateAvailabilityExceptions`.
+  - Next.js Turbopack build verified clean (`npm run build`: 51 routes compiled, 0 errors). Docker container `flexbridge-r1-frontend-1` rebuilt and healthy on port 3000.
+  - Dedicated staging suite `scripts/test_candidate_enrollments_exceptions_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer.
+  - Comprehensive 21-suite regression runner `scripts/run_all_staging_tests.py`: 21/21 passed 100% GREEN in 38.14s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/candidate_enrollments_exceptions/CANDIDATE_ENROLLMENTS_EXCEPTIONS_REPORT.md`.
+
+
 
 
 
