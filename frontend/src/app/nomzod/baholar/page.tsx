@@ -122,7 +122,7 @@ export default function CandidateRatingsPage() {
           comment: ratingComment.trim() || undefined,
           idempotency_key: `rate-${selectedRelation.relation_id}-${Date.now()}`,
         });
-        setSubmitSuccessMsg("Baholash muvaffaqiyatli yuborildi! AC-024 bo'yicha 14 kunlik Double-Blind himoya davriga kiritildi.");
+        setSubmitSuccessMsg("Baholash muvaffaqiyatli yuborildi! 14 kunlik ikki tomonlama maxfiy himoya davriga kiritildi.");
         setCriterionScores({});
         setRatingComment("");
         await loadRatings();
@@ -139,7 +139,7 @@ export default function CandidateRatingsPage() {
     if (!appealTarget) return;
 
     if (appealReason.trim().length < 10) {
-      setAppealErrorMsg("E'tiroz sababi kamida 10 ta belgidan iborat bo'lishi shart.");
+      setAppealErrorMsg("E’tiroz sababi kamida 10 ta belgidan iborat bo‘lishi shart.");
       return;
     }
 
@@ -153,7 +153,7 @@ export default function CandidateRatingsPage() {
           reason: appealReason.trim(),
           evidence_notes: appealEvidence.trim() || undefined,
         });
-        setAppealSuccessMsg("E'tiroz qabul qilindi va mustaqil ko'rib chiqish navbatiga qo'shildi (AC-025).");
+        setAppealSuccessMsg("E’tiroz qabul qilindi va mustaqil ko‘rib chiqish navbatiga qo‘shildi.");
         setTimeout(() => {
           setAppealTarget(null);
           setAppealReason("");
@@ -162,7 +162,7 @@ export default function CandidateRatingsPage() {
         }, 2000);
         await loadRatings();
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "E'tirozni yuborishda xatolik";
+        const msg = err instanceof Error ? err.message : "E’tirozni yuborishda xatolik";
         setAppealErrorMsg(msg);
       }
     });
@@ -171,25 +171,25 @@ export default function CandidateRatingsPage() {
   const agg = data?.aggregate;
 
   return (
-    <div className="w-full text-zinc-100 font-sans">
+    <div className="w-full text-[var(--fb-ink)] font-sans">
       <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2">
-              <Award className="w-6 h-6 text-amber-400" />
-              Baholar, Ko&apos;rib Chiqish & E&apos;tirozlar Markazi
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--fb-ink)] flex items-center gap-2">
+              <Award className="w-6 h-6 text-amber-500" />
+              Baholar, Ko‘rib Chiqish & E’tirozlar Markazi
             </h1>
-            <p className="text-sm text-zinc-400 mt-1">
-              Bilateral Double-Blind himoyasi (AC-024) va Rubrika mezonlari asosida mustaqil baholash tizimi (API-057 / API-047 / API-058)
+            <p className="text-sm text-[var(--fb-ink-secondary)] mt-1">
+              Ikki tomonlama maxfiy himoya va mezonlar jadvali asosidagi mustaqil baholash tizimi.
             </p>
           </div>
           <button
             onClick={loadRatings}
             disabled={loading}
-            className="px-4 py-2 text-xs font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition flex items-center gap-2 self-start md:self-auto"
+            className="px-4 py-2 text-xs font-semibold rounded-xl skeuo-btn-secondary transition flex items-center gap-2 self-start md:self-auto"
           >
-            <Clock className="w-4 h-4 text-zinc-400" />
+            <Clock className="w-4 h-4 text-[var(--fb-ink-muted)]" />
             Yangilash
           </button>
         </div>
@@ -264,11 +264,11 @@ export default function CandidateRatingsPage() {
                 <div>
                   <span className="text-zinc-500">Minimal chegara:</span>
                   <p className="font-semibold text-zinc-200 mt-0.5 tabular-nums">
-                    n &ge; 5 (AC-023 Maxfiylik)
+                    n &ge; 5 ta baho (Maxfiylik himoyasi)
                   </p>
                 </div>
                 <div>
-                  <span className="text-zinc-500">So&apos;nggi hisoblash:</span>
+                  <span className="text-zinc-500">So‘nggi hisoblash:</span>
                   <p className="font-semibold text-zinc-200 mt-0.5 tabular-nums">
                     {agg.computed_at ? new Date(agg.computed_at).toLocaleDateString() : "Hali hisoblanmagan"}
                   </p>
@@ -276,15 +276,15 @@ export default function CandidateRatingsPage() {
               </div>
             </div>
 
-            {/* Double-Blind Protection Card (AC-024) */}
+            {/* Double-Blind Protection Card */}
             <div className="p-6 rounded-[28px] skeuo-card flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 text-zinc-300 font-semibold text-sm">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Bilateral Double-Blind (AC-024)
+                  Ikki Tomonlama Maxfiy Baholash
                 </div>
                 <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                  Ish beruvchi va nomzod baholashlari bir-biriga ta&apos;sir qilmasligi uchun 14 kunlik maxfiylik oynasi qo&apos;llaniladi.
+                  Ish beruvchi va talaba baholashlari bir-biriga ta’sir qilmasligi uchun 14 kunlik maxfiylik davri qo‘llaniladi.
                 </p>
                 <div className="mt-4 space-y-2 text-xs">
                   <div className="flex items-center gap-2 text-zinc-300">
@@ -293,17 +293,17 @@ export default function CandidateRatingsPage() {
                   </div>
                   <div className="flex items-center gap-2 text-zinc-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>Qasoskorlik (retaliation) xavfi bartaraf etiladi</span>
+                    <span>Xolis va adolatli fikr-mulohaza kafolatlanadi</span>
                   </div>
                   <div className="flex items-center gap-2 text-zinc-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>14 kundan so&apos;ng baholar avtomatik e&apos;lon qilinadi</span>
+                    <span>14 kundan so‘ng baholar avtomatik e’lon qilinadi</span>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 pt-4 border-t border-zinc-800 text-[11px] text-zinc-500">
-                E&apos;tiroz bildirish oynasi: nashr etilgan kundan boshlab 14 kun (AC-025).
+                E’tiroz bildirish oynasi: nashr etilgan kundan boshlab 14 kun.
               </div>
             </div>
 
@@ -371,11 +371,11 @@ export default function CandidateRatingsPage() {
                     <div className="flex items-center gap-2">
                       {sub.blind_window_active ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-950/60 text-amber-400 border border-amber-800/50 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Double-Blind Himoya Davri (AC-024)
+                          <Lock className="w-3 h-3" /> Maxfiy Himoya Davri
                         </span>
                       ) : (
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Nashr etilgan (Published)
+                          <CheckCircle2 className="w-3 h-3" /> Nashr etilgan
                         </span>
                       )}
                       <span className="text-xs text-zinc-500 font-mono">ID: {sub.id.slice(0, 8)}...</span>
@@ -410,15 +410,15 @@ export default function CandidateRatingsPage() {
                     {!sub.blind_window_active && sub.status === "PUBLISHED" && (
                       <button
                         onClick={() => setAppealTarget(sub)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/50 transition flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-xl skeuo-btn-secondary text-xs font-semibold text-rose-600 dark:text-rose-300 flex items-center gap-1.5"
                       >
-                        <Scale className="w-3.5 h-3.5 text-red-400" />
-                        E&apos;tiroz bildirish (AC-025)
+                        <Scale className="w-3.5 h-3.5 text-rose-500" />
+                        E’tiroz bildirish
                       </button>
                     )}
                     {sub.status === "UNDER_APPEAL" && (
                       <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-950/50 text-amber-300 border border-amber-800/50">
-                        E&apos;tiroz ko&apos;rib chiqilmoqda
+                        E’tiroz ko‘rib chiqilmoqda
                       </span>
                     )}
                   </div>
@@ -453,7 +453,7 @@ export default function CandidateRatingsPage() {
                     <p className="text-xs text-zinc-300 italic">&ldquo;{sub.comment}&rdquo;</p>
                   )}
                   <div className="text-[11px] text-zinc-500">
-                    <span>Bog&apos;liq munosabat ID: {sub.engagement_id || sub.placement_id || "—"}</span>
+                    <span>Bog‘liq munosabat ID: {sub.engagement_id || sub.placement_id || "—"}</span>
                   </div>
                 </div>
               ))
@@ -461,12 +461,12 @@ export default function CandidateRatingsPage() {
           </div>
         )}
 
-        {/* TAB 3: Evaluate Completed Relations (API-047) */}
+        {/* TAB 3: Evaluate Completed Relations */}
         {activeTab === "evaluate" && (
           <div className="space-y-6">
             {data?.eligible_relations.length === 0 ? (
               <div className="p-8 rounded-2xl bg-[#121214] border border-zinc-800 text-center text-zinc-400 text-sm">
-                Baholash uchun mos yakunlangan munosabatlar mavjud emas (AC-022 bo&apos;yicha faqat yakunlangan amaliyot yoki ish munosabatlari baholanadi).
+                Baholash uchun mos yakunlangan munosabatlar mavjud emas (faqat yakunlangan amaliyot yoki ish munosabatlari baholanadi).
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -517,7 +517,7 @@ export default function CandidateRatingsPage() {
                 <div>
                   <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
                     <Scale className="w-5 h-5 text-emerald-400" />
-                    Rubrika Mezonlari Bo&apos;yicha Baholash (API-047)
+                    Mezonlar Jadvali Bo‘yicha Baholash
                   </h3>
                   <p className="text-xs text-zinc-400 mt-1">
                     Rubrika oilasi: <span className="font-semibold text-zinc-300">{selectedRubric.family} (v{selectedRubric.version})</span> | 1 dan 5 gacha ball bering.
@@ -602,10 +602,10 @@ export default function CandidateRatingsPage() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full md:w-auto px-6 py-2.5 rounded-xl font-medium text-xs bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                  className="w-full md:w-auto px-6 py-2.5 rounded-xl font-semibold text-xs skeuo-btn-accent text-white flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
-                  {isPending ? "Yuborilmoqda..." : "Baholashni Tasdiqlash & Yuborish (API-047)"}
+                  {isPending ? "Yuborilmoqda..." : "Baholashni Tasdiqlash & Yuborish"}
                 </button>
               </form>
             )}
@@ -613,14 +613,14 @@ export default function CandidateRatingsPage() {
         )}
       </div>
 
-      {/* Appeal Modal (API-058 / AC-025) */}
+      {/* Appeal Modal */}
       {appealTarget && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-zinc-800 rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-                <Scale className="w-4 h-4 text-red-400" />
-                Bahoga E&apos;tiroz Bildirish (API-058 / AC-025)
+          <div className="skeuo-card rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-[var(--fb-hairline)] pb-3">
+              <h3 className="text-sm font-semibold text-[var(--fb-ink)] flex items-center gap-2">
+                <Scale className="w-4 h-4 text-rose-500" />
+                Bahoga E’tiroz Bildirish
               </h3>
               <button
                 onClick={() => setAppealTarget(null)}
@@ -702,10 +702,10 @@ export default function CandidateRatingsPage() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-medium bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-1.5 shadow-md"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold skeuo-btn-accent text-white disabled:opacity-50 flex items-center gap-1.5"
                 >
                   <Scale className="w-3.5 h-3.5" />
-                  {isPending ? "Yuborilmoqda..." : "E'tirozni Yuborish (API-058)"}
+                  {isPending ? "Yuborilmoqda..." : "E’tirozni Yuborish"}
                 </button>
               </div>
             </form>

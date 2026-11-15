@@ -808,14 +808,14 @@ function RoyxatdanOtishWizard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-bold text-[var(--fb-ink)]">
-                      4. Platforma Operatori / SOC
+                      4. Platforma Operatori
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/12 text-amber-800 dark:text-amber-300 border border-amber-500/25">
                       /operator
                     </span>
                   </div>
                   <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
-                    Dual-control platforma vakolati tayyorlash, moderatsiya va SOC audit nazorati
+                    Ikki bosqichli platforma vakolati tayyorlash, moderatsiya va tizim audit nazorati
                   </p>
                 </div>
               </div>
@@ -1673,29 +1673,29 @@ export default function RoyxatdanOtishPage() {
         <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] items-start">
           {/* Left Onboarding Guide Column */}
           <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
-            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
-              4 bosqichli onboarding
+            <div className="inline-flex w-fit items-center gap-2 rounded-lg skeuo-badge-recessed px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              4 bosqichli tezkor ulanish
             </div>
             <div>
-              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
                 Mos hisob turini tanlang va kabinetga kiring
               </h2>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                SMS yoki rasmiy Telegram bot orqali xavfsiz hisob yarating va rol bo‘yicha kabinetni (taklif tokeni, OTM tayinlovi yoki operator 2FA) shu yerning o‘zida faollashtiring.
+              <p className="mt-2 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
+                SMS yoki rasmiy Telegram bot orqali xavfsiz hisob yarating va rol bo‘yicha kabinetni (taklif kodi, OTM tayinlovi yoki operator 2FA) shu yerning o‘zida faollashtiring.
               </p>
             </div>
-            <ol className="space-y-3 pt-2 border-t border-white/[0.06] text-xs text-zinc-300">
+            <ol className="space-y-3 pt-2 border-t border-[var(--fb-hairline)] text-xs text-[var(--fb-ink-secondary)]">
               <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">1</span>
-                <span><strong className="text-white">Rolni tanlash:</strong> Talaba, Korxona HR, Universitet yoki Operator sifatida ro‘yxatdan o‘tish.</span>
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full skeuo-well-sm text-[10px] font-bold text-[var(--fb-ink)]">1</span>
+                <span><strong className="text-[var(--fb-ink)]">Rolni tanlash:</strong> Talaba, Korxona HR, Universitet yoki Operator sifatida ro‘yxatdan o‘tish.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">2</span>
-                <span><strong className="text-white">Kontakt tasdig‘i:</strong> SMS yoki Telegram botda raqam mosligini tasdiqlash.</span>
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full skeuo-well-sm text-[10px] font-bold text-[var(--fb-ink)]">2</span>
+                <span><strong className="text-[var(--fb-ink)]">Kontakt tasdig‘i:</strong> SMS yoki Telegram botda raqam mosligini tasdiqlash.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] font-bold">3</span>
-                <span><strong className="text-white">Shaxsiy kabinet:</strong> Rolingizga mos alohida boshqaruv paneliga o‘tish.</span>
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full skeuo-well-sm text-[10px] font-bold text-[var(--fb-ink)]">3</span>
+                <span><strong className="text-[var(--fb-ink)]">Shaxsiy kabinet:</strong> Rolingizga mos alohida boshqaruv paneliga o‘tish.</span>
               </li>
             </ol>
           </aside>

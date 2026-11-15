@@ -288,10 +288,10 @@ function OperatorKirishForm() {
         )}
 
         <div className="pt-4 border-t border-white/[0.06] space-y-2 text-[11px] text-zinc-400">
-          <div className="rounded-lg border border-amber-500/15 bg-amber-500/[0.04] p-2.5">
-            <p className="font-mono text-amber-300 font-semibold">Dual-Control Platform Access</p>
-            <p className="text-zinc-400 mt-0.5">
-              Platforma xodimlari rollari (<code className="text-zinc-300">platform_role_grants</code>) mustaqil tasdiq va majburiy TOTP 2FA orqali beriladi; ochiq ro‘yxatdan o‘tish mavjud emas.
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.06] p-2.5">
+            <p className="text-amber-700 dark:text-amber-300 font-semibold">Ikki Bosqichli Operator Nazorati</p>
+            <p className="text-[var(--fb-ink-muted)] mt-0.5">
+              Platforma xodimlari rollari mustaqil tasdiq va majburiy TOTP 2FA orqali beriladi; ochiq ro‘yxatdan o‘tish mavjud emas.
             </p>
           </div>
         </div>
@@ -317,31 +317,31 @@ export default function OperatorKirishPage() {
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-300">
               SOC Xavfsizlik Terminal
             </div>
-            <div>
-              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
-                Platforma nazorati, audit va moderatsiya markazi
-              </h2>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Ushbu kirish sahifasi faqat platforma darajasidagi maxsus rollar (<code className="text-amber-300">OPERATOR</code>, <code className="text-amber-300">MODERATOR</code>, <code className="text-amber-300">AUDITOR</code>, <code className="text-amber-300">SUPPORT</code>, <code className="text-amber-300">FINANCE</code>) uchun ajratilgan.
-              </p>
-            </div>
-            <div className="space-y-2.5 pt-2 border-t border-white/[0.06] text-xs">
+              <div>
+                <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
+                  Platforma nazorati, audit va moderatsiya markazi
+                </h2>
+                <p className="mt-2 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
+                  Ushbu kirish sahifasi faqat platforma darajasidagi maxsus nazoratchi rollar (operator, moderator, auditor, qo‘llab-quvvatlash va moliya mutaxassislari) uchun ajratilgan.
+                </p>
+              </div>
+            <div className="space-y-2.5 pt-2 border-t border-[var(--fb-hairline)] text-xs">
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-3">
-                <p className="font-mono font-semibold text-amber-300">01 // Hash-Chain Audit & Replay</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">
+                <p className="font-mono font-semibold text-amber-700 dark:text-amber-300">01 // O‘zgarmas Audit & Tekshiruv</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">
                   Shubhali xatti-harakatlar, autentifikatsiya hodisalari va tiklash jurnallari nazorati.
                 </p>
               </div>
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-3">
-                <p className="font-mono font-semibold text-amber-300">02 // KYB & OTM Moderatsiyasi</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">
+                <p className="font-mono font-semibold text-amber-700 dark:text-amber-300">02 // KYB & OTM Moderatsiyasi</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">
                   Korxonalar, OTM tayinlovlari va talaba ro‘yxatga olish hujjatlarini mustaqil tasdiqlash.
                 </p>
               </div>
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-3">
-                <p className="font-mono font-semibold text-amber-300">03 // Moliya, Support & Xavfsizlik</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">
-                  Dual-control ledger tekshiruvi, shikoyat tiklash va rollarni boshqarish.
+                <p className="font-mono font-semibold text-amber-700 dark:text-amber-300">03 // Moliya, Murojaat & Xavfsizlik</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">
+                  Ikki tomonlama nazoratli balans tekshiruvi, murojaatlarni hal etish va rollarni boshqarish.
                 </p>
               </div>
             </div>

@@ -452,7 +452,7 @@ export default function CandidateProfileHub() {
         experience_months: Number(profileExpMonths),
       });
       setProfile(updated);
-      setProfileSuccessMsg("Profil ma'lumotlari muvaffaqiyatli saqlandi! (API-026)");
+      setProfileSuccessMsg("Profil ma’lumotlari muvaffaqiyatli saqlandi!");
       setTimeout(() => setProfileSuccessMsg(null), 4000);
     } catch (err: unknown) {
       setProfileErrorMsg(err instanceof Error ? err.message : "Saqlashda xatolik yuz berdi");
@@ -473,7 +473,7 @@ export default function CandidateProfileHub() {
         remove_skill_ids: [],
       });
       await loadProfileData();
-      setSkillsSuccessMsg("Ko‘nikma ro‘yxatga muvaffaqiyatli qo‘shildi! (API-032)");
+      setSkillsSuccessMsg("Ko‘nikma ro‘yxatga muvaffaqiyatli qo‘shildi!");
       setTimeout(() => setSkillsSuccessMsg(null), 4000);
     } catch (err: unknown) {
       setSkillsErrorMsg(err instanceof Error ? err.message : "Ko‘nikma qo‘shishda xatolik");
@@ -534,7 +534,7 @@ export default function CandidateProfileHub() {
     setAvailErrorMsg(null);
     try {
       await saveCandidateAvailability(rules);
-      setAvailSuccessMsg("Haftalik bo‘sh vaqt jadvali muvaffaqiyatli saqlandi! (API-028)");
+      setAvailSuccessMsg("Haftalik bo‘sh vaqt jadvali muvaffaqiyatli saqlandi!");
       setTimeout(() => setAvailSuccessMsg(null), 4000);
     } catch (err: unknown) {
       setAvailErrorMsg(err instanceof Error ? err.message : "Jadvalni saqlashda xatolik");
@@ -588,7 +588,7 @@ export default function CandidateProfileHub() {
         exceptions,
       });
 
-      setExcSuccessMsg("Taqvim istisnolari muvaffaqiyatli yangilandi! (API-036)");
+      setExcSuccessMsg("Taqvim istisnolari muvaffaqiyatli yangilandi!");
       setTimeout(() => setExcSuccessMsg(null), 4000);
     } catch (err: unknown) {
       setExcErrorMsg(err instanceof Error ? err.message : "Istisnolarni saqlashda xatolik");
@@ -602,7 +602,7 @@ export default function CandidateProfileHub() {
     e.preventDefault();
     const instId = selectedInstId === "CUSTOM" ? customInstId.trim() : selectedInstId;
     if (!instId || !enrProgram.trim() || !enrStartDate) {
-      setEnrErrorMsg("OTM, mutaxassislik/yo'nalish va boshlanish sanasi to'ldirilishi shart.");
+      setEnrErrorMsg("OTM, mutaxassislik/yo‘nalish va boshlanish sanasi to‘ldirilishi shart.");
       return;
     }
 
@@ -621,7 +621,7 @@ export default function CandidateProfileHub() {
         file_ids: [],
       });
 
-      setEnrSuccessMsg("Talabalik arizasi muvaffaqiyatli topshirildi va tekshiruv navbatiga kiritildi! (API-027)");
+      setEnrSuccessMsg("Talabalik arizasi muvaffaqiyatli topshirildi va tekshiruv navbatiga kiritildi!");
       setEnrProgram("");
       setEnrStudentRef("");
       setEnrEvidenceNote("");
@@ -943,7 +943,7 @@ export default function CandidateProfileHub() {
       setWorkExperiences(res.work_experiences || []);
       setLanguages(res.languages || []);
       setResumeDetailsSuccessMsg(
-        "To'liq rezyume bo'limlari (Erishgan yutuqlar, Qilingan ishlar, Tillar va Ta'lim) muvaffaqiyatli saqlandi! (API-026-RESUME-DETAILS)"
+        "To‘liq rezyume bo‘limlari (yutuqlar, tajriba, tillar va ta’lim) muvaffaqiyatli saqlandi!"
       );
       setTimeout(() => setResumeDetailsSuccessMsg(null), 5000);
     } catch (err: unknown) {
@@ -1030,8 +1030,8 @@ export default function CandidateProfileHub() {
               </span>
               <span className="text-[var(--fb-ink-muted)] text-xs">• Profil, HEMIS va Amaliyot Rezyumesi</span>
               {currentUser ? (
-                <span className="text-[11px] font-mono font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2.5 py-0.5 rounded-full border border-emerald-500/25">
-                  Faol: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2.5 py-0.5 rounded-full border border-emerald-500/25">
+                  Talaba hisobi faol
                 </span>
               ) : (
                 <span className="text-[11px] font-mono font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/12 px-2.5 py-0.5 rounded-full border border-amber-500/25">
@@ -1040,7 +1040,7 @@ export default function CandidateProfileHub() {
               )}
             </div>
             <h1 className="font-display text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
-              Nomzod Profili, Ta&apos;lim (HEMIS) va Vaqt Taqsimoti Markazi
+              Nomzod Profili, Ta’lim (HEMIS) va Vaqt Taqsimoti Markazi
             </h1>
             <p className="text-xs text-[var(--fb-ink-muted)]">
               Kasbiy rezyume, tasdiqlangan ko‘nikmalar, OTM talabalik hisobi (HEMIS) va O‘zR MK 118-moddasi bo‘yicha grafik boshqaruvi.
@@ -1315,7 +1315,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <User className="w-4 h-4 text-primary" />
-              <span>Kasbiy Profil (API-026)</span>
+              <span>Kasbiy Profil</span>
             </button>
 
             <button
@@ -1328,7 +1328,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <Briefcase className="w-4 h-4 text-cyan-400" />
-              <span>To&apos;liq Rezyume: Yutuqlar & Qilingan Ishlar</span>
+              <span>To‘liq Rezyume: Yutuqlar & Qilingan Ishlar</span>
               {workExperiences.length + achievements.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300">
                   {workExperiences.length + achievements.length}
@@ -1346,7 +1346,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>Ko‘nikmalar Katalogi (API-032)</span>
+              <span>Ko‘nikmalar Katalogi</span>
               {mySkills.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400">
                   {mySkills.length}
@@ -1364,7 +1364,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <Calendar className="w-4 h-4 text-amber-400" />
-              <span>Dars & Ish Jadvali (API-028 / API-035 / API-036)</span>
+              <span>Dars & Ish Jadvali</span>
               {rules.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-400">
                   {rules.length} ta qoida
@@ -1382,7 +1382,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <GraduationCap className="w-4 h-4 text-blue-400" />
-              <span>Talabalik & Oliy Ta&apos;lim / HEMIS (API-027 / API-034)</span>
+              <span>Talabalik & Oliy Ta’lim / HEMIS</span>
               {enrollments.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-400">
                   {enrollments.length}
@@ -1400,7 +1400,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <FolderGit2 className="w-4 h-4 text-purple-400" />
-              <span>Portfolio & Loyihalar (API-026-PORTFOLIO)</span>
+              <span>Portfolio & Loyihalar</span>
               {portfolios.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-purple-500/20 text-purple-400">
                   {portfolios.length}
@@ -1418,7 +1418,7 @@ export default function CandidateProfileHub() {
               }`}
             >
               <Award className="w-4 h-4 text-yellow-400" />
-              <span>Sertifikatlar (API-026-CERT)</span>
+              <span>Sertifikatlar</span>
               {certificates.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-yellow-500/20 text-yellow-400">
                   {certificates.length}
@@ -1531,14 +1531,14 @@ export default function CandidateProfileHub() {
                     <button
                       type="submit"
                       disabled={isSavingProfile}
-                      className="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-md shadow-primary/20"
+                      className="px-4 py-2.5 rounded-xl skeuo-btn-accent disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-2"
                     >
                       {isSavingProfile ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <Save className="w-3.5 h-3.5" />
                       )}
-                      <span>Saqlash (API-026)</span>
+                      <span>Saqlash</span>
                     </button>
                   </div>
                 </form>
@@ -2190,14 +2190,14 @@ export default function CandidateProfileHub() {
                     type="button"
                     onClick={handleSaveAvailability}
                     disabled={isSavingAvailability}
-                    className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20 self-start sm:self-auto"
+                    className="px-4 py-2 rounded-xl skeuo-btn-accent disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 self-start sm:self-auto"
                   >
                     {isSavingAvailability ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <Save className="w-3.5 h-3.5" />
                     )}
-                    <span>Jadvalni Saqlash (API-028)</span>
+                    <span>Jadvalni Saqlash</span>
                   </button>
                 </div>
 
@@ -2332,10 +2332,10 @@ export default function CandidateProfileHub() {
                   <div>
                     <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                       <CalendarDays className="w-4 h-4 text-sky-400" />
-                      <span>Sana Bo&apos;yicha Maxsus Kunlar & Imtihon Istisnolari (API-036)</span>
+                      <span>Sana Bo‘yicha Maxsus Kunlar & Imtihon Istisnolari</span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-0.5">
-                      Muayyan sanalar uchun maxsus bo&apos;sh (AVAILABLE) yoki band (UNAVAILABLE - imtihon, dam olish) soatlarini belgilang.
+                      Muayyan sanalar uchun maxsus bo‘sh yoki band (imtihon, ta’til, dam olish) soatlaringizni belgilang.
                     </p>
                   </div>
 
@@ -2343,14 +2343,14 @@ export default function CandidateProfileHub() {
                     type="button"
                     onClick={handleSaveExceptions}
                     disabled={isSavingExceptions || exceptions.length === 0}
-                    className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-sky-600/20 self-start sm:self-auto"
+                    className="px-4 py-2 rounded-xl skeuo-btn-obsidian disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 self-start sm:self-auto"
                   >
                     {isSavingExceptions ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <Save className="w-3.5 h-3.5" />
                     )}
-                    <span>Istisnolarni Saqlash (API-036)</span>
+                    <span>Istisnolarni Saqlash</span>
                   </button>
                 </div>
 
@@ -2567,7 +2567,7 @@ export default function CandidateProfileHub() {
                         <span>Mening Talabalik Hujjatlarim & OTM Birikishlari</span>
                       </h3>
                       <p className="text-xs text-zinc-400 mt-0.5">
-                        Oliygoh yoki texnikum bilan tasdiqlangan akademik munosabatlar tarixi (API-034).
+                        Oliygoh yoki texnikum bilan tasdiqlangan akademik munosabatlar tarixi.
                       </p>
                     </div>
 
@@ -2767,14 +2767,14 @@ export default function CandidateProfileHub() {
                     <button
                       type="submit"
                       disabled={isSubmittingEnrollment}
-                      className="w-full mt-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-600/20"
+                      className="w-full mt-2 px-4 py-2.5 rounded-xl skeuo-btn-accent disabled:opacity-50 text-xs font-semibold text-white flex items-center justify-center gap-2"
                     >
                       {isSubmittingEnrollment ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <Plus className="w-3.5 h-3.5" />
                       )}
-                      <span>Arizani Yuborish (API-027)</span>
+                      <span>Arizani Yuborish</span>
                     </button>
                   </form>
                 </div>

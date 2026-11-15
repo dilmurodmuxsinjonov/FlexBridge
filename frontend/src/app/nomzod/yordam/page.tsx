@@ -287,8 +287,8 @@ export default function CandidateHelpPrivacyPage() {
               <LifeBuoy className="w-6 h-6 text-sky-400" />
               Yordam Markazi, Maxfiylik & Bildirishnomalar Hubi
             </h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              Texnik qo‘llab-quvvatlash chiptalari (API-063/064), GDPR maxfiylik huquqlari (API-062) va xabarnomalar boshqaruvi (API-059).
+            <p className="text-xs text-[var(--fb-ink-secondary)] mt-1">
+              Texnik qo‘llab-quvvatlash murojaatlari, shaxsiy ma’lumotlar maxfiyligi va bildirishnomalar boshqaruvi.
             </p>
           </div>
           <button
@@ -297,55 +297,55 @@ export default function CandidateHelpPrivacyPage() {
               if (activeTab === "PRIVACY") loadPrivacyRequests();
               if (activeTab === "NOTIFICATIONS") loadPreferences();
             }}
-            className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#121214] hover:bg-white/[0.06] border border-white/[0.08] text-zinc-300 transition flex items-center gap-2 self-start md:self-auto shadow-sm"
+            className="px-3.5 py-2 text-xs font-semibold rounded-xl skeuo-btn-secondary flex items-center gap-2 self-start md:self-auto"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-zinc-400" />
+            <RefreshCw className="w-3.5 h-3.5 text-[var(--fb-ink-muted)]" />
             Yangilash
           </button>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto">
+        <div className="flex items-center gap-2 border-b border-[var(--fb-hairline)] pb-1 overflow-x-auto">
           <button
             onClick={() => setActiveTab("TICKETS")}
-            className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "TICKETS"
-                ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                ? "skeuo-btn-obsidian text-white"
+                : "text-[var(--fb-ink-secondary)] hover:text-[var(--fb-ink)]"
             }`}
           >
             <MessageSquare className="w-4 h-4 text-sky-400" />
-            <span>Murojaatlar & Yordam (API-063/064)</span>
-            <span className="px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
+            <span>Murojaatlar & Yordam</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 text-[10px] font-mono">
               {tickets.length}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab("PRIVACY")}
-            className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "PRIVACY"
-                ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                ? "skeuo-btn-obsidian text-white"
+                : "text-[var(--fb-ink-secondary)] hover:text-[var(--fb-ink)]"
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Maxfiylik Huquqlari & GDPR (API-062)</span>
-            <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
+            <span>Maxfiylik Huquqlari</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">
               {privacyRequests.length}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab("NOTIFICATIONS")}
-            className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "NOTIFICATIONS"
-                ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                ? "skeuo-btn-obsidian text-white"
+                : "text-[var(--fb-ink-secondary)] hover:text-[var(--fb-ink)]"
             }`}
           >
             <Bell className="w-4 h-4 text-amber-400" />
-            <span>Bildirishnomalar Sozlamalari (API-059)</span>
+            <span>Bildirishnomalar Sozlamalari</span>
           </button>
         </div>
 
@@ -699,7 +699,7 @@ export default function CandidateHelpPrivacyPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <h3 className="text-sm font-semibold text-white">Yangi Yordam Murojaati Yaratish (API-063)</h3>
+              <h3 className="text-sm font-semibold text-white">Yangi Yordam Murojaati Yaratish</h3>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
@@ -878,7 +878,7 @@ export default function CandidateHelpPrivacyPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <h3 className="text-sm font-semibold text-white">Maxfiylik So‘rovi Berish (API-062)</h3>
+              <h3 className="text-sm font-semibold text-white">Maxfiylik So‘rovi Berish</h3>
               <button onClick={() => setIsPrivacyModalOpen(false)} className="text-zinc-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>

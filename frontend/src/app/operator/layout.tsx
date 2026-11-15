@@ -59,30 +59,22 @@ export default function OperatorLayout({
     return (
       <div className="min-h-[calc(100vh-4rem)] text-[var(--fb-ink)] flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg rounded-3xl skeuo-card p-7 space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-3 py-1 text-xs font-mono font-semibold text-amber-700 dark:text-amber-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
             <ShieldAlert className="w-4 h-4" />
-            <span>SOC Rol Chegarasi (Role Boundary)</span>
+            <span>Kirish Chegarasi</span>
           </div>
           <div className="space-y-2">
-            <h1 className="font-heading text-xl font-bold text-white">
-              Bu terminal faqat Platforma Operatori va Auditorlari uchun
+            <h1 className="font-display text-xl font-bold text-[var(--fb-ink)]">
+              Bu bo‘lim faqat Platforma Operatorlari va Auditorlari uchun
             </h1>
-            <p className="text-xs leading-relaxed text-zinc-400">
-              Siz hozir{" "}
-              <span className="font-mono text-zinc-200">
-                {currentUser.user_id}
-              </span>{" "}
-              (<span className="font-mono text-amber-300">{currentUser.roles.join(", ")}</span>)
-              hisobi bilan tizimdasiz. SOC xavfsizlik terminaliga kirish uchun vakolatli{" "}
-              <code className="text-amber-300">OPERATOR</code> /{" "}
-              <code className="text-amber-300">MODERATOR</code> /{" "}
-              <code className="text-amber-300">AUDITOR</code> hisobi talab qilinadi.
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
+              Siz hozir boshqa foydalanuvchi hisobi bilan tizimdasiz. Operator nazorat paneliga kirish uchun vakolatli platforma operatori hisobi talab qilinadi.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-white/[0.06]">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--fb-border)]">
             <Link
               href={targetDashboard.href}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition-colors"
+              className="skeuo-btn-obsidian rounded-full px-4 py-2 text-xs"
             >
               <span>{targetDashboard.label}ga qaytish</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -90,7 +82,7 @@ export default function OperatorLayout({
             <button
               type="button"
               onClick={handleLogoutAndSwitch}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors"
+              className="skeuo-btn-accent rounded-full px-4 py-2 text-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Chiqish va Operator sifatida kirish</span>
@@ -109,7 +101,7 @@ export default function OperatorLayout({
             <div className="flex items-center gap-2 text-amber-700 dark:text-amber-200">
               <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>
-                <strong>Operator SOC Terminal:</strong> Dual-control vakolat va 2FA (TOTP) asosidagi xavfsiz kirish.
+                <strong>Operator Nazorat Terminali:</strong> Ikki bosqichli tasdiqlash va 2FA (TOTP) asosidagi xavfsiz kirish.
               </span>
             </div>
             <div className="flex items-center gap-2">

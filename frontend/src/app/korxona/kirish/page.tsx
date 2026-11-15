@@ -381,22 +381,22 @@ export default function KorxonaKirishPage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Bosh sahifaga qaytish</span>
           </Link>
-          <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400/90">
-            PORTAL SCOPE: EMPLOYER (ORG ROLES)
+          <span className="text-[11px] font-mono rounded-full skeuo-badge-recessed px-3 py-0.5 text-emerald-700 dark:text-emerald-400">
+            Korxona HR Portali • Tashkilot rollari
           </span>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] items-start">
           <aside className="rounded-[28px] skeuo-card p-6 sm:p-7 space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300">
+            <div className="inline-flex items-center gap-2 rounded-lg skeuo-badge-recessed px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
               Ish Beruvchi & HR Ruxsatlari
             </div>
             <div>
-              <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Korxona vakillari uchun alohida izolyatsiyalangan kirish
+              <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
+                Korxona vakillari uchun alohida himoyalangan kirish
               </h2>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Ushbu kirish faqat tashkilotga biriktirilgan <span className="text-emerald-300 font-mono">OWNER / HR / MENTOR / HOST_COORDINATOR / BILLING</span> hisoblari uchun ochiq. Talaba va OTM hisoblari bu kirish orqali qabul qilinmaydi.
+              <p className="mt-2 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
+                Ushbu kirish faqat tashkilotga biriktirilgan rahbar, HR mutaxassis, amaliyot mentori, koordinator va hisobchi hisoblari uchun ochiq. Talaba va OTM hisoblari bu sahifadan kirmaydi.
               </p>
             </div>
 

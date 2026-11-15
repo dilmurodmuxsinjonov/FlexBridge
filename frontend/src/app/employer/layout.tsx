@@ -60,15 +60,13 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
           <h1 className="font-display text-xl font-bold text-[var(--fb-ink)]">
             Bu bo‘lim faqat Korxona / Ish beruvchi vakillari uchun ajratilgan
           </h1>
-          <p className="text-xs leading-relaxed text-zinc-400">
-            Siz hozir{" "}
-            <span className="font-mono text-zinc-200">{currentUser.roles.join(", ")}</span>{" "}
-            hisobi bilan tizimga kirgansiz. Korxona HR va mentorlik kabinetiga kirish uchun tashkilotga biriktirilgan korxona hisobingiz bilan kiring.
+          <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
+            Siz hozir boshqa turdagi hisob bilan tizimga kirgansiz. Korxona HR va mentorlik kabinetiga kirish uchun tashkilotga biriktirilgan korxona hisobingiz bilan kiring.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
               href={dash.href}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 border border-white/15 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15 transition-colors"
+              className="skeuo-btn-obsidian rounded-full px-4 py-2 text-xs"
             >
               <span>{dash.label}</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -76,7 +74,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
             <button
               type="button"
               onClick={handleEmployerSwitchLogout}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors"
+              className="skeuo-btn-accent rounded-full px-4 py-2 text-xs"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Chiqish va korxona sifatida kirish</span>

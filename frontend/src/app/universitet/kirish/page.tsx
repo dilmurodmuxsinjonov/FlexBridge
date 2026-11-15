@@ -366,7 +366,7 @@ export default function UniversitetKirishPage() {
               <div>
                 <p className="font-semibold text-zinc-100">Kafedra & O‘qituvchi Tayinlash</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">
-                  Talabalarga ilmiy rahbar biriktirish va nazorat ro‘yxati (`API-102`, `API-103`).
+                  Talabalarga ilmiy rahbar biriktirish, yo‘llanma berish va nazorat ro‘yxati.
                 </p>
               </div>
             </div>
@@ -375,7 +375,7 @@ export default function UniversitetKirishPage() {
               <div>
                 <p className="font-semibold text-zinc-100">OTM Dars Jadvali & Yuklash</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">
-                  Guruh dars jadvallarini qo‘lda kiritish yoki tayyor shablondan import (`API-098`).
+                  Guruh dars jadvallarini qo‘lda kiritish yoki tayyor jadval shablonidan yuklash.
                 </p>
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function UniversitetKirishPage() {
               <div>
                 <p className="font-semibold text-zinc-100">Yakuniy Xulosa, E-Imzo & Eksport</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">
-                  Kundaliklar bahosi, yakuniy xulosa E-Imzo va rasmiy PDF hisobot (`API-100`).
+                  Kundaliklar bahosi, yakuniy xulosa E-Imzo va rasmiy PDF hisobot yaratish.
                 </p>
               </div>
             </div>

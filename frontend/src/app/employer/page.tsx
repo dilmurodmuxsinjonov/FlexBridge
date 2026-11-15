@@ -446,7 +446,7 @@ export default function EmployerPortal() {
       const res = await publishEmployerOpportunity(oppId.trim());
       setOppLifecycleMsg({
         type: "success",
-        text: `Vakansiya (${oppId.slice(0, 8)}...) muvaffaqiyatli nashr qilindi (API-081)! Holat: ${res.status || 'PUBLISHED'}`,
+        text: `Vakansiya muvaffaqiyatli nashr qilindi! Holat: ${res.status || "PUBLISHED"}`,
       });
       if (orgId.trim()) {
         loadDashboard(orgId.trim());
@@ -470,7 +470,7 @@ export default function EmployerPortal() {
       await transitionOpportunityStatus(oppId.trim(), status);
       setOppLifecycleMsg({
         type: "success",
-        text: `Vakansiya holati '${status}' ga muvaffaqiyatli o'zgartirildi (API-082)!`,
+        text: `Vakansiya holati "${status}" ga muvaffaqiyatli o‘zgartirildi!`,
       });
       if (orgId.trim()) {
         loadDashboard(orgId.trim());
@@ -788,7 +788,7 @@ export default function EmployerPortal() {
       });
       setOrgDirectoryProfile(saved);
       setOrgDirectorySuccessMsg(
-        `Korxona ma'lumotnomasi va rekvizitlari muvaffaqiyatli saqlandi! To'ldirilganlik: ${saved.completion_percent}% (API-067-DIRECTORY)`
+        `Korxona ma’lumotnomasi va rekvizitlari muvaffaqiyatli saqlandi! To‘ldirilganlik: ${saved.completion_percent}%`
       );
       setTimeout(() => setOrgDirectorySuccessMsg(null), 5000);
     } catch (err: unknown) {
@@ -834,7 +834,7 @@ export default function EmployerPortal() {
     e.preventDefault();
     if (!revokeModalMembership || !orgId.trim()) return;
     if (revokeReason.trim().length < 15) {
-      setRevokeError("Bekor qilish sababi kamida 15 ta belgidan iborat bo‘lishi shart (API-075 qat'iy talabi).");
+      setRevokeError("Bekor qilish sababi kamida 15 ta belgidan iborat bo‘lishi shart.");
       return;
     }
 
@@ -915,7 +915,7 @@ export default function EmployerPortal() {
       return;
     }
     if (refundReason.trim().length < 15) {
-      setRefundError("Qaytarish sababi kamida 15 ta belgidan iborat bo‘lishi shart (API-095 talabi).");
+      setRefundError("Qaytarish sababi kamida 15 ta belgidan iborat bo‘lishi shart.");
       return;
     }
 
@@ -1081,26 +1081,24 @@ export default function EmployerPortal() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400">
                 Korxona HR &amp; Mentorlik Markazi
               </span>
-              <span className="text-zinc-500 text-xs">• API-068 / API-082-086 / CAP-015</span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
-                  <span>Kirilgan: {currentUser.user_id.slice(0, 8)}...</span>
-                  <span className="text-zinc-500">({currentUser.roles.join(", ")})</span>
+                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                  <span>Korxona hisobi faol</span>
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
-            <h1 className="font-heading text-lg md:text-xl font-bold text-zinc-100">
+            <h1 className="font-heading text-lg md:text-xl font-bold text-[var(--fb-ink)]">
               Tashkilot HR va Vakansiyalar Boshqaruvi
             </h1>
-            <p className="text-xs text-zinc-400">
-              Haqiqiy backend orqali tashkilot statistikasi, vakansiyalar va nomzodlar bosqichlari (Kanban) monitoringi.
+            <p className="text-xs text-[var(--fb-ink-secondary)]">
+              Tashkilot statistikasi, vakansiyalar va nomzodlar bosqichlarini real vaqtda boshqarish.
             </p>
           </div>
 
@@ -1459,16 +1457,15 @@ export default function EmployerPortal() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400">
                     Nomzodlar Kanbani
                   </span>
-                  <span className="text-zinc-500 text-xs">• API-082, 083, 084, 085, 086</span>
                 </div>
-                <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
                   Arizalarni Bosqichma-bosqich Boshqarish va Suhbat Belgilash
                 </h2>
-                <p className="text-xs text-zinc-400">
-                  Vakansiyaga topshirilgan barcha nomzodlarni saralash, suhbat tayinlash va rasmiy takliflar (Offer) yuborish.
+                <p className="text-xs text-[var(--fb-ink-secondary)]">
+                  Vakansiyaga topshirilgan nomzodlarni saralash, suhbat tayinlash va rasmiy ish takliflari yuborish.
                 </p>
               </div>
 
@@ -1479,15 +1476,15 @@ export default function EmployerPortal() {
                     type="text"
                     value={targetOppId}
                     onChange={(e) => setTargetOppId(e.target.value)}
-                    placeholder="Vakansiya ID (UUID)"
-                    className="w-64 px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                    placeholder="Vakansiya identifikatori"
+                    className="w-64 px-3 py-1.5 rounded-xl skeuo-input text-xs font-mono"
                   />
                 </div>
                 <button
                   type="button"
                   disabled={isLoadingApps || !targetOppId.trim()}
                   onClick={() => loadApplications(targetOppId)}
-                  className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+                  className="px-3.5 py-1.5 rounded-xl skeuo-btn-accent text-xs font-semibold text-white flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoadingApps ? (
                     <>
@@ -1507,8 +1504,8 @@ export default function EmployerPortal() {
                   type="button"
                   disabled={isPublishingOpp || !targetOppId.trim()}
                   onClick={() => handlePublishOpportunity(targetOppId)}
-                  title="Qoralama vakansiyani nashr qilish (API-081)"
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+                  title="Qoralama vakansiyani nashr qilish"
+                  className="px-3 py-1.5 rounded-xl skeuo-btn-obsidian text-white text-xs font-semibold flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isPublishingOpp ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                   <span>Nashr qilish</span>
@@ -1518,18 +1515,18 @@ export default function EmployerPortal() {
                   type="button"
                   disabled={isTransitioningOpp || !targetOppId.trim()}
                   onClick={() => handleTransitionOpportunity(targetOppId, "PAUSED")}
-                  title="Vakansiyani vaqtincha to'xtatish (API-082)"
-                  className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Vakansiyani vaqtincha to‘xtatish"
+                  className="px-3 py-1.5 rounded-xl skeuo-btn-secondary text-amber-700 dark:text-amber-300 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span>To'xtatish</span>
+                  <span>To‘xtatish</span>
                 </button>
 
                 <button
                   type="button"
                   disabled={isTransitioningOpp || !targetOppId.trim()}
                   onClick={() => handleTransitionOpportunity(targetOppId, "CLOSED")}
-                  title="Vakansiyani yopish (API-082)"
-                  className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Vakansiyani yopish"
+                  className="px-3 py-1.5 rounded-xl skeuo-btn-secondary text-rose-700 dark:text-rose-300 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span>Yopish</span>
                 </button>
@@ -1846,10 +1843,9 @@ export default function EmployerPortal() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                      Workplace Mentor Hub
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-indigo-700 dark:text-indigo-400">
+                      Mentorlik Markazi
                     </span>
-                    <span className="text-zinc-500 text-xs">• API-090, API-091, API-092, API-089, API-069</span>
                   </div>
                   <h2 className="font-heading text-base md:text-lg font-bold text-white">
                     Amaliyot Kundaliklarini Baholash va Mentorlik Boshqaruvi
@@ -2073,7 +2069,7 @@ export default function EmployerPortal() {
                             : "text-zinc-400 hover:text-white"
                         }`}
                       >
-                        Menga biriktirilganlar (API-089)
+                        Menga biriktirilganlar
                       </button>
                       <button
                         type="button"
@@ -2084,7 +2080,7 @@ export default function EmployerPortal() {
                             : "text-zinc-400 hover:text-white"
                         }`}
                       >
-                        Tashkilot amaliyotlari (API-069)
+                        Tashkilot amaliyotlari
                       </button>
                     </div>
 
@@ -2221,16 +2217,15 @@ export default function EmployerPortal() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Tashkilot & Jamoa Hub
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400">
+                      Tashkilot & Jamoa Markazi
                     </span>
-                    <span className="text-zinc-500 text-xs font-mono">• API-072, API-073, API-074, API-075, API-067</span>
                   </div>
-                  <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                    Tashkilot Huquqlari, Verifikatsiya va Jamoa Boshqaruvi
+                  <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
+                    Tashkilot Huquqlari, Tekshiruv Holati va Jamoa Boshqaruvi
                   </h2>
-                  <p className="text-xs text-zinc-400">
-                    Tashkilot faoliyat imkoniyatlari (Capabilities), davlat tekshiruvi holati, a&apos;zolar ro&apos;yxati va 24 soatlik taklifnomalar yuborish.
+                  <p className="text-xs text-[var(--fb-ink-secondary)]">
+                    Tashkilot vakolatlari, rasmiy tekshiruv holati, jamoa a’zolari ro‘yxati va 24 soatlik taklifnomalar yuborish.
                   </p>
                 </div>
 
@@ -2252,11 +2247,10 @@ export default function EmployerPortal() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                        Faoliyat Imkoniyatlari (Capabilities)
+                      <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                        Faoliyat Vakolatlari
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">API-072</span>
                   </div>
 
                   {isLoadingCapabilities ? (
@@ -2303,11 +2297,10 @@ export default function EmployerPortal() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Building className="w-4 h-4 text-primary" />
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                        Tashkilot Verifikatsiyasi (STIR / Soliq)
+                      <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                        Tashkilot Tekshiruvi (STIR / Soliq)
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">API-067</span>
                   </div>
 
                   {isLoadingVerification ? (
@@ -2373,11 +2366,10 @@ export default function EmployerPortal() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-primary" />
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                        Jamoa A&apos;zolari va Rollar ({orgMemberships.length})
+                      <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                        Jamoa A’zolari va Rollar ({orgMemberships.length})
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">API-073</span>
                   </div>
 
                   {membershipsError && (
@@ -2478,11 +2470,10 @@ export default function EmployerPortal() {
                   <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                     <div className="flex items-center gap-2">
                       <UserPlus className="w-4 h-4 text-emerald-400" />
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                        Yangi A&apos;zo Taklif Qilish
+                      <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                        Yangi A’zo Taklif Qilish
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">API-074</span>
                   </div>
 
                   <form onSubmit={handleInviteMember} className="flex flex-col gap-3">
@@ -2602,8 +2593,8 @@ export default function EmployerPortal() {
                       OTM hamkorlik shartnomalari, uch tomonlama amaliyot bitimlari va talabalar uchun korxona pasporti.
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-semibold">
-                    To&apos;ldirilganlik: {orgDirectoryProfile.completion_percent || 0}% • API-067-DIRECTORY
+                  <span className="px-3 py-1 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-300 text-xs font-mono font-semibold">
+                    To‘ldirilganlik: {orgDirectoryProfile.completion_percent || 0}%
                   </span>
                 </div>
 
@@ -2802,14 +2793,14 @@ export default function EmployerPortal() {
                     <button
                       type="submit"
                       disabled={isSavingOrgDirectory || isLoadingOrgDirectory}
-                      className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-2 shrink-0 shadow-md shadow-emerald-600/20"
+                      className="skeuo-btn-accent px-5 py-2.5 text-xs shrink-0 disabled:opacity-50"
                     >
                       {isSavingOrgDirectory ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <CheckCircle2 className="w-3.5 h-3.5" />
                       )}
-                      <span>Korxona Ma&apos;lumotnomasini Saqlash</span>
+                      <span>Korxona Ma’lumotnomasini Saqlash</span>
                     </button>
                   </div>
                 </form>
@@ -2826,16 +2817,15 @@ export default function EmployerPortal() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      To‘lovlar & Obuna Hub
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-amber-700 dark:text-amber-400">
+                      To‘lovlar & Obuna Markazi
                     </span>
-                    <span className="text-zinc-500 text-xs font-mono">• API-070, API-093, API-094, API-095</span>
                   </div>
-                  <h3 className="text-base font-semibold text-zinc-100">
+                  <h3 className="text-base font-semibold text-[var(--fb-ink)]">
                     Tarif Rejalari, Xizmat Huquqlari & Tranzaksiyalar
                   </h3>
-                  <p className="text-xs text-zinc-400">
-                    Tashkilot faol obunasi, e&apos;lon kvotalari, hisob-fakturalar va to‘lov qaytarish (refund) boshqaruvi.
+                  <p className="text-xs text-[var(--fb-ink-secondary)]">
+                    Tashkilot faol obunasi, e’lon kvotalari, hisob-fakturalar va to‘lovni qaytarish so‘rovlari boshqaruvi.
                   </p>
                 </div>
 
@@ -2943,11 +2933,11 @@ export default function EmployerPortal() {
                   <div className="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-400" />
-                      <span className="text-xs font-semibold text-zinc-200">
-                        Tarif Rejalari (API-094)
+                      <span className="text-xs font-semibold text-[var(--fb-ink)]">
+                        Tarif Rejalari
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">MFA + OWNER/BILLING</span>
+                    <span className="text-[10px] font-mono text-[var(--fb-ink-muted)]">Rahbar / Hisobchi + 2FA</span>
                   </div>
 
                   {/* Plan Cards */}
@@ -3045,16 +3035,16 @@ export default function EmployerPortal() {
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
                       <span className="text-xs font-semibold text-zinc-200">
-                        Xizmat Huquqlari & Kvotalar (API-070)
+                        Xizmat Huquqlari & Kvotalar
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500">REALTIME USAGE</span>
+                    <span className="text-[10px] font-mono text-zinc-500">JONLI HOLAT</span>
                   </div>
 
                   {/* Slot Usage Progress Bar */}
                   <div className="flex flex-col gap-2 p-3 bg-surface-card rounded-lg border border-white/[0.05]">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-zinc-400">Faol E&apos;lonlar Slotidan Foydalanish:</span>
+                      <span className="text-zinc-400">Faol e’lonlar kvotasidan foydalanish:</span>
                       <span className="font-bold text-zinc-200 tabular-nums">
                         {entitlements?.usage?.concurrent_active_opportunities ?? 0} / {entitlements?.usage?.concurrent_active_limit ?? 0}
                       </span>
@@ -3085,7 +3075,7 @@ export default function EmployerPortal() {
                       <span className="text-zinc-200">
                         {entitlements?.active_entitlement?.starts_at
                           ? new Date(entitlements.active_entitlement.starts_at).toLocaleString()
-                          : "Ko'rsatilmagan"}
+                          : "Ko‘rsatilmagan"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
@@ -3097,24 +3087,24 @@ export default function EmployerPortal() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between py-1">
-                      <span className="text-zinc-400">Bog&apos;langan Buyurtma:</span>
+                      <span className="text-zinc-400">Bog‘langan buyurtma:</span>
                       <span className="font-mono text-zinc-400">
                         {entitlements?.active_entitlement?.order_id
                           ? `#${entitlements.active_entitlement.order_id.slice(0, 8)}`
-                          : "To'g'ridan-to'g'ri"}
+                          : "To‘g‘ridan-to‘g‘ri"}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Section C: Hisob-fakturalar & Buyurtmalar Tarixi (API-093) */}
+              {/* Section C: Hisob-fakturalar & Buyurtmalar Tarixi */}
               <div className="bg-surface-lowest border border-white/[0.05] rounded-xl p-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
                   <div className="flex items-center gap-2">
                     <Receipt className="w-4 h-4 text-zinc-400" />
                     <span className="text-xs font-semibold text-zinc-200">
-                      Buyurtmalar & Hisob-fakturalar Tarixi (API-093)
+                      Buyurtmalar va Hisob-fakturalar Tarixi
                     </span>
                   </div>
                   <span className="text-[10px] font-mono text-zinc-500">
@@ -3174,9 +3164,9 @@ export default function EmployerPortal() {
                                     setRefundError(null);
                                     setRefundSuccess(null);
                                   }}
-                                  className="px-2.5 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[11px] font-semibold transition-all"
+                                  className="skeuo-btn-secondary px-2.5 py-1 text-[11px]"
                                 >
-                                  Mablag‘ni Qaytarish (API-095)
+                                  Mablag‘ni qaytarish
                                 </button>
                               )}
                             </td>
@@ -3206,7 +3196,7 @@ export default function EmployerPortal() {
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
                       Nomzodlar Qidiruv Markazi
                     </span>
-                    <span className="text-zinc-500 text-xs font-mono">• API-087 • O‘zR MK 118-modda</span>
+                    <span className="text-zinc-500 text-xs font-mono">• O‘zR MK 118-modda</span>
                   </div>
                   <h2 className="text-lg font-bold text-white font-heading">
                     Iste’dodlar Bazasi & Aqlli Moslashtirish
@@ -4291,7 +4281,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <Video className="w-5 h-5 text-indigo-400" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Suhbat Belgilash (API-085)
+                  Suhbat Belgilash
                 </h3>
               </div>
               <button
@@ -4392,7 +4382,7 @@ export default function EmployerPortal() {
                 <button
                   type="submit"
                   disabled={isSubmittingInterview || !interviewStartsAt || !interviewEndsAt}
-                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                  className="skeuo-btn-accent px-5 py-2 text-xs disabled:opacity-50"
                 >
                   {isSubmittingInterview ? (
                     <>
@@ -4426,7 +4416,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <Send className="w-5 h-5 text-emerald-400" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Rasmiy Ish Taklifi (Offer) Yuborish (API-086)
+                  Rasmiy Ish Taklifi Yuborish
                 </h3>
               </div>
               <button
@@ -4499,7 +4489,7 @@ export default function EmployerPortal() {
                 <button
                   type="submit"
                   disabled={isSubmittingOffer}
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                  className="skeuo-btn-accent px-5 py-2 text-xs disabled:opacity-50"
                 >
                   {isSubmittingOffer ? (
                     <>
@@ -4533,7 +4523,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <XCircle className="w-5 h-5 text-rose-400" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Arizani Rad Etish (API-083)
+                  Arizani Rad Etish
                 </h3>
               </div>
               <button
@@ -4580,7 +4570,7 @@ export default function EmployerPortal() {
                 <button
                   type="submit"
                   disabled={isSubmittingReject}
-                  className="inline-flex items-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-500 px-5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                  className="skeuo-btn-accent px-5 py-2 text-xs disabled:opacity-50"
                 >
                   {isSubmittingReject ? (
                     <>
@@ -4614,7 +4604,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Nomzod HR Snapshot & Audit Tarixi (API-084)
+                  Nomzod Profili & Holat Tarixi
                 </h3>
               </div>
               <button
@@ -4629,7 +4619,7 @@ export default function EmployerPortal() {
             {isLoadingDetail ? (
               <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs text-zinc-400">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                <span>Ma&apos;lumotlar yuklanmoqda...</span>
+                <span>Ma’lumotlar yuklanmoqda...</span>
               </div>
             ) : detailError ? (
               <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
@@ -4669,7 +4659,7 @@ export default function EmployerPortal() {
 
                 {/* Audit events trail */}
                 <div className="flex flex-col gap-2">
-                  <h4 className="text-xs font-semibold text-zinc-300">O&apos;zgarishlar Tarixi (Audit Log):</h4>
+                  <h4 className="text-xs font-semibold text-zinc-300">O‘zgarishlar Tarixi:</h4>
                   <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                     {hrDetail.events.length === 0 ? (
                       <span className="text-zinc-500 text-xs">Hodisalar mavjud emas</span>
@@ -4725,7 +4715,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Kundalikni Tekshirish va Baholash (API-091 / API-092)
+                  Kundalikni Tekshirish va Baholash
                 </h3>
               </div>
               <button
@@ -4774,14 +4764,14 @@ export default function EmployerPortal() {
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-zinc-300">Talaba xulosasi:</span>
                   <div className="p-3 rounded-xl bg-surface-lowest border border-white/[0.06] text-xs text-zinc-300">
-                    {revisionDetail.summary || "Xulosa ko'rsatilmagan."}
+                    {revisionDetail.summary || "Xulosa ko‘rsatilmagan."}
                   </div>
                 </div>
 
                 {/* Task Breakdown */}
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-semibold text-zinc-300">
-                    Bajarilgan vazifalar ro&apos;yxati ({revisionDetail.tasks?.length || 0} ta):
+                    Bajarilgan vazifalar ro‘yxati ({revisionDetail.tasks?.length || 0} ta):
                   </span>
                   <div className="flex flex-col gap-2 max-h-56 overflow-y-auto">
                     {!revisionDetail.tasks || revisionDetail.tasks.length === 0 ? (
@@ -4845,7 +4835,7 @@ export default function EmployerPortal() {
                 {/* Evaluation Form */}
                 <form onSubmit={handleSubmitReviewDecision} className="flex flex-col gap-3 pt-2 border-t border-white/[0.08]">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-zinc-300">Mentor Qarori (API-092):</label>
+                    <label className="text-xs font-semibold text-zinc-300">Mentor Qarori:</label>
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
@@ -5035,7 +5025,7 @@ export default function EmployerPortal() {
                 <div>
                   <h4 className="text-sm font-semibold text-zinc-100">To‘lovni Qaytarish So‘rovi</h4>
                   <p className="text-[11px] text-zinc-400 font-mono">
-                    Buyurtma #{refundModalOrder.id.slice(0, 8)} • API-095
+                    Buyurtma #{refundModalOrder.id.slice(0, 8)}
                   </p>
                 </div>
               </div>
@@ -5101,7 +5091,7 @@ export default function EmployerPortal() {
                 <button
                   type="submit"
                   disabled={isSubmittingRefund || refundReason.trim().length < 15}
-                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-rose-600/20"
+                  className="skeuo-btn-accent px-4 py-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmittingRefund ? (
                     <>
@@ -5111,7 +5101,7 @@ export default function EmployerPortal() {
                   ) : (
                     <>
                       <CreditCard className="w-3.5 h-3.5" />
-                      <span>So‘rovni Yuborish (API-095)</span>
+                      <span>So‘rovni Yuborish</span>
                     </>
                   )}
                 </button>

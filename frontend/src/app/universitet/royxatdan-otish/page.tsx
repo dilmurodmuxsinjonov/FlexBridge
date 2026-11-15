@@ -691,9 +691,9 @@ function UniversitetRegistrationContent() {
         {step === 3 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[var(--fb-ink)] flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-indigo-400" />
-                <span>OTM Tayinlovlar Ro‘yxati (`API-017` / `API-097`)</span>
+                <span>OTM Tayinlovlar Ro‘yxati</span>
               </h2>
               <button
                 type="button"

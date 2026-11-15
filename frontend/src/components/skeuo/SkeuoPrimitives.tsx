@@ -1,10 +1,127 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowDownRight, type LucideIcon } from "lucide-react";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
+import { ArrowUpRight, ArrowDownRight, ArrowRight, type LucideIcon } from "lucide-react";
 
 type SkeuoSurface = "raised" | "recessed" | "obsidian";
+
+export type SkeuoButtonVariant = "obsidian" | "accent" | "secondary" | "subtle";
+export type SkeuoButtonSize = "sm" | "md" | "lg";
+
+export interface SkeuoButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  children: React.ReactNode;
+  variant?: SkeuoButtonVariant;
+  size?: SkeuoButtonSize;
+  arrow?: boolean;
+  icon?: LucideIcon;
+}
+
+const BUTTON_VARIANT_CLASS: Record<SkeuoButtonVariant, string> = {
+  obsidian: "skeuo-btn-obsidian",
+  accent: "skeuo-btn-accent",
+  secondary: "skeuo-btn-secondary",
+  subtle: "skeuo-badge-recessed hover:text-[var(--fb-ink)]",
+};
+
+const BUTTON_SIZE_CLASS: Record<SkeuoButtonSize, string> = {
+  sm: "rounded-full px-3.5 py-1.5 text-xs gap-1.5",
+  md: "rounded-xl px-4 py-2.5 text-xs sm:text-sm gap-2",
+  lg: "rounded-2xl px-5 py-3 text-sm gap-2",
+};
+
+export function SkeuoButton({
+  children,
+  variant = "obsidian",
+  size = "md",
+  arrow = false,
+  icon: Icon,
+  className = "",
+  disabled,
+  ...rest
+}: SkeuoButtonProps) {
+  const prefersReduced = useReducedMotion();
+
+  return (
+    <motion.button
+      whileHover={prefersReduced || disabled ? undefined : { y: -1.5 }}
+      whileTap={prefersReduced || disabled ? undefined : { y: 2, scale: 0.982 }}
+      transition={{ type: "spring", stiffness: 540, damping: 32 }}
+      disabled={disabled}
+      className={`group inline-flex items-center justify-center font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fb-accent)] disabled:opacity-50 disabled:pointer-events-none ${BUTTON_VARIANT_CLASS[variant]} ${BUTTON_SIZE_CLASS[size]} ${className}`}
+      {...rest}
+    >
+      {Icon && <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+      <span className="relative z-10 inline-flex items-center gap-1.5">{children}</span>
+      {arrow && (
+        <ArrowRight
+          className="relative z-10 h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
+      )}
+    </motion.button>
+  );
+}
+
+export function SkeuoRevealGrid({
+  children,
+  className = "",
+  stagger = 0.055,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  stagger?: number;
+}) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: {
+          transition: { staggerChildren: stagger, delayChildren: 0.02 },
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function SkeuoRevealItem({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 12 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export interface SkeuoCardProps {
   children: React.ReactNode;
@@ -104,18 +221,26 @@ export function SkeuoStatCard({
   active = false,
 }: SkeuoStatCardProps) {
   const palette = TONE_MAP[tone];
+  const prefersReduced = useReducedMotion();
   const Wrapper = onClick ? motion.button : motion.div;
 
   return (
     <Wrapper
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-      className={`skeuo-card relative overflow-hidden w-full rounded-[22px] p-4 text-left flex flex-col justify-between gap-2.5 transition-all ${
+      whileHover={prefersReduced ? undefined : { y: -2.5 }}
+      whileTap={prefersReduced || !onClick ? undefined : { y: 1.5, scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 460, damping: 30 }}
+      className={`skeuo-card skeuo-card-interactive relative overflow-hidden w-full rounded-[22px] p-4 text-left flex flex-col justify-between gap-2.5 transition-all ${
         active ? "ring-2 ring-[var(--fb-accent)]" : ""
-      } ${onClick ? "cursor-pointer active:scale-[0.985]" : ""}`}
+      } ${onClick ? "cursor-pointer" : ""}`}
     >
+      {active && (
+        <span
+          aria-hidden="true"
+          className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[var(--fb-accent)] shadow-[0_0_8px_rgba(217,95,43,0.75)] animate-pulse"
+        />
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--fb-ink-muted)] truncate">
@@ -219,8 +344,9 @@ export function SkeuoToggle({
       >
         <motion.span
           layout
-          transition={{ type: "spring", stiffness: 520, damping: 32 }}
-          className={`flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,1)] ${
+          whileHover={{ scale: 1.06 }}
+          transition={{ type: "spring", stiffness: 540, damping: 32 }}
+          className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-white to-stone-200 ring-1 ring-black/10 shadow-[0_2px_6px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,1)] ${
             checked ? "ml-auto" : "mr-auto"
           }`}
         >
@@ -282,13 +408,28 @@ export function SkeuoVerticalMeter({
               "linear-gradient(90deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 36%, rgba(0,0,0,0.08) 100%)",
           }}
         />
+        {/* Laser-Etched Gauge Calibration Ticks */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-2 inset-y-3 z-20 flex flex-col justify-between"
+        >
+          <span className="h-[1px] w-2 bg-black/15 dark:bg-white/20 rounded-full" />
+          <span className="h-[1px] w-3 bg-black/20 dark:bg-white/25 rounded-full" />
+          <span className="h-[1px] w-2 bg-black/15 dark:bg-white/20 rounded-full" />
+        </div>
         {clamped > 0 && (
           <motion.div
             initial={{ height: "0%" }}
             animate={{ height: `${Math.max(14, clamped)}%` }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className={`w-full rounded-full bg-gradient-to-b ${palette.barFill} shadow-[0_2px_10px_rgba(0,0,0,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.5)] relative`}
-          />
+            className={`w-full rounded-full bg-gradient-to-b ${palette.barFill} shadow-[0_2px_10px_rgba(0,0,0,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.5)] relative overflow-hidden`}
+          >
+            {/* Luminous Surface Meniscus */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-1 top-0.5 h-1 rounded-full bg-white/55 blur-[0.5px]"
+            />
+          </motion.div>
         )}
         {/* Floating Frosted Percentage Medallion */}
         <motion.div
@@ -319,7 +460,7 @@ export function SkeuoVerticalMeter({
         <button
           type="button"
           onClick={onAction}
-          className="w-full rounded-xl skeuo-btn-secondary px-2.5 py-1.5 text-[11px] font-semibold transition active:scale-[0.97]"
+          className="w-full rounded-xl skeuo-btn-secondary px-2.5 py-1.5 text-[11px] font-semibold"
         >
           {actionLabel}
         </button>
@@ -417,8 +558,8 @@ export function SkeuoLiveFeed({
           <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.75)] animate-pulse" />
           <h3 className="font-heading text-sm font-bold text-[var(--fb-ink)]">{title}</h3>
         </div>
-        <span className="rounded-full skeuo-well-sm px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--fb-ink-muted)]">
-          Live Stream
+        <span className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+          Jonli oqim
         </span>
       </div>
 
@@ -535,8 +676,8 @@ export function SkeuoAreaChart({
             {points[hoveredIdx].label}: {points[hoveredIdx].value}
           </div>
         ) : (
-          <div className="rounded-full skeuo-well-sm px-2.5 py-0.5 font-mono text-[10px] text-[var(--fb-ink-muted)] tabular-nums">
-            Spline • {safeSeries.length} nuqta
+          <div className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 font-mono text-[10px] tabular-nums">
+            Dinamika • {safeSeries.length} nuqta
           </div>
         )}
       </div>

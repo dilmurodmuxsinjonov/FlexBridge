@@ -797,7 +797,7 @@ function KorxonaRegistrationContent() {
                   Agar yangi korxona ochmoqchi bo‘lsangiz:
                 </p>
                 <p className="text-[11px] leading-relaxed">
-                  Yangi korxonani ro‘yxatdan o‘tkazish uchun STIR va davlat ro‘yxatidan o‘tganlik guvohnomasi (<span className="font-mono text-zinc-300">API-065</span>) platforma moderatori tomonidan tasdiqlanishi talab etiladi. Tasdiqdan so‘ng korxona nomidan e’lon berish huquqi avtomatik ochiladi.
+                  Yangi korxonani ro‘yxatdan o‘tkazish uchun STIR va davlat ro‘yxatidan o‘tganlik guvohnomasi platforma moderatori tomonidan tasdiqlanishi talab etiladi. Tasdiqdan so‘ng korxona nomidan e’lon berish huquqi avtomatik ochiladi.
                 </p>
                 <div className="pt-1 flex flex-wrap gap-3">
                   <Link

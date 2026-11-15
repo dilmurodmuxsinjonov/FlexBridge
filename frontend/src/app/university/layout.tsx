@@ -61,15 +61,13 @@ export default function UniversityLayout({ children }: { children: React.ReactNo
           <h1 className="font-display text-xl font-bold text-[var(--fb-ink)]">
             Bu bo‘lim faqat Universitet / OTM koordinatori va o‘qituvchilari uchun ajratilgan
           </h1>
-          <p className="text-xs leading-relaxed text-zinc-400">
-            Siz hozir{" "}
-            <span className="font-mono text-zinc-200">{currentUser.roles.join(", ")}</span>{" "}
-            hisobi bilan tizimga kirgansiz. OTM dekanati va amaliyot nazorati kabinetiga kirish uchun akademik rolga ega hisobingiz bilan kiring.
+          <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
+            Siz hozir boshqa turdagi hisob bilan tizimga kirgansiz. OTM dekanati va amaliyot nazorati kabinetiga kirish uchun akademik rolga ega hisobingiz bilan kiring.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
               href={dash.href}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 border border-white/15 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15 transition-colors"
+              className="skeuo-btn-obsidian rounded-full px-4 py-2 text-xs"
             >
               <span>{dash.label}</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -77,7 +75,7 @@ export default function UniversityLayout({ children }: { children: React.ReactNo
             <button
               type="button"
               onClick={handleAcademicSwitchLogout}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+              className="skeuo-btn-accent rounded-full px-4 py-2 text-xs"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Chiqish va OTM sifatida kirish</span>

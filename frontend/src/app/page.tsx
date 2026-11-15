@@ -18,7 +18,13 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { fetchOpportunities, Opportunity, OpportunityPage } from "@/lib/api";
-import { SkeuoStatCard, SkeuoToggle, SkeuoVerticalMeter } from "@/components/skeuo/SkeuoPrimitives";
+import {
+  SkeuoRevealGrid,
+  SkeuoRevealItem,
+  SkeuoStatCard,
+  SkeuoToggle,
+  SkeuoVerticalMeter,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 type Filters = { query: string; region: string; paid: "" | "true" | "false" };
 type FeedStatus = "loading" | "ready" | "error";
@@ -53,7 +59,7 @@ function VacancyCard({ job }: { job: Opportunity }) {
     : null;
 
   return (
-    <article className="rounded-3xl skeuo-card p-5 sm:p-6 transition-transform hover:-translate-y-0.5">
+    <article className="rounded-3xl skeuo-card skeuo-card-interactive p-5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3.5">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl skeuo-well text-[#D95F2B]">
@@ -89,7 +95,7 @@ function VacancyCard({ job }: { job: Opportunity }) {
             </div>
           </div>
         </div>
-        <span className="shrink-0 self-start rounded-full skeuo-well-sm px-3 py-1 text-xs font-semibold text-[var(--fb-ink)]">
+        <span className="shrink-0 self-start skeuo-badge-recessed text-[var(--fb-ink)]">
           {job.kind === "PART_TIME" ? "Yarim stavka" : job.kind === "INTERNSHIP" ? "Amaliyot" : job.kind}
         </span>
       </div>
@@ -117,9 +123,10 @@ function VacancyCard({ job }: { job: Opportunity }) {
         ) : <div />}
         <Link
           href={`/ishlar/${job.id}`}
-          className="inline-flex items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-1.5 text-xs font-semibold"
+          className="skeuo-btn-accent group rounded-full px-4 py-1.5 text-xs"
         >
-          Batafsil / Ariza <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Batafsil</span>
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
         </Link>
       </div>
     </article>
@@ -282,15 +289,16 @@ export default function StudentPortal() {
               </label>
               <button
                 type="submit"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full skeuo-btn-obsidian px-5 py-2.5 text-sm font-semibold"
+                className="skeuo-btn-accent shrink-0 rounded-full px-5 py-2.5 text-sm"
               >
-                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Qidirish
+                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                <span>Qidirish</span>
               </button>
             </form>
 
             {/* Quick Preset Chips */}
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[var(--fb-ink-muted)] font-medium">Tezkor tanlov:</span>
+              <span className="text-[var(--fb-ink-muted)] font-medium">Tezkor filtr:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -300,7 +308,7 @@ export default function StudentPortal() {
                   setFilters((f) => ({ ...f, region: "Toshkent" }));
                   setReload((v) => v + 1);
                 }}
-                className={`rounded-full px-3.5 py-1.5 font-semibold transition-all ${
+                className={`rounded-full px-3.5 py-1.5 text-xs ${
                   filters.region === "Toshkent" ? "skeuo-btn-obsidian" : "skeuo-btn-secondary"
                 }`}
               >
@@ -315,7 +323,7 @@ export default function StudentPortal() {
                   setFilters((f) => ({ ...f, paid: "true" }));
                   setReload((v) => v + 1);
                 }}
-                className={`rounded-full px-3.5 py-1.5 font-semibold transition-all ${
+                className={`rounded-full px-3.5 py-1.5 text-xs ${
                   filters.paid === "true" ? "skeuo-btn-obsidian" : "skeuo-btn-secondary"
                 }`}
               >
@@ -324,7 +332,7 @@ export default function StudentPortal() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className={`rounded-full px-3.5 py-1.5 font-semibold transition-all ${
+                className={`rounded-full px-3.5 py-1.5 text-xs ${
                   !filters.query && !filters.region && !filters.paid
                     ? "skeuo-btn-obsidian"
                     : "skeuo-btn-secondary"
@@ -340,14 +348,14 @@ export default function StudentPortal() {
             <div className="px-1 text-[11px] font-bold uppercase tracking-wider text-[var(--fb-ink-muted)]">
               Rolingiz bo‘yicha kabinetni tanlang
             </div>
-            <div className="rounded-2xl skeuo-card p-3.5 space-y-2.5">
+            <div className="rounded-2xl skeuo-card skeuo-card-interactive p-3.5 space-y-2.5">
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-bold text-[var(--fb-ink)]">
                     Talaba / Nomzod Kabineti
                   </p>
                   <p className="text-[11px] text-[var(--fb-ink-muted)] mt-0.5">
-                    Rezyume, HEMIS jadvali, arizalar va kundalik e-imzo
+                    Rezyume, dars jadvali, arizalar va kundalik e-imzo
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full border border-sky-500/30 bg-sky-500/12 px-2.5 py-0.5 text-[10px] font-bold text-sky-700 dark:text-sky-300">
@@ -357,19 +365,19 @@ export default function StudentPortal() {
               <div className="flex flex-wrap items-center gap-2 pt-0.5">
                 <Link
                   href="/talaba/kirish"
-                  className="inline-flex items-center rounded-full skeuo-btn-obsidian px-3 py-1 text-[11px] font-semibold transition-all"
+                  className="skeuo-btn-accent rounded-full px-3.5 py-1 text-[11px]"
                 >
                   Talaba kirishi
                 </Link>
                 <Link
                   href="/nomzod"
-                  className="inline-flex items-center rounded-full skeuo-btn-secondary px-3 py-1 text-[11px] font-semibold transition-all"
+                  className="skeuo-btn-secondary rounded-full px-3 py-1 text-[11px]"
                 >
                   Kabinet
                 </Link>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-2xl skeuo-card px-3.5 py-3 transition-transform hover:-translate-y-0.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-2xl skeuo-card skeuo-card-interactive px-3.5 py-3">
               <div className="min-w-0">
                 <Link
                   href="/employer"
@@ -378,25 +386,25 @@ export default function StudentPortal() {
                   Korxona & HR Markazi
                 </Link>
                 <p className="text-[11px] text-[var(--fb-ink-muted)] mt-0.5 truncate">
-                  Vakansiya joylash, Kanban saralash va mentor tasdig‘i
+                  Vakansiya joylash, nomzod saralash va mentor tasdig‘i
                 </p>
               </div>
               <div className="shrink-0 flex flex-wrap items-center gap-1.5">
                 <Link
                   href="/korxona/kirish"
-                  className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                  className="skeuo-btn-obsidian rounded-full px-3 py-1 text-[10px]"
                 >
                   Korxona kirishi
                 </Link>
                 <Link
                   href="/employer"
-                  className="rounded-full skeuo-btn-secondary px-2.5 py-1 text-[10px] font-semibold transition-colors"
+                  className="skeuo-btn-secondary rounded-full px-2.5 py-1 text-[10px]"
                 >
                   Kabinet
                 </Link>
               </div>
             </div>
-            <div className="rounded-2xl skeuo-card px-3.5 py-3 transition-transform hover:-translate-y-0.5">
+            <div className="rounded-2xl skeuo-card skeuo-card-interactive px-3.5 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold text-[var(--fb-ink)]">
@@ -413,29 +421,29 @@ export default function StudentPortal() {
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <Link
                   href="/universitet/kirish"
-                  className="rounded-full border border-indigo-500/30 bg-indigo-500/12 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+                  className="skeuo-btn-obsidian rounded-full px-3 py-1 text-[11px]"
                 >
-                  OTM kirishi →
+                  OTM kirishi
                 </Link>
                 <Link
                   href="/university"
-                  className="rounded-full skeuo-btn-secondary px-2.5 py-1 text-[11px] font-semibold transition-colors"
+                  className="skeuo-btn-secondary rounded-full px-2.5 py-1 text-[11px]"
                 >
                   Kabinet
                 </Link>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl skeuo-card px-3.5 py-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl skeuo-card skeuo-card-interactive px-3.5 py-2.5">
               <div className="min-w-0">
-                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">Platforma Operatori & SOC</p>
+                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">Platforma Operatori</p>
                 <p className="text-[10px] text-[var(--fb-ink-muted)] truncate">Audit, moderatsiya va moliya nazorati</p>
               </div>
               <Link
                 href="/operator/kirish"
-                className="shrink-0 rounded-full border border-amber-500/35 bg-amber-500/12 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 transition-colors"
+                className="skeuo-btn-secondary shrink-0 rounded-full px-3 py-1 text-[11px]"
               >
-                SOC kirishi →
+                Operator kirishi
               </Link>
             </div>
           </div>
@@ -454,14 +462,14 @@ export default function StudentPortal() {
         <SkeuoStatCard
           title="Bo‘sh ish o‘rinlari"
           value={status === "ready" ? totalOpenSlots : "—"}
-          subtitle="Server kvotasi bo‘yicha"
+          subtitle="Mavjud amaliyot kvotalari"
           icon={MapPin}
           tone="sky"
         />
         <SkeuoStatCard
           title="Tasdiqlangan korxonalar"
           value={status === "ready" ? verifiedOrgCount : "—"}
-          subtitle="KYB & Audit o‘tgan"
+          subtitle="Rasmiy tekshirilgan"
           icon={ShieldCheck}
           tone="emerald"
         />
@@ -481,7 +489,7 @@ export default function StudentPortal() {
               Katalog balansi
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-[var(--fb-ink-muted)]">
-              Haqiqiy server e’lonlari bo‘yicha to‘lovli, hududiy va moslashuvchan ish ulushi.
+              Faol vakansiyalar bo‘yicha to‘lovli, hududiy va moslashuvchan format ulushi.
             </p>
           </div>
 
@@ -531,7 +539,7 @@ export default function StudentPortal() {
             title="Toshkent hududi"
             percentage={tashkentPercent}
             amountLabel={`${tashkentCount} ta`}
-            subtitle="Poytaxt ulushi"
+            subtitle="Poytaxt bo‘yicha"
             tone="sky"
           />
           <SkeuoVerticalMeter
@@ -539,7 +547,7 @@ export default function StudentPortal() {
             title="Gibrid / Masofa"
             percentage={flexModePercent}
             amountLabel={`${flexModeCount} ta`}
-            subtitle="Moslashuvchan"
+            subtitle="Erkin / Gibrid"
             tone="emerald"
           />
           <SkeuoVerticalMeter
@@ -547,7 +555,7 @@ export default function StudentPortal() {
             title="Faol kvota"
             percentage={activeQuotaPercent}
             amountLabel={`${totalOpenSlots} o‘rin`}
-            subtitle="Bo‘sh sig‘im"
+            subtitle="Umumiy kvota"
             tone="indigo"
           />
         </div>
@@ -595,19 +603,23 @@ export default function StudentPortal() {
               </div>
             )}
             {status === "ready" && page && page.items.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2">
-                {page.items.map((job) => <VacancyCard key={job.id} job={job} />)}
-              </div>
+              <SkeuoRevealGrid className="grid gap-4 md:grid-cols-2">
+                {page.items.map((job) => (
+                  <SkeuoRevealItem key={job.id}>
+                    <VacancyCard job={job} />
+                  </SkeuoRevealItem>
+                ))}
+              </SkeuoRevealGrid>
             )}
           </div>
 
           {status === "ready" && page && (history.length > 0 || page.has_more) && (
             <nav aria-label="E’lonlar sahifalari" className="mt-5 flex items-center justify-between border-t border-[var(--fb-border)] pt-4 text-xs">
-              <button type="button" onClick={previousPage} disabled={history.length === 0} className="inline-flex items-center gap-1 rounded-full skeuo-btn-secondary px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" onClick={previousPage} disabled={history.length === 0} className="skeuo-btn-secondary rounded-full px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40">
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Oldingi
               </button>
               <span className="font-mono font-semibold text-[var(--fb-ink-muted)]">{history.length + 1}-sahifa</span>
-              <button type="button" onClick={nextPage} disabled={!page.has_more || !page.next_after} className="inline-flex items-center gap-1 rounded-full skeuo-btn-secondary px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" onClick={nextPage} disabled={!page.has_more || !page.next_after} className="skeuo-btn-secondary rounded-full px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40">
                 Keyingi <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </nav>
@@ -620,12 +632,12 @@ export default function StudentPortal() {
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               <h2 className="font-display text-sm font-bold text-[var(--fb-ink)]">Katalog mezonlari</h2>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-[var(--fb-ink-muted)]">Ommaviy ro‘yxatda faqat e’lon qilingan imkoniyatlar va tasdiqlangan tashkilotlar ko‘rinadi. Bo‘sh o‘rinlar soni server javobidan olinadi.</p>
+            <p className="mt-3 text-xs leading-relaxed text-[var(--fb-ink-muted)]">Ommaviy ro‘yxatda faqat e’lon qilingan imkoniyatlar va tasdiqlangan tashkilotlar ko‘rinadi. Bo‘sh o‘rinlar soni tashkilot kvotasiga ko‘ra avtomatik yangilanadi.</p>
           </div>
           <div className="rounded-3xl skeuo-card p-5">
             <div className="flex items-center gap-2 text-[#D95F2B]">
               <BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />
-              <h2 className="font-display text-sm font-bold text-[var(--fb-ink)]">Shaxsiy amallar</h2>
+              <h2 className="font-display text-sm font-bold text-[var(--fb-ink)]">Kabinet imkoniyatlari</h2>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-[var(--fb-ink-muted)]">Bu sahifa ommaviy e’lonlarni ko‘rsatadi. Ariza, saqlangan e’lon va shaxsiy moslik natijalari hisobga bog‘langan alohida jarayonlardir.</p>
           </div>

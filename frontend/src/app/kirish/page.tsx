@@ -387,7 +387,7 @@ function KirishForm() {
       {/* Security Disclaimer */}
       <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-500">
         <Lock className="w-3.5 h-3.5 text-zinc-600" />
-        <span>256-bit shifrlangan xavfsiz ulanish (RFC 6238 / AC-023)</span>
+        <span>256-bit shifrlangan himoyalangan ulanish va ikki bosqichli 2FA nazorati</span>
       </div>
     </div>
   );
@@ -449,7 +449,7 @@ export default function KirishPage() {
                 className="block rounded-2xl skeuo-well p-3.5 border border-amber-500/25 hover:border-amber-500/50 transition-colors"
               >
                 <p className="font-bold text-amber-800 dark:text-amber-300">Platforma Operatori (SOC) &rarr;</p>
-                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">Hash-chain audit, KYB/OTM moderatsiyasi, moliya va xavfsizlik nazorati.</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">O‘zgarmas audit jurnali, KYB/OTM moderatsiyasi, moliya va xavfsizlik nazorati.</p>
               </Link>
             </div>
           </aside>

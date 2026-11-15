@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Lock, Mail, KeyRound, AlertCircle, Loader2, X, ShieldCheck } from "lucide-react";
 import { loginUser, verifyMfa, AuthUser } from "@/lib/api";
 
@@ -82,8 +83,13 @@ export default function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md skeuo-card rounded-3xl p-6 sm:p-8 flex flex-col gap-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-md skeuo-card rounded-3xl p-6 sm:p-8 flex flex-col gap-5"
+      >
         <button
           onClick={onClose}
           type="button"
@@ -179,7 +185,7 @@ export default function AuthModal({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-3 px-4 rounded-2xl skeuo-btn-obsidian font-semibold text-xs md:text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-2 py-3 px-4 rounded-2xl skeuo-btn-accent font-semibold text-xs md:text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -189,7 +195,7 @@ export default function AuthModal({
             ) : mfaTicket ? (
               <span>Tasdiqlash va Kirish</span>
             ) : (
-              <span>Kirish</span>
+              <span>Tizimga kirish</span>
             )}
           </button>
         </form>
@@ -242,7 +248,7 @@ export default function AuthModal({
             </Link>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

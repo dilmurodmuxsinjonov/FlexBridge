@@ -115,10 +115,10 @@ export default function PrivacyPolicyPage() {
           <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] space-y-2">
             <div className="flex items-center gap-2 text-primary">
               <EyeOff className="w-4 h-4" />
-              <h3 className="text-xs font-bold uppercase tracking-wider">AC-023 Differensial Maxfiylik</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider">Differensial Maxfiylik Kafolati</h3>
             </div>
             <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Tashkilot yoki talaba reytinglari 5 tadan kam bo&apos;lganda, ma&apos;lumotlar anonimlashtirilib maxfiy tutiladi.
+              Tashkilot yoki talaba reytinglari 5 tadan kam bo‘lganda, ma’lumotlar anonimlashtirilib maxfiy tutiladi.
             </p>
           </div>
 

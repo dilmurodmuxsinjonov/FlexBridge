@@ -77,7 +77,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
   PUBLIC: {
     id: "PUBLIC",
     label: "Karyera Katalogi",
-    greetingPrefix: "Xush kelibsiz",
+    greetingPrefix: "FlexBridge",
     brandName: "FlexBridge",
     brandAccent: "text-[#D95F2B]",
     subtitle: "Dual ta’lim & amaliyot ekotizimi",
@@ -189,28 +189,28 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
   },
   OPERATOR: {
     id: "OPERATOR",
-    label: "SOC Terminal",
-    greetingPrefix: "SOC Terminal",
+    label: "Nazorat Markazi",
+    greetingPrefix: "Operator Markazi",
     brandName: "FlexBridge",
     brandAccent: "text-[#F59E0B]",
     subtitle: "Audit, KYB Tasdiqlash & Xavfsizlik",
-    badgeText: "SOC Operator",
+    badgeText: "Operator",
     badgeClass: "border-amber-500/35 bg-amber-500/12 text-amber-700 dark:text-amber-300",
     accentHex: "#F59E0B",
     islandDotClass: "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.85)]",
     icon: ShieldAlert,
     links: [
-      { id: "op-audit", href: "/operator", tabId: "AUDIT", label: "Audit Log", shortLabel: "Audit", icon: ShieldAlert, exact: true },
+      { id: "op-audit", href: "/operator", tabId: "AUDIT", label: "Audit Jurnali", shortLabel: "Audit", icon: ShieldAlert, exact: true },
       { id: "op-verif", href: "/operator", tabId: "VERIFICATION", label: "KYB Tasdiqlash", shortLabel: "KYB", icon: FileCheck2 },
-      { id: "op-bg", href: "/operator", tabId: "BREAK_GLASS", label: "Break-Glass", shortLabel: "Break-Glass", icon: KeyRound },
-      { id: "op-sup", href: "/operator", tabId: "SUPPORT_OPS", label: "Support Ops", shortLabel: "Support", icon: LifeBuoy },
-      { id: "op-fin", href: "/operator", tabId: "FINANCE", label: "Moliya Hub", shortLabel: "Moliya", icon: CreditCard },
+      { id: "op-bg", href: "/operator", tabId: "BREAK_GLASS", label: "Favqulodda Ruxsat", shortLabel: "Favqulodda", icon: KeyRound },
+      { id: "op-sup", href: "/operator", tabId: "SUPPORT_OPS", label: "Murojaatlar Markazi", shortLabel: "Murojaat", icon: LifeBuoy },
+      { id: "op-fin", href: "/operator", tabId: "FINANCE", label: "Moliya Nazorati", shortLabel: "Moliya", icon: CreditCard },
     ],
     dockTools: [
       { id: "op-audit", href: "/operator", tabId: "AUDIT", label: "Tizim Audit Jurnali", shortLabel: "Audit", icon: ShieldAlert, exact: true },
       { id: "op-verif", href: "/operator", tabId: "VERIFICATION", label: "Tashkilot KYB Tekshiruvi", shortLabel: "KYB", icon: FileCheck2 },
-      { id: "op-bg", href: "/operator", tabId: "BREAK_GLASS", label: "Favqulodda Break-Glass", shortLabel: "Break-Glass", icon: KeyRound },
-      { id: "op-sup", href: "/operator", tabId: "SUPPORT_OPS", label: "Murojaatlar & Support Ops", shortLabel: "Support", icon: LifeBuoy },
+      { id: "op-bg", href: "/operator", tabId: "BREAK_GLASS", label: "Favqulodda Kirish Nazorati", shortLabel: "Favqulodda", icon: KeyRound },
+      { id: "op-sup", href: "/operator", tabId: "SUPPORT_OPS", label: "Murojaatlar & Yordam Markazi", shortLabel: "Murojaatlar", icon: LifeBuoy },
       { id: "op-fin", href: "/operator", tabId: "FINANCE", label: "Moliya va To‘lov nazorati", shortLabel: "Moliya", icon: CreditCard },
     ],
   },
@@ -394,7 +394,9 @@ export default function Navbar() {
 
   const headerGreeting = currentUser
     ? `${theme.greetingPrefix}, ${theme.badgeText}`
-    : `${theme.greetingPrefix}, FlexBridge`;
+    : personaKey === "PUBLIC"
+      ? "FlexBridge"
+      : `${theme.greetingPrefix}, FlexBridge`;
 
   return (
     <>
@@ -434,12 +436,13 @@ export default function Navbar() {
             </span>
             <span className="text-zinc-500">•</span>
             <span className="font-mono text-[11px] text-zinc-400">
-              {currentUser ? "FAOL SESSIYA" : "STAGING REAL-TIME"}
+              {currentUser ? "FAOL KABINET" : "JONLI TIZIM"}
             </span>
             {!isAuthPage && !hidePortalSwitcher && (
               <div className="relative pl-2 border-l border-white/10" ref={dropdownRef}>
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setPortalsOpenPath((prev) => (prev === pathname ? null : pathname))}
                   aria-expanded={portalsOpen}
                   className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
@@ -447,9 +450,9 @@ export default function Navbar() {
                   <Sparkles className="w-3 h-3 text-[#D95F2B]" />
                   <span>Portallar</span>
                   <ChevronDown
-                    className={`h-3 w-3 transition-transform ${portalsOpen ? "rotate-180" : ""}`}
+                    className={`h-3 w-3 transition-transform duration-200 ${portalsOpen ? "rotate-180" : ""}`}
                   />
-                </button>
+                </motion.button>
 
                 <AnimatePresence>
                   {portalsOpen && (
@@ -518,8 +521,10 @@ export default function Navbar() {
 
           {/* Right Floating Action Pills & Circular Theme Switcher */}
           <div className="pointer-events-auto flex items-center gap-2">
-            <button
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.93 }}
               onClick={toggleTheme}
               title={
                 colorMode === "light"
@@ -529,29 +534,48 @@ export default function Navbar() {
               aria-label="Rang mavzusini almashtirish"
               className="w-10 h-10 rounded-full skeuo-btn-secondary flex items-center justify-center shrink-0"
             >
-              {colorMode === "light" ? (
-                <Moon className="w-4 h-4 text-[var(--fb-ink)]" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-300" />
-              )}
-            </button>
+              <AnimatePresence mode="wait" initial={false}>
+                {colorMode === "light" ? (
+                  <motion.span
+                    key="moon"
+                    initial={{ opacity: 0, rotate: -35, scale: 0.7 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={{ opacity: 0, rotate: 35, scale: 0.7 }}
+                    transition={{ duration: 0.16 }}
+                  >
+                    <Moon className="w-4 h-4 text-[var(--fb-ink)]" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="sun"
+                    initial={{ opacity: 0, rotate: -35, scale: 0.7 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={{ opacity: 0, rotate: 35, scale: 0.7 }}
+                    transition={{ duration: 0.16 }}
+                  >
+                    <Sun className="w-4 h-4 text-amber-300" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
 
             {currentUser && userDashboard ? (
               <div className="skeuo-card rounded-full p-1 pl-2.5 flex items-center gap-2">
-                {pathname !== userDashboard.href && (
+                {pathname !== userDashboard.href ? (
                   <Link
                     href={userDashboard.href}
                     className={`hidden sm:inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${userDashboard.badgeClass}`}
                   >
                     <span>{userDashboard.label}</span>
                   </Link>
+                ) : (
+                  <div className="hidden md:flex items-center gap-1.5 px-2 text-xs text-[var(--fb-ink)]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+                    <span className="max-w-[140px] truncate font-semibold">
+                      {userDashboard.label}
+                    </span>
+                  </div>
                 )}
-                <div className="hidden md:flex items-center gap-1.5 px-2 text-xs text-[var(--fb-ink)]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-                  <span className="max-w-[140px] truncate font-semibold">
-                    {userDashboard.label}
-                  </span>
-                </div>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -566,7 +590,7 @@ export default function Navbar() {
               <div className="skeuo-card rounded-full p-1 flex items-center gap-1.5">
                 <Link
                   href={loginHref}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-[var(--fb-ink)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="skeuo-btn-secondary !rounded-full px-3.5 py-1.5 text-xs"
                 >
                   <Lock className="h-3.5 w-3.5" />
                   <span>Kirish</span>
@@ -574,7 +598,7 @@ export default function Navbar() {
                 {personaKey !== "OPERATOR" && (
                   <Link
                     href={registerHref}
-                    className="inline-flex items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-1.5 text-xs font-semibold"
+                    className="skeuo-btn-accent !rounded-full px-4 py-1.5 text-xs"
                   >
                     <span>Ro‘yxatdan o‘tish</span>
                   </Link>
@@ -592,13 +616,15 @@ export default function Navbar() {
           data-skeuo-dark="true"
           className="hidden lg:flex fixed left-3.5 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-1.5 p-2 rounded-[28px] skeuo-obsidian"
         >
-          {theme.dockTools.map((tool) => {
+            {theme.dockTools.map((tool) => {
             const Icon = tool.icon;
             const active = isNavItemActive(tool);
             return (
-              <button
+              <motion.button
                 key={tool.id}
                 type="button"
+                whileHover={{ scale: 1.07 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={() => handleNavAction(tool)}
                 title={tool.label}
                 aria-label={tool.label}
@@ -616,11 +642,11 @@ export default function Navbar() {
                 <Icon className="relative z-10 w-4 h-4" />
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full bg-[#151518] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg border border-white/15 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                  className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full bg-[#151518] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg border border-white/15 -translate-x-1 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-150"
                 >
                   {tool.shortLabel}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </aside>
@@ -683,16 +709,18 @@ export default function Navbar() {
           </div>
 
           {/* Detached Circular Utility Button (Matches Video Bottom-Right Obsidian Orb) */}
-          <button
+          <motion.button
             type="button"
+            whileHover={{ y: -2, scale: 1.06 }}
+            whileTap={{ scale: 0.91 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             title="Sahifa yuqorisiga chiqish"
             aria-label="Yuqoriga chiqish"
             data-skeuo-dark="true"
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full skeuo-obsidian flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform shrink-0"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full skeuo-obsidian flex items-center justify-center text-white shrink-0"
           >
             <ArrowUp className="w-4 h-4 text-white" />
-          </button>
+          </motion.button>
         </nav>
       )}
     </>
