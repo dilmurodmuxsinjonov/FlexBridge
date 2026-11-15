@@ -1,12 +1,12 @@
 # FlexBridge 1.4: Avtomatlashtirilgan Staging Testlari Katalogi
 
-Ushbu katalog FlexBridge 1.4 platformasining barcha 27 ta mustaqil staging test to‘plamlarini o‘z ichiga oladi. Barcha testlar Docker konteynerlaridagi haqiqiy backend (`127.0.0.1:8000`), PgBouncer (`127.0.0.1:5432/flexbridge`), va Next.js 16 BFF (`127.0.0.1:3000`) stekiga qarshi to‘g‘ridan-to‘g‘ri ishlaydi.
+Ushbu katalog FlexBridge 1.4 platformasining barcha 28 ta mustaqil staging test to‘plamlarini o‘z ichiga oladi. Barcha testlar Docker konteynerlaridagi haqiqiy backend (`127.0.0.1:8000`), PgBouncer (`127.0.0.1:5432/flexbridge`), va Next.js 16 BFF (`127.0.0.1:3000`) stekiga qarshi to‘g‘ridan-to‘g‘ri ishlaydi.
 
 ---
 
 ## 1. Yagona Master Runner
 
-Barcha 27 ta test to‘plamini ketma-ket yurgazish, avtomatik rate-limit tozalash va umumiy ijro xulosasini olish uchun:
+Barcha 28 ta test to‘plamini ketma-ket yurgazish, avtomatik rate-limit tozalash va umumiy ijro xulosasini olish uchun:
 
 ```powershell
 python scripts/run_all_staging_tests.py
@@ -59,6 +59,7 @@ python scripts/run_all_staging_tests.py
 | `test_user_support_privacy_staging.py` | Foydalanuvchi qo‘llab-quvvatlash chiptalari, GDPR/APPI shaxsiy ma’lumotlar huquqlari va bildirishnoma sozlamalari (`API-059`, `API-062`, `API-063`, `API-064`, `API-114`). |
 | `test_user_security_sessions_staging.py` | Parolni o‘zgartirish, TOTP 2FA ro‘yxatdan o‘tkazish/tasdiqlash, 8 ta favqulodda zaxira kodi va ko‘p qurilmali sessiyalar (`API-060`, `API-061`). |
 | `test_standalone_auth_pages_staging.py` | Mustaqil `/kirish` (MFA challenge bilan), 3-qadamli `/royxatdan-otish` (SMS challenge & consume), va SSR navigatsiyasi (`API-002`, `CAP-002`). |
+| `test_telegram_phone_verification_staging.py` | Ro‘yxatdan o‘tishda SMS yoki Telegram Bot tanlovi, `/start` da `request_contact: True` so‘rovi, sayt va Telegram raqamlari mosligi tekshiruvi (`API-002`, `TELEGRAM`). |
 
 ### F. Ommaviy Xizmatlar & Platforma Integratsiyasi
 | Skript | Tekshiriladigan Xizmatlar & Shartnomalar |

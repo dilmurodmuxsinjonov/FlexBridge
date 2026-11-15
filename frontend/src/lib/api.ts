@@ -4245,6 +4245,8 @@ export async function fetchPublicHelp(document: string): Promise<HelpDocumentRes
 export interface AuthOptionsResponse {
   ok: boolean;
   channels: string[];
+  delivery_methods?: string[];
+  telegram_bot_username?: string;
   otp_expires_in: number;
   otp_max_attempts: number;
   resend_after: number;
@@ -4256,8 +4258,41 @@ export interface ChallengeIssueResponse {
   ok: boolean;
   challenge_id: string;
   status: string;
+  delivery_method?: "SMS" | "TELEGRAM" | "EMAIL";
+  telegram_bot_username?: string;
+  telegram_deep_link?: string;
   expires_in: number;
   resend_after: number;
+}
+
+export interface ChallengeStatusResponse {
+  ok: boolean;
+  challenge_id: string;
+  channel: string;
+  purpose: string;
+  delivery_method: "SMS" | "TELEGRAM" | "EMAIL";
+  delivery_status: string;
+  telegram_verified: boolean;
+  telegram_bot_username?: string;
+  telegram_deep_link?: string;
+  consumed: boolean;
+  superseded: boolean;
+  expired: boolean;
+  expires_at: string | null;
+}
+
+export interface TelegramBotWebhookResponse {
+  ok: boolean;
+  step: "AWAITING_CONTACT" | "CONTACT_VERIFIED_OTP_DELIVERED" | string;
+  bound_challenge_id?: string | null;
+  challenge_id?: string;
+  telegram_user_id?: number;
+  verified_phone?: string;
+  telegram_verified?: boolean;
+  delivery_status?: string;
+  otp_code?: string;
+  bot_message: string;
+  reply_markup?: Record<string, unknown>;
 }
 
 export interface ChallengeConsumeResponse {
@@ -4304,18 +4339,67 @@ export async function fetchAuthOptions(): Promise<AuthOptionsResponse> {
 export async function issueAuthChallenge(
   channel: "PHONE" | "EMAIL",
   destination: string,
-  purpose: "REGISTER" | "LOGIN" | "RECOVERY"
+  purpose: "REGISTER" | "LOGIN" | "RECOVERY",
+  deliveryMethod?: "SMS" | "TELEGRAM" | "EMAIL"
 ): Promise<ChallengeIssueResponse> {
   const res = await fetch("/api/bff/auth/challenges", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ channel, destination, purpose }),
+    body: JSON.stringify({
+      channel,
+      destination,
+      purpose,
+      ...(deliveryMethod ? { delivery_method: deliveryMethod } : {}),
+    }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.message || data.error || "CHALLENGE_FAILED");
   }
   return data as ChallengeIssueResponse;
+}
+
+export async function fetchAuthChallengeStatus(
+  challengeId: string
+): Promise<ChallengeStatusResponse> {
+  const res = await fetch(`/api/bff/auth/challenges/${encodeURIComponent(challengeId)}/status`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "CHALLENGE_STATUS_FAILED");
+  }
+  return data as ChallengeStatusResponse;
+}
+
+export async function sendTelegramBotUpdate(payload: {
+  challenge_id?: string | null;
+  message: {
+    from: { id: number; first_name?: string; username?: string };
+    chat?: { id: number; type?: string };
+    text?: string;
+    contact?: {
+      phone_number: string;
+      first_name?: string;
+      user_id?: number;
+    };
+  };
+}): Promise<TelegramBotWebhookResponse> {
+  const res = await fetch("/api/bff/auth/telegram/webhook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "TELEGRAM_WEBHOOK_FAILED");
+    (err as unknown as { code?: string; status?: number }).code = data.error;
+    (err as unknown as { code?: string; status?: number }).status = res.status;
+    throw err;
+  }
+  return data as TelegramBotWebhookResponse;
 }
 
 export async function consumeAuthChallenge(

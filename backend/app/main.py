@@ -69,9 +69,9 @@ async def authentication_boundary(request: Request, call_next):
     import re
     from app.core.iam_security import SENSITIVE_ROLES
     public = {'/api/v1/auth/register','/api/v1/auth/login','/api/v1/health/live','/api/v1/health/ready',
-        '/api/v1/auth/options','/api/v1/auth/challenges','/api/v1/auth/recovery','/api/v1/auth/mfa/verify','/api/v1/auth/passkeys/options','/api/v1/auth/passkeys/verify',
+        '/api/v1/auth/options','/api/v1/auth/challenges','/api/v1/auth/telegram/webhook','/api/v1/auth/recovery','/api/v1/auth/mfa/verify','/api/v1/auth/passkeys/options','/api/v1/auth/passkeys/verify',
         '/api/v1/onboarding/options','/api/v1/services/public','/api/v1/prices/public'}
-    public_path=request.url.path in public or bool(re.fullmatch(r'/api/v1/auth/(?:challenges/[^/]+/(?:consume|resend)|recovery/[^/]+(?:/complete)?)',request.url.path))
+    public_path=request.url.path in public or bool(re.fullmatch(r'/api/v1/auth/(?:challenges/[^/]+/(?:consume|resend|status)|recovery/[^/]+(?:/complete)?)',request.url.path))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/organizations/[^/]+/(?:public|opportunities|rating-summary)',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/invitations/[^/]+',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and request.url.path != '/api/v1/opportunities/feed' and bool(re.fullmatch(r'/api/v1/opportunities(?:/[^/]+)?',request.url.path)))

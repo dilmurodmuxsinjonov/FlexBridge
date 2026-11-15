@@ -35,17 +35,24 @@ def require_factor(conn,user,password,totp_code=None,session_id=None):
     return user
 
 class IdentityService:
-    def issue_challenge(self,*,channel,destination,purpose,ip,bound_user=None):
+    def issue_challenge(self,*,channel,destination,purpose,ip,bound_user=None,delivery_method=None):
         if purpose not in ('REGISTER','LOGIN','RECOVERY','CONTACT'):raise AuthError('INVALID_PURPOSE','Invalid verification purpose',422)
         if purpose=='CONTACT' and not bound_user:raise AuthError('AUTH_REQUIRED','Sign in to verify a new contact')
         value=normalize_contact(channel,destination)
-        configuration();digest('configuration','check');encrypt({})
+        if channel=='PHONE':
+            method=(delivery_method or 'SMS').upper()
+            if method not in ('SMS','TELEGRAM'):raise AuthError('INVALID_DELIVERY_METHOD','Use SMS or TELEGRAM for PHONE channel',422)
+        else:
+            method=(delivery_method or 'EMAIL').upper()
+            if method!='EMAIL':raise AuthError('INVALID_DELIVERY_METHOD','Use EMAIL delivery method for EMAIL channel',422)
+        if method!='TELEGRAM':configuration()
+        digest('configuration','check');encrypt({})
         rate_limit('otp-ip',ip,20,600);rate_limit('otp-target',channel+':'+value,5,600)
         with transaction() as conn:
             lock_contact(conn,channel+':'+value)
-            return self._issue(conn,channel,value,purpose,bound_user)
+            return self._issue(conn,channel,value,purpose,bound_user,delivery_method=method)
 
-    def _issue(self,conn,channel,value,purpose,bound_user=None):
+    def _issue(self,conn,channel,value,purpose,bound_user=None,delivery_method='SMS'):
         t=table('auth_challenges');dest_digest=digest('destination',channel+':'+value)
         old=conn.execute(select(t).where(t.c.destination_digest==dest_digest,t.c.purpose==purpose).order_by(t.c.created_at.desc()).limit(1)).mappings().first()
         if old and old['created_at']+timedelta(seconds=60)>now():raise AuthError('RESEND_COOLDOWN','Wait before requesting another code',429)
@@ -56,10 +63,17 @@ class IdentityService:
         conn.execute(t.insert().values(id=challenge_id,created_at=now(),updated_at=now(),channel=channel,purpose=purpose,
             user_id=bound_user if purpose=='CONTACT' else (contact['user_id'] if contact else None),contact_id=contact['id'] if contact else None,
             destination_digest=dest_digest,code_hmac=digest('otp',challenge_id+':'+purpose+':'+code),
-            expires_at=now()+timedelta(minutes=5),attempts=0,destination_encrypted=encrypt({'value':value}),
-            delivery_encrypted=encrypt({'code':code}),delivery_status='PENDING'))
+            expires_at=now()+timedelta(minutes=5),attempts=0,
+            destination_encrypted=encrypt({'value':value,'delivery_method':delivery_method,'telegram_verified':False}),
+            delivery_encrypted=encrypt({'code':code,'delivery_method':delivery_method}),delivery_status='PENDING'))
+        if delivery_method=='TELEGRAM':
+            from app.services.telegram_bot import get_bot_username
+            bot_username=get_bot_username()
+            return {'challenge_id':challenge_id,'status':'AWAITING_TELEGRAM_CONTACT','delivery_method':'TELEGRAM',
+                'telegram_bot_username':bot_username,'telegram_deep_link':f'https://t.me/{bot_username}?start={challenge_id}',
+                'expires_in':300,'resend_after':60}
         enqueue(conn,'AUTH_OTP_DELIVERY',challenge_id,{'challenge_id':challenge_id},'otp:'+challenge_id)
-        return {'challenge_id':challenge_id,'status':'QUEUED','expires_in':300,'resend_after':60}
+        return {'challenge_id':challenge_id,'status':'QUEUED','delivery_method':delivery_method,'expires_in':300,'resend_after':60}
 
     def resend(self,*,challenge_id,purpose,ip,bound_user=None):
         # A public UUID alone cannot reveal the destination; all replies omit contact/account details.
@@ -68,24 +82,52 @@ class IdentityService:
             row=conn.execute(select(t).where(t.c.id==challenge_id)).mappings().first()
         if not row or row['purpose']!=purpose:raise AuthError('INVALID_OR_EXPIRED_PROOF','Verification is required')
         if purpose=='CONTACT' and row['user_id']!=bound_user:raise AuthError('AUTH_REQUIRED','Sign in to verify a new contact')
-        value=decrypt(row['destination_encrypted'])['value']
-        return self.issue_challenge(channel=row['channel'],destination=value,purpose=purpose,ip=ip,bound_user=bound_user)
+        dest_data=decrypt(row['destination_encrypted'])
+        value=dest_data['value']
+        delivery_method=dest_data.get('delivery_method')
+        return self.issue_challenge(channel=row['channel'],destination=value,purpose=purpose,ip=ip,bound_user=bound_user,delivery_method=delivery_method)
+
+    def challenge_status(self,*,challenge_id,ip):
+        rate_limit('otp-status-ip',ip,120,600)
+        t=table('auth_challenges')
+        with transaction() as conn:
+            row=conn.execute(select(t).where(t.c.id==challenge_id)).mappings().first()
+        if not row:raise AuthError('CHALLENGE_NOT_FOUND','Challenge not found',404)
+        dest_data=decrypt(row['destination_encrypted'])
+        method=dest_data.get('delivery_method','SMS')
+        from app.services.telegram_bot import get_bot_username
+        bot_username=get_bot_username()
+        return {
+            'challenge_id':str(row['id']),
+            'channel':row['channel'],
+            'purpose':row['purpose'],
+            'delivery_method':method,
+            'delivery_status':row['delivery_status'],
+            'telegram_verified':bool(dest_data.get('telegram_verified',False)),
+            'telegram_bot_username':bot_username if method=='TELEGRAM' else None,
+            'telegram_deep_link':f'https://t.me/{bot_username}?start={row["id"]}' if method=='TELEGRAM' else None,
+            'expires_at':row['expires_at'].isoformat() if row['expires_at'] else None,
+        }
 
     def consume(self,*,challenge_id,purpose,code,ip):
         rate_limit('otp-verify-ip',ip,40,600)
         error=None;result=None;t=table('auth_challenges')
         with transaction() as conn:
             row=conn.execute(select(t).where(t.c.id==challenge_id).with_for_update()).mappings().first()
-            if (not row or row['purpose']!=purpose or row['expires_at']<=now() or row['consumed_at'] or row['superseded_at'] or row['attempts']>=5
-                or row['delivery_status']!='SENT'):
+            dest_data=decrypt(row['destination_encrypted']) if row and row['destination_encrypted'] else {}
+            if (not row or row['purpose']!=purpose or row['expires_at']<=now() or row['consumed_at'] or row['superseded_at'] or row['attempts']>=5):
+                error=AuthError('INVALID_OR_EXPIRED_CODE','Verification code is invalid or expired')
+            elif dest_data.get('delivery_method')=='TELEGRAM' and not dest_data.get('telegram_verified'):
+                error=AuthError('TELEGRAM_CONTACT_REQUIRED','Telefon raqamingizni avval Telegram botda ulashib tasdiqlang',403)
+            elif row['delivery_status']!='SENT':
                 error=AuthError('INVALID_OR_EXPIRED_CODE','Verification code is invalid or expired')
             elif not hmac.compare_digest(row['code_hmac'],digest('otp',challenge_id+':'+purpose+':'+code)):
                 conn.execute(t.update().where(t.c.id==challenge_id).values(attempts=row['attempts']+1,updated_at=now()))
                 error=AuthError('INVALID_OR_EXPIRED_CODE','Verification code is invalid or expired')
             else:
-                value=decrypt(row['destination_encrypted'])['value']
+                value=dest_data['value']
                 token=issue_continuation(conn,'CONTACT_'+purpose,user_id=row['user_id'],challenge_id=challenge_id,
-                    payload={'channel':row['channel'],'value':value,'contact_id':row['contact_id']})
+                    payload={'channel':row['channel'],'value':value,'contact_id':row['contact_id'],'delivery_method':dest_data.get('delivery_method','SMS')})
                 conn.execute(t.update().where(t.c.id==challenge_id).values(consumed_at=now(),delivery_status='CONSUMED',delivery_encrypted=None,updated_at=now()))
                 result={'verification_token':token,'purpose':purpose,'expires_in':300}
         if error:raise error
