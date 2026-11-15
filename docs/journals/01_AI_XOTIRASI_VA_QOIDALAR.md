@@ -1638,3 +1638,22 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
     - Executed master 29-suite regression runner `scripts/run_all_staging_tests.py`: **ALL 29/29 TEST SUITES PASSED 100% GREEN in 69.43s (zero regressions)**.
     - Forensic audit report documented at `reviews/2026-11-15/full_resume_and_portal_directories/FULL_RESUME_PORTAL_DIRECTORIES_REPORT.md`.
 
+## LOG-153 / University Class Timetable Manual Entry & Official Template Upload/Import (`API-098-TIMETABLE`, FB-202, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #202, Branch `feature/202-university-timetable-manual-and-template-import`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - **Backend Service (`backend/app/services/university_timetable.py`)**:
+    - Implemented `UniversityTimetableService` supporting manual class schedule entry (`REPLACE`, `APPEND`, `DELETE_SLOT`, `MERGE_GROUP`), official CSV/JSON template specification download (`flexbridge_otm_dars_jadvali_shablon.csv` / `.json`), and CSV/JSON template upload/import with UTF-8 BOM handling, comma `,` and semicolon `;` delimiter auto-detection, Uzbek weekday name parsing (`Dushanba`..`Shanba` or `1..7`), 7-para time presets (`08:30–09:50`..`18:00–19:20`), and intra-group time overlap protection (`422 TIMETABLE_SLOT_OVERLAP`).
+    - Added automatic calculation of student free work windows (`computed_free_windows` in `[08:00, 20:00)` minus class intervals + commute buffer) and automatic synchronization of `flexbridge.availability_rules` for enrolled students (`flexbridge.enrollments`) of that institution.
+  - **FastAPI & Next.js 16 BFF Routes**:
+    - Mounted `GET/PUT /api/v1/institutions/{inst}/timetables`, `GET /api/v1/institutions/{inst}/timetables/template`, and `POST /api/v1/institutions/{inst}/timetables/import` in `backend/app/api/v1/academic_admission.py`.
+    - Mounted Next.js 16 BFF routes `/api/bff/university/institutions/[inst]/timetables`, `/api/bff/university/institutions/[inst]/timetables/template`, and `/api/bff/university/institutions/[inst]/timetables/import` with `validateOrigin` CSRF protection and HTTP-only cookie forwarding.
+  - **University Portal UI (`frontend/src/app/university/page.tsx`)**:
+    - Added Tab 6 `"timetable"` (**"Dars Jadvali (Qo‘lda & Shablon)"**) with manual schedule entry form, 1-click official `.CSV` and `.JSON` template download buttons, drag-and-drop/file-picker `.CSV` & `.JSON` template upload/import, group filter, and real-time student free work windows display.
+  - **Staging Verification**:
+    - 7-phase staging suite `scripts/test_university_timetable_staging.py`: **7/7 PHASES PASSED 100% GREEN**.
+    - Master 30-suite regression runner `scripts/run_all_staging_tests.py`: **ALL 30/30 TEST SUITES PASSED 100% GREEN (zero regressions)**.
+
+

@@ -432,3 +432,13 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - `GET/PUT /api/v1/institutions/{inst}/directory-profile`: Complete University OTM Directory Profile (official name, HEMIS registry code, rector, career center head, faculties, educational programs, annual intern quota) with `INSTITUTION_SCOPE_FORBIDDEN` (403) cross-institution IDOR guard.
   - `POST /api/v1/institutions/{inst}/academic-agreements`: Create versioned Academic Partnership Agreement (`institution_agreements` + partner organization metadata).
 
+
+## UNIVERSITY-TIMETABLE-FB202 — University Class Timetable Manual Entry & Template Upload/Import (2026-11-15)
+
+- **Contracts**: `API-098-TIMETABLE`, `API-098-TIMETABLE-TEMPLATE`, `API-098-TIMETABLE-IMPORT` (Issue #202), branch `feature/202-university-timetable-manual-and-template-import`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `GET/PUT /api/v1/institutions/{inst}/timetables`: Retrieve or manually save/append/delete weekly class schedule slots per academic group (`group_code`, `program_name`, `study_year`, `weekday`, `para_number`, `start_time`, `end_time`, `subject_name`, `lesson_type`, `room`, `teacher_name`).
+  - `GET /api/v1/institutions/{inst}/timetables/template`: Download official ready-to-fill `.csv` and `.json` schedule templates with standard columns and para presets.
+  - `POST /api/v1/institutions/{inst}/timetables/import`: Upload and validate `.csv` or `.json` class schedule templates (`REPLACE` or `APPEND`), reject intra-group time overlaps (`422 TIMETABLE_SLOT_OVERLAP`), compute free student work windows, and automatically synchronize `flexbridge.availability_rules` for enrolled students (`flexbridge.enrollments`).
+
+

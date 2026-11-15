@@ -5038,18 +5038,192 @@ export async function createInstitutionPartnerAgreement(
   return data as UniversityPartnerAgreementItem;
 }
 
+// ============================================================================
+// FB-202: University Class Timetable Manual Entry & Template Import (API-098-TIMETABLE)
+// ============================================================================
 
+export interface UniversityTimetableSlotItem {
+  id?: string;
+  group_code: string;
+  program_name: string;
+  study_year: string;
+  weekday: number;
+  weekday_name?: string;
+  para_number: number;
+  start_time: string;
+  end_time: string;
+  start_minute?: number;
+  end_minute?: number;
+  subject_name: string;
+  lesson_type: "MA'RUZA" | "AMALIYOT" | "LABORATORIYA" | "SEMINAR";
+  room: string;
+  teacher_name: string;
+}
 
+export interface UniversityTimetableFreeInterval {
+  start_minute: number;
+  end_minute: number;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+}
 
+export interface UniversityTimetableFreeWindowDay {
+  weekday: number;
+  weekday_name: string;
+  class_count: number;
+  free_intervals: UniversityTimetableFreeInterval[];
+}
 
+export interface UniversityTimetableResponse {
+  ok: boolean;
+  contract_id: string;
+  institution_id: string;
+  institution_name: string;
+  academic_semester: string;
+  commute_buffer_minutes: number;
+  groups: string[];
+  total_slots: number;
+  slots: UniversityTimetableSlotItem[];
+  computed_free_windows: Record<string, UniversityTimetableFreeWindowDay[]>;
+  students_synced_count: number;
+  updated_at?: string | null;
+  imported_count?: number;
+  groups_updated?: string[];
+  para_presets?: Array<{ para_number: number; start_time: string; end_time: string }>;
+}
 
+export interface UniversityTimetableTemplateResponse {
+  ok: boolean;
+  contract_id: string;
+  institution_id: string;
+  institution_name: string;
+  format: "CSV" | "JSON";
+  filename: string;
+  columns: string[];
+  allowed_lesson_types: string[];
+  para_presets: Array<{ para_number: number; start_time: string; end_time: string }>;
+  csv_template: string;
+  json_template: string;
+  sample_rows: UniversityTimetableSlotItem[];
+}
 
+export async function fetchInstitutionTimetable(
+  institutionId: string,
+  groupCode?: string
+): Promise<UniversityTimetableResponse> {
+  const qs = groupCode ? `?group_code=${encodeURIComponent(groupCode)}` : "";
+  const res = await fetch(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/timetables${qs}`,
+    {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error === "object" && data.error?.code
+        ? data.error.code
+        : data.message || data.error || "TIMETABLE_FETCH_FAILED"
+    );
+  }
+  return data as UniversityTimetableResponse;
+}
 
+export async function saveInstitutionTimetable(
+  institutionId: string,
+  payload: {
+    mode?: "REPLACE" | "APPEND" | "DELETE_SLOT" | "MERGE_GROUP";
+    slots?: UniversityTimetableSlotItem[];
+    slot?: Partial<UniversityTimetableSlotItem>;
+    slot_id?: string;
+    group_code?: string;
+    academic_semester?: string;
+    commute_buffer_minutes?: number;
+    sync_student_availability?: boolean;
+  }
+): Promise<UniversityTimetableResponse> {
+  const res = await fetch(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/timetables`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error === "object" && data.error?.code
+        ? data.error.code
+        : data.message || data.error || "TIMETABLE_SAVE_FAILED"
+    );
+  }
+  return data as UniversityTimetableResponse;
+}
 
+export async function fetchInstitutionTimetableTemplate(
+  institutionId: string,
+  format: "CSV" | "JSON" = "CSV"
+): Promise<UniversityTimetableTemplateResponse> {
+  const res = await fetch(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/timetables/template?format=${format}`,
+    {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error === "object" && data.error?.code
+        ? data.error.code
+        : data.message || data.error || "TIMETABLE_TEMPLATE_FETCH_FAILED"
+    );
+  }
+  return data as UniversityTimetableTemplateResponse;
+}
 
-
-
-
-
+export async function importInstitutionTimetable(
+  institutionId: string,
+  payload: {
+    format: "CSV" | "JSON";
+    content?: string;
+    content_base64?: string;
+    replace_existing?: boolean;
+    academic_semester?: string;
+    commute_buffer_minutes?: number;
+    sync_student_availability?: boolean;
+  }
+): Promise<UniversityTimetableResponse> {
+  const res = await fetch(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/timetables/import`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error === "object" && data.error?.code
+        ? data.error.code
+        : data.message || data.error || "TIMETABLE_IMPORT_FAILED"
+    );
+  }
+  return data as UniversityTimetableResponse;
+}
 
 

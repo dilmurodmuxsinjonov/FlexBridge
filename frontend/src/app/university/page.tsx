@@ -27,6 +27,10 @@ import {
   Filter,
   Search,
   AlertTriangle,
+  Calendar,
+  Upload,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -56,17 +60,33 @@ import {
   saveInstitutionDirectoryProfile,
   createInstitutionPartnerAgreement,
   InstitutionDirectoryProfile,
+  fetchInstitutionTimetable,
+  saveInstitutionTimetable,
+  fetchInstitutionTimetableTemplate,
+  importInstitutionTimetable,
+  UniversityTimetableResponse,
+  UniversityTimetableSlotItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
+
+const PARA_PRESETS: Record<number, { start: string; end: string }> = {
+  1: { start: "08:30", end: "09:50" },
+  2: { start: "10:00", end: "11:20" },
+  3: { start: "11:30", end: "12:50" },
+  4: { start: "13:30", end: "14:50" },
+  5: { start: "15:00", end: "16:20" },
+  6: { start: "16:30", end: "17:50" },
+  7: { start: "18:00", end: "19:20" },
+};
 
 export default function UniversityPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Active Tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics"
-  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "exports" | "analytics">("queue");
+  // Active Tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable"
+  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable">("queue");
 
   // TAB 1: Daily Log Review Queue (API-105)
   const [queueItems, setQueueItems] = useState<AcademicReviewQueueItem[]>([]);
@@ -334,6 +354,175 @@ export default function UniversityPortal() {
       setInstDirectoryErrorMsg(err instanceof Error ? err.message : "Shartnoma yaratishda xatolik");
     } finally {
       setIsCreatingAgreement(false);
+    }
+  };
+
+  // TAB 6: University Class Timetable (Manual Entry & Template Upload/Import) (API-098-TIMETABLE)
+  const [timetableData, setTimetableData] = useState<UniversityTimetableResponse | null>(null);
+  const [isLoadingTimetable, setIsLoadingTimetable] = useState(false);
+  const [isSavingTimetable, setIsSavingTimetable] = useState(false);
+  const [timetableSuccessMsg, setTimetableSuccessMsg] = useState<string | null>(null);
+  const [timetableErrorMsg, setTimetableErrorMsg] = useState<string | null>(null);
+  const [selectedTimetableGroup, setSelectedTimetableGroup] = useState<string>("");
+  const [importMode, setImportMode] = useState<"REPLACE" | "APPEND">("REPLACE");
+
+  const [manualSlot, setManualSlot] = useState<Partial<UniversityTimetableSlotItem>>({
+    group_code: "DI-21-01",
+    program_name: "Dasturiy injiniring",
+    study_year: "4-kurs",
+    weekday: 1,
+    para_number: 1,
+    start_time: "08:30",
+    end_time: "09:50",
+    subject_name: "",
+    lesson_type: "MA'RUZA",
+    room: "B-304",
+    teacher_name: "",
+  });
+
+  const loadTimetable = useCallback(
+    async (targetInstId?: string, groupFilter?: string) => {
+      const inst = targetInstId || institutionId;
+      if (!inst) return;
+      setIsLoadingTimetable(true);
+      setTimetableErrorMsg(null);
+      try {
+        const res = await fetchInstitutionTimetable(
+          inst,
+          groupFilter !== undefined ? groupFilter || undefined : selectedTimetableGroup || undefined
+        );
+        setTimetableData(res);
+      } catch (err: unknown) {
+        setTimetableErrorMsg(
+          err instanceof Error ? err.message : "Dars jadvalini yuklashda xatolik yuz berdi"
+        );
+      } finally {
+        setIsLoadingTimetable(false);
+      }
+    },
+    [institutionId, selectedTimetableGroup]
+  );
+
+  const handleManualParaChange = (paraNum: number) => {
+    const preset = PARA_PRESETS[paraNum];
+    setManualSlot((prev) => ({
+      ...prev,
+      para_number: paraNum,
+      start_time: preset ? preset.start : prev.start_time,
+      end_time: preset ? preset.end : prev.end_time,
+    }));
+  };
+
+  const handleAddManualSlot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!institutionId) return;
+    if (!manualSlot.subject_name || manualSlot.subject_name.trim().length < 2) {
+      setTimetableErrorMsg("Fan nomini kiriting (kamida 2 ta belgi).");
+      return;
+    }
+    setIsSavingTimetable(true);
+    setTimetableErrorMsg(null);
+    setTimetableSuccessMsg(null);
+    try {
+      const saved = await saveInstitutionTimetable(institutionId, {
+        mode: "APPEND",
+        academic_semester: timetableData?.academic_semester || "2026-2027 Kuzgi semestr",
+        commute_buffer_minutes: timetableData?.commute_buffer_minutes || 30,
+        slot: {
+          ...manualSlot,
+          group_code: (manualSlot.group_code || "DI-21-01").trim().toUpperCase(),
+          subject_name: manualSlot.subject_name.trim(),
+        },
+      });
+      setTimetableData(saved);
+      setManualSlot((prev) => ({ ...prev, subject_name: "" }));
+      setTimetableSuccessMsg(
+        `Dars mashg'uloti jadvalga muvaffaqiyatli qo'shildi! Talabalar bo'sh ish oynalari (${saved.students_synced_count} nafar) yangilandi.`
+      );
+      setTimeout(() => setTimetableSuccessMsg(null), 5000);
+    } catch (err: unknown) {
+      setTimetableErrorMsg(
+        err instanceof Error ? err.message : "Dars jadvaliga qo'shishda xatolik yuz berdi"
+      );
+    } finally {
+      setIsSavingTimetable(false);
+    }
+  };
+
+  const handleDeleteTimetableSlot = async (slotId: string) => {
+    if (!institutionId || !slotId) return;
+    setIsSavingTimetable(true);
+    setTimetableErrorMsg(null);
+    try {
+      const saved = await saveInstitutionTimetable(institutionId, {
+        mode: "DELETE_SLOT",
+        slot_id: slotId,
+      });
+      setTimetableData(saved);
+      setTimetableSuccessMsg("Dars mashg'uloti jadvaldan o'chirildi.");
+      setTimeout(() => setTimetableSuccessMsg(null), 3500);
+    } catch (err: unknown) {
+      setTimetableErrorMsg(
+        err instanceof Error ? err.message : "Jadvaldan o'chirishda xatolik yuz berdi"
+      );
+    } finally {
+      setIsSavingTimetable(false);
+    }
+  };
+
+  const handleDownloadTimetableTemplate = async (format: "CSV" | "JSON") => {
+    if (!institutionId) return;
+    setTimetableErrorMsg(null);
+    try {
+      const tpl = await fetchInstitutionTimetableTemplate(institutionId, format);
+      const isCsv = format === "CSV";
+      const content = isCsv ? tpl.csv_template : tpl.json_template;
+      const filename = tpl.filename;
+      const mime = isCsv ? "text/csv;charset=utf-8;" : "application/json;charset=utf-8;";
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      setTimetableErrorMsg(
+        err instanceof Error ? err.message : "Shablonni yuklab olishda xatolik yuz berdi"
+      );
+    }
+  };
+
+  const handleUploadTimetableTemplateFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !institutionId) return;
+    setIsSavingTimetable(true);
+    setTimetableErrorMsg(null);
+    setTimetableSuccessMsg(null);
+    try {
+      const textContent = await file.text();
+      const format = file.name.toLowerCase().endsWith(".json") ? "JSON" : "CSV";
+      const saved = await importInstitutionTimetable(institutionId, {
+        format,
+        replace_existing: importMode === "REPLACE",
+        academic_semester: timetableData?.academic_semester || "2026-2027 Kuzgi semestr",
+        commute_buffer_minutes: timetableData?.commute_buffer_minutes || 30,
+        content: textContent,
+      });
+      setTimetableData(saved);
+      setTimetableSuccessMsg(
+        `Shablon fayl (${file.name}) muvaffaqiyatli yuklandi! Jami: ${saved.total_slots} ta dars, ${saved.groups.length} ta guruh, ${saved.students_synced_count} nafar talaba jadvali sinxronlandi.`
+      );
+      setTimeout(() => setTimetableSuccessMsg(null), 6000);
+    } catch (err: unknown) {
+      setTimetableErrorMsg(
+        err instanceof Error ? err.message : "Shablon jadvalni yuklashda xatolik yuz berdi"
+      );
+    } finally {
+      setIsSavingTimetable(false);
+      e.target.value = "";
     }
   };
 
@@ -678,6 +867,26 @@ export default function UniversityPortal() {
             >
               <BarChart3 className="w-4 h-4" />
               <span>Analitika & Monitoring</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("timetable");
+                if (institutionId) {
+                  loadTimetable(institutionId);
+                } else {
+                  loadCoordinatorQueue();
+                }
+              }}
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "timetable"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Dars Jadvali (Qo&apos;lda & Shablon)</span>
             </button>
           </div>
         )}
@@ -2167,6 +2376,465 @@ export default function UniversityPortal() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB 6: UNIVERSITY CLASS TIMETABLE (MANUAL ENTRY & TEMPLATE UPLOAD) (API-098-TIMETABLE) */}
+      {currentUser && activeTab === "timetable" && (
+        <div className="flex flex-col gap-6">
+          {/* Header Banner */}
+          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm">
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                  Dars Jadvali Boshqaruvi
+                </span>
+                <span className="text-zinc-500 text-xs font-mono">
+                  • API-098-TIMETABLE • Qo&apos;lda Kiritish & Shablon Import (CSV / JSON)
+                </span>
+                {timetableData && (
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Jami: {timetableData.total_slots} ta dars • {timetableData.groups.length} ta guruh • Sinxronlangan talabalar: {timetableData.students_synced_count} nafar
+                  </span>
+                )}
+              </div>
+              <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                OTM Guruhlari Dars Jadvalini Qo&apos;lda Kiritish yoki Shablon Orqali Yuklash
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Universitet xodimi dars jadvalini qo&apos;lda forma orqali kiritishi yoki tayyor rasmiy shablonni (.CSV / .JSON) yuklab olib to&apos;ldirgan holda tizimga yuklashi mumkin. Jadval saqlangach, talabalarning darsdan bo&apos;sh ish vaqtlari avtomatik hisoblanadi.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleDownloadTimetableTemplate("CSV")}
+                className="px-3.5 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs font-semibold text-emerald-300 transition-all flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>CSV Shablon Yuklab Olish</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownloadTimetableTemplate("JSON")}
+                className="px-3.5 py-2 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-xs font-semibold text-indigo-300 transition-all flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>JSON Shablon Yuklab Olish</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => institutionId && loadTimetable(institutionId)}
+                disabled={isLoadingTimetable}
+                className="px-3 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingTimetable ? "animate-spin" : ""}`} />
+                <span>Yangilash</span>
+              </button>
+            </div>
+          </div>
+
+          {timetableSuccessMsg && (
+            <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>{timetableSuccessMsg}</span>
+            </div>
+          )}
+
+          {timetableErrorMsg && (
+            <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{timetableErrorMsg}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Manual Entry Form + Template File Upload */}
+            <div className="flex flex-col gap-5">
+              {/* 1. Manual Slot Entry Form */}
+              <form
+                onSubmit={handleAddManualSlot}
+                className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3.5 shadow-sm"
+              >
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      1. Dars Jadvalini Qo&apos;lda Kiritish
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">MANUAL ENTRY</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Guruh kodi *</label>
+                    <input
+                      type="text"
+                      required
+                      value={manualSlot.group_code || ""}
+                      onChange={(e) => setManualSlot({ ...manualSlot, group_code: e.target.value })}
+                      placeholder="DI-21-01"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Kurs / Bosqich</label>
+                    <select
+                      value={manualSlot.study_year || "4-kurs"}
+                      onChange={(e) => setManualSlot({ ...manualSlot, study_year: e.target.value })}
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                    >
+                      <option value="1-kurs">1-kurs</option>
+                      <option value="2-kurs">2-kurs</option>
+                      <option value="3-kurs">3-kurs</option>
+                      <option value="4-kurs">4-kurs</option>
+                      <option value="Magistr 1-kurs">Magistr 1-kurs</option>
+                      <option value="Magistr 2-kurs">Magistr 2-kurs</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-zinc-400">Ta&apos;lim yo&apos;nalishi</label>
+                  <input
+                    type="text"
+                    value={manualSlot.program_name || ""}
+                    onChange={(e) => setManualSlot({ ...manualSlot, program_name: e.target.value })}
+                    placeholder="Dasturiy injiniring"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Hafta kuni *</label>
+                    <select
+                      value={manualSlot.weekday || 1}
+                      onChange={(e) => setManualSlot({ ...manualSlot, weekday: Number(e.target.value) })}
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                    >
+                      <option value={1}>1 - Dushanba</option>
+                      <option value={2}>2 - Seshanba</option>
+                      <option value={3}>3 - Chorshanba</option>
+                      <option value={4}>4 - Payshanba</option>
+                      <option value={5}>5 - Juma</option>
+                      <option value={6}>6 - Shanba</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Para (Juftlik) *</label>
+                    <select
+                      value={manualSlot.para_number || 1}
+                      onChange={(e) => handleManualParaChange(Number(e.target.value))}
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    >
+                      <option value={1}>1-para (08:30-09:50)</option>
+                      <option value={2}>2-para (10:00-11:20)</option>
+                      <option value={3}>3-para (11:30-12:50)</option>
+                      <option value={4}>4-para (13:30-14:50)</option>
+                      <option value={5}>5-para (15:00-16:20)</option>
+                      <option value={6}>6-para (16:30-17:50)</option>
+                      <option value={7}>7-para (18:00-19:20)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Boshlanish vaqti (HH:MM)</label>
+                    <input
+                      type="time"
+                      required
+                      value={manualSlot.start_time || "08:30"}
+                      onChange={(e) => setManualSlot({ ...manualSlot, start_time: e.target.value })}
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Tugash vaqti (HH:MM)</label>
+                    <input
+                      type="time"
+                      required
+                      value={manualSlot.end_time || "09:50"}
+                      onChange={(e) => setManualSlot({ ...manualSlot, end_time: e.target.value })}
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-zinc-400">Fan nomi *</label>
+                  <input
+                    type="text"
+                    required
+                    value={manualSlot.subject_name || ""}
+                    onChange={(e) => setManualSlot({ ...manualSlot, subject_name: e.target.value })}
+                    placeholder="Masalan: Sun'iy intellekt asoslari"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Mashg&apos;ulot turi</label>
+                    <select
+                      value={manualSlot.lesson_type || "MA'RUZA"}
+                      onChange={(e) =>
+                        setManualSlot({
+                          ...manualSlot,
+                          lesson_type: e.target.value as UniversityTimetableSlotItem["lesson_type"],
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                    >
+                      <option value="MA'RUZA">MA&apos;RUZA</option>
+                      <option value="AMALIYOT">AMALIYOT</option>
+                      <option value="LABORATORIYA">LABORATORIYA</option>
+                      <option value="SEMINAR">SEMINAR</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] text-zinc-400">Auditoriya / Xona</label>
+                    <input
+                      type="text"
+                      value={manualSlot.room || ""}
+                      onChange={(e) => setManualSlot({ ...manualSlot, room: e.target.value })}
+                      placeholder="B-304"
+                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-zinc-400">O&apos;qituvchi F.I.Sh.</label>
+                  <input
+                    type="text"
+                    value={manualSlot.teacher_name || ""}
+                    onChange={(e) => setManualSlot({ ...manualSlot, teacher_name: e.target.value })}
+                    placeholder="Prof. R. Rahimov"
+                    className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSavingTimetable}
+                  className="mt-1 w-full py-2.5 px-4 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all"
+                >
+                  {isSavingTimetable ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  <span>Darsni Jadvalga Qo&apos;shish</span>
+                </button>
+              </form>
+
+              {/* 2. Template Upload Card */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3.5 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      2. Shablon Jadvalni Yuklash (.CSV / .JSON)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-400">TEMPLATE IMPORT</span>
+                </div>
+
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Rasmiy shablon ustunlari: <code className="text-zinc-200 font-mono">group_code, program_name, study_year, weekday, para_number, start_time, end_time, subject_name, lesson_type, room, teacher_name</code>.
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-[11px] text-zinc-300 font-semibold">Yuklash rejimi:</label>
+                  <select
+                    value={importMode}
+                    onChange={(e) => setImportMode(e.target.value as "REPLACE" | "APPEND")}
+                    className="px-2.5 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
+                  >
+                    <option value="REPLACE">To&apos;liq yangilash (REPLACE)</option>
+                    <option value="APPEND">Mavjud jadvalga qo&apos;shish (APPEND)</option>
+                  </select>
+                </div>
+
+                <label className="w-full py-4 px-4 rounded-xl border-2 border-dashed border-emerald-500/30 hover:border-emerald-400/60 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 text-center">
+                  <Upload className="w-5 h-5 text-emerald-400" />
+                  <span className="text-xs font-semibold text-emerald-300">
+                    Tayyorlangan .CSV yoki .JSON jadval faylini tanlang
+                  </span>
+                  <span className="text-[10px] text-zinc-400">
+                    Fayl tanlangach avtomatik tekshiriladi va guruhlar bo&apos;yicha dars jadvali saqlanadi
+                  </span>
+                  <input
+                    type="file"
+                    accept=".csv,.json,text/csv,application/json"
+                    onChange={handleUploadTimetableTemplateFile}
+                    disabled={isSavingTimetable}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Right 2 Columns: Weekly Class Schedule Table & Computed Free Work Windows */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              {/* Group Filter & Stats */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Haftalik Dars Jadvali ({timetableData?.slots.length || 0} ta mashg&apos;ulot)
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-zinc-400">Guruh bo&apos;yicha filtr:</span>
+                    <select
+                      value={selectedTimetableGroup}
+                      onChange={(e) => {
+                        setSelectedTimetableGroup(e.target.value);
+                        if (institutionId) loadTimetable(institutionId, e.target.value);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
+                    >
+                      <option value="">Barcha guruhlar ({timetableData?.groups.length || 0})</option>
+                      {(timetableData?.groups || []).map((grp) => (
+                        <option key={grp} value={grp}>
+                          {grp}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {!timetableData || timetableData.slots.length === 0 ? (
+                  <div className="py-12 text-center flex flex-col items-center gap-2 text-zinc-400">
+                    <Calendar className="w-8 h-8 text-zinc-500" />
+                    <span className="text-xs font-semibold text-white">
+                      Hozircha dars jadvali kiritilmagan
+                    </span>
+                    <span className="text-[11px] text-zinc-400 max-w-md">
+                      Chap tomondagi forma orqali darslarni qo&apos;lda kiriting yoki rasmiy .CSV / .JSON shablonni yuklab olib tizimga yuklang.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-white/[0.08] text-[11px] text-zinc-400 uppercase">
+                          <th className="py-2.5 px-3">Guruh</th>
+                          <th className="py-2.5 px-3">Kun</th>
+                          <th className="py-2.5 px-3">Vaqt (Para)</th>
+                          <th className="py-2.5 px-3">Fan va O&apos;qituvchi</th>
+                          <th className="py-2.5 px-3">Turi / Xona</th>
+                          <th className="py-2.5 px-3 text-right">Amal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.06]">
+                        {timetableData.slots.map((slot) => (
+                          <tr key={slot.id} className="hover:bg-white/[0.02]">
+                            <td className="py-2.5 px-3 font-mono font-semibold text-indigo-300">
+                              {slot.group_code}
+                              <div className="text-[10px] text-zinc-500 font-sans">
+                                {slot.study_year}
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3 text-white font-medium">
+                              {slot.weekday_name}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-emerald-400">
+                              {slot.start_time}–{slot.end_time}
+                              <div className="text-[10px] text-zinc-500">
+                                {slot.para_number}-para
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="font-semibold text-white">{slot.subject_name}</div>
+                              {slot.teacher_name && (
+                                <div className="text-[11px] text-zinc-400">{slot.teacher_name}</div>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 text-[10px] font-mono">
+                                {slot.lesson_type}
+                              </span>
+                              {slot.room && (
+                                <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                                  Xona: {slot.room}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <button
+                                type="button"
+                                onClick={() => slot.id && handleDeleteTimetableSlot(slot.id)}
+                                disabled={isSavingTimetable}
+                                title="O'chirish"
+                                className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/15 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Computed Free Work Windows per Group (for Employer Smart Search Sync) */}
+              {timetableData && Object.keys(timetableData.computed_free_windows || {}).length > 0 && (
+                <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3.5 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-emerald-400" />
+                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        Avtomatik Hisoblangan Darsdan Bo&apos;sh Ish Vaqtlari (Ish Beruvchi Qidiruvi Uchun)
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-400">
+                      Yo&apos;l buferi: ±{timetableData.commute_buffer_minutes} daqiqa
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.entries(timetableData.computed_free_windows).map(([grp, days]) => (
+                      <div
+                        key={grp}
+                        className="p-3.5 rounded-lg bg-surface border border-white/[0.06] flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold font-mono text-indigo-300">
+                            Guruh: {grp}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-mono">
+                            08:00–20:00 diapazoni
+                          </span>
+                        </div>
+                        <div className="space-y-1 text-[11px]">
+                          {days.map((d) => (
+                            <div key={d.weekday} className="flex items-center justify-between gap-2">
+                              <span className="text-zinc-400">{d.weekday_name}:</span>
+                              <span className="font-mono text-zinc-200">
+                                {d.free_intervals.length > 0
+                                  ? d.free_intervals.map((w) => `${w.start_time}–${w.end_time}`).join(", ")
+                                  : "Bo'sh vaqt yo'q"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

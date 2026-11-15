@@ -1267,6 +1267,12 @@ Keyingi kichik qadam:
   * **Bosqich 1 (Nomzod Portali)**: `GET/PUT /api/bff/candidate/resume-details` (`achievements`, `work_experiences`, `languages`, `education_details`, `career_preferences`), `POST /api/bff/candidate/files/upload` (CV va Sertifikat PDF fayllarini bevosita yuklash va ClamAV tekshiruvi), hamda boyitilgan PDF/JSON rezyume eksporti (`/nomzod`).
   * **Bosqich 2 (Korxona Portali)**: `GET/PUT /api/bff/employer/organization/[org]/directory-profile` — korxona rasmiy ma'lumotnomasi, bank rekvizitlari (MFO, hisob raqami, direktor, HR aloqa) va talabalar uchun sharoitlar (`/employer`).
   * **Bosqich 3 (Universitet Portali)**: `GET/PUT /api/bff/university/institutions/[inst]/directory-profile` va `POST /api/bff/university/institutions/[inst]/agreements` — OTM pasporti, rektor, karera markazi, fakultetlar, ta'lim yo'nalishlari shifrlari va yangi hamkorlik shartnomalari tuzish (`/university`).
-  * **Bosqich 4 (To'liq Miqyosdagi Tekshiruv)**: 12 bosqichli `scripts/test_full_resume_org_univ_directory_staging.py` (12/12 PASS) va barcha **29/29 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (69.43s, 0 regressiya)**.
+  * **Bosqich 4 (To'liq Miqyosdagi Tekshiruv)**: 12 bosqichli `scripts/test_full_resume_org_univ_directory_staging.py` (12/12 PASS) va barcha **29/29 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (69.43s, 0 regressiya)**. PR #201 birlashtirildi (`2b8667b`).
+
+- **FB-202 (University Class Timetable Manual Entry & Official Template Upload/Import Hub)**:
+  * 3 Next.js BFF marshruti: `/api/bff/university/institutions/[inst]/timetables`, `/api/bff/university/institutions/[inst]/timetables/template`, `/api/bff/university/institutions/[inst]/timetables/import` (`API-098-TIMETABLE`).
+  * Universitet Portali 6-tabi `timetable` ("Dars Jadvali (Qo'lda & Shablon)") — OTM xodimi tomonidan dars jadvalini qo'lda kiritish, rasmiy `.CSV` va `.JSON` shablonlarni yuklab olish hamda to'ldirilgan shablonni yuklash orqali guruhlar jadvalini va talabalarning darsdan bo'sh ish vaqtlarini (`flexbridge.availability_rules`) avtomatik sinxronlash.
+  * 7-bosqichli `scripts/test_university_timetable_staging.py` (7/7 PASS) va barcha **30/30 staging test to'plamlari (`scripts/run_all_staging_tests.py`) 100% YASHIL (0 regressiya)**.
+
 
 
