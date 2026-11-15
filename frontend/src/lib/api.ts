@@ -3938,6 +3938,73 @@ export async function revokeUserSession(sessionId: string): Promise<RevokeSessio
   return data as RevokeSessionResult;
 }
 
+// ---------------------------------------------------------------------------
+// Public CMS: Policies & Help Documentation (API-013, API-014)
+// ---------------------------------------------------------------------------
+
+export interface PolicyClauseItem {
+  id: string;
+  title: string;
+  summary: string;
+}
+
+export interface PolicyDocumentResponse {
+  ok: boolean;
+  contract_id: string;
+  document: string;
+  title: string;
+  version: string;
+  effective_date: string;
+  contact_email: string;
+  content_markdown: string;
+  clauses: PolicyClauseItem[];
+}
+
+export interface HelpSectionItem {
+  heading: string;
+  anchor: string;
+}
+
+export interface HelpDocumentResponse {
+  ok: boolean;
+  contract_id: string;
+  slug: string;
+  title: string;
+  version: string;
+  effective_date: string;
+  content_markdown: string;
+  sections: HelpSectionItem[];
+}
+
+export async function fetchPublicPolicy(document: string): Promise<PolicyDocumentResponse> {
+  const res = await fetch(`/api/bff/public/policies/${encodeURIComponent(document.toLowerCase())}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "POLICY_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as PolicyDocumentResponse;
+}
+
+export async function fetchPublicHelp(document: string): Promise<HelpDocumentResponse> {
+  const res = await fetch(`/api/bff/public/help/${encodeURIComponent(document.toLowerCase())}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "HELP_FETCH_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as HelpDocumentResponse;
+}
+
+
 
 
 

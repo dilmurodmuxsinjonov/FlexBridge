@@ -1529,6 +1529,27 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 22-suite regression runner `scripts/run_all_staging_tests.py`: ALL 22/22 TEST SUITES PASSED 100% GREEN in 40.17s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/user_security_mfa_sessions/USER_SECURITY_MFA_SESSIONS_REPORT.md`.
 
+## LOG-146 / Public CMS: Legal Policies, Help Documentation & Modern Platform Footer Hub (FB-188, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #188, Branch `feature/188-public-cms-legal-footer-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 2 Next.js 16 BFF endpoints (`/api/bff/public/policies/[document]`, `/api/bff/public/help/[document]`) proxying canonical contracts API-013, API-014 under CAP-039 / PUBLIC_INFO with ISR public caching (`revalidate: 600`), typed JSON error handling (POLICY_NOT_FOUND, DOCUMENT_NOT_FOUND), and seamless alias resolution (`onboarding` -> `getting-started`).
+  - Constructed 3 dedicated standalone public pages adhering strictly to anti-slop guidelines (#09090b canvas, #121214 cards, Lucide SVG icons, zero emojis):
+    1. `/shartlar` (`frontend/src/app/shartlar/page.tsx`): Terms of Service, Acceptable Use Policy, and Rating Guidelines CMS viewer with interactive clause cards and metadata telemetry.
+    2. `/maxfiylik` (`frontend/src/app/maxfiylik/page.tsx`): Privacy and Cookie Policy viewer with AC-023 differential privacy boundary disclosures, GDPR/APPI right to erasure, and contact cards.
+    3. `/haqida` (`frontend/src/app/haqida/page.tsx`): Platform architecture and interactive help guides viewer (`getting-started`/`onboarding`, `candidate-guide`, `employer-guide`, `academic-guide`, `schedule-matching`) detailing the algorithmic matching engine and O'zR Mehnat Kodeksi 118-modda guarantees.
+  - Overhauled Platform Footer Hub (`frontend/src/components/Footer.tsx`):
+    - Removed outdated prototype note.
+    - Replaced with a modern, high-trust multi-column directory across 4 portals (Nomzod, Ish Beruvchi, Universitet, Operator), direct legal links, support channels, and statutory compliance bar (O'zR Mehnat Kodeksi 118-moddasi, HEMIS v3.2, live staging status badge).
+  - Extended TypeScript SDK (`frontend/src/lib/api.ts`) with `fetchPublicPolicy` and `fetchPublicHelp` typed helpers.
+  - Next.js Turbopack build verified clean (`npm run build`: 58 routes compiled, 0 errors). Docker container `flexbridge-r1-frontend-1` rebuilt and healthy on port 3000.
+  - Dedicated staging suite `scripts/test_public_cms_footer_staging.py`: 10/10 phases passed 100% GREEN against Next.js BFF and canonical backend.
+  - Comprehensive 23-suite regression runner `scripts/run_all_staging_tests.py`: ALL 23/23 TEST SUITES PASSED 100% GREEN in 48.75s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/public_cms_legal_footer/PUBLIC_CMS_LEGAL_FOOTER_REPORT.md`.
+
+
 
 
 
