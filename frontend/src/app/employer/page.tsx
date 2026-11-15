@@ -38,6 +38,11 @@ import {
   Phone,
   Trash2,
   Key,
+  CreditCard,
+  Receipt,
+  Coins,
+  TrendingUp,
+  Sparkles,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -59,6 +64,10 @@ import {
   inviteOrgMember,
   revokeOrgMembership,
   fetchOrgVerificationStatus,
+  fetchOrgEntitlements,
+  fetchOrgBillingOverview,
+  createOrgOrder,
+  requestOrderRefund,
   AuthUser,
   EmployerDashboardMetrics,
   EmployerOpportunityApplicationItem,
@@ -70,6 +79,10 @@ import {
   OrgCapabilityItem,
   OrgMembershipItem,
   OrgVerificationStatusResponse,
+  OrgEntitlementsResponse,
+  OrgBillingOverviewResponse,
+  OrgOrderItem,
+  OrgInvoiceItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
@@ -132,10 +145,32 @@ export default function EmployerPortal() {
   const [detailError, setDetailError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
-  // FB-162 & FB-168: Workspace Tabs & Hub States
+  // FB-162, FB-168 & FB-174: Workspace Tabs & Hub States
   // -------------------------------------------------------------------------
-  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB">("KANBAN");
+  const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB">("KANBAN");
   const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS">("QUEUE");
+
+  // -------------------------------------------------------------------------
+  // FB-174: Billing Overview, Entitlements, Orders & Refunds (API-070, 093, 094, 095)
+  // -------------------------------------------------------------------------
+  const [entitlements, setEntitlements] = useState<OrgEntitlementsResponse | null>(null);
+  const [billingOverview, setBillingOverview] = useState<OrgBillingOverviewResponse | null>(null);
+  const [isLoadingBilling, setIsLoadingBilling] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
+
+  // New Subscription Order State (API-094)
+  const [selectedPlanCode, setSelectedPlanCode] = useState<"ORG_PLAN_30D" | "SINGLE_POST_30D">("ORG_PLAN_30D");
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
+
+  // Refund Request Modal State (API-095)
+  const [refundModalOrder, setRefundModalOrder] = useState<OrgOrderItem | null>(null);
+  const [refundAmountUzs, setRefundAmountUzs] = useState("");
+  const [refundReason, setRefundReason] = useState("");
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
+  const [refundSuccess, setRefundSuccess] = useState<string | null>(null);
 
   // Review Queue State (API-090)
   const [reviewQueue, setReviewQueue] = useState<MentorReviewQueueItem[]>([]);
@@ -621,6 +656,90 @@ export default function EmployerPortal() {
     }
   };
 
+  // -------------------------------------------------------------------------
+  // FB-174: Billing Hub Data Loaders & Action Handlers (API-070, 093, 094, 095)
+  // -------------------------------------------------------------------------
+  const loadBillingHubData = useCallback(async (targetOrgId: string) => {
+    if (!targetOrgId.trim()) return;
+    const tid = targetOrgId.trim();
+
+    setIsLoadingBilling(true);
+    setBillingError(null);
+
+    try {
+      const [entData, billData] = await Promise.all([
+        fetchOrgEntitlements(tid),
+        fetchOrgBillingOverview(tid),
+      ]);
+      setEntitlements(entData);
+      setBillingOverview(billData);
+    } catch (err: unknown) {
+      setBillingError(err instanceof Error ? err.message : "To‘lov va kvota ma'lumotlarini yuklashda xatolik yuz berdi.");
+    } finally {
+      setIsLoadingBilling(false);
+    }
+  }, []);
+
+  const handleCreateOrder = async (planCode: "ORG_PLAN_30D" | "SINGLE_POST_30D") => {
+    if (!orgId.trim()) {
+      setOrderError("Tashkilot ID tanlanmagan.");
+      return;
+    }
+    setIsOrdering(true);
+    setOrderError(null);
+    setOrderSuccess(null);
+
+    try {
+      const res = await createOrgOrder(orgId.trim(), {
+        plan_code: planCode,
+        idempotency_key: `ord_${crypto.randomUUID()}`,
+      });
+      setOrderSuccess(`Buyurtma #${res.order.id.slice(0, 8)} muvaffaqiyatli yaratildi. Summa: ${res.order.amount.toLocaleString()} UZS.`);
+      await loadBillingHubData(orgId.trim());
+    } catch (err: unknown) {
+      setOrderError(err instanceof Error ? err.message : "Buyurtma berishda xatolik yuz berdi.");
+    } finally {
+      setIsOrdering(false);
+    }
+  };
+
+  const handleRequestRefund = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!refundModalOrder) return;
+    const amt = Number(refundAmountUzs);
+    if (!amt || isNaN(amt) || amt <= 0) {
+      setRefundError("Qaytarish summasi 0 dan katta bo‘lishi shart.");
+      return;
+    }
+    if (refundReason.trim().length < 15) {
+      setRefundError("Qaytarish sababi kamida 15 ta belgidan iborat bo‘lishi shart (API-095 talabi).");
+      return;
+    }
+
+    setIsSubmittingRefund(true);
+    setRefundError(null);
+    setRefundSuccess(null);
+
+    try {
+      const res = await requestOrderRefund(refundModalOrder.id, {
+        amount_uzs: Math.round(amt),
+        reason: refundReason.trim(),
+      });
+      setRefundSuccess(`Qaytarish so‘rovi #${res.refund_id.slice(0, 8)} muvaffaqiyatli qabul qilindi.`);
+      await loadBillingHubData(orgId.trim());
+      setTimeout(() => {
+        setRefundModalOrder(null);
+        setRefundAmountUzs("");
+        setRefundReason("");
+        setRefundSuccess(null);
+      }, 2000);
+    } catch (err: unknown) {
+      setRefundError(err instanceof Error ? err.message : "Qaytarish so‘rovini yuborishda xatolik yuz berdi.");
+    } finally {
+      setIsSubmittingRefund(false);
+    }
+  };
+
   // Group applications into Kanban columns
   const kanbanColumns = useMemo(() => {
     const submitted: EmployerOpportunityApplicationItem[] = [];
@@ -986,6 +1105,23 @@ export default function EmployerPortal() {
             >
               <Building className="w-4 h-4" />
               <span>Tashkilot & Jamoa Boshqaruvi</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMainTab("BILLING_HUB");
+                if (orgId.trim()) {
+                  loadBillingHubData(orgId.trim());
+                }
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                activeMainTab === "BILLING_HUB"
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface-card hover:bg-surface border border-white/[0.08] text-zinc-400 hover:text-white"
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>To‘lovlar, Tariflar & Kvotalar</span>
             </button>
           </div>
 
@@ -2013,6 +2149,383 @@ export default function EmployerPortal() {
               </div>
             </section>
           )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* FB-174: TO‘LOVLAR, TARIFLAR & KVOTALAR HUBI (API-070, 093, 094, 095) */}
+          {/* ----------------------------------------------------------------- */}
+          {activeMainTab === "BILLING_HUB" && (
+            <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col gap-6 shadow-lg">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      To‘lovlar & Obuna Hub
+                    </span>
+                    <span className="text-zinc-500 text-xs font-mono">• API-070, API-093, API-094, API-095</span>
+                  </div>
+                  <h3 className="text-base font-semibold text-zinc-100">
+                    Tarif Rejalari, Xizmat Huquqlari & Tranzaksiyalar
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Tashkilot faol obunasi, e&apos;lon kvotalari, hisob-fakturalar va to‘lov qaytarish (refund) boshqaruvi.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isLoadingBilling || !orgId.trim()}
+                  onClick={() => loadBillingHubData(orgId.trim())}
+                  className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingBilling ? "animate-spin" : ""}`} />
+                  <span>Yangilash</span>
+                </button>
+              </div>
+
+              {/* Billing Error / Success */}
+              {billingError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{billingError}</span>
+                </div>
+              )}
+              {orderSuccess && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-400 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{orderSuccess}</span>
+                </div>
+              )}
+              {orderError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{orderError}</span>
+                </div>
+              )}
+
+              {/* 4 Telemetry Metrics Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3.5 bg-surface-lowest rounded-xl border border-white/[0.05] flex flex-col gap-1">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Joriy Obuna Tarifi</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold text-zinc-100">
+                      {billingOverview?.plan?.code || "BEPUL"}
+                    </span>
+                    <span
+                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+                        billingOverview?.plan?.status === "ACTIVE"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                      }`}
+                    >
+                      {billingOverview?.plan?.status === "ACTIVE" ? "FAOL" : "NOFAOL"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-surface-lowest rounded-xl border border-white/[0.05] flex flex-col gap-1">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <Coins className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Post E&apos;lon Kvotasi</span>
+                  </span>
+                  <span className="text-base font-bold text-zinc-100 tabular-nums">
+                    {entitlements?.active_entitlement?.quota !== null && entitlements?.active_entitlement?.quota !== undefined
+                      ? `${entitlements.active_entitlement.quota} ta`
+                      : (billingOverview?.plan?.quota !== null && billingOverview?.plan?.quota !== undefined
+                          ? `${billingOverview.plan.quota} ta`
+                          : "Cheksiz")}
+                  </span>
+                </div>
+
+                <div className="p-3.5 bg-surface-lowest rounded-xl border border-white/[0.05] flex flex-col gap-1">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Bo‘sh Vakansiya Slotlari</span>
+                  </span>
+                  <span className="text-base font-bold text-zinc-100 tabular-nums">
+                    {entitlements?.usage?.concurrent_slots_available ?? 0} ta bo‘sh
+                  </span>
+                  <span className="text-[10px] text-zinc-500 tabular-nums">
+                    Limit: {entitlements?.usage?.concurrent_active_limit ?? 0} ta bir vaqtda
+                  </span>
+                </div>
+
+                <div className="p-3.5 bg-surface-lowest rounded-xl border border-white/[0.05] flex flex-col gap-1">
+                  <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Amal Qilish Muddati</span>
+                  </span>
+                  <span className="text-base font-bold text-zinc-100 tabular-nums">
+                    {entitlements?.usage?.days_remaining ?? 0} kun
+                  </span>
+                  <span className="text-[10px] text-zinc-500">
+                    {entitlements?.active_entitlement?.ends_at
+                      ? new Date(entitlements.active_entitlement.ends_at).toLocaleDateString()
+                      : "Muddatsiz"}
+                  </span>
+                </div>
+              </div>
+
+              {/* GRID 2 COLUMNS: Plans on Left, Entitlements on Right */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Section A: Tarif Rejalari & Buyurtma Berish (API-094) */}
+                <div className="bg-surface-lowest border border-white/[0.05] rounded-xl p-4 flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span className="text-xs font-semibold text-zinc-200">
+                        Tarif Rejalari (API-094)
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">MFA + OWNER/BILLING</span>
+                  </div>
+
+                  {/* Plan Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Plan 1: ORG_PLAN_30D */}
+                    <div
+                      onClick={() => setSelectedPlanCode("ORG_PLAN_30D")}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col gap-2.5 ${
+                        selectedPlanCode === "ORG_PLAN_30D"
+                          ? "bg-primary/10 border-primary text-white shadow-md shadow-primary/10"
+                          : "bg-surface-card border-white/[0.08] hover:border-white/[0.2] text-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-100">Kompaniya Oylik</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-semibold">Tavsiya</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-bold text-zinc-100 tabular-nums">599,000</span>
+                        <span className="text-[10px] text-zinc-400">UZS / oy</span>
+                      </div>
+                      <ul className="text-[11px] text-zinc-400 flex flex-col gap-1.5">
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>5 ta bir vaqtda faol vakansiya</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>Cheksiz post e&apos;lon krediti</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>30 kunlik to‘liq amal muddati</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Plan 2: SINGLE_POST_30D */}
+                    <div
+                      onClick={() => setSelectedPlanCode("SINGLE_POST_30D")}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col gap-2.5 ${
+                        selectedPlanCode === "SINGLE_POST_30D"
+                          ? "bg-primary/10 border-primary text-white shadow-md shadow-primary/10"
+                          : "bg-surface-card border-white/[0.08] hover:border-white/[0.2] text-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-100">Bittalik E&apos;lon</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-semibold">Start</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-bold text-zinc-100 tabular-nums">149,000</span>
+                        <span className="text-[10px] text-zinc-400">UZS</span>
+                      </div>
+                      <ul className="text-[11px] text-zinc-400 flex flex-col gap-1.5">
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>1 ta bir vaqtda faol e&apos;lon</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>1 ta post e&apos;lon qilish krediti</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>30 kunlik faollik muddati</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isOrdering || !orgId.trim()}
+                    onClick={() => handleCreateOrder(selectedPlanCode)}
+                    className="w-full py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-primary/20"
+                  >
+                    {isOrdering ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Buyurtma rasmiylashtirilmoqda...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckSquare className="w-4 h-4" />
+                        <span>{selectedPlanCode === "ORG_PLAN_30D" ? "599,000 UZS lik Kompaniya Tarifini Olish" : "149,000 UZS lik Bittalik E'lonni Olish"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Section B: Xizmat Huquqlari & Kvota Telemetriyasi (API-070) */}
+                <div className="bg-surface-lowest border border-white/[0.05] rounded-xl p-4 flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-semibold text-zinc-200">
+                        Xizmat Huquqlari & Kvotalar (API-070)
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-500">REALTIME USAGE</span>
+                  </div>
+
+                  {/* Slot Usage Progress Bar */}
+                  <div className="flex flex-col gap-2 p-3 bg-surface-card rounded-lg border border-white/[0.05]">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-400">Faol E&apos;lonlar Slotidan Foydalanish:</span>
+                      <span className="font-bold text-zinc-200 tabular-nums">
+                        {entitlements?.usage?.concurrent_active_opportunities ?? 0} / {entitlements?.usage?.concurrent_active_limit ?? 0}
+                      </span>
+                    </div>
+                    <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            entitlements?.usage?.concurrent_active_limit
+                              ? ((entitlements.usage.concurrent_active_opportunities / entitlements.usage.concurrent_active_limit) * 100)
+                              : 0
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Entitlement Details List */}
+                  <div className="flex flex-col gap-2 text-xs">
+                    <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
+                      <span className="text-zinc-400">Faol Xizmat Turi:</span>
+                      <span className="font-mono text-zinc-200">{entitlements?.active_entitlement?.service_kind || "BEPUL_KIRISH"}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
+                      <span className="text-zinc-400">Boshlanish Sanasi:</span>
+                      <span className="text-zinc-200">
+                        {entitlements?.active_entitlement?.starts_at
+                          ? new Date(entitlements.active_entitlement.starts_at).toLocaleString()
+                          : "Ko'rsatilmagan"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
+                      <span className="text-zinc-400">Tugash Sanasi:</span>
+                      <span className="text-zinc-200">
+                        {entitlements?.active_entitlement?.ends_at
+                          ? new Date(entitlements.active_entitlement.ends_at).toLocaleString()
+                          : "Muddatsiz"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-zinc-400">Bog&apos;langan Buyurtma:</span>
+                      <span className="font-mono text-zinc-400">
+                        {entitlements?.active_entitlement?.order_id
+                          ? `#${entitlements.active_entitlement.order_id.slice(0, 8)}`
+                          : "To'g'ridan-to'g'ri"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section C: Hisob-fakturalar & Buyurtmalar Tarixi (API-093) */}
+              <div className="bg-surface-lowest border border-white/[0.05] rounded-xl p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-zinc-400" />
+                    <span className="text-xs font-semibold text-zinc-200">
+                      Buyurtmalar & Hisob-fakturalar Tarixi (API-093)
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">
+                    Jami: {billingOverview?.orders?.length ?? 0} ta buyurtma
+                  </span>
+                </div>
+
+                {billingOverview?.orders && billingOverview.orders.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-white/[0.08] text-zinc-400 font-medium">
+                          <th className="py-2 px-3">Buyurtma ID</th>
+                          <th className="py-2 px-3">Tarif Rejasi</th>
+                          <th className="py-2 px-3">Summa</th>
+                          <th className="py-2 px-3">Holati</th>
+                          <th className="py-2 px-3">Sana</th>
+                          <th className="py-2 px-3 text-right">Harakat</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.04]">
+                        {billingOverview.orders.map((order) => (
+                          <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="py-2.5 px-3 font-mono text-zinc-300">
+                              #{order.id.slice(0, 8)}
+                            </td>
+                            <td className="py-2.5 px-3 font-semibold text-zinc-200">
+                              {order.plan_code || "XIZMAT_PAKETI"}
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-zinc-100 tabular-nums">
+                              {order.amount.toLocaleString()} UZS
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span
+                                className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                                  order.status === "PAID"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                    : order.status === "PENDING_PAYMENT"
+                                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                    : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                }`}
+                              >
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-zinc-400">
+                              {order.created_at ? new Date(order.created_at).toLocaleDateString() : "—"}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              {order.status === "PAID" && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRefundModalOrder(order);
+                                    setRefundAmountUzs(String(order.amount));
+                                    setRefundReason("");
+                                    setRefundError(null);
+                                    setRefundSuccess(null);
+                                  }}
+                                  className="px-2.5 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[11px] font-semibold transition-all"
+                                >
+                                  Mablag‘ni Qaytarish (API-095)
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-xs text-zinc-500">
+                    Hozircha buyurtmalar mavjud emas. Yuqoridagi tariflardan birini tanlab buyurtma bering.
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
         </div>
       )}
 
@@ -2917,6 +3430,106 @@ export default function EmployerPortal() {
                     <>
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>A&apos;zolikni to&apos;xtatish</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------------------- */}
+      {/* FB-174: MABLAG‘NI QAYTARISH SO‘ROVI MODALI (API-095) */}
+      {/* ----------------------------------------------------------------- */}
+      {refundModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/[0.1] bg-surface-card p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <CreditCard className="w-4 h-4" />
+                </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-zinc-100">To‘lovni Qaytarish So‘rovi</h4>
+                  <p className="text-[11px] text-zinc-400 font-mono">
+                    Buyurtma #{refundModalOrder.id.slice(0, 8)} • API-095
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRefundModalOrder(null)}
+                className="p-1 rounded-lg hover:bg-white/[0.05] text-zinc-400 hover:text-white"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            {refundError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{refundError}</span>
+              </div>
+            )}
+            {refundSuccess && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-400 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{refundSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRequestRefund} className="flex flex-col gap-3.5">
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  Qaytarish Summasi (UZS)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={refundModalOrder.amount}
+                  value={refundAmountUzs}
+                  onChange={(e) => setRefundAmountUzs(e.target.value)}
+                  className="w-full rounded-xl border border-white/[0.1] bg-surface-lowest px-3 py-2 text-xs text-zinc-100 tabular-nums focus:border-primary focus:outline-none"
+                />
+                <span className="text-[10px] text-zinc-500">Maksimal: {refundModalOrder.amount.toLocaleString()} UZS</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  Qaytarish Sababi (kamida 15 ta belgi) *
+                </label>
+                <textarea
+                  rows={3}
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="Xizmat ko‘rsatish rejasini o‘zgartirish yoki xato to‘lov sababli..."
+                  className="w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRefundModalOrder(null)}
+                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRefund || refundReason.trim().length < 15}
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-rose-600/20"
+                >
+                  {isSubmittingRefund ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Yuborilmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span>So‘rovni Yuborish (API-095)</span>
                     </>
                   )}
                 </button>

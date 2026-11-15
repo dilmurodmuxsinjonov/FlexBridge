@@ -2787,6 +2787,186 @@ export async function fetchInstitutionAcademicAgreements(
   return (data.items || []) as AcademicAgreementItem[];
 }
 
+// ---------------------------------------------------------------------------
+// FB-174: Employer Billing, Entitlements, Orders & Refunds (API-070, 093, 094, 095)
+// ---------------------------------------------------------------------------
+
+export interface OrgEntitlementUsage {
+  concurrent_active_opportunities: number;
+  concurrent_active_limit: number;
+  concurrent_slots_available: number;
+  quota_remaining: number | null;
+  days_remaining: number;
+}
+
+export interface OrgActiveEntitlement {
+  id: string;
+  order_id: string | null;
+  service_kind: string;
+  plan_code: string;
+  status: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  days_remaining: number;
+  quota: number | null;
+  post_credits_remaining: number | null;
+  concurrent_active_limit: number;
+  concurrent_active_count: number;
+  concurrent_slots_remaining: number;
+  created_at: string | null;
+}
+
+export interface OrgEntitlementsResponse {
+  ok: boolean;
+  contract_id: "API-070";
+  organization_id: string;
+  has_active_entitlement: boolean;
+  active_entitlement: OrgActiveEntitlement | null;
+  usage: OrgEntitlementUsage;
+}
+
+export interface OrgBillingPlan {
+  code: string;
+  status: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  quota: number | null;
+  concurrent_active_limit: number;
+}
+
+export interface OrgOrderItem {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  plan_code?: string | null;
+  price_snapshot?: Record<string, unknown> | null;
+  created_at: string | null;
+}
+
+export interface OrgInvoiceItem {
+  id: string;
+  order_id: string;
+  number: string;
+  amount: number;
+  currency: string;
+  fiscal_status: string;
+  status: string;
+  issued_at: string | null;
+  paid_at: string | null;
+}
+
+export interface OrgBillingOverviewResponse {
+  ok: boolean;
+  contract_id: "API-093";
+  organization_id: string;
+  plan: OrgBillingPlan;
+  entitlement?: Record<string, unknown> | null;
+  orders: OrgOrderItem[];
+  invoices: OrgInvoiceItem[];
+}
+
+export interface CreateOrgOrderPayload {
+  plan_code: string;
+  idempotency_key?: string;
+}
+
+export interface OrgOrderResult {
+  ok: boolean;
+  contract_id: "API-094";
+  order: OrgOrderItem;
+  invoice: OrgInvoiceItem;
+}
+
+export interface RequestOrderRefundPayload {
+  amount_uzs: number;
+  reason: string;
+}
+
+export interface OrderRefundResult {
+  ok: boolean;
+  contract_id: "API-095";
+  refund_id: string;
+  status: string;
+}
+
+export async function fetchOrgEntitlements(
+  organizationId: string
+): Promise<OrgEntitlementsResponse> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(organizationId)}/entitlements`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ENTITLEMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OrgEntitlementsResponse;
+}
+
+export async function fetchOrgBillingOverview(
+  organizationId: string
+): Promise<OrgBillingOverviewResponse> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(organizationId)}/billing`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_BILLING_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OrgBillingOverviewResponse;
+}
+
+export async function createOrgOrder(
+  organizationId: string,
+  payload: CreateOrgOrderPayload
+): Promise<OrgOrderResult> {
+  const res = await fetch(`/api/bff/employer/organization/${encodeURIComponent(organizationId)}/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CREATE_ORDER_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OrgOrderResult;
+}
+
+export async function requestOrderRefund(
+  orderId: string,
+  payload: RequestOrderRefundPayload
+): Promise<OrderRefundResult> {
+  const res = await fetch(`/api/bff/employer/orders/${encodeURIComponent(orderId)}/refund`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "REQUEST_REFUND_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OrderRefundResult;
+}
+
+
 
 
 
