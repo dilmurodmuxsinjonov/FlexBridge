@@ -602,7 +602,7 @@ export default function Navbar() {
                 onClick={() => handleNavAction(tool)}
                 title={tool.label}
                 aria-label={tool.label}
-                className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`group relative w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                   active ? "text-[#161618]" : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -614,6 +614,12 @@ export default function Navbar() {
                   />
                 )}
                 <Icon className="relative z-10 w-4 h-4" />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full bg-[#151518] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg border border-white/15 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                >
+                  {tool.shortLabel}
+                </span>
               </button>
             );
           })}
@@ -624,11 +630,11 @@ export default function Navbar() {
       {!isAuthPage && (
         <nav
           aria-label="Asosiy suzuvchi navigatsiya"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 max-w-[94vw] pointer-events-auto"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 max-w-[98vw] pointer-events-auto"
         >
           <div
             data-skeuo-dark="true"
-            className="skeuo-obsidian rounded-full p-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[82vw] sm:max-w-none"
+            className="skeuo-obsidian rounded-full p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar max-w-[calc(100vw-60px)] sm:max-w-none"
           >
             {theme.links.map((item) => {
               const Icon = item.icon;
@@ -653,7 +659,7 @@ export default function Navbar() {
                     key={item.id}
                     type="button"
                     onClick={() => handleNavAction(item)}
-                    className={`relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-colors ${
+                    className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
                       active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
                     }`}
                   >
@@ -666,7 +672,7 @@ export default function Navbar() {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className={`relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-colors ${
+                  className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
                     active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
                   }`}
                 >
@@ -683,9 +689,9 @@ export default function Navbar() {
             title="Sahifa yuqorisiga chiqish"
             aria-label="Yuqoriga chiqish"
             data-skeuo-dark="true"
-            className="w-11 h-11 rounded-full skeuo-obsidian flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform shrink-0"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full skeuo-obsidian flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform shrink-0"
           >
-            <ArrowUp className="w-4 h-4" />
+            <ArrowUp className="w-4 h-4 text-white" />
           </button>
         </nav>
       )}

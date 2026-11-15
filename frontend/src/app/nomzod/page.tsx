@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Loader2,
   LogIn,
-  LogOut,
   ShieldCheck,
   FileText,
   Search,
@@ -58,7 +57,6 @@ import {
   fetchCandidateResumeDetails,
   saveCandidateResumeDetails,
   uploadCandidatePdfFile,
-  logoutUser,
   AuthUser,
   CandidateProfileData,
   CandidateProfileSkill,
@@ -663,14 +661,6 @@ export default function CandidateProfileHub() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-    } finally {
-      setCurrentUser(null);
-    }
-  };
-
   // Telemetry computation for Enrollments
   const activeEnrollment = useMemo(() => {
     return enrollments.find((e) => e.current_student && e.status !== "ENDED") || enrollments[0] || null;
@@ -1035,31 +1025,31 @@ export default function CandidateProfileHub() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-300 border border-sky-500/25">
                 Talaba & Nomzod Kabineti
               </span>
-              <span className="text-zinc-500 text-xs">• API-026 / API-027 / API-028 / API-032 / API-034 / API-035 / API-036</span>
+              <span className="text-[var(--fb-ink-muted)] text-xs">• Profil, HEMIS va Amaliyot Rezyumesi</span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                <span className="text-[11px] font-mono font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2.5 py-0.5 rounded-full border border-emerald-500/25">
                   Faol: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <span className="text-[11px] font-mono font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/12 px-2.5 py-0.5 rounded-full border border-amber-500/25">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
-            <h1 className="font-heading text-lg md:text-xl font-bold text-white tracking-tight">
+            <h1 className="font-display text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
               Nomzod Profili, Ta&apos;lim (HEMIS) va Vaqt Taqsimoti Markazi
             </h1>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-[var(--fb-ink-muted)]">
               Kasbiy rezyume, tasdiqlangan ko‘nikmalar, OTM talabalik hisobi (HEMIS) va O‘zR MK 118-moddasi bo‘yicha grafik boshqaruvi.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {isAuthLoading ? (
-              <div className="flex items-center gap-2 text-xs text-zinc-400">
+              <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-muted)]">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Yuklanmoqda...</span>
               </div>
@@ -1069,29 +1059,21 @@ export default function CandidateProfileHub() {
                   type="button"
                   onClick={handleExportResume}
                   disabled={isExportingResume}
-                  className="px-3.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-semibold text-emerald-300 hover:text-emerald-200 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                  className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isExportingResume ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <Download className="w-3.5 h-3.5" />
                   )}
                   <span>Rezyumeni PDF formatida yuklab olish</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Chiqish</span>
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Nomzod sifatida kirish</span>
@@ -1102,32 +1084,32 @@ export default function CandidateProfileHub() {
       </section>
 
       {exportSuccessMsg && (
-        <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+        <div className="p-3.5 rounded-2xl skeuo-card border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2 font-medium">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span>{exportSuccessMsg}</span>
         </div>
       )}
       {exportErrorMsg && (
-        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+        <div className="p-3.5 rounded-2xl skeuo-card border border-rose-500/25 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2 font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
           <span>{exportErrorMsg}</span>
         </div>
       )}
 
       {/* LOGIN REQUIRED GATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-[#121214] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center text-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-1">
-            <User className="w-6 h-6" />
+        <section className="w-full skeuo-card rounded-[28px] p-10 sm:p-12 flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-[#D95F2B] mb-1">
+            <User className="w-7 h-7" />
           </div>
-          <h2 className="text-base font-bold text-white">Profilni boshqarish uchun tizimga kiring</h2>
-          <p className="text-xs text-zinc-400 max-w-md">
+          <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">Profilni boshqarish uchun tizimga kiring</h2>
+          <p className="text-xs text-[var(--fb-ink-muted)] max-w-md leading-relaxed">
             Shaxsiy rezyume, ko‘nikmalar, OTM talabalik holati (HEMIS) va haftalik bo‘sh vaqt jadvalini sozlash uchun hisobingizga kiring.
           </p>
           <button
             type="button"
             onClick={() => setIsLoginModalOpen(true)}
-            className="mt-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all shadow-md shadow-primary/20"
+            className="mt-2 px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold"
           >
             Kirish oynasini ochish
           </button>
@@ -1147,57 +1129,146 @@ export default function CandidateProfileHub() {
         ];
         const doneCount = profileChecklist.filter(Boolean).length;
         const completionPct = Math.round((doneCount / profileChecklist.length) * 100);
+        const profileTextPct = (profileHeadline.trim() ? 50 : 0) + (profileBio.trim() ? 50 : 0);
+        const skillsPct = Math.min(100, Math.round((mySkills.length / 5) * 100));
+        const schedulePct = Math.min(100, Math.round((rules.length / 3) * 100));
+        const hemisPct = enrollments.length > 0 ? 100 : 0;
+        const showcaseCount = portfolios.length + workExperiences.length + achievements.length + certificates.length;
+        const portfolioPct = Math.min(100, Math.round((showcaseCount / 3) * 100));
         return (
         <div className="flex flex-col gap-6">
-          {/* SKEUOMORPHIC EXECUTIVE KPI & LIQUID METER STRIP */}
-          <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <SkeuoStatCard
-                title="Ko‘nikmalar"
-                value={mySkills.length}
-                subtitle="Tasdiqlangan katalog"
-                icon={Sparkles}
-                tone="emerald"
-                active={activeTab === "SKILLS"}
-                onClick={() => setActiveTab("SKILLS")}
-              />
-              <SkeuoStatCard
-                title="Jadval qoidalari"
-                value={rules.length}
-                subtitle="MK 118-modda mosligi"
-                icon={Calendar}
-                tone="orange"
-                active={activeTab === "AVAILABILITY"}
-                onClick={() => setActiveTab("AVAILABILITY")}
-              />
-              <SkeuoStatCard
-                title="OTM / HEMIS"
-                value={enrollments.length}
-                subtitle="Akademik biriktiruv"
-                icon={GraduationCap}
+          {/* ROW A: COMPACT EXECUTIVE KPI STRIP */}
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <SkeuoStatCard
+              title="Ko‘nikmalar"
+              value={mySkills.length}
+              subtitle="Tasdiqlangan katalog"
+              icon={Sparkles}
+              tone="emerald"
+              active={activeTab === "SKILLS"}
+              onClick={() => setActiveTab("SKILLS")}
+            />
+            <SkeuoStatCard
+              title="Jadval qoidalari"
+              value={rules.length}
+              subtitle="MK 118-modda mosligi"
+              icon={Calendar}
+              tone="orange"
+              active={activeTab === "AVAILABILITY"}
+              onClick={() => setActiveTab("AVAILABILITY")}
+            />
+            <SkeuoStatCard
+              title="OTM / HEMIS"
+              value={enrollments.length}
+              subtitle="Akademik biriktiruv"
+              icon={GraduationCap}
+              tone="sky"
+              active={activeTab === "ENROLLMENTS"}
+              onClick={() => setActiveTab("ENROLLMENTS")}
+            />
+            <SkeuoStatCard
+              title="Loyiha & Yutuqlar"
+              value={portfolios.length + workExperiences.length + certificates.length}
+              subtitle="Portfolio va sertifikat"
+              icon={Award}
+              tone="indigo"
+              active={activeTab === "PORTFOLIO"}
+              onClick={() => setActiveTab("PORTFOLIO")}
+            />
+          </section>
+
+          {/* ROW B: HARDWARE LIQUID METER POD (5 LIVE COMPLETION TUBES) */}
+          <section
+            aria-label="Rezyume va profil tayyorligi"
+            className="grid gap-6 rounded-[28px] skeuo-card p-5 sm:p-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center"
+          >
+            <div className="space-y-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-300">
+                  HR Reyting Indeksi
+                </span>
+                <div className="mt-2.5 flex items-baseline gap-2.5">
+                  <span className="font-mono text-4xl font-bold tracking-tight text-[var(--fb-ink)]">
+                    {completionPct}%
+                  </span>
+                  <span className="text-xs font-semibold text-[var(--fb-ink-muted)]">
+                    ({doneCount} / {profileChecklist.length} band)
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs leading-relaxed text-[var(--fb-ink-muted)]">
+                  Rezyume bo‘limlaringizning to‘ldirilganlik holati ish beruvchilar qidiruvidagi o‘rningizni belgilaydi.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("PROFILE")}
+                  className="rounded-full skeuo-btn-obsidian px-3.5 py-1.5 text-xs font-semibold"
+                >
+                  Profilni to‘ldirish
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("SKILLS")}
+                  className="rounded-full skeuo-btn-secondary px-3.5 py-1.5 text-xs font-semibold"
+                >
+                  Ko‘nikma qo‘shish
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <SkeuoVerticalMeter
+                compact
+                title="Profil matni"
+                percentage={profileTextPct}
+                amountLabel={`${profileTextPct}%`}
+                subtitle="Sarlavha & bio"
                 tone="sky"
-                active={activeTab === "ENROLLMENTS"}
-                onClick={() => setActiveTab("ENROLLMENTS")}
+                onAction={() => setActiveTab("PROFILE")}
+                actionLabel="Tahrir"
               />
-              <SkeuoStatCard
-                title="Loyiha & Yutuqlar"
-                value={portfolios.length + workExperiences.length + certificates.length}
-                subtitle="Portfolio va sertifikat"
-                icon={Award}
+              <SkeuoVerticalMeter
+                compact
+                title="Ko‘nikmalar"
+                percentage={skillsPct}
+                amountLabel={`${mySkills.length} ta`}
+                subtitle="Maqsad: 5+"
+                tone="emerald"
+                onAction={() => setActiveTab("SKILLS")}
+                actionLabel="Qo‘shish"
+              />
+              <SkeuoVerticalMeter
+                compact
+                title="Jadval"
+                percentage={schedulePct}
+                amountLabel={`${rules.length} ta`}
+                subtitle="Bo‘sh vaqt"
+                tone="orange"
+                onAction={() => setActiveTab("AVAILABILITY")}
+                actionLabel="Sozlash"
+              />
+              <SkeuoVerticalMeter
+                compact
+                title="HEMIS"
+                percentage={hemisPct}
+                amountLabel={enrollments.length > 0 ? "Tasdiqlangan" : "Kutilmoqda"}
+                subtitle="Talaba maqomi"
                 tone="indigo"
-                active={activeTab === "PORTFOLIO"}
-                onClick={() => setActiveTab("PORTFOLIO")}
+                onAction={() => setActiveTab("ENROLLMENTS")}
+                actionLabel="Ochish"
+              />
+              <SkeuoVerticalMeter
+                compact
+                title="Portfolio"
+                percentage={portfolioPct}
+                amountLabel={`${showcaseCount} ta`}
+                subtitle="Loyiha & yutuq"
+                tone="amber"
+                onAction={() => setActiveTab("PORTFOLIO")}
+                actionLabel="Yuklash"
               />
             </div>
-            <SkeuoVerticalMeter
-              title="Rezyume to‘liqligi"
-              percentage={completionPct}
-              amountLabel={`${doneCount} / ${profileChecklist.length}`}
-              subtitle="HR qidiruv reytingi"
-              tone="sky"
-              onAction={() => setActiveTab("PROFILE")}
-              actionLabel="To‘ldirish"
-            />
           </section>
 
           {/* SKEUOMORPHIC SLIDING SEGMENTED TABS */}

@@ -11,7 +11,6 @@ import {
   GraduationCap,
   Loader2,
   LogIn,
-  LogOut,
   AlertCircle,
   Plus,
   CheckCircle2,
@@ -45,7 +44,6 @@ import {
 import {
   fetchAuthMe,
   fetchEmployerDashboard,
-  logoutUser,
   createEmployerOpportunity,
   fetchEmployerOpportunityApplications,
   transitionApplicationStatus,
@@ -384,15 +382,6 @@ export default function EmployerPortal() {
       window.removeEventListener("flexbridge:auth-changed", syncSession);
     };
   }, []);
-
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setDashboard(null);
-    setDashboardError(null);
-    setApplications([]);
-    setTargetOppId("");
-  };
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
@@ -1130,25 +1119,17 @@ export default function EmployerPortal() {
                     setCreateSuccess(null);
                     setCreateError(null);
                   }}
-                  className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Yangi e’lon joylash</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Chiqish</span>
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Tizimga kirish</span>
@@ -1160,15 +1141,15 @@ export default function EmployerPortal() {
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-surface-card/60 border border-emerald-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+        <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-emerald-700 dark:text-emerald-400">
             <Building className="w-7 h-7" />
           </div>
-          <div className="flex flex-col gap-1 max-w-md">
-            <h2 className="text-base md:text-lg font-heading font-semibold text-white">
+          <div className="flex flex-col gap-1.5 max-w-md">
+            <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
               Tashkilot ma’lumotlariga kirish uchun tizimga kiring
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
               Ushbu bo‘lim tashkilot HR vakillari va rahbarlari uchun mo‘ljallangan. Tashkilotingiz tahlillari va nomzodlarini boshqarish uchun tizimga kiring.
             </p>
           </div>
@@ -1176,20 +1157,20 @@ export default function EmployerPortal() {
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>HR hisobi bilan kirish</span>
             </button>
             <Link
               href="/korxona/kirish"
-              className="px-4 py-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-emerald-700 dark:text-emerald-300"
             >
               Korxona alohida kirishi
             </Link>
             <Link
               href="/korxona/royxatdan-otish"
-              className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-xs font-semibold text-zinc-200 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold"
             >
               Korxona vakili ro‘yxatdan o‘tish
             </Link>
@@ -1201,9 +1182,9 @@ export default function EmployerPortal() {
       {currentUser && (
         <div className="flex flex-col gap-6">
           {/* ORG ID SELECTOR */}
-          <section className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-md">
+          <section className="w-full skeuo-card rounded-3xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex flex-1 items-center gap-2">
-              <label htmlFor="orgIdInput" className="text-xs font-medium text-zinc-300 shrink-0">
+              <label htmlFor="orgIdInput" className="text-xs font-semibold text-[var(--fb-ink)] shrink-0">
                 Tashkilot ID (UUID):
               </label>
               <input
@@ -1212,14 +1193,14 @@ export default function EmployerPortal() {
                 value={orgId}
                 onChange={(e) => setOrgId(e.target.value)}
                 placeholder="masalan: e1a54054-0eb7-4eb2-a7d1-e63013d39ea3"
-                className="w-full max-w-md px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
+                className="w-full max-w-md px-3.5 py-2 rounded-2xl skeuo-input text-xs font-mono"
               />
             </div>
             <button
               type="button"
               disabled={isLoadingDashboard || !orgId.trim()}
               onClick={() => loadDashboard(orgId)}
-              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+              className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoadingDashboard ? (
                 <>
@@ -1237,8 +1218,8 @@ export default function EmployerPortal() {
 
           {/* DASHBOARD ERROR MESSAGE */}
           {dashboardError && (
-            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+            <div className="p-4 rounded-2xl skeuo-card border border-rose-500/25 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
               <div className="flex flex-col gap-0.5">
                 <span className="font-semibold">Kirish rad etildi / Xatolik:</span>
                 <span>{dashboardError}</span>
@@ -1265,8 +1246,8 @@ export default function EmployerPortal() {
                     : ("info" as const),
             }));
             return (
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_300px]">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   <SkeuoStatCard
                     title="Vakansiyalar"
                     value={dashboard.metrics.opportunities.total}
@@ -1307,18 +1288,20 @@ export default function EmployerPortal() {
                     active={activeMainTab === "MENTOR_HUB"}
                   />
                 </div>
-                <SkeuoVerticalMeter
-                  title="Faol vakansiyalar"
-                  percentage={activeOppPct}
-                  amountLabel={`${dashboard.metrics.opportunities.published} / ${dashboard.metrics.opportunities.total}`}
-                  subtitle="Nashr etilgan ulush"
-                  tone="emerald"
-                />
-                <SkeuoLiveFeed
-                  title="Oxirgi arizalar oqimi"
-                  items={feedItems}
-                  emptyText="Arizalarni ko‘rish uchun e’lon tanlang."
-                />
+                <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+                  <SkeuoVerticalMeter
+                    title="Faol vakansiyalar"
+                    percentage={activeOppPct}
+                    amountLabel={`${dashboard.metrics.opportunities.published} / ${dashboard.metrics.opportunities.total}`}
+                    subtitle="Nashr etilgan ulush"
+                    tone="emerald"
+                  />
+                  <SkeuoLiveFeed
+                    title="Oxirgi arizalar oqimi"
+                    items={feedItems}
+                    emptyText="Arizalarni ko‘rish uchun e’lon tanlang."
+                  />
+                </div>
               </div>
             );
           })()}

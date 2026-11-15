@@ -4,28 +4,41 @@
 
 @layer base {
   :root {
-    --background: 230 226 216;
-    --foreground: 23 22 20;
+    --background: 228 223 212;
+    --foreground: 22 21 19;
 
-    --fb-canvas: #e6e2d8;
-    --fb-canvas-dot: rgba(24, 21, 16, 0.055);
-    --fb-stage: #f4f1ea;
-    --fb-card-top: #fdfcfa;
-    --fb-card-bottom: #f3efe7;
-    --fb-well: #e7e2d7;
-    --fb-well-deep: #dcd6c8;
-    --fb-obsidian: #161618;
-    --fb-obsidian-elevated: #232327;
-    --fb-ink: #171614;
-    --fb-ink-secondary: #534f48;
-    --fb-ink-muted: #847d72;
-    --fb-hairline: rgba(24, 21, 16, 0.09);
-    --fb-bevel: rgba(255, 255, 255, 0.92);
+    --fb-canvas: #e4dfd4;
+    --fb-canvas-dot: rgba(24, 21, 16, 0.065);
+    --fb-stage: #f6f3ec;
+    --fb-card-top: #fefdfb;
+    --fb-card-bottom: #f2ede3;
+    --fb-well: #ebe6da;
+    --fb-well-deep: #dfd9cb;
+    --fb-obsidian: #151518;
+    --fb-obsidian-elevated: #232328;
+    --fb-ink: #161513;
+    --fb-ink-secondary: #4e4a42;
+    --fb-ink-muted: #787166;
+    --fb-hairline: rgba(24, 21, 16, 0.095);
+    --fb-border: rgba(24, 21, 16, 0.1);
+    --fb-bevel: rgba(255, 255, 255, 0.94);
     --fb-accent: #d95f2b;
-    --fb-shadow-stage: 0 24px 60px -18px rgba(32, 26, 16, 0.16), 0 4px 14px -4px rgba(32, 26, 16, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    --fb-shadow-card: 0 12px 26px -8px rgba(34, 28, 18, 0.10), 0 3px 8px -2px rgba(34, 28, 18, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.96);
-    --fb-shadow-well: inset 0 2px 6px rgba(36, 28, 16, 0.11), inset 0 1px 1px rgba(36, 28, 16, 0.06), 0 1px 0 rgba(255, 255, 255, 0.85);
-    --fb-shadow-dock: 0 18px 40px -10px rgba(18, 15, 10, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    --fb-shadow-stage:
+      0 26px 64px -20px rgba(34, 26, 14, 0.17),
+      0 6px 18px -6px rgba(34, 26, 14, 0.08),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.97);
+    --fb-shadow-card:
+      0 12px 26px -10px rgba(36, 28, 16, 0.11),
+      0 3px 9px -2px rgba(36, 28, 16, 0.055),
+      inset 0 1px 0 rgba(255, 255, 255, 0.97);
+    --fb-shadow-well:
+      inset 0 2px 6px rgba(38, 29, 16, 0.115),
+      inset 0 1px 1.5px rgba(38, 29, 16, 0.06),
+      0 1px 0 rgba(255, 255, 255, 0.88);
+    --fb-shadow-dock:
+      0 20px 44px -10px rgba(16, 13, 8, 0.36),
+      0 4px 12px -2px rgba(16, 13, 8, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.17);
   }
 
   html.dark {
@@ -33,24 +46,35 @@
     --foreground: 244 244 245;
 
     --fb-canvas: #09090b;
-    --fb-canvas-dot: rgba(255, 255, 255, 0.035);
-    --fb-stage: #111114;
-    --fb-card-top: #1b1b20;
-    --fb-card-bottom: #131317;
-    --fb-well: #0b0b0e;
-    --fb-well-deep: #070709;
+    --fb-canvas-dot: rgba(255, 255, 255, 0.04);
+    --fb-stage: #111115;
+    --fb-card-top: #1c1c22;
+    --fb-card-bottom: #131318;
+    --fb-well: #0b0b0f;
+    --fb-well-deep: #060608;
     --fb-obsidian: #18181d;
     --fb-obsidian-elevated: #27272e;
-    --fb-ink: #f4f4f5;
+    --fb-ink: #f4f4f6;
     --fb-ink-secondary: #a1a1aa;
-    --fb-ink-muted: #71717a;
-    --fb-hairline: rgba(255, 255, 255, 0.08);
+    --fb-ink-muted: #7b7b86;
+    --fb-hairline: rgba(255, 255, 255, 0.085);
+    --fb-border: rgba(255, 255, 255, 0.085);
     --fb-bevel: rgba(255, 255, 255, 0.09);
     --fb-accent: #f97316;
-    --fb-shadow-stage: 0 28px 70px -20px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --fb-shadow-card: 0 14px 28px -10px rgba(0, 0, 0, 0.62), 0 2px 6px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --fb-shadow-well: inset 0 2px 7px rgba(0, 0, 0, 0.72), inset 0 1px 1px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.05);
-    --fb-shadow-dock: 0 20px 44px -8px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+    --fb-shadow-stage:
+      0 30px 72px -20px rgba(0, 0, 0, 0.82),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    --fb-shadow-card:
+      0 14px 30px -10px rgba(0, 0, 0, 0.65),
+      0 2px 6px rgba(0, 0, 0, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.085);
+    --fb-shadow-well:
+      inset 0 2px 8px rgba(0, 0, 0, 0.75),
+      inset 0 1px 1px rgba(0, 0, 0, 0.5),
+      0 1px 0 rgba(255, 255, 255, 0.055);
+    --fb-shadow-dock:
+      0 22px 46px -8px rgba(0, 0, 0, 0.88),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
   }
 
   * {
@@ -70,16 +94,31 @@
   font-variant-numeric: tabular-nums;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .bg-grid-pattern {
-  background-size: 28px 28px;
-  background-image: radial-gradient(circle, var(--fb-canvas-dot) 1px, transparent 1px);
+  background-size: 26px 26px;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--fb-canvas-dot) 1px, transparent 0),
+    radial-gradient(ellipse 80% 45% at 50% 0%, rgba(217, 95, 43, 0.055), transparent 70%);
 }
 
 /* Tactile Skeuomorphic Component Primitives */
 .skeuo-stage {
-  background: var(--fb-stage);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 18%), var(--fb-stage);
   border: 1px solid var(--fb-hairline);
   box-shadow: var(--fb-shadow-stage);
+}
+
+html.dark .skeuo-stage {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 18%), var(--fb-stage);
 }
 
 .skeuo-card {
@@ -103,22 +142,26 @@ html.dark .skeuo-well-sm {
 }
 
 .skeuo-obsidian {
-  background: radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.08), transparent 45%), #161618;
+  background: radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.1), transparent 48%), #151518;
   color: #f4f4f5;
-  border: 1px solid rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   box-shadow: var(--fb-shadow-dock);
 }
 
 .skeuo-btn-obsidian {
-  background: linear-gradient(180deg, #27272c 0%, #141416 100%);
+  background: linear-gradient(180deg, #292930 0%, #141417 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 18px -6px rgba(18, 15, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  transition: transform 80ms ease-out, filter 140ms ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 9px 18px -6px rgba(18, 15, 10, 0.45),
+    0 2px 4px rgba(18, 15, 10, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 90ms ease-out, filter 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 .skeuo-btn-obsidian:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
+  transform: translateY(-0.5px);
 }
 
 .skeuo-btn-obsidian:active {
@@ -130,7 +173,7 @@ html.dark .skeuo-well-sm {
   color: var(--fb-ink);
   border: 1px solid var(--fb-hairline);
   box-shadow: 0 3px 8px -2px rgba(24, 20, 14, 0.12), inset 0 1px 0 var(--fb-bevel);
-  transition: transform 80ms ease-out, filter 140ms ease-out;
+  transition: transform 90ms ease-out, filter 150ms ease-out;
 }
 
 .skeuo-btn-secondary:hover {
@@ -148,6 +191,10 @@ html.dark .skeuo-well-sm {
   box-shadow: var(--fb-shadow-well);
 }
 
+.skeuo-input::placeholder {
+  color: var(--fb-ink-muted);
+}
+
 /*
  * Adaptive Light-Mode Surface & Ink Compatibility Bridge:
  * Ensures nested portal modules that still reference legacy dark tokens
@@ -161,22 +208,28 @@ html:not(.dark) .bg-background {
 }
 
 html:not(.dark) .bg-\[\#121214\],
+html:not(.dark) .bg-\[\#121214\]\/80,
+html:not(.dark) .bg-\[\#141417\],
 html:not(.dark) .bg-surface-card,
+html:not(.dark) .bg-surface-card\/70,
 html:not(.dark) .bg-surface,
 html:not(.dark) .bg-zinc-900,
 html:not(.dark) .bg-zinc-900\/80,
 html:not(.dark) .bg-zinc-900\/70,
 html:not(.dark) .bg-zinc-900\/60,
-html:not(.dark) .bg-zinc-900\/50 {
+html:not(.dark) .bg-zinc-900\/50,
+html:not(.dark) .bg-zinc-900\/40 {
   background: linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-card-bottom) 100%);
   border-color: var(--fb-hairline);
   box-shadow: var(--fb-shadow-card);
   color: var(--fb-ink);
 }
 
+html:not(.dark) .bg-\[\#18181b\],
 html:not(.dark) .bg-zinc-950,
 html:not(.dark) .bg-zinc-950\/80,
 html:not(.dark) .bg-zinc-950\/60,
+html:not(.dark) .bg-zinc-950\/40,
 html:not(.dark) .bg-surface-lowest {
   background-color: var(--fb-well);
   border-color: var(--fb-hairline);
@@ -184,7 +237,23 @@ html:not(.dark) .bg-surface-lowest {
   color: var(--fb-ink);
 }
 
-html:not(.dark) [data-skeuo-dark="true"] .text-white {
+html:not(.dark) .bg-sky-950\/25 {
+  background-color: rgba(14, 165, 233, 0.11);
+}
+html:not(.dark) .bg-emerald-950\/25 {
+  background-color: rgba(16, 185, 129, 0.11);
+}
+html:not(.dark) .bg-indigo-950\/25 {
+  background-color: rgba(99, 102, 241, 0.11);
+}
+html:not(.dark) .bg-amber-950\/25 {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+html:not(.dark) [data-skeuo-dark="true"],
+html:not(.dark) [data-skeuo-dark="true"] .text-white,
+html:not(.dark) .skeuo-obsidian,
+html:not(.dark) .skeuo-obsidian .text-white {
   color: #ffffff;
 }
 
@@ -199,29 +268,53 @@ html:not(.dark) .bg-rose-600 {
   color: #ffffff;
 }
 
-html:not(.dark) .text-white:not(.bg-primary *):not(.bg-sky-500 *):not(.bg-sky-600 *):not(.bg-emerald-600 *):not(.bg-indigo-600 *):not(.bg-amber-600 *):not(.bg-rose-600 *):not([data-skeuo-dark="true"] *):not(.skeuo-btn-obsidian):not(.skeuo-btn-obsidian *) {
+html:not(.dark) .text-white:not(.bg-primary *):not(.bg-sky-500 *):not(.bg-sky-600 *):not(.bg-emerald-600 *):not(.bg-indigo-600 *):not(.bg-amber-600 *):not(.bg-rose-600 *):not([data-skeuo-dark="true"]):not([data-skeuo-dark="true"] *):not(.skeuo-obsidian):not(.skeuo-obsidian *):not(.skeuo-btn-obsidian):not(.skeuo-btn-obsidian *) {
   color: var(--fb-ink);
 }
 
-html:not(.dark) .text-zinc-100:not([data-skeuo-dark="true"] *),
-html:not(.dark) .text-zinc-200:not([data-skeuo-dark="true"] *),
-html:not(.dark) .text-on-surface:not([data-skeuo-dark="true"] *) {
+html:not(.dark) .text-zinc-100:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: var(--fb-ink);
 }
 
-html:not(.dark) .text-zinc-300:not([data-skeuo-dark="true"] *),
-html:not(.dark) .text-zinc-400:not([data-skeuo-dark="true"] *),
-html:not(.dark) .text-on-surface-variant:not([data-skeuo-dark="true"] *) {
+html:not(.dark) .text-zinc-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface-variant:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: var(--fb-ink-secondary);
 }
 
-html:not(.dark) .text-zinc-500:not([data-skeuo-dark="true"] *) {
+html:not(.dark) .text-zinc-500:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: var(--fb-ink-muted);
+}
+
+/* Pastel semantic text -> high-contrast readable tones on Light Warm paper */
+html:not(.dark) .text-sky-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-sky-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #0369a1;
+}
+html:not(.dark) .text-emerald-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-emerald-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #047857;
+}
+html:not(.dark) .text-indigo-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-indigo-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #4338ca;
+}
+html:not(.dark) .text-amber-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #b45309;
+}
+html:not(.dark) .text-rose-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-rose-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #be123c;
 }
 
 html:not(.dark) .border-white\/\[0\.08\],
 html:not(.dark) .border-white\/\[0\.06\],
 html:not(.dark) .border-white\/\[0\.1\],
+html:not(.dark) .border-white\/10,
 html:not(.dark) .border-zinc-800,
 html:not(.dark) .border-zinc-800\/80 {
   border-color: var(--fb-hairline);

@@ -72,32 +72,35 @@ export default function Footer() {
     (Boolean(pathname?.startsWith("/operator")) ||
       Boolean(currentUser && isOperatorOnlyRoles(currentUser.roles)));
   return (
-    <footer className="mt-auto w-full px-3 sm:px-6 pb-24 pt-6 text-[var(--fb-ink-muted)] text-xs">
+    <footer className="mt-auto w-full px-3 sm:px-6 lg:pl-16 2xl:pl-10 pb-24 pt-6 text-[var(--fb-ink-muted)] text-xs">
       <div className="max-w-[1440px] mx-auto skeuo-card rounded-[28px] overflow-hidden">
       {/* Main Directory Links */}
       <div className="px-5 sm:px-8 lg:px-10 py-10 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Column 1: Brand & Mission */}
           <div className="space-y-3">
-            <Link href="/" className="inline-flex items-center gap-2 select-none group">
-              <div className="w-7 h-7 rounded bg-primary flex items-center justify-center text-white shadow-sm font-bold text-sm tracking-wider">
-                FB
+            <Link href="/" className="inline-flex items-center gap-2.5 select-none group">
+              <div
+                data-skeuo-dark="true"
+                className="w-8 h-8 rounded-xl skeuo-obsidian flex items-center justify-center text-white font-bold text-xs tracking-wider"
+              >
+                <span className="text-[#D95F2B]">F</span>B
               </div>
-              <span className="font-heading font-bold text-base tracking-tight text-white group-hover:text-primary transition-colors">
+              <span className="font-heading font-bold text-base tracking-tight text-[var(--fb-ink)] group-hover:text-[#D95F2B] transition-colors">
                 FlexBridge
               </span>
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-white/[0.06] text-primary border border-primary/20 tracking-wider">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full skeuo-well-sm text-[#C2410C] dark:text-orange-400 tracking-wider">
                 v1.4
               </span>
             </Link>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed max-w-xs">
+            <p className="text-[11px] text-[var(--fb-ink-secondary)] leading-relaxed max-w-xs">
               O&apos;zbekiston talabalari uchun moslashuvchan ish va amaliyot imkoniyatlarini taqdim etuvchi
               yagona rasmiy ekotizim.
             </p>
 
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/12 border border-emerald-500/25 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>100% Tirik Staging Integratsiya</span>
             </div>
           </div>

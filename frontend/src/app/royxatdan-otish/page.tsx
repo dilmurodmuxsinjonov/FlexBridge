@@ -579,16 +579,20 @@ function RoyxatdanOtishWizard() {
     <div className="w-full max-w-lg space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
-        <Link href="/" className="inline-flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition">
+        <Link href="/" className="inline-flex items-center gap-2.5 group">
+          <div
+            data-skeuo-dark="true"
+            className="relative w-11 h-11 rounded-2xl skeuo-obsidian flex items-center justify-center font-display font-bold text-white shadow-lg group-hover:scale-105 transition"
+          >
             FB
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#D95F2B] ring-2 ring-[var(--fb-bg)]" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">FlexBridge</span>
+          <span className="font-display text-xl font-bold tracking-tight text-[var(--fb-ink)]">FlexBridge</span>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
           Ro‘yxatdan O‘tish
         </h1>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-[var(--fb-ink-muted)]">
           Talaba, Korxona, Universitet va Operator uchun yagona ro‘yxatdan o‘tish va rolga yo‘naltirish
         </p>
       </div>
@@ -597,52 +601,56 @@ function RoyxatdanOtishWizard() {
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step >= 1 ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-500"
+            data-skeuo-dark={step >= 1 ? "true" : undefined}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+              step >= 1 ? "skeuo-obsidian text-white" : "skeuo-well text-[var(--fb-ink-muted)]"
             }`}
           >
             1
           </div>
-          <span className={`text-xs ${step >= 1 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
+          <span className={`text-xs ${step >= 1 ? "text-[var(--fb-ink)] font-semibold" : "text-[var(--fb-ink-muted)]"}`}>
             Rol
           </span>
         </div>
-        <div className="w-6 h-[1px] bg-zinc-800" />
+        <div className="w-6 h-[1px] bg-[var(--fb-border)]" />
         <div className="flex items-center gap-2">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step >= 2 ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-500"
+            data-skeuo-dark={step >= 2 ? "true" : undefined}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+              step >= 2 ? "skeuo-obsidian text-white" : "skeuo-well text-[var(--fb-ink-muted)]"
             }`}
           >
             2
           </div>
-          <span className={`text-xs ${step >= 2 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
+          <span className={`text-xs ${step >= 2 ? "text-[var(--fb-ink)] font-semibold" : "text-[var(--fb-ink-muted)]"}`}>
             Telefon
           </span>
         </div>
-        <div className="w-6 h-[1px] bg-zinc-800" />
+        <div className="w-6 h-[1px] bg-[var(--fb-border)]" />
         <div className="flex items-center gap-2">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step >= 3 ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-500"
+            data-skeuo-dark={step >= 3 ? "true" : undefined}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+              step >= 3 ? "skeuo-obsidian text-white" : "skeuo-well text-[var(--fb-ink-muted)]"
             }`}
           >
             3
           </div>
-          <span className={`text-xs ${step >= 3 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
+          <span className={`text-xs ${step >= 3 ? "text-[var(--fb-ink)] font-semibold" : "text-[var(--fb-ink-muted)]"}`}>
             Profil
           </span>
         </div>
-        <div className="w-6 h-[1px] bg-zinc-800" />
+        <div className="w-6 h-[1px] bg-[var(--fb-border)]" />
         <div className="flex items-center gap-2">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step >= 4 ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-500"
+            data-skeuo-dark={step >= 4 ? "true" : undefined}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+              step >= 4 ? "skeuo-obsidian text-white" : "skeuo-well text-[var(--fb-ink-muted)]"
             }`}
           >
             4
           </div>
-          <span className={`text-xs ${step >= 4 ? "text-zinc-200 font-medium" : "text-zinc-500"}`}>
+          <span className={`text-xs ${step >= 4 ? "text-[var(--fb-ink)] font-semibold" : "text-[var(--fb-ink-muted)]"}`}>
             Kabinet
           </span>
         </div>
@@ -671,10 +679,10 @@ function RoyxatdanOtishWizard() {
         {step === 1 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="text-sm font-semibold text-zinc-200">
+              <h2 className="text-sm font-bold text-[var(--fb-ink)]">
                 Platformadagi faoliyat turini tanlang (4 portal)
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-[var(--fb-ink-muted)]">
                 Ro‘yxatdan o‘tgach hisobingiz roliga qarab avtomatik o‘z kabinetingizga o‘tkazilasiz
               </p>
             </div>
@@ -683,29 +691,31 @@ function RoyxatdanOtishWizard() {
               {/* Option 1: Candidate */}
               <div
                 onClick={() => setSelectedRole("CANDIDATE")}
-                className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
+                className={`p-4 rounded-2xl cursor-pointer transition-all flex items-start gap-3.5 ${
                   selectedRole === "CANDIDATE"
-                    ? "bg-sky-950/25 border-sky-500/80 ring-1 ring-sky-500/40"
-                    : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
+                    ? "skeuo-card border border-sky-500/70 ring-1 ring-sky-500/35"
+                    : "skeuo-well hover:-translate-y-0.5"
                 }`}
               >
                 <div
-                  className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "CANDIDATE" ? "bg-sky-600 text-white" : "bg-zinc-800 text-zinc-400"
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    selectedRole === "CANDIDATE"
+                      ? "bg-sky-600 text-white shadow-sm"
+                      : "skeuo-well-sm text-sky-700 dark:text-sky-300"
                   }`}
                 >
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-zinc-100">
+                    <span className="text-xs font-bold text-[var(--fb-ink)]">
                       1. Talaba / Nomzod
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-300 border border-sky-500/25">
                       /nomzod
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
                     Dars jadvaliga mos amaliyot, rezyume, smenali ishlar va e-imzoli kundalik
                   </p>
                 </div>
@@ -714,29 +724,31 @@ function RoyxatdanOtishWizard() {
               {/* Option 2: Employer */}
               <div
                 onClick={() => setSelectedRole("EMPLOYER")}
-                className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
+                className={`p-4 rounded-2xl cursor-pointer transition-all flex items-start gap-3.5 ${
                   selectedRole === "EMPLOYER"
-                    ? "bg-emerald-950/25 border-emerald-500/80 ring-1 ring-emerald-500/40"
-                    : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
+                    ? "skeuo-card border border-emerald-500/70 ring-1 ring-emerald-500/35"
+                    : "skeuo-well hover:-translate-y-0.5"
                 }`}
               >
                 <div
-                  className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "EMPLOYER" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    selectedRole === "EMPLOYER"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "skeuo-well-sm text-emerald-700 dark:text-emerald-300"
                   }`}
                 >
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-zinc-100">
+                    <span className="text-xs font-bold text-[var(--fb-ink)]">
                       2. Korxona / HR Vakili
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
                       /employer
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
                     Tashkilot taklifini qabul qilish, vakansiyalar, nomzod Kanban va mentorlik
                   </p>
                 </div>
@@ -745,29 +757,31 @@ function RoyxatdanOtishWizard() {
               {/* Option 3: Academic */}
               <div
                 onClick={() => setSelectedRole("ACADEMIC")}
-                className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
+                className={`p-4 rounded-2xl cursor-pointer transition-all flex items-start gap-3.5 ${
                   selectedRole === "ACADEMIC"
-                    ? "bg-indigo-950/25 border-indigo-500/80 ring-1 ring-indigo-500/40"
-                    : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
+                    ? "skeuo-card border border-indigo-500/70 ring-1 ring-indigo-500/35"
+                    : "skeuo-well hover:-translate-y-0.5"
                 }`}
               >
                 <div
-                  className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "ACADEMIC" ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-400"
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    selectedRole === "ACADEMIC"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "skeuo-well-sm text-indigo-700 dark:text-indigo-300"
                   }`}
                 >
                   <School className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-zinc-100">
+                    <span className="text-xs font-bold text-[var(--fb-ink)]">
                       3. OTM / Universitet Vakili
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 border border-indigo-500/25">
                       /university
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
                     Kafedra tayinlovini tasdiqlash, dars jadvali va yakuniy akademik xulosalar
                   </p>
                 </div>
@@ -776,29 +790,31 @@ function RoyxatdanOtishWizard() {
               {/* Option 4: Platform Operator */}
               <div
                 onClick={() => setSelectedRole("OPERATOR")}
-                className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3.5 ${
+                className={`p-4 rounded-2xl cursor-pointer transition-all flex items-start gap-3.5 ${
                   selectedRole === "OPERATOR"
-                    ? "bg-amber-950/25 border-amber-500/80 ring-1 ring-amber-500/40"
-                    : "bg-[#18181b] border-zinc-800 hover:border-zinc-700"
+                    ? "skeuo-card border border-amber-500/70 ring-1 ring-amber-500/35"
+                    : "skeuo-well hover:-translate-y-0.5"
                 }`}
               >
                 <div
-                  className={`p-2.5 rounded-lg shrink-0 ${
-                    selectedRole === "OPERATOR" ? "bg-amber-600 text-zinc-950" : "bg-zinc-800 text-zinc-400"
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    selectedRole === "OPERATOR"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "skeuo-well-sm text-amber-700 dark:text-amber-300"
                   }`}
                 >
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-zinc-100">
+                    <span className="text-xs font-bold text-[var(--fb-ink)]">
                       4. Platforma Operatori / SOC
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/12 text-amber-800 dark:text-amber-300 border border-amber-500/25">
                       /operator
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
                     Dual-control platforma vakolati tayyorlash, moderatsiya va SOC audit nazorati
                   </p>
                 </div>
@@ -811,34 +827,34 @@ function RoyxatdanOtishWizard() {
                 setErrorMessage(null);
                 setStep(2);
               }}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 mt-4"
+              className="w-full py-3 skeuo-btn-obsidian rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 mt-4"
             >
               <span>Davom etish</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/80 text-[11px]">
+            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--fb-border)] text-[11px]">
               <Link
                 href="/talaba/royxatdan-otish"
-                className="rounded-lg border border-sky-500/20 bg-sky-500/[0.05] px-2.5 py-1.5 text-sky-300 hover:bg-sky-500/10 text-center font-medium transition-colors"
+                className="rounded-xl skeuo-well-sm border border-sky-500/25 px-2.5 py-2 text-sky-700 dark:text-sky-300 hover:border-sky-500/50 text-center font-semibold transition-colors"
               >
                 Alohida Talaba ulanishi
               </Link>
               <Link
                 href="/korxona/royxatdan-otish"
-                className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.05] px-2.5 py-1.5 text-emerald-300 hover:bg-emerald-500/10 text-center font-medium transition-colors"
+                className="rounded-xl skeuo-well-sm border border-emerald-500/25 px-2.5 py-2 text-emerald-700 dark:text-emerald-300 hover:border-emerald-500/50 text-center font-semibold transition-colors"
               >
                 Alohida Korxona ulanishi
               </Link>
               <Link
                 href="/universitet/royxatdan-otish"
-                className="rounded-lg border border-indigo-500/20 bg-indigo-500/[0.05] px-2.5 py-1.5 text-indigo-300 hover:bg-indigo-500/10 text-center font-medium transition-colors"
+                className="rounded-xl skeuo-well-sm border border-indigo-500/25 px-2.5 py-2 text-indigo-700 dark:text-indigo-300 hover:border-indigo-500/50 text-center font-semibold transition-colors"
               >
                 Alohida OTM ulanishi
               </Link>
               <Link
                 href="/operator/kirish"
-                className="rounded-lg border border-amber-500/20 bg-amber-500/[0.05] px-2.5 py-1.5 text-amber-300 hover:bg-amber-500/10 text-center font-medium transition-colors"
+                className="rounded-xl skeuo-well-sm border border-amber-500/25 px-2.5 py-2 text-amber-800 dark:text-amber-300 hover:border-amber-500/50 text-center font-semibold transition-colors"
               >
                 Operator SOC kirishi
               </Link>

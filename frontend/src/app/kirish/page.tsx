@@ -144,16 +144,20 @@ function KirishForm() {
     <div className="w-full max-w-md space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
-        <Link href="/" className="inline-flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition">
+        <Link href="/" className="inline-flex items-center gap-2.5 group">
+          <div
+            data-skeuo-dark="true"
+            className="relative w-11 h-11 rounded-2xl skeuo-obsidian flex items-center justify-center font-display font-bold text-white shadow-lg group-hover:scale-105 transition"
+          >
             FB
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#D95F2B] ring-2 ring-[var(--fb-bg)]" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">FlexBridge</span>
+          <span className="font-display text-xl font-bold tracking-tight text-[var(--fb-ink)]">FlexBridge</span>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
           {mfaRequired ? "Ikki Bosqichli Tasdiqlash" : "Tizimga Kirish"}
         </h1>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-[var(--fb-ink-muted)]">
           {mfaRequired
             ? "Ilovangizdagi (Google Authenticator) 6 xonali kodni kiriting"
             : "Talabalar, korxonalar, OTMlar va operatorlar uchun yagona kirish — rolingizga mos kabinetga avtomatik yo‘naltirilasiz"}
@@ -165,43 +169,43 @@ function KirishForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <Link
             href="/talaba/kirish"
-            className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] px-3 py-2.5 text-xs hover:bg-sky-500/10 transition-colors"
+            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-sky-500/25 px-3.5 py-2.5 text-xs hover:border-sky-500/50 transition-colors"
           >
             <div>
-              <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
-              <p className="text-[11px] text-zinc-400">Talaba kirishi</p>
+              <p className="font-bold text-sky-700 dark:text-sky-300">Talaba / Nomzod</p>
+              <p className="text-[11px] text-[var(--fb-ink-muted)]">Talaba kirishi</p>
             </div>
-            <span className="shrink-0 font-semibold text-sky-400">Kirish &rarr;</span>
+            <span className="shrink-0 font-bold text-sky-700 dark:text-sky-400">Kirish &rarr;</span>
           </Link>
           <Link
             href="/korxona/kirish"
-            className="flex items-center justify-between gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-3 py-2.5 text-xs hover:bg-emerald-500/10 transition-colors"
+            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-emerald-500/25 px-3.5 py-2.5 text-xs hover:border-emerald-500/50 transition-colors"
           >
             <div>
-              <p className="font-semibold text-emerald-300">Korxona / HR</p>
-              <p className="text-[11px] text-zinc-400">Korxona kirishi</p>
+              <p className="font-bold text-emerald-700 dark:text-emerald-300">Korxona / HR</p>
+              <p className="text-[11px] text-[var(--fb-ink-muted)]">Korxona kirishi</p>
             </div>
-            <span className="shrink-0 font-semibold text-emerald-400">Kirish &rarr;</span>
+            <span className="shrink-0 font-bold text-emerald-700 dark:text-emerald-400">Kirish &rarr;</span>
           </Link>
           <Link
             href="/universitet/kirish"
-            className="flex items-center justify-between gap-2 rounded-xl border border-indigo-500/25 bg-indigo-500/[0.06] px-3 py-2.5 text-xs hover:bg-indigo-500/10 transition-colors"
+            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-indigo-500/25 px-3.5 py-2.5 text-xs hover:border-indigo-500/50 transition-colors"
           >
             <div>
-              <p className="font-semibold text-indigo-300">Universitet / OTM</p>
-              <p className="text-[11px] text-zinc-400">OTM kirishi</p>
+              <p className="font-bold text-indigo-700 dark:text-indigo-300">Universitet / OTM</p>
+              <p className="text-[11px] text-[var(--fb-ink-muted)]">OTM kirishi</p>
             </div>
-            <span className="shrink-0 font-semibold text-indigo-400">Kirish &rarr;</span>
+            <span className="shrink-0 font-bold text-indigo-700 dark:text-indigo-400">Kirish &rarr;</span>
           </Link>
           <Link
             href="/operator/kirish"
-            className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-3 py-2.5 text-xs hover:bg-amber-500/10 transition-colors"
+            className="flex items-center justify-between gap-2 rounded-2xl skeuo-well-sm border border-amber-500/25 px-3.5 py-2.5 text-xs hover:border-amber-500/50 transition-colors"
           >
             <div>
-              <p className="font-semibold text-amber-300">Operator / SOC</p>
-              <p className="text-[11px] text-zinc-400">Operator kirishi</p>
+              <p className="font-bold text-amber-800 dark:text-amber-300">Operator / SOC</p>
+              <p className="text-[11px] text-[var(--fb-ink-muted)]">Operator kirishi</p>
             </div>
-            <span className="shrink-0 font-semibold text-amber-400">Kirish &rarr;</span>
+            <span className="shrink-0 font-bold text-amber-800 dark:text-amber-400">Kirish &rarr;</span>
           </Link>
         </div>
 
@@ -224,7 +228,7 @@ function KirishForm() {
           /* Step 1: Destination & Password Form */
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--fb-ink)] mb-1.5">
                 Telefon raqam yoki Elektron pochta
               </label>
               <div className="relative">
@@ -234,20 +238,20 @@ function KirishForm() {
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   placeholder="+998901234567 yoki pochta@misol.uz"
-                  className="w-full bg-[#18181b] border border-zinc-700/80 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition"
+                  className="w-full skeuo-input rounded-2xl px-4 py-2.5 text-sm pr-10"
                 />
-                <Smartphone className="w-4 h-4 text-zinc-500 absolute right-3.5 top-3" />
+                <Smartphone className="w-4 h-4 text-[var(--fb-ink-muted)] absolute right-3.5 top-3" />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium text-zinc-300">
+                <label className="text-xs font-semibold text-[var(--fb-ink)]">
                   Parol
                 </label>
                 <Link
                   href="/haqida"
-                  className="text-[11px] text-zinc-400 hover:text-indigo-400 transition"
+                  className="text-[11px] font-medium text-[var(--fb-ink-muted)] hover:text-[#D95F2B] transition"
                 >
                   Yordam kerakmi?
                 </Link>
@@ -259,12 +263,12 @@ function KirishForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-[#18181b] border border-zinc-700/80 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition pr-10"
+                  className="w-full skeuo-input rounded-2xl px-4 py-2.5 text-sm pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-zinc-400 hover:text-zinc-200 transition"
+                  className="absolute right-3.5 top-3 text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -404,48 +408,48 @@ export default function KirishPage() {
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] items-start">
           {/* Left Architectural Context Panel */}
           <aside className="hidden lg:flex flex-col gap-5 rounded-[28px] skeuo-card p-7">
-            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full skeuo-well-sm px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#D95F2B]">
               Yagona autentifikatsiya
             </div>
             <div>
-              <h2 className="font-heading text-2xl font-bold tracking-tight text-white">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
                 Har bir rol uchun alohida xavfsiz ish muhiti
               </h2>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              <p className="mt-2 text-xs leading-relaxed text-[var(--fb-ink-muted)]">
                 Kirishingiz bilan tizim sizni tegishli kabinetga yo‘naltiradi: Talaba, Korxona HR, OTM Dekanat yoki Operator SOC.
               </p>
             </div>
-            <div className="space-y-2.5 pt-2 border-t border-white/[0.06] text-xs">
+            <div className="space-y-2.5 pt-2 border-t border-[var(--fb-border)] text-xs">
               <Link
                 href="/talaba/kirish"
-                className="block rounded-xl border border-sky-500/25 bg-sky-500/[0.06] p-3 hover:border-sky-400/50 hover:bg-sky-500/10 transition-colors"
+                className="block rounded-2xl skeuo-well p-3.5 border border-sky-500/25 hover:border-sky-500/50 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
-                  <span className="text-[10px] font-semibold text-sky-400">Alohida kirish &rarr;</span>
+                  <p className="font-bold text-sky-700 dark:text-sky-300">Talaba / Nomzod</p>
+                  <span className="text-[10px] font-bold text-sky-700 dark:text-sky-400">Alohida kirish &rarr;</span>
                 </div>
-                <p className="text-zinc-400 text-[11px] mt-0.5">HEMIS jadvali, rezyume, arizalar va ikki tomonlama e-imzoli kundalik.</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">HEMIS jadvali, rezyume, arizalar va ikki tomonlama e-imzoli kundalik.</p>
               </Link>
               <Link
                 href="/korxona/kirish"
-                className="block rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3 hover:border-emerald-400/45 hover:bg-emerald-500/[0.08] transition-colors"
+                className="block rounded-2xl skeuo-well p-3.5 border border-emerald-500/25 hover:border-emerald-500/50 transition-colors"
               >
-                <p className="font-semibold text-emerald-300">Ish Beruvchi / Korxona →</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">Nomzod Kanban, mentorlik tasdig‘i, jamoa va kvota boshqaruvi.</p>
+                <p className="font-bold text-emerald-700 dark:text-emerald-300">Ish Beruvchi / Korxona →</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">Nomzod Kanban, mentorlik tasdig‘i, jamoa va kvota boshqaruvi.</p>
               </Link>
               <Link
                 href="/universitet/kirish"
-                className="block rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-3 hover:border-indigo-400/50 transition-colors"
+                className="block rounded-2xl skeuo-well p-3.5 border border-indigo-500/25 hover:border-indigo-500/50 transition-colors"
               >
-                <p className="font-semibold text-indigo-300">Universitet / OTM &rarr;</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">Kafedra taqsimoti, dars jadvali integratsiyasi va yakuniy xulosalar.</p>
+                <p className="font-bold text-indigo-700 dark:text-indigo-300">Universitet / OTM &rarr;</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">Kafedra taqsimoti, dars jadvali integratsiyasi va yakuniy xulosalar.</p>
               </Link>
               <Link
                 href="/operator/kirish"
-                className="block rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-3 hover:border-amber-400/50 transition-colors"
+                className="block rounded-2xl skeuo-well p-3.5 border border-amber-500/25 hover:border-amber-500/50 transition-colors"
               >
-                <p className="font-semibold text-amber-300">Platforma Operatori (SOC) &rarr;</p>
-                <p className="text-zinc-400 text-[11px] mt-0.5">Hash-chain audit, KYB/OTM moderatsiyasi, moliya va xavfsizlik nazorati.</p>
+                <p className="font-bold text-amber-800 dark:text-amber-300">Platforma Operatori (SOC) &rarr;</p>
+                <p className="text-[var(--fb-ink-muted)] text-[11px] mt-0.5">Hash-chain audit, KYB/OTM moderatsiyasi, moliya va xavfsizlik nazorati.</p>
               </Link>
             </div>
           </aside>

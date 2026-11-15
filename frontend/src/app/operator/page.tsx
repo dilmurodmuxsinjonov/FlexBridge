@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Loader2,
   LogIn,
-  LogOut,
   AlertCircle,
   ShieldAlert,
   ClipboardCheck,
@@ -49,7 +48,6 @@ import {
   fetchOperatorFinanceSummary,
   fetchOperatorReconciliation,
   approveOperatorRefund,
-  logoutUser,
   AuthUser,
   OperatorAuditEventItem,
   OperatorVerificationCaseItem,
@@ -353,25 +351,6 @@ export default function OperatorPortal() {
     }
   }, [currentUser, activeTab, loadFinanceHub]);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setAuditEvents([]);
-    setCases([]);
-    setTickets([]);
-    setRestoreRuns([]);
-    setAnalytics(null);
-    setFinanceSummary(null);
-    setReconciliationItems([]);
-    setReconciliationSummary(null);
-    setEventsError(null);
-    setCasesError(null);
-    setTicketsError(null);
-    setFinanceError(null);
-    setReconciliationError(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
-
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     loadAuditEvents();
@@ -594,18 +573,14 @@ export default function OperatorPortal() {
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                SOC konsol faol
+              </span>
             ) : (
               <Link
                 href="/operator/kirish"
-                className="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Operator sifatida kirish</span>
@@ -617,22 +592,22 @@ export default function OperatorPortal() {
 
       {/* UNAUTHENTICATED NOTICE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-[#121214]/80 border border-amber-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+        <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-amber-700 dark:text-amber-400">
             <Lock className="w-7 h-7" />
           </div>
-          <div className="flex flex-col gap-1 max-w-md">
-            <h2 className="text-base md:text-lg font-heading font-semibold text-white">
+          <div className="flex flex-col gap-1.5 max-w-md">
+            <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
               Xavfsizlik audit va operator boshqaruviga kirish uchun tizimga kiring
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
               Ushbu bo‘lim faqat vakolatli xavfsizlik auditorlari va tizim ma’murlari (ADMIN, AUDITOR, OPERATOR) uchun mo‘ljallangan.
             </p>
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/operator/kirish"
-              className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>SOC alohida kirishi</span>
@@ -640,7 +615,7 @@ export default function OperatorPortal() {
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-amber-800 dark:text-amber-300"
             >
               Tezkor terminal kirishi
             </button>
@@ -664,36 +639,36 @@ export default function OperatorPortal() {
         }));
         return (
           <div className="flex flex-col gap-5">
-            <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_320px]">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <SkeuoStatCard
-                  title="Audit hodisalari"
-                  value={auditEvents.length}
-                  subtitle="O‘zgarmas hash-zanjir"
-                  icon={FileCheck2}
-                  tone="amber"
-                  active={activeTab === "AUDIT"}
-                  onClick={() => setActiveTab("AUDIT")}
-                />
-                <SkeuoStatCard
-                  title="KYC / KYB navbati"
-                  value={cases.length}
-                  subtitle={`${verifiedCount} ta ko‘rib chiqilgan`}
-                  icon={ClipboardCheck}
-                  tone="emerald"
-                  active={activeTab === "VERIFICATION"}
-                  onClick={() => setActiveTab("VERIFICATION")}
-                />
-                <SkeuoStatCard
-                  title="Support & SLA"
-                  value={tickets.length}
-                  subtitle="Ochiq operator murojaatlari"
-                  icon={LifeBuoy}
-                  tone="sky"
-                  active={activeTab === "SUPPORT_OPS"}
-                  onClick={() => setActiveTab("SUPPORT_OPS")}
-                />
-              </div>
+            <section className="grid gap-4 sm:grid-cols-3">
+              <SkeuoStatCard
+                title="Audit hodisalari"
+                value={auditEvents.length}
+                subtitle="O‘zgarmas hash-zanjir"
+                icon={FileCheck2}
+                tone="amber"
+                active={activeTab === "AUDIT"}
+                onClick={() => setActiveTab("AUDIT")}
+              />
+              <SkeuoStatCard
+                title="KYC / KYB navbati"
+                value={cases.length}
+                subtitle={`${verifiedCount} ta ko‘rib chiqilgan`}
+                icon={ClipboardCheck}
+                tone="emerald"
+                active={activeTab === "VERIFICATION"}
+                onClick={() => setActiveTab("VERIFICATION")}
+              />
+              <SkeuoStatCard
+                title="Support & SLA"
+                value={tickets.length}
+                subtitle="Ochiq operator murojaatlari"
+                icon={LifeBuoy}
+                tone="sky"
+                active={activeTab === "SUPPORT_OPS"}
+                onClick={() => setActiveTab("SUPPORT_OPS")}
+              />
+            </section>
+            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
               <SkeuoVerticalMeter
                 title="KYB tekshiruv ulushi"
                 percentage={kybPct}

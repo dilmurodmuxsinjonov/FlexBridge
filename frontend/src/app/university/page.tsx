@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Loader2,
   LogIn,
-  LogOut,
   FileCheck,
   BookOpen,
   Award,
@@ -45,7 +44,6 @@ import {
   fetchInstitutionSupervisions,
   fetchInstitutionAcademicAgreements,
   fetchUniversityAnalytics,
-  logoutUser,
   AuthUser,
   AcademicReviewQueueItem,
   TeacherAcademicAssignmentItem,
@@ -606,22 +604,6 @@ export default function UniversityPortal() {
     };
   }, [loadQueue, loadAssignments, loadCoordinatorQueue]);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setQueueItems([]);
-    setAssignments([]);
-    setCoordinatorQueue([]);
-    setQueueError(null);
-    setAssignmentsError(null);
-    setCoordError(null);
-    setIsReviewModalOpen(false);
-    setSelectedReviewItem(null);
-    setIsConclusionModalOpen(false);
-    setIsNominateModalOpen(false);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
-
   const handleOpenReview = (item: AcademicReviewQueueItem) => {
     setSelectedReviewItem(item);
     setIsReviewModalOpen(true);
@@ -831,23 +813,19 @@ export default function UniversityPortal() {
               </div>
             )}
             {isAuthLoading ? (
-              <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+              <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-muted)]">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 active:scale-[0.98]"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                OTM sessiyasi faol
+              </span>
             ) : (
               <Link
                 href="/universitet/kirish"
-                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>O‘qituvchi sifatida kirish</span>
@@ -859,22 +837,22 @@ export default function UniversityPortal() {
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-surface-card/60 border border-indigo-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
+        <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-indigo-700 dark:text-indigo-400">
             <GraduationCap className="w-7 h-7" />
           </div>
-          <div className="flex flex-col gap-1 max-w-md">
-            <h2 className="text-base md:text-lg font-heading font-semibold text-white">
+          <div className="flex flex-col gap-1.5 max-w-md">
+            <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
               Akademik portalga kirish talab etiladi
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
               Talabalarning amaliyot kundaliklarini baholash, yakuniy akademik xulosalarni rasmiylashtirish yoki o‘qituvchilarni biriktirish uchun tizimga kiring.
             </p>
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/universitet/kirish"
-              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+              className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>OTM alohida kirishi</span>
@@ -882,13 +860,13 @@ export default function UniversityPortal() {
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-semibold text-indigo-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-indigo-700 dark:text-indigo-300"
             >
               Tezkor oyna orqali kirish
             </button>
             <Link
               href="/universitet/royxatdan-otish"
-              className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-xs font-semibold text-zinc-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold"
             >
               OTM vakili ulanishi
             </Link>
@@ -902,36 +880,36 @@ export default function UniversityPortal() {
         const assignedPct = Math.round((assignments.length / totalTrackable) * 100);
         return (
           <div className="flex flex-col gap-5">
-            <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_320px]">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <SkeuoStatCard
-                  title="Kundaliklar navbati"
-                  value={queueItems.length}
-                  subtitle="Akademik ko‘rik kutilmoqda"
-                  icon={FileCheck}
-                  tone="orange"
-                  active={activeTab === "queue"}
-                  onClick={() => setActiveTab("queue")}
-                />
-                <SkeuoStatCard
-                  title="Biriktirilgan amaliyotlar"
-                  value={assignments.length}
-                  subtitle="O‘qituvchi nazorati ostida"
-                  icon={BookOpen}
-                  tone="indigo"
-                  active={activeTab === "assignments"}
-                  onClick={() => setActiveTab("assignments")}
-                />
-                <SkeuoStatCard
-                  title="Kafedra taqsimoti"
-                  value={coordinatorQueue.length}
-                  subtitle="Rahbar tayinlovi kutilmoqda"
-                  icon={Users}
-                  tone="sky"
-                  active={activeTab === "coordinator"}
-                  onClick={() => setActiveTab("coordinator")}
-                />
-              </div>
+            <section className="grid gap-4 sm:grid-cols-3">
+              <SkeuoStatCard
+                title="Kundaliklar navbati"
+                value={queueItems.length}
+                subtitle="Akademik ko‘rik kutilmoqda"
+                icon={FileCheck}
+                tone="orange"
+                active={activeTab === "queue"}
+                onClick={() => setActiveTab("queue")}
+              />
+              <SkeuoStatCard
+                title="Biriktirilgan amaliyotlar"
+                value={assignments.length}
+                subtitle="O‘qituvchi nazorati ostida"
+                icon={BookOpen}
+                tone="indigo"
+                active={activeTab === "assignments"}
+                onClick={() => setActiveTab("assignments")}
+              />
+              <SkeuoStatCard
+                title="Kafedra taqsimoti"
+                value={coordinatorQueue.length}
+                subtitle="Rahbar tayinlovi kutilmoqda"
+                icon={Users}
+                tone="sky"
+                active={activeTab === "coordinator"}
+                onClick={() => setActiveTab("coordinator")}
+              />
+            </section>
+            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
               <SkeuoVerticalMeter
                 title="Biriktiruv qamrovi"
                 percentage={assignedPct}
