@@ -33,6 +33,7 @@ import {
   fetchCandidateApplicationDetail,
   withdrawCandidateApplication,
   reapplyCandidateApplication,
+  respondToCandidateOffer,
   fetchAuthMe,
   logoutUser,
   AuthUser,
@@ -244,6 +245,40 @@ export default function CandidateApplicationsPage() {
     }
   };
 
+  // Offer Response Handler (API-043 / FB-164)
+  const [isRespondingOffer, setIsRespondingOffer] = useState(false);
+  const [offerResponseFeedback, setOfferResponseFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+    engagementId?: string;
+  } | null>(null);
+
+  const handleRespondOffer = async (decision: "ACCEPT" | "DECLINE") => {
+    if (!detail?.offer) return;
+    setIsRespondingOffer(true);
+    setOfferResponseFeedback(null);
+    try {
+      const res = await respondToCandidateOffer(detail.offer.id, { decision });
+      setOfferResponseFeedback({
+        type: "success",
+        message: res.message || (decision === "ACCEPT" ? "Taklif muvaffaqiyatli qabul qilindi!" : "Taklif rad etildi"),
+        engagementId: res.engagement_id,
+      });
+      // Refresh list and detail
+      await loadData(activeTab);
+      if (selectedAppId) {
+        await openDetail(selectedAppId);
+      }
+    } catch (err: unknown) {
+      setOfferResponseFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Taklifga javob berishda xatolik yuz berdi",
+      });
+    } finally {
+      setIsRespondingOffer(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logoutUser();
     setUser(null);
@@ -304,6 +339,31 @@ export default function CandidateApplicationsPage() {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Sub-Navigation between Candidate Pages */}
+      <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
+        <Link
+          href="/nomzod"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Kasbiy Profil
+        </Link>
+        <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
+          Mening Arizalarim
+        </span>
+        <Link
+          href="/nomzod/shartnomalar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Shartnomalar & Amaliyot
+        </Link>
+        <Link
+          href="/nomzod/kundalik"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Amaliyot Kundaligi
+        </Link>
       </div>
 
       {/* Unauthenticated View */}
@@ -641,21 +701,92 @@ export default function CandidateApplicationsPage() {
                     </div>
                   )}
 
-                  {/* Active Offer Notice if offered */}
+                  {/* Active Offer Notice if offered (API-043 / FB-164) */}
                   {detail.offer && (
                     <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
-                      <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs mb-2">
-                        <Award className="h-4 w-4" />
-                        <span>Ish taklifi (Offer)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
+                          <Award className="h-4 w-4" />
+                          <span>Ish taklifi (Offer - API-043)</span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            detail.offer.status === "ACCEPTED"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                              : detail.offer.status === "DECLINED"
+                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                              : detail.offer.status === "EXPIRED"
+                              ? "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                              : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                          }`}
+                        >
+                          {detail.offer.status}
+                        </span>
                       </div>
-                      <div className="text-xs text-zinc-300">
-                        <p>Holat: <span className="font-bold text-emerald-300">{detail.offer.status}</span></p>
+
+                      <div className="text-xs text-zinc-300 space-y-1">
+                        <p>
+                          Holat: <span className="font-bold text-emerald-300">{detail.offer.status}</span>
+                        </p>
                         {detail.offer.expires_at && (
-                          <p className="mt-1 text-zinc-400 text-[11px]">
+                          <p className="text-zinc-400 text-[11px]">
                             Amal qilish muddati: {new Date(detail.offer.expires_at).toLocaleString("uz-UZ")}
                           </p>
                         )}
                       </div>
+
+                      {/* Offer Action Buttons if ISSUED */}
+                      {detail.offer.status === "ISSUED" && (
+                        <div className="mt-4 pt-3 border-t border-emerald-500/20 flex flex-col gap-2.5">
+                          <p className="text-[11px] text-zinc-300">
+                            Ushbu taklifni qabul qilasizmi yoki rad etasizmi? Qabul qilinsa, tashkilot bilan rasmiy ish/amaliyot shartnomasi rasmiylashtiriladi.
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleRespondOffer("ACCEPT")}
+                              disabled={isRespondingOffer}
+                              className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                            >
+                              {isRespondingOffer ? (
+                                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              )}
+                              <span>Taklifni qabul qilish (Accept)</span>
+                            </button>
+                            <button
+                              onClick={() => handleRespondOffer("DECLINE")}
+                              disabled={isRespondingOffer}
+                              className="py-2 px-3 rounded-lg border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                            >
+                              <XCircle className="h-3.5 w-3.5" />
+                              <span>Rad etish</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Offer Feedback */}
+                      {offerResponseFeedback && (
+                        <div
+                          className={`mt-3 p-2.5 rounded-lg text-xs ${
+                            offerResponseFeedback.type === "success"
+                              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
+                              : "bg-rose-500/10 border border-rose-500/30 text-rose-300"
+                          }`}
+                        >
+                          <p>{offerResponseFeedback.message}</p>
+                          {offerResponseFeedback.engagementId && (
+                            <Link
+                              href={`/nomzod/shartnomalar?engagement_id=${offerResponseFeedback.engagementId}`}
+                              className="inline-flex items-center gap-1.5 mt-2 text-primary hover:underline font-semibold"
+                            >
+                              <span>Ish munosabatini tasdiqlash sahifasiga o'tish</span>
+                              <ArrowRight className="h-3 w-3" />
+                            </Link>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   User,
@@ -403,6 +404,31 @@ export default function CandidateProfileHub() {
           </div>
         </div>
       </section>
+
+      {/* Sub-Navigation between Candidate Pages */}
+      <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 text-xs overflow-x-auto">
+        <span className="px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary font-semibold whitespace-nowrap">
+          Kasbiy Profil
+        </span>
+        <Link
+          href="/nomzod/arizalar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Mening Arizalarim
+        </Link>
+        <Link
+          href="/nomzod/shartnomalar"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Shartnomalar & Amaliyot
+        </Link>
+        <Link
+          href="/nomzod/kundalik"
+          className="px-3 py-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors whitespace-nowrap"
+        >
+          Amaliyot Kundaligi
+        </Link>
+      </div>
 
       {/* LOGIN REQUIRED GATE */}
       {!currentUser && !isAuthLoading && (

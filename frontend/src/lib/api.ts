@@ -1861,3 +1861,211 @@ export async function fetchOrganizationPlacements(
   return (data.items || []) as OrganizationPlacementItem[];
 }
 
+// ---------------------------------------------------------------------------
+// Candidate Offer Acceptance, Dual-Confirmed Job Engagements & Placements Hub (FB-164)
+// ---------------------------------------------------------------------------
+
+export interface OfferRespondPayload {
+  decision: "ACCEPT" | "DECLINE";
+  note?: string;
+}
+
+export interface OfferRespondResponse {
+  contract_id: string;
+  id: string;
+  status: string;
+  accepted_at?: string;
+  opportunity_id?: string;
+  vacancies_remaining?: number;
+  engagement_id?: string;
+  message: string;
+}
+
+export interface JobEngagementConfirmation {
+  id: string;
+  side: "CANDIDATE" | "EMPLOYER";
+  action: "CONFIRM_START" | "CONFIRM_END" | "DISPUTE_START" | "DISPUTE_END";
+  response: string;
+  occurred_at: string;
+}
+
+export interface JobEngagementDetail {
+  contract_id: string;
+  id: string;
+  application_id: string;
+  offer_id: string;
+  status: "PENDING_START_CONFIRMATION" | "ACTIVE" | "COMPLETED" | "DISPUTED";
+  start_date: string | null;
+  end_date: string | null;
+  terms_snapshot: Record<string, unknown>;
+  confirmed_started_at: string | null;
+  my_side: "CANDIDATE" | "EMPLOYER";
+  opportunity: {
+    id: string;
+    organization_id: string;
+    kind: string;
+    status: string;
+  };
+  confirmations: JobEngagementConfirmation[];
+  pending_sides: string[];
+}
+
+export interface EngagementConfirmationPayload {
+  action: "CONFIRM_START" | "CONFIRM_END" | "DISPUTE_START" | "DISPUTE_END";
+  note?: string;
+}
+
+export interface PlacementPlanTask {
+  code: string;
+  title: string;
+  expected_result: string;
+  required: boolean;
+  target_minutes?: number | null;
+}
+
+export interface PlacementPlanDetail {
+  contract_id: string;
+  placement_id: string;
+  status: string;
+  terms_id: string;
+  version: number;
+  start_date: string;
+  end_date: string;
+  academic_required: boolean;
+  academic_scope: Record<string, unknown>;
+  title?: string;
+  objectives?: string;
+  daily_limit_minutes: number;
+  weekly_limit_minutes: number;
+  required_minutes: number;
+  tasks: PlacementPlanTask[];
+}
+
+export interface PlacementAcceptPayload {
+  terms_id: string;
+  version: number;
+  idempotency_key?: string;
+}
+
+export async function respondToCandidateOffer(
+  offerId: string,
+  payload: OfferRespondPayload
+): Promise<OfferRespondResponse> {
+  const res = await fetch(`/api/bff/candidate/offers/${encodeURIComponent(offerId)}/respond`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "RESPOND_TO_OFFER_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OfferRespondResponse;
+}
+
+export async function fetchCandidateEngagement(
+  engagementId: string
+): Promise<JobEngagementDetail> {
+  const res = await fetch(`/api/bff/candidate/engagements/${encodeURIComponent(engagementId)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ENGAGEMENT_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as JobEngagementDetail;
+}
+
+export async function submitEngagementConfirmation(
+  engagementId: string,
+  payload: EngagementConfirmationPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/candidate/engagements/${encodeURIComponent(engagementId)}/confirmations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUBMIT_ENGAGEMENT_CONFIRMATION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+export async function fetchCandidatePlacementsList(
+  limit = 50,
+  after?: string
+): Promise<{ contract_id: string; items: CandidatePlacementItem[]; next_after: string | null }> {
+  const query = new URLSearchParams();
+  query.set("limit", String(limit));
+  if (after) query.set("after", after);
+  const res = await fetch(`/api/bff/candidate/placements?${query.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_CANDIDATE_PLACEMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { contract_id: string; items: CandidatePlacementItem[]; next_after: string | null };
+}
+
+export async function fetchPlacementPlanDetail(
+  placementId: string
+): Promise<PlacementPlanDetail> {
+  const res = await fetch(`/api/bff/candidate/placements/${encodeURIComponent(placementId)}/plan`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_PLACEMENT_PLAN_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as PlacementPlanDetail;
+}
+
+export async function acceptCandidatePlacementTerms(
+  placementId: string,
+  payload: PlacementAcceptPayload
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/bff/candidate/placements/${encodeURIComponent(placementId)}/accept`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "ACCEPT_PLACEMENT_TERMS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as Record<string, unknown>;
+}
+
+
