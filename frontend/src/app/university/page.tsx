@@ -17,6 +17,10 @@ import {
   Send,
   UserCheck,
   X,
+  Download,
+  FileSpreadsheet,
+  Building2,
+  ExternalLink,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -26,6 +30,9 @@ import {
   submitAcademicPlacementConclusion,
   fetchCoordinatorAssignmentQueue,
   assignTeacherToPlacement,
+  generateInstitutionExport,
+  fetchInstitutionSupervisions,
+  fetchInstitutionAcademicAgreements,
   logoutUser,
   AuthUser,
   AcademicReviewQueueItem,
@@ -33,6 +40,9 @@ import {
   AcademicDecisionContext,
   CoordinatorAssignmentQueueItem,
   AcademicTeacherOption,
+  InstitutionExportReceipt,
+  StudentSupervisionItem,
+  AcademicAgreementItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
@@ -42,8 +52,8 @@ export default function UniversityPortal() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Active Tab: "queue" | "assignments" | "coordinator"
-  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator">("queue");
+  // Active Tab: "queue" | "assignments" | "coordinator" | "exports"
+  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "exports">("queue");
 
   // TAB 1: Daily Log Review Queue (API-105)
   const [queueItems, setQueueItems] = useState<AcademicReviewQueueItem[]>([]);
@@ -81,6 +91,21 @@ export default function UniversityPortal() {
   const [isNominateModalOpen, setIsNominateModalOpen] = useState(false);
   const [isSubmittingNominate, setIsSubmittingNominate] = useState(false);
   const [nominateStatusMsg, setNominateStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // TAB 4: Reports & Academic Agreements (API-100, API-098, API-101)
+  const [exportFormat, setExportFormat] = useState<"PDF" | "JSON">("PDF");
+  const [includeDetails, setIncludeDetails] = useState(true);
+  const [isGeneratingExport, setIsGeneratingExport] = useState(false);
+  const [exportReceipt, setExportReceipt] = useState<InstitutionExportReceipt | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const [supervisions, setSupervisions] = useState<StudentSupervisionItem[]>([]);
+  const [isLoadingSupervisions, setIsLoadingSupervisions] = useState(false);
+  const [supervisionsError, setSupervisionsError] = useState<string | null>(null);
+
+  const [academicAgreements, setAcademicAgreements] = useState<AcademicAgreementItem[]>([]);
+  const [isLoadingAgreements, setIsLoadingAgreements] = useState(false);
+  const [agreementsError, setAgreementsError] = useState<string | null>(null);
 
   const loadQueue = useCallback(async () => {
     setIsLoadingQueue(true);
@@ -122,6 +147,57 @@ export default function UniversityPortal() {
       setIsLoadingCoord(false);
     }
   }, []);
+
+  const loadReportsAndAgreements = useCallback(async (targetInstId: string) => {
+    if (!targetInstId) return;
+    setIsLoadingSupervisions(true);
+    setSupervisionsError(null);
+    setIsLoadingAgreements(true);
+    setAgreementsError(null);
+
+    try {
+      const sups = await fetchInstitutionSupervisions(targetInstId);
+      setSupervisions(sups);
+    } catch (err: unknown) {
+      setSupervisionsError(err instanceof Error ? err.message : "Superviziyalarni yuklashda xatolik.");
+      setSupervisions([]);
+    } finally {
+      setIsLoadingSupervisions(false);
+    }
+
+    try {
+      const agrs = await fetchInstitutionAcademicAgreements(targetInstId);
+      setAcademicAgreements(agrs);
+    } catch (err: unknown) {
+      setAgreementsError(err instanceof Error ? err.message : "Shartnomalarni yuklashda xatolik.");
+      setAcademicAgreements([]);
+    } finally {
+      setIsLoadingAgreements(false);
+    }
+  }, []);
+
+  const handleGenerateExport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!institutionId) {
+      setExportError("Muassasa ID aniqlanmadi.");
+      return;
+    }
+    setIsGeneratingExport(true);
+    setExportError(null);
+    try {
+      const receipt = await generateInstitutionExport(institutionId, {
+        format: exportFormat,
+        include_details: includeDetails,
+      });
+      setExportReceipt(receipt);
+      // reload supervisions & agreements
+      await loadReportsAndAgreements(institutionId);
+    } catch (err: unknown) {
+      setExportError(err instanceof Error ? err.message : "Hisobotni yaratishda xatolik yuz berdi.");
+    } finally {
+      setIsGeneratingExport(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -378,6 +454,24 @@ export default function UniversityPortal() {
                 {coordinatorQueue.length}
               </span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("exports");
+                if (institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                }
+              }}
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === "exports"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Yig&apos;ma Hisobotlar & Shartnomalar</span>
+            </button>
           </div>
         )}
       </section>
@@ -492,6 +586,293 @@ export default function UniversityPortal() {
         </div>
       )}
 
+      {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
+      {currentUser && activeTab === "exports" && (
+        <div className="flex flex-col gap-6">
+          {/* Header Card */}
+          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Hisobot & Shartnomalar Hub
+                </span>
+                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
+              </div>
+              <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
+              </p>
+            </div>
+
+            {institutionId && (
+              <button
+                type="button"
+                disabled={isLoadingSupervisions || isLoadingAgreements}
+                onClick={() => loadReportsAndAgreements(institutionId)}
+                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 self-start md:self-center disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSupervisions || isLoadingAgreements ? "animate-spin" : ""}`} />
+                <span>Yangilash</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Columns: Report Generator & Generated Receipt */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              {/* Generator Form */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileSpreadsheet className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
+                </div>
+
+                <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
+                  {exportError && (
+                    <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{exportError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-semibold text-zinc-300">
+                      Hujjat formati:
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 max-w-xs">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("PDF")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "PDF"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <FileCheck className="w-3.5 h-3.5" />
+                        <span>PDF Format</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("JSON")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "JSON"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>JSON Ma&apos;lumot</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      id="include-details"
+                      type="checkbox"
+                      checked={includeDetails}
+                      onChange={(e) => setIncludeDetails(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/[0.1] bg-surface text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="include-details" className="text-xs text-zinc-300 cursor-pointer">
+                      Barcha talabalar amaliyot va kundalik detallarini hisobotga qo&apos;shish
+                    </label>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-surface-container border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
+                    * Rasmiy ogohlantirish: Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi.
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isGeneratingExport}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/25"
+                  >
+                    {isGeneratingExport ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Hisobot shakllantirilmoqda...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Rasmiy Hisobotni Shakllantirish ({exportFormat})</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Export Receipt Preview (when available) */}
+              {exportReceipt && (
+                <div className="p-5 rounded-xl bg-surface-card border border-emerald-500/20 flex flex-col gap-4 shadow-sm animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <div>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                          Hisobot Tayyor (Kvitansiya #{exportReceipt.export_id.slice(0, 8)})
+                        </h4>
+                        <span className="text-[11px] text-zinc-400">
+                          Yaratilgan: {new Date(exportReceipt.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <a
+                      href={exportReceipt.download_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Yuklab Olish ({exportReceipt.export_format})</span>
+                    </a>
+                  </div>
+
+                  {/* Summary KPI Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-white/[0.06]">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Biriktirilgan Talabalar</span>
+                      <span className="text-xl font-bold font-mono text-white tabular-nums">
+                        {exportReceipt.summary.total_students_enrolled}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Superviziyalar</span>
+                      <span className="text-xl font-bold font-mono text-emerald-400 tabular-nums">
+                        {exportReceipt.summary.total_supervisions}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Amaliyotlar</span>
+                      <span className="text-xl font-bold font-mono text-blue-400 tabular-nums">
+                        {exportReceipt.summary.total_placements}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Ish Soatlari</span>
+                      <span className="text-xl font-bold font-mono text-amber-300 tabular-nums">
+                        {exportReceipt.summary.total_logged_hours} soat
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right 1 Column: Supervisions & Academic Agreements */}
+            <div className="flex flex-col gap-5">
+              {/* Student Supervisions Card (API-098) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Superviziyalar ({supervisions.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
+                </div>
+
+                {supervisionsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {supervisionsError}
+                  </div>
+                )}
+
+                {isLoadingSupervisions ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : supervisions.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Superviziyalar mavjud emas.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {supervisions.map((sup) => (
+                      <div
+                        key={sup.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">{sup.purpose}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            {sup.status || "ACTIVE"}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Academic Agreements Card (API-101) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Hamkorlik Shartnomalari ({academicAgreements.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
+                </div>
+
+                {agreementsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {agreementsError}
+                  </div>
+                )}
+
+                {isLoadingAgreements ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : academicAgreements.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Faol shartnomalar topilmadi.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {academicAgreements.map((agr) => (
+                      <div
+                        key={agr.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            {agr.status}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Shartnoma ID: #{agr.id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TAB 2: TEACHER ASSIGNED PLACEMENTS & CONCLUSIONS */}
       {currentUser && activeTab === "assignments" && (
         <div className="flex flex-col gap-6">
@@ -571,6 +952,293 @@ export default function UniversityPortal() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
+      {currentUser && activeTab === "exports" && (
+        <div className="flex flex-col gap-6">
+          {/* Header Card */}
+          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Hisobot & Shartnomalar Hub
+                </span>
+                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
+              </div>
+              <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
+              </p>
+            </div>
+
+            {institutionId && (
+              <button
+                type="button"
+                disabled={isLoadingSupervisions || isLoadingAgreements}
+                onClick={() => loadReportsAndAgreements(institutionId)}
+                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 self-start md:self-center disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSupervisions || isLoadingAgreements ? "animate-spin" : ""}`} />
+                <span>Yangilash</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Columns: Report Generator & Generated Receipt */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              {/* Generator Form */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileSpreadsheet className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
+                </div>
+
+                <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
+                  {exportError && (
+                    <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{exportError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-semibold text-zinc-300">
+                      Hujjat formati:
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 max-w-xs">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("PDF")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "PDF"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <FileCheck className="w-3.5 h-3.5" />
+                        <span>PDF Format</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("JSON")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "JSON"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>JSON Ma&apos;lumot</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      id="include-details"
+                      type="checkbox"
+                      checked={includeDetails}
+                      onChange={(e) => setIncludeDetails(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/[0.1] bg-surface text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="include-details" className="text-xs text-zinc-300 cursor-pointer">
+                      Barcha talabalar amaliyot va kundalik detallarini hisobotga qo&apos;shish
+                    </label>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-surface-container border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
+                    * Rasmiy ogohlantirish: Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi.
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isGeneratingExport}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/25"
+                  >
+                    {isGeneratingExport ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Hisobot shakllantirilmoqda...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Rasmiy Hisobotni Shakllantirish ({exportFormat})</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Export Receipt Preview (when available) */}
+              {exportReceipt && (
+                <div className="p-5 rounded-xl bg-surface-card border border-emerald-500/20 flex flex-col gap-4 shadow-sm animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <div>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                          Hisobot Tayyor (Kvitansiya #{exportReceipt.export_id.slice(0, 8)})
+                        </h4>
+                        <span className="text-[11px] text-zinc-400">
+                          Yaratilgan: {new Date(exportReceipt.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <a
+                      href={exportReceipt.download_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Yuklab Olish ({exportReceipt.export_format})</span>
+                    </a>
+                  </div>
+
+                  {/* Summary KPI Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-white/[0.06]">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Biriktirilgan Talabalar</span>
+                      <span className="text-xl font-bold font-mono text-white tabular-nums">
+                        {exportReceipt.summary.total_students_enrolled}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Superviziyalar</span>
+                      <span className="text-xl font-bold font-mono text-emerald-400 tabular-nums">
+                        {exportReceipt.summary.total_supervisions}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Amaliyotlar</span>
+                      <span className="text-xl font-bold font-mono text-blue-400 tabular-nums">
+                        {exportReceipt.summary.total_placements}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Ish Soatlari</span>
+                      <span className="text-xl font-bold font-mono text-amber-300 tabular-nums">
+                        {exportReceipt.summary.total_logged_hours} soat
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right 1 Column: Supervisions & Academic Agreements */}
+            <div className="flex flex-col gap-5">
+              {/* Student Supervisions Card (API-098) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Superviziyalar ({supervisions.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
+                </div>
+
+                {supervisionsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {supervisionsError}
+                  </div>
+                )}
+
+                {isLoadingSupervisions ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : supervisions.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Superviziyalar mavjud emas.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {supervisions.map((sup) => (
+                      <div
+                        key={sup.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">{sup.purpose}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            {sup.status || "ACTIVE"}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Academic Agreements Card (API-101) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Hamkorlik Shartnomalari ({academicAgreements.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
+                </div>
+
+                {agreementsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {agreementsError}
+                  </div>
+                )}
+
+                {isLoadingAgreements ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : academicAgreements.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Faol shartnomalar topilmadi.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {academicAgreements.map((agr) => (
+                      <div
+                        key={agr.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            {agr.status}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Shartnoma ID: #{agr.id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -657,6 +1325,293 @@ export default function UniversityPortal() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
+      {currentUser && activeTab === "exports" && (
+        <div className="flex flex-col gap-6">
+          {/* Header Card */}
+          <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Hisobot & Shartnomalar Hub
+                </span>
+                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
+              </div>
+              <h2 className="font-heading text-base md:text-lg font-bold text-white">
+                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
+              </p>
+            </div>
+
+            {institutionId && (
+              <button
+                type="button"
+                disabled={isLoadingSupervisions || isLoadingAgreements}
+                onClick={() => loadReportsAndAgreements(institutionId)}
+                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 self-start md:self-center disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSupervisions || isLoadingAgreements ? "animate-spin" : ""}`} />
+                <span>Yangilash</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Columns: Report Generator & Generated Receipt */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              {/* Generator Form */}
+              <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileSpreadsheet className="w-4 h-4 text-primary" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
+                </div>
+
+                <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
+                  {exportError && (
+                    <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{exportError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-semibold text-zinc-300">
+                      Hujjat formati:
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 max-w-xs">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("PDF")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "PDF"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <FileCheck className="w-3.5 h-3.5" />
+                        <span>PDF Format</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat("JSON")}
+                        className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+                          exportFormat === "JSON"
+                            ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                            : "bg-surface-lowest text-zinc-400 border-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>JSON Ma&apos;lumot</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      id="include-details"
+                      type="checkbox"
+                      checked={includeDetails}
+                      onChange={(e) => setIncludeDetails(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/[0.1] bg-surface text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="include-details" className="text-xs text-zinc-300 cursor-pointer">
+                      Barcha talabalar amaliyot va kundalik detallarini hisobotga qo&apos;shish
+                    </label>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-surface-container border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
+                    * Rasmiy ogohlantirish: Axborot amaliyot hisoboti; davlat diplomi, rasmiy baho yoki malaka attestatsiyasi hisoblanmaydi.
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isGeneratingExport}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/25"
+                  >
+                    {isGeneratingExport ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Hisobot shakllantirilmoqda...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Rasmiy Hisobotni Shakllantirish ({exportFormat})</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Export Receipt Preview (when available) */}
+              {exportReceipt && (
+                <div className="p-5 rounded-xl bg-surface-card border border-emerald-500/20 flex flex-col gap-4 shadow-sm animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <div>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                          Hisobot Tayyor (Kvitansiya #{exportReceipt.export_id.slice(0, 8)})
+                        </h4>
+                        <span className="text-[11px] text-zinc-400">
+                          Yaratilgan: {new Date(exportReceipt.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <a
+                      href={exportReceipt.download_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Yuklab Olish ({exportReceipt.export_format})</span>
+                    </a>
+                  </div>
+
+                  {/* Summary KPI Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-white/[0.06]">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Biriktirilgan Talabalar</span>
+                      <span className="text-xl font-bold font-mono text-white tabular-nums">
+                        {exportReceipt.summary.total_students_enrolled}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Superviziyalar</span>
+                      <span className="text-xl font-bold font-mono text-emerald-400 tabular-nums">
+                        {exportReceipt.summary.total_supervisions}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Amaliyotlar</span>
+                      <span className="text-xl font-bold font-mono text-blue-400 tabular-nums">
+                        {exportReceipt.summary.total_placements}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] uppercase font-semibold text-zinc-500">Jami Ish Soatlari</span>
+                      <span className="text-xl font-bold font-mono text-amber-300 tabular-nums">
+                        {exportReceipt.summary.total_logged_hours} soat
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right 1 Column: Supervisions & Academic Agreements */}
+            <div className="flex flex-col gap-5">
+              {/* Student Supervisions Card (API-098) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Superviziyalar ({supervisions.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
+                </div>
+
+                {supervisionsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {supervisionsError}
+                  </div>
+                )}
+
+                {isLoadingSupervisions ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : supervisions.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Superviziyalar mavjud emas.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {supervisions.map((sup) => (
+                      <div
+                        key={sup.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">{sup.purpose}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            {sup.status || "ACTIVE"}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Academic Agreements Card (API-101) */}
+              <div className="p-4 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Hamkorlik Shartnomalari ({academicAgreements.length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
+                </div>
+
+                {agreementsError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                    {agreementsError}
+                  </div>
+                )}
+
+                {isLoadingAgreements ? (
+                  <div className="py-6 flex items-center justify-center text-zinc-400 gap-2 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Yuklanmoqda...</span>
+                  </div>
+                ) : academicAgreements.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface text-center text-zinc-400 text-xs">
+                    Faol shartnomalar topilmadi.
+                  </div>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {academicAgreements.map((agr) => (
+                      <div
+                        key={agr.id}
+                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            {agr.status}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-zinc-500">
+                          Shartnoma ID: #{agr.id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
