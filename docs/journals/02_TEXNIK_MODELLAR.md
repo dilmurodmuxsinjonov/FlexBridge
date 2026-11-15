@@ -441,4 +441,14 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - `GET /api/v1/institutions/{inst}/timetables/template`: Download official ready-to-fill `.csv` and `.json` schedule templates with standard columns and para presets.
   - `POST /api/v1/institutions/{inst}/timetables/import`: Upload and validate `.csv` or `.json` class schedule templates (`REPLACE` or `APPEND`), reject intra-group time overlaps (`422 TIMETABLE_SLOT_OVERLAP`), compute free student work windows, and automatically synchronize `flexbridge.availability_rules` for enrolled students (`flexbridge.enrollments`).
 
+## INTERNSHIP-DOCUMENTS-EIMZO-FB204 — Standardized Diary, Final Conclusion & 3-Party E-Imzo (2026-11-15)
+
+- **Contracts**: `FB-204-EIMZO`, `FB-204-DIARY-STANDARD`, `FB-204-CONCLUSION-DOC`, `FB-204-DOC-EXPORT`, branch `feature/204-standardized-diary-conclusion-eimzo`, base `integration/r1-agent-collaboration`.
+- **Endpoints**:
+  - `GET/PUT /api/v1/me/e-imzo`: Per-party electronic signature certificates (`CANDIDATE`, `EMPLOYER`, `UNIVERSITY`) with strict role eligibility checks (`403 SIGNATURE_PARTY_FORBIDDEN`).
+  - `GET/PUT /api/v1/placements/{placement_id}/diary/standard` & `POST .../diary/sign`: Document 1 standardized Uzbek OTM/Enterprise internship diary passport, daily entry extensions, and continuous 3-party `HMAC-SHA256` E-Imzo confirmation (`FB-SIG-D-...`).
+  - `GET /api/v1/placements/{placement_id}/conclusion-document` & `POST .../conclusion-document/sign`: Document 2 separate end-of-internship conclusion sections (Employer evaluation, University academic decision/ECTS, Student reflection) converging to `TRI_PARTY_SIGNED` (`FB-SIG-C-...`).
+  - `POST /api/v1/placements/{placement_id}/documents/download` & `GET .../documents/files/{file_id}/download`: Render & stream formatted multi-page A4 `pypdf` PDFs and JSON exports for both official documents, plus `GET /api/v1/internship-documents/verify/{code}`.
+
+
 
