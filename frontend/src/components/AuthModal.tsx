@@ -218,6 +218,18 @@ export default function AuthModal({
             </Link>
           </div>
         )}
+        {requiredPortal === "ACADEMIC" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>OTM vakili hisobingiz yo‘qmi?</span>
+            <Link
+              href="/universitet/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              OTM vakili sifatida ulanish →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

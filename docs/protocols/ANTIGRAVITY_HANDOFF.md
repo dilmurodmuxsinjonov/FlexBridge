@@ -844,3 +844,6 @@ va pilot_ready=true deb yozma. Yangi current-state dalili bilan handoffni yangil
 
 
 - Joriy topshiriq (FB-206 / Issue #206): Barcha sahifalarni alohida ko'rib chiqib, har bir foydalanuvchi turi (`PUBLIC`, `CANDIDATE` `/nomzod/*`, `EMPLOYER` `/employer`, `UNIVERSITY` `/university`, `OPERATOR` `/operator`, `/kirish`, `/royxatdan-otish`) uchun rolga xos dizayn, rang identifikatsiyasi, `Navbar.tsx` moslashuvi va chap yon boshqaruv panellari bilan qayta qurish yakunlandi (`1.1`/`1.2` qo'shilmadi). Barcha 18 sahifa SSR HTTP 200 va **31/31 staging test to'plamlari 100% yashil (`78.94s`)**.
+
+
+- Joriy topshiriq (FB-212 / Issue #212 / `LOG-158`): Universitet / OTM (`ACADEMIC`) foydalanuvchi turi uchun alohida `/universitet/kirish` (`portal="ACADEMIC"`), `/universitet/royxatdan-otish` (SMS/Telegram + `GET /api/v1/me/contacts` + `/api/bff/university/appointments/[id]/consent` roziligi), `/university/layout.tsx` rol chegarasi va Indigo `Navbar`/`Footer` izolyatsiyasi yakunlandi (`main` muzlatilgan, PR `integration/r1-agent-collaboration` ga). **34/34 staging test to'plamlari 100% yashil (`91.4s`)**. Keyingi qadam: Platforma Operatori (`OPERATOR`) izolyatsiyasi va yakunda 4 ta rol uchun birlashtirilgan bosh `/kirish` hamda `/royxatdan-otish`.

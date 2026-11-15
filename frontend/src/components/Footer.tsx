@@ -13,9 +13,10 @@ import {
   Building2,
   User,
   Search,
+  GraduationCap,
 } from "lucide-react";
 import { fetchAuthMe, type AuthUser } from "@/lib/api";
-import { isEmployerOnlyRoles, isStudentOnlyRoles } from "@/lib/roles";
+import { isAcademicOnlyRoles, isEmployerOnlyRoles, isStudentOnlyRoles } from "@/lib/roles";
 
 function isStudentOnlyUser(user: AuthUser | null): boolean {
   return Boolean(user && isStudentOnlyRoles(user.roles));
@@ -53,6 +54,12 @@ export default function Footer() {
     (Boolean(pathname?.startsWith("/employer")) ||
       Boolean(pathname?.startsWith("/korxona")) ||
       Boolean(currentUser && isEmployerOnlyRoles(currentUser.roles)));
+  const isUniversityScope =
+    !isStudentScope &&
+    !isEmployerScope &&
+    (Boolean(pathname?.startsWith("/university")) ||
+      Boolean(pathname?.startsWith("/universitet")) ||
+      Boolean(currentUser && isAcademicOnlyRoles(currentUser.roles)));
   return (
     <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
       {/* Main Directory Links */}
@@ -90,10 +97,39 @@ export default function Footer() {
                 ? "Talaba Bo‘limlari"
                 : isEmployerScope
                   ? "Korxona Bo‘limlari"
-                  : "Platforma Portallari"}
+                  : isUniversityScope
+                    ? "OTM Bo‘limlari"
+                    : "Platforma Portallari"}
             </h4>
             <ul className="space-y-2 text-[11px]">
-              {isEmployerScope ? (
+              {isUniversityScope ? (
+                <>
+                  <li>
+                    <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>OTM Akademik Portal</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/universitet/kirish" className="hover:text-white transition flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>OTM Kirishi (Alohida)</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/universitet/royxatdan-otish" className="hover:text-white transition flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>OTM Vakili Ulanishi</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
+                      <Search className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Bosh Sahifa & Katalog</span>
+                    </Link>
+                  </li>
+                </>
+              ) : isEmployerScope ? (
                 <>
                   <li>
                     <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
@@ -174,9 +210,36 @@ export default function Footer() {
           {/* Column 3: Services */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              {isEmployerScope ? "Korxona Xizmatlari" : "Nomzod Xizmatlari"}
+              {isUniversityScope
+                ? "OTM Xizmatlari"
+                : isEmployerScope
+                  ? "Korxona Xizmatlari"
+                  : "Nomzod Xizmatlari"}
             </h4>
-            {isEmployerScope ? (
+            {isUniversityScope ? (
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <Link href="/university" className="hover:text-white transition">
+                    Amaliyot Kundaliklari Tekshiruvi
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/university" className="hover:text-white transition">
+                    Yakuniy Akademik Xulosalar & E-Imzo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/university" className="hover:text-white transition">
+                    Kafedra Taqsimoti & Dars Jadvali
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/university" className="hover:text-white transition">
+                    O‘qituvchi Vakolat & Tasdiqlash
+                  </Link>
+                </li>
+              </ul>
+            ) : isEmployerScope ? (
               <ul className="space-y-2 text-[11px]">
                 <li>
                   <Link href="/employer" className="hover:text-white transition">

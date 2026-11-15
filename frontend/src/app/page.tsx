@@ -343,22 +343,35 @@ export default function StudentPortal() {
                 </Link>
               </div>
             </div>
-            <Link
-              href="/university"
-              className="group flex items-center justify-between rounded-xl border border-indigo-500/20 bg-surface-card px-4 py-3 hover:border-indigo-400/50 hover:bg-indigo-500/[0.06] transition-colors"
-            >
-              <div>
-                <p className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">
-                  Universitet / OTM Portali
-                </p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Dekanat nazorati, dars jadvali va yig‘ma hisobotlar
-                </p>
+            <div className="rounded-xl border border-indigo-500/20 bg-surface-card px-4 py-3 hover:border-indigo-400/40 transition-colors">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-white">
+                    Universitet / OTM Portali
+                  </p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Dekanat nazorati, dars jadvali va yig‘ma hisobotlar
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md border border-indigo-500/25 bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-400">
+                  OTM
+                </span>
               </div>
-              <span className="shrink-0 rounded-md border border-indigo-500/25 bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-400">
-                OTM
-              </span>
-            </Link>
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <Link
+                  href="/universitet/kirish"
+                  className="rounded-md bg-indigo-500/15 border border-indigo-500/30 px-2.5 py-1 text-[11px] font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors"
+                >
+                  OTM kirishi →
+                </Link>
+                <Link
+                  href="/university"
+                  className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:bg-white/[0.06] transition-colors"
+                >
+                  Kabinet
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
