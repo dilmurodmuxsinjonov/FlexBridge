@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Loader2,
   LogIn,
-  LogOut,
   AlertCircle,
   ShieldAlert,
   ClipboardCheck,
@@ -45,7 +44,6 @@ import {
   fetchOperatorFinanceSummary,
   fetchOperatorReconciliation,
   approveOperatorRefund,
-  logoutUser,
   AuthUser,
   OperatorAuditEventItem,
   OperatorVerificationCaseItem,
@@ -58,6 +56,12 @@ import {
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+  SkeuoLiveFeed,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
@@ -339,25 +343,6 @@ export default function OperatorPortal() {
     if (tab === "FINANCE") void loadFinanceHub();
   };
 
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setAuditEvents([]);
-    setCases([]);
-    setTickets([]);
-    setRestoreRuns([]);
-    setAnalytics(null);
-    setFinanceSummary(null);
-    setReconciliationItems([]);
-    setReconciliationSummary(null);
-    setEventsError(null);
-    setCasesError(null);
-    setTicketsError(null);
-    setFinanceError(null);
-    setReconciliationError(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
-
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     loadAuditEvents();
@@ -526,32 +511,49 @@ export default function OperatorPortal() {
     }
   };
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flexbridge:portal-tab-changed", {
+        detail: { tab: activeTab },
+      })
+    );
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onDockTab = (ev: Event) => {
+      const next = (ev as CustomEvent<{ tab?: string }>).detail?.tab as ActiveTab | undefined;
+      if (!next) return;
+      setActiveTab(next);
+    };
+    window.addEventListener("flexbridge:dock-tab", onDockTab);
+    return () => window.removeEventListener("flexbridge:dock-tab", onDockTab);
+  }, []);
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* SOC COMMAND TERMINAL HEADER */}
-      <section className="w-full bg-[#121214] border border-white/[0.08] border-t-2 border-t-amber-500 rounded-xl p-5 shadow-sm">
+      <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                SOC // SECURITY OPERATIONS HUB
+              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-amber-700 dark:text-amber-400">
+                Xavfsizlik va Nazorat Markazi
               </span>
-              <span className="text-zinc-500 text-xs font-mono">• API-109..124 / AUDIT_APPEND_ONLY</span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  CLEARANCE: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
+                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  Operator vakolati faol
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  LOCKED // Avtorizatsiyadan o‘tilmagan
+                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                  Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
-            <h1 className="font-heading text-lg md:text-xl font-bold text-white tracking-tight">
+            <h1 className="font-heading text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
               Platforma Operatori va Xavfsizlik Boshqaruv Markazi
             </h1>
-            <p className="text-xs text-zinc-400">
-              Tashkilotlarni tekshirish navbati, 4-ko‘z tamoyilidagi Break-Glass ruxsatlari va o‘zgartirib bo‘lmas audit jurnali.
+            <p className="text-xs text-[var(--fb-ink-secondary)]">
+              Tashkilotlarni tekshirish navbati, 4-ko‘z tamoyilidagi favqulodda ruxsatlar va o‘zgartirib bo‘lmas audit jurnali.
             </p>
           </div>
 
@@ -562,18 +564,14 @@ export default function OperatorPortal() {
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                SOC konsol faol
+              </span>
             ) : (
               <Link
                 href="/operator/kirish"
-                className="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Operator sifatida kirish</span>
@@ -585,22 +583,22 @@ export default function OperatorPortal() {
 
       {/* UNAUTHENTICATED NOTICE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-[#121214]/80 border border-amber-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+        <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-amber-700 dark:text-amber-400">
             <Lock className="w-7 h-7" />
           </div>
-          <div className="flex flex-col gap-1 max-w-md">
-            <h2 className="text-base md:text-lg font-heading font-semibold text-white">
+          <div className="flex flex-col gap-1.5 max-w-md">
+            <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
               Xavfsizlik audit va operator boshqaruviga kirish uchun tizimga kiring
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
               Ushbu bo‘lim faqat vakolatli xavfsizlik auditorlari va tizim ma’murlari (ADMIN, AUDITOR, OPERATOR) uchun mo‘ljallangan.
             </p>
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/operator/kirish"
-              className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-zinc-950 transition-all flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>SOC alohida kirishi</span>
@@ -608,7 +606,7 @@ export default function OperatorPortal() {
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-amber-800 dark:text-amber-300"
             >
               Tezkor terminal kirishi
             </button>
@@ -616,16 +614,92 @@ export default function OperatorPortal() {
         </section>
       )}
 
+      {/* AUTHENTICATED SOC TELEMETRY ROW + MODULE SWITCHER */}
+      {currentUser && (() => {
+        const verifiedCount = cases.filter((c) => c.status === "APPROVED" || c.status === "CLOSED").length;
+        const kybPct = cases.length ? Math.round((verifiedCount / cases.length) * 100) : 100;
+        const auditFeed = auditEvents.slice(0, 5).map((evt) => ({
+          id: evt.id,
+          title: evt.action,
+          meta: `${evt.object_type || "Tizim"}${evt.actor_id ? ` • ${evt.actor_id.slice(0, 8)}...` : ""}`,
+          time: evt.occurred_at ? new Date(evt.occurred_at).toLocaleTimeString("uz-UZ") : "Yaqinda",
+          status:
+            evt.action.includes("REVOKE") || evt.action.includes("REJECT") || evt.action.includes("BREAK")
+              ? ("warn" as const)
+              : ("ok" as const),
+        }));
+        return (
+          <div className="flex flex-col gap-5">
+            <section className="grid gap-4 sm:grid-cols-3">
+              <SkeuoStatCard
+                title="Audit hodisalari"
+                value={auditEvents.length}
+                subtitle="O‘zgarmas hash-zanjir"
+                icon={FileCheck2}
+                tone="amber"
+                active={activeTab === "AUDIT"}
+                onClick={() => setActiveTab("AUDIT")}
+              />
+              <SkeuoStatCard
+                title="KYC / KYB navbati"
+                value={cases.length}
+                subtitle={`${verifiedCount} ta ko‘rib chiqilgan`}
+                icon={ClipboardCheck}
+                tone="emerald"
+                active={activeTab === "VERIFICATION"}
+                onClick={() => setActiveTab("VERIFICATION")}
+              />
+              <SkeuoStatCard
+                title="Support & SLA"
+                value={tickets.length}
+                subtitle="Ochiq operator murojaatlari"
+                icon={LifeBuoy}
+                tone="sky"
+                active={activeTab === "SUPPORT_OPS"}
+                onClick={() => setActiveTab("SUPPORT_OPS")}
+              />
+            </section>
+            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <SkeuoVerticalMeter
+                title="KYB tekshiruv ulushi"
+                percentage={kybPct}
+                amountLabel={`${verifiedCount} / ${cases.length || 0}`}
+                subtitle="Navbat bajarilishi"
+                tone="amber"
+              />
+              <SkeuoLiveFeed
+                title="Jonli SOC Audit Oqimi"
+                items={auditFeed}
+                emptyText="Audit hodisalari yuklanmagan."
+              />
+            </section>
+
+            <SkeuoSegmented
+              layoutName="operatorWorkspaceTabs"
+              value={activeTab}
+              onChange={(next) => setActiveTab(next as ActiveTab)}
+              options={[
+                { id: "AUDIT", label: "Audit Jurnali", icon: FileCheck2, badge: auditEvents.length || undefined },
+                { id: "VERIFICATION", label: "KYB Tekshiruvi", icon: ClipboardCheck, badge: cases.length || undefined },
+                { id: "BREAK_GLASS", label: "Favqulodda Ruxsat", icon: ShieldAlert },
+                { id: "SUPPORT_OPS", label: "Murojaatlar", icon: LifeBuoy, badge: tickets.length || undefined },
+                { id: "FINANCE", label: "Moliya Markazi", icon: CreditCard },
+              ]}
+            />
+          </div>
+        );
+      })()}
+
       {/* AUTHENTICATED SOC COMMAND CONSOLE */}
       {currentUser && (
         <div className="grid gap-6 lg:grid-cols-[276px_minmax(0,1fr)] lg:items-start">
           {/* Left SOC Telemetry Navigation Rail */}
           <aside
-            aria-label="SOC Terminal modullari"
-            className="rounded-xl border border-amber-500/20 bg-[#121214] p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            aria-label="Nazorat terminali bo‘limlari"
+            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
           >
-            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-400/80">
-              SOC // SECURITY MODULES
+            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400/80">
+              Nazorat Modullari
             </div>
             <button
               onClick={() => selectTab("AUDIT")}
@@ -637,7 +711,7 @@ export default function OperatorPortal() {
             >
               <span className="flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="font-mono text-[11px]">01 // AUDIT (API-118)</span>
+                <span className="font-mono text-[11px]">01 // Audit Jurnali</span>
               </span>
               <span className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] font-mono">
                 {auditEvents.length}
@@ -898,10 +972,10 @@ export default function OperatorPortal() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-white">
-                      Break-Glass Favqulodda Ruxsat (API-119)
+                      Favqulodda Vaqtinchalik Ruxsat
                     </h3>
                     <p className="text-[11px] text-zinc-400">
-                      4-ko‘z tamoyilidagi mustaqil tasdiqlovchi bilan vaqtinchalik imtiyozli rol berish.
+                      Ikki bosqichli tasdiqlash orqali vaqtinchalik maxsus ruxsat berish.
                     </p>
                   </div>
                 </div>
@@ -917,10 +991,10 @@ export default function OperatorPortal() {
                   <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex flex-col gap-1">
                     <span className="font-semibold flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      Break-Glass Ruxsati Tasdiqlandi (API-119)
+                      Favqulodda Ruxsat Tasdiqlandi
                     </span>
                     <span className="font-mono text-[11px] text-zinc-400">
-                      Grant ID: {bgResult.grant_id} | Rol: {bgResult.role_code} | Muddati: {bgResult.expires_at}
+                      Ruxsat ID: {bgResult.grant_id} | Rol: {bgResult.role_code} | Muddati: {bgResult.expires_at}
                     </span>
                   </div>
                 )}
@@ -928,7 +1002,7 @@ export default function OperatorPortal() {
                 <form onSubmit={handleBreakGlassSubmit} className="flex flex-col gap-3">
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Maqsadli Foydalanuvchi ID (target_user_id)
+                      Foydalanuvchi identifikatori
                     </label>
                     <input
                       type="text"
@@ -982,7 +1056,7 @@ export default function OperatorPortal() {
                       className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 font-mono"
                     />
                     <span className="text-[10px] text-zinc-500 mt-0.5 block">
-                      Dual-Control: So‘rovchi o‘z so‘rovini o‘zi tasdiqlay olmaydi (SELF_APPROVAL_FORBIDDEN).
+                      Ikki bosqichli nazorat: So‘rovchi o‘z so‘rovini o‘zi tasdiqlay olmaydi.
                     </span>
                   </div>
 
@@ -1002,19 +1076,19 @@ export default function OperatorPortal() {
                   <button
                     type="submit"
                     disabled={isSubmittingBg}
-                    className="w-full py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-xs font-semibold text-zinc-950 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10"
+                    className="skeuo-btn-accent w-full py-2.5 px-4 disabled:opacity-50 text-xs justify-center"
                   >
                     {isSubmittingBg ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <KeyRound className="w-3.5 h-3.5" />
                     )}
-                    <span>Imtiyozli Ruxsatni Berish (Break-Glass)</span>
+                    <span>Imtiyozli Ruxsatni Berish</span>
                   </button>
                 </form>
               </div>
 
-              {/* EMERGENCY SESSION REVOCATION (API-120) */}
+              {/* EMERGENCY SESSION REVOCATION */}
               <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
@@ -1022,7 +1096,7 @@ export default function OperatorPortal() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-white">
-                      Favqulodda Sessiyani Bekor Qilish (API-120)
+                      Favqulodda Sessiyani Bekor Qilish
                     </h3>
                     <p className="text-[11px] text-zinc-400">
                       Zararlangan yoki shubhali foydalanuvchining barcha faol sessiyalarini darhol to‘xtatish.
@@ -1041,7 +1115,7 @@ export default function OperatorPortal() {
                   <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex flex-col gap-1">
                     <span className="font-semibold flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      Sessiyalar Muvaffaqiyatli Bekor Qilindi (API-120)
+                      Sessiyalar Muvaffaqiyatli Bekor Qilindi
                     </span>
                     <span className="font-mono text-[11px] text-zinc-400">
                       Foydalanuvchi: {revokeResult.target_user_id} | Bekor qilingan sessiyalar soni: {revokeResult.revoked_count}
@@ -1052,7 +1126,7 @@ export default function OperatorPortal() {
                 <form onSubmit={handleRevokeSessionsSubmit} className="flex flex-col gap-3">
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Target Foydalanuvchi ID (target_user_id)
+                      Foydalanuvchi identifikatori
                     </label>
                     <input
                       type="text"
@@ -1102,7 +1176,7 @@ export default function OperatorPortal() {
                   <div>
                     <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                       <Activity className="w-4 h-4 text-sky-400" />
-                      <span>Platforma Operatsion Telemetriyasi & SLA (API-124)</span>
+                      <span>Platforma Operatsion Telemetriyasi & SLA</span>
                     </h2>
                     <p className="text-xs text-zinc-400">
                       Hodisalar deduplikatsiyasi, o‘zaro boshlanish konversiyasi va tizim chidamliligi metrikalari.
@@ -1121,10 +1195,10 @@ export default function OperatorPortal() {
                     <button
                       type="button"
                       onClick={() => setIsIncidentModalOpen(true)}
-                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-rose-600/20"
+                      className="skeuo-btn-accent px-3.5 py-2 text-xs shrink-0"
                     >
                       <Flame className="w-3.5 h-3.5" />
-                      <span>Insident E&apos;lon Qilish (P1..P4)</span>
+                      <span>Hodisa E’lon Qilish (P1–P4)</span>
                     </button>
                   </div>
                 </div>
@@ -1185,7 +1259,7 @@ export default function OperatorPortal() {
                   <div className="flex items-center gap-2">
                     <Server className="w-4 h-4 text-purple-400" />
                     <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Falokatdan Tiklash (DR Drill Runs) & SLA Muvofiqligi (API-123)
+                      Tizim Tiklanish Mashqlari & SLA Muvofiqligi
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1217,7 +1291,7 @@ export default function OperatorPortal() {
                       <thead>
                         <tr className="border-b border-white/[0.06] text-zinc-500 text-[11px]">
                           <th className="py-2 px-3 font-semibold">Sinov ID</th>
-                          <th className="py-2 px-3 font-semibold">Ma&apos;lumotlar Bazasi</th>
+                          <th className="py-2 px-3 font-semibold">Ma’lumotlar Bazasi</th>
                           <th className="py-2 px-3 font-semibold">RPO / RTO</th>
                           <th className="py-2 px-3 font-semibold">SLA Holati</th>
                           <th className="py-2 px-3 font-semibold">Sana & Tasdiq</th>
@@ -1254,7 +1328,7 @@ export default function OperatorPortal() {
                   <div className="flex items-center gap-2">
                     <LifeBuoy className="w-4 h-4 text-sky-400" />
                     <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Texnik Yordam Tiketlari Navbati (API-112) ({tickets.length})
+                      Texnik Yordam Murojaatlari Navbati ({tickets.length})
                     </h3>
                   </div>
 
@@ -1375,7 +1449,7 @@ export default function OperatorPortal() {
                     <span>Moliya & Shlyuz Solishtiruvi Markazi</span>
                   </h2>
                   <p className="text-xs text-zinc-400">
-                    Buxgalteriya balansi (API-117), to‘lov shlyuzlari solishtiruvi (API-115) va 4-ko‘z tamoyilidagi mablag‘ qaytarishlar (API-078).
+                    Moliyaviy balans, to‘lov shlyuzlari solishtiruvi va ikki bosqichli mablag‘ qaytarish nazorati.
                   </p>
                 </div>
                 <button
@@ -1522,7 +1596,7 @@ export default function OperatorPortal() {
                   <div className="flex items-center gap-2">
                     <ShieldAlert className="w-4 h-4 text-amber-400" />
                     <h3 className="text-sm font-semibold text-white">
-                      4-Ko‘z Tamoyilidagi Qaytarishlarni Tasdiqlash (API-078 / Dual-Control Approvals)
+                      Mablag‘ Qaytarish So‘rovlarini Tasdiqlash (Ikki Bosqichli Nazorat)
                     </h3>
                   </div>
                   <p className="text-xs text-zinc-400">
@@ -1558,14 +1632,14 @@ export default function OperatorPortal() {
                     type="button"
                     onClick={() => handleApproveRefund(manualRefundId)}
                     disabled={!manualRefundId.trim() || approvingRefundId === manualRefundId}
-                    className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-600/20 shrink-0"
+                    className="skeuo-btn-obsidian w-full sm:w-auto px-4 py-2 disabled:opacity-50 text-xs shrink-0"
                   >
                     {approvingRefundId === manualRefundId ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <CheckCheck className="w-3.5 h-3.5" />
                     )}
-                    <span>Tasdiqlash (Dual-Control)</span>
+                    <span>Tasdiqlash</span>
                   </button>
                 </div>
               </div>
@@ -1576,7 +1650,7 @@ export default function OperatorPortal() {
                   <div>
                     <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                       <Receipt className="w-4 h-4 text-primary" />
-                      <span>To‘lov Shlyuzlari va Buxgalteriya Jurnali Solishtiruvi (API-115)</span>
+                      <span>To‘lov Shlyuzlari va Moliyaviy Jurnal Solishtiruvi</span>
                     </h3>
                     <p className="text-xs text-zinc-400">
                       Billing ledger yozuvlari tashqi to‘lov shlyuzlari (Payme, Click, Uzum) tranzaksiyalari bilan taqqoslanadi. Zero PII ta’minlangan.
@@ -1774,7 +1848,7 @@ export default function OperatorPortal() {
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">
-                  Tekshiruv Xulosasini Chiqarish (API-110)
+                  Tekshiruv Xulosasini Chiqarish
                 </h3>
                 <span className="text-[11px] font-mono text-zinc-400">
                   Case ID: {selectedCase.id} | Rev-{selectedCase.revision || 1}
@@ -1884,7 +1958,7 @@ export default function OperatorPortal() {
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">
-                  Yordam Tiketiga Javob Berish (API-113)
+                  Murojaatga Javob Berish
                 </h3>
                 <span className="text-[11px] font-mono text-zinc-400">
                   Tiket ID: #{selectedTicket.id.slice(0, 8)}... | {selectedTicket.category} ({selectedTicket.priority})
@@ -1935,7 +2009,7 @@ export default function OperatorPortal() {
                     onChange={(e) => setIsInternalNote(e.target.checked)}
                     className="rounded bg-[#18181b] border-white/[0.1] text-primary focus:ring-primary/20 w-4 h-4"
                   />
-                  <span>Ichki Eslatma (faqat operatorlar ko&apos;radi)</span>
+                  <span>Ichki Eslatma (faqat operatorlar ko‘radi)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -1945,7 +2019,7 @@ export default function OperatorPortal() {
                     onChange={(e) => setReplyStatus(e.target.value)}
                     className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
                   >
-                    <option value="">O&apos;zgarishsiz</option>
+                    <option value="">O‘zgarishsiz</option>
                     <option value="IN_PROGRESS">IN_PROGRESS (Jarayonda)</option>
                     <option value="RESOLVED">RESOLVED (Hal qilindi)</option>
                     <option value="CLOSED">CLOSED (Yopildi)</option>
@@ -1987,7 +2061,7 @@ export default function OperatorPortal() {
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-rose-500" />
                 <h3 className="text-sm font-semibold text-white">
-                  Favqulodda Operatsion Insident E&apos;lon Qilish (API-122)
+                  Favqulodda Operatsion Hodisa E’lon Qilish
                 </h3>
               </div>
               <button
@@ -2055,7 +2129,7 @@ export default function OperatorPortal() {
 
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Qisqacha Tavsif / Dastlabki Ta&apos;sir
+                  Qisqacha Tavsif / Dastlabki Ta’sir
                 </label>
                 <textarea
                   rows={3}
@@ -2070,21 +2144,21 @@ export default function OperatorPortal() {
                 <button
                   type="button"
                   onClick={() => setIsIncidentModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-medium text-zinc-300"
+                  className="skeuo-btn-secondary px-4 py-2 text-xs"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingIncident}
-                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-1.5 shadow-md shadow-rose-600/20"
+                  className="skeuo-btn-accent px-4 py-2 disabled:opacity-50 text-xs"
                 >
                   {isSubmittingIncident ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     <Flame className="w-3.5 h-3.5" />
                   )}
-                  <span>Insidentni E&apos;lon Qilish</span>
+                  <span>Hodisani E’lon Qilish</span>
                 </button>
               </div>
             </form>

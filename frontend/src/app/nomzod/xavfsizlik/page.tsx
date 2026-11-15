@@ -35,6 +35,7 @@ import {
   UserSecurityOverview,
   ActiveSessionItem,
 } from "@/lib/api";
+import { SkeuoStatCard } from "@/components/skeuo/SkeuoPrimitives";
 
 export default function CandidateSecurityPage() {
   const router = useRouter();
@@ -272,16 +273,16 @@ export default function CandidateSecurityPage() {
               <Shield className="w-6 h-6 text-primary" />
               Xavfsizlik, Ikki Bosqichli Autentifikatsiya (MFA) & Sessiyalar
             </h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              Step-up parol himoyasi (API-060), TOTP autentifikatori, favqulodda zaxira kodlari va faol qurilmalarni boshqarish (API-061).
+            <p className="text-xs text-[var(--fb-ink-secondary)] mt-1">
+              Parol bilan qo‘shimcha tasdiqlash, ikki bosqichli autentifikatsiya, zaxira kodlari va faol qurilmalarni boshqarish.
             </p>
           </div>
           <button
             onClick={loadSecurityOverview}
             disabled={isLoading}
-            className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#121214] hover:bg-white/[0.06] border border-white/[0.08] text-zinc-300 transition flex items-center gap-2 self-start md:self-auto shadow-sm"
+            className="px-3.5 py-2 text-xs font-semibold rounded-xl skeuo-btn-secondary flex items-center gap-2 self-start md:self-auto"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-zinc-400 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[var(--fb-ink-muted)] ${isLoading ? "animate-spin" : ""}`} />
             Yangilash
           </button>
         </div>
@@ -315,61 +316,34 @@ export default function CandidateSecurityPage() {
         {/* TELEMETRY CARDS */}
         {/* ------------------------------------------------------------------- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Ikki Bosqichli Himoya (MFA)</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                  securityData?.totp_enabled
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                }`}>
-                  {securityData?.totp_enabled ? "FAOL (TOTP)" : "YOQILMAGAN"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Assurance Darajasi</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-bold font-mono text-white">
-                  {securityData?.totp_enabled ? "A2 (MFA-LEVEL)" : "A1 (PASSWORD)"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
-              <KeyRound className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Zaxira Tiklash Kodlari</p>
-              <p className="text-base font-bold font-mono text-white mt-1 tabular-nums">
-                {securityData?.recovery_codes_count ?? 0} <span className="text-xs text-zinc-500 font-normal">ta faol</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
-              <Laptop className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Faol Sessiyalar</p>
-              <p className="text-base font-bold font-mono text-white mt-1 tabular-nums">
-                {securityData?.sessions?.length ?? 0} <span className="text-xs text-zinc-500 font-normal">ta qurilma</span>
-              </p>
-            </div>
-          </div>
+          <SkeuoStatCard
+            title="Ikki bosqichli himoya (MFA)"
+            value={securityData?.totp_enabled ? "FAOL" : "YOQILMAGAN"}
+            subtitle="TOTP autentifikator holati"
+            icon={ShieldCheck}
+            tone={securityData?.totp_enabled ? "emerald" : "amber"}
+          />
+          <SkeuoStatCard
+            title="Assurance darajasi"
+            value={securityData?.totp_enabled ? "A2" : "A1"}
+            subtitle={securityData?.totp_enabled ? "MFA-LEVEL himoya" : "Faqat parol darajasi"}
+            icon={Lock}
+            tone="sky"
+          />
+          <SkeuoStatCard
+            title="Zaxira tiklash kodlari"
+            value={securityData?.recovery_codes_count ?? 0}
+            subtitle="Faol tiklash kalitlari"
+            icon={KeyRound}
+            tone="amber"
+          />
+          <SkeuoStatCard
+            title="Faol sessiyalar"
+            value={securityData?.sessions?.length ?? 0}
+            subtitle="Ulangan qurilmalar"
+            icon={Laptop}
+            tone="indigo"
+          />
         </div>
 
         {/* ------------------------------------------------------------------- */}
@@ -403,7 +377,7 @@ export default function CandidateSecurityPage() {
                   setEnrollSecret(null);
                   setErrorMessage(null);
                 }}
-                className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-primary/20 self-start sm:self-auto"
+                className="px-4 py-2 rounded-xl skeuo-btn-accent text-white text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>2FA Himoyasini Yoqish</span>
@@ -484,7 +458,7 @@ export default function CandidateSecurityPage() {
             <div>
               <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <Laptop className="w-5 h-5 text-violet-400" />
-                Faol Qurilmalar & Sessiyalar Boshqaruvi (API-061)
+                Faol Qurilmalar & Sessiyalar Boshqaruvi
               </h2>
               <p className="text-xs text-zinc-400 mt-1">
                 Hisobingizga kirilgan barcha faol sessiyalar ro‘yxati. Notanish yoki eski qurilmalarni istalgan vaqtda bekor qilishingiz mumkin.

@@ -221,7 +221,7 @@ function TalabaKirishForm() {
       </div>
 
       {/* Form Card */}
-      <div className="rounded-2xl border border-sky-500/20 bg-[#121214] p-6 sm:p-7 shadow-2xl space-y-5">
+      <div className="rounded-[28px] skeuo-card p-6 sm:p-7 space-y-5">
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-xl flex items-start gap-3 text-xs text-rose-300">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
@@ -397,19 +397,19 @@ function TalabaKirishForm() {
 
 export default function TalabaKirishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-5xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>E’lonlar katalogiga qaytish</span>
           </Link>
           <Link
             href="/kirish"
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition"
+            className="text-xs font-medium text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
           >
             Korxona yoki OTM xodimi? Umumiy kirish →
           </Link>
@@ -417,7 +417,7 @@ export default function TalabaKirishPage() {
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] items-start">
           {/* Left Panel: Strictly Student-Permitted Capabilities */}
-          <aside className="rounded-2xl border border-sky-500/20 bg-surface-card p-6 sm:p-7 space-y-5">
+          <aside className="rounded-[28px] skeuo-card p-6 sm:p-7 space-y-5">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-sky-400">
                 Talabaga ruxsat etilgan modullar

@@ -271,8 +271,8 @@ function ShartnomalarHubContent() {
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-white tracking-tight">
             Amaliyot & Ish Shartnomalari Markazi
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Kandidat amaliyot o&apos;quv rejalari (API-050), shartnomani qabul qilish (API-048) va ikki tomonlama ish boshlanishini tasdiqlash (API-045, API-046).
+          <p className="mt-1 text-sm text-[var(--fb-ink-secondary)]">
+            Amaliyot o‘quv rejalari, shartnomalarni qabul qilish va ikki tomonlama ish boshlanishini tasdiqlash markazi.
           </p>
         </div>
 
@@ -306,7 +306,7 @@ function ShartnomalarHubContent() {
           ) : (
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl skeuo-btn-accent px-4 py-2 text-xs font-semibold text-white"
             >
               <span>Tizimga kirish</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -317,21 +317,21 @@ function ShartnomalarHubContent() {
 
       {/* Unauthenticated View */}
       {!currentUser && !isAuthLoading && (
-        <section className="rounded-xl border border-white/[0.08] bg-surface-card p-8 md:p-12 text-center flex flex-col items-center max-w-xl mx-auto my-8">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-4">
+        <section className="rounded-[26px] skeuo-card p-8 md:p-12 text-center flex flex-col items-center max-w-xl mx-auto my-8">
+          <div className="h-12 w-12 rounded-2xl skeuo-well-sm flex items-center justify-center text-[#D95F2B] mb-4">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h2 className="font-heading text-lg font-bold text-white mb-2">
-            Shartnomalarni ko&apos;rish uchun tizimga kiring
+          <h2 className="font-heading text-lg font-bold text-[var(--fb-ink)] mb-2">
+            Shartnomalarni ko‘rish uchun tizimga kiring
           </h2>
-          <p className="text-xs text-zinc-400 max-w-md mb-6 leading-relaxed">
-            Tasdiqlangan amaliyot o&apos;quv rejalari, korxona bilan kelishilgan vazifalar va ish boshlanishini ikki tomonlama tasdiqlash uchun nomzod hisobingizga kiring.
+          <p className="text-xs text-[var(--fb-ink-secondary)] max-w-md mb-6 leading-relaxed">
+            Tasdiqlangan amaliyot o‘quv rejalari, korxona bilan kelishilgan vazifalar va ish boshlanishini ikki tomonlama tasdiqlash uchun talaba hisobingizga kiring.
           </p>
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl skeuo-btn-accent px-5 py-2.5 text-xs font-semibold text-white"
           >
-            <span>Nomzod sifatida kirish</span>
+            <span>Talaba sifatida kirish</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </section>
@@ -341,17 +341,17 @@ function ShartnomalarHubContent() {
       {currentUser && (
         <div className="flex flex-col gap-6">
           {/* Main Module Tabs Switcher */}
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-px">
+          <div className="flex items-center gap-2 border-b border-[var(--fb-hairline)] pb-px">
             <button
               onClick={() => setActiveTab("PLACEMENTS")}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors ${
                 activeTab === "PLACEMENTS"
-                  ? "border-primary text-white bg-primary/5"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+                  ? "border-primary text-[var(--fb-ink)] bg-primary/5"
+                  : "border-transparent text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
               }`}
             >
               <BookOpen className="h-4 w-4 text-primary" />
-              <span>Amaliyot Shartnomalari & O&apos;quv Rejasi (API-030 / API-050)</span>
+              <span>Amaliyot Shartnomalari & O‘quv Rejasi</span>
               {placements.length > 0 && (
                 <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">
                   {placements.length}
@@ -363,12 +363,12 @@ function ShartnomalarHubContent() {
               onClick={() => setActiveTab("ENGAGEMENTS")}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors ${
                 activeTab === "ENGAGEMENTS"
-                  ? "border-primary text-white bg-primary/5"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+                  ? "border-primary text-[var(--fb-ink)] bg-primary/5"
+                  : "border-transparent text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
               }`}
             >
-              <Briefcase className="h-4 w-4 text-emerald-400" />
-              <span>Ish Munosabatlari & Boshlanishni Tasdiqlash (API-045 / API-046)</span>
+              <Briefcase className="h-4 w-4 text-emerald-500" />
+              <span>Ish Munosabatlari & Boshlanishni Tasdiqlash</span>
             </button>
           </div>
 
@@ -383,13 +383,13 @@ function ShartnomalarHubContent() {
                     Faol va Rejalashtirilgan Amaliyotlar
                   </h2>
                   <p className="text-xs text-zinc-400">
-                    Oliy ta&apos;lim muassasasi yoki korxona bilan bog&apos;langan barcha amaliyot o&apos;rinlari ro&apos;yxati.
+                    Oliy ta’lim muassasasi yoki korxona bilan bog‘langan barcha amaliyot o‘rinlari ro‘yxati.
                   </p>
                 </div>
                 <button
                   onClick={loadPlacements}
                   disabled={isLoadingPlacements}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-surface-card text-xs text-zinc-300 hover:text-white transition-colors"
+                  className="skeuo-btn-secondary px-3 py-1.5 text-xs"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${isLoadingPlacements ? "animate-spin text-primary" : ""}`} />
                   <span>Yangilash</span>
@@ -406,14 +406,14 @@ function ShartnomalarHubContent() {
               {isLoadingPlacements ? (
                 <div className="py-12 text-center text-xs text-zinc-400">
                   <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                  Amaliyotlar ro&apos;yxati yuklanmoqda...
+                  Amaliyotlar ro‘yxati yuklanmoqda...
                 </div>
               ) : placements.length === 0 ? (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-8 text-center text-xs text-zinc-400">
                   <BookOpen className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
                   <p className="text-zinc-300 font-semibold mb-1">Hozircha amaliyot shartnomalari mavjud emas</p>
                   <p className="text-zinc-500">
-                    Tashkilotlar tomonidan e&apos;lon qilingan vakansiyalarga ariza topshiring va taklifni qabul qiling.
+                    Tashkilotlar tomonidan e’lon qilingan vakansiyalarga ariza topshiring va taklifni qabul qiling.
                   </p>
                 </div>
               ) : (
@@ -462,10 +462,10 @@ function ShartnomalarHubContent() {
 
                           <button
                             onClick={() => handleOpenPlanModal(plc.id)}
-                            className="py-1.5 px-3 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                            className="py-1.5 px-3 rounded-xl skeuo-btn-obsidian text-white text-xs font-semibold flex items-center gap-1.5"
                           >
                             <BookOpen className="h-3.5 w-3.5" />
-                            <span>Rejani ko&apos;rish (API-050)</span>
+                            <span>Rejani ko‘rish</span>
                           </button>
                         </div>
                       </div>
@@ -482,12 +482,12 @@ function ShartnomalarHubContent() {
           {activeTab === "ENGAGEMENTS" && (
             <div className="flex flex-col gap-6">
               {/* Engagement Lookup Input */}
-              <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-5">
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
-                  Ish Munosabatini Qidirish & Tekshirish (API-045)
+              <div className="rounded-2xl skeuo-card p-5">
+                <h2 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider mb-2">
+                  Ish Munosabatini Qidirish & Tekshirish
                 </h2>
-                <p className="text-xs text-zinc-400 mb-4">
-                  Ish beruvchi tomonidan berilgan taklif (Offer) qabul qilingandan so&apos;ng shakllangan ish munosabati identifikatorini kiriting.
+                <p className="text-xs text-[var(--fb-ink-secondary)] mb-4">
+                  Ish beruvchi tomonidan berilgan taklif qabul qilingandan so‘ng shakllangan ish munosabati identifikatorini kiriting.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-2.5">
@@ -495,17 +495,17 @@ function ShartnomalarHubContent() {
                     <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                     <input
                       type="text"
-                      placeholder="Engagement UUID (masalan: 123e4567-e89b-12d3-a456-426614174000)..."
+                      placeholder="Munosabat ID (masalan: 123e4567-e89b-12d3-a456-426614174000)..."
                       value={engagementIdInput}
                       onChange={(e) => setEngagementIdInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && loadEngagement()}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg border border-white/[0.08] bg-black/40 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 font-mono"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl skeuo-input text-xs font-mono"
                     />
                   </div>
                   <button
                     onClick={() => loadEngagement()}
                     disabled={isLoadingEngagement || !engagementIdInput.trim()}
-                    className="w-full sm:w-auto py-2 px-4 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                    className="w-full sm:w-auto py-2 px-4 rounded-xl skeuo-btn-accent text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${isLoadingEngagement ? "animate-spin" : ""}`} />
                     <span>Yuklash</span>
@@ -524,7 +524,7 @@ function ShartnomalarHubContent() {
               {isLoadingEngagement ? (
                 <div className="py-12 text-center text-xs text-zinc-400">
                   <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                  Ish munosabati ma&apos;lumotlari tekshirilmoqda...
+                  Ish munosabati ma’lumotlari tekshirilmoqda...
                 </div>
               ) : activeEngagement ? (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-6 space-y-6">
@@ -550,14 +550,14 @@ function ShartnomalarHubContent() {
                     </span>
                   </div>
 
-                  {/* Dual-Party Confirmation Visualizer (AC-014) */}
-                  <div className="rounded-lg border border-white/[0.06] bg-black/30 p-4">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+                  {/* Dual-Party Confirmation Visualizer */}
+                  <div className="rounded-xl skeuo-well p-4">
+                    <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider mb-2 flex items-center gap-2">
                       <ShieldCheck className="h-4 w-4 text-primary" />
-                      <span>Ikki Tomonlama Ish Boshlanishini Tasdiqlash (AC-014)</span>
+                      <span>Ikki Tomonlama Ish Boshlanishini Tasdiqlash</span>
                     </h3>
-                    <p className="text-[11px] text-zinc-400 mb-4 leading-relaxed">
-                      O&apos;zbekiston Respublikasi Mehnat Kodeksi va FlexBridge reglamentiga ko&apos;ra, faol ish holati (ACTIVE) faqat ikkala tomon — ham nomzod, ham ish beruvchi CONFIRM_START tasdig&apos;ini yuborgandan so&apos;ng kuchga kiradi.
+                    <p className="text-[11px] text-[var(--fb-ink-secondary)] mb-4 leading-relaxed">
+                      O‘zbekiston Respublikasi Mehnat Kodeksi va FlexBridge reglamentiga ko‘ra, faol ish holati faqat ikkala tomon — ham talaba, ham ish beruvchi tasdiqlaganidan so‘ng kuchga kiradi.
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -647,7 +647,7 @@ function ShartnomalarHubContent() {
                             className="py-2 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           >
                             <CheckCircle2 className="h-4 w-4" />
-                            <span>Ish boshlanganini tasdiqlash (CONFIRM_START)</span>
+                            <span>Ish boshlanganini tasdiqlash</span>
                           </button>
                           <button
                             onClick={() => handleConfirmEngagement("DISPUTE_START")}
@@ -655,7 +655,7 @@ function ShartnomalarHubContent() {
                             className="py-2 px-3.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           >
                             <AlertTriangle className="h-4 w-4" />
-                            <span>E&apos;tiroz bildirish (DISPUTE_START)</span>
+                            <span>E’tiroz bildirish</span>
                           </button>
                         </>
                       )}
@@ -665,10 +665,10 @@ function ShartnomalarHubContent() {
                           <button
                             onClick={() => handleConfirmEngagement("CONFIRM_END")}
                             disabled={isSubmittingConfirmation}
-                            className="py-2 px-3.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                            className="skeuo-btn-obsidian py-2 px-3.5 text-xs disabled:opacity-50"
                           >
                             <CheckCircle2 className="h-4 w-4" />
-                            <span>Ish yakunlanganini tasdiqlash (CONFIRM_END)</span>
+                            <span>Ish yakunlanganini tasdiqlash</span>
                           </button>
                           <button
                             onClick={() => handleConfirmEngagement("DISPUTE_END")}
@@ -676,7 +676,7 @@ function ShartnomalarHubContent() {
                             className="py-2 px-3.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           >
                             <AlertTriangle className="h-4 w-4" />
-                            <span>Yakunlanishga e&apos;tiroz bildirish</span>
+                            <span>Yakunlanishga e’tiroz bildirish</span>
                           </button>
                         </>
                       )}
@@ -687,7 +687,7 @@ function ShartnomalarHubContent() {
                   {activeEngagement.confirmations.length > 0 && (
                     <div className="border-t border-white/[0.06] pt-4">
                       <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
-                        Tasdiqlar Tarixi (Audit Trail)
+                        Tasdiqlar Tarixi
                       </h4>
                       <div className="space-y-2">
                         {activeEngagement.confirmations.map((conf) => (
@@ -714,7 +714,7 @@ function ShartnomalarHubContent() {
                 </div>
               ) : (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-8 text-center text-xs text-zinc-500">
-                  Engagement UUID kiriting va &quot;Yuklash&quot; tugmasini bosing.
+                  Shartnoma kodini kiriting va «Yuklash» tugmasini bosing.
                 </div>
               )}
             </div>
@@ -731,9 +731,9 @@ function ShartnomalarHubContent() {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 mb-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-[var(--fb-ink)] flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-primary" />
-                  <span>Amaliyot O&apos;quv Rejasi & Shartlari (API-050)</span>
+                  <span>Amaliyot O‘quv Rejasi & Shartlari</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5 font-mono">
                   Placement ID: {selectedPlacementId}
@@ -847,7 +847,7 @@ function ShartnomalarHubContent() {
                   <div className="rounded-lg border border-primary/30 bg-primary/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
                       <h5 className="text-xs font-bold text-white mb-0.5">
-                        Amaliyot shartlari va o&apos;quv rejasiga rozimisiz?
+                        Amaliyot shartlari va o‘quv rejasiga rozimisiz?
                       </h5>
                       <p className="text-[11px] text-zinc-300">
                         Shartlarni qabul qilish orqali siz belgilangan vazifalarni bajarish va kundalik yuritish majburiyatini olasiz.
@@ -857,14 +857,14 @@ function ShartnomalarHubContent() {
                     <button
                       onClick={handleAcceptTerms}
                       disabled={isAcceptingTerms}
-                      className="w-full sm:w-auto py-2 px-4 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shrink-0 shadow-md"
+                      className="w-full sm:w-auto py-2 px-4 rounded-xl skeuo-btn-accent text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
                     >
                       {isAcceptingTerms ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
                       ) : (
                         <Check className="h-4 w-4" />
                       )}
-                      <span>Shartlarni Qabul Qilish (API-048)</span>
+                      <span>Shartlarni Qabul Qilish</span>
                     </button>
                   </div>
                 )}

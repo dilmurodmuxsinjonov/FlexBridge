@@ -4,50 +4,497 @@
 
 @layer base {
   :root {
+    --background: 228 223 212;
+    --foreground: 22 21 19;
+
+    --fb-canvas: #e4dfd4;
+    --fb-canvas-dot: rgba(24, 21, 16, 0.065);
+    --fb-stage: #f6f3ec;
+    --fb-card-top: #fefdfb;
+    --fb-card-bottom: #f2ede3;
+    --fb-well: #ebe6da;
+    --fb-well-deep: #dfd9cb;
+    --fb-obsidian: #151518;
+    --fb-obsidian-elevated: #232328;
+    --fb-ink: #161513;
+    --fb-ink-secondary: #4e4a42;
+    --fb-ink-muted: #787166;
+    --fb-hairline: rgba(24, 21, 16, 0.095);
+    --fb-border: rgba(24, 21, 16, 0.1);
+    --fb-bevel: rgba(255, 255, 255, 0.94);
+    --fb-accent: #d95f2b;
+    --fb-key-chamfer: rgba(36, 28, 16, 0.16);
+    --fb-shadow-stage:
+      0 26px 64px -20px rgba(34, 26, 14, 0.17),
+      0 6px 18px -6px rgba(34, 26, 14, 0.08),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.97);
+    --fb-shadow-card:
+      0 12px 26px -10px rgba(36, 28, 16, 0.11),
+      0 3px 9px -2px rgba(36, 28, 16, 0.055),
+      inset 0 1px 0 rgba(255, 255, 255, 0.97);
+    --fb-shadow-well:
+      inset 0 2px 6px rgba(38, 29, 16, 0.115),
+      inset 0 1px 1.5px rgba(38, 29, 16, 0.06),
+      0 1px 0 rgba(255, 255, 255, 0.88);
+    --fb-shadow-dock:
+      0 20px 44px -10px rgba(16, 13, 8, 0.36),
+      0 4px 12px -2px rgba(16, 13, 8, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.17);
+  }
+
+  html.dark {
     --background: 9 9 11;
     --foreground: 244 244 245;
+
+    --fb-canvas: #09090b;
+    --fb-canvas-dot: rgba(255, 255, 255, 0.04);
+    --fb-stage: #111115;
+    --fb-card-top: #1c1c22;
+    --fb-card-bottom: #131318;
+    --fb-well: #0b0b0f;
+    --fb-well-deep: #060608;
+    --fb-obsidian: #18181d;
+    --fb-obsidian-elevated: #27272e;
+    --fb-ink: #f4f4f6;
+    --fb-ink-secondary: #a1a1aa;
+    --fb-ink-muted: #7b7b86;
+    --fb-hairline: rgba(255, 255, 255, 0.085);
+    --fb-border: rgba(255, 255, 255, 0.085);
+    --fb-bevel: rgba(255, 255, 255, 0.09);
+    --fb-accent: #f97316;
+    --fb-key-chamfer: rgba(0, 0, 0, 0.65);
+    --fb-shadow-stage:
+      0 30px 72px -20px rgba(0, 0, 0, 0.82),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    --fb-shadow-card:
+      0 14px 30px -10px rgba(0, 0, 0, 0.65),
+      0 2px 6px rgba(0, 0, 0, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.085);
+    --fb-shadow-well:
+      inset 0 2px 8px rgba(0, 0, 0, 0.75),
+      inset 0 1px 1px rgba(0, 0, 0, 0.5),
+      0 1px 0 rgba(255, 255, 255, 0.055);
+    --fb-shadow-dock:
+      0 22px 46px -8px rgba(0, 0, 0, 0.88),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
   }
 
   * {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--fb-hairline);
   }
 
   body {
-    background-color: #09090b;
-    color: #f4f4f5;
+    background-color: var(--fb-canvas);
+    color: var(--fb-ink);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
+    transition: background-color 220ms ease-out, color 220ms ease-out;
   }
 }
 
-/* Tabular numbers for all financial, GPA, and time elements */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Subtle background grid pattern from Stitch design system */
-.bg-grid-pattern {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Custom dark scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.bg-grid-pattern {
+  background-size: 26px 26px;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--fb-canvas-dot) 1px, transparent 0),
+    radial-gradient(ellipse 80% 45% at 50% 0%, rgba(217, 95, 43, 0.055), transparent 70%);
+}
+
+/* Tactile Skeuomorphic Component Primitives */
+.skeuo-stage {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 18%), var(--fb-stage);
+  border: 1px solid var(--fb-hairline);
+  box-shadow: var(--fb-shadow-stage);
+}
+
+html.dark .skeuo-stage {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 18%), var(--fb-stage);
+}
+
+.skeuo-card {
+  background: linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-card-bottom) 100%);
+  border: 1px solid var(--fb-hairline);
+  box-shadow: var(--fb-shadow-card);
+}
+
+.skeuo-well {
+  background-color: var(--fb-well);
+  border: 1px solid var(--fb-hairline);
+  box-shadow: var(--fb-shadow-well);
+}
+
+.skeuo-well-sm {
+  box-shadow: inset 0 1px 3px rgba(32, 24, 14, 0.14), 0 1px 0 var(--fb-bevel);
+}
+
+html.dark .skeuo-well-sm {
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.skeuo-obsidian {
+  background: radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.1), transparent 48%), #151518;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: var(--fb-shadow-dock);
+}
+
+.skeuo-btn-obsidian {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-weight: 600;
+  background: linear-gradient(180deg, #2d2d35 0%, #1c1c22 54%, #131317 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 3px 0 #09090b,
+    0 11px 22px -7px rgba(16, 13, 9, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), filter 160ms ease-out, box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skeuo-btn-obsidian::after,
+.skeuo-btn-accent::after,
+.skeuo-btn-secondary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    112deg,
+    transparent 24%,
+    rgba(255, 255, 255, 0.16) 46%,
+    rgba(255, 255, 255, 0.24) 50%,
+    rgba(255, 255, 255, 0.08) 54%,
+    transparent 76%
+  );
+  transform: translateX(-130%) skewX(-14deg);
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.skeuo-btn-obsidian:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1.5px);
+  box-shadow:
+    0 4.5px 0 #09090b,
+    0 15px 26px -7px rgba(16, 13, 9, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.skeuo-btn-obsidian:hover::after,
+.skeuo-btn-accent:hover::after,
+.skeuo-btn-secondary:hover::after {
+  transform: translateX(130%) skewX(-14deg);
+}
+
+.skeuo-btn-obsidian:active {
+  transform: translateY(2px) scale(0.985);
+  box-shadow:
+    0 1px 0 #09090b,
+    0 4px 10px -4px rgba(16, 13, 9, 0.48),
+    inset 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.skeuo-btn-accent {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-weight: 600;
+  background: linear-gradient(180deg, #cf4f1b 0%, #b84214 56%, #9e350d 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 210, 185, 0.28);
+  box-shadow:
+    0 3px 0 #6d2104,
+    0 12px 24px -7px rgba(184, 66, 20, 0.46),
+    inset 0 1px 0 rgba(255, 224, 200, 0.46),
+    inset 0 -1px 0 rgba(68, 18, 0, 0.35);
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), filter 160ms ease-out, box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skeuo-btn-accent:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1.5px);
+  box-shadow:
+    0 4.5px 0 #6d2104,
+    0 15px 28px -7px rgba(184, 66, 20, 0.54),
+    inset 0 1px 0 rgba(255, 234, 215, 0.55),
+    inset 0 -1px 0 rgba(68, 18, 0, 0.35);
+}
+
+.skeuo-btn-accent:active {
+  transform: translateY(2px) scale(0.985);
+  box-shadow:
+    0 1px 0 #6d2104,
+    0 4px 10px -4px rgba(184, 66, 20, 0.4),
+    inset 0 2px 4px rgba(68, 18, 0, 0.4);
+}
+
+.skeuo-btn-secondary {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-weight: 600;
+  background: linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-well) 100%);
+  color: var(--fb-ink);
+  border: 1px solid var(--fb-hairline);
+  box-shadow:
+    0 2.5px 0 var(--fb-key-chamfer),
+    0 6px 14px -4px rgba(24, 20, 14, 0.14),
+    inset 0 1px 0 var(--fb-bevel);
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), filter 160ms ease-out, box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skeuo-btn-secondary:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow:
+    0 3.5px 0 var(--fb-key-chamfer),
+    0 10px 18px -5px rgba(24, 20, 14, 0.18),
+    inset 0 1px 0 var(--fb-bevel);
+}
+
+.skeuo-btn-secondary:active {
+  transform: translateY(1.5px) scale(0.985);
+  box-shadow:
+    0 1px 0 var(--fb-key-chamfer),
+    0 2px 6px -2px rgba(24, 20, 14, 0.12),
+    inset 0 1.5px 3px rgba(24, 20, 14, 0.12);
+}
+
+.skeuo-badge-recessed {
+  background-color: var(--fb-well);
+  color: var(--fb-ink-secondary);
+  border: 1px solid var(--fb-hairline);
+  box-shadow:
+    inset 0 1.5px 3px rgba(32, 24, 14, 0.12),
+    0 1px 0 var(--fb-bevel);
+}
+
+html.dark .skeuo-badge-recessed {
+  box-shadow:
+    inset 0 1.5px 4px rgba(0, 0, 0, 0.65),
+    0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.skeuo-card-interactive {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease-out;
+}
+
+.skeuo-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(217, 95, 43, 0.35);
+}
+
+.skeuo-input {
+  background-color: var(--fb-well);
+  color: var(--fb-ink);
+  border: 1px solid var(--fb-hairline);
+  box-shadow: var(--fb-shadow-well);
+}
+
+.skeuo-input::placeholder {
+  color: var(--fb-ink-muted);
+}
+
+/*
+ * Adaptive Light-Mode Surface & Ink Compatibility Bridge:
+ * Ensures nested portal modules that still reference legacy dark tokens
+ * remain crisp, tactile, and high-contrast in Warm Light Skeuomorphism mode
+ * without touching explicitly dark obsidian docks or saturated CTAs.
+ */
+html:not(.dark) .bg-\[\#09090b\],
+html:not(.dark) .bg-background {
+  background-color: var(--fb-canvas);
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .bg-\[\#121214\],
+html:not(.dark) .bg-\[\#121214\]\/80,
+html:not(.dark) .bg-\[\#141417\],
+html:not(.dark) .bg-surface-card,
+html:not(.dark) .bg-surface-card\/70,
+html:not(.dark) .bg-surface,
+html:not(.dark) .bg-zinc-900,
+html:not(.dark) .bg-zinc-900\/80,
+html:not(.dark) .bg-zinc-900\/70,
+html:not(.dark) .bg-zinc-900\/60,
+html:not(.dark) .bg-zinc-900\/50,
+html:not(.dark) .bg-zinc-900\/40 {
+  background: linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-card-bottom) 100%);
+  border-color: var(--fb-hairline);
+  box-shadow: var(--fb-shadow-card);
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .bg-\[\#18181b\],
+html:not(.dark) .bg-zinc-950,
+html:not(.dark) .bg-zinc-950\/80,
+html:not(.dark) .bg-zinc-950\/60,
+html:not(.dark) .bg-zinc-950\/40,
+html:not(.dark) .bg-surface-lowest {
+  background-color: var(--fb-well);
+  border-color: var(--fb-hairline);
+  box-shadow: var(--fb-shadow-well);
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .bg-sky-950\/25 {
+  background-color: rgba(14, 165, 233, 0.11);
+}
+html:not(.dark) .bg-emerald-950\/25 {
+  background-color: rgba(16, 185, 129, 0.11);
+}
+html:not(.dark) .bg-indigo-950\/25 {
+  background-color: rgba(99, 102, 241, 0.11);
+}
+html:not(.dark) .bg-amber-950\/25 {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+html:not(.dark) [data-skeuo-dark="true"],
+html:not(.dark) [data-skeuo-dark="true"] .text-white,
+html:not(.dark) .skeuo-obsidian,
+html:not(.dark) .skeuo-obsidian .text-white {
+  color: #ffffff;
+}
+
+html:not(.dark) .bg-\[\#161618\] .text-white,
+html:not(.dark) .bg-primary,
+html:not(.dark) .skeuo-btn-accent,
+html:not(.dark) .skeuo-btn-accent .text-white,
+html:not(.dark) .bg-sky-500,
+html:not(.dark) .bg-sky-600,
+html:not(.dark) .bg-emerald-600,
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-amber-600,
+html:not(.dark) .bg-rose-600 {
+  color: #ffffff;
+}
+
+html:not(.dark) .text-white:not(.bg-primary *):not(.skeuo-btn-accent):not(.skeuo-btn-accent *):not(.bg-sky-500 *):not(.bg-sky-600 *):not(.bg-emerald-600 *):not(.bg-indigo-600 *):not(.bg-amber-600 *):not(.bg-rose-600 *):not([data-skeuo-dark="true"]):not([data-skeuo-dark="true"] *):not(.skeuo-obsidian):not(.skeuo-obsidian *):not(.skeuo-btn-obsidian):not(.skeuo-btn-obsidian *) {
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .text-zinc-100:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .text-zinc-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface-variant:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink-secondary);
+}
+
+html:not(.dark) .text-zinc-500:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink-muted);
+}
+
+/* Pastel semantic text -> high-contrast readable tones on Light Warm paper */
+html:not(.dark) .text-sky-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-sky-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #0369a1;
+}
+html:not(.dark) .text-emerald-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-emerald-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #047857;
+}
+html:not(.dark) .text-indigo-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-indigo-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #4338ca;
+}
+html:not(.dark) .text-amber-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #b45309;
+}
+html:not(.dark) .text-rose-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-rose-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #be123c;
+}
+
+html:not(.dark) .border-white\/\[0\.08\],
+html:not(.dark) .border-white\/\[0\.06\],
+html:not(.dark) .border-white\/\[0\.1\],
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-zinc-800,
+html:not(.dark) .border-zinc-800\/80 {
+  border-color: var(--fb-hairline);
+}
+
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
+html:not(.dark) select,
+html:not(.dark) textarea {
+  background-color: var(--fb-well);
+  color: var(--fb-ink);
+  border-color: var(--fb-hairline);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: var(--fb-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: rgba(120, 113, 108, 0.38);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: rgba(120, 113, 108, 0.58);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeuo-btn-obsidian,
+  .skeuo-btn-accent,
+  .skeuo-btn-secondary,
+  .skeuo-card-interactive {
+    transition: none;
+  }
+  .skeuo-btn-obsidian::after,
+  .skeuo-btn-accent::after,
+  .skeuo-btn-secondary::after {
+    display: none;
+  }
+  .skeuo-btn-obsidian:hover,
+  .skeuo-btn-obsidian:active,
+  .skeuo-btn-accent:hover,
+  .skeuo-btn-accent:active,
+  .skeuo-btn-secondary:hover,
+  .skeuo-btn-secondary:active,
+  .skeuo-card-interactive:hover {
+    transform: none;
+  }
 }

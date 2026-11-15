@@ -699,7 +699,7 @@ export default function CandidateApplicationsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-violet-400 font-semibold text-xs">
                           <Video className="h-4 w-4" />
-                          <span>Suhbat taklifi (Interview - API-042)</span>
+                          <span>Suhbat taklifi</span>
                         </div>
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
@@ -801,7 +801,7 @@ export default function CandidateApplicationsPage() {
                                 onClick={() => setShowRescheduleInput(true)}
                                 className="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all disabled:opacity-50"
                               >
-                                <span>Qayta vaqt so&apos;rash</span>
+                                <span>Qayta vaqt so‘rash</span>
                               </button>
                               <button
                                 type="button"
@@ -809,7 +809,7 @@ export default function CandidateApplicationsPage() {
                                 onClick={() => handleInterviewResponse(detail.interview!.id, "DECLINED")}
                                 className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-medium transition-all disabled:opacity-50"
                               >
-                                <span>Rad etish (Decline)</span>
+                                <span>Rad etish</span>
                               </button>
                             </div>
                           )}
@@ -824,7 +824,7 @@ export default function CandidateApplicationsPage() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
                           <Award className="h-4 w-4" />
-                          <span>Ish taklifi (Offer - API-043)</span>
+                          <span>Rasmiy ish taklifi</span>
                         </div>
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
@@ -898,7 +898,7 @@ export default function CandidateApplicationsPage() {
                               href={`/nomzod/shartnomalar?engagement_id=${offerResponseFeedback.engagementId}`}
                               className="inline-flex items-center gap-1.5 mt-2 text-primary hover:underline font-semibold"
                             >
-                              <span>Ish munosabatini tasdiqlash sahifasiga o&apos;tish</span>
+                              <span>Ish munosabatini tasdiqlash sahifasiga o‘tish</span>
                               <ArrowRight className="h-3 w-3" />
                             </Link>
                           )}

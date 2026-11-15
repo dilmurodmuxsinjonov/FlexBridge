@@ -1323,6 +1323,24 @@ Keyingi kichik qadam:
   * **Yagona 4-Bosqichli `/royxatdan-otish`**: `frontend/src/app/royxatdan-otish/page.tsx` da baza `roles: ["CANDIDATE"]` ro‘yxatdan o‘tish tuzatildi hamda 4-bosqich rol faollashtirish UI qo‘shildi (`EMPLOYER` taklif tokeni + `MFA_REQUIRED` uchun `/nomzod/xavfsizlik` yo‘riqnomasi, `ACADEMIC` OTM tayinlovi roziligi, `OPERATOR` 2FA/dual-control tekshiruvi). `main`/`master` muzlatilgan holda saqlandi (`integration/r1-agent-collaboration`).
   * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` (0 xato), `py_compile` (0 xato), Docker `frontend` build, `scripts/test_unified_auth_all_roles_staging.py` (3/3 bosqich YASHIL) va `scripts/run_all_staging_tests.py` (**36/36 to‘plam 100% YASHIL, 116.69s**).
 
+
+### 2026-11-15 | LOG-161 | Issue #218 (`feature/218-skeuomorphic-dashboard-design`) -> Barcha portallar uchun ikki rejimli Skeuomorfik Dizayn Tizimi
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (ALL 36/36 STAGING TEST SUITES GREEN)**.
+- **Nima Qilindi**:
+  * **Ikki Rejimli Rang va Qavariq Dizayn (`ThemeProvider.tsx`, `globals.css`, `SkeuoPrimitives.tsx`)**: `Light Warm` (`#E6E2D8`/`#F4F1EA` iliq tosh foni va qavariq `.skeuo-card`/`.skeuo-well` kartalar) standart qilindi hamda sarlavhadagi Quyosh/Oy tugmasi orqali `Dark Obsidian` rejimiga o‘tkazish imkoniyati (`flexbridge:theme`) yaratildi. `framer-motion` bilan `SkeuoStatCard`, `SkeuoToggle`, `SkeuoVerticalMeter`, `SkeuoSegmented`, `SkeuoLiveFeed` va `SkeuoAreaChart` komponentlari qurildi.
+  * **3 ta Suzuvchi Obsidian Chrome (`Navbar.tsx`, `Footer.tsx`, `AuthModal.tsx`, `layout.tsx`)**: Dynamic Island jonli statusli yuqori pill bar, chap vertikal tezkor asboblar doki (`flexbridge:dock-tab`) va `layoutId` animatsiyali pastki suzuvchi kapsula dok (+ yuqoriga sakrash tugmasi) barcha rol izolyatsiyalarini buzmasdan birlashtirildi.
+  * **To‘liq Qamrov (25 ta Sahifa)**: Ommaviy katalog (`/`), CMS/Auth (`/ishlar/[id]`, `/kirish`, `/royxatdan-otish`, `/talaba/*`, `/korxona/*`, `/universitet/*`, `/operator/kirish`) hamda barcha 4 kabinet (`/nomzod/*`, `/employer`, `/university`, `/operator`) skeuomorfik elementlar bilan boyitildi (`1.1` va `1.2` qo‘shilmadi; `main` muzlatilgan holda saqlandi).
+  * **Tekshiruv**: `npx tsc --noEmit` (0 xato), `npx eslint` yangi komponentlarda (0 xato), Docker `frontend` rebuild, 25/25 sahifa SSR HTTP 200 (`Light Warm`), va `scripts/run_all_staging_tests.py` (**36/36 to‘plam 100% YASHIL, 120.21s**).
+
+
+### 2026-11-15 | LOG-162 | PR `#219` (`feature/218-skeuomorphic-dashboard-design`) -> Brauzer Auditi va Skeuomorfik UI Mukammallashtirish
+- **Holat**: **YETKAZILDI VA TEKSHIRILDI (PLAYWRIGHT VIZUAL AUDIT + 36/36 STAGING TESTLAR YASHIL)**.
+- **Nima Qilindi**:
+  * **Real Brauzer Auditi va Light/Dark Kontrast (`globals.css`, `SkeuoPrimitives.tsx`, `Navbar.tsx`, `Footer.tsx`)**: Playwright Edge skrinshotlari va DOM kontrast tahlili asosida `[data-skeuo-dark="true"]` o‘z-o‘zini moslash nuqsoni, Light Warm matn/fon kontrastlari va mobil (`390x844`) pastki dok sig‘imi tuzatildi; `SkeuoVerticalMeter` (3D glass shisha silindr + `compact` rejim), `SkeuoStatCard` va `SkeuoAreaChart` (silliq Catmull-Rom Bezier egri chizig‘i) namuna darajasidan oshirildi.
+  * **Ommaviy Katalog (`/`) & Yagona Kirish/Ro‘yxatdan O‘tish (`/kirish`, `/royxatdan-otish`)**: Yaxlit `.skeuo-well` qidiruv paneli, 2 ustunli Bento vakansiya setkasi, real server ma’lumotlariga ulangan **Katalog balansi** (`SkeuoToggle` + 4 ta shisha kolba), mobil `scrollWidth=390` tuzatishi, hamda `Obsidian / Terracotta` brend belgili va AI-slop gradientlardan xoli auth sahifalari joriy etildi.
+  * **4 ta Kabinetda Bento Proporsiyalari (`/nomzod`, `/employer`, `/university`, `/operator`)**: Cho‘zilgan KPI kartalar alohida ixcham qatorga ajratildi, `/nomzod`da 5 kolbali **HR Reyting Indeksi** Bento bloki qo‘shildi va ortiqcha dublikat tugmalar tozalandi (`1.1`/`1.2` qo‘shilmadi; `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` muzlatilgan holda PR `#219` -> `integration/r1-agent-collaboration`).
+  * **Tekshiruv**: `npx tsc --noEmit` (0 xato), 9 ta asosiy faylda `npx eslint` (0 xato, 0 ogohlantirish), Docker `frontend` rebuild, Playwright Edge vizual/kontrast auditi (`0` mobil toshish, `0` taqiqlangan matn), `scripts/run_all_staging_tests.py` (**36/36 to‘plam 100% YASHIL, 124.8s**).
+
 ### 2026-11-16 | LOG-163 | Issue #220 (`fix/220-integration-ci-green`) -> Integration CI'ni yashil holatga qaytarish
 - **Holat**: **LOKAL TEKSHIRILDI; BACKEND GitHub CI KUTILMOQDA** (Claude Code).
 - **Sabab**: `integration/r1-agent-collaboration` CI qizil edi: Frontend lint 94 xato (2026-11-14 dan, oxirgi yashil `2de979a`), backend 11 test (2026-11-15 dan, oxirgi yashil `178e31d`). Shu davrda ~20 PR merge qilingan; jurnaldagi "N/N YASHIL" faqat lokal staging skriptlariga tegishli edi.

@@ -423,7 +423,7 @@ def run_phase_1() -> None:
 
     status, reg_html, _ = make_request(f"{FRONTEND_URL}/royxatdan-otish")
     assert status == 200 and isinstance(reg_html, str) and len(reg_html) > 500
-    for expected in ("4 bosqichli onboarding", "Talaba", "Korxona HR", "Universitet", "Operator"):
+    for expected in ("4 bosqichli tezkor ulanish", "Talaba", "Korxona HR", "Universitet", "Operator"):
         assert expected in reg_html, f"Expected {expected!r} in /royxatdan-otish SSR HTML"
     assert "Verified Skill" not in reg_html and "Match Coach" not in reg_html
     print("  OK: /kirish & /royxatdan-otish SSR clean and expose all 4 user role paths.")

@@ -213,7 +213,7 @@ function KorxonaKirishForm() {
         </p>
       </div>
 
-      <div className="bg-[#121214] border border-emerald-500/20 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="skeuo-card rounded-[28px] p-6 sm:p-8 space-y-6">
         {errorMessage && (
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-xs text-rose-400">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
@@ -371,32 +371,32 @@ function KorxonaKirishForm() {
 
 export default function KorxonaKirishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-5xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)] transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Bosh sahifaga qaytish</span>
           </Link>
-          <span className="text-[11px] font-mono text-emerald-400/90">
-            PORTAL SCOPE: EMPLOYER (ORG ROLES)
+          <span className="text-[11px] font-mono rounded-full skeuo-badge-recessed px-3 py-0.5 text-emerald-700 dark:text-emerald-400">
+            Korxona HR Portali • Tashkilot rollari
           </span>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] items-start">
-          <aside className="rounded-2xl border border-emerald-500/20 bg-surface-card p-6 sm:p-7 space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300">
+          <aside className="rounded-[28px] skeuo-card p-6 sm:p-7 space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-lg skeuo-badge-recessed px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
               Ish Beruvchi & HR Ruxsatlari
             </div>
             <div>
-              <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Korxona vakillari uchun alohida izolyatsiyalangan kirish
+              <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[var(--fb-ink)]">
+                Korxona vakillari uchun alohida himoyalangan kirish
               </h2>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                Ushbu kirish faqat tashkilotga biriktirilgan <span className="text-emerald-300 font-mono">OWNER / HR / MENTOR / HOST_COORDINATOR / BILLING</span> hisoblari uchun ochiq. Talaba va OTM hisoblari bu kirish orqali qabul qilinmaydi.
+              <p className="mt-2 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
+                Ushbu kirish faqat tashkilotga biriktirilgan rahbar, HR mutaxassis, amaliyot mentori, koordinator va hisobchi hisoblari uchun ochiq. Talaba va OTM hisoblari bu sahifadan kirmaydi.
               </p>
             </div>
 

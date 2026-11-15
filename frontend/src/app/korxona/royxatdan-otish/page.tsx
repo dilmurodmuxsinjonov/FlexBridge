@@ -371,7 +371,7 @@ function KorxonaRegistrationContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-2xl space-y-6">
         <div className="flex items-center justify-between gap-3">
           <Link
@@ -797,7 +797,7 @@ function KorxonaRegistrationContent() {
                   Agar yangi korxona ochmoqchi bo‘lsangiz:
                 </p>
                 <p className="text-[11px] leading-relaxed">
-                  Yangi korxonani ro‘yxatdan o‘tkazish uchun STIR va davlat ro‘yxatidan o‘tganlik guvohnomasi (<span className="font-mono text-zinc-300">API-065</span>) platforma moderatori tomonidan tasdiqlanishi talab etiladi. Tasdiqdan so‘ng korxona nomidan e’lon berish huquqi avtomatik ochiladi.
+                  Yangi korxonani ro‘yxatdan o‘tkazish uchun STIR va davlat ro‘yxatidan o‘tganlik guvohnomasi platforma moderatori tomonidan tasdiqlanishi talab etiladi. Tasdiqdan so‘ng korxona nomidan e’lon berish huquqi avtomatik ochiladi.
                 </p>
                 <div className="pt-1 flex flex-wrap gap-3">
                   <Link

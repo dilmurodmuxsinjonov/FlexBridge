@@ -72,32 +72,36 @@ export default function Footer() {
     (Boolean(pathname?.startsWith("/operator")) ||
       Boolean(currentUser && isOperatorOnlyRoles(currentUser.roles)));
   return (
-    <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
+    <footer className="mt-auto w-full px-3 sm:px-6 lg:pl-16 2xl:pl-10 pb-24 pt-6 text-[var(--fb-ink-muted)] text-xs">
+      <div className="max-w-[1440px] mx-auto skeuo-card rounded-[28px] overflow-hidden">
       {/* Main Directory Links */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div className="px-5 sm:px-8 lg:px-10 py-10 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Column 1: Brand & Mission */}
           <div className="space-y-3">
-            <Link href="/" className="inline-flex items-center gap-2 select-none group">
-              <div className="w-7 h-7 rounded bg-primary flex items-center justify-center text-white shadow-sm font-bold text-sm tracking-wider">
-                FB
+            <Link href="/" className="inline-flex items-center gap-2.5 select-none group">
+              <div
+                data-skeuo-dark="true"
+                className="w-8 h-8 rounded-xl skeuo-obsidian flex items-center justify-center text-white font-bold text-xs tracking-wider"
+              >
+                <span className="text-[#D95F2B]">F</span>B
               </div>
-              <span className="font-heading font-bold text-base tracking-tight text-white group-hover:text-primary transition-colors">
+              <span className="font-heading font-bold text-base tracking-tight text-[var(--fb-ink)] group-hover:text-[#D95F2B] transition-colors">
                 FlexBridge
               </span>
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-white/[0.06] text-primary border border-primary/20 tracking-wider">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full skeuo-well-sm text-[#C2410C] dark:text-orange-400 tracking-wider">
                 v1.4
               </span>
             </Link>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed max-w-xs">
-              O&apos;zbekiston talabalari uchun moslashuvchan ish va amaliyot imkoniyatlarini taqdim etuvchi
+            <p className="text-[11px] text-[var(--fb-ink-secondary)] leading-relaxed max-w-xs">
+              O‘zbekiston talabalari uchun moslashuvchan ish va amaliyot imkoniyatlarini taqdim etuvchi
               yagona rasmiy ekotizim.
             </p>
 
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>100% Tirik Staging Integratsiya</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Tasdiqlangan milliy ekotizim</span>
             </div>
           </div>
 
@@ -111,7 +115,7 @@ export default function Footer() {
                   : isUniversityScope
                     ? "OTM Bo‘limlari"
                     : isOperatorScope
-                      ? "SOC Terminal Bo‘limlari"
+                      ? "Nazorat Paneli Bo‘limlari"
                       : "Platforma Portallari"}
             </h4>
             <ul className="space-y-2 text-[11px]">
@@ -120,13 +124,13 @@ export default function Footer() {
                   <li>
                     <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Operator SOC Terminali</span>
+                      <span>Operator Nazorat Paneli</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/operator/kirish" className="hover:text-white transition flex items-center gap-1.5">
                       <Lock className="w-3.5 h-3.5 text-amber-400" />
-                      <span>SOC Alohida Kirishi</span>
+                      <span>Operator Kirishi</span>
                     </Link>
                   </li>
                   <li>
@@ -231,7 +235,7 @@ export default function Footer() {
                       <li>
                         <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
                           <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                          <span>Platforma Operatori SOC</span>
+                          <span>Platforma Operatori</span>
                         </Link>
                       </li>
                     </>
@@ -245,7 +249,7 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
               {isOperatorScope
-                ? "SOC Xizmatlari"
+                ? "Nazorat Xizmatlari"
                 : isUniversityScope
                   ? "OTM Xizmatlari"
                   : isEmployerScope
@@ -255,18 +259,18 @@ export default function Footer() {
             {isOperatorScope ? (
               <ul className="space-y-2 text-[11px]">
                 <li>
-                  <Link href="/operator" className="hover:text-white transition">
-                    Hash-Chain Audit & Tizim Hodisalari
+                  <Link href="/operator" className="hover:text-[var(--fb-ink)] transition">
+                    O‘zgarmas Audit & Tizim Hodisalari
                   </Link>
                 </li>
                 <li>
-                  <Link href="/operator" className="hover:text-white transition">
+                  <Link href="/operator" className="hover:text-[var(--fb-ink)] transition">
                     KYB, OTM & Talaba Moderatsiya Navbati
                   </Link>
                 </li>
                 <li>
-                  <Link href="/operator" className="hover:text-white transition">
-                    Moliya, Ledger & Qaytarish Nazorati
+                  <Link href="/operator" className="hover:text-[var(--fb-ink)] transition">
+                    Moliya, Balans & Qaytarish Nazorati
                   </Link>
                 </li>
                 <li>
@@ -329,18 +333,18 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/nomzod/shartnomalar" className="hover:text-white transition">
-                    Amaliyot Shartnomalari (API-030/050)
+                  <Link href="/nomzod/shartnomalar" className="hover:text-[var(--fb-ink)] transition">
+                    Amaliyot Shartnomalari va E-Imzo
                   </Link>
                 </li>
                 <li>
-                  <Link href="/nomzod/kundalik" className="hover:text-white transition">
+                  <Link href="/nomzod/kundalik" className="hover:text-[var(--fb-ink)] transition">
                     Kunlik Amaliyot Kundaligi
                   </Link>
                 </li>
                 <li>
-                  <Link href="/nomzod/saqlanganlar" className="hover:text-white transition">
-                    Saqlangan E‘lonlar (Bookmarks)
+                  <Link href="/nomzod/saqlanganlar" className="hover:text-[var(--fb-ink)] transition">
+                    Saqlangan E’lonlar
                   </Link>
                 </li>
                 <li>
@@ -357,33 +361,33 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Column 4: Legal & CMS */}
+          {/* Column 4: Legal & Help */}
           <div className="space-y-3">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              Qonuniy & Yordam (CMS)
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--fb-ink)]">
+              Huquqiy Ma’lumotlar & Yordam
             </h4>
             <ul className="space-y-2 text-[11px]">
               <li>
-                <Link href="/shartlar" className="hover:text-white transition flex items-center gap-1.5">
+                <Link href="/shartlar" className="hover:text-[var(--fb-ink)] transition flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-primary" />
-                  <span>Foydalanish Shartlari (Terms)</span>
+                  <span>Foydalanish Shartlari</span>
                 </Link>
               </li>
               <li>
-                <Link href="/maxfiylik" className="hover:text-white transition flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Maxfiylik Siyosati (Privacy)</span>
+                <Link href="/maxfiylik" className="hover:text-[var(--fb-ink)] transition flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Maxfiylik Siyosati</span>
                 </Link>
               </li>
               <li>
-                <Link href="/haqida" className="hover:text-white transition flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-sky-400" />
+                <Link href="/haqida" className="hover:text-[var(--fb-ink)] transition flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-sky-500" />
                   <span>Platforma Haqida & Qo‘llanmalar</span>
                 </Link>
               </li>
               <li>
-                <Link href="/nomzod/yordam" className="hover:text-white transition">
-                  Texnik Qo‘llab-Quvvatlash & Chiptalar
+                <Link href="/nomzod/yordam" className="hover:text-[var(--fb-ink)] transition">
+                  Texnik Qo‘llab-Quvvatlash Markazi
                 </Link>
               </li>
             </ul>
@@ -392,23 +396,24 @@ export default function Footer() {
       </div>
 
       {/* Bottom Legal Bar */}
-      <div className="border-t border-white/[0.06] bg-[#09090b] py-5 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] text-zinc-500 font-mono">
+      <div className="border-t border-[var(--fb-border)] skeuo-well rounded-none border-x-0 border-b-0 py-5 px-5 sm:px-8 lg:px-10">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-[11px] text-[var(--fb-ink-muted)] font-mono">
           <div className="flex flex-wrap items-center gap-4">
-            <p>© 2026 FlexBridge Inc. Barcha huquqlar himoyalangan.</p>
-            <span className="hidden sm:inline text-zinc-700">|</span>
-            <span className="flex items-center gap-1 text-zinc-400">
+            <p>© 2026 FlexBridge. Barcha huquqlar himoyalangan.</p>
+            <span className="hidden sm:inline opacity-40">|</span>
+            <span className="flex items-center gap-1 text-[var(--fb-ink-secondary)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-              O‘zR Mehnat Kodeksi 118-modda (kunlik 8-soatlik chegara)
+              O‘zR Mehnat Kodeksi 118-modda (kunlik 8 soatlik me’yor)
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <span>HEMIS v3.2 Integratsiyasi</span>
-            <span className="text-zinc-700">•</span>
-            <span>SHA-256 Kriptografik Audit</span>
+            <span>HEMIS Akademik Integratsiyasi</span>
+            <span className="opacity-40">•</span>
+            <span>Himoyalangan Raqamli E-Imzo</span>
           </div>
         </div>
+      </div>
       </div>
     </footer>
   );

@@ -727,7 +727,7 @@ function TalabaRoyxatdanOtishWizard() {
 
       <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-500">
         <Shield className="w-3.5 h-3.5 text-zinc-600" />
-        <span>Hisob turi: faqat Talaba / Nomzod (CANDIDATE)</span>
+        <span>Hisob turi: faqat Talaba / Nomzod</span>
       </div>
     </div>
   );
@@ -735,7 +735,7 @@ function TalabaRoyxatdanOtishWizard() {
 
 export default function TalabaRoyxatdanOtishPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen text-[var(--fb-ink)] py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-2xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link

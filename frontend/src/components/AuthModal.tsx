@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Lock, Mail, KeyRound, AlertCircle, Loader2, X, ShieldCheck } from "lucide-react";
 import { loginUser, verifyMfa, AuthUser } from "@/lib/api";
 
@@ -82,23 +83,28 @@ export default function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-surface-card border border-white/[0.1] rounded-xl shadow-2xl p-6 sm:p-8 flex flex-col gap-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-md skeuo-card rounded-3xl p-6 sm:p-8 flex flex-col gap-5"
+      >
         <button
           onClick={onClose}
           type="button"
           aria-label="Yopish"
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+          className="absolute top-4 right-4 w-9 h-9 rounded-full skeuo-btn-secondary flex items-center justify-center text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex flex-col gap-1.5 text-center sm:text-left">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-1">
+          <div className="w-11 h-11 rounded-2xl skeuo-well flex items-center justify-center text-[#D95F2B] mb-1">
             <Lock className="w-5 h-5" />
           </div>
-          <h2 className="text-xl font-heading font-bold text-white tracking-tight">{title}</h2>
-          <p className="text-xs text-zinc-400">{subtitle}</p>
+          <h2 className="text-xl font-display font-bold text-[var(--fb-ink)] tracking-tight">{title}</h2>
+          <p className="text-xs text-[var(--fb-ink-muted)]">{subtitle}</p>
         </div>
 
         {errorMessage && (
@@ -125,7 +131,7 @@ export default function AuthModal({
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="user@example.com yoki +998901234567"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
                   />
                 </div>
               </div>
@@ -142,7 +148,7 @@ export default function AuthModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
                   />
                 </div>
               </div>
@@ -163,7 +169,7 @@ export default function AuthModal({
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value)}
                   placeholder="123456"
-                  className="w-full text-center tracking-widest text-lg font-mono py-2 rounded-lg bg-surface border border-white/[0.08] text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors"
+                  className="w-full text-center tracking-widest text-lg font-mono py-2.5 rounded-xl skeuo-input"
                 />
               </div>
               <button
@@ -179,7 +185,7 @@ export default function AuthModal({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-2.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium text-xs md:text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20"
+            className="w-full mt-2 py-3 px-4 rounded-2xl skeuo-btn-accent font-semibold text-xs md:text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -189,7 +195,7 @@ export default function AuthModal({
             ) : mfaTicket ? (
               <span>Tasdiqlash va Kirish</span>
             ) : (
-              <span>Kirish</span>
+              <span>Tizimga kirish</span>
             )}
           </button>
         </form>
@@ -242,7 +248,7 @@ export default function AuthModal({
             </Link>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

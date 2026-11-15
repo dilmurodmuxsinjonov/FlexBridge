@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Loader2,
   LogIn,
-  LogOut,
   FileCheck,
   BookOpen,
   Award,
@@ -45,7 +44,6 @@ import {
   fetchInstitutionSupervisions,
   fetchInstitutionAcademicAgreements,
   fetchUniversityAnalytics,
-  logoutUser,
   AuthUser,
   AcademicReviewQueueItem,
   TeacherAcademicAssignmentItem,
@@ -70,6 +68,12 @@ import {
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
+import {
+  SkeuoStatCard,
+  SkeuoVerticalMeter,
+  SkeuoSegmented,
+  SkeuoAreaChart,
+} from "@/components/skeuo/SkeuoPrimitives";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   1: { start: "08:30", end: "09:50" },
@@ -325,11 +329,11 @@ export default function UniversityPortal() {
       const saved = await saveInstitutionDirectoryProfile(institutionId, instDirectoryProfile);
       setInstDirectoryProfile(saved);
       setInstDirectorySuccessMsg(
-        `OTM pasporti va ma'lumotnomasi muvaffaqiyatli saqlandi! To'ldirilganlik: ${saved.completion_percent}% (API-098-DIRECTORY)`
+        `OTM pasporti va ma’lumotnomasi muvaffaqiyatli saqlandi! To‘ldirilganlik: ${saved.completion_percent}%`
       );
       setTimeout(() => setInstDirectorySuccessMsg(null), 5000);
     } catch (err: unknown) {
-      setInstDirectoryErrorMsg(err instanceof Error ? err.message : "OTM ma'lumotnomasini saqlashda xatolik");
+      setInstDirectoryErrorMsg(err instanceof Error ? err.message : "OTM ma’lumotnomasini saqlashda xatolik");
     } finally {
       setIsSavingInstDirectory(false);
     }
@@ -350,7 +354,7 @@ export default function UniversityPortal() {
       });
       setNewAgrPartnerName("");
       setNewAgrNumber("");
-      setInstDirectorySuccessMsg("Yangi hamkorlik shartnomasi muvaffaqiyatli ro'yxatdan o'tkazildi! (API-101-CREATE)");
+      setInstDirectorySuccessMsg("Yangi hamkorlik shartnomasi muvaffaqiyatli ro‘yxatdan o‘tkazildi!");
       await loadReportsAndAgreements(institutionId);
     } catch (err: unknown) {
       setInstDirectoryErrorMsg(err instanceof Error ? err.message : "Shartnoma yaratishda xatolik");
@@ -599,22 +603,6 @@ export default function UniversityPortal() {
     };
   }, [loadQueue, loadAssignments, loadCoordinatorQueue]);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    setQueueItems([]);
-    setAssignments([]);
-    setCoordinatorQueue([]);
-    setQueueError(null);
-    setAssignmentsError(null);
-    setCoordError(null);
-    setIsReviewModalOpen(false);
-    setSelectedReviewItem(null);
-    setIsConclusionModalOpen(false);
-    setIsNominateModalOpen(false);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
-
   const handleOpenReview = (item: AcademicReviewQueueItem) => {
     setSelectedReviewItem(item);
     setIsReviewModalOpen(true);
@@ -730,23 +718,67 @@ export default function UniversityPortal() {
     loadCoordinatorQueue();
   };
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flexbridge:portal-tab-changed", {
+        detail: { tab: activeTab },
+      })
+    );
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onDockTab = (ev: Event) => {
+      const next = (ev as CustomEvent<{ tab?: string }>).detail?.tab as
+        | "queue"
+        | "assignments"
+        | "coordinator"
+        | "exports"
+        | "analytics"
+        | "timetable"
+        | "documents"
+        | undefined;
+      if (!next) return;
+      setActiveTab(next);
+      if (next === "documents") {
+        loadAssignments();
+        if (institutionId) loadReportsAndAgreements(institutionId);
+      } else if (next === "timetable") {
+        if (institutionId) loadTimetable(institutionId);
+        else loadCoordinatorQueue();
+      } else if (next === "exports" && institutionId) {
+        loadReportsAndAgreements(institutionId);
+      } else if (next === "analytics") {
+        if (institutionId) loadAnalytics(institutionId);
+        else loadCoordinatorQueue();
+      }
+    };
+    window.addEventListener("flexbridge:dock-tab", onDockTab);
+    return () => window.removeEventListener("flexbridge:dock-tab", onDockTab);
+  }, [
+    institutionId,
+    loadAssignments,
+    loadReportsAndAgreements,
+    loadTimetable,
+    loadCoordinatorQueue,
+    loadAnalytics,
+  ]);
+
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* ACADEMIC DEANERY HEADER BAR */}
-      <section className="w-full bg-surface-card border border-white/[0.08] border-t-2 border-t-indigo-500 rounded-xl p-6 shadow-sm">
+      <section className="w-full skeuo-card rounded-[28px] p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/25">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-indigo-700 dark:text-indigo-400">
                 Universitet Akademik Dekanati
               </span>
-              <span className="text-zinc-500 text-xs font-mono">• API-105 / API-108 / API-103</span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Kirilgan: {currentUser.user_id.slice(0, 8)}... ({currentUser.roles.join(", ")})
+                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  Dekanat hisobi faol
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
@@ -779,23 +811,19 @@ export default function UniversityPortal() {
               </div>
             )}
             {isAuthLoading ? (
-              <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+              <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-muted)]">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
                 <span>Yuklanmoqda...</span>
               </div>
             ) : currentUser ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 active:scale-[0.98]"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Chiqish</span>
-              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                OTM sessiyasi faol
+              </span>
             ) : (
               <Link
                 href="/universitet/kirish"
-                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+                className="px-4 py-2 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>O‘qituvchi sifatida kirish</span>
@@ -807,22 +835,22 @@ export default function UniversityPortal() {
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
-        <section className="w-full bg-surface-card/60 border border-indigo-500/20 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
+        <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-indigo-700 dark:text-indigo-400">
             <GraduationCap className="w-7 h-7" />
           </div>
-          <div className="flex flex-col gap-1 max-w-md">
-            <h2 className="text-base md:text-lg font-heading font-semibold text-white">
+          <div className="flex flex-col gap-1.5 max-w-md">
+            <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
               Akademik portalga kirish talab etiladi
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
               Talabalarning amaliyot kundaliklarini baholash, yakuniy akademik xulosalarni rasmiylashtirish yoki o‘qituvchilarni biriktirish uchun tizimga kiring.
             </p>
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/universitet/kirish"
-              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+              className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span>OTM alohida kirishi</span>
@@ -830,13 +858,13 @@ export default function UniversityPortal() {
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-semibold text-indigo-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-indigo-700 dark:text-indigo-300"
             >
               Tezkor oyna orqali kirish
             </button>
             <Link
               href="/universitet/royxatdan-otish"
-              className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-xs font-semibold text-zinc-300 transition-all"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold"
             >
               OTM vakili ulanishi
             </Link>
@@ -844,12 +872,109 @@ export default function UniversityPortal() {
         </section>
       )}
 
+      {/* ACADEMIC SKEUOMORPHIC EXECUTIVE STRIP & WORKSPACE SWITCHER */}
+      {currentUser && (() => {
+        const totalTrackable = Math.max(assignments.length + coordinatorQueue.length, 1);
+        const assignedPct = Math.round((assignments.length / totalTrackable) * 100);
+        return (
+          <div className="flex flex-col gap-5">
+            <section className="grid gap-4 sm:grid-cols-3">
+              <SkeuoStatCard
+                title="Kundaliklar navbati"
+                value={queueItems.length}
+                subtitle="Akademik ko‘rik kutilmoqda"
+                icon={FileCheck}
+                tone="orange"
+                active={activeTab === "queue"}
+                onClick={() => setActiveTab("queue")}
+              />
+              <SkeuoStatCard
+                title="Biriktirilgan amaliyotlar"
+                value={assignments.length}
+                subtitle="O‘qituvchi nazorati ostida"
+                icon={BookOpen}
+                tone="indigo"
+                active={activeTab === "assignments"}
+                onClick={() => setActiveTab("assignments")}
+              />
+              <SkeuoStatCard
+                title="Kafedra taqsimoti"
+                value={coordinatorQueue.length}
+                subtitle="Rahbar tayinlovi kutilmoqda"
+                icon={Users}
+                tone="sky"
+                active={activeTab === "coordinator"}
+                onClick={() => setActiveTab("coordinator")}
+              />
+            </section>
+            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <SkeuoVerticalMeter
+                title="Biriktiruv qamrovi"
+                percentage={assignedPct}
+                amountLabel={`${assignments.length} / ${assignments.length + coordinatorQueue.length}`}
+                subtitle="Kafedra taqsimot ulushi"
+                tone="indigo"
+              />
+              <SkeuoAreaChart
+                title="Dekanat nazorat dinamikasi"
+                subtitle="Jonli modullar kesimida"
+                accentHex="#6366F1"
+                series={[
+                  { label: "Navbat", value: queueItems.length },
+                  { label: "Amaliyot", value: assignments.length },
+                  { label: "Taqsimot", value: coordinatorQueue.length },
+                  { label: "Shartnoma", value: academicAgreements.length },
+                  { label: "Rahbarlik", value: supervisions.length },
+                ]}
+              />
+            </section>
+
+            <SkeuoSegmented
+              layoutName="universityWorkspaceTabs"
+              value={activeTab}
+              onChange={(next) => {
+                const tab = next as
+                  | "queue"
+                  | "assignments"
+                  | "coordinator"
+                  | "exports"
+                  | "analytics"
+                  | "timetable"
+                  | "documents";
+                setActiveTab(tab);
+                if (tab === "documents") {
+                  loadAssignments();
+                  if (institutionId) loadReportsAndAgreements(institutionId);
+                } else if (tab === "timetable") {
+                  if (institutionId) loadTimetable(institutionId);
+                  else loadCoordinatorQueue();
+                } else if (tab === "exports" && institutionId) {
+                  loadReportsAndAgreements(institutionId);
+                } else if (tab === "analytics") {
+                  if (institutionId) loadAnalytics(institutionId);
+                  else loadCoordinatorQueue();
+                }
+              }}
+              options={[
+                { id: "queue", label: "Navbat", icon: FileCheck, badge: queueItems.length || undefined },
+                { id: "assignments", label: "Biriktirilganlar", icon: BookOpen, badge: assignments.length || undefined },
+                { id: "documents", label: "E-Imzo", icon: ShieldCheck },
+                { id: "coordinator", label: "Kafedra", icon: Users, badge: coordinatorQueue.length || undefined },
+                { id: "timetable", label: "Dars Jadvali", icon: Calendar },
+                { id: "exports", label: "Hisobotlar", icon: FileSpreadsheet },
+                { id: "analytics", label: "Analitika", icon: BarChart3 },
+              ]}
+            />
+          </div>
+        );
+      })()}
+
       {/* ACADEMIC WORKSPACE: LEFT REGISTRY RAIL + ACTIVE TAB */}
       {currentUser && (
         <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
           <aside
             aria-label="Akademik bo‘limlar"
-            className="rounded-xl border border-indigo-500/20 bg-surface-card p-2.5 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
           >
             <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-400/80">
               Amaliyot Nazorati
@@ -1147,10 +1272,10 @@ export default function UniversityPortal() {
                       <button
                         type="button"
                         onClick={() => handleOpenConclusionModal(assignment.placement_id, assignment.id)}
-                        className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
+                        className="px-3.5 py-2 rounded-xl skeuo-btn-accent text-xs font-semibold text-white flex items-center gap-1.5"
                       >
                         <Award className="w-3.5 h-3.5" />
-                        <span>Akademik Xulosa (API-108)</span>
+                        <span>Akademik Xulosa</span>
                       </button>
                     </div>
                   </div>
@@ -1254,16 +1379,15 @@ export default function UniversityPortal() {
           <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Hisobot & Shartnomalar Hub
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400">
+                  Hisobot & Shartnomalar Markazi
                 </span>
-                <span className="text-zinc-500 text-xs font-mono">• API-100, API-098, API-101</span>
               </div>
-              <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                Muassasa Yig&apos;ma Hisoboti va Hamkorlik Shartnomalari
+              <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
+                Muassasa Yig‘ma Hisoboti va Hamkorlik Shartnomalari
               </h2>
-              <p className="text-xs text-zinc-400">
-                Talabalar amaliyoti, o&apos;quv rejalari va soatlar sarfi bo&apos;yicha rasmiy PDF va JSON hisobotlarini shakllantirish (CAP-026 / API-100) hamda faol hamkorlik shartnomalari nazorati.
+              <p className="text-xs text-[var(--fb-ink-secondary)]">
+                Talabalar amaliyoti, o‘quv rejalari va soatlar sarfi bo‘yicha rasmiy PDF va jadval hisobotlarini shakllantirish hamda hamkorlik shartnomalari nazorati.
               </p>
             </div>
 
@@ -1288,11 +1412,11 @@ export default function UniversityPortal() {
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4 text-primary" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Rasmiy Yig&apos;ma Hisobot Yaratish (API-100)
+                    <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                      Rasmiy Yig‘ma Hisobot Yaratish
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500">CAP-026 / REPORT_EXPORT</span>
+                  <span className="text-[10px] font-mono text-[var(--fb-ink-muted)]">Rasmiy eksport</span>
                 </div>
 
                 <form onSubmit={handleGenerateExport} className="flex flex-col gap-4">
@@ -1437,11 +1561,10 @@ export default function UniversityPortal() {
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
                     <GraduationCap className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Superviziyalar ({supervisions.length})
+                    <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
+                      Ilmiy Rahbarliklar ({supervisions.length})
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-098</span>
                 </div>
 
                 {supervisionsError && (
@@ -1486,11 +1609,10 @@ export default function UniversityPortal() {
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                    <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
                       Hamkorlik Shartnomalari ({academicAgreements.length})
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500">API-101</span>
                 </div>
 
                 {agreementsError && (
@@ -1544,8 +1666,8 @@ export default function UniversityPortal() {
                   Universitet rekvizitlari, Karera markazi mas&apos;ullari, fakultetlar tarkibi va korxonalar bilan tuzilgan amaliyot shartnomalari.
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-mono font-semibold">
-                To&apos;ldirilganlik: {instDirectoryProfile.completion_percent || 0}% • API-098-DIRECTORY
+              <span className="px-3 py-1 rounded-full skeuo-badge-recessed text-primary text-xs font-mono font-semibold">
+                To‘ldirilganlik: {instDirectoryProfile.completion_percent || 0}%
               </span>
             </div>
 
@@ -1802,8 +1924,8 @@ export default function UniversityPortal() {
               className="p-4 rounded-xl bg-surface border border-white/[0.06] flex flex-col md:flex-row md:items-end gap-3"
             >
               <div className="flex-1 flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-emerald-400">
-                  + Yangi Hamkor Korxona bilan Amaliyot Shartnomasi Tuzish (API-101-CREATE)
+                <label className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  + Yangi Hamkor Korxona bilan Amaliyot Shartnomasi Tuzish
                 </label>
                 <input
                   type="text"
@@ -2491,11 +2613,11 @@ export default function UniversityPortal() {
           <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm">
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-indigo-700 dark:text-indigo-300">
                   Dars Jadvali Boshqaruvi
                 </span>
-                <span className="text-zinc-500 text-xs font-mono">
-                  • API-098-TIMETABLE • Qo&apos;lda Kiritish & Shablon Import (CSV / JSON)
+                <span className="text-[var(--fb-ink-muted)] text-xs font-mono">
+                  • Qo‘lda Kiritish & Shablon Import (CSV / JSON)
                 </span>
                 {timetableData && (
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -2992,7 +3114,7 @@ export default function UniversityPortal() {
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2 text-white font-heading font-semibold text-base">
                 <Award className="w-5 h-5 text-primary" />
-                <span>Yakuniy Akademik Xulosa (API-108)</span>
+                <span>Yakuniy Akademik Xulosa</span>
               </div>
               <button
                 type="button"
@@ -3153,7 +3275,7 @@ export default function UniversityPortal() {
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2 text-white font-heading font-semibold text-base">
                 <UserCheck className="w-5 h-5 text-primary" />
-                <span>O‘qituvchi Biriktirish (API-102)</span>
+                <span>O‘qituvchi Biriktirish</span>
               </div>
               <button
                 type="button"

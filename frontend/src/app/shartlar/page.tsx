@@ -53,7 +53,7 @@ export default function TermsAndPoliciesPage() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen text-[var(--fb-ink)] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-zinc-400">
@@ -205,7 +205,7 @@ export default function TermsAndPoliciesPage() {
             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-zinc-400 flex items-start gap-3">
               <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                Ushbu shartlar FlexBridge 1.4 kanonik shartnomasi (<span className="font-mono text-zinc-200">API-014</span>) orqali versiyalangan va platforma barcha ishtirokchilari (nomzod, ish beruvchi, OTM) uchun yuridik jihatdan majburiy hisoblanadi.
+                Ushbu shartlar FlexBridge 1.4 rasmiy kelishuvi asosida versiyalangan va platforma barcha ishtirokchilari (nomzod, ish beruvchi, OTM) uchun yuridik jihatdan majburiy hisoblanadi.
               </p>
             </div>
           </div>

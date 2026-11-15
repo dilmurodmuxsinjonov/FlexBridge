@@ -19,6 +19,7 @@ import {
   markNotificationRead,
   NotificationItem,
 } from "@/lib/api";
+import { SkeuoStatCard, SkeuoToggle } from "@/components/skeuo/SkeuoPrimitives";
 import { describeRequestError } from "@/lib/errors";
 import { useAsyncData } from "@/lib/useAsyncData";
 
@@ -85,40 +86,19 @@ export default function NotificationsInboxPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          {/* Unread Filter Toggle */}
-          <div className="flex items-center p-0.5 rounded bg-white/[0.04] border border-white/[0.08] text-xs">
-            <button
-              type="button"
-              aria-pressed={!unreadOnly}
-              onClick={() => setUnreadOnly(false)}
-              className={`px-3 py-1.5 rounded transition-colors ${
-                !unreadOnly
-                  ? "bg-primary text-white font-medium shadow-sm"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Barchasi
-            </button>
-            <button
-              type="button"
-              aria-pressed={unreadOnly}
-              onClick={() => setUnreadOnly(true)}
-              className={`px-3 py-1.5 rounded transition-colors ${
-                unreadOnly
-                  ? "bg-primary text-white font-medium shadow-sm"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Faqat o&apos;qilmagan
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          <SkeuoToggle
+            checked={unreadOnly}
+            onChange={(next) => setUnreadOnly(next)}
+            label="Faqat o‘qilmagan"
+            tone="orange"
+          />
 
           <button
             type="button"
             onClick={refresh}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold skeuo-btn-secondary rounded-full disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             Yangilash
@@ -143,14 +123,20 @@ export default function NotificationsInboxPage() {
 
       {/* Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
-          <span className="text-xs text-zinc-400 uppercase tracking-wider block">Jami Xabarlar</span>
-          <span className="text-2xl font-bold text-white mt-1 block font-mono">{items.length}</span>
-        </div>
-        <div className="p-4 rounded bg-[#121214] border border-white/[0.08]">
-          <span className="text-xs text-zinc-400 uppercase tracking-wider block">O&apos;qilmagan Xabarlar</span>
-          <span className="text-2xl font-bold text-amber-400 mt-1 block font-mono">{unreadCount}</span>
-        </div>
+        <SkeuoStatCard
+          title="Jami xabarlar"
+          value={items.length}
+          subtitle="Oxirgi 50 ta bildirishnoma"
+          icon={Bell}
+          tone="sky"
+        />
+        <SkeuoStatCard
+          title="O‘qilmagan xabarlar"
+          value={unreadCount}
+          subtitle={unreadCount > 0 ? "E’tibor talab qiladi" : "Barchasi o‘qilgan"}
+          icon={CheckCircle2}
+          tone="amber"
+        />
       </div>
 
       {/* Content Area */}
