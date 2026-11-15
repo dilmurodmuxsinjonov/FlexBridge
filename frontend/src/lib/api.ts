@@ -4004,6 +4004,119 @@ export async function fetchPublicHelp(document: string): Promise<HelpDocumentRes
   return data as HelpDocumentResponse;
 }
 
+// ---------------------------------------------------------------------------
+// Standalone Auth & Onboarding Registration API (FB-190)
+// ---------------------------------------------------------------------------
+
+export interface AuthOptionsResponse {
+  ok: boolean;
+  channels: string[];
+  otp_expires_in: number;
+  otp_max_attempts: number;
+  resend_after: number;
+  terms_version: string;
+  privacy_version: string;
+}
+
+export interface ChallengeIssueResponse {
+  ok: boolean;
+  challenge_id: string;
+  status: string;
+  expires_in: number;
+  resend_after: number;
+}
+
+export interface ChallengeConsumeResponse {
+  ok: boolean;
+  verification_token: string;
+  purpose: string;
+  expires_in: number;
+}
+
+export interface RegisterUserPayload {
+  verification_token: string;
+  display_name: string;
+  password: string;
+  adult_confirmed: boolean;
+  terms_version?: string;
+  privacy_version?: string;
+  roles?: string[];
+  enable_totp?: boolean;
+}
+
+export interface RegisterUserResponse {
+  ok: boolean;
+  user: {
+    id: string;
+    display_name: string;
+    roles: string[];
+    adult_declared_at: string;
+  };
+  logged_in: boolean;
+}
+
+export async function fetchAuthOptions(): Promise<AuthOptionsResponse> {
+  const res = await fetch("/api/bff/auth/options", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "OPTIONS_FETCH_FAILED");
+  }
+  return data as AuthOptionsResponse;
+}
+
+export async function issueAuthChallenge(
+  channel: "PHONE" | "EMAIL",
+  destination: string,
+  purpose: "REGISTER" | "LOGIN" | "RECOVERY"
+): Promise<ChallengeIssueResponse> {
+  const res = await fetch("/api/bff/auth/challenges", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ channel, destination, purpose }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "CHALLENGE_FAILED");
+  }
+  return data as ChallengeIssueResponse;
+}
+
+export async function consumeAuthChallenge(
+  challenge_id: string,
+  purpose: "REGISTER" | "LOGIN" | "RECOVERY",
+  code: string
+): Promise<ChallengeConsumeResponse> {
+  const res = await fetch(`/api/bff/auth/challenges/${encodeURIComponent(challenge_id)}/consume`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ purpose, code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "CODE_VERIFICATION_FAILED");
+  }
+  return data as ChallengeConsumeResponse;
+}
+
+export async function registerCandidateUser(
+  payload: RegisterUserPayload
+): Promise<RegisterUserResponse> {
+  const res = await fetch("/api/bff/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || "REGISTRATION_FAILED");
+  }
+  return data as RegisterUserResponse;
+}
+
+
 
 
 

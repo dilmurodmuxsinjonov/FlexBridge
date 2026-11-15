@@ -1549,6 +1549,24 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
   - Comprehensive 23-suite regression runner `scripts/run_all_staging_tests.py`: ALL 23/23 TEST SUITES PASSED 100% GREEN in 48.75s (zero regressions).
   - Forensic audit report: `reviews/2026-11-15/public_cms_legal_footer/PUBLIC_CMS_LEGAL_FOOTER_REPORT.md`.
 
+## LOG-147 / Standalone Authentication Pages (/kirish, /royxatdan-otish) & Onboarding Entry Flows (FB-190, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #190, Branch `feature/190-standalone-auth-onboarding-pages`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 4 Next.js 16 BFF endpoints (`/api/bff/auth/options`, `/api/bff/auth/challenges`, `/api/bff/auth/challenges/[id]/consume`, `/api/bff/auth/register`) and upgraded `/api/auth/login` with intelligent channel inference (`PHONE` vs `EMAIL`) proxying canonical contracts under CAP-002 with HttpOnly session cookie issuance, CSRF origin defense, and typed payloads.
+  - Constructed 2 dedicated standalone public authentication & onboarding pages adhering strictly to anti-slop guidelines (#09090b canvas, #121214 cards, Lucide SVG icons, zero emojis):
+    1. `/kirish` (`frontend/src/app/kirish/page.tsx`): Dedicated full-page login with phone/email and password inputs, reveal toggles, step-up MFA Challenge (HTTP 202) 6-digit TOTP code entry, error banners, and role-based portal redirects (`/nomzod`, `/employer`, `/university`, `/operator`).
+    2. `/royxatdan-otish` (`frontend/src/app/royxatdan-otish/page.tsx`): 3-step onboarding wizard featuring: Step 1 Role Selection (`CANDIDATE`, `EMPLOYER`, `ACADEMIC`); Step 2 Phone verification & SMS OTP challenge issuance & consumption; Step 3 Full name (`display_name`), password strength meter (12+ chars), adult declaration (`adult_confirmed`), and legal policy agreement (`terms_version: "2026.1"`, `privacy_version: "2026.1"`) with automatic session establishment.
+  - Enhanced Platform Navigation (`frontend/src/components/Navbar.tsx`) with direct "Kirish" and "Ro‘yxatdan o‘tish" navigation buttons.
+  - Extended TypeScript SDK (`frontend/src/lib/api.ts`) with `fetchAuthOptions`, `issueAuthChallenge`, `consumeAuthChallenge`, and `registerCandidateUser`.
+  - Next.js Turbopack build verified clean (`npm run build`: 63 routes compiled, 0 errors). Docker container `flexbridge-r1-frontend-1` rebuilt and healthy on port 3000.
+  - Dedicated staging suite `scripts/test_standalone_auth_pages_staging.py`: 10/10 phases passed 100% GREEN against PgBouncer and Next.js BFF.
+  - Comprehensive 24-suite regression runner `scripts/run_all_staging_tests.py`: ALL 24/24 TEST SUITES PASSED 100% GREEN in 53.09s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/standalone_auth_pages/STANDALONE_AUTH_PAGES_REPORT.md`.
+
+
 
 
 
