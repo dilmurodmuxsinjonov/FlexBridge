@@ -1182,6 +1182,12 @@ Keyingi kichik qadam:
   * `npx tsc --noEmit`: 0 xato.
   * `npm run build`: Turbopack 31/31 marshrut muvaffaqiyatli kompilyatsiya qilindi.
 
+- **FB-166 (Candidate Ratings, Double-Blind Reviews, Rubrics & Appeals Hub)**:
+  * 5 Next.js BFF marshruti: `/api/bff/candidate/ratings`, `/api/bff/candidate/engagements/[id]/ratings`, `/api/bff/candidate/ratings/[id]/appeals`, `/api/bff/candidate/saved-opportunities`, `/api/bff/candidate/saved-opportunities/[id]`.
+  * Nomzod Baholari Hubi (`/nomzod/baholar`) va Saqlangan E'lonlar Hubi (`/nomzod/saqlanganlar`).
+  * 12 ta staging test to'plami bo'yicha 105/105 test 100% Yashil (0 regressiya).
+
+
 
 
 
