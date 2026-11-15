@@ -1667,3 +1667,197 @@ export async function assignTeacherToPlacement(
   }
   return data as { ok: boolean; assignment?: Record<string, unknown> };
 }
+
+export interface MentorReviewQueueItem {
+  revision_id: string;
+  daily_log_id: string;
+  placement_id: string;
+  organization_id: string;
+  log_date: string | null;
+  day_type: string;
+  summary: string;
+  total_minutes: number;
+  status: string;
+  submitted_at: string | null;
+  due_at: string | null;
+  is_escalated: boolean;
+  candidate: {
+    id: string;
+    user_id: string;
+    full_name: string;
+    headline: string;
+  };
+}
+
+export interface MentorLogRevisionDetail {
+  contract_id: "API-091";
+  revision_id: string;
+  daily_log_id: string;
+  placement_id: string;
+  organization_id: string;
+  log_date: string | null;
+  day_type: string;
+  summary: string;
+  total_minutes: number;
+  status: string;
+  submitted_at: string | null;
+  due_at: string | null;
+  is_escalated: boolean;
+  candidate: {
+    id: string;
+    user_id: string;
+    full_name: string;
+    headline: string;
+  };
+  terms?: {
+    terms_id: string;
+    daily_limit_minutes: number;
+    weekly_limit_hours: number;
+  } | null;
+  tasks: Array<{
+    task_id: string;
+    title: string;
+    minutes: number;
+    start_minute?: number | null;
+    end_minute?: number | null;
+    evidence?: Array<{
+      evidence_id: string;
+      file_id: string;
+      visibility: string;
+      created_at?: string | null;
+    }>;
+  }>;
+  existing_review?: {
+    review_id: string;
+    decision: string;
+    comment?: string | null;
+    decided_at?: string | null;
+  } | null;
+}
+
+export interface MentorAssignmentItem {
+  id: string;
+  placement_id: string;
+  membership_id: string;
+  assigned_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+}
+
+export interface OrganizationPlacementItem {
+  id: string;
+  application_id: string;
+  offer_id: string;
+  candidate_id: string;
+  organization_id: string;
+  enrollment_id?: string | null;
+  academic_track: boolean;
+  status: string;
+  start_date: string;
+  end_date: string;
+  version: number;
+  current_terms_id: string;
+}
+
+export async function fetchMentorReviewQueue(
+  limit = 50,
+  cursor?: string
+): Promise<{ items: MentorReviewQueueItem[]; total: number; next_cursor: string | null }> {
+  const sp = new URLSearchParams({ limit: limit.toString() });
+  if (cursor) sp.set("cursor", cursor);
+
+  const res = await fetch(`/api/bff/employer/mentor/review-queue?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_MENTOR_QUEUE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return {
+    items: (data.items || []) as MentorReviewQueueItem[],
+    total: data.total ?? (data.items || []).length,
+    next_cursor: data.next_cursor || null,
+  };
+}
+
+export async function fetchWorkplaceRevisionDetail(
+  revisionId: string
+): Promise<MentorLogRevisionDetail> {
+  const res = await fetch(`/api/bff/employer/mentor/log-revisions/${encodeURIComponent(revisionId)}/workplace`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_WORKPLACE_REVISION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data.revision as MentorLogRevisionDetail;
+}
+
+export async function submitWorkplaceReview(
+  revisionId: string,
+  payload: {
+    decision: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED";
+    comment?: string;
+  }
+): Promise<{ ok: boolean; review: Record<string, unknown> }> {
+  const res = await fetch(`/api/bff/employer/mentor/log-revisions/${encodeURIComponent(revisionId)}/workplace-reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "SUBMIT_WORKPLACE_REVIEW_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as { ok: boolean; review: Record<string, unknown> };
+}
+
+export async function fetchMentorAssignments(
+  limit = 50
+): Promise<MentorAssignmentItem[]> {
+  const res = await fetch(`/api/bff/employer/mentor/assignments?limit=${limit}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_MENTOR_ASSIGNMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as MentorAssignmentItem[];
+}
+
+export async function fetchOrganizationPlacements(
+  orgId: string,
+  limit = 50
+): Promise<OrganizationPlacementItem[]> {
+  const res = await fetch(`/api/bff/employer/placements?organization_id=${encodeURIComponent(orgId)}&limit=${limit}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_ORG_PLACEMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as OrganizationPlacementItem[];
+}
+
