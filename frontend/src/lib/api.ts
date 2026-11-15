@@ -2966,6 +2966,155 @@ export async function requestOrderRefund(
   return data as OrderRefundResult;
 }
 
+// ---------------------------------------------------------------------------
+// FB-176: Operator Finance Summary, Reconciliation & Refunds (API-117, 115, 078)
+// ---------------------------------------------------------------------------
+
+export interface OperatorFinancePlanStat {
+  plan_code: string;
+  total_entitlements: number;
+  active_count: number;
+  cash_received_uzs: number;
+  recognized_revenue_uzs: number;
+  deferred_revenue_uzs: number;
+}
+
+export interface OperatorFinanceSummaryResponse {
+  ok: boolean;
+  contract_id: string;
+  capability?: string;
+  period?: {
+    start_date: string | null;
+    end_date: string | null;
+  };
+  cash_received_uzs?: number;
+  cash_collected_uzs?: number;
+  recognized_revenue_uzs?: number;
+  deferred_revenue_uzs?: number;
+  refunded_amount_uzs?: number;
+  net_revenue_uzs?: number;
+  active_subscriptions_count?: number;
+  plans_breakdown?: OperatorFinancePlanStat[];
+  currency?: string;
+}
+
+export interface OperatorReconciliationItem {
+  ledger_entry_id?: string;
+  id?: string;
+  occurred_at?: string | null;
+  entry_kind?: string;
+  organization_id?: string | null;
+  order_id?: string | null;
+  payment_attempt_id?: string | null;
+  refund_id?: string | null;
+  provider?: string | null;
+  provider_transaction_id?: string | null;
+  ledger_amount_uzs?: number;
+  gateway_amount_uzs?: number | null;
+  currency?: string;
+  ledger_status?: string;
+  gateway_status?: string | null;
+  is_discrepant?: boolean;
+  discrepancy_flags?: string[];
+  created_at?: string;
+}
+
+export interface OperatorReconciliationSummary {
+  total_reconciled?: number;
+  total_discrepancies?: number;
+  matched_count?: number;
+  total_checked?: number;
+}
+
+export interface OperatorReconciliationResponse {
+  ok: boolean;
+  contract_id: string;
+  capability?: string;
+  items: OperatorReconciliationItem[];
+  summary?: OperatorReconciliationSummary;
+  next_cursor?: string | null;
+  has_more?: boolean;
+  total_records?: number;
+}
+
+export interface ApproveOperatorRefundResult {
+  ok: boolean;
+  contract_id: "API-078";
+  refund_id: string;
+  status: "PENDING_SECOND_APPROVAL" | "APPROVED";
+}
+
+export async function fetchOperatorFinanceSummary(params?: {
+  start_date?: string;
+  end_date?: string;
+}): Promise<OperatorFinanceSummaryResponse> {
+  const search = new URLSearchParams();
+  if (params?.start_date) search.set("start_date", params.start_date);
+  if (params?.end_date) search.set("end_date", params.end_date);
+
+  const res = await fetch(`/api/bff/operator/finance-summary?${search.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_FINANCE_SUMMARY_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorFinanceSummaryResponse;
+}
+
+export async function fetchOperatorReconciliation(params?: {
+  start_date?: string;
+  end_date?: string;
+  provider?: string;
+  discrepancy_only?: boolean;
+  limit?: number;
+  cursor?: string;
+}): Promise<OperatorReconciliationResponse> {
+  const search = new URLSearchParams();
+  if (params?.start_date) search.set("start_date", params.start_date);
+  if (params?.end_date) search.set("end_date", params.end_date);
+  if (params?.provider) search.set("provider", params.provider);
+  if (params?.discrepancy_only !== undefined) search.set("discrepancy_only", String(params.discrepancy_only));
+  if (params?.limit) search.set("limit", String(params.limit));
+  if (params?.cursor) search.set("cursor", params.cursor);
+
+  const res = await fetch(`/api/bff/operator/reconciliation?${search.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_RECONCILIATION_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as OperatorReconciliationResponse;
+}
+
+export async function approveOperatorRefund(
+  refundId: string
+): Promise<ApproveOperatorRefundResult> {
+  const res = await fetch(`/api/bff/operator/refunds/${encodeURIComponent(refundId)}/approve`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "APPROVE_REFUND_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as ApproveOperatorRefundResult;
+}
+
+
 
 
 

@@ -1193,7 +1193,27 @@ Keyingi kichik qadam:
 - **FB-166 (Candidate Ratings, Double-Blind Reviews, Rubrics & Appeals Hub)**:
   * 5 Next.js BFF marshruti: `/api/bff/candidate/ratings`, `/api/bff/candidate/engagements/[id]/ratings`, `/api/bff/candidate/ratings/[id]/appeals`, `/api/bff/candidate/saved-opportunities`, `/api/bff/candidate/saved-opportunities/[id]`.
   * Nomzod Baholari Hubi (`/nomzod/baholar`) va Saqlangan E'lonlar Hubi (`/nomzod/saqlanganlar`).
-  * 12 ta staging test to'plami bo'yicha 105/105 test 100% Yashil (0 regressiya).
+  * 12 ta staging test to'plami bo'yicha 105/105 test 100% Yashil (0 regressiya). PR #167 birlashtirildi (`91b4892`).
+
+- **FB-170 (University Institutional Agreements, Supervisions & Official Exports Hub)**:
+  * 3 Next.js BFF marshruti: `/api/bff/university/institutions/[inst]/agreements`, `/api/bff/university/institutions/[inst]/supervisions`, `/api/bff/university/institutions/[inst]/exports` (API-098, API-099, API-100).
+  * Universitet Portali 4-tabi `AGREEMENTS_EXPORTS` ("Hamkorlik Shartnomalari & Rasmiy Eksportlar").
+  * 13 ta staging test to'plami bo'yicha 115/115 test 100% Yashil (0 regressiya). PR #171 birlashtirildi (`9b8e217`).
+
+- **FB-172 (Platform Operator Support Tickets Queue, Incidents & DR SLA Telemetry Hub)**:
+  * 5 Next.js BFF marshruti: `/api/bff/operator/support-tickets`, `/api/bff/operator/support-tickets/[id]/messages`, `/api/bff/operator/incidents`, `/api/bff/operator/restore-runs`, `/api/bff/operator/analytics` (API-112, API-113, API-122, API-123, API-124).
+  * Operator Portali 4-tabi `SUPPORT_OPS` ("Texnik Yordam & Operatsion SLA").
+  * 14 ta staging test to'plami bo'yicha 125/125 test 100% Yashil (0 regressiya). PR #173 birlashtirildi (`dc3337e`).
+
+- **FB-174 (Employer Billing Overview, Service Entitlements & Subscription Orders Hub)**:
+  * 4 Next.js BFF marshruti: `/api/bff/employer/organization/[org]/entitlements`, `/api/bff/employer/organization/[org]/billing`, `/api/bff/employer/organization/[org]/orders`, `/api/bff/employer/orders/[id]/refund` (API-070, API-093, API-094, API-095).
+  * Ish Beruvchi Portali 4-tabi `BILLING_HUB` ("To‘lovlar, Tariflar & Kvotalar").
+  * 15 ta staging test to'plami bo'yicha 145/145 test 100% Yashil (0 regressiya). PR #175 birlashtirildi (`dade952`).
+
+- **FB-176 (Operator Financial Summary, Gateway Reconciliation & Dual-Control Refund Approvals Hub)**:
+  * 3 Next.js BFF marshruti: `/api/bff/operator/finance-summary`, `/api/bff/operator/reconciliation`, `/api/bff/operator/refunds/[id]/approve` (API-117, API-115, API-078).
+  * Operator Portali 5-tabi `FINANCE` ("Moliya & Solishtiruv"), 4 ta KPI kartasi, rejalar taqsimoti, 4-ko‘z tamoyilidagi qaytarishlar va Zero-PII solishtiruvi.
+  * 17 ta staging test to'plami bo'yicha 160+/160+ test 100% Yashil (0 regressiya, 28.98s umumiy vaqt). PR #177 ochildi va birlashtirilmoqda.
 
 
 

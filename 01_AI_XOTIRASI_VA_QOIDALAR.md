@@ -1396,13 +1396,59 @@ Full AGY report retained at D:/Codex/FlexBridge-agents/AGY-001_REPORT.md; valida
 - **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
 - **Service & Implementation**:
   - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/candidate/ratings`, `/api/bff/candidate/engagements/[id]/ratings`, `/api/bff/candidate/ratings/[id]/appeals`, `/api/bff/candidate/saved-opportunities`, `/api/bff/candidate/saved-opportunities/[id]`) proxying backend canonical contracts API-057, API-047, API-058, API-004, API-037, API-038 with HttpOnly session validation, CSRF origin defense, and strict Pydantic extra-forbidden payload sanitization.
-  - Updated TypeScript client `frontend/src/lib/api.ts` with all types (`RatingAggregate`, `RubricVersion`, `RatingCriterion`, `ReceivedRatingItem`, `GivenRatingItem`, `EligibleRelationItem`, `SavedOpportunityItem`) and API caller methods.
-  - Created brand new dedicated Hub page `frontend/src/app/nomzod/baholar/page.tsx` featuring Candidate Aggregated Score & Privacy Badge (AC-023: $n < 5$ withheld explanation / distinct UNRATED status), 14-day Bilateral Double-Blind Protection Visualizer (AC-024), Completed Engagement Evaluation Form with multi-criteria rubric scoring (API-047), and Rating Appeal Modal (API-058 / AC-025).
-  - Created brand new dedicated Hub page `frontend/src/app/nomzod/saqlanganlar/page.tsx` for saved opportunities bookmarks with preserved status, work mode badges, and one-click unsave/apply actions (API-004, API-037, API-038).
-  - Synchronized sub-navigation across all 6 candidate pages (`/nomzod`, `/nomzod/arizalar`, `/nomzod/shartnomalar`, `/nomzod/kundalik`, `/nomzod/baholar`, `/nomzod/saqlanganlar`).
-  - Implemented and executed `scripts/test_candidate_ratings_appeals_staging.py` with 10 comprehensive phases: 100% GREEN (10/10 passed).
-  - Executed full regression suite across all 12 staging test suites: 105/105 tests passed 100% GREEN (zero regressions).
+  - Updated TypeScript client `frontend/src/lib/api.ts` with all types and API caller methods.
+  - Created dedicated Hub pages `frontend/src/app/nomzod/baholar/page.tsx` and `frontend/src/app/nomzod/saqlanganlar/page.tsx`.
+  - Staging suite `scripts/test_candidate_ratings_appeals_staging.py`: 10/10 passed 100% GREEN. PR #167 merged (`91b4892`).
   - Forensic audit report: `reviews/2026-11-15/candidate_ratings_appeals_hub/CANDIDATE_RATINGS_APPEALS_REPORT.md`.
+
+
+## LOG-137 / University Portal: Institutional Agreements, Supervisions & Official Verification Exports Hub (FB-170, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #170, Branch `feature/170-university-agreements-exports-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 3 Next.js 16 BFF endpoints (`/api/bff/university/institutions/[inst]/agreements`, `/api/bff/university/institutions/[inst]/supervisions`, `/api/bff/university/institutions/[inst]/exports`) proxying backend canonical contracts API-098, API-099, API-100 with HttpOnly session validation, CSRF origin defense, and anti-tamper export token generation.
+  - Upgraded University Portal (`frontend/src/app/university/page.tsx`) with 4th tab `AGREEMENTS_EXPORTS` ("Hamkorlik Shartnomalari & Rasmiy Eksportlar").
+  - Staging suite `scripts/test_university_exports_staging.py`: 10/10 passed 100% GREEN. PR #171 merged (`9b8e217`).
+  - Forensic audit report: `reviews/2026-11-15/university_exports_hub/UNIVERSITY_EXPORTS_REPORT.md`.
+
+
+## LOG-138 / Platform Operator Portal: Support Tickets Queue, Incident Declarations, DR Restore SLA & Platform Analytics Hub (FB-172, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #172, Branch `feature/172-operator-support-sla-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 5 Next.js 16 BFF endpoints (`/api/bff/operator/support-tickets`, `/api/bff/operator/support-tickets/[id]/messages`, `/api/bff/operator/incidents`, `/api/bff/operator/restore-runs`, `/api/bff/operator/analytics`) proxying backend canonical contracts API-112, API-113, API-122, API-123, API-124 with HttpOnly session validation, MFA assurance elevation, and CSRF origin defense.
+  - Upgraded Operator Portal (`frontend/src/app/operator/page.tsx`) with 4th tab `SUPPORT_OPS` ("Texnik Yordam & Operatsion SLA").
+  - Staging suite `scripts/test_operator_support_ops_staging.py`: 10/10 passed 100% GREEN. PR #173 merged (`dc3337e`).
+  - Forensic audit report: `reviews/2026-11-15/operator_support_ops/OPERATOR_SUPPORT_OPS_REPORT.md`.
+
+
+## LOG-139 / Employer Portal: Billing Overview, Service Entitlements, Subscription Orders & Refunds Hub (FB-174, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #174, Branch `feature/174-employer-billing-entitlements-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 4 Next.js 16 BFF endpoints (`/api/bff/employer/organization/[org]/entitlements`, `/api/bff/employer/organization/[org]/billing`, `/api/bff/employer/organization/[org]/orders`, `/api/bff/employer/orders/[id]/refund`) proxying backend canonical contracts API-070, API-093, API-094, API-095 with HttpOnly session validation, CSRF origin defense, and strict Pydantic extra-forbidden payload sanitization.
+  - Upgraded Employer Portal (`frontend/src/app/employer/page.tsx`) with 4th tab `BILLING_HUB` ("To‘lovlar, Tariflar & Kvotalar").
+  - Staging suite `scripts/test_employer_billing_staging.py`: 10/10 passed 100% GREEN. PR #175 merged (`dade952`).
+  - Forensic audit report: `reviews/2026-11-15/employer_billing_hub/EMPLOYER_BILLING_REPORT.md`.
+
+
+## LOG-140 / Platform Operator Portal: Financial Accounting Summary, Gateway Reconciliation & Dual-Control Refund Approvals Hub (FB-176, VICTORY CONFIRMED)
+
+- **Issue / Branch**: Issue #176, Branch `feature/176-operator-finance-reconciliation-hub`, target `integration/r1-agent-collaboration`.
+- **Main Status**: Main branch strictly frozen at commit `764fb98496fa40857acb07844fd09fcafa99b7d6` (Q-015 / AGENTS.md); zero mutations to main.
+- **AI & Roles**: Antigravity Autonomous Master Execution & Principal Systems Technologist.
+- **Service & Implementation**:
+  - Implemented 3 Next.js 16 BFF endpoints (`/api/bff/operator/finance-summary`, `/api/bff/operator/reconciliation`, `/api/bff/operator/refunds/[id]/approve`) proxying backend canonical contracts API-117, API-115, API-078 with HttpOnly session validation, MFA assurance elevation, and CSRF origin defense.
+  - Upgraded Operator Portal (`frontend/src/app/operator/page.tsx`) with 5th tab `FINANCE` ("Moliya & Solishtiruv"), featuring 4 KPI cards (Kassa, Tan Olingan, Kechiktirilgan, Sof Daromad), tarif rejalari taqsimoti, 4-ko‘z tamoyilidagi qaytarishlar tasdiqlash paneli va Zero-PII shlyuz solishtiruvi.
+  - Staging suite `scripts/test_operator_finance_staging.py`: 10/10 passed 100% GREEN.
+  - Comprehensive 17-suite regression runner `scripts/run_all_staging_tests.py`: 17/17 passed 100% GREEN in 28.98s (zero regressions).
+  - Forensic audit report: `reviews/2026-11-15/operator_finance_hub/OPERATOR_FINANCE_REPORT.md`.
 
 
 
