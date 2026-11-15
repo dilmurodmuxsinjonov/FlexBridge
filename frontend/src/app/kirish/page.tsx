@@ -17,6 +17,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { loginUser, verifyMfa, fetchAuthMe } from "@/lib/api";
+import { isRoleAllowedForPortal, type PortalScope, resolvePortalDashboard } from "@/lib/roles";
 
 function KirishForm() {
   const router = useRouter();
@@ -38,19 +39,23 @@ function KirishForm() {
 
   const handleRedirectAfterLogin = useCallback(
     (roles: string[]) => {
-      if (redirectParam && redirectParam.startsWith("/")) {
-        router.push(redirectParam);
-        return;
+      const targetDashboard = resolvePortalDashboard(roles);
+      if (redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")) {
+        const portalScopeMap: Array<[string, PortalScope]> = [
+          ["/operator", "OPERATOR"],
+          ["/employer", "EMPLOYER"],
+          ["/university", "ACADEMIC"],
+          ["/nomzod", "CANDIDATE"],
+        ];
+        const matched = portalScopeMap.find(([prefix]) => redirectParam.startsWith(prefix));
+        if (!matched || isRoleAllowedForPortal(roles, matched[1])) {
+          router.push(redirectParam);
+          router.refresh();
+          return;
+        }
       }
-      if (roles.includes("OPERATOR")) {
-        router.push("/operator");
-      } else if (roles.includes("EMPLOYER") || roles.includes("ORGANIZATION")) {
-        router.push("/employer");
-      } else if (roles.includes("ACADEMIC") || roles.includes("TEACHER")) {
-        router.push("/university");
-      } else {
-        router.push("/nomzod");
-      }
+      router.push(targetDashboard.href);
+      router.refresh();
     },
     [redirectParam, router]
   );
@@ -87,11 +92,13 @@ function KirishForm() {
           setMfaTicket(res.mfa_ticket);
           setSuccessMessage("Ikki bosqichli autentifikatsiya kodi talab etiladi.");
         } else {
-          setSuccessMessage("Tizimga muvaffaqiyatli kirildi! Yo‘naltirilmoqda...");
+          window.dispatchEvent(new Event("flexbridge:auth-changed"));
           const userRoles = "roles" in res ? (res.roles as string[]) : [];
+          const dash = resolvePortalDashboard(userRoles);
+          setSuccessMessage(`Muvaffaqiyatli kirildi! ${dash.label} sahifasiga yo‘naltirilmoqda...`);
           setTimeout(() => {
             handleRedirectAfterLogin(userRoles);
-          }, 600);
+          }, 400);
         }
       } else {
         setErrorMessage(res.error || "Kirish ma'lumotlari noto‘g‘ri.");
@@ -116,11 +123,13 @@ function KirishForm() {
     try {
       const res = await verifyMfa(mfaTicket, totpCode.trim());
       if (res.ok) {
-        setSuccessMessage("MFA muvaffaqiyatli tasdiqlandi! Yo‘naltirilmoqda...");
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
         const userRoles = "roles" in res ? (res.roles as string[]) : [];
+        const dash = resolvePortalDashboard(userRoles);
+        setSuccessMessage(`MFA tasdiqlandi! ${dash.label} sahifasiga yo‘naltirilmoqda...`);
         setTimeout(() => {
           handleRedirectAfterLogin(userRoles);
-        }, 600);
+        }, 400);
       } else {
         setErrorMessage(res.error || "Kiritilgan 2FA kodi yaroqsiz yoki eskirgan.");
       }
@@ -147,7 +156,7 @@ function KirishForm() {
         <p className="text-xs text-zinc-400">
           {mfaRequired
             ? "Ilovangizdagi (Google Authenticator) 6 xonali kodni kiriting"
-            : "Talabalar, ish beruvchilar va OTMlar uchun yagona xavfsiz kabinet"}
+            : "Talabalar, korxonalar, OTMlar va operatorlar uchun yagona kirish — rolingizga mos kabinetga avtomatik yo‘naltirilasiz"}
         </p>
       </div>
 
