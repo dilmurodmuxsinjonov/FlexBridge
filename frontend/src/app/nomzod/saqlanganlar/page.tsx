@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Bookmark,
   Trash2,
   ExternalLink,
   Briefcase,
-  MapPin,
-  Calendar,
   AlertCircle,
   Clock,
   CheckCircle2,
@@ -20,47 +18,41 @@ import {
   deleteSavedOpportunity,
   SavedOpportunityItem,
 } from "@/lib/api";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
+
+async function loadSavedItems(): Promise<SavedOpportunityItem[]> {
+  const res = await fetchMySavedOpportunities(1, 50);
+  return res.items || [];
+}
 
 export default function SavedOpportunitiesPage() {
-  const [items, setItems] = useState<SavedOpportunityItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const saved = useAsyncData("saved-opportunities", loadSavedItems);
+  const items = saved.data ?? [];
+  const loading = saved.isLoading;
+  const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  const loadSaved = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchMySavedOpportunities(1, 50);
-      setItems(res.items || []);
-    } catch (caught: unknown) {
-      const err = caught as Error & { status?: number };
-      if (err.status === 401) {
-        setError("Tizimga kirish talab etiladi. Iltimos, profilingizga kiring.");
-      } else {
-        setError(err.message || "Saqlangan e'lonlarni yuklashda xatolik yuz berdi");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error =
+    actionError ??
+    (saved.error ? describeRequestError(saved.error, "Saqlangan e'lonlarni yuklashda xatolik yuz berdi") : null);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadSaved();
-  }, []);
+  const loadSaved = () => {
+    setActionError(null);
+    void saved.reload();
+  };
 
   const handleRemove = async (savedId: string, title: string) => {
     try {
       setRemovingId(savedId);
+      setActionError(null);
       await deleteSavedOpportunity(savedId);
-      setItems((prev) => prev.filter((i) => i.id !== savedId));
+      saved.mutate((prev) => prev?.filter((i) => i.id !== savedId));
       setActionSuccess(`"${title}" muvaffaqiyatli saqlanganlardan olib tashlandi.`);
       setTimeout(() => setActionSuccess(null), 4000);
     } catch (caught: unknown) {
-      const err = caught as Error & { status?: number };
-      setError(err.message || "E'lonni o'chirishda xatolik yuz berdi");
+      setActionError(describeRequestError(caught, "E'lonni o'chirishda xatolik yuz berdi"));
     } finally {
       setRemovingId(null);
     }

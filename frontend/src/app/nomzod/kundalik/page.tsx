@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -15,7 +15,6 @@ import {
   Send,
   RefreshCw,
   LogOut,
-  ChevronRight,
   ShieldCheck,
   FileCheck,
   Award,
@@ -34,17 +33,61 @@ import {
   saveStandardizedDiary,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import { useAsyncData } from "@/lib/useAsyncData";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 
+// Stable empty values: the form sync below compares `logs` by identity.
+const EMPTY_PLACEMENTS: CandidatePlacementItem[] = [];
+const EMPTY_LOGS: DailyLogItem[] = [];
+
+async function loadCurrentUser(): Promise<AuthUser | null> {
+  try {
+    return await fetchAuthMe();
+  } catch {
+    return null;
+  }
+}
+
+async function loadPlacementItems(): Promise<CandidatePlacementItem[]> {
+  try {
+    const res = await fetchCandidatePlacements();
+    return res.items || [];
+  } catch (err: unknown) {
+    console.error("Failed to load placements:", err);
+    throw err;
+  }
+}
+
+async function loadPlacementLogItems(placementId: string): Promise<DailyLogItem[]> {
+  try {
+    const res = await fetchPlacementLogs(placementId);
+    return res.items || [];
+  } catch (err: unknown) {
+    console.error("Failed to load logs:", err);
+    throw err;
+  }
+}
+
 export default function CandidateKundalikPage() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const auth = useAsyncData("auth-me", loadCurrentUser);
+  const user = auth.data ?? null;
+  const authLoading = auth.isLoading;
+  const loadUser = auth.reload;
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const [placements, setPlacements] = useState<CandidatePlacementItem[]>([]);
-  const [selectedPlacement, setSelectedPlacement] = useState<CandidatePlacementItem | null>(null);
-  const [logs, setLogs] = useState<DailyLogItem[]>([]);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const placementsQuery = useAsyncData(user ? `placements:${user.user_id}` : null, loadPlacementItems);
+  const placements = placementsQuery.data ?? EMPTY_PLACEMENTS;
+  // Explicit choice wins; otherwise default to the first placement.
+  const [chosenPlacement, setSelectedPlacement] = useState<CandidatePlacementItem | null>(null);
+  const selectedPlacement = chosenPlacement ?? placements[0] ?? null;
+
+  const selectedPlacementId = selectedPlacement?.id ?? null;
+  const logsQuery = useAsyncData(selectedPlacementId ? `logs:${selectedPlacementId}` : null, () =>
+    loadPlacementLogItems(selectedPlacementId ?? "")
+  );
+  const logs = logsQuery.data ?? EMPTY_LOGS;
+  const isLoadingLogs = logsQuery.isLoading;
+  const reloadLogs = logsQuery.reload;
 
   // Form state
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -68,63 +111,6 @@ export default function CandidateKundalikPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // Load current user
-  const loadUser = useCallback(async () => {
-    try {
-      setAuthLoading(true);
-      const auth = await fetchAuthMe();
-      setUser(auth);
-    } catch {
-      setUser(null);
-    } finally {
-      setAuthLoading(false);
-    }
-  }, []);
-
-  // Load placements
-  const loadPlacements = useCallback(async () => {
-    try {
-      const res = await fetchCandidatePlacements();
-      setPlacements(res.items || []);
-      if (res.items && res.items.length > 0) {
-        setSelectedPlacement((prev) => prev || res.items[0]);
-      }
-    } catch (err: unknown) {
-      console.error("Failed to load placements:", err);
-    }
-  }, []);
-
-  // Load logs for selected placement
-  const loadLogs = useCallback(async (placementId: string) => {
-    try {
-      setIsLoadingLogs(true);
-      const res = await fetchPlacementLogs(placementId);
-      setLogs(res.items || []);
-    } catch (err: unknown) {
-      console.error("Failed to load logs:", err);
-    } finally {
-      setIsLoadingLogs(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadUser();
-  }, [loadUser]);
-
-  useEffect(() => {
-    if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-      loadPlacements();
-    }
-  }, [user, loadPlacements]);
-
-  useEffect(() => {
-    if (selectedPlacement) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-      loadLogs(selectedPlacement.id);
-    }
-  }, [selectedPlacement, loadLogs]);
 
   // Synchronize form when selectedDate or logs change. Adjusted during render
   // (react.dev "You Might Not Need an Effect") instead of a cascading effect.
@@ -225,7 +211,7 @@ export default function CandidateKundalikPage() {
         message: `${selectedDate} sanasi uchun qoralama kundalik muvaffaqiyatli saqlandi.`,
       });
 
-      await loadLogs(selectedPlacement.id);
+      await reloadLogs();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Qoralamani saqlashda xatolik yuz berdi";
       setNotification({ type: "error", message: msg });
@@ -278,7 +264,7 @@ export default function CandidateKundalikPage() {
         message: `${selectedDate} sanasidagi kundalik o'qituvchi va mentor tekshiruviga muvaffaqiyatli topshirildi.`,
       });
 
-      await loadLogs(selectedPlacement.id);
+      await reloadLogs();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Kundalikni topshirishda xatolik yuz berdi";
       setNotification({ type: "error", message: msg });
@@ -355,7 +341,7 @@ export default function CandidateKundalikPage() {
               <button
                 onClick={async () => {
                   await logoutUser();
-                  setUser(null);
+                  auth.mutate(() => null);
                 }}
                 className="text-xs text-zinc-400 hover:text-rose-400 transition-colors flex items-center gap-1"
               >
@@ -818,7 +804,7 @@ export default function CandidateKundalikPage() {
                 </div>
 
                 <button
-                  onClick={() => selectedPlacement && loadLogs(selectedPlacement.id)}
+                  onClick={() => void reloadLogs()}
                   disabled={isLoadingLogs}
                   className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-800"
                 >

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/server/session";
 
 const VERIFIED_INSTITUTIONS_CATALOG = [
@@ -34,7 +34,7 @@ const VERIFIED_INSTITUTIONS_CATALOG = [
   },
 ];
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getSessionFromCookie();
   if (!session || !session.access_token) {
     return NextResponse.json(

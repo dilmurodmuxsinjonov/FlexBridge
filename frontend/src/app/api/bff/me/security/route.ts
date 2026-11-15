@@ -7,7 +7,7 @@ const backendInternalUrl = (process.env.BACKEND_INTERNAL_URL || "http://127.0.0.
  * GET /api/bff/me/security
  * Returns TOTP status, recovery codes count, current session ID, and active sessions list.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getSessionFromCookie();
     if (!session || !session.access_token) {

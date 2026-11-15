@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import {
   Award,
   CheckCircle2,
@@ -155,72 +155,85 @@ export default function InternshipDocumentsHub({ party, placementId }: Internshi
   });
   const [isSigningConclusion, setIsSigningConclusion] = useState(false);
 
-  const loadAll = useCallback(async () => {
-    if (!placementId) return;
-    setIsLoading(true);
+  // Reset loading state during render when the document scope changes, so the
+  // effect below only subscribes to the request (no cascading setState).
+  const requestKey = placementId ? `${party}:${placementId}` : null;
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  if (requestKey !== loadedKey) {
+    setLoadedKey(requestKey);
+    setIsLoading(requestKey !== null);
     setErrorMsg(null);
-    try {
-      const [eimzoRes, diaryRes, concRes] = await Promise.all([
-        fetchMyEImzo(party),
-        fetchStandardizedDiary(placementId),
-        fetchFinalConclusionDocument(placementId),
-      ]);
-      const myCert = eimzoRes.certificates[party];
-      setCert(myCert);
-      if (myCert) {
-        setCertForm({
-          full_name: myCert.full_name || "",
-          position_title: myCert.position_title || "",
-          organization_or_university: myCert.organization_or_university || "",
-          stir_or_pinfl: myCert.stir_or_pinfl || "",
-        });
-      }
-      setDiaryWs(diaryRes);
-      setPassportForm(diaryRes.diary_passport);
-      setConclusionDoc(concRes);
+  }
 
-      if (concRes.candidate_section) {
-        setCandForm({
-          student_reflection: concRes.candidate_section.student_reflection || "",
-          achievements_highlight: concRes.candidate_section.achievements_highlight || "",
-          recommended_improvements: concRes.candidate_section.recommended_improvements || "",
-        });
-      }
-      if (concRes.employer_section) {
-        const cr = concRes.employer_section.competency_ratings;
-        setEmpForm({
-          overall_score: concRes.employer_section.overall_score,
-          employer_verdict: concRes.employer_section.employer_verdict,
-          hire_recommendation: concRes.employer_section.hire_recommendation,
-          characterization_summary: concRes.employer_section.characterization_summary || "",
-          discipline: cr?.discipline ?? 5,
-          technical_skills: cr?.technical_skills ?? 5,
-          teamwork: cr?.teamwork ?? 5,
-          initiative: cr?.initiative ?? 5,
-          communication: cr?.communication ?? 5,
-        });
-      }
-      if (concRes.university_section) {
-        setUniForm({
-          academic_score: concRes.university_section.academic_score,
-          letter_grade: concRes.university_section.letter_grade,
-          ects_credits: concRes.university_section.ects_credits,
-          defense_date: concRes.university_section.defense_date || new Date().toISOString().split("T")[0],
-          academic_verdict: concRes.university_section.academic_verdict,
-          academic_summary: concRes.university_section.academic_summary || "",
-        });
-      }
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Hujjat ma'lumotlarini yuklashda xatolik.");
-    } finally {
-      setIsLoading(false);
+  const applyLoadedDocuments = useEffectEvent((
+    eimzoRes: Awaited<ReturnType<typeof fetchMyEImzo>>,
+    diaryRes: StandardizedDiaryWorkspace,
+    concRes: FinalConclusionDocument
+  ) => {
+    const myCert = eimzoRes.certificates[party];
+    setCert(myCert);
+    if (myCert) {
+      setCertForm({
+        full_name: myCert.full_name || "",
+        position_title: myCert.position_title || "",
+        organization_or_university: myCert.organization_or_university || "",
+        stir_or_pinfl: myCert.stir_or_pinfl || "",
+      });
     }
-  }, [party, placementId]);
+    setDiaryWs(diaryRes);
+    setPassportForm(diaryRes.diary_passport);
+    setConclusionDoc(concRes);
+
+    if (concRes.candidate_section) {
+      setCandForm({
+        student_reflection: concRes.candidate_section.student_reflection || "",
+        achievements_highlight: concRes.candidate_section.achievements_highlight || "",
+        recommended_improvements: concRes.candidate_section.recommended_improvements || "",
+      });
+    }
+    if (concRes.employer_section) {
+      const cr = concRes.employer_section.competency_ratings;
+      setEmpForm({
+        overall_score: concRes.employer_section.overall_score,
+        employer_verdict: concRes.employer_section.employer_verdict,
+        hire_recommendation: concRes.employer_section.hire_recommendation,
+        characterization_summary: concRes.employer_section.characterization_summary || "",
+        discipline: cr?.discipline ?? 5,
+        technical_skills: cr?.technical_skills ?? 5,
+        teamwork: cr?.teamwork ?? 5,
+        initiative: cr?.initiative ?? 5,
+        communication: cr?.communication ?? 5,
+      });
+    }
+    if (concRes.university_section) {
+      setUniForm({
+        academic_score: concRes.university_section.academic_score,
+        letter_grade: concRes.university_section.letter_grade,
+        ects_credits: concRes.university_section.ects_credits,
+        defense_date: concRes.university_section.defense_date || new Date().toISOString().split("T")[0],
+        academic_verdict: concRes.university_section.academic_verdict,
+        academic_summary: concRes.university_section.academic_summary || "",
+      });
+    }
+  });
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadAll();
-  }, [loadAll]);
+    if (!placementId) return;
+    let active = true;
+    Promise.all([fetchMyEImzo(party), fetchStandardizedDiary(placementId), fetchFinalConclusionDocument(placementId)])
+      .then(([eimzoRes, diaryRes, concRes]) => {
+        if (active) applyLoadedDocuments(eimzoRes, diaryRes, concRes);
+      })
+      .catch((err: unknown) => {
+        if (active) setErrorMsg(err instanceof Error ? err.message : "Hujjat ma'lumotlarini yuklashda xatolik.");
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [party, placementId]);
 
   const handleSaveCert = async (e: React.FormEvent) => {
     e.preventDefault();

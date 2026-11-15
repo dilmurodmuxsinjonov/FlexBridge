@@ -56,7 +56,6 @@ import {
   StudentSupervisionItem,
   AcademicAgreementItem,
   UniversityAnalyticsResponse,
-  StudentAttendanceItem,
   fetchInstitutionDirectoryProfile,
   saveInstitutionDirectoryProfile,
   createInstitutionPartnerAgreement,
@@ -1687,7 +1686,7 @@ export default function UniversityPortal() {
                       ))}
                     </div>
                   )}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                     <input
                       type="text"
                       value={newFacultyName}
@@ -1701,6 +1700,15 @@ export default function UniversityPortal() {
                       onChange={(e) => setNewFacultyDean(e.target.value)}
                       placeholder="Dekan F.I.Sh."
                       className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      value={newFacultyStudents}
+                      onChange={(e) => setNewFacultyStudents(e.target.value)}
+                      placeholder="Talabalar soni"
+                      aria-label="Fakultet talabalar soni"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
                     />
                     <button
                       type="button"
@@ -1728,7 +1736,7 @@ export default function UniversityPortal() {
                       ))}
                     </div>
                   )}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                     <input
                       type="text"
                       value={newProgramCode}
@@ -1743,6 +1751,15 @@ export default function UniversityPortal() {
                       placeholder="Yo'nalish nomi"
                       className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
                     />
+                    <select
+                      value={newProgramDegree}
+                      onChange={(e) => setNewProgramDegree(e.target.value)}
+                      aria-label="Ta'lim darajasi"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white"
+                    >
+                      <option value="BAKALAVR">Bakalavr (4 yil)</option>
+                      <option value="MAGISTRATURA">Magistratura (2 yil)</option>
+                    </select>
                     <button
                       type="button"
                       onClick={handleAddProgram}
@@ -1813,6 +1830,16 @@ export default function UniversityPortal() {
                   min={1}
                   value={newAgrQuota}
                   onChange={(e) => setNewAgrQuota(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
+                />
+              </div>
+              <div className="w-full md:w-40 flex flex-col gap-1">
+                <label htmlFor="new-agr-valid-to" className="text-[11px] text-zinc-400">Amal qilish muddati</label>
+                <input
+                  id="new-agr-valid-to"
+                  type="date"
+                  value={newAgrValidTo}
+                  onChange={(e) => setNewAgrValidTo(e.target.value)}
                   className="px-3 py-2 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-white font-mono"
                 />
               </div>

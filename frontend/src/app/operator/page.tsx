@@ -14,7 +14,6 @@ import {
   UserX,
   KeyRound,
   RefreshCw,
-  Search,
   Clock,
   Send,
   X,
@@ -24,13 +23,10 @@ import {
   Flame,
   Activity,
   Server,
-  Plus,
   CreditCard,
   Receipt,
   Coins,
-  DollarSign,
   Filter,
-  ArrowUpRight,
   CheckCheck,
 } from "lucide-react";
 import {
@@ -58,8 +54,6 @@ import {
   OperatorPlatformAnalytics,
   OperatorFinanceSummaryResponse,
   OperatorReconciliationItem,
-  OperatorReconciliationResponse,
-  ApproveOperatorRefundResult,
   BreakGlassAccessResult,
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
@@ -335,19 +329,15 @@ export default function OperatorPortal() {
     };
   }, [loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
 
-  useEffect(() => {
-    if (currentUser && activeTab === "SUPPORT_OPS") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-      loadSupportOps();
-    }
-  }, [currentUser, activeTab, loadSupportOps]);
-
-  useEffect(() => {
-    if (currentUser && activeTab === "FINANCE") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-      loadFinanceHub();
-    }
-  }, [currentUser, activeTab, loadFinanceHub]);
+  // Opening the support or finance tab refreshes it. Sign-in (auth sync above)
+  // already loads every queue, so no effect is needed for user changes.
+  const selectTab = (tab: ActiveTab) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    if (!currentUser) return;
+    if (tab === "SUPPORT_OPS") void loadSupportOps();
+    if (tab === "FINANCE") void loadFinanceHub();
+  };
 
   const handleLogout = async () => {
     await logoutUser();
@@ -638,7 +628,7 @@ export default function OperatorPortal() {
               SOC // SECURITY MODULES
             </div>
             <button
-              onClick={() => setActiveTab("AUDIT")}
+              onClick={() => selectTab("AUDIT")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "AUDIT"
                   ? "border-amber-400 bg-amber-500/10 text-amber-200"
@@ -655,7 +645,7 @@ export default function OperatorPortal() {
             </button>
 
             <button
-              onClick={() => setActiveTab("VERIFICATION")}
+              onClick={() => selectTab("VERIFICATION")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "VERIFICATION"
                   ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
@@ -672,7 +662,7 @@ export default function OperatorPortal() {
             </button>
 
             <button
-              onClick={() => setActiveTab("BREAK_GLASS")}
+              onClick={() => selectTab("BREAK_GLASS")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "BREAK_GLASS"
                   ? "border-rose-400 bg-rose-500/10 text-rose-200"
@@ -684,7 +674,7 @@ export default function OperatorPortal() {
             </button>
 
             <button
-              onClick={() => setActiveTab("SUPPORT_OPS")}
+              onClick={() => selectTab("SUPPORT_OPS")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "SUPPORT_OPS"
                   ? "border-sky-400 bg-sky-500/10 text-sky-200"
@@ -701,7 +691,7 @@ export default function OperatorPortal() {
             </button>
 
             <button
-              onClick={() => setActiveTab("FINANCE")}
+              onClick={() => selectTab("FINANCE")}
               className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
                 activeTab === "FINANCE"
                   ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
@@ -1139,6 +1129,12 @@ export default function OperatorPortal() {
                   </div>
                 </div>
 
+                {analyticsError && (
+                  <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{analyticsError}</span>
+                  </div>
+                )}
                 {/* 4 KPI TELEMETRY CARDS */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="p-3.5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-1">
@@ -1639,6 +1635,12 @@ export default function OperatorPortal() {
                   </div>
                 )}
 
+                {reconciliationError && (
+                  <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{reconciliationError}</span>
+                  </div>
+                )}
                 {/* RECONCILIATION ITEMS TABLE */}
                 {isLoadingReconciliation ? (
                   <div className="p-8 flex items-center justify-center gap-2 text-xs text-zinc-400">

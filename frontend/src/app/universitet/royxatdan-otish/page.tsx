@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useEffectEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -106,6 +106,11 @@ function UniversitetRegistrationContent() {
     }
   };
 
+  const onSignedInNonAcademic = useEffectEvent(() => {
+    setStep(3);
+    loadAppointmentInbox();
+  });
+
   useEffect(() => {
     let active = true;
     fetchAuthOptions()
@@ -122,8 +127,7 @@ function UniversitetRegistrationContent() {
       if (isAcademicRoles(user.roles)) {
         router.push("/university");
       } else {
-        setStep(3);
-        loadAppointmentInbox();
+        onSignedInNonAcademic();
       }
     });
 

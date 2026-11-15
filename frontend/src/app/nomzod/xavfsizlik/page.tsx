@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
 import {
   Shield,
   ShieldCheck,
-  ShieldAlert,
   KeyRound,
   Smartphone,
   Laptop,
@@ -20,9 +22,7 @@ import {
   Download,
   AlertTriangle,
   X,
-  FileText,
   User,
-  Clock,
   ArrowRight,
 } from "lucide-react";
 import {
@@ -37,9 +37,15 @@ import {
 } from "@/lib/api";
 
 export default function CandidateSecurityPage() {
-  const [securityData, setSecurityData] = useState<UserSecurityOverview | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const overview = useAsyncData<UserSecurityOverview>("security-overview", fetchUserSecurityOverview);
+  const securityData = overview.data ?? null;
+  const isLoading = overview.isLoading;
+  // Errors from user actions; load errors come from `overview.error`.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const displayedError =
+    errorMessage ??
+    (overview.error ? describeRequestError(overview.error, "Xavfsizlik ma'lumotlarini yuklashda xatolik yuz berdi.") : null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
@@ -80,25 +86,11 @@ export default function CandidateSecurityPage() {
   // ---------------------------------------------------------------------------
   // Data Loading
   // ---------------------------------------------------------------------------
+  const reloadOverview = overview.reload;
   const loadSecurityOverview = useCallback(async () => {
-    setIsLoading(true);
     setErrorMessage(null);
-    try {
-      const data = await fetchUserSecurityOverview();
-      setSecurityData(data);
-    } catch (err: unknown) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Xavfsizlik ma'lumotlarini yuklashda xatolik yuz berdi."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    loadSecurityOverview();
-  }, [loadSecurityOverview]);
+    await reloadOverview();
+  }, [reloadOverview]);
 
   // ---------------------------------------------------------------------------
   // TOTP Handlers
@@ -237,7 +229,10 @@ export default function CandidateSecurityPage() {
     try {
       await revokeUserSession(sessionId);
       if (isCurrent) {
-        window.location.assign("/");
+        // BFF cleared the session cookie; resync shared chrome like the Navbar logout does.
+        window.dispatchEvent(new Event("flexbridge:auth-changed"));
+        router.push("/");
+        router.refresh();
         return;
       }
       setSuccessMessage("Sessiya muvaffaqiyatli yakunlandi.");
@@ -292,11 +287,11 @@ export default function CandidateSecurityPage() {
         </div>
 
         {/* Alert Notifications */}
-        {errorMessage && (
+        {displayedError && (
           <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-              <span>{errorMessage}</span>
+              <span>{displayedError}</span>
             </div>
             <button onClick={() => setErrorMessage(null)} className="text-rose-400 hover:text-rose-200">
               <X className="w-4 h-4" />

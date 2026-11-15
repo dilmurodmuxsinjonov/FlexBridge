@@ -84,7 +84,6 @@ import {
   OrgOrderItem,
   searchEmployerCandidates,
   CandidateSearchItem,
-  CandidateSearchParams,
   CandidateSearchResponse,
   fetchOrganizationDirectoryProfile,
   saveOrganizationDirectoryProfile,

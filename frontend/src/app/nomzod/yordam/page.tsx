@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { useState, useCallback } from "react";
 import {
   LifeBuoy,
   ShieldCheck,
@@ -9,19 +8,15 @@ import {
   Send,
   Plus,
   RefreshCw,
-  Clock,
   AlertCircle,
   CheckCircle2,
   Loader2,
-  FileText,
-  User,
   Trash2,
   Download,
   Edit3,
   X,
   MessageSquare,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import {
   fetchMySupportTickets,
@@ -37,8 +32,26 @@ import {
   CustomerPrivacyRequestItem,
   NotificationPreferenceItem,
 } from "@/lib/api";
+import { describeRequestError } from "@/lib/errors";
+import { useAsyncData } from "@/lib/useAsyncData";
 
 type ActiveTab = "TICKETS" | "PRIVACY" | "NOTIFICATIONS";
+
+const EMPTY_TICKETS: CustomerSupportTicketItem[] = [];
+const EMPTY_PRIVACY_REQUESTS: CustomerPrivacyRequestItem[] = [];
+const EMPTY_PREFERENCES: NotificationPreferenceItem[] = [];
+
+async function loadTicketItems(): Promise<CustomerSupportTicketItem[]> {
+  return (await fetchMySupportTickets()).items || [];
+}
+
+async function loadPrivacyRequestItems(): Promise<CustomerPrivacyRequestItem[]> {
+  return (await fetchMyPrivacyRequests()).items || [];
+}
+
+async function loadPreferenceItems(): Promise<NotificationPreferenceItem[]> {
+  return (await fetchMyNotificationPreferences()).preferences || [];
+}
 
 export default function CandidateHelpPrivacyPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("TICKETS");
@@ -46,9 +59,10 @@ export default function CandidateHelpPrivacyPage() {
   // ---------------------------------------------------------------------------
   // Tab 1: Support Tickets State
   // ---------------------------------------------------------------------------
-  const [tickets, setTickets] = useState<CustomerSupportTicketItem[]>([]);
-  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
-  const [ticketsError, setTicketsError] = useState<string | null>(null);
+  const ticketsQuery = useAsyncData("support-tickets", loadTicketItems);
+  const tickets = ticketsQuery.data ?? EMPTY_TICKETS;
+  const isLoadingTickets = ticketsQuery.isLoading;
+  const ticketsError = ticketsQuery.error ? describeRequestError(ticketsQuery.error, "Murojaatlarni yuklashda xatolik") : null;
 
   // Create Ticket Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -72,9 +86,12 @@ export default function CandidateHelpPrivacyPage() {
   // ---------------------------------------------------------------------------
   // Tab 2: Privacy Requests State
   // ---------------------------------------------------------------------------
-  const [privacyRequests, setPrivacyRequests] = useState<CustomerPrivacyRequestItem[]>([]);
-  const [isLoadingPrivacy, setIsLoadingPrivacy] = useState(false);
-  const [privacyError, setPrivacyError] = useState<string | null>(null);
+  const privacyQuery = useAsyncData("privacy-requests", loadPrivacyRequestItems);
+  const privacyRequests = privacyQuery.data ?? EMPTY_PRIVACY_REQUESTS;
+  const isLoadingPrivacy = privacyQuery.isLoading;
+  const privacyError = privacyQuery.error
+    ? describeRequestError(privacyQuery.error, "Maxfiylik so'rovlarini yuklashda xatolik")
+    : null;
 
   // Create Privacy Request Modal
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
@@ -87,26 +104,18 @@ export default function CandidateHelpPrivacyPage() {
   // ---------------------------------------------------------------------------
   // Tab 3: Notification Preferences State
   // ---------------------------------------------------------------------------
-  const [preferences, setPreferences] = useState<NotificationPreferenceItem[]>([]);
-  const [isLoadingPrefs, setIsLoadingPrefs] = useState(false);
-  const [prefsError, setPrefsError] = useState<string | null>(null);
+  const prefsQuery = useAsyncData("notification-preferences", loadPreferenceItems);
+  const preferences = prefsQuery.data ?? EMPTY_PREFERENCES;
+  const isLoadingPrefs = prefsQuery.isLoading;
+  const setPreferences = (updater: (prev: NotificationPreferenceItem[]) => NotificationPreferenceItem[]) =>
+    prefsQuery.mutate((prev) => updater(prev ?? EMPTY_PREFERENCES));
+  // Save errors; load errors come from `prefsQuery.error`.
+  const [prefsSaveError, setPrefsError] = useState<string | null>(null);
+  const prefsError =
+    prefsSaveError ??
+    (prefsQuery.error ? describeRequestError(prefsQuery.error, "Bildirishnoma sozlamalarini yuklashda xatolik") : null);
   const [prefsSuccessMsg, setPrefsSuccessMsg] = useState<string | null>(null);
   const [isSavingPrefs, setIsSavingPrefs] = useState(false);
-
-  // Load Tickets (API-063)
-  const loadTickets = useCallback(async () => {
-    setIsLoadingTickets(true);
-    setTicketsError(null);
-    try {
-      const res = await fetchMySupportTickets();
-      setTickets(res.items || []);
-    } catch (err: unknown) {
-      setTicketsError(err instanceof Error ? err.message : "Murojaatlarni yuklashda xatolik");
-      setTickets([]);
-    } finally {
-      setIsLoadingTickets(false);
-    }
-  }, []);
 
   // Load Messages for a Ticket (API-064)
   const loadMessages = useCallback(async (ticketId: string) => {
@@ -123,41 +132,22 @@ export default function CandidateHelpPrivacyPage() {
     }
   }, []);
 
-  // Load Privacy Requests (API-062)
-  const loadPrivacyRequests = useCallback(async () => {
-    setIsLoadingPrivacy(true);
-    setPrivacyError(null);
-    try {
-      const res = await fetchMyPrivacyRequests();
-      setPrivacyRequests(res.items || []);
-    } catch (err: unknown) {
-      setPrivacyError(err instanceof Error ? err.message : "Maxfiylik so'rovlarini yuklashda xatolik");
-      setPrivacyRequests([]);
-    } finally {
-      setIsLoadingPrivacy(false);
-    }
-  }, []);
-
-  // Load Notification Preferences (API-059)
-  const loadPreferences = useCallback(async () => {
-    setIsLoadingPrefs(true);
+  const loadTickets = ticketsQuery.reload;
+  const loadPrivacyRequests = privacyQuery.reload;
+  const loadPreferences = () => {
     setPrefsError(null);
-    try {
-      const res = await fetchMyNotificationPreferences();
-      setPreferences(res.preferences || []);
-    } catch (err: unknown) {
-      setPrefsError(err instanceof Error ? err.message : "Bildirishnoma sozlamalarini yuklashda xatolik");
-    } finally {
-      setIsLoadingPrefs(false);
-    }
-  }, []);
+    return prefsQuery.reload();
+  };
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
-    if (activeTab === "TICKETS") loadTickets();
-    if (activeTab === "PRIVACY") loadPrivacyRequests();
-    if (activeTab === "NOTIFICATIONS") loadPreferences();
-  }, [activeTab, loadTickets, loadPrivacyRequests, loadPreferences]);
+  // Switching tabs refreshes that tab, as before; counts in the tab headers
+  // stay populated because every list loads once on mount.
+  const selectTab = (tab: ActiveTab) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    if (tab === "TICKETS") void loadTickets();
+    if (tab === "PRIVACY") void loadPrivacyRequests();
+    if (tab === "NOTIFICATIONS") void loadPreferences();
+  };
 
   // Open ticket details
   const handleSelectTicket = (t: CustomerSupportTicketItem) => {
@@ -268,7 +258,8 @@ export default function CandidateHelpPrivacyPage() {
     setPrefsSuccessMsg(null);
     try {
       const res = await updateMyNotificationPreferences(preferences);
-      setPreferences(res.preferences || preferences);
+      const saved = res.preferences;
+      if (saved) setPreferences(() => saved);
       setPrefsSuccessMsg("Bildirishnoma sozlamalari muvaffaqiyatli saqlandi!");
       setTimeout(() => setPrefsSuccessMsg(null), 3000);
     } catch (err: unknown) {
@@ -308,7 +299,7 @@ export default function CandidateHelpPrivacyPage() {
         {/* Tab Controls */}
         <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto">
           <button
-            onClick={() => setActiveTab("TICKETS")}
+            onClick={() => selectTab("TICKETS")}
             className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "TICKETS"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -323,7 +314,7 @@ export default function CandidateHelpPrivacyPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("PRIVACY")}
+            onClick={() => selectTab("PRIVACY")}
             className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "PRIVACY"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -338,7 +329,7 @@ export default function CandidateHelpPrivacyPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("NOTIFICATIONS")}
+            onClick={() => selectTab("NOTIFICATIONS")}
             className={`px-4 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "NOTIFICATIONS"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -513,6 +504,12 @@ export default function CandidateHelpPrivacyPage() {
               <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 Maxfiylik So‘rovlari Tarixi ({privacyRequests.length})
               </h4>
+              {privacyError && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{privacyError}</span>
+                </div>
+              )}
               {isLoadingPrivacy ? (
                 <div className="p-8 text-center text-xs text-zinc-400 flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
@@ -816,6 +813,12 @@ export default function CandidateHelpPrivacyPage() {
 
             {/* Messages Body */}
             <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#0d0d0f]">
+              {messagesError && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{messagesError}</span>
+                </div>
+              )}
               {isLoadingMessages ? (
                 <div className="p-8 text-center text-xs text-zinc-400 flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-sky-400" />

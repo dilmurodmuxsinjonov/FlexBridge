@@ -62,8 +62,8 @@ const config: Config = {
         full: "9999px",
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        heading: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        heading: ["var(--font-jakarta)", "Plus Jakarta Sans", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "Menlo", "monospace"],
       },
       spacing: {
