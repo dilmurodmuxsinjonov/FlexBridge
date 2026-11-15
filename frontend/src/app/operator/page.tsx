@@ -24,6 +24,13 @@ import {
   Activity,
   Server,
   Plus,
+  CreditCard,
+  Receipt,
+  Coins,
+  DollarSign,
+  Filter,
+  ArrowUpRight,
+  CheckCheck,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -38,6 +45,9 @@ import {
   declareOperatorIncident,
   fetchOperatorRestoreRuns,
   fetchOperatorAnalytics,
+  fetchOperatorFinanceSummary,
+  fetchOperatorReconciliation,
+  approveOperatorRefund,
   logoutUser,
   AuthUser,
   OperatorAuditEventItem,
@@ -45,12 +55,16 @@ import {
   OperatorSupportTicketItem,
   OperatorRestoreRunItem,
   OperatorPlatformAnalytics,
+  OperatorFinanceSummaryResponse,
+  OperatorReconciliationItem,
+  OperatorReconciliationResponse,
+  ApproveOperatorRefundResult,
   BreakGlassAccessResult,
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
-type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS";
+type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
 export default function OperatorPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -132,6 +146,27 @@ export default function OperatorPortal() {
   const [analytics, setAnalytics] = useState<OperatorPlatformAnalytics | null>(null);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
+  // Tab 5: Finance & Reconciliation Hub (API-117, API-115, API-078)
+  const [financeSummary, setFinanceSummary] = useState<OperatorFinanceSummaryResponse | null>(null);
+  const [isLoadingFinance, setIsLoadingFinance] = useState(false);
+  const [financeError, setFinanceError] = useState<string | null>(null);
+
+  const [reconciliationItems, setReconciliationItems] = useState<OperatorReconciliationItem[]>([]);
+  const [reconciliationSummary, setReconciliationSummary] = useState<{
+    total_reconciled?: number;
+    total_discrepancies?: number;
+    matched_count?: number;
+  } | null>(null);
+  const [reconciliationProvider, setReconciliationProvider] = useState<string>("ALL");
+  const [reconciliationDiscrepancyOnly, setReconciliationDiscrepancyOnly] = useState<boolean>(false);
+  const [isLoadingReconciliation, setIsLoadingReconciliation] = useState(false);
+  const [reconciliationError, setReconciliationError] = useState<string | null>(null);
+
+  const [approvingRefundId, setApprovingRefundId] = useState<string | null>(null);
+  const [manualRefundId, setManualRefundId] = useState<string>("");
+  const [approveRefundSuccess, setApproveRefundSuccess] = useState<string | null>(null);
+  const [approveRefundError, setApproveRefundError] = useState<string | null>(null);
 
   // Load Audit Events (API-118)
   const loadAuditEvents = useCallback(async () => {
@@ -222,6 +257,60 @@ export default function OperatorPortal() {
     await Promise.allSettled([loadSupportTickets(), loadRestoreRuns(), loadAnalytics()]);
   }, [loadSupportTickets, loadRestoreRuns, loadAnalytics]);
 
+  const loadFinanceSummary = useCallback(async () => {
+    setIsLoadingFinance(true);
+    setFinanceError(null);
+    try {
+      const res = await fetchOperatorFinanceSummary();
+      setFinanceSummary(res);
+    } catch (err: unknown) {
+      setFinanceError(err instanceof Error ? err.message : "Moliya xulosasini yuklashda xatolik yuz berdi");
+      setFinanceSummary(null);
+    } finally {
+      setIsLoadingFinance(false);
+    }
+  }, []);
+
+  const loadReconciliation = useCallback(async () => {
+    setIsLoadingReconciliation(true);
+    setReconciliationError(null);
+    try {
+      const res = await fetchOperatorReconciliation({
+        provider: reconciliationProvider === "ALL" ? undefined : reconciliationProvider,
+        discrepancy_only: reconciliationDiscrepancyOnly ? true : undefined,
+        limit: 50,
+      });
+      setReconciliationItems(res.items || []);
+      setReconciliationSummary(res.summary || null);
+    } catch (err: unknown) {
+      setReconciliationError(err instanceof Error ? err.message : "Solishtiruv (reconciliation) ma'lumotlarini yuklashda xatolik");
+      setReconciliationItems([]);
+    } finally {
+      setIsLoadingReconciliation(false);
+    }
+  }, [reconciliationProvider, reconciliationDiscrepancyOnly]);
+
+  const loadFinanceHub = useCallback(async () => {
+    await Promise.allSettled([loadFinanceSummary(), loadReconciliation()]);
+  }, [loadFinanceSummary, loadReconciliation]);
+
+  const handleApproveRefund = async (refundId: string) => {
+    if (!refundId.trim()) return;
+    setApprovingRefundId(refundId);
+    setApproveRefundError(null);
+    setApproveRefundSuccess(null);
+    try {
+      const res = await approveOperatorRefund(refundId.trim());
+      setApproveRefundSuccess(`Qaytarish #${refundId.slice(0, 8)} muvaffaqiyatli tasdiqlandi! Yangi holat: ${res.status}`);
+      setManualRefundId("");
+      await loadFinanceHub();
+    } catch (err: unknown) {
+      setApproveRefundError(err instanceof Error ? err.message : "Mablag' qaytarishni tasdiqlashda xatolik");
+    } finally {
+      setApprovingRefundId(null);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
     fetchAuthMe().then((user) => {
@@ -232,19 +321,26 @@ export default function OperatorPortal() {
           loadAuditEvents();
           loadVerificationCases();
           loadSupportOps();
+          loadFinanceHub();
         }
       }
     });
     return () => {
       isMounted = false;
     };
-  }, [loadAuditEvents, loadVerificationCases, loadSupportOps]);
+  }, [loadAuditEvents, loadVerificationCases, loadSupportOps, loadFinanceHub]);
 
   useEffect(() => {
     if (currentUser && activeTab === "SUPPORT_OPS") {
       loadSupportOps();
     }
   }, [currentUser, activeTab, loadSupportOps]);
+
+  useEffect(() => {
+    if (currentUser && activeTab === "FINANCE") {
+      loadFinanceHub();
+    }
+  }, [currentUser, activeTab, loadFinanceHub]);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -254,9 +350,14 @@ export default function OperatorPortal() {
     setTickets([]);
     setRestoreRuns([]);
     setAnalytics(null);
+    setFinanceSummary(null);
+    setReconciliationItems([]);
+    setReconciliationSummary(null);
     setEventsError(null);
     setCasesError(null);
     setTicketsError(null);
+    setFinanceError(null);
+    setReconciliationError(null);
   };
 
   const handleLoginSuccess = (user: AuthUser) => {
@@ -570,6 +671,23 @@ export default function OperatorPortal() {
               <span className="px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
                 {tickets.length}
               </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("FINANCE")}
+              className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === "FINANCE"
+                  ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+              }`}
+            >
+              <CreditCard className="w-4 h-4 text-emerald-400" />
+              <span>Moliya & Solishtiruv (API-117 / API-115 / API-078)</span>
+              {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
+                <span className="px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
+                  {reconciliationSummary.total_discrepancies} tafovut
+                </span>
+              ) : null}
             </button>
           </div>
 
@@ -1213,6 +1331,400 @@ export default function OperatorPortal() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: FINANCE & RECONCILIATION HUB (API-117, API-115, API-078) */}
+          {activeTab === "FINANCE" && (
+            <div className="flex flex-col gap-6">
+              {/* TOP ACTION BAR & REFRESH */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-emerald-400" />
+                    <span>Moliya & Shlyuz Solishtiruvi Markazi</span>
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Buxgalteriya balansi (API-117), to‘lov shlyuzlari solishtiruvi (API-115) va 4-ko‘z tamoyilidagi mablag‘ qaytarishlar (API-078).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadFinanceHub}
+                  disabled={isLoadingFinance || isLoadingReconciliation}
+                  className="px-3.5 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-200 flex items-center gap-2 transition-all self-start sm:self-auto shadow-sm"
+                >
+                  <RefreshCw
+                    className={`w-3.5 h-3.5 ${
+                      isLoadingFinance || isLoadingReconciliation ? "animate-spin text-emerald-400" : ""
+                    }`}
+                  />
+                  <span>Yangilash</span>
+                </button>
+              </div>
+
+              {/* ERROR NOTICES */}
+              {financeError && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                  <span>{financeError}</span>
+                </div>
+              )}
+
+              {/* 1. FINANCIAL SUMMARY KPI CARDS (API-117) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-400">Naqd Pul Tushumi</span>
+                    <Coins className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="text-xl font-bold font-mono text-white">
+                    {financeSummary?.cash_received_uzs != null
+                      ? `${financeSummary.cash_received_uzs.toLocaleString()} UZS`
+                      : "—"}
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    To‘langan invoyslar bo‘yicha jami tushum
+                  </span>
+                </div>
+
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-400">Tan Olingan Daromad</span>
+                    <CheckCheck className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="text-xl font-bold font-mono text-white">
+                    {financeSummary?.recognized_revenue_uzs != null
+                      ? `${financeSummary.recognized_revenue_uzs.toLocaleString()} UZS`
+                      : "—"}
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    Xizmat ko‘rsatilgan davr bo‘yicha daromad
+                  </span>
+                </div>
+
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-400">Kechiktirilgan Daromad</span>
+                    <Clock className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="text-xl font-bold font-mono text-white">
+                    {financeSummary?.deferred_revenue_uzs != null
+                      ? `${financeSummary.deferred_revenue_uzs.toLocaleString()} UZS`
+                      : "—"}
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    Kelgusi davr xizmatlari uchun bo‘nak
+                  </span>
+                </div>
+
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-400">Sof Daromad / Qaytarilgan</span>
+                    <Receipt className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <div className="text-xl font-bold font-mono text-white">
+                    {financeSummary?.net_revenue_uzs != null
+                      ? `${financeSummary.net_revenue_uzs.toLocaleString()} UZS`
+                      : "—"}
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    Qaytarilgan: {financeSummary?.refunded_amount_uzs != null ? `${financeSummary.refunded_amount_uzs.toLocaleString()} UZS` : "0 UZS"}
+                  </span>
+                </div>
+              </div>
+
+              {/* TARIFF PLAN BREAKDOWN (API-117) */}
+              {financeSummary?.plans_breakdown && financeSummary.plans_breakdown.length > 0 && (
+                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                      Tarif Rejalari Bo‘yicha Taqsimot (Plans Breakdown)
+                    </h3>
+                    <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      Faol Obunalar: {financeSummary.active_subscriptions_count ?? 0} ta
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-white/[0.08] text-zinc-400">
+                          <th className="py-2.5 px-3">Tarif Kodi</th>
+                          <th className="py-2.5 px-3">Jami Huquqlar</th>
+                          <th className="py-2.5 px-3">Faol Obunalar</th>
+                          <th className="py-2.5 px-3">Kassa Tushumi</th>
+                          <th className="py-2.5 px-3">Tan Olingan Daromad</th>
+                          <th className="py-2.5 px-3">Kechiktirilgan Daromad</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.04]">
+                        {financeSummary.plans_breakdown.map((plan, idx) => (
+                          <tr key={idx} className="hover:bg-white/[0.02]">
+                            <td className="py-2.5 px-3 font-mono font-semibold text-white">
+                              {plan.plan_code}
+                            </td>
+                            <td className="py-2.5 px-3 text-zinc-300">{plan.total_entitlements}</td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
+                                {plan.active_count} ta faol
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-zinc-200">
+                              {plan.cash_received_uzs?.toLocaleString()} UZS
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-emerald-400">
+                              {plan.recognized_revenue_uzs?.toLocaleString()} UZS
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-amber-400">
+                              {plan.deferred_revenue_uzs?.toLocaleString()} UZS
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. DUAL-CONTROL REFUND APPROVAL HUB (API-078) */}
+              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-semibold text-white">
+                      4-Ko‘z Tamoyilidagi Qaytarishlarni Tasdiqlash (API-078 / Dual-Control Approvals)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    Platforma xavfsizligi bo‘yicha har qanday mablag‘ qaytarish 2 ta mustaqil moliya operatori tomonidan tasdiqlanishi shart:
+                    1-tasdiq <span className="font-mono text-amber-400">PENDING_SECOND_APPROVAL</span> holatiga o‘tkazadi,
+                    2-tasdiq esa <span className="font-mono text-emerald-400">APPROVED</span> qilib avtomatik <span className="font-mono text-zinc-300">REFUND_EXECUTE</span> vazifasini ishga tushiradi. O‘ziga o‘zi tasdiqlash taqiqlangan.
+                  </p>
+                </div>
+
+                {approveRefundSuccess && (
+                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{approveRefundSuccess}</span>
+                  </div>
+                )}
+
+                {approveRefundError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{approveRefundError}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                  <input
+                    type="text"
+                    value={manualRefundId}
+                    onChange={(e) => setManualRefundId(e.target.value)}
+                    placeholder="Qaytarish UUID kodi (masalan: 123e4567-e89b-12d3-a456-426614174000)..."
+                    className="w-full sm:flex-1 bg-[#18181b] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleApproveRefund(manualRefundId)}
+                    disabled={!manualRefundId.trim() || approvingRefundId === manualRefundId}
+                    className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-600/20 shrink-0"
+                  >
+                    {approvingRefundId === manualRefundId ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <CheckCheck className="w-3.5 h-3.5" />
+                    )}
+                    <span>Tasdiqlash (Dual-Control)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 3. GATEWAY VS LEDGER RECONCILIATION HUB (API-115) */}
+              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <Receipt className="w-4 h-4 text-primary" />
+                      <span>To‘lov Shlyuzlari va Buxgalteriya Jurnali Solishtiruvi (API-115)</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      Billing ledger yozuvlari tashqi to‘lov shlyuzlari (Payme, Click, Uzum) tranzaksiyalari bilan taqqoslanadi. Zero PII ta’minlangan.
+                    </p>
+                  </div>
+
+                  {/* RECONCILIATION FILTERS */}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex items-center gap-1.5 bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1">
+                      <Filter className="w-3 h-3 text-zinc-400" />
+                      <select
+                        value={reconciliationProvider}
+                        onChange={(e) => setReconciliationProvider(e.target.value)}
+                        className="bg-transparent text-xs text-zinc-300 focus:outline-none cursor-pointer"
+                      >
+                        <option value="ALL">Barcha Provayderlar</option>
+                        <option value="PAYME">PAYME</option>
+                        <option value="CLICK">CLICK</option>
+                        <option value="UZUM">UZUM</option>
+                      </select>
+                    </div>
+
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1.5 hover:bg-white/[0.04] transition-all">
+                      <input
+                        type="checkbox"
+                        checked={reconciliationDiscrepancyOnly}
+                        onChange={(e) => setReconciliationDiscrepancyOnly(e.target.checked)}
+                        className="rounded border-zinc-700 text-rose-500 focus:ring-rose-500/40"
+                      />
+                      <span>Faqat Tafovutlar ({reconciliationSummary?.total_discrepancies ?? 0})</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* RECONCILIATION SUMMARY STATS */}
+                {reconciliationSummary && (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-[#18181b] border border-white/[0.06] rounded-lg p-2.5 flex flex-col items-center justify-center">
+                      <span className="text-[10px] uppercase font-bold text-zinc-400">Jami Solishtirilgan</span>
+                      <span className="text-sm font-mono font-bold text-white">
+                        {reconciliationSummary.total_reconciled ?? reconciliationItems.length}
+                      </span>
+                    </div>
+                    <div className="bg-[#18181b] border border-white/[0.06] rounded-lg p-2.5 flex flex-col items-center justify-center">
+                      <span className="text-[10px] uppercase font-bold text-emerald-400">To‘liq Mos Kelgan</span>
+                      <span className="text-sm font-mono font-bold text-emerald-400">
+                        {reconciliationSummary.matched_count ?? 0}
+                      </span>
+                    </div>
+                    <div className="bg-[#18181b] border border-white/[0.06] rounded-lg p-2.5 flex flex-col items-center justify-center">
+                      <span className="text-[10px] uppercase font-bold text-rose-400">Tafovut Aniqlangan</span>
+                      <span className="text-sm font-mono font-bold text-rose-400">
+                        {reconciliationSummary.total_discrepancies ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* RECONCILIATION ITEMS TABLE */}
+                {isLoadingReconciliation ? (
+                  <div className="p-8 flex items-center justify-center gap-2 text-xs text-zinc-400">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Solishtiruv ma’lumotlari tekshirilmoqda...</span>
+                  </div>
+                ) : reconciliationItems.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-400">
+                    Solishtiruv yozuvlari topilmadi.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-white/[0.08] text-zinc-400">
+                          <th className="py-2.5 px-3">Sana</th>
+                          <th className="py-2.5 px-3">Yozuv Turi</th>
+                          <th className="py-2.5 px-3">Provayder & Tranzaksiya</th>
+                          <th className="py-2.5 px-3">Ledger Summasi</th>
+                          <th className="py-2.5 px-3">Shlyuz Summasi</th>
+                          <th className="py-2.5 px-3">Holat</th>
+                          <th className="py-2.5 px-3">Tafovut</th>
+                          <th className="py-2.5 px-3 text-right">Amal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.04]">
+                        {reconciliationItems.map((item, idx) => (
+                          <tr
+                            key={idx}
+                            className={`hover:bg-white/[0.02] ${
+                              item.is_discrepant ? "bg-rose-500/[0.03]" : ""
+                            }`}
+                          >
+                            <td className="py-2.5 px-3 text-zinc-400 whitespace-nowrap">
+                              {item.occurred_at ? new Date(item.occurred_at).toLocaleString() : "—"}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
+                                  item.entry_kind === "PAYMENT_CAPTURED"
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : item.entry_kind === "REFUND_EXECUTED"
+                                    ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                    : "bg-zinc-800 text-zinc-300"
+                                }`}
+                              >
+                                {item.entry_kind}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-white">{item.provider || "ICHKI"}</span>
+                                <span className="text-[10px] font-mono text-zinc-400">
+                                  {item.provider_transaction_id || item.payment_attempt_id?.slice(0, 8) || "—"}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3 font-mono font-medium text-white">
+                              {item.ledger_amount_uzs?.toLocaleString()} {item.currency}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-zinc-300">
+                              {item.gateway_amount_uzs != null
+                                ? `${item.gateway_amount_uzs.toLocaleString()} ${item.currency}`
+                                : "—"}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="flex items-center gap-1.5 text-[11px]">
+                                <span className="font-mono text-zinc-300">{item.ledger_status}</span>
+                                {item.gateway_status && (
+                                  <>
+                                    <span className="text-zinc-500">/</span>
+                                    <span className="font-mono text-zinc-400">{item.gateway_status}</span>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              {item.is_discrepant ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {item.discrepancy_flags?.map((fl, fIdx) => (
+                                    <span
+                                      key={fIdx}
+                                      className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono"
+                                    >
+                                      {fl}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-medium">
+                                  Mos
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              {item.refund_id ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveRefund(item.refund_id!)}
+                                  disabled={approvingRefundId === item.refund_id}
+                                  className="px-2.5 py-1 rounded bg-surface hover:bg-surface-high border border-white/[0.08] text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-all inline-flex items-center gap-1"
+                                >
+                                  {approvingRefundId === item.refund_id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <CheckCheck className="w-3 h-3" />
+                                  )}
+                                  <span>Tasdiqlash</span>
+                                </button>
+                              ) : (
+                                <span className="text-zinc-600 text-[11px]">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
