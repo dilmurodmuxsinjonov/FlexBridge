@@ -878,6 +878,9 @@ function ShartnomalarHubContent() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        requiredPortal="CANDIDATE"
+        title="Talaba / Nomzod kirishi"
+        subtitle="Amaliyot shartnomalarini ko‘rish va tasdiqlash uchun talaba hisobingizga kiring"
         onSuccess={async () => {
           setIsAuthModalOpen(false);
           const user = await fetchAuthMe().catch(() => null);

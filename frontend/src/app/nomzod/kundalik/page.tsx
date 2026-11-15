@@ -892,6 +892,9 @@ export default function CandidateKundalikPage() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
+        requiredPortal="CANDIDATE"
+        title="Talaba / Nomzod kirishi"
+        subtitle="Amaliyot kundaligi va e-imzo uchun talaba hisobingizga kiring"
         onSuccess={() => {
           setAuthModalOpen(false);
           loadUser();

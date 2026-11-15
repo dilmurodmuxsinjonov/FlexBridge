@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   User,
   FileText,
@@ -15,7 +15,18 @@ import {
   LifeBuoy,
   Search,
   GraduationCap,
+  Lock,
+  LogOut,
+  ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
+import { fetchAuthMe, logoutUser, type AuthUser } from "@/lib/api";
+import { isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
+
+function getOtherRoleDashboard(roles: string[]): { href: string; label: string } {
+  const dash = resolvePortalDashboard(roles);
+  return { href: dash.href, label: dash.label };
+}
 
 interface SidebarGroup {
   title: string;
@@ -62,7 +73,46 @@ const STUDENT_NAV_GROUPS: SidebarGroup[] = [
 
 export default function NomzodLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const flatItems = STUDENT_NAV_GROUPS.flatMap((g) => g.items);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [authResolved, setAuthResolved] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const syncAuth = () => {
+      fetchAuthMe()
+        .then((user) => {
+          if (active) {
+            setCurrentUser(user);
+            setAuthResolved(true);
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setCurrentUser(null);
+            setAuthResolved(true);
+          }
+        });
+    };
+    syncAuth();
+    window.addEventListener("flexbridge:auth-changed", syncAuth);
+    return () => {
+      active = false;
+      window.removeEventListener("flexbridge:auth-changed", syncAuth);
+    };
+  }, [pathname]);
+
+  const isCandidate = Boolean(currentUser && isStudentOnlyRoles(currentUser.roles));
+  const isWrongRoleUser = Boolean(authResolved && currentUser && !isCandidate);
+
+  const handleStudentSwitchLogout = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+    router.push("/talaba/kirish");
+    router.refresh();
+  };
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100">
@@ -90,6 +140,42 @@ export default function NomzodLayout({ children }: { children: React.ReactNode }
             <div className="mt-3 pt-3 border-t border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed">
               HEMIS jadvali asosida mos smenali ishlar va elektron imzoli amaliyot kundaligi.
             </div>
+            {authResolved && (
+              <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+                {currentUser && isCandidate ? (
+                  <div className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium truncate">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+                      <span>Talaba sessiyasi faol</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleStudentSwitchLogout}
+                      className="inline-flex items-center gap-1 text-zinc-400 hover:text-rose-300 transition-colors"
+                    >
+                      <LogOut className="h-3 w-3" />
+                      <span>Chiqish</span>
+                    </button>
+                  </div>
+                ) : !currentUser ? (
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href="/talaba/kirish"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sky-500 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-400 transition-colors"
+                    >
+                      <Lock className="h-3 w-3" />
+                      <span>Talaba kirishi</span>
+                    </Link>
+                    <Link
+                      href="/talaba/royxatdan-otish"
+                      className="inline-flex items-center justify-center rounded-lg border border-sky-500/25 bg-sky-500/10 px-3 py-1.5 text-[11px] font-medium text-sky-300 hover:bg-sky-500/20 transition-colors"
+                    >
+                      Talaba ro‘yxatdan o‘tishi
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Grouped Vertical Navigation */}
@@ -158,7 +244,45 @@ export default function NomzodLayout({ children }: { children: React.ReactNode }
         </nav>
 
         {/* Main Workspace Content */}
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1">
+          {isWrongRoleUser && currentUser ? (
+            <div className="rounded-2xl border border-amber-500/25 bg-[#121214] p-8 max-w-xl mx-auto my-8 space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+                <ShieldAlert className="h-4 w-4" />
+                <span>Rol chegarasi</span>
+              </div>
+              <h1 className="font-heading text-xl font-bold text-white">
+                Bu bo‘lim faqat Talaba / Nomzodlar uchun ajratilgan
+              </h1>
+              <p className="text-xs leading-relaxed text-zinc-400">
+                Siz hozir{" "}
+                <span className="font-mono text-zinc-200">
+                  {currentUser.roles.join(", ")}
+                </span>{" "}
+                hisobi bilan tizimga kirgansiz. Talaba kabinetining funksiyalaridan (rezyume, arizalar, amaliyot kundaligi) foydalanish uchun talaba hisobingiz bilan alohida kiring.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href={getOtherRoleDashboard(currentUser.roles).href}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 border border-white/15 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15 transition-colors"
+                >
+                  <span>{getOtherRoleDashboard(currentUser.roles).label}</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleStudentSwitchLogout}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-sky-500 px-4 py-2 text-xs font-semibold text-white hover:bg-sky-400 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Chiqish va talaba sifatida kirish</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
+        </div>
       </div>
     </div>
   );

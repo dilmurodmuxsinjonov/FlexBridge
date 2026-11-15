@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -10,8 +14,40 @@ import {
   User,
   Search,
 } from "lucide-react";
+import { fetchAuthMe, type AuthUser } from "@/lib/api";
+import { isStudentOnlyRoles } from "@/lib/roles";
+
+function isStudentOnlyUser(user: AuthUser | null): boolean {
+  return Boolean(user && isStudentOnlyRoles(user.roles));
+}
 
 export default function Footer() {
+  const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const syncAuth = () => {
+      fetchAuthMe()
+        .then((user) => {
+          if (active) setCurrentUser(user);
+        })
+        .catch(() => {
+          if (active) setCurrentUser(null);
+        });
+    };
+    syncAuth();
+    window.addEventListener("flexbridge:auth-changed", syncAuth);
+    return () => {
+      active = false;
+      window.removeEventListener("flexbridge:auth-changed", syncAuth);
+    };
+  }, [pathname]);
+
+  const isStudentScope =
+    Boolean(pathname?.startsWith("/nomzod")) ||
+    Boolean(pathname?.startsWith("/talaba")) ||
+    isStudentOnlyUser(currentUser);
   return (
     <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
       {/* Main Directory Links */}
@@ -45,7 +81,7 @@ export default function Footer() {
           {/* Column 2: Core Portals */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              Platforma Portallari
+              {isStudentScope ? "Talaba Bo‘limlari" : "Platforma Portallari"}
             </h4>
             <ul className="space-y-2 text-[11px]">
               <li>
@@ -60,24 +96,38 @@ export default function Footer() {
                   <span>Nomzod & Talaba Kabineti</span>
                 </Link>
               </li>
-              <li>
-                <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Ish Beruvchi HR Kabineti</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Universitet Koordinatori</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Platforma Operatori SOC</span>
-                </Link>
-              </li>
+              {isStudentScope ? (
+                <li>
+                  <Link
+                    href="/talaba/kirish"
+                    className="hover:text-white transition flex items-center gap-1.5"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Talaba Kirishi (Alohida)</span>
+                  </Link>
+                </li>
+              ) : (
+                <>
+                  <li>
+                    <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
+                      <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Ish Beruvchi HR Kabineti</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Universitet Koordinatori</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Platforma Operatori SOC</span>
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 

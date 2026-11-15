@@ -287,22 +287,35 @@ export default function StudentPortal() {
             <div className="px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Rolingiz bo‘yicha kabinetni tanlang
             </div>
-            <Link
-              href="/nomzod"
-              className="group flex items-center justify-between rounded-xl border border-sky-500/20 bg-surface-card px-4 py-3 hover:border-sky-400/50 hover:bg-sky-500/[0.06] transition-colors"
-            >
-              <div>
-                <p className="text-xs font-bold text-white group-hover:text-sky-300 transition-colors">
-                  Talaba / Nomzod Kabineti
-                </p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Rezyume, HEMIS jadvali, arizalar va kundalik e-imzo
-                </p>
+            <div className="rounded-xl border border-sky-500/20 bg-surface-card p-4 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs font-bold text-white">
+                    Talaba / Nomzod Kabineti
+                  </p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Rezyume, HEMIS jadvali, arizalar va kundalik e-imzo
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold text-sky-400">
+                  Talaba
+                </span>
               </div>
-              <span className="shrink-0 rounded-md border border-sky-500/25 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold text-sky-400">
-                Talaba
-              </span>
-            </Link>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Link
+                  href="/talaba/kirish"
+                  className="inline-flex items-center rounded-lg bg-sky-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-sky-400 transition-colors"
+                >
+                  Talaba kirishi
+                </Link>
+                <Link
+                  href="/nomzod"
+                  className="inline-flex items-center rounded-lg border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 text-[11px] font-medium text-sky-300 hover:bg-sky-500/20 transition-colors"
+                >
+                  Kabinet
+                </Link>
+              </div>
+            </div>
             <Link
               href="/employer"
               className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-surface-card px-4 py-3 hover:border-emerald-400/50 hover:bg-emerald-500/[0.06] transition-colors"

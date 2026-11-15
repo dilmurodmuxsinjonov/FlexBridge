@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { isRoleAllowedForPortal } from "@/lib/roles";
 
 export interface SessionData {
   token: string;
@@ -167,4 +168,70 @@ export function verifyCsrfOrigin(request: Request): boolean {
   } catch {
     return false;
   }
+}
+
+const PORTAL_MISMATCH_MESSAGES: Record<string, string> = {
+  CANDIDATE:
+    "Ushbu kirish sahifasi faqat Talaba / Nomzod hisoblari uchun. O'zingizga tegishli portaldan kiring.",
+  EMPLOYER:
+    "Ushbu kirish sahifasi faqat Korxona / Ish beruvchi hisoblari uchun. O'zingizga tegishli portaldan kiring.",
+  ACADEMIC:
+    "Ushbu kirish sahifasi faqat Universitet / OTM xodimlari uchun. O'zingizga tegishli portaldan kiring.",
+  OPERATOR:
+    "Ushbu kirish sahifasi faqat Platforma Operatori (SOC) hisoblari uchun.",
+};
+
+export { isRoleAllowedForPortal };
+
+/**
+ * Resolves user identity from /api/v1/auth/me, enforces portal role boundary,
+ * and sets encrypted session cookie only when authorized.
+ */
+export async function completeAuthenticatedSession(params: {
+  token: string;
+  expiresIn: number;
+  fallbackUserId?: string;
+  portal?: string;
+}): Promise<
+  | { ok: true; user_id: string; roles: string[] }
+  | { ok: false; status: number; error: string; message: string }
+> {
+  let resolvedUserId = params.fallbackUserId ? String(params.fallbackUserId) : "";
+  let resolvedRoles: string[] = [];
+
+  try {
+    const meRes = await backendFetch("/api/v1/auth/me", { method: "GET" }, params.token);
+    if (meRes.ok) {
+      const meData = await meRes.json();
+      resolvedUserId = String(meData.user_id || resolvedUserId);
+      resolvedRoles = Array.isArray(meData.roles) ? meData.roles : [];
+    }
+  } catch {
+    // Fallback to basic identity if /me fails transiently
+  }
+
+  const normalizedPortal = params.portal?.trim().toUpperCase();
+  if (normalizedPortal && !isRoleAllowedForPortal(resolvedRoles, normalizedPortal)) {
+    return {
+      ok: false,
+      status: 403,
+      error: "ROLE_PORTAL_MISMATCH",
+      message:
+        PORTAL_MISMATCH_MESSAGES[normalizedPortal] ||
+        "Sizning hisobingiz ushbu portalga kirish huquqiga ega emas.",
+    };
+  }
+
+  await setSessionCookie({
+    token: params.token,
+    user_id: resolvedUserId,
+    roles: resolvedRoles,
+    expires_at: Math.floor(Date.now() / 1000) + params.expiresIn,
+  });
+
+  return {
+    ok: true,
+    user_id: resolvedUserId,
+    roles: resolvedRoles,
+  };
 }

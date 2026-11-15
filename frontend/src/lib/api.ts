@@ -304,12 +304,13 @@ function notifyAuthChanged() {
 export async function loginUser(
   destination: string,
   password: string,
-  totp_code?: string
+  totp_code?: string,
+  portal?: "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR"
 ): Promise<LoginResult> {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ destination, password, totp_code }),
+    body: JSON.stringify({ destination, password, totp_code, portal }),
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 202) {
@@ -321,7 +322,7 @@ export async function loginUser(
     };
   }
   if (!res.ok) {
-    return { ok: false, error: data.error || "LOGIN_FAILED" };
+    return { ok: false, error: data.message || data.error || "LOGIN_FAILED" };
   }
   notifyAuthChanged();
   return {
@@ -331,15 +332,19 @@ export async function loginUser(
   };
 }
 
-export async function verifyMfa(mfa_ticket: string, code: string): Promise<LoginResult> {
+export async function verifyMfa(
+  mfa_ticket: string,
+  code: string,
+  portal?: "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR"
+): Promise<LoginResult> {
   const res = await fetch("/api/auth/mfa/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ mfa_ticket, code }),
+    body: JSON.stringify({ mfa_ticket, code, portal }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { ok: false, error: data.error || "MFA_VERIFICATION_FAILED" };
+    return { ok: false, error: data.message || data.error || "MFA_VERIFICATION_FAILED" };
   }
   notifyAuthChanged();
   return {
