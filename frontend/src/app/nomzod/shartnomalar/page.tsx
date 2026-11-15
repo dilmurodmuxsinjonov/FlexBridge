@@ -272,7 +272,7 @@ function ShartnomalarHubContent() {
             Amaliyot & Ish Shartnomalari Markazi
           </h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Kandidat amaliyot o'quv rejalari (API-050), shartnomani qabul qilish (API-048) va ikki tomonlama ish boshlanishini tasdiqlash (API-045, API-046).
+            Kandidat amaliyot o&apos;quv rejalari (API-050), shartnomani qabul qilish (API-048) va ikki tomonlama ish boshlanishini tasdiqlash (API-045, API-046).
           </p>
         </div>
 
@@ -322,10 +322,10 @@ function ShartnomalarHubContent() {
             <ShieldCheck className="h-6 w-6" />
           </div>
           <h2 className="font-heading text-lg font-bold text-white mb-2">
-            Shartnomalarni ko'rish uchun tizimga kiring
+            Shartnomalarni ko&apos;rish uchun tizimga kiring
           </h2>
           <p className="text-xs text-zinc-400 max-w-md mb-6 leading-relaxed">
-            Tasdiqlangan amaliyot o'quv rejalari, korxona bilan kelishilgan vazifalar va ish boshlanishini ikki tomonlama tasdiqlash uchun nomzod hisobingizga kiring.
+            Tasdiqlangan amaliyot o&apos;quv rejalari, korxona bilan kelishilgan vazifalar va ish boshlanishini ikki tomonlama tasdiqlash uchun nomzod hisobingizga kiring.
           </p>
           <button
             onClick={() => setIsAuthModalOpen(true)}
@@ -351,7 +351,7 @@ function ShartnomalarHubContent() {
               }`}
             >
               <BookOpen className="h-4 w-4 text-primary" />
-              <span>Amaliyot Shartnomalari & O'quv Rejasi (API-030 / API-050)</span>
+              <span>Amaliyot Shartnomalari & O&apos;quv Rejasi (API-030 / API-050)</span>
               {placements.length > 0 && (
                 <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">
                   {placements.length}
@@ -383,7 +383,7 @@ function ShartnomalarHubContent() {
                     Faol va Rejalashtirilgan Amaliyotlar
                   </h2>
                   <p className="text-xs text-zinc-400">
-                    Oliy ta'lim muassasasi yoki korxona bilan bog'langan barcha amaliyot o'rinlari ro'yxati.
+                    Oliy ta&apos;lim muassasasi yoki korxona bilan bog&apos;langan barcha amaliyot o&apos;rinlari ro&apos;yxati.
                   </p>
                 </div>
                 <button
@@ -406,14 +406,14 @@ function ShartnomalarHubContent() {
               {isLoadingPlacements ? (
                 <div className="py-12 text-center text-xs text-zinc-400">
                   <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                  Amaliyotlar ro'yxati yuklanmoqda...
+                  Amaliyotlar ro&apos;yxati yuklanmoqda...
                 </div>
               ) : placements.length === 0 ? (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-8 text-center text-xs text-zinc-400">
                   <BookOpen className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
                   <p className="text-zinc-300 font-semibold mb-1">Hozircha amaliyot shartnomalari mavjud emas</p>
                   <p className="text-zinc-500">
-                    Tashkilotlar tomonidan e'lon qilingan vakansiyalarga ariza topshiring va taklifni qabul qiling.
+                    Tashkilotlar tomonidan e&apos;lon qilingan vakansiyalarga ariza topshiring va taklifni qabul qiling.
                   </p>
                 </div>
               ) : (
@@ -465,7 +465,7 @@ function ShartnomalarHubContent() {
                             className="py-1.5 px-3 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
                           >
                             <BookOpen className="h-3.5 w-3.5" />
-                            <span>Rejani ko'rish (API-050)</span>
+                            <span>Rejani ko&apos;rish (API-050)</span>
                           </button>
                         </div>
                       </div>
@@ -487,7 +487,7 @@ function ShartnomalarHubContent() {
                   Ish Munosabatini Qidirish & Tekshirish (API-045)
                 </h2>
                 <p className="text-xs text-zinc-400 mb-4">
-                  Ish beruvchi tomonidan berilgan taklif (Offer) qabul qilingandan so'ng shakllangan ish munosabati identifikatorini kiriting.
+                  Ish beruvchi tomonidan berilgan taklif (Offer) qabul qilingandan so&apos;ng shakllangan ish munosabati identifikatorini kiriting.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-2.5">
@@ -524,7 +524,7 @@ function ShartnomalarHubContent() {
               {isLoadingEngagement ? (
                 <div className="py-12 text-center text-xs text-zinc-400">
                   <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
-                  Ish munosabati ma'lumotlari tekshirilmoqda...
+                  Ish munosabati ma&apos;lumotlari tekshirilmoqda...
                 </div>
               ) : activeEngagement ? (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-6 space-y-6">
@@ -557,7 +557,7 @@ function ShartnomalarHubContent() {
                       <span>Ikki Tomonlama Ish Boshlanishini Tasdiqlash (AC-014)</span>
                     </h3>
                     <p className="text-[11px] text-zinc-400 mb-4 leading-relaxed">
-                      O'zbekiston Respublikasi Mehnat Kodeksi va FlexBridge reglamentiga ko'ra, faol ish holati (ACTIVE) faqat ikkala tomon — ham nomzod, ham ish beruvchi CONFIRM_START tasdig'ini yuborgandan so'ng kuchga kiradi.
+                      O&apos;zbekiston Respublikasi Mehnat Kodeksi va FlexBridge reglamentiga ko&apos;ra, faol ish holati (ACTIVE) faqat ikkala tomon — ham nomzod, ham ish beruvchi CONFIRM_START tasdig&apos;ini yuborgandan so&apos;ng kuchga kiradi.
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -655,7 +655,7 @@ function ShartnomalarHubContent() {
                             className="py-2 px-3.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           >
                             <AlertTriangle className="h-4 w-4" />
-                            <span>E'tiroz bildirish (DISPUTE_START)</span>
+                            <span>E&apos;tiroz bildirish (DISPUTE_START)</span>
                           </button>
                         </>
                       )}
@@ -676,7 +676,7 @@ function ShartnomalarHubContent() {
                             className="py-2 px-3.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           >
                             <AlertTriangle className="h-4 w-4" />
-                            <span>Yakunlanishga e'tiroz bildirish</span>
+                            <span>Yakunlanishga e&apos;tiroz bildirish</span>
                           </button>
                         </>
                       )}
@@ -714,7 +714,7 @@ function ShartnomalarHubContent() {
                 </div>
               ) : (
                 <div className="rounded-xl border border-white/[0.08] bg-[#121214] p-8 text-center text-xs text-zinc-500">
-                  Engagement UUID kiriting va "Yuklash" tugmasini bosing.
+                  Engagement UUID kiriting va &quot;Yuklash&quot; tugmasini bosing.
                 </div>
               )}
             </div>
@@ -733,7 +733,7 @@ function ShartnomalarHubContent() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-primary" />
-                  <span>Amaliyot O'quv Rejasi & Shartlari (API-050)</span>
+                  <span>Amaliyot O&apos;quv Rejasi & Shartlari (API-050)</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5 font-mono">
                   Placement ID: {selectedPlacementId}
@@ -847,7 +847,7 @@ function ShartnomalarHubContent() {
                   <div className="rounded-lg border border-primary/30 bg-primary/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
                       <h5 className="text-xs font-bold text-white mb-0.5">
-                        Amaliyot shartlari va o'quv rejasiga rozimisiz?
+                        Amaliyot shartlari va o&apos;quv rejasiga rozimisiz?
                       </h5>
                       <p className="text-[11px] text-zinc-300">
                         Shartlarni qabul qilish orqali siz belgilangan vazifalarni bajarish va kundalik yuritish majburiyatini olasiz.

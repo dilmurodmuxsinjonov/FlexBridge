@@ -48,9 +48,9 @@ export async function GET(req: NextRequest) {
       items: data.items || [],
       next_after: data.next_after || null,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { ok: false, error: "PROXY_ERROR", message: err?.message || "Ichki tarmoq xatoligi" },
+      { ok: false, error: "PROXY_ERROR", message: (err instanceof Error && err.message) || "Ichki tarmoq xatoligi" },
       { status: 502 }
     );
   }

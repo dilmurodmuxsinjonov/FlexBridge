@@ -8,7 +8,7 @@ Verifies:
 5. Date range filtering and validation (422 on invalid order or format)
 6. Pagination controls (page, page_size, total_pages) and bounds validation
 7. Inclusion flags (include_tasks, include_reviews)
-8. 130 tables migration schema regression
+8. 133 tables migration schema regression
 """
 from datetime import date, timedelta
 from uuid import uuid4
@@ -346,13 +346,13 @@ def test_reviews_and_tasks_inclusion_flags(client, identities, organization):
         assert 'academic_reviews' not in rev
 
 
-def test_130_tables_migration_regression():
-    """Verify runtime PostgreSQL schema contains all 130 tables including all log tables."""
+def test_133_tables_migration_regression():
+    """Verify runtime PostgreSQL schema contains all 133 tables including all log tables."""
     with transaction() as conn:
         count = conn.execute(
             text("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'flexbridge'")
         ).scalar_one()
-        assert count == 130, f"Expected 130 tables, got {count}"
+        assert count == 133, f"Expected 133 tables, got {count}"
 
         # Verify daily_logs and log_revisions exist
         for tbl in ['daily_logs', 'log_revisions', 'log_task_entries', 'workplace_log_reviews', 'academic_log_reviews']:

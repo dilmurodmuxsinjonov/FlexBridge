@@ -32,10 +32,15 @@ export default function AboutAndHelpPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const selectTab = (tab: HelpDocSlug) => {
+    if (tab === activeTab) return;
     setIsLoading(true);
     setErrorMessage(null);
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    let isMounted = true;
 
     fetchPublicHelp(activeTab)
       .then((data) => {
@@ -83,7 +88,7 @@ export default function AboutAndHelpPage() {
         {/* Document Selector Tabs */}
         <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto text-xs">
           <button
-            onClick={() => setActiveTab("onboarding")}
+            onClick={() => selectTab("onboarding")}
             className={`px-3.5 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "onboarding"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -95,7 +100,7 @@ export default function AboutAndHelpPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("candidate-guide")}
+            onClick={() => selectTab("candidate-guide")}
             className={`px-3.5 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "candidate-guide"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -107,7 +112,7 @@ export default function AboutAndHelpPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("employer-guide")}
+            onClick={() => selectTab("employer-guide")}
             className={`px-3.5 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "employer-guide"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -119,7 +124,7 @@ export default function AboutAndHelpPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("academic-guide")}
+            onClick={() => selectTab("academic-guide")}
             className={`px-3.5 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "academic-guide"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"
@@ -131,7 +136,7 @@ export default function AboutAndHelpPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("schedule-matching")}
+            onClick={() => selectTab("schedule-matching")}
             className={`px-3.5 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shrink-0 ${
               activeTab === "schedule-matching"
                 ? "bg-white/[0.08] text-white border border-white/[0.12] shadow-sm"

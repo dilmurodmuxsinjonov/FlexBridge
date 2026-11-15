@@ -108,23 +108,29 @@ export default function CandidateKundalikPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
     loadUser();
   }, [loadUser]);
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
       loadPlacements();
     }
   }, [user, loadPlacements]);
 
   useEffect(() => {
     if (selectedPlacement) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch on mount/dependency change; loader resets its loading/error flags
       loadLogs(selectedPlacement.id);
     }
   }, [selectedPlacement, loadLogs]);
 
-  // Synchronize form when selectedDate or logs change
-  useEffect(() => {
+  // Synchronize form when selectedDate or logs change. Adjusted during render
+  // (react.dev "You Might Not Need an Effect") instead of a cascading effect.
+  const [formSyncSource, setFormSyncSource] = useState<{ date: string; logs: DailyLogItem[] } | null>(null);
+  if (formSyncSource === null || formSyncSource.date !== selectedDate || formSyncSource.logs !== logs) {
+    setFormSyncSource({ date: selectedDate, logs });
     const existingLog = logs.find((l) => l.local_date === selectedDate);
     if (existingLog) {
       setDayType(existingLog.day_type || "WORKED");
@@ -139,7 +145,7 @@ export default function CandidateKundalikPage() {
       setSummaryText("");
       setTasks([{ title: "Kafedra va amaliyot rejasi bo'yicha vazifalar", minutes: 240 }]);
     }
-  }, [selectedDate, logs]);
+  }
 
   const activeLogForDate = useMemo(() => {
     return logs.find((l) => l.local_date === selectedDate);
@@ -696,7 +702,7 @@ export default function CandidateKundalikPage() {
                         totalCalculatedMinutes > 480 ? "text-red-400 font-bold" : "text-white"
                       }`}
                     >
-                      {totalCalculatedMinutes} daqiqa ({(totalCalculatedMinutes / 60).toFixed(1)} soat) / 480 daq me'yor
+                      {totalCalculatedMinutes} daqiqa ({(totalCalculatedMinutes / 60).toFixed(1)} soat) / 480 daq me&apos;yor
                     </span>
                   </div>
                 </div>
@@ -735,7 +741,7 @@ export default function CandidateKundalikPage() {
               {(activeLogForDate?.status === "SUBMITTED" || activeLogForDate?.status === "REVIEWED") && (
                 <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl flex items-center gap-2 text-xs text-blue-300">
                   <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  Ushbu kundalik allaqachon tekshiruvga topshirilgan. O'zgarmaslik (immutability) qoidasiga ko'ra tahrirlash cheklangan.
+                  Ushbu kundalik allaqachon tekshiruvga topshirilgan. O&apos;zgarmaslik (immutability) qoidasiga ko&apos;ra tahrirlash cheklangan.
                 </div>
               )}
             </div>
@@ -761,7 +767,7 @@ export default function CandidateKundalikPage() {
                     </div>
                     {activeLogForDate.workplace_reviews[0].comment && (
                       <p className="text-xs text-zinc-400 mt-1 italic">
-                        "{activeLogForDate.workplace_reviews[0].comment}"
+                        &quot;{activeLogForDate.workplace_reviews[0].comment}&quot;
                       </p>
                     )}
                   </div>
@@ -774,7 +780,7 @@ export default function CandidateKundalikPage() {
                 {activeLogForDate.academic_reviews && activeLogForDate.academic_reviews.length > 0 ? (
                   <div className="p-3.5 bg-[#09090b] border border-white/5 rounded-xl">
                     <div className="text-xs font-medium text-zinc-300 flex items-center justify-between mb-1">
-                      <span>Universitet o'qituvchisi taqrizi:</span>
+                      <span>Universitet o&apos;qituvchisi taqrizi:</span>
                       <span className="text-[11px] text-zinc-500">
                         {activeLogForDate.academic_reviews[0].decided_at}
                       </span>
@@ -784,13 +790,13 @@ export default function CandidateKundalikPage() {
                     </div>
                     {activeLogForDate.academic_reviews[0].comment && (
                       <p className="text-xs text-zinc-400 mt-1 italic">
-                        "{activeLogForDate.academic_reviews[0].comment}"
+                        &quot;{activeLogForDate.academic_reviews[0].comment}&quot;
                       </p>
                     )}
                   </div>
                 ) : (
                   <div className="text-xs text-zinc-500 italic">
-                    O'qituvchi taqrizi hali kiritilmagan
+                    O&apos;qituvchi taqrizi hali kiritilmagan
                   </div>
                 )}
               </div>

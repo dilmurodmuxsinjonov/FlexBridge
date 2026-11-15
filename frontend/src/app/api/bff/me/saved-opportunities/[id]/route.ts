@@ -61,9 +61,9 @@ export async function DELETE(
       contract_id: "API-038",
       deleted_id: id,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { ok: false, error: "PROXY_ERROR", message: err?.message || "Ichki tarmoq xatoligi" },
+      { ok: false, error: "PROXY_ERROR", message: (err instanceof Error && err.message) || "Ichki tarmoq xatoligi" },
       { status: 502 }
     );
   }

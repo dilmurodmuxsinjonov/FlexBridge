@@ -201,6 +201,32 @@ export default function UniversityPortal() {
     }
   }, []);
 
+  const [instDirectoryProfile, setInstDirectoryProfile] = useState<InstitutionDirectoryProfile>({
+    institution_id: "",
+    status: "VERIFIED",
+    official_name: "",
+    short_name: "",
+    registry_code: "",
+    institution_type: "Davlat oliy ta'lim muassasasi",
+    region: "Toshkent shahri",
+    address: "",
+    rector_name: "",
+    career_center_head: "",
+    contact_phone: "",
+    contact_email: "",
+    website_url: "",
+    faculties: [],
+    programs: [],
+    annual_intern_quota: 500,
+    internship_policy_summary: "",
+    partner_agreements: [],
+    completion_percent: 0,
+  });
+  const [isLoadingInstDirectory, setIsLoadingInstDirectory] = useState(false);
+  const [isSavingInstDirectory, setIsSavingInstDirectory] = useState(false);
+  const [instDirectorySuccessMsg, setInstDirectorySuccessMsg] = useState<string | null>(null);
+  const [instDirectoryErrorMsg, setInstDirectoryErrorMsg] = useState<string | null>(null);
+
   const loadReportsAndAgreements = useCallback(async (targetInstId: string) => {
     if (!targetInstId) return;
     setIsLoadingSupervisions(true);
@@ -238,32 +264,6 @@ export default function UniversityPortal() {
       setIsLoadingInstDirectory(false);
     }
   }, []);
-
-  const [instDirectoryProfile, setInstDirectoryProfile] = useState<InstitutionDirectoryProfile>({
-    institution_id: "",
-    status: "VERIFIED",
-    official_name: "",
-    short_name: "",
-    registry_code: "",
-    institution_type: "Davlat oliy ta'lim muassasasi",
-    region: "Toshkent shahri",
-    address: "",
-    rector_name: "",
-    career_center_head: "",
-    contact_phone: "",
-    contact_email: "",
-    website_url: "",
-    faculties: [],
-    programs: [],
-    annual_intern_quota: 500,
-    internship_policy_summary: "",
-    partner_agreements: [],
-    completion_percent: 0,
-  });
-  const [isLoadingInstDirectory, setIsLoadingInstDirectory] = useState(false);
-  const [isSavingInstDirectory, setIsSavingInstDirectory] = useState(false);
-  const [instDirectorySuccessMsg, setInstDirectorySuccessMsg] = useState<string | null>(null);
-  const [instDirectoryErrorMsg, setInstDirectoryErrorMsg] = useState<string | null>(null);
 
   const [newFacultyName, setNewFacultyName] = useState("");
   const [newFacultyDean, setNewFacultyDean] = useState("");
