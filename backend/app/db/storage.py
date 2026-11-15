@@ -168,7 +168,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision not in ('0020_placement_exports', '0021_candidate_portal_extension', '0022_enrollment_institution_review'):
+        if revision not in ('0020_placement_exports', '0021_candidate_portal_extension', '0022_enrollment_inst_review'):
             raise RuntimeError('Database migrations are not current')
     return engine
 
