@@ -153,16 +153,28 @@ function KirishForm() {
 
       {/* Main Card */}
       <div className="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
-        <Link
-          href="/talaba/kirish"
-          className="flex items-center justify-between gap-3 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] px-3.5 py-2.5 text-xs hover:bg-sky-500/10 transition-colors"
-        >
-          <div>
-            <p className="font-semibold text-sky-300">Talaba / Nomzodmisiz?</p>
-            <p className="text-[11px] text-zinc-400">Faqat talabalar uchun ajratilgan alohida kirish</p>
-          </div>
-          <span className="shrink-0 font-semibold text-sky-400">Talaba kirishi &rarr;</span>
-        </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <Link
+            href="/talaba/kirish"
+            className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] px-3 py-2.5 text-xs hover:bg-sky-500/10 transition-colors"
+          >
+            <div>
+              <p className="font-semibold text-sky-300">Talaba / Nomzod</p>
+              <p className="text-[11px] text-zinc-400">Talaba kirishi</p>
+            </div>
+            <span className="shrink-0 font-semibold text-sky-400">Kirish &rarr;</span>
+          </Link>
+          <Link
+            href="/korxona/kirish"
+            className="flex items-center justify-between gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-3 py-2.5 text-xs hover:bg-emerald-500/10 transition-colors"
+          >
+            <div>
+              <p className="font-semibold text-emerald-300">Korxona / HR</p>
+              <p className="text-[11px] text-zinc-400">Korxona kirishi</p>
+            </div>
+            <span className="shrink-0 font-semibold text-emerald-400">Kirish &rarr;</span>
+          </Link>
+        </div>
 
         {/* Status Alerts */}
         {errorMessage && (
@@ -385,10 +397,13 @@ export default function KirishPage() {
                 </div>
                 <p className="text-zinc-400 text-[11px] mt-0.5">HEMIS jadvali, rezyume, arizalar va ikki tomonlama e-imzoli kundalik.</p>
               </Link>
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3">
-                <p className="font-semibold text-emerald-300">Ish Beruvchi / Korxona</p>
+              <Link
+                href="/korxona/kirish"
+                className="block rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3 hover:border-emerald-400/45 hover:bg-emerald-500/[0.08] transition-colors"
+              >
+                <p className="font-semibold text-emerald-300">Ish Beruvchi / Korxona →</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">Nomzod Kanban, mentorlik tasdig‘i, jamoa va kvota boshqaruvi.</p>
-              </div>
+              </Link>
               <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-3">
                 <p className="font-semibold text-indigo-300">Universitet / OTM</p>
                 <p className="text-zinc-400 text-[11px] mt-0.5">Kafedra taqsimoti, dars jadvali integratsiyasi va yakuniy xulosalar.</p>

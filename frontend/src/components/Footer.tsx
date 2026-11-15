@@ -15,7 +15,7 @@ import {
   Search,
 } from "lucide-react";
 import { fetchAuthMe, type AuthUser } from "@/lib/api";
-import { isStudentOnlyRoles } from "@/lib/roles";
+import { isEmployerOnlyRoles, isStudentOnlyRoles } from "@/lib/roles";
 
 function isStudentOnlyUser(user: AuthUser | null): boolean {
   return Boolean(user && isStudentOnlyRoles(user.roles));
@@ -48,6 +48,11 @@ export default function Footer() {
     Boolean(pathname?.startsWith("/nomzod")) ||
     Boolean(pathname?.startsWith("/talaba")) ||
     isStudentOnlyUser(currentUser);
+  const isEmployerScope =
+    !isStudentScope &&
+    (Boolean(pathname?.startsWith("/employer")) ||
+      Boolean(pathname?.startsWith("/korxona")) ||
+      Boolean(currentUser && isEmployerOnlyRoles(currentUser.roles)));
   return (
     <footer className="mt-auto w-full border-t border-white/[0.08] bg-[#0c0c0e] text-zinc-400 text-xs">
       {/* Main Directory Links */}
@@ -81,93 +86,153 @@ export default function Footer() {
           {/* Column 2: Core Portals */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              {isStudentScope ? "Talaba Bo‘limlari" : "Platforma Portallari"}
+              {isStudentScope
+                ? "Talaba Bo‘limlari"
+                : isEmployerScope
+                  ? "Korxona Bo‘limlari"
+                  : "Platforma Portallari"}
             </h4>
             <ul className="space-y-2 text-[11px]">
-              <li>
-                <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
-                  <Search className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Bo‘sh Ish O‘rinlari Katalogi</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod" className="hover:text-white transition flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Nomzod & Talaba Kabineti</span>
-                </Link>
-              </li>
-              {isStudentScope ? (
-                <li>
-                  <Link
-                    href="/talaba/kirish"
-                    className="hover:text-white transition flex items-center gap-1.5"
-                  >
-                    <Lock className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Talaba Kirishi (Alohida)</span>
-                  </Link>
-                </li>
-              ) : (
+              {isEmployerScope ? (
                 <>
                   <li>
                     <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
-                      <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Ish Beruvchi HR Kabineti</span>
+                      <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Korxona & HR Kabineti</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Universitet Koordinatori</span>
+                    <Link href="/korxona/kirish" className="hover:text-white transition flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Korxona Kirishi (Alohida)</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
-                      <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Platforma Operatori SOC</span>
+                    <Link href="/korxona/royxatdan-otish" className="hover:text-white transition flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Korxona Vakili Ro‘yxatdan O‘tish</span>
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
+                      <Search className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Bosh Sahifa & Katalog</span>
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link href="/" className="hover:text-white transition flex items-center gap-1.5">
+                      <Search className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Bo‘sh Ish O‘rinlari Katalogi</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/nomzod" className="hover:text-white transition flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Nomzod & Talaba Kabineti</span>
+                    </Link>
+                  </li>
+                  {isStudentScope ? (
+                    <li>
+                      <Link
+                        href="/talaba/kirish"
+                        className="hover:text-white transition flex items-center gap-1.5"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Talaba Kirishi (Alohida)</span>
+                      </Link>
+                    </li>
+                  ) : (
+                    <>
+                      <li>
+                        <Link href="/employer" className="hover:text-white transition flex items-center gap-1.5">
+                          <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>Ish Beruvchi HR Kabineti</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/university" className="hover:text-white transition flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>Universitet Koordinatori</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/operator" className="hover:text-white transition flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>Platforma Operatori SOC</span>
+                        </Link>
+                      </li>
+                    </>
+                  )}
                 </>
               )}
             </ul>
           </div>
 
-          {/* Column 3: Candidate Services */}
+          {/* Column 3: Services */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-              Nomzod Xizmatlari
+              {isEmployerScope ? "Korxona Xizmatlari" : "Nomzod Xizmatlari"}
             </h4>
-            <ul className="space-y-2 text-[11px]">
-              <li>
-                <Link href="/nomzod/arizalar" className="hover:text-white transition">
-                  Arizalarim & Suhbatlar
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod/shartnomalar" className="hover:text-white transition">
-                  Amaliyot Shartnomalari (API-030/050)
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod/kundalik" className="hover:text-white transition">
-                  Kunlik Amaliyot Kundaligi
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod/saqlanganlar" className="hover:text-white transition">
-                  Saqlangan E‘lonlar (Bookmarks)
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod/baholar" className="hover:text-white transition">
-                  Reytinglar & Sharhlar
-                </Link>
-              </li>
-              <li>
-                <Link href="/nomzod/xavfsizlik" className="hover:text-white transition">
-                  Xavfsizlik, 2FA & Sessiyalar
-                </Link>
-              </li>
-            </ul>
+            {isEmployerScope ? (
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <Link href="/employer" className="hover:text-white transition">
+                    Vakansiyalar & Nomzod Kanban
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/employer" className="hover:text-white transition">
+                    Amaliyot Shartnomalari & Mentor E-Imzo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/employer" className="hover:text-white transition">
+                    Korxona Profili, Jamoa & Takliflar
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/employer" className="hover:text-white transition">
+                    Obuna, Kvota & To‘lovlar
+                  </Link>
+                </li>
+              </ul>
+            ) : (
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <Link href="/nomzod/arizalar" className="hover:text-white transition">
+                    Arizalarim & Suhbatlar
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nomzod/shartnomalar" className="hover:text-white transition">
+                    Amaliyot Shartnomalari (API-030/050)
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nomzod/kundalik" className="hover:text-white transition">
+                    Kunlik Amaliyot Kundaligi
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nomzod/saqlanganlar" className="hover:text-white transition">
+                    Saqlangan E‘lonlar (Bookmarks)
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nomzod/baholar" className="hover:text-white transition">
+                    Reytinglar & Sharhlar
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nomzod/xavfsizlik" className="hover:text-white transition">
+                    Xavfsizlik, 2FA & Sessiyalar
+                  </Link>
+                </li>
+              </ul>
+            )}
           </div>
 
           {/* Column 4: Legal & CMS */}

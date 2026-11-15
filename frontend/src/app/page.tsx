@@ -316,22 +316,33 @@ export default function StudentPortal() {
                 </Link>
               </div>
             </div>
-            <Link
-              href="/employer"
-              className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-surface-card px-4 py-3 hover:border-emerald-400/50 hover:bg-emerald-500/[0.06] transition-colors"
-            >
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/20 bg-surface-card px-4 py-3 hover:border-emerald-400/50 hover:bg-emerald-500/[0.06] transition-colors">
               <div>
-                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+                <Link
+                  href="/employer"
+                  className="text-xs font-bold text-white hover:text-emerald-300 transition-colors"
+                >
                   Korxona & HR Markazi
-                </p>
+                </Link>
                 <p className="text-[11px] text-zinc-400 mt-0.5">
                   Vakansiya joylash, Kanban saralash va mentor tasdig‘i
                 </p>
               </div>
-              <span className="shrink-0 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
-                Korxona
-              </span>
-            </Link>
+              <div className="shrink-0 flex items-center gap-1.5">
+                <Link
+                  href="/korxona/kirish"
+                  className="rounded-md border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-colors"
+                >
+                  Korxona kirishi
+                </Link>
+                <Link
+                  href="/employer"
+                  className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-zinc-300 hover:text-white transition-colors"
+                >
+                  Kabinet
+                </Link>
+              </div>
+            </div>
             <Link
               href="/university"
               className="group flex items-center justify-between rounded-xl border border-indigo-500/20 bg-surface-card px-4 py-3 hover:border-indigo-400/50 hover:bg-indigo-500/[0.06] transition-colors"

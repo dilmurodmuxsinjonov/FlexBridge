@@ -37,6 +37,10 @@ export const OPERATOR_ROLE_CODES = [
   "SUPPORT",
 ] as const;
 
+export const EMPLOYER_ROLE_SET = new Set<string>(EMPLOYER_ROLE_CODES);
+export const ACADEMIC_ROLE_SET = new Set<string>(ACADEMIC_ROLE_CODES);
+export const OPERATOR_ROLE_SET = new Set<string>(OPERATOR_ROLE_CODES);
+
 export const NON_STUDENT_ROLE_SET = new Set<string>([
   ...EMPLOYER_ROLE_CODES,
   ...ACADEMIC_ROLE_CODES,
@@ -63,6 +67,18 @@ export function isStudentOnlyRoles(roles?: string[] | null): boolean {
   const upper = normalizeRoles(roles);
   if (!upper.length) return false;
   return upper.includes("CANDIDATE") && !upper.some((role) => NON_STUDENT_ROLE_SET.has(role));
+}
+
+export function isEmployerRoles(roles?: string[] | null): boolean {
+  return normalizeRoles(roles).some((role) => EMPLOYER_ROLE_SET.has(role));
+}
+
+export function isEmployerOnlyRoles(roles?: string[] | null): boolean {
+  const upper = normalizeRoles(roles);
+  return (
+    upper.some((role) => EMPLOYER_ROLE_SET.has(role)) &&
+    !upper.some((role) => ACADEMIC_ROLE_SET.has(role) || OPERATOR_ROLE_SET.has(role))
+  );
 }
 
 export function isRoleAllowedForPortal(roles: string[], portal?: string): boolean {
