@@ -2457,6 +2457,119 @@ export async function fetchOrgVerificationStatus(
   return data as OrgVerificationStatusResponse;
 }
 
+// ---------------------------------------------------------------------------
+// FB-170: University Report Exports, Supervisions & Agreements (API-100, 098, 101)
+// ---------------------------------------------------------------------------
+export interface InstitutionExportSummary {
+  institution_id: string;
+  institution_name: string;
+  registry_code?: string;
+  total_students_enrolled: number;
+  total_supervisions: number;
+  total_active_agreements: number;
+  total_placements: number;
+  placements_by_status: Record<string, number>;
+  total_submitted_logs: number;
+  total_logged_minutes: number;
+  total_logged_hours: number;
+  total_academic_conclusions: number;
+  placements?: Array<Record<string, unknown>>;
+  generated_at: string;
+  disclaimer: string;
+}
+
+export interface InstitutionExportReceipt {
+  contract_id: string;
+  capability: string;
+  export_id: string;
+  institution_id: string;
+  file_id: string;
+  actor_role: string;
+  export_format: "PDF" | "JSON";
+  created_at: string;
+  expires_at: string;
+  download_url: string;
+  disclaimer: string;
+  summary: InstitutionExportSummary;
+  is_idempotent_replay: boolean;
+}
+
+export interface StudentSupervisionItem {
+  id: string;
+  enrollment_id: string;
+  agreement_id: string;
+  purpose: string;
+  legal_basis?: string;
+  status?: string;
+  created_at?: string;
+}
+
+export interface AcademicAgreementItem {
+  id: string;
+  institution_id: string;
+  organization_id: string;
+  status: string;
+  created_at?: string;
+}
+
+export async function generateInstitutionExport(
+  institutionId: string,
+  payload: { format: "PDF" | "JSON"; include_details?: boolean; idempotency_key?: string }
+): Promise<InstitutionExportReceipt> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/exports`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "GENERATE_EXPORT_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as InstitutionExportReceipt;
+}
+
+export async function fetchInstitutionSupervisions(
+  institutionId: string,
+  limit = 50
+): Promise<StudentSupervisionItem[]> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/supervisions?limit=${limit}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_SUPERVISIONS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as StudentSupervisionItem[];
+}
+
+export async function fetchInstitutionAcademicAgreements(
+  institutionId: string,
+  limit = 50
+): Promise<AcademicAgreementItem[]> {
+  const res = await fetch(`/api/bff/university/institutions/${encodeURIComponent(institutionId)}/agreements?limit=${limit}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "FETCH_AGREEMENTS_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return (data.items || []) as AcademicAgreementItem[];
+}
+
 
 
 
