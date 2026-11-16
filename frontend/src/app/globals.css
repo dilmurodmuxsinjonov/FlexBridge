@@ -605,14 +605,17 @@ html:not(.dark) .text-zinc-500:not([data-skeuo-dark="true"] *):not(.skeuo-obsidi
 }
 
 /* Pastel semantic text -> readable tones on light glass */
+html:not(.dark) .text-sky-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-sky-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-sky-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: #0369a1;
 }
+html:not(.dark) .text-emerald-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-emerald-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-emerald-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: #047857;
 }
+html:not(.dark) .text-indigo-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-indigo-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-indigo-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: #4338ca;
@@ -622,6 +625,7 @@ html:not(.dark) .text-amber-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsid
 html:not(.dark) .text-amber-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: #b45309;
 }
+html:not(.dark) .text-rose-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-rose-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
 html:not(.dark) .text-rose-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
   color: #be123c;

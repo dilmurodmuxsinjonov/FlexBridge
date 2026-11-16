@@ -68,6 +68,12 @@ def inbox(limit:int=Query(default=50,ge=1,le=100),actor:ActorContext=Depends(req
     return {'items':service.inbox(actor,limit)}
 
 
+@router.get('/institutions/{inst}/staff-appointments')
+def staff(inst:UUID,actor:ActorContext=Depends(require_actor_context)):
+    """Coordinator: the institution's staff appointments and its current agreement."""
+    return {'contract_id':'API-097-STAFF',**service.staff(actor,str(inst))}
+
+
 @router.post('/institution-appointments/{id}/consent')
 def consent(id:UUID,payload:ConsentInput,actor:ActorContext=Depends(require_actor_context)):
     return service.consent(actor,str(id),expected_revision=payload.expected_revision,decision=payload.decision,

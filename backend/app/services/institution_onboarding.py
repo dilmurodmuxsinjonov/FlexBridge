@@ -397,6 +397,38 @@ class InstitutionOnboardingService:
                 .where(requests.c.target_user_id==actor.user_id).order_by(requests.c.created_at.desc(),appointments.c.id).limit(limit)).mappings()
             return [dict(row) for row in rows]
 
+    def staff(self,actor,institution_id,limit=200):
+        """Coordinator view of the institution's appointments (pending, active,
+        revoked) and the current agreement a staff request must cite."""
+        with transaction() as conn:
+            inst=get_row(conn,'institutions',institution_id)
+            institution_authority(conn,actor,institution_id,'COORDINATOR')
+            requests,cases,appointments,users=(table(n) for n in ('institution_onboarding_requests','verification_cases','institution_appointments','users'))
+            rows=list(conn.execute(select(appointments.c.id,appointments.c.status,appointments.c.valid_from,appointments.c.valid_to,
+                    appointments.c.accepted_at,appointments.c.created_at,requests.c.mode,requests.c.target_user_id,
+                    cases.c.status.label('case_status'),cases.c.decision_reason,cases.c.current_revision,users.c.display_name)
+                .join(requests,requests.c.appointment_id==appointments.c.id).join(cases,cases.c.id==requests.c.case_id)
+                .join(users,users.c.id==requests.c.target_user_id)
+                .where(appointments.c.institution_id==institution_id)
+                .order_by(appointments.c.created_at.desc(),appointments.c.id).limit(limit)).mappings())
+            grants=table('institution_role_grants')
+            active=set()
+            if rows:
+                active={r['appointment_id'] for r in conn.execute(select(grants.c.appointment_id).where(
+                    grants.c.appointment_id.in_([r['id'] for r in rows]),grants.c.revoked_at.is_(None))).mappings()}
+            agreements=table('institution_agreements');today=now().astimezone(TASHKENT).date()
+            agreement=conn.execute(select(agreements.c.id,agreements.c.version,agreements.c.status,agreements.c.valid_from,agreements.c.valid_to)
+                .where(agreements.c.institution_id==institution_id,agreements.c.status=='ACTIVE',agreements.c.valid_from<=today,
+                    (agreements.c.valid_to.is_(None))|(agreements.c.valid_to>=today))
+                .order_by(agreements.c.version.desc()).limit(1)).mappings().first()
+            items=[{'id':r['id'],'display_name':r['display_name'],'mode':r['mode'],
+                'role':'COORDINATOR' if r['mode']=='FIRST_COORDINATOR' else 'TEACHER','is_self':r['target_user_id']==actor.user_id,
+                'status':r['status'],'case_status':r['case_status'],'decision_reason':r['decision_reason'],'revision':r['current_revision'],
+                'valid_from':r['valid_from'],'valid_to':r['valid_to'],'accepted_at':r['accepted_at'],'created_at':r['created_at'],
+                'role_active':r['id'] in active} for r in rows]
+            return {'institution':{'id':inst['id'],'name':inst['name'],'status':inst['status'],'registry_code':inst['registry_code']},
+                'agreement':dict(agreement) if agreement else None,'items':items}
+
     def download_own(self,actor,appointment_id,file_id):
         from app.adapters import storage
         with transaction() as conn:
