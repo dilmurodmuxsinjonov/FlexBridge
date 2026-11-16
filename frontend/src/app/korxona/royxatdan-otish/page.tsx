@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import OrganizationConnectForm from "@/components/employer/OrganizationConnectForm";
 import Link from "next/link";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,6 +45,7 @@ function KorxonaRegistrationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialToken = searchParams.get("token") || "";
+  const [showConnect, setShowConnect] = useState(searchParams.get("ulash") === "1");
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -632,12 +634,29 @@ function KorxonaRegistrationContent() {
             <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold text-zinc-100">
-                  Korxona Taklif Tokenini Faollashtirish
+                  Korxonaga qo‘shilish
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Tashkilot rahbari yoki administrator tomonidan yuborilgan 43 belgili taklif tokenini kiriting.
+                  Rahbaringiz yuborgan taklif havolasi orqali qo‘shiling yoki korxonangizni o‘zingiz ro‘yxatdan o‘tkazing.
                 </p>
               </div>
+              <div className="rounded-2xl skeuo-well p-4 space-y-2 text-sm">
+                <p className="font-semibold text-[var(--fb-ink)]">Korxonangiz hali FlexBridge’da yo‘qmi?</p>
+                <p className="text-[var(--fb-ink-secondary)] leading-relaxed">
+                  Uni ro‘yxatdan o‘tkazing — tasdiqlangach, siz korxonaning asosiy (rahbar) akkauntiga ega bo‘lasiz va xodimlarni o‘zingiz taklif qilasiz.
+                </p>
+                {!showConnect && (
+                  <button type="button" onClick={() => setShowConnect(true)} data-tone="emerald" className="skeuo-btn-tone rounded-xl px-4 py-2 text-xs">
+                    Korxonani ro‘yxatdan o‘tkazish
+                  </button>
+                )}
+              </div>
+              {showConnect && (
+                <div className="rounded-2xl skeuo-card p-4 sm:p-5">
+                  <OrganizationConnectForm />
+                </div>
+              )}
+              <p className="text-xs font-semibold text-[var(--fb-ink-secondary)]">Taklif havolasi yoki tokeni bor bo‘lsa:</p>
 
               <form onSubmit={handleAcceptInvitation} className="space-y-4">
                 <div>

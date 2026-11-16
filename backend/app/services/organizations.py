@@ -424,6 +424,43 @@ class OrganizationService:
                     entity_id=membership_id, metadata={'reason': reason})
             return {'membership_id': membership_id, 'status': 'REVOKED'}
 
+    def team(self, actor, org_id):
+        """Owner view of the organization's people: members with names and roles,
+        pending join requests (with the requested role) and open invitations."""
+        with transaction() as conn:
+            org = get_row(conn, 'organizations', org_id)
+            mfa_authority(conn, actor)
+            org_authority(conn, actor.user_id, org_id, 'OWNER')
+            members, grants, roles, users = (table(n) for n in ('org_memberships', 'org_role_grants', 'role_catalog', 'users'))
+            rows = list(conn.execute(select(members, users.c.display_name).join(users, users.c.id == members.c.user_id)
+                .where(members.c.organization_id == org_id).order_by(members.c.created_at, members.c.id)).mappings())
+            role_rows = conn.execute(select(grants.c.membership_id, roles.c.code).join(roles, roles.c.id == grants.c.role_id)
+                .where(grants.c.membership_id.in_([r['id'] for r in rows] or ['00000000-0000-0000-0000-000000000000']),
+                       grants.c.revoked_at.is_(None), roles.c.scope_kind == 'ORG')).mappings()
+            active_roles = {}
+            for r in role_rows:
+                active_roles.setdefault(r['membership_id'], []).append(r['code'])
+            role_codes = {r['id']: r['code'] for r in conn.execute(select(roles.c.id, roles.c.code).where(roles.c.scope_kind == 'ORG')).mappings()}
+            people, requests = [], []
+            for r in rows:
+                item = {'membership_id': r['id'], 'display_name': r['display_name'], 'status': r['status'],
+                        'roles': sorted(active_roles.get(r['id'], [])), 'is_self': r['user_id'] == actor.user_id,
+                        'created_at': r['created_at'], 'accepted_at': r['accepted_at'], 'revoked_at': r['revoked_at']}
+                if r['status'] == 'PENDING_APPROVAL' and not r['revoked_at']:
+                    request = load_domain_record('membership_requests', r['id']) or {}
+                    item['requested_role'] = role_codes.get(request.get('role_id'))
+                    item['self_join'] = request.get('origin') == 'SELF_JOIN'
+                    requests.append(item)
+                else:
+                    people.append(item)
+            inv = table('org_invitations')
+            invitations = [{'id': r['id'], 'role_code': role_codes.get(r['role_id']), 'channel': r['channel'],
+                            'created_at': r['created_at'], 'expires_at': r['expires_at']}
+                           for r in conn.execute(select(inv).where(inv.c.organization_id == org_id, inv.c.accepted_at.is_(None),
+                               inv.c.revoked_at.is_(None), inv.c.expires_at > now()).order_by(inv.c.created_at.desc()).limit(50)).mappings()]
+            return {'organization': {key: org[key] for key in ('id', 'public_name', 'legal_name', 'status', 'tax_id', 'region')},
+                    'members': people, 'join_requests': requests, 'invitations': invitations}
+
     def join_detail(self, actor, org_id, membership_id):
         require_mfa(actor)
         with transaction() as conn:

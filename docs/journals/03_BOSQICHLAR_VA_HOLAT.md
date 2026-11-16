@@ -1415,3 +1415,11 @@ Keyingi kichik qadam:
 - **Tekshiruv**: vitest 75/75, lint 0, build OK; Edge Playwright (mock) desktop/mobil - toshish yo'q. IAM.md yangilandi.
 - PR #234 (df5b942) va #236 (1363c75) integration'ga merge qilindi.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-176 | Issue #239 -> Korxonaning markaziy (OWNER) akkaunti va jamoasi
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "korxona markaziy akkaunti ham qilinsin".
+- **Topilma**: backend modeli bor (POST /organizations: asoschi moderator tekshiruvidan keyin OWNER, mavjud korxonaga qo'shilish = PENDING_APPROVAL; takliflar; a'zolikni bekor qilish). Kamchiliklar: korxonani ro'yxatdan o'tkazish UI yo'q edi; taklif tokeni hech kimga yetkazilmasdi (UI "yuborildi" derdi); a'zolar "Foydalanuvchi #id" bo'lib rolsiz ko'rinardi; qo'shilish so'rovlarini tasdiqlash UI yo'q edi.
+- **Backend**: `GET /api/v1/organizations/{org}/team` (faqat MFA OWNER): a'zolar ism + faol rollar, qo'shilish so'rovlari (so'ralgan rol), ochiq takliflar. Test `test_org_team.py` (3).
+- **Frontend**: `/employer` -> "Tashkilot & Jamoa": yangi `OrganizationTeamPanel` (ismlar, o'zbekcha rollar, taklif -> 24 soatlik ulashiladigan havola + nusxalash, so'rovni tasdiqlash/rad etish, xodimni sabab bilan chiqarish, taklifni bekor qilish); eski ro'yxat/forma/modal olib tashlandi. `/korxona/royxatdan-otish` 3-bosqich: "Korxonani ro'yxatdan o'tkazish" (`OrganizationConnectForm`: STIR, nomlar, hudud, sayt, PDF vakolat hujjati - `files/pdf` ORGANIZATION_EVIDENCE, 2FA oldindan tekshiriladi); `?ulash=1` va `?token=` havolalari. BFF: `employer/organization/[org]/team`, `members/[id]/approve`, `invitations/[id]/revoke`, `employer/organizations`.
+- **Tekshiruv**: vitest 79/79, lint 0, build OK; Edge Playwright (mock) jamoa desktop/mobil-dark va ulash formasi - toshish yo'q.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

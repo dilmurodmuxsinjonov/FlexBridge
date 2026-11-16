@@ -81,7 +81,7 @@ function fileToBase64(file: File): Promise<string> {
 
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
-export async function uploadStaffPdf(file: File, purpose: "INSTITUTION_APPOINTMENT" | "INSTITUTION_AGREEMENT") {
+export async function uploadStaffPdf(file: File, purpose: "INSTITUTION_APPOINTMENT" | "INSTITUTION_AGREEMENT" | "ORGANIZATION_EVIDENCE") {
   if (file.type && file.type !== "application/pdf") throw new StaffApiError("INVALID_PDF_FORMAT", 0);
   if (file.size > MAX_PDF_BYTES) throw new StaffApiError("INVALID_FILE_SIZE", 0);
   const content_base64 = await fileToBase64(file);
