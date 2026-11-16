@@ -134,19 +134,19 @@ function WeekTimeline({ rules, classes = [], today, onEdit }: { rules: Availabil
                     >
                       {d}
                     </span>
-                    <div className="relative h-8 flex-1 rounded-full bg-[var(--fb-well-deep)]/40">
+                    <div className="relative h-8 flex-1 rounded-full bg-[color-mix(in_srgb,var(--fb-well-deep)_40%,transparent)]">
                       {ticks.slice(1, -1).map((t) => (
                         <span
                           key={t}
                           aria-hidden="true"
-                          className="absolute top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-[var(--fb-ink-muted)]/30"
+                          className="absolute top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-[color-mix(in_srgb,var(--fb-ink-muted)_30%,transparent)]"
                           style={{ left: `${((t - from) / span) * 100}%` }}
                         />
                       ))}
                       {dayClasses.map((c) => (
                         <span
                           key={`c${c.start_minute}`}
-                          className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-[var(--fb-ink-muted)]/45"
+                          className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-[color-mix(in_srgb,var(--fb-ink-muted)_45%,transparent)]"
                           style={{ left: `${((c.start_minute - from) / span) * 100}%`, width: `${((c.end_minute - c.start_minute) / span) * 100}%` }}
                           title={`${DAY_NAMES[i]}: dars ${c.start_time}–${c.end_time}, ${c.subject_name}`}
                         />
@@ -180,7 +180,7 @@ function WeekTimeline({ rules, classes = [], today, onEdit }: { rules: Availabil
               </span>
               {classes.length > 0 && (
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-1.5 w-3 rounded-full bg-[var(--fb-ink-muted)]/45" aria-hidden="true" /> Dars
+                  <span className="h-1.5 w-3 rounded-full bg-[color-mix(in_srgb,var(--fb-ink-muted)_45%,transparent)]" aria-hidden="true" /> Dars
                 </span>
               )}
             </div>

@@ -180,7 +180,7 @@ export default function StudentTimetable({ data, now = new Date() }: { data: MyT
                 {days.map((d) => {
                   const s = slots.find((x) => x.weekday === d.n && x.para_number === p);
                   return (
-                    <div key={`${p}-${d.n}`} className={`min-h-[84px] rounded-[18px] ${d.n === today ? "bg-[var(--fb-well-deep)]/50" : ""}`}>
+                    <div key={`${p}-${d.n}`} className={`min-h-[84px] rounded-[18px] ${d.n === today ? "bg-[color-mix(in_srgb,var(--fb-well-deep)_50%,transparent)]" : ""}`}>
                       {s ? <LessonCard s={s} dense /> : <span className="sr-only">Dars yo‘q</span>}
                     </div>
                   );

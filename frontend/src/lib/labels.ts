@@ -74,6 +74,7 @@ const LABELS: Record<string, string> = {
   EXPIRED: "Muddati o‘tgan",
   PUBLISHED: "E’lon qilingan",
   ARCHIVED: "Arxivda",
+  PAUSED: "To‘xtatilgan",
   SUBMITTED: "Yuborildi",
   WITHDRAWN: "Qaytarib olindi",
   PAID: "To‘langan",
