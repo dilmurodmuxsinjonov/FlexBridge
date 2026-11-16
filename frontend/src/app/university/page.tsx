@@ -64,6 +64,8 @@ import {
   createInstitutionPartnerAgreement,
   InstitutionDirectoryProfile,
   fetchInstitutionTimetable,
+  logoutUser,
+  type WorkspaceItem,
   saveInstitutionTimetable,
   fetchInstitutionTimetableTemplate,
   importInstitutionTimetable,
@@ -73,11 +75,10 @@ import {
 import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
-import {
-  SkeuoStatCard,
-  SkeuoVerticalMeter,
-  SkeuoAreaChart,
-} from "@/components/skeuo/SkeuoPrimitives";
+import UniversityOverview, { type UniversityTab } from "@/components/university/UniversityOverview";
+import ProfileCard from "@/components/profile/ProfileCard";
+import { initials } from "@/lib/person";
+import { useAsyncData } from "@/lib/useAsyncData";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   1: { start: "08:30", end: "09:50" },
@@ -125,6 +126,7 @@ export default function UniversityPortal() {
   const [coordinatorQueue, setCoordinatorQueue] = useState<CoordinatorAssignmentQueueItem[]>([]);
   const [teachersList, setTeachersList] = useState<AcademicTeacherOption[]>([]);
   const [institutionId, setInstitutionId] = useState<string | null>(null);
+  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
   const [isLoadingCoord, setIsLoadingCoord] = useState(false);
   const [coordError, setCoordError] = useState<string | null>(null);
 
@@ -602,7 +604,10 @@ export default function UniversityPortal() {
               if (!isMounted) return;
               const coordinated = ws.institutions.find((i) => i.roles.includes("COORDINATOR"));
               const chosen = coordinated ?? ws.institutions[0];
-              if (chosen) setInstitutionId((current) => current ?? chosen.id);
+              if (chosen) {
+                setInstitutionId((current) => current ?? chosen.id);
+                setWorkspace((current) => current ?? chosen);
+              }
             })
             .catch(() => {});
         }
@@ -776,6 +781,18 @@ export default function UniversityPortal() {
     loadAnalytics,
   ]);
 
+  const overviewTimetable = useAsyncData(institutionId ? `uni-timetable:${institutionId}` : null, () =>
+    fetchInstitutionTimetable(institutionId ?? "").catch(() => null)
+  );
+  const isCoordinator = Boolean(
+    workspace?.roles.includes("COORDINATOR") || (currentUser?.roles || []).includes("COORDINATOR")
+  );
+  const handleSignOut = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+  };
+
   // Switch the workspace section and load what it needs (sidebar + mobile dock).
   const switchTab = (tab: "queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents" | "staff") => {
     setActiveTab(tab);
@@ -795,7 +812,8 @@ export default function UniversityPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* ACADEMIC DEANERY HEADER BAR */}
+      {/* ACADEMIC DEANERY HEADER BAR (guests; signed-in staff get the overview) */}
+      {!currentUser && (
       <section className="w-full skeuo-card rounded-[28px] p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
@@ -862,6 +880,7 @@ export default function UniversityPortal() {
           </div>
         </div>
       </section>
+      )}
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
@@ -902,73 +921,33 @@ export default function UniversityPortal() {
         </section>
       )}
 
-      {/* ACADEMIC SKEUOMORPHIC EXECUTIVE STRIP & WORKSPACE SWITCHER */}
-      {currentUser && (() => {
-        const totalTrackable = Math.max(assignments.length + coordinatorQueue.length, 1);
-        const assignedPct = Math.round((assignments.length / totalTrackable) * 100);
-        return (
-          <div className="flex flex-col gap-5">
-            <section className="grid gap-4 sm:grid-cols-3">
-              <SkeuoStatCard
-                title="Kundaliklar navbati"
-                value={queueItems.length}
-                subtitle="Akademik ko‘rik kutilmoqda"
-                icon={FileCheck}
-                tone="orange"
-                active={activeTab === "queue"}
-                onClick={() => switchTab("queue")}
-              />
-              <SkeuoStatCard
-                title="Biriktirilgan amaliyotlar"
-                value={assignments.length}
-                subtitle="O‘qituvchi nazorati ostida"
-                icon={BookOpen}
-                tone="indigo"
-                active={activeTab === "assignments"}
-                onClick={() => switchTab("assignments")}
-              />
-              <SkeuoStatCard
-                title="Kafedra taqsimoti"
-                value={coordinatorQueue.length}
-                subtitle="Rahbar tayinlovi kutilmoqda"
-                icon={Users}
-                tone="sky"
-                active={activeTab === "coordinator"}
-                onClick={() => switchTab("coordinator")}
-              />
-            </section>
-            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-              <SkeuoVerticalMeter
-                title="Biriktiruv qamrovi"
-                percentage={assignedPct}
-                amountLabel={`${assignments.length} / ${assignments.length + coordinatorQueue.length}`}
-                subtitle="Kafedra taqsimot ulushi"
-                tone="indigo"
-              />
-              <SkeuoAreaChart
-                title="Dekanat nazorat dinamikasi"
-                subtitle="Jonli modullar kesimida"
-                accentHex="#6366F1"
-                series={[
-                  { label: "Navbat", value: queueItems.length },
-                  { label: "Amaliyot", value: assignments.length },
-                  { label: "Taqsimot", value: coordinatorQueue.length },
-                  { label: "Shartnoma", value: academicAgreements.length },
-                  { label: "Rahbarlik", value: supervisions.length },
-                ]}
-              />
-            </section>
-
-          </div>
-        );
-      })()}
+      {/* OVERVIEW (bento) */}
+      {currentUser && (
+        <UniversityOverview
+          name={currentUser.display_name}
+          institutionName={workspace?.name ?? timetableData?.institution_name}
+          institutionRegion={workspace?.region}
+          isCoordinator={isCoordinator}
+          queue={queueItems}
+          queueError={queueError}
+          assignments={assignments}
+          coordinatorQueue={coordinatorQueue}
+          teachersCount={teachersList.length}
+          timetable={timetableData ?? overviewTimetable.data ?? null}
+          onOpen={(tab: UniversityTab) => {
+            switchTab(tab);
+            document.getElementById("uni-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        />
+      )}
 
       {/* ACADEMIC WORKSPACE: LEFT REGISTRY RAIL + ACTIVE TAB */}
       {currentUser && (
-        <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
+        <div id="uni-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
+          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
           <aside
             aria-label="Akademik bo‘limlar"
-            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
           >
             <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Amaliyot Nazorati
@@ -1138,174 +1117,129 @@ export default function UniversityPortal() {
               <span>Analitika &amp; Monitoring</span>
             </button>
           </aside>
+          <div className="hidden lg:block">
+            <ProfileCard
+              name={currentUser?.display_name}
+              roleLabel={`${isCoordinator ? "Koordinator" : "O‘qituvchi"}${workspace?.name ? ` · ${workspace.name}` : ""}`}
+              onLogout={handleSignOut}
+            />
+          </div>
+          </div>
 
           <div className="min-w-0 flex flex-col gap-6">
 
       {/* TAB 1: DAILY LOGS REVIEW QUEUE */}
       {currentUser && activeTab === "queue" && (
-        <div className="flex flex-col gap-6">
-          {queueError && (
-            <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-              <span>{queueError}</span>
+        <section className="fb-panel skeuo-card flex flex-col gap-4 p-5 sm:p-6" aria-labelledby="uni-queue-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 id="uni-queue-title" className="text-lg font-semibold text-[var(--fb-ink)]">Kundaliklar navbati</h2>
+              <p className="text-xs text-[var(--fb-ink-muted)]">Eng eskisi yuqorida · har bir kunlik hisobotni ko‘rib, qaror qiling</p>
             </div>
+            <button type="button" onClick={loadQueue} className="fb-icon-btn fb-icon-btn-light" aria-label="Navbatni yangilash">
+              <RefreshCw className={`h-4 w-4 ${isLoadingQueue ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+          {queueError && (
+            <p role="alert" className="flex items-start gap-2 rounded-2xl bg-rose-500/10 px-4 py-3 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {queueError}
+            </p>
           )}
-
           {isLoadingQueue ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-xs">Akademik ko‘rib chiqish navbati yuklanmoqda...</span>
+            <div className="flex items-center justify-center gap-2 py-12 text-xs text-[var(--fb-ink-muted)]">
+              <Loader2 className="h-4 w-4 animate-spin" /> Navbat yuklanmoqda…
             </div>
           ) : queueItems.length === 0 ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-1" />
-              <h3 className="text-sm font-semibold text-white">Ko‘rib chiqish navbati bo‘sh</h3>
-              <p className="text-xs text-zinc-400 max-w-md">
-                Sizga biriktirilgan talabalarning barcha topshirilgan amaliyot kundaliklari to‘liq ko‘rib chiqilgan.
-              </p>
+            <div className="flex flex-col items-center gap-2 rounded-[22px] skeuo-well px-6 py-12 text-center">
+              <CheckCircle2 className="h-7 w-7 text-[var(--fb-ink)]" />
+              <p className="text-sm font-semibold text-[var(--fb-ink)]">Navbat bo‘sh</p>
+              <p className="max-w-md text-xs text-[var(--fb-ink-secondary)]">Talabalaringiz yuborgan barcha kundaliklar ko‘rib chiqilgan.</p>
             </div>
           ) : (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
-              <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
-                <span className="text-xs font-semibold text-white">
-                  Kutilayotgan kundaliklar ({queueItems.length} ta)
-                </span>
-                <button
-                  type="button"
-                  onClick={loadQueue}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Yangilash</span>
-                </button>
-              </div>
-
-              <div className="divide-y divide-white/[0.06]">
-                {queueItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 hover:bg-white/[0.02] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">
-                          {item.student_name || "Talaba"}
-                        </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                          Rev #{item.revision}
-                        </span>
-                        <span className="text-xs text-zinc-400">• Sana: {item.local_date}</span>
-                      </div>
-                      <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-2">
-                        <span>Maqsad: {item.purpose}</span>
-                        <span>•</span>
-                        <span className="font-mono text-[11px]">
-                          Amaliyot ID: {item.placement_id.slice(0, 8)}...
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                        Ko‘rib chiqish kutilmoqda
+            <ul className="flex flex-col gap-2">
+              {[...queueItems]
+                .sort((x, y) => (x.submitted_at || x.local_date).localeCompare(y.submitted_at || y.local_date))
+                .map((item) => (
+                  <li key={item.id} className="fb-file-row flex-wrap sm:flex-nowrap">
+                    <span className="fb-avatar h-9 w-9 shrink-0 text-xs" aria-hidden="true">
+                      {initials(item.student_name)}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-[var(--fb-ink)]">{item.student_name || "Talaba"}</span>
+                      <span className="block text-[11px] text-[var(--fb-ink-muted)] tabular-nums">
+                        {item.local_date} kundaligi{item.revision > 1 ? ` · ${item.revision}-tahrir` : ""}
+                        {item.submitted_at ? ` · yuborilgan ${new Date(item.submitted_at).toLocaleDateString("uz-UZ")}` : ""}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenReview(item)}
-                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
-                      >
-                        <FileCheck className="w-3.5 h-3.5" />
-                        <span>Ko‘rib chiqish</span>
-                      </button>
-                    </div>
-                  </div>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenReview(item)}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-2 text-xs font-semibold"
+                    >
+                      <FileCheck className="h-3.5 w-3.5" /> Ko‘rib chiqish
+                    </button>
+                  </li>
                 ))}
-              </div>
-            </div>
+            </ul>
           )}
-        </div>
+        </section>
       )}
 
       {/* TAB 2: TEACHER ASSIGNED PLACEMENTS & CONCLUSIONS */}
       {currentUser && activeTab === "assignments" && (
-        <div className="flex flex-col gap-6">
-          {assignmentsError && (
-            <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-              <span>{assignmentsError}</span>
+        <section className="fb-panel skeuo-card flex flex-col gap-4 p-5 sm:p-6" aria-labelledby="uni-assign-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 id="uni-assign-title" className="text-lg font-semibold text-[var(--fb-ink)]">Biriktirilgan talabalar</h2>
+              <p className="text-xs text-[var(--fb-ink-muted)]">Amaliyot yakunida har bir talaba uchun akademik xulosa yozasiz</p>
             </div>
+            <button type="button" onClick={loadAssignments} className="fb-icon-btn fb-icon-btn-light" aria-label="Ro‘yxatni yangilash">
+              <RefreshCw className={`h-4 w-4 ${isLoadingAssignments ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+          {assignmentsError && (
+            <p role="alert" className="flex items-start gap-2 rounded-2xl bg-rose-500/10 px-4 py-3 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {assignmentsError}
+            </p>
           )}
-
           {isLoadingAssignments ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-xs">Biriktirilgan amaliyotlar yuklanmoqda...</span>
+            <div className="flex items-center justify-center gap-2 py-12 text-xs text-[var(--fb-ink-muted)]">
+              <Loader2 className="h-4 w-4 animate-spin" /> Yuklanmoqda…
             </div>
           ) : assignments.length === 0 ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
-              <BookOpen className="w-8 h-8 text-zinc-500 mb-1" />
-              <h3 className="text-sm font-semibold text-white">Biriktirilgan amaliyotlar mavjud emas</h3>
-              <p className="text-xs text-zinc-400 max-w-md">
-                Hozirda sizga biriktirilgan talaba amaliyotlari topilmadi. Kafedra koordinatori tomonidan talaba biriktirilishi kutilmoqda.
-              </p>
+            <div className="flex flex-col items-center gap-2 rounded-[22px] skeuo-well px-6 py-12 text-center">
+              <BookOpen className="h-7 w-7 text-[var(--fb-ink-muted)]" />
+              <p className="text-sm font-semibold text-[var(--fb-ink)]">Hali talaba biriktirilmagan</p>
+              <p className="max-w-md text-xs text-[var(--fb-ink-secondary)]">Kafedra koordinatori sizni ilmiy rahbar etib tayinlaganda talabalar shu yerda chiqadi.</p>
             </div>
           ) : (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
-              <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
-                <span className="text-xs font-semibold text-white">
-                  Biriktirilgan amaliyotlar ({assignments.length} ta)
-                </span>
-                <button
-                  type="button"
-                  onClick={loadAssignments}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Yangilash</span>
-                </button>
-              </div>
-
-              <div className="divide-y divide-white/[0.06]">
-                {assignments.map((assignment) => (
-                  <div
-                    key={assignment.id}
-                    className="p-4 hover:bg-white/[0.02] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            <ul className="flex flex-col gap-2">
+              {assignments.map((assignment) => (
+                <li key={assignment.id} className="fb-file-row flex-wrap sm:flex-nowrap">
+                  <span className="fb-avatar h-9 w-9 shrink-0 text-xs" aria-hidden="true">
+                    {initials(assignment.student_name)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-[var(--fb-ink)]">{assignment.student_name || "Talaba"}</span>
+                    <span className="block truncate text-[11px] text-[var(--fb-ink-muted)]">
+                      {[assignment.organization_name, `biriktirilgan ${new Date(assignment.assigned_at).toLocaleDateString("uz-UZ")}`].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${assignment.accepted_at ? "fb-nav-active" : "fb-capsule"}`}>
+                    {assignment.accepted_at ? "Nazoratda" : "Qabul kutmoqda"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenConclusionModal(assignment.placement_id, assignment.id)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-2 text-xs font-semibold"
                   >
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium text-white">
-                          Amaliyot ID: {assignment.placement_id.slice(0, 8)}...
-                        </span>
-                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {assignment.accepted_at ? "Qabul qilingan" : "Biriktirilgan"}
-                        </span>
-                        <span className="text-xs text-zinc-400 font-mono">
-                          Biriktirilgan sana: {new Date(assignment.assigned_at).toLocaleDateString("uz-UZ")}
-                        </span>
-                      </div>
-                      <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-3">
-                        <span>Biriktiruv ID: {assignment.id.slice(0, 8)}...</span>
-                        <span>•</span>
-                        <span>Muassasa ID: {assignment.institution_id.slice(0, 8)}...</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenConclusionModal(assignment.placement_id, assignment.id)}
-                        className="px-3.5 py-2 rounded-xl skeuo-btn-accent text-xs font-semibold text-white flex items-center gap-1.5"
-                      >
-                        <Award className="w-3.5 h-3.5" />
-                        <span>Akademik Xulosa</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <Award className="h-3.5 w-3.5" /> Akademik xulosa
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
-        </div>
+        </section>
       )}
 
       {/* STUDENT-STATUS CONFIRMATION (coordinator, until HEMIS) */}
