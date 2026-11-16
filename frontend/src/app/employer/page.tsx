@@ -1299,18 +1299,18 @@ export default function EmployerPortal() {
           <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
             <aside
               aria-label="Korxona boshqaruv menyusi"
-              className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+              className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
             >
-              <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">
+              <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
                 Rekruting &amp; Qabul
               </div>
               <button
                 type="button"
                 onClick={() => switchMainTab("KANBAN")}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2.5 text-left whitespace-nowrap ${
                   activeMainTab === "KANBAN"
-                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <Users className="w-4 h-4 shrink-0" />
@@ -1324,10 +1324,10 @@ export default function EmployerPortal() {
                     handleSearch();
                   }
                 }}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all text-left whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center justify-between gap-2 text-left whitespace-nowrap ${
                   activeMainTab === "SEARCH_HUB"
-                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <span className="flex items-center gap-2.5">
@@ -1341,7 +1341,7 @@ export default function EmployerPortal() {
                 )}
               </button>
 
-              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[11px] font-medium text-[var(--fb-ink-muted)]">
                 Amaliyot &amp; E-Imzo
               </div>
               <button
@@ -1355,10 +1355,10 @@ export default function EmployerPortal() {
                     loadPlacements();
                   }
                 }}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all text-left whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center justify-between gap-2 text-left whitespace-nowrap ${
                   activeMainTab === "MENTOR_HUB"
-                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <span className="flex items-center gap-2.5">
@@ -1372,7 +1372,7 @@ export default function EmployerPortal() {
                 )}
               </button>
 
-              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[11px] font-medium text-[var(--fb-ink-muted)]">
                 Korxona &amp; Moliya
               </div>
               <button
@@ -1383,10 +1383,10 @@ export default function EmployerPortal() {
                     loadOrgHubData(orgId.trim());
                   }
                 }}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2.5 text-left whitespace-nowrap ${
                   activeMainTab === "ORG_HUB"
-                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <Building className="w-4 h-4 shrink-0" />
@@ -1400,10 +1400,10 @@ export default function EmployerPortal() {
                     loadBillingHubData(orgId.trim());
                   }
                 }}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 border-l-2 transition-all text-left whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2.5 text-left whitespace-nowrap ${
                   activeMainTab === "BILLING_HUB"
-                    ? "border-emerald-400 bg-emerald-500/10 text-emerald-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <CreditCard className="w-4 h-4 shrink-0" />

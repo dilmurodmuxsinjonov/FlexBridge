@@ -393,7 +393,10 @@ export default function Navbar() {
   };
 
   // Guests (including on role-specific sign-in pages) just see the brand.
-  const headerGreeting = currentUser ? `${theme.greetingPrefix}, ${theme.badgeText}` : "FlexBridge";
+  const ownFirstName = currentUser?.display_name?.trim().split(/\s+/)[0];
+  const headerGreeting = currentUser
+    ? `${theme.greetingPrefix}, ${theme.greetingPrefix === "Salom" && ownFirstName ? ownFirstName : theme.badgeText}`
+    : "FlexBridge";
 
   return (
     <>

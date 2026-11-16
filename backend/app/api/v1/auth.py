@@ -50,7 +50,12 @@ def login(payload:LoginRequest,request:HTTPRequest):
 
 @router.get('/auth/me')
 def me(actor:ActorContext=Depends(require_actor_context)):
-    return {'user_id':actor.user_id,'session_id':actor.session_id,'roles':actor.roles}
+    # display_name is the caller's own name, shown on their profile card.
+    from sqlalchemy import select
+    users=table('users')
+    with transaction() as conn:
+        display_name=conn.execute(select(users.c.display_name).where(users.c.id==actor.user_id)).scalar()
+    return {'user_id':actor.user_id,'session_id':actor.session_id,'roles':actor.roles,'display_name':display_name}
 
 @router.delete('/me/sessions/{id}')
 def revoke(id:UUID,actor:ActorContext=Depends(require_actor_context)):

@@ -83,6 +83,8 @@ export interface AuthUser {
   user_id: string;
   session_id: string;
   roles: string[];
+  /** The user's own name (profile card); absent on older backends. */
+  display_name?: string | null;
 }
 
 export type LoginResult =

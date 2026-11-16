@@ -1433,7 +1433,7 @@ Keyingi kichik qadam:
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-16 | LOG-178 | Issue #243 -> Sahifalar ko'rigi: topilgan xatolarni tuzatish
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "o'zing ko'rib chiq va xatolarni topib to'g'irla" (49 sahifa x 2 ko'rinish galereyasi asosida).
+- **Holat**: **MERGED** (#244, c969d76). Foydalanuvchi: "o'zing ko'rib chiq va xatolarni topib to'g'irla" (49 sahifa x 2 ko'rinish galereyasi asosida).
 - **Topildi va tuzatildi**:
   - Xato matnlari: 50 BFF marshruti backend `detail` obyektini `error` sifatida uzatadi, sahifalar "[object Object]" yoki "INSTITUTIONS_NOT_FOUND" kabi kodni ko'rsatardi. Yangi `lib/errorText.ts` (ma'lum kodlar o'zbekcha, noma'lum kodlar umumiy jumla), `api.ts` dagi 136 joy va 3 ro'yxatdan o'tish sahifasi unga o'tkazildi.
   - Enum yorliqlari: yangi `lib/labels.ts` (`enumLabel`): INTERNSHIP_AGREEMENT/HYBRID (e'lon kartasidan toshib chiqardi), OWNER, INTERMEDIATE, UNAVAILABLE, BEPUL_KIRISH, murojaat ustuvorligi/turi/holati; "Self-declared/Verified", "MANUAL ENTRY", "Matching Engine", "Assurance", "/nomzod" kabi yo'l belgilar o'zbekchaga.
@@ -1442,4 +1442,15 @@ Keyingi kichik qadam:
   - Kundalik: faol amaliyot bo'lmasa kiritish formasi ko'rsatilmaydi; arizalar/shartnomalar/kundalikdagi takroriy "Faol hisob / ID / Chiqish" bloki olib tashlandi (Navbar'da bor).
   - Baholar: backend izohidan "AC-023" olib tashlandi, og'ir kulrang blok yengil quduqqa.
 - **Tekshiruv**: eslint 0, tsc 0, vitest 90/90 (+5), next build OK; Edge bilan 15 ommaviy sahifa qayta suratga olindi (markdown, enum, tugma matni, placeholder tasdiqlandi). Kabinet sahifalarini qayta suratga olish uchun yangi staging sessiya kerak edi; seed skripti IAM shifrlash kalitini talab qiladi (.env) - unga tegilmadi, kabinet sahifalari CI va kod ko'rigi bilan tekshirildi.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-179 | Issue #245 -> Dizayn prototipi: foydalanuvchi profili va elementlar
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi namuna rasm yubordi (monoxrom bento dashboard: katta sarlavha, avatarli pill-taymlayn, qora kartalar, chap pastda profil kartasi) va "profil ko'rinishi hamda element qismlariga chuqurroq yondash" dedi.
+- **Yechim**:
+  - `globals.css` "Mono bento" qatlami: `fb-display` (katta sarlavha), `fb-ink-card` (qora karta, dark rejimda ham), `fb-nav-item` (faol bo'lim - qora pill, dark rejimda oq pill), `fb-capsule`, `fb-bar` (taymlayn), `fb-seg`, `fb-avatar` (bosh harflar), `fb-progress`, `fb-file-row`, `fb-icon-btn`, dekorativ `fb-ring` (reduced-motion'da to'xtaydi).
+  - `components/profile/ProfileOverview.tsx`: "Salom, {ism}" + "Mening profilim"; haftalik bo'sh vaqt taymlayni (hafta kunlari x soatlar, bugungi kun ajratilgan, haftalik soat jami); profil tayyorligi % (5 bo'lim, har biri tegishli tabni ochadi); qora "Rezyume" kartasi (PDF yuklab olish, tahrirlash); "Hujjatlarim" (sertifikat + portfolio, "+"); arizalar statistikasi (jami / ko'rib chiqilmoqda / suhbat / taklif, yuklanmasa xabar - nol emas); qora panel: ko'nikmalar (tasdiqlangan ulushi), tajriba (oylar), talabalik (ariza -> tekshiruv -> tasdiq). Faqat haqiqiy ma'lumot, soxta grafik yo'q.
+  - `components/profile/ProfileCard.tsx`: sidebar pastida avatar, ism, rol, ochiladigan hisob menyusi (Xavfsizlik, Chiqish; aria-expanded).
+  - Nomzod sidebar'i oq panel + qora faol pill; korxona va universitet yon menyulari ham shu elementga o'tkazildi. Navbar salomlashuvi ism bilan.
+  - Backend `/auth/me` endi foydalanuvchining o'z `display_name`ini qaytaradi (+ test `test_auth_me_profile.py`), BFF uzatadi.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 100/100 (+10), next build OK; Edge'da nomzod API'lari mock qilingan holda desktop yorug'/qorong'i va mobil suratlar (konsol xatosi yo'q, gorizontal toshish yo'q). Korxona/universitet menyulari suratga olinmadi (sessiya kerak), lint/build bilan tekshirildi. Backend testi faqat CI'da.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

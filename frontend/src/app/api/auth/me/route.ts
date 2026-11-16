@@ -22,6 +22,7 @@ export async function GET() {
         user_id: data.user_id,
         session_id: data.session_id,
         roles: data.roles || session.roles,
+        display_name: typeof data.display_name === "string" ? data.display_name : null,
       },
     });
   } catch {
