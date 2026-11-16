@@ -150,6 +150,20 @@ Kirish sahifalari va AuthModal'dagi "Parolni unutdingizmi?" shu sahifaga olib bo
 `POST /api/bff/auth/recovery/{id}/complete`; tokenlar faqat brauzer xotirasida turadi, URL yoki
 cookie'ga yozilmaydi. Ikkinchi omilsiz foydalanuvchi PENDING_REVIEW raqamini oladi; uni ko'rib
 chiqadigan operator navbati hali yo'q (OPS qarori kerak).
+
+Universitet tasdig'i (2026-11-16, Issue #237, foydalanuvchi qarori): ikkinchi omili yo'q talaba uchun
+mustaqil omil sifatida o'z universitetining koordinatori tasdig'i qabul qilinadi.
+- `GET /institutions/{inst}/recovery-requests`: faqat MFA sessiyali joriy COORDINATOR; faqat shu
+  muassasada joriy VERIFIED enrollment'i bor talabalarning 7 kunlik PENDING_REVIEW so'rovlari
+  (kontaktlar niqoblangan). O'z so'rovini ko'ra/hal qila olmaydi.
+- `POST /institutions/{inst}/recovery-requests/{id}/decide`: APPROVE/REJECT + sabab (>=15), audit
+  (`ACCOUNT_RECOVERY_{APPROVED|REJECTED}_BY_INSTITUTION`, institution_id, sabab). Begona/hal qilingan/
+  eskirgan so'rov uchun bir xil 404.
+- Tasdiq parolni o'zgartirmaydi: talaba 72 soat ichida **xuddi shu kontakt** bilan yangi RECOVERY OTP
+  isbotlab `POST /auth/recovery` yuborsa, so'rov READY_TO_RESET bo'ladi; tasdiq CONSUMED (bir martalik).
+  Keyin odatdagi complete: barcha sessiyalar va MFA omillari bekor qilinadi.
+- Qoldiq xavf: koordinator + SIM almashtirish birgalikda hisobni ochishi mumkin; shuning uchun
+  muassasa doirasi, MFA, sabab va audit majburiy. DB-darajadagi guard hali yo'q (ilova tekshiruvi).
 Telefon qayta boshqa hisobga bog'lansa, avvalgi kontaktga chiqarilgan proof/reset token
 eski shaxsning hisobini ochish uchun ishlamaydi.
 

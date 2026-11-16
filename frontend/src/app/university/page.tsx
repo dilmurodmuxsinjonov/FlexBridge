@@ -3,6 +3,7 @@
 import Link from "next/link";
 import EnrollmentRequestsPanel from "@/components/EnrollmentRequestsPanel";
 import UniversityStaffPanel from "@/components/university/UniversityStaffPanel";
+import RecoveryRequestsPanel from "@/components/university/RecoveryRequestsPanel";
 import { useEffect, useState, useCallback } from "react";
 import {
   CheckCircle2,
@@ -1308,7 +1309,12 @@ export default function UniversityPortal() {
       )}
 
       {/* STUDENT-STATUS CONFIRMATION (coordinator, until HEMIS) */}
-      {currentUser && activeTab === "enrollments" && <EnrollmentRequestsPanel institutionId={institutionId} />}
+      {currentUser && activeTab === "enrollments" && (
+        <div className="flex flex-col gap-6">
+          <EnrollmentRequestsPanel institutionId={institutionId} />
+          <RecoveryRequestsPanel institutionId={institutionId} />
+        </div>
+      )}
       {currentUser && activeTab === "staff" && <UniversityStaffPanel institutionId={institutionId} />}
 
       {/* TAB 3: COORDINATOR ASSIGNMENT QUEUE & TEACHER NOMINATION */}

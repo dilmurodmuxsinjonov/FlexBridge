@@ -1407,3 +1407,11 @@ Keyingi kichik qadam:
 - **Frontend**: `/university` -> "Xodimlar" (koordinator): ro'yxat, xodim qo'shish (telefon/pochta + buyruq PDF + sanalar + huquqiy asos), bekor qilish (sabab bilan). `/universitet/royxatdan-otish` 3-bosqich: "Universitetni ulash" arizasi (nom, hudud, STIR, buyruq PDF, shartnoma PDF; 2FA/kontakt oldindan tekshiriladi). BFF: `files/pdf`, `university/institutions/[inst]/staff`, `university/appointments` POST, `appointments/[id]/revoke` (`lib/server/proxy.ts`). O'zbekcha xato xabarlari (`lib/universityStaff.ts`).
 - **Tekshiruv**: vitest 67/67 (+5), lint 0, build OK; Edge Playwright (mock): xodimlar paneli desktop/mobil-dark, ulash formasi; 56 sahifa regressiya - toshish yo'q.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-175 | Issue #237 -> Talaba parolini universitet koordinatori tasdiqlashi
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi qarori: ikkinchi omili yo'q talabalar uchun universitet koordinatori tasdig'i ("navbatma navbat bajar").
+- **Backend**: `identity.request_recovery` - shu kontaktdan 72 soat ichidagi APPROVED so'rov mustaqil omil (bir martalik, CONSUMED, audit). `services/institution_recovery.py`: navbat (joriy VERIFIED talabalar, niqoblangan kontaktlar) va qaror (MFA koordinator, o'zi emas, sabab). Marshrutlar `/api/v1/institutions/{inst}/recovery-requests[/{id}/decide]`. Test: `test_institution_recovery.py` (4: to'liq oqim, boshqa OTM/o'qituvchi/talaba rad, kontaktga bog'liqlik + 72 soat, sabab).
+- **Frontend**: `/university` -> "Talabalikni tasdiqlash" ichida "Parolni tiklash so'rovlari" paneli; `/parolni-tiklash` matnlari (koordinatorga murojaat, "Tasdiqlandi" holati). BFF `university/institutions/[inst]/recovery-requests*`.
+- **Tekshiruv**: vitest 75/75, lint 0, build OK; Edge Playwright (mock) desktop/mobil - toshish yo'q. IAM.md yangilandi.
+- PR #234 (df5b942) va #236 (1363c75) integration'ga merge qilindi.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

@@ -64,6 +64,17 @@ describe("PasswordRecovery", () => {
     expect(rec.requestRecovery).toHaveBeenCalledWith("v".repeat(40), {});
   });
 
+  it("tells the student when the university approved and how to finish", async () => {
+    await reachFactorStep();
+    rec.requestRecovery.mockResolvedValue({ recovery_id: "r-3", recovery_token: "s", status: "PENDING_REVIEW", expires_in: 1800 });
+    fireEvent.click(screen.getByRole("button", { name: /Qo‘lda tekshiruvga yuborish/ }));
+    expect(await screen.findByText(/universitetingiz koordinatoriga/)).toBeInTheDocument();
+    rec.fetchRecoveryStatus.mockResolvedValue({ recovery_id: "r-3", status: "APPROVED" });
+    fireEvent.click(screen.getByRole("button", { name: /Holatni yangilash/ }));
+    expect(await screen.findByText(/Shaxsingiz tasdiqlandi/)).toBeInTheDocument();
+    expect(rec.fetchRecoveryStatus).toHaveBeenCalledWith("r-3", "s");
+  });
+
   it("shows a readable message for a wrong code", async () => {
     rec.startRecovery.mockResolvedValue({ challenge_id: "c-1", delivery_method: "EMAIL", expires_in: 300, resend_after: 60 });
     rec.verifyRecoveryCode.mockRejectedValue(new RecoveryError("INVALID_OR_EXPIRED_CODE", 401));
