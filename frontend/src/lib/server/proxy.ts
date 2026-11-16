@@ -22,7 +22,7 @@ export function backendErrorCode(status: number, data: unknown, fallback: string
 export async function proxyAuthed(
   request: Request,
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown; headers?: Record<string, string>; fallbackError: string }
+  init: { method: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; headers?: Record<string, string>; fallbackError: string }
 ): Promise<NextResponse> {
   if (init.method !== "GET" && !verifyCsrfOrigin(request)) {
     return NextResponse.json({ ok: false, error: "CSRF_ORIGIN_MISMATCH" }, { status: 403 });

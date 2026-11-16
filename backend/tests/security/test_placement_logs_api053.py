@@ -352,7 +352,7 @@ def test_133_tables_migration_regression():
         count = conn.execute(
             text("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'flexbridge'")
         ).scalar_one()
-        assert count == 133, f"Expected 133 tables, got {count}"
+        assert count == 138, f"Expected 138 tables, got {count}"
 
         # Verify daily_logs and log_revisions exist
         for tbl in ['daily_logs', 'log_revisions', 'log_task_entries', 'workplace_log_reviews', 'academic_log_reviews']:
