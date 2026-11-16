@@ -6,7 +6,7 @@ import type { OperatorAuditEventItem, OperatorSupportTicketItem, OperatorVerific
 import { enumLabel } from "@/lib/labels";
 import { firstName, uzDate } from "@/lib/person";
 
-export type OperatorTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
+export type OperatorTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
 export interface OperatorOverviewProps {
   name?: string | null;
@@ -16,6 +16,8 @@ export interface OperatorOverviewProps {
   tickets: OperatorSupportTicketItem[];
   auditEvents: OperatorAuditEventItem[];
   discrepancies: number | null;
+  /** Draft vacancies waiting for a moderator (null when the role cannot moderate). */
+  moderationCount?: number | null;
   onOpen: (tab: OperatorTab) => void;
   /** Injected for tests; defaults to now. */
   today?: Date;
@@ -28,12 +30,13 @@ const URGENT = new Set(["URGENT", "CRITICAL", "HIGH"]);
 /** "ORG_VERIFICATION_DECIDED" -> "Org verification decided" (operators read these; no raw codes). */
 const actionText = (a: string) => enumLabel(a);
 
-export function attentionItems(p: Pick<OperatorOverviewProps, "cases" | "tickets" | "discrepancies" | "visible">) {
+export function attentionItems(p: Pick<OperatorOverviewProps, "cases" | "tickets" | "discrepancies" | "visible" | "moderationCount">) {
   const items: Array<{ key: string; text: string; tab: OperatorTab; count: number }> = [];
   const urgent = p.tickets.filter((t) => !CLOSED_TICKET.has(t.status) && URGENT.has(t.priority)).length;
   const overdueCases = p.cases.filter((c) => OPEN_CASE.has(c.status || "") && c.due_at && new Date(c.due_at) < new Date()).length;
   if (p.visible.includes("SUPPORT_OPS") && urgent) items.push({ key: "urgent", text: "muhim murojaat (shoshilinch / yuqori)", tab: "SUPPORT_OPS", count: urgent });
   if (p.visible.includes("VERIFICATION") && overdueCases) items.push({ key: "overdue", text: "tekshiruv muddati o‘tgan", tab: "VERIFICATION", count: overdueCases });
+  if (p.visible.includes("MODERATION") && p.moderationCount) items.push({ key: "moderation", text: "e’lon moderatsiyani kutmoqda", tab: "MODERATION", count: p.moderationCount });
   if (p.visible.includes("FINANCE") && p.discrepancies) items.push({ key: "recon", text: "to‘lovda nomuvofiqlik", tab: "FINANCE", count: p.discrepancies });
   return items;
 }

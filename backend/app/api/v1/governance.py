@@ -118,6 +118,13 @@ def update_academic_assignment_endpoint(
     return internship_log_service.revoke_academic_assignment(actor,assignment_id)
 
 
+@router.get("/moderation/opportunities")
+def moderation_queue_endpoint(limit: int = 50, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
+    """Draft vacancies awaiting moderation (MODERATOR only)."""
+    require_platform(actor,'MODERATOR')
+    return governance_service.moderation_queue(actor=actor,limit=limit)
+
+
 @router.post("/moderation/actions", status_code=201)
 def create_moderation_action_endpoint(payload: ModerationActionRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     require_platform(actor,'MODERATOR')

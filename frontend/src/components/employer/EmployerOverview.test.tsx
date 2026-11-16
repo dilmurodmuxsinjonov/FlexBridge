@@ -71,7 +71,7 @@ describe("EmployerOverview", () => {
     const onCreate = vi.fn();
     render(<EmployerOverview {...props({ onCreate })} />);
     const list = screen.getByRole("heading", { name: "E’lonlarim" }).closest("section")!;
-    expect(within(list).getByText("Qoralama · 0 ariza")).toBeInTheDocument();
+    expect(within(list).getByText("Moderatsiyada · 0 ariza")).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: /Yangi e’lon/ })[0]);
     expect(onCreate).toHaveBeenCalled();
   });

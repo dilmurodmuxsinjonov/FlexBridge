@@ -34,6 +34,8 @@ const MESSAGES: Record<string, string> = {
   INVALID_FILE_SIZE: "Fayl hajmi juda katta.",
   ENTITLEMENT_REQUIRED: "Bu amal uchun tarif yoki kvota kerak.",
   QUOTA_EXCEEDED: "Kvota tugagan. Tarifni yangilang.",
+  MODERATION_APPROVAL_REQUIRED: "E’lon hali moderatordan o‘tmagan. Tasdiqlangach e’lon qilishingiz mumkin.",
+  ACTIVE_ENTITLEMENT_REQUIRED: "E’lon qilish uchun faol tarif kerak — «To‘lovlar va tariflar» bo‘limidan tanlang.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

@@ -35,7 +35,14 @@ export function funnelStages(m: EmployerDashboardMetrics["metrics"]) {
   ];
 }
 
-const STATUS_ORDER = ["PUBLISHED", "DRAFT", "PAUSED", "CLOSED"] as const;
+const STATUS_ORDER = ["PUBLISHED", "APPROVED", "DRAFT", "PAUSED", "CLOSED"] as const;
+
+/** Vacancy lifecycle in the words an employer needs: draft -> moderation -> approved -> published. */
+const VACANCY_STATUS: Record<string, string> = {
+  DRAFT: "Moderatsiyada",
+  APPROVED: "Tasdiqlandi — e’lon qilish mumkin",
+  REJECTED: "Moderator rad etdi",
+};
 
 function FunnelCard({ metrics, onOpen }: EmployerOverviewProps) {
   if (!metrics) return null;
@@ -176,7 +183,7 @@ function OpportunityList({ opportunities, onOpenOpportunity, onCreate }: Employe
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-xs font-semibold text-[var(--fb-ink)]">{o.title}</span>
-                  <span className="block truncate text-[11px] text-[var(--fb-ink-muted)]">{enumLabel(o.status)} · {o.applications_count} ariza</span>
+                  <span className="block truncate text-[11px] text-[var(--fb-ink-muted)]">{VACANCY_STATUS[o.status] || enumLabel(o.status)} · {o.applications_count} ariza</span>
                 </span>
               </button>
             </li>
