@@ -1489,7 +1489,7 @@ Keyingi kichik qadam:
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-16 | LOG-184 | Issue #255 -> Qolib ketgan va tushunarsiz qismlar
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "qolib ketgan qismlarni aniqla, tushunarsiz bo'lib qolganlarini ham, qo'shimcha kerak bo'lsa kirit".
+- **Holat**: **MERGED** (#256, 96dab70). Foydalanuvchi: "qolib ketgan qismlarni aniqla, tushunarsiz bo'lib qolganlarini ham, qo'shimcha kerak bo'lsa kirit".
 - **Aniqlash usuli**: har bir sahifada eski klasslar, xom ID (`.slice(0, 8)`), jargon soni bo'yicha reyting + nomzod sahifalarini mock bilan suratga olish.
 - **Topilgan xatolar**: (1) universitet "Yig'ma hisobotlar"dagi kelishuv kartasi `agr.organization_id.slice` ni chaqirardi, backend esa bu maydonni qaytarmaydi -> kelishuv bo'lsa tab yiqilardi; tur va karta haqiqiy maydonlarga (versiya, maqsadlar, muddat) moslandi, rahbarlik kartasi talaba ismi va tasdiq sanasi bilan. (2) Baholar sahifasi javobda ro'yxat bo'lmasa yiqilardi; arizalar statistikasi maydon bo'lmasa "NaN" ko'rsatardi -> API'da normallashtirildi. (3) Xodim tayinloviga rozilik beruvchi qaysi universitet so'rayotganini ko'rmasdi (faqat ID) -> backend inbox'ga `institution_name` qo'shildi (+ test).
 - **Xom ID'lar o'rniga ma'no**: korxona kanbanida nomzod sarlavhasi (ariza snapshot'i DB-042 bo'yicha ataylab ismsiz - ism qo'shilmadi), mentorlik/amaliyot kartalari sana va holat bilan; nomzod shartnomalari - vakansiya, korxona, "shartlar kelishilgan"; saqlanganlar - korxona nomi (backend'ga `organization_name` qo'shildi); baholar va talabalikdagi ID'lar olib tashlandi; sertifikatdagi "File UUID" maydoni olib tashlandi; e'londa kirgan hisob ismi; universitet navbati, talabalar jadvali, hujjatlar tanlovi. Buyurtma/murojaat/kvitansiya raqamlari va operator paneli ID'lari ataylab qoldirildi.
@@ -1497,4 +1497,11 @@ Keyingi kichik qadam:
 - **Vizual**: eski ko'k/indigo/sky tugmalar (131+ joy) CSS orqali qora pill'ga, eski kartalar 20px burchakka.
 - **Qo'shimcha**: nomzod sidebar'iga "Xabarlar".
 - **Tekshiruv**: eslint 0, tsc 0, vitest 128/128, next build OK; Edge'da 7 nomzod sahifasi va korxona paneli mock bilan (konsol xatosi yo'q, toshish yo'q).
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-185 | Issue #257 -> Universitet ichki tablari va operator paneli
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi LOG-184 hisobotidagi "ichki tablarni qayta ishlash" taklifiga: "ha bajar".
+- **Universitet**: "Kafedra taqsimoti" -> "Ilmiy rahbar tayinlash" mono ro'yxat (avatar, holat, qora tugma, tushuntirish); dars jadvali: hafta kuni nomi backend bermasa raqamdan, CSV yuklash yordami ingliz ustun nomlari o'rniga oddiy tilda, "REPLACE/APPEND" o'rniga o'zbekcha; sarlavhalar: Hisobotlar, Platforma kelishuvlari, Universitet ma'lumotlari, Davomat, Haftalik soatlar, Natijalar va baholar, Dars jadvali; haftalik trend ustunlari pill (oxirgi hafta ajratilgan); kelishuv/rahbarlik maqsadlari o'zbekcha (ACADEMIC_VIEW va boshq.).
+- **Operator paneli**: `components/operator/OperatorOverview.tsx` - "Salom, {ism}" + "Operator paneli", rollar o'zbekcha; faqat rol ochishi mumkin bo'lgan modullar: tekshiruv navbati (ochiq soni, progress, birinchi 3 ta), murojaatlar muhimligi bo'yicha (pill), qora "Diqqat talab qiladi" (muhim murojaatlar, muddati o'tgan tekshiruvlar, to'lov nomuvofiqligi), so'nggi hodisalar, qora panel (audit, moliya, favqulodda ruxsat). Eski SkeuoStatCard/VerticalMeter/LiveFeed (feed'da xom harakat kodi va xodim ID) olib tashlandi; sidebar pill + ProfileCard; mehmon uchun sarlavha. Audit jadvalida harakat va obyekt turi o'qiladigan (asl kod tooltip'da); ID/kalit/xesh ustunlari forensika uchun qoldirildi.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 133/133 (+5), next build OK; Edge'da mock bilan universitet 6 ta tab va operator paneli (desktop yorug'/qorong'i, mobil) - konsol xatosi yo'q, toshish yo'q.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

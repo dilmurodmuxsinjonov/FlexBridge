@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import {
   fetchAuthMe,
+  logoutUser,
   fetchOperatorAuditEvents,
   fetchOperatorVerificationCases,
   claimVerificationCase,
@@ -58,11 +59,9 @@ import {
   EmergencyRevokeSessionsResult,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
-import {
-  SkeuoStatCard,
-  SkeuoVerticalMeter,
-  SkeuoLiveFeed,
-} from "@/components/skeuo/SkeuoPrimitives";
+
+import OperatorOverview from "@/components/operator/OperatorOverview";
+import ProfileCard from "@/components/profile/ProfileCard";
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
@@ -358,6 +357,12 @@ export default function OperatorPortal() {
 
   // Opening the support or finance tab refreshes it. Sign-in (auth sync above)
   // already loads every queue, so no effect is needed for user changes.
+  const handleOperatorSignOut = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+  };
+
   const selectTab = (tab: ActiveTab) => {
     if (tab === activeTab) return;
     setActiveTab(tab);
@@ -556,6 +561,7 @@ export default function OperatorPortal() {
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
       {/* SOC COMMAND TERMINAL HEADER */}
+      {!currentUser && (
       <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
@@ -604,6 +610,7 @@ export default function OperatorPortal() {
           </div>
         </div>
       </section>
+      )}
 
       {/* UNAUTHENTICATED NOTICE */}
       {!currentUser && !isAuthLoading && (
@@ -638,154 +645,107 @@ export default function OperatorPortal() {
         </section>
       )}
 
-      {/* AUTHENTICATED SOC TELEMETRY ROW + MODULE SWITCHER */}
-      {currentUser && (() => {
-        const verifiedCount = cases.filter((c) => c.status === "APPROVED" || c.status === "CLOSED").length;
-        const kybPct = cases.length ? Math.round((verifiedCount / cases.length) * 100) : 100;
-        const auditFeed = auditEvents.slice(0, 5).map((evt) => ({
-          id: evt.id,
-          title: evt.action,
-          meta: `${evt.object_type || "Tizim"}${evt.actor_id ? ` • ${evt.actor_id.slice(0, 8)}...` : ""}`,
-          time: evt.occurred_at ? new Date(evt.occurred_at).toLocaleTimeString("uz-UZ") : "Yaqinda",
-          status:
-            evt.action.includes("REVOKE") || evt.action.includes("REJECT") || evt.action.includes("BREAK")
-              ? ("warn" as const)
-              : ("ok" as const),
-        }));
-        return (
-          <div className="flex flex-col gap-5">
-            <section className="grid gap-4 sm:grid-cols-3">
-              <SkeuoStatCard
-                title="Audit hodisalari"
-                value={auditEvents.length}
-                subtitle="O‘zgarmas hash-zanjir"
-                icon={FileCheck2}
-                tone="amber"
-                active={activeTab === "AUDIT"}
-                onClick={() => setActiveTab("AUDIT")}
-              />
-              <SkeuoStatCard
-                title="KYC / KYB navbati"
-                value={cases.length}
-                subtitle={`${verifiedCount} ta ko‘rib chiqilgan`}
-                icon={ClipboardCheck}
-                tone="emerald"
-                active={activeTab === "VERIFICATION"}
-                onClick={() => setActiveTab("VERIFICATION")}
-              />
-              <SkeuoStatCard
-                title="Support & SLA"
-                value={tickets.length}
-                subtitle="Ochiq operator murojaatlari"
-                icon={LifeBuoy}
-                tone="sky"
-                active={activeTab === "SUPPORT_OPS"}
-                onClick={() => setActiveTab("SUPPORT_OPS")}
-              />
-            </section>
-            <section className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-              <SkeuoVerticalMeter
-                title="KYB tekshiruv ulushi"
-                percentage={kybPct}
-                amountLabel={`${verifiedCount} / ${cases.length || 0}`}
-                subtitle="Navbat bajarilishi"
-                tone="amber"
-              />
-              <SkeuoLiveFeed
-                title="Jonli SOC Audit Oqimi"
-                items={auditFeed}
-                emptyText="Audit hodisalari yuklanmagan."
-              />
-            </section>
-
-          </div>
-        );
-      })()}
+      {/* OVERVIEW (bento; only the modules this role may open) */}
+      {currentUser && (
+        <OperatorOverview
+          name={currentUser.display_name}
+          roles={currentUser.roles || []}
+          visible={TAB_MODULES.filter(([, mods]) => mods.some((m) => canUseOperatorModule(currentUser.roles || [], m))).map(([t]) => t)}
+          cases={cases}
+          tickets={tickets}
+          auditEvents={auditEvents}
+          discrepancies={reconciliationSummary?.total_discrepancies ?? null}
+          onOpen={(tab) => {
+            selectTab(tab);
+            document.getElementById("op-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        />
+      )}
 
       {/* AUTHENTICATED SOC COMMAND CONSOLE */}
       {currentUser && (
-        <div className="grid gap-6 lg:grid-cols-[276px_minmax(0,1fr)] lg:items-start">
-          {/* Left SOC Telemetry Navigation Rail */}
+        <div id="op-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
+          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
           <aside
             aria-label="Nazorat terminali bo‘limlari"
-            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
           >
-            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400/80">
-              Nazorat Modullari
+            <div className="hidden lg:block px-3 pb-1 pt-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
+              Bo‘limlar
             </div>
             <button
               onClick={() => selectTab("AUDIT")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
                 activeTab === "AUDIT"
-                  ? "border-amber-400 bg-amber-500/10 text-amber-200"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
-                <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
+                <FileCheck2 className="w-4 h-4 shrink-0" />
                 <span className="text-xs">Audit jurnali</span>
               </span>
-              <span className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
                 {auditEvents.length}
               </span>
             </button>
 
             <button
               onClick={() => selectTab("VERIFICATION")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
                 activeTab === "VERIFICATION"
-                  ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
-                <ClipboardCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <ClipboardCheck className="w-4 h-4 shrink-0" />
                 <span className="text-xs">Tashkilotlarni tekshirish</span>
               </span>
-              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
                 {cases.length}
               </span>
             </button>
 
             <button
               onClick={() => selectTab("BREAK_GLASS")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 border-l-2 whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs ${
                 activeTab === "BREAK_GLASS"
-                  ? "border-rose-400 bg-rose-500/10 text-rose-200"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
-              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+              <ShieldAlert className="w-4 h-4 shrink-0" />
               <span className="text-xs">Favqulodda ruxsat</span>
             </button>
 
             <button
               onClick={() => selectTab("SUPPORT_OPS")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
                 activeTab === "SUPPORT_OPS"
-                  ? "border-sky-400 bg-sky-500/10 text-sky-200"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
-                <LifeBuoy className="w-4 h-4 text-sky-400 shrink-0" />
+                <LifeBuoy className="w-4 h-4 shrink-0" />
                 <span className="text-xs">Murojaatlar</span>
               </span>
-              <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
                 {tickets.length}
               </span>
             </button>
 
             <button
               onClick={() => selectTab("FINANCE")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all flex items-center justify-between gap-2 border-l-2 whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
                 activeTab === "FINANCE"
-                  ? "border-emerald-400 bg-emerald-500/10 text-emerald-200"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CreditCard className="w-4 h-4 shrink-0" />
                 <span className="text-xs">Moliya</span>
               </span>
               {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
@@ -795,6 +755,14 @@ export default function OperatorPortal() {
               ) : null}
             </button>
           </aside>
+          <div className="hidden lg:block">
+            <ProfileCard
+              name={currentUser.display_name}
+              roleLabel={(currentUser.roles || []).map((r) => enumLabel(r)).join(", ") || "Operator"}
+              onLogout={handleOperatorSignOut}
+            />
+          </div>
+          </div>
 
           <div className="min-w-0 flex flex-col gap-6">
 
@@ -825,7 +793,7 @@ export default function OperatorPortal() {
                 <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
                   <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
                     <span className="text-xs font-semibold text-white">
-                      Kriptografik Audit Voqealari ({auditEvents.length} ta qayd)
+                      Audit jurnali ({auditEvents.length} ta yozuv)
                     </span>
                     <button
                       type="button"
@@ -843,10 +811,10 @@ export default function OperatorPortal() {
                         <tr>
                           <th className="px-4 py-2.5">Sana / Vaqt</th>
                           <th className="px-4 py-2.5">Harakat</th>
-                          <th className="px-4 py-2.5">Aktyor (User ID)</th>
+                          <th className="px-4 py-2.5">Kim (ID)</th>
                           <th className="px-4 py-2.5">Obyekt turi</th>
-                          <th className="px-4 py-2.5">Obyekt kaliti</th>
-                          <th className="px-4 py-2.5">Xesh / Digest</th>
+                          <th className="px-4 py-2.5">Obyekt</th>
+                          <th className="px-4 py-2.5">Xesh</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/[0.06]">
@@ -856,14 +824,14 @@ export default function OperatorPortal() {
                               {evt.occurred_at ? new Date(evt.occurred_at).toLocaleString("uz-UZ") : "-"}
                             </td>
                             <td className="px-4 py-3 font-semibold text-white">
-                              <span className="px-2 py-0.5 rounded bg-white/[0.06] text-primary border border-primary/20 text-[10px] font-mono">
-                                {evt.action}
+                              <span title={evt.action} className="text-xs font-semibold text-[var(--fb-ink)]">
+                                {enumLabel(evt.action)}
                               </span>
                             </td>
                             <td className="px-4 py-3 font-mono text-zinc-300">
                               {evt.actor_id ? `${evt.actor_id.slice(0, 8)}...` : "Tizim"}
                             </td>
-                            <td className="px-4 py-3 text-zinc-300">{evt.object_type || "-"}</td>
+                            <td className="px-4 py-3 text-zinc-300" title={evt.object_type || undefined}>{enumLabel(evt.object_type, "-")}</td>
                             <td className="px-4 py-3 font-mono text-zinc-400">
                               {evt.object_key ? `${evt.object_key.slice(0, 12)}...` : "-"}
                             </td>
