@@ -12,6 +12,7 @@ import {
   AlertCircle,
   ShieldAlert,
   ClipboardCheck,
+  Briefcase,
   UserX,
   KeyRound,
   RefreshCw,
@@ -61,14 +62,18 @@ import {
 import AuthModal from "@/components/AuthModal";
 
 import OperatorOverview from "@/components/operator/OperatorOverview";
+import ModerationPanel from "@/components/operator/ModerationPanel";
+import { fetchModerationQueue } from "@/lib/moderation";
+import { useAsyncData } from "@/lib/useAsyncData";
 import ProfileCard from "@/components/profile/ProfileCard";
 
-type ActiveTab = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
+type ActiveTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
 // Which permission each console tab needs (any one of them opens the tab).
 const TAB_MODULES: Array<[ActiveTab, OperatorModule[]]> = [
   ["AUDIT", ["AUDIT"]],
   ["VERIFICATION", ["VERIFICATION"]],
+  ["MODERATION", ["MODERATION"]],
   ["BREAK_GLASS", ["BREAK_GLASS"]],
   ["SUPPORT_OPS", ["SUPPORT_TICKETS", "PLATFORM_HEALTH"]],
   ["FINANCE", ["FINANCE"]],
@@ -357,6 +362,11 @@ export default function OperatorPortal() {
 
   // Opening the support or finance tab refreshes it. Sign-in (auth sync above)
   // already loads every queue, so no effect is needed for user changes.
+  const moderationQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "MODERATION") ? `operator-moderation:${currentUser.user_id}` : null,
+    () => fetchModerationQueue().catch(() => [])
+  );
+
   const handleOperatorSignOut = async () => {
     await logoutUser();
     setCurrentUser(null);
@@ -655,6 +665,7 @@ export default function OperatorPortal() {
           tickets={tickets}
           auditEvents={auditEvents}
           discrepancies={reconciliationSummary?.total_discrepancies ?? null}
+          moderationCount={moderationQuery.data?.length ?? null}
           onOpen={(tab) => {
             selectTab(tab);
             document.getElementById("op-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -706,6 +717,27 @@ export default function OperatorPortal() {
                 {cases.length}
               </span>
             </button>
+
+            {currentUser && canUseOperatorModule(currentUser.roles || [], "MODERATION") && (
+            <button
+              onClick={() => selectTab("MODERATION")}
+              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
+                activeTab === "MODERATION"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 shrink-0" />
+                <span className="text-xs">E’lonlar moderatsiyasi</span>
+              </span>
+              {(moderationQuery.data?.length ?? 0) > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
+                  {moderationQuery.data?.length}
+                </span>
+              )}
+            </button>
+            )}
 
             <button
               onClick={() => selectTab("BREAK_GLASS")}
@@ -849,6 +881,8 @@ export default function OperatorPortal() {
           )}
 
           {/* TAB 2: VERIFICATION CASES */}
+          {activeTab === "MODERATION" && <ModerationPanel onCountChange={() => void moderationQuery.reload()} />}
+
           {activeTab === "VERIFICATION" && (
             <div className="flex flex-col gap-4">
               {casesError && (

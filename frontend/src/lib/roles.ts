@@ -163,11 +163,13 @@ export function resolvePortalDashboard(roles?: string[] | null): {
  * require_platform('MODERATOR')) so the UI neither fetches nor shows modules
  * that would only answer 403. The backend remains the authority.
  */
-export type OperatorModule = "AUDIT" | "VERIFICATION" | "BREAK_GLASS" | "SUPPORT_TICKETS" | "PLATFORM_HEALTH" | "FINANCE";
+export type OperatorModule = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_TICKETS" | "PLATFORM_HEALTH" | "FINANCE";
 
 const OPERATOR_MODULE_ROLES: Record<OperatorModule, readonly string[]> = {
   AUDIT: ["ADMIN", "AUDITOR"],
   VERIFICATION: ["MODERATOR"],
+  // Vacancy moderation (GET /moderation/opportunities, POST /moderation/actions) is MODERATOR-only.
+  MODERATION: ["MODERATOR"],
   BREAK_GLASS: ["ADMIN", "SECURITY_LEAD", "OPERATIONS"],
   SUPPORT_TICKETS: ["SUPPORT", "ADMIN", "MODERATOR"],
   PLATFORM_HEALTH: ["ADMIN", "OPERATIONS", "SECURITY_LEAD", "AUDITOR"],

@@ -494,7 +494,12 @@ export async function fetchOpportunityDetail(id: string): Promise<OpportunityDet
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
-  return data as OpportunityDetail;
+  // API-005 names the company public_name / legal_name; the page reads organization.name.
+  const org = data.organization || {};
+  return {
+    ...data,
+    organization: { ...org, name: org.name || org.public_name || org.legal_name || "", status: org.status || "" },
+  } as OpportunityDetail;
 }
 
 export async function submitOpportunityApplication(

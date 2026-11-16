@@ -51,6 +51,30 @@ class GovernanceScopeService:
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ORG_MEMBER_APPROVED_DUAL_CONTROL',entity_type='membership',entity_id=member_id)
             return {**row,'status':'ACTIVE'}
 
+    def moderation_queue(self,*,actor:ActorContext,limit=50):
+        """Draft vacancies waiting for a moderator (oldest first). The moderation decision
+        itself is record_moderation_action; a moderator may not decide on their own draft."""
+        from sqlalchemy import select as _select
+        from app.services.authority import moderator_authority
+        o,r,org=table('opportunities'),table('opportunity_revisions'),table('organizations')
+        with transaction() as conn:
+            moderator_authority(conn,actor)
+            rows=conn.execute(_select(o.c.id,o.c.kind,o.c.capacity,o.c.created_at,r.c.title,r.c.description,r.c.contract_type,
+                    r.c.work_mode,r.c.region,r.c.is_paid,r.c.salary_min,r.c.salary_max,r.c.salary_period,r.c.currency,r.c.author_id,
+                    org.c.id.label('organization_id'),org.c.public_name,org.c.legal_name,org.c.status.label('organization_status'))
+                .select_from(o.join(r,r.c.id==o.c.current_revision_id).join(org,org.c.id==o.c.organization_id))
+                .where(o.c.status=='DRAFT').order_by(o.c.created_at.asc(),o.c.id.asc()).limit(max(1,min(int(limit),100)))).mappings().all()
+        items=[]
+        for row in rows:
+            item={k:v for k,v in dict(row).items() if k not in ('author_id','public_name','legal_name')}
+            item['organization_name']=row['public_name'] or row['legal_name']
+            item['own']=str(row['author_id'])==str(actor.user_id)
+            item['created_at']=row['created_at'].isoformat() if row['created_at'] else None
+            for k in ('salary_min','salary_max'):
+                if item.get(k) is not None:item[k]=float(item[k])
+            items.append(item)
+        return {'items':items}
+
     def record_moderation_action(self,*,actor:ActorContext,target_entity_type,target_entity_id,action_type,policy_code,reason_code,justification):
         from app.services.authority import moderator_authority
         actor_id=actor.user_id
