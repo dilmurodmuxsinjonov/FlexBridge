@@ -128,7 +128,6 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
-  const [forgotOpen, setForgotOpen] = useState(false);
 
   const [mfaTicket, setMfaTicket] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -408,14 +407,9 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
                   <label htmlFor={`${ids}-pw`} className="text-sm font-semibold text-[var(--fb-ink)]">
                     Parol
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setForgotOpen((v) => !v)}
-                    aria-expanded={forgotOpen}
-                    className="text-xs font-medium text-[var(--fb-ink-secondary)] underline-offset-2 hover:underline"
-                  >
+                  <Link href="/parolni-tiklash" className="text-xs font-medium text-[var(--fb-ink-secondary)] underline-offset-2 hover:underline">
                     Parolni unutdingizmi?
-                  </button>
+                  </Link>
                 </div>
                 <div className="relative">
                   <input
@@ -441,14 +435,6 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
                   </button>
                 </div>
                 {capsLock && <p className="mt-1.5 text-xs font-medium text-amber-700 dark:text-amber-300">Caps Lock yoqilgan.</p>}
-                {forgotOpen && (
-                  <p className="mt-2 rounded-xl skeuo-well p-3 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
-                    Hozircha parol tashkilotingiz administratori yoki FlexBridge qo‘llab-quvvatlash xizmati orqali tiklanadi.{" "}
-                    <Link href="/haqida" className="font-semibold underline underline-offset-2">
-                      Bog‘lanish
-                    </Link>
-                  </p>
-                )}
               </div>
 
               <button type="submit" data-tone={config.tone} disabled={busy || redirecting} className="skeuo-btn-tone mt-1 w-full rounded-2xl px-4 py-3.5 text-sm disabled:opacity-60">
