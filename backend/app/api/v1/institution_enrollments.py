@@ -70,3 +70,25 @@ def decide(inst: UUID, case_id: UUID, payload: Decision,
     _case_in_institution(inst, case_id)
     return service.decide(actor, str(case_id), decision=payload.decision,
                           expected_revision=payload.expected_revision, reason=payload.reason)
+
+
+# --- Account recovery vouched by the student's university (Issue #237) -------
+from app.services.institution_recovery import institution_recovery_service as recovery_service  # noqa: E402
+
+
+class RecoveryDecision(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    decision: Literal['APPROVE', 'REJECT']
+    reason: str = Field(min_length=15, max_length=2000)
+
+
+@router.get('/{inst}/recovery-requests')
+def recovery_queue(inst: UUID, actor: ActorContext = Depends(require_actor_context)):
+    """Coordinator: pending password-recovery requests of the institution's verified students."""
+    return recovery_service.queue(actor, str(inst))
+
+
+@router.post('/{inst}/recovery-requests/{request_id}/decide')
+def recovery_decide(inst: UUID, request_id: UUID, payload: RecoveryDecision,
+                    actor: ActorContext = Depends(require_actor_context)):
+    return recovery_service.decide(actor, str(inst), str(request_id), decision=payload.decision, reason=payload.reason)

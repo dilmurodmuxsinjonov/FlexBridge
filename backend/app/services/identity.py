@@ -13,6 +13,7 @@ from app.services.auth import auth_service,AuthError,verify_totp_code,hash_passw
 from app.adapters.identity_delivery import configuration
 
 audit=AppendOnlyAuditStore()
+INSTITUTION_APPROVAL_TTL=timedelta(hours=72)
 
 def lock_contact(conn,value):
     conn.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':digest('contact-lock',value)})
@@ -262,6 +263,20 @@ class IdentityService:
                 elif totp_code:
                     loaded=auth_service._load_user(uid)
                     trusted=bool(loaded['totp_secret'] and verify_totp_code(loaded['totp_secret'],totp_code))
+                else:
+                    # Independent factor for students without MFA: their university
+                    # coordinator approved an earlier request from this same contact
+                    # (identity checked out-of-band). Single use, 72 hours.
+                    t=table('recovery_requests')
+                    approval=conn.execute(select(t).where(t.c.user_id==uid,t.c.kind=='ACCOUNT_ACCESS',t.c.status=='APPROVED',
+                        t.c.reviewer_id.is_not(None),t.c.resolved_at>now()-INSTITUTION_APPROVAL_TTL,
+                        t.c.requester_contact_digest==digest('destination',p['channel']+':'+p['value']))
+                        .order_by(t.c.resolved_at.desc()).limit(1).with_for_update()).mappings().first()
+                    if approval:
+                        trusted=True
+                        conn.execute(t.update().where(t.c.id==approval['id']).values(status='CONSUMED',updated_at=now()))
+                        audit.append_audit_event(actor_id=uid,action='ACCOUNT_RECOVERY_APPROVAL_USED',entity_type='recovery_request',
+                            entity_id=approval['id'],metadata={'reviewer_id':str(approval['reviewer_id'])})
             rid=str(uuid4());status='READY_TO_RESET' if trusted else 'PENDING_REVIEW'
             conn.execute(table('recovery_requests').insert().values(id=rid,created_at=now(),updated_at=now(),user_id=uid,kind='ACCOUNT_ACCESS',status=status,
                 requester_contact_digest=digest('destination',p['channel']+':'+p['value'])))
