@@ -37,6 +37,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
+import ChatNavButton from "@/components/chat/ChatNavButton";
 import {
   isAcademicOnlyRoles,
   isEmployerOnlyRoles,
@@ -560,6 +561,8 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </motion.button>
+
+            {currentUser && <ChatNavButton active={pathname?.startsWith("/xabarlar") ?? false} />}
 
             {currentUser && userDashboard ? (
               <div className="skeuo-card rounded-full p-1 pl-2.5 flex items-center gap-2">

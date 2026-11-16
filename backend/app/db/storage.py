@@ -129,6 +129,8 @@ from app.db.candidate_portal_extension import register_tables as register_candid
 register_candidate_portal_tables(metadata,_TYPES)
 from app.db.feature_flag_admin import register_tables as register_feature_flag_tables
 register_feature_flag_tables(metadata,_TYPES)
+from app.db.chat import register_tables as register_chat_tables
+register_chat_tables(metadata,_TYPES)
 circuit_breaker_table = Table('circuit_breaker_state', metadata,
     Column('key', Text, primary_key=True), Column('state', Text, nullable=False), Column('incident_id', Text),
     Column('reason_code', Text), Column('tripped_by', Text), Column('tripped_at', DateTime(timezone=True)),
@@ -168,7 +170,7 @@ def init_storage() -> Engine:
     engine = get_engine()
     with engine.connect() as conn:
         revision = conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()
-        if revision not in ('0020_placement_exports', '0021_candidate_portal_extension', '0022_enrollment_inst_review'):
+        if revision not in ('0020_placement_exports', '0021_candidate_portal_extension', '0022_enrollment_inst_review', '0023_chat_messaging'):
             raise RuntimeError('Database migrations are not current')
     return engine
 

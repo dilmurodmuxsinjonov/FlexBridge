@@ -51,6 +51,7 @@ from app.api.v1.notifications import router as notifications_router
 from app.api.v1.academic_admission import router as academic_admission_router
 from app.api.v1.academic_decisions import router as academic_decisions_router
 from app.api.v1.feature_flags import router as feature_flags_router
+from app.api.v1.chat import router as chat_router
 from app.services.placements import PlacementScopeError
 from app.services.internship_logs import InternshipLogScopeError
 from app.services.governance import GovernanceError
@@ -178,6 +179,7 @@ app.include_router(feature_flags_router)
 app.include_router(internship_logs_router)
 app.include_router(internship_documents_router)
 app.include_router(files_router)
+app.include_router(chat_router)
 app.include_router(billing_router)
 app.include_router(operations_router)
 app.include_router(moderation_appeals_router)

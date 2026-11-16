@@ -478,7 +478,7 @@ def test_migration_schema_integrity():
     """Verify 133 tables migration schema baseline remains intact (DB-058 log_evidence)."""
     with transaction() as conn:
         tables_res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'flexbridge'")).scalar_one()
-        assert tables_res == 133
+        assert tables_res == 138
         col_res = conn.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_schema = 'flexbridge' AND table_name = 'log_evidence' ORDER BY ordinal_position"
         )).fetchall()
