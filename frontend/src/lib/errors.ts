@@ -28,6 +28,17 @@ const LOGIN_ERROR_MESSAGES: Record<string, string> = {
   EMAIL_OR_DESTINATION_AND_PASSWORD_REQUIRED: "Telefon/pochta va parolni kiriting.",
   MFA_TICKET_AND_CODE_REQUIRED: "6 xonali kodni kiriting.",
   INTERNAL_ERROR: "Server bilan bog‘lanib bo‘lmadi. Birozdan so‘ng qayta urinib ko‘ring.",
+  INVALID_OR_EXPIRED_CODE: "Kod noto‘g‘ri yoki muddati o‘tgan. Yangi kod so‘rang yoki qayta tekshiring.",
+  INVALID_OR_EXPIRED_PROOF: "Tasdiqlash muddati tugadi. Jarayonni boshidan boshlang.",
+  RESEND_COOLDOWN: "Yangi kod so‘rashdan oldin bir daqiqa kuting.",
+  TELEGRAM_CONTACT_REQUIRED: "Avval Telegram botda telefon raqamingizni ulashing.",
+  TELEGRAM_UNAVAILABLE: "Telegram orqali tasdiqlash hozir ishlamayapti. SMS’ni tanlang.",
+  IDENTITY_DELIVERY_UNAVAILABLE: "SMS/pochta orqali kod yuborish hozircha sozlanmagan. Telegram’ni tanlang yoki qo‘llab-quvvatlashga yozing.",
+  INVALID_CONTACT: "Telefon raqamni +998901234567 ko‘rinishida yoki to‘g‘ri pochta manzilini kiriting.",
+  INVALID_DELIVERY_METHOD: "Bu kanal uchun tanlangan yuborish usuli mos emas.",
+  PASSWORD_TOO_SHORT: "Parol kamida 12 ta belgidan iborat bo‘lishi kerak.",
+  INVALID_INPUT: "Kiritilgan ma’lumotlar to‘liq emas yoki noto‘g‘ri.",
+  RECOVERY_FAILED: "Parolni tiklab bo‘lmadi. Birozdan so‘ng qayta urinib ko‘ring.",
 };
 
 /**

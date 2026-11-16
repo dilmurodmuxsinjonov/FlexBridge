@@ -143,7 +143,12 @@ export default function AuthModal({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="auth-modal-pw" className="text-sm font-semibold text-[var(--fb-ink)]">Parol</label>
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="auth-modal-pw" className="text-sm font-semibold text-[var(--fb-ink)]">Parol</label>
+                  <Link href="/parolni-tiklash" className="text-xs font-medium text-[var(--fb-ink-secondary)] underline-offset-2 hover:underline">
+                    Parolni unutdingizmi?
+                  </Link>
+                </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
                     <KeyRound className="w-4 h-4" />
