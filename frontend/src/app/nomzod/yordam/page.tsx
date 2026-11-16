@@ -275,10 +275,7 @@ export default function CandidateHelpPrivacyPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <LifeBuoy className="w-6 h-6 text-sky-400" />
-              Yordam Markazi, Maxfiylik & Bildirishnomalar Hubi
-            </h1>
+            <h1 className="fb-display">Yordam</h1>
             <p className="text-xs text-[var(--fb-ink-secondary)] mt-1">
               Texnik qo‘llab-quvvatlash murojaatlari, shaxsiy ma’lumotlar maxfiyligi va bildirishnomalar boshqaruvi.
             </p>

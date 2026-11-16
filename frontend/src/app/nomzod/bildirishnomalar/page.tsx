@@ -78,9 +78,7 @@ export default function NotificationsInboxPage() {
             <Bell className="w-4 h-4" />
             <span>Xabarnomalar Markazi</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-heading text-white">
-            Bildirishnomalar va Xabarlar
-          </h1>
+          <h1 className="fb-display">Bildirishnomalar</h1>
           <p className="text-zinc-400 text-sm mt-1">
             Platforma yangiliklari, suhbatlar, arizalar va amaliyot bo&apos;yicha xabarlar qutisi.
           </p>

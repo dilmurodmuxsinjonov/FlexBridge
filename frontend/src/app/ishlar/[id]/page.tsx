@@ -413,7 +413,7 @@ export default function OpportunityDetailPage({
               <div className="mt-4 flex items-center gap-2 border-t border-white/[0.06] pt-3 text-xs text-zinc-400">
                 <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
                 <span>
-                  Kirilgan hisob: <strong className="text-zinc-200">{user.user_id.slice(0, 8)}...</strong>
+                  Kirilgan hisob: <strong className="text-zinc-200">{user.display_name || "talaba"}</strong>
                 </span>
               </div>
             )}

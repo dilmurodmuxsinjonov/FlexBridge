@@ -71,9 +71,7 @@ export default function SavedOpportunitiesPage() {
             <Bookmark className="w-4 h-4" />
             <span>Nomzod Markazi</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-heading text-white">
-            Saqlangan Vakansiyalar va E&apos;lonlar
-          </h1>
+          <h1 className="fb-display">Saqlanganlar</h1>
           <p className="text-zinc-400 text-sm mt-1">
             Siz saqlab qo&apos;ygan qiziqarli amaliyot va ish o&apos;rinlari to&apos;plami.
           </p>
@@ -182,7 +180,7 @@ export default function SavedOpportunitiesPage() {
                     <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-400">
                       <span className="flex items-center gap-1.5">
                         <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
-                        Tashkilot ID: <span className="font-mono text-zinc-300">{opp.organization_id ? `${opp.organization_id.slice(0, 8)}...` : "N/A"}</span>
+                        {opp.organization_name || "Korxona"}
                       </span>
                       {item.created_at && (
                         <span className="flex items-center gap-1.5">

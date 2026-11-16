@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { errorText } from "@/lib/errorText";
+import { enumLabel } from "@/lib/labels";
 import Link from "next/link";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -50,6 +51,7 @@ interface InvitePreview {
 interface PendingAppointmentItem {
   id: string;
   institution_id: string;
+  institution_name?: string | null;
   status: string;
   case_status: string;
   current_revision: number;
@@ -1341,9 +1343,9 @@ function RoyxatdanOtishWizard() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div>
-                            <div className="font-semibold text-white">OTM ID: {appt.institution_id}</div>
+                            <div className="font-semibold text-white">{appt.institution_name || "Universitet"}</div>
                             <div className="text-[11px] text-zinc-400">
-                              Holat: {appt.status} ({appt.case_status}) • rev {appt.current_revision}
+                              Holat: {enumLabel(appt.status)} · tekshiruv: {enumLabel(appt.case_status)}
                             </div>
                           </div>
                         </div>

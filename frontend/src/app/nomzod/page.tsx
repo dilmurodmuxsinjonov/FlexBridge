@@ -775,7 +775,7 @@ export default function CandidateProfileHub() {
         content_base64: b64,
       });
       setCertFileId(res.file_id);
-      setUploadedCertFilename(`${res.filename} (CLEAN • ${res.file_id.slice(0, 8)}...)`);
+      setUploadedCertFilename(`${res.filename} — viruslarga tekshirildi`);
     } catch (err: unknown) {
       setCertErrorMsg(err instanceof Error ? err.message : "PDF faylni yuklashda xatolik");
     } finally {
@@ -1549,8 +1549,8 @@ export default function CandidateProfileHub() {
                   <span className="text-sm font-bold text-white truncate" title={activeEnrollment?.institution_name || "Mavjud emas"}>
                     {activeEnrollment?.institution_name || "Mavjud emas"}
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-500 truncate">
-                    ID: {activeEnrollment ? activeEnrollment.institution_id.slice(0, 8) + "..." : "N/A"}
+                  <span className="text-[10px] text-zinc-500 truncate">
+                    {activeEnrollment ? enumLabel(activeEnrollment.status) : "Talabalik qo‘shilmagan"}
                   </span>
                 </div>
 
@@ -2339,13 +2339,6 @@ export default function CandidateProfileHub() {
                     ✓ Yuklandi: {uploadedCertFilename}
                   </span>
                 )}
-                <input
-                  type="text"
-                  value={certFileId}
-                  onChange={(e) => setCertFileId(e.target.value)}
-                  placeholder="Yoki tayyor File UUID: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50"
-                />
               </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/[0.06]">

@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   ArrowRight,
   CalendarDays,
+  MessageCircle,
 } from "lucide-react";
 import { fetchAuthMe, logoutUser, type AuthUser } from "@/lib/api";
 import { isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
@@ -67,6 +68,7 @@ const STUDENT_NAV_GROUPS: SidebarGroup[] = [
   {
     title: "Hisob & Aloqa",
     items: [
+      { href: "/xabarlar", label: "Xabarlar", icon: MessageCircle },
       { href: "/nomzod/bildirishnomalar", label: "Bildirishnomalar", icon: Bell },
       { href: "/nomzod/xavfsizlik", label: "Xavfsizlik & MFA", icon: Shield },
       { href: "/nomzod/yordam", label: "Yordam & Maxfiylik", icon: LifeBuoy },

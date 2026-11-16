@@ -78,6 +78,7 @@ import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 import UniversityOverview, { type UniversityTab } from "@/components/university/UniversityOverview";
 import ProfileCard from "@/components/profile/ProfileCard";
 import { initials } from "@/lib/person";
+import { enumLabel } from "@/lib/labels";
 import { useAsyncData } from "@/lib/useAsyncData";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
@@ -1281,11 +1282,6 @@ export default function UniversityPortal() {
                   <span className="text-xs font-semibold text-white">
                     Biriktirish kutilayotgan talabalar ({coordinatorQueue.length} ta)
                   </span>
-                  {institutionId && (
-                    <span className="text-[11px] font-mono text-zinc-500">
-                      (Muassasa: {institutionId.slice(0, 8)}...)
-                    </span>
-                  )}
                 </div>
                 <button
                   type="button"
@@ -1312,11 +1308,7 @@ export default function UniversityPortal() {
                           Taqsimot kutilmoqda
                         </span>
                       </div>
-                      <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-2">
-                        <span>Amaliyot ID: {item.placement_id.slice(0, 8)}...</span>
-                        <span>•</span>
-                        <span>Enrollment ID: {item.enrollment_id.slice(0, 8)}...</span>
-                      </div>
+                      <div className="text-xs text-zinc-400">Amaliyot boshlanishidan oldin ilmiy rahbar tayinlang</div>
                     </div>
 
                     <div className="flex items-center gap-2.5">
@@ -1349,7 +1341,7 @@ export default function UniversityPortal() {
                 </span>
               </div>
               <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
-                Muassasa Yig‘ma Hisoboti va Hamkorlik Shartnomalari
+                Yig‘ma hisobot va kelishuvlar
               </h2>
               <p className="text-xs text-[var(--fb-ink-secondary)]">
                 Talabalar amaliyoti, o‘quv rejalari va soatlar sarfi bo‘yicha rasmiy PDF va jadval hisobotlarini shakllantirish hamda hamkorlik shartnomalari nazorati.
@@ -1378,7 +1370,7 @@ export default function UniversityPortal() {
                   <div className="flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4 text-primary" />
                     <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
-                      Rasmiy Yig‘ma Hisobot Yaratish
+                      Yig‘ma hisobot yaratish
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-[var(--fb-ink-muted)]">Rasmiy eksport</span>
@@ -1555,13 +1547,13 @@ export default function UniversityPortal() {
                         className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{sup.purpose}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            {sup.status || "ACTIVE"}
+                          <span className="font-semibold text-white">{sup.student_name || "Talaba"}</span>
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            {enumLabel(sup.purpose)}
                           </span>
                         </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Enrollment: #{sup.enrollment_id.slice(0, 8)}...
+                        <span className="text-[11px] text-zinc-500">
+                          {sup.coordinator_accepted_at ? `Koordinator tasdiqlagan: ${new Date(sup.coordinator_accepted_at).toLocaleDateString("uz-UZ")}` : "Koordinator tasdig‘i kutilmoqda"}
                         </span>
                       </div>
                     ))}
@@ -1603,13 +1595,14 @@ export default function UniversityPortal() {
                         className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">Tashkilot #{agr.organization_id.slice(0, 8)}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {agr.status}
+                          <span className="font-semibold text-white">Platforma kelishuvi{agr.version ? ` · ${agr.version}-versiya` : ""}</span>
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Amalda
                           </span>
                         </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          Shartnoma ID: #{agr.id.slice(0, 8)}...
+                        <span className="text-[11px] text-zinc-500">
+                          {[agr.valid_from && `${agr.valid_from} dan`, agr.valid_to ? `${agr.valid_to} gacha` : "muddatsiz"].filter(Boolean).join(" ")}
+                          {agr.purposes && agr.purposes.length > 0 ? ` · ${agr.purposes.map((p) => enumLabel(p)).join(", ")}` : ""}
                         </span>
                       </div>
                     ))}
@@ -2253,9 +2246,6 @@ export default function UniversityPortal() {
                             <tr key={student.placement_id} className="hover:bg-white/[0.02] transition-colors">
                               <td className="py-2.5 px-3">
                                 <div className="font-semibold text-white">{student.student_name}</div>
-                                <div className="text-[10px] font-mono text-zinc-500">
-                                  ID: {student.student_id.slice(0, 8)}...
-                                </div>
                               </td>
                               <td className="py-2.5 px-3 text-zinc-400">{student.program}</td>
                               <td className="py-2.5 px-3 text-zinc-300">{student.organization_name}</td>
@@ -2591,7 +2581,7 @@ export default function UniversityPortal() {
                 )}
               </div>
               <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                OTM Guruhlari Dars Jadvalini Qo&apos;lda Kiritish yoki Shablon Orqali Yuklash
+                Dars jadvali
               </h2>
               <p className="text-xs text-zinc-400">
                 Universitet xodimi dars jadvalini qo&apos;lda forma orqali kiritishi yoki tayyor rasmiy shablonni (.CSV / .JSON) yuklab olib to&apos;ldirgan holda tizimga yuklashi mumkin. Jadval saqlangach, talabalarning darsdan bo&apos;sh ish vaqtlari avtomatik hisoblanadi.
@@ -2653,7 +2643,7 @@ export default function UniversityPortal() {
                   <div className="flex items-center gap-2">
                     <Plus className="w-4 h-4 text-primary" />
                     <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      1. Dars Jadvalini Qo&apos;lda Kiritish
+                      Qo&apos;lda kiritish
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-zinc-500">Qo‘lda kiritish</span>
@@ -2833,7 +2823,7 @@ export default function UniversityPortal() {
                   <div className="flex items-center gap-2">
                     <Upload className="w-4 h-4 text-emerald-400" />
                     <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      2. Shablon Jadvalni Yuklash (.CSV / .JSON)
+                      Fayldan yuklash (CSV yoki JSON)
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-emerald-400">Shablondan yuklash</span>
@@ -2989,7 +2979,7 @@ export default function UniversityPortal() {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-emerald-400" />
                       <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                        Avtomatik Hisoblangan Darsdan Bo&apos;sh Ish Vaqtlari (Ish Beruvchi Qidiruvi Uchun)
+                        Talabalarning darsdan bo&apos;sh vaqti (avtomatik)
                       </h3>
                     </div>
                     <span className="text-[10px] font-mono text-emerald-400">
@@ -3053,7 +3043,7 @@ export default function UniversityPortal() {
             >
               {assignments.map((a) => (
                 <option key={`ua-${a.placement_id}`} value={a.placement_id}>
-                  {a.student_name || "Talaba"} (#{a.placement_id.slice(0, 8)})
+                  {a.student_name || "Talaba"}{a.organization_name ? ` — ${a.organization_name}` : ""}
                 </option>
               ))}
             </select>
@@ -3277,10 +3267,6 @@ export default function UniversityPortal() {
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Talaba:</span>
                   <span className="font-semibold text-white">{nominatePlacement.student_name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Amaliyot ID:</span>
-                  <span className="font-mono text-zinc-300">{nominatePlacement.placement_id.slice(0, 8)}...</span>
                 </div>
               </div>
 

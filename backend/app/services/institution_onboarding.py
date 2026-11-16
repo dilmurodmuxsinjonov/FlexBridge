@@ -391,9 +391,11 @@ class InstitutionOnboardingService:
     def inbox(self,actor,limit=50):
         with transaction() as conn:
             account_authority(conn,actor)
-            requests,cases,appointments=(table(n) for n in ('institution_onboarding_requests','verification_cases','institution_appointments'))
-            rows=conn.execute(select(appointments.c.id,appointments.c.institution_id,appointments.c.status,cases.c.status.label('case_status'),cases.c.current_revision)
+            requests,cases,appointments,insts=(table(n) for n in ('institution_onboarding_requests','verification_cases','institution_appointments','institutions'))
+            # The person asked to consent must see which university is asking.
+            rows=conn.execute(select(appointments.c.id,appointments.c.institution_id,insts.c.name.label('institution_name'),appointments.c.status,cases.c.status.label('case_status'),cases.c.current_revision)
                 .join(requests,requests.c.appointment_id==appointments.c.id).join(cases,cases.c.id==requests.c.case_id)
+                .outerjoin(insts,insts.c.id==appointments.c.institution_id)
                 .where(requests.c.target_user_id==actor.user_id).order_by(requests.c.created_at.desc(),appointments.c.id).limit(limit)).mappings()
             return [dict(row) for row in rows]
 
