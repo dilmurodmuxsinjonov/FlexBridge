@@ -31,6 +31,7 @@ import type {
 import { enumLabel } from "@/lib/labels";
 import { firstName, initials, isoWeekday, uzDate } from "@/lib/person";
 import { experienceMonths } from "@/components/resume/resumeDraft";
+import type { ClassSlot } from "@/lib/timetable";
 
 export type OverviewTab = "PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES";
 
@@ -45,6 +46,8 @@ export interface ProfileOverviewProps {
   certificates: CertificateItem[];
   experiences: CandidateWorkExperienceItem[];
   resumeUpdatedAt?: string | null;
+  /** Official class timetable slots (drawn under the free-time bars). */
+  classes?: ClassSlot[];
   applications: CandidateApplicationsSummary | null;
   applicationsError?: boolean;
   isExporting: boolean;
@@ -69,10 +72,11 @@ export function readinessItems(p: Pick<ProfileOverviewProps, "headline" | "skill
   ];
 }
 
-function WeekTimeline({ rules, today, onEdit }: { rules: AvailabilityRuleItem[]; today: Date; onEdit: () => void }) {
+function WeekTimeline({ rules, classes = [], today, onEdit }: { rules: AvailabilityRuleItem[]; classes?: ClassSlot[]; today: Date; onEdit: () => void }) {
   const todayIdx = isoWeekday(today);
-  const minStart = rules.length ? Math.min(...rules.map((r) => r.start_minute)) : 8 * 60;
-  const maxEnd = rules.length ? Math.max(...rules.map((r) => r.end_minute)) : 20 * 60;
+  const spans = [...rules, ...classes];
+  const minStart = spans.length ? Math.min(...spans.map((r) => r.start_minute)) : 8 * 60;
+  const maxEnd = spans.length ? Math.max(...spans.map((r) => r.end_minute)) : 20 * 60;
   const from = Math.max(0, Math.floor(Math.min(minStart, 8 * 60) / 60) * 60);
   const to = Math.min(24 * 60, Math.ceil(Math.max(maxEnd, 20 * 60) / 60) * 60);
   const span = to - from;
@@ -120,6 +124,7 @@ function WeekTimeline({ rules, today, onEdit }: { rules: AvailabilityRuleItem[];
               {DAYS.map((d, i) => {
                 const weekday = i + 1;
                 const dayRules = rules.filter((r) => r.weekday === weekday);
+                const dayClasses = classes.filter((c) => c.weekday === weekday);
                 const isToday = weekday === todayIdx;
                 return (
                   <li key={d} className="flex items-center gap-2">
@@ -136,6 +141,14 @@ function WeekTimeline({ rules, today, onEdit }: { rules: AvailabilityRuleItem[];
                           aria-hidden="true"
                           className="absolute top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-[var(--fb-ink-muted)]/30"
                           style={{ left: `${((t - from) / span) * 100}%` }}
+                        />
+                      ))}
+                      {dayClasses.map((c) => (
+                        <span
+                          key={`c${c.start_minute}`}
+                          className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-[var(--fb-ink-muted)]/45"
+                          style={{ left: `${((c.start_minute - from) / span) * 100}%`, width: `${((c.end_minute - c.start_minute) / span) * 100}%` }}
+                          title={`${DAY_NAMES[i]}: dars ${c.start_time}–${c.end_time}, ${c.subject_name}`}
                         />
                       ))}
                       {dayRules.map((r) => {
@@ -165,6 +178,11 @@ function WeekTimeline({ rules, today, onEdit }: { rules: AvailabilityRuleItem[];
               <span className="inline-flex items-center gap-1.5">
                 <span className="fb-bar fb-bar-today h-2.5 w-2.5" aria-hidden="true" /> Bugun
               </span>
+              {classes.length > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-1.5 w-3 rounded-full bg-[var(--fb-ink-muted)]/45" aria-hidden="true" /> Dars
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -472,7 +490,7 @@ export default function ProfileOverview(props: ProfileOverviewProps) {
       </header>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <WeekTimeline rules={props.rules} today={today} onEdit={() => props.onOpenTab("AVAILABILITY")} />
+        <WeekTimeline rules={props.rules} classes={props.classes} today={today} onEdit={() => props.onOpenTab("AVAILABILITY")} />
         <ReadinessCard {...props} />
         <ResumeCard {...props} />
       </div>

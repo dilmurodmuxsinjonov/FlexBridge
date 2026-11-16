@@ -170,7 +170,7 @@ export default function InternshipDocumentsHub({ party, placementId }: Internshi
     diaryRes: StandardizedDiaryWorkspace,
     concRes: FinalConclusionDocument
   ) => {
-    const myCert = eimzoRes.certificates[party];
+    const myCert = eimzoRes.certificates?.[party];
     setCert(myCert);
     if (myCert) {
       setCertForm({
@@ -599,9 +599,9 @@ export default function InternshipDocumentsHub({ party, placementId }: Internshi
 
           {/* 3-Party Live Diary Stamps + Continuous Sign Trigger */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <StampCard party="CANDIDATE" stamp={diaryWs.signatures.CANDIDATE} />
-            <StampCard party="EMPLOYER" stamp={diaryWs.signatures.EMPLOYER} />
-            <StampCard party="UNIVERSITY" stamp={diaryWs.signatures.UNIVERSITY} />
+            <StampCard party="CANDIDATE" stamp={diaryWs.signatures?.CANDIDATE} />
+            <StampCard party="EMPLOYER" stamp={diaryWs.signatures?.EMPLOYER} />
+            <StampCard party="UNIVERSITY" stamp={diaryWs.signatures?.UNIVERSITY} />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center p-3.5 rounded-xl bg-primary/[0.06] border border-primary/20">
@@ -667,9 +667,9 @@ export default function InternshipDocumentsHub({ party, placementId }: Internshi
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <StampCard party="EMPLOYER" stamp={conclusionDoc.signatures.EMPLOYER} />
-            <StampCard party="UNIVERSITY" stamp={conclusionDoc.signatures.UNIVERSITY} />
-            <StampCard party="CANDIDATE" stamp={conclusionDoc.signatures.CANDIDATE} />
+            <StampCard party="EMPLOYER" stamp={conclusionDoc.signatures?.EMPLOYER} />
+            <StampCard party="UNIVERSITY" stamp={conclusionDoc.signatures?.UNIVERSITY} />
+            <StampCard party="CANDIDATE" stamp={conclusionDoc.signatures?.CANDIDATE} />
           </div>
 
           {/* Current Party Separate Final Conclusion Form */}

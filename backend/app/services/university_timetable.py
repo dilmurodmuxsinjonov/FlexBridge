@@ -21,7 +21,7 @@ from collections import defaultdict
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.api.dependencies import ActorContext
 from app.core.audit import AppendOnlyAuditStore
@@ -184,6 +184,16 @@ def _verify_institution_staff(conn: Any, actor: ActorContext, inst_id: str) -> d
     return dict(inst)
 
 
+def _verify_timetable_editor(conn: Any, actor: ActorContext, inst_id: str) -> dict[str, Any]:
+    """Writing the timetable rewrites every enrolled student's work availability,
+    so it needs an MFA coordinator, not just any active staff membership."""
+    inst = _verify_institution_staff(conn, actor, inst_id)
+    from app.services.authority import institution_authority
+
+    institution_authority(conn, actor, inst_id, "COORDINATOR", require_mfa=True)
+    return inst
+
+
 def _parse_time_to_minutes(val: str, field_name: str = "time") -> tuple[str, int]:
     cleaned = str(val or "").strip()
     m = TIME_RE.match(cleaned)
@@ -342,6 +352,23 @@ def _compute_free_work_windows(
     return result
 
 
+def _match_group(
+    program: Any, groups: list[str], slots: list[dict[str, Any]], default_group: str
+) -> tuple[str, str]:
+    """Pick the timetable group for an enrollment program.
+
+    Returns (group_code, matched_by): "PROGRAM" when the program names the
+    group or the group's programme, otherwise the institution's default group.
+    """
+    prog = str(program or "").strip().upper()
+    for grp in groups:
+        if (grp and grp in prog) or any(
+            s["group_code"] == grp and s["program_name"].upper() in prog for s in slots
+        ):
+            return grp, "PROGRAM"
+    return default_group, "DEFAULT"
+
+
 def _sync_enrolled_students_availability(
     conn: Any,
     inst_id: str,
@@ -362,7 +389,11 @@ def _sync_enrolled_students_availability(
     enrollments = conn.execute(
         select(t_enr.c.candidate_id, t_enr.c.program).where(
             t_enr.c.institution_id == inst_id,
-            t_enr.c.end_date.is_(None),
+            t_enr.c.start_date <= local_today(),
+            or_(t_enr.c.end_date.is_(None), t_enr.c.end_date >= local_today()),
+            # A declared or pending enrollment must not let a timetable rewrite
+            # that student's own availability.
+            t_enr.c.status == "VERIFIED",
         )
     ).mappings().all()
 
@@ -375,14 +406,7 @@ def _sync_enrolled_students_availability(
             continue
         seen_candidates.add(cand_id)
 
-        prog = str(row.get("program") or "").strip().upper()
-        matched_group = default_group
-        for grp in free_by_group:
-            if grp in prog or any(
-                s["group_code"] == grp and s["program_name"].upper() in prog for s in slots
-            ):
-                matched_group = grp
-                break
+        matched_group, _ = _match_group(row.get("program"), list(free_by_group), slots, default_group)
 
         day_windows = free_by_group[matched_group]
         conn.execute(t_rules.delete().where(t_rules.c.candidate_id == cand_id))
@@ -484,6 +508,80 @@ class UniversityTimetableService:
             ],
         }
 
+    def get_my_timetable(self, actor: ActorContext) -> dict[str, Any]:
+        """The calling student's own class timetable (read-only).
+
+        Only a current VERIFIED enrollment at a VERIFIED institution unlocks it;
+        a merely declared or pending enrollment does not reveal an institution's
+        schedule.
+        """
+        from app.api.dependencies import candidate_id_for
+
+        candidate_id = candidate_id_for(actor)
+        e = table("enrollments")
+        inst = table("institutions")
+        with transaction() as conn:
+            account_authority(conn, actor)
+            row = conn.execute(
+                select(e.c.institution_id, e.c.program, inst.c.name)
+                .select_from(e.join(inst, inst.c.id == e.c.institution_id))
+                .where(
+                    e.c.candidate_id == candidate_id,
+                    e.c.status == "VERIFIED",
+                    e.c.start_date <= local_today(),
+                    or_(e.c.end_date.is_(None), e.c.end_date >= local_today()),
+                    inst.c.status == "VERIFIED",
+                )
+                .order_by(e.c.start_date.desc())
+            ).mappings().first()
+
+        base: dict[str, Any] = {
+            "ok": True,
+            "contract_id": "API-098-MY-TIMETABLE",
+            "institution_name": None,
+            "program": None,
+            "group_code": None,
+            "matched_by": None,
+            "academic_semester": None,
+            "updated_at": None,
+            "slots": [],
+            "free_windows": [],
+        }
+        if not row:
+            return {**base, "status": "NO_VERIFIED_ENROLLMENT"}
+
+        stored = load_domain_record(TIMETABLE_NAMESPACE, str(row["institution_id"])) or {}
+        all_slots: list[dict[str, Any]] = stored.get("slots") if isinstance(stored.get("slots"), list) else []
+        base.update(
+            institution_name=row["name"],
+            program=row["program"],
+            academic_semester=stored.get("academic_semester"),
+            updated_at=stored.get("updated_at"),
+        )
+        if not all_slots:
+            return {**base, "status": "TIMETABLE_NOT_PUBLISHED"}
+
+        groups = sorted({s["group_code"] for s in all_slots if s.get("group_code")})
+        group, matched_by = _match_group(row["program"], groups, all_slots, groups[0])
+        public_keys = (
+            "weekday", "weekday_name", "para_number", "start_time", "end_time", "start_minute",
+            "end_minute", "subject_name", "lesson_type", "room", "teacher_name",
+        )
+        slots = [{k: s.get(k) for k in public_keys} for s in all_slots if s.get("group_code") == group]
+        commute = int(stored.get("commute_buffer_minutes") or 30)
+        free = _compute_free_work_windows(
+            [s for s in all_slots if s.get("group_code") == group], commute_buffer_minutes=commute
+        ).get(group, [])
+        return {
+            **base,
+            "status": "OK",
+            "group_code": group,
+            "matched_by": matched_by,
+            "commute_buffer_minutes": commute,
+            "slots": slots,
+            "free_windows": free,
+        }
+
     def save_manual_timetable(
         self,
         actor: ActorContext,
@@ -492,7 +590,7 @@ class UniversityTimetableService:
     ) -> dict[str, Any]:
         """Save manually entered timetable slots (or append/remove a slot) and sync student work availability."""
         with transaction() as conn:
-            _verify_institution_staff(conn, actor, inst_id)
+            _verify_timetable_editor(conn, actor, inst_id)
             current = load_domain_record(TIMETABLE_NAMESPACE, str(inst_id)) or {}
             existing_slots: list[dict[str, Any]] = (
                 current.get("slots") if isinstance(current.get("slots"), list) else []
@@ -609,7 +707,7 @@ class UniversityTimetableService:
     ) -> dict[str, Any]:
         """Parse, validate, and import a CSV or JSON schedule template uploaded by University staff."""
         with transaction() as conn:
-            _verify_institution_staff(conn, actor, inst_id)
+            _verify_timetable_editor(conn, actor, inst_id)
             current = load_domain_record(TIMETABLE_NAMESPACE, str(inst_id)) or {}
             existing_slots: list[dict[str, Any]] = (
                 current.get("slots") if isinstance(current.get("slots"), list) else []

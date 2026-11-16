@@ -70,6 +70,7 @@ import AuthModal from "@/components/AuthModal";
 import { SkeuoSegmented } from "@/components/skeuo/SkeuoPrimitives";
 import ProfileOverview from "@/components/profile/ProfileOverview";
 import { useAsyncData } from "@/lib/useAsyncData";
+import { fetchMyTimetable } from "@/lib/timetable";
 
 
 const WEEKDAY_NAMES = [
@@ -98,6 +99,9 @@ export default function CandidateProfileHub() {
   const applicationsQuery = useAsyncData(
     currentUser ? `applications-summary:${currentUser.user_id}` : null,
     fetchCandidateApplicationsSummary
+  );
+  const timetableQuery = useAsyncData(currentUser ? `my-timetable:${currentUser.user_id}` : null, () =>
+    fetchMyTimetable().catch(() => null)
   );
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -852,6 +856,7 @@ export default function CandidateProfileHub() {
           region={profileRegion}
           skills={mySkills}
           rules={rules}
+          classes={timetableQuery.data?.status === "OK" ? timetableQuery.data.slots : undefined}
           enrollments={enrollments}
           portfolios={portfolios}
           certificates={certificates}
