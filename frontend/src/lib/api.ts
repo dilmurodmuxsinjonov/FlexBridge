@@ -5593,3 +5593,94 @@ export async function fetchManagedOpportunities(organizationId: string, status?:
   }
   return Array.isArray(data.items) ? data.items : [];
 }
+
+// ---------------------------------------------------------------------------
+// Student-status confirmation by the university coordinator (until HEMIS)
+// ---------------------------------------------------------------------------
+export interface EnrollmentRequestItem {
+  case_id: string;
+  enrollment_id: string;
+  status: "PENDING" | "IN_REVIEW" | "NEEDS_INFO" | string;
+  current_revision: number;
+  due_at: string | null;
+  student_name: string;
+  program: string;
+  start_date: string;
+  end_date: string | null;
+  submitted_at: string;
+  assigned_to_me: boolean;
+  claimed_by_other: boolean;
+}
+
+export interface EnrollmentRequestDetail {
+  case: { id: string; status: string; current_revision: number };
+  submissions: Array<{
+    revision: number;
+    program: string;
+    start_date: string;
+    end_date: string | null;
+    evidence_note: string;
+    files: Array<{ id: string; sha256: string; byte_size: number; download_path: string | null }>;
+  }>;
+  decisions: Array<{ revision: number; action: string; reason: string; created_at: string }>;
+}
+
+async function enrollmentJson<T>(res: Response, fallback: string): Promise<T> {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || fallback);
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as T;
+}
+
+const enrollmentBase = (inst: string) => `/api/bff/university/enrollment-requests/${encodeURIComponent(inst)}`;
+
+export async function fetchEnrollmentRequests(institutionId: string): Promise<EnrollmentRequestItem[]> {
+  const data = await enrollmentJson<{ items: EnrollmentRequestItem[] }>(
+    await fetch(enrollmentBase(institutionId), { headers: { Accept: "application/json" }, cache: "no-store" }),
+    "ENROLLMENT_QUEUE_FAILED"
+  );
+  return data.items || [];
+}
+
+export async function claimEnrollmentRequest(institutionId: string, caseId: string): Promise<void> {
+  await enrollmentJson(
+    await fetch(`${enrollmentBase(institutionId)}/${encodeURIComponent(caseId)}/claim`, { method: "POST" }),
+    "ENROLLMENT_CLAIM_FAILED"
+  );
+}
+
+export async function fetchEnrollmentRequestDetail(institutionId: string, caseId: string): Promise<EnrollmentRequestDetail> {
+  return enrollmentJson<EnrollmentRequestDetail>(
+    await fetch(`${enrollmentBase(institutionId)}/${encodeURIComponent(caseId)}`, { headers: { Accept: "application/json" }, cache: "no-store" }),
+    "ENROLLMENT_DETAIL_FAILED"
+  );
+}
+
+export async function openEnrollmentEvidence(institutionId: string, caseId: string, fileId: string): Promise<string> {
+  const data = await enrollmentJson<{ signed_url: string }>(
+    await fetch(`${enrollmentBase(institutionId)}/${encodeURIComponent(caseId)}/files/${encodeURIComponent(fileId)}`, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    }),
+    "EVIDENCE_DOWNLOAD_FAILED"
+  );
+  return data.signed_url;
+}
+
+export async function decideEnrollmentRequest(
+  institutionId: string,
+  caseId: string,
+  body: { decision: "APPROVE" | "REJECT" | "NEEDS_INFO"; expected_revision: number; reason: string }
+): Promise<void> {
+  await enrollmentJson(
+    await fetch(`${enrollmentBase(institutionId)}/${encodeURIComponent(caseId)}/decision`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+    "ENROLLMENT_DECISION_FAILED"
+  );
+}

@@ -58,7 +58,7 @@ def test_populated_academic_upgrade_preserves_history_without_fabricating_new_co
         migrate('head')
         with engine.begin() as conn:
             assert history(conn)==before
-            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0021_candidate_portal_extension'
+            assert conn.execute(text('SELECT version_num FROM public.alembic_version')).scalar_one()=='0022_enrollment_inst_review'
             assert conn.execute(text("SELECT count(*) FROM pg_tables WHERE schemaname='flexbridge'")).scalar_one()==133
             q=dict(conn.execute(select(table('academic_assignment_proofs'))).mappings().one())
             b=dict(conn.execute(select(table('placement_academic_bindings'))).mappings().one())

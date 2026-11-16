@@ -19,12 +19,12 @@ def register_tables(metadata, types):
             'id': 'uuid', 'created_at': 'timestamptz', 'enrollment_id': 'uuid',
             'case_id': 'uuid', 'revision': 'integer', 'action': 'text',
             'actor_id': 'uuid', 'session_id': 'uuid', 'auth_version': 'integer',
-            'platform_grant_id': 'uuid', 'reason': 'text', 'idempotency_key': 'text',
+            'platform_grant_id': 'uuid', 'institution_grant_id': 'uuid', 'reason': 'text', 'idempotency_key': 'text',
             'request_fingerprint': 'text', 'receipt': 'jsonb'}}
     optional = {
         'enrollment_origins': {'case_id', 'idempotency_key', 'request_fingerprint'},
         'enrollment_submissions': {'end_date', 'student_ref_digest'},
-        'enrollment_events': {'case_id', 'revision', 'platform_grant_id', 'idempotency_key', 'request_fingerprint'}}
+        'enrollment_events': {'case_id', 'revision', 'platform_grant_id', 'institution_grant_id', 'idempotency_key', 'request_fingerprint'}}
     for name, fields in definitions.items():
         keys = {'enrollment_id'} if name.endswith('origins') else (
             {'case_id', 'revision'} if name.endswith('submissions') else {'id'})
