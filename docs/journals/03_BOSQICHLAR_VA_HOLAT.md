@@ -1394,6 +1394,12 @@ Keyingi kichik qadam:
 - **Tekshiruv**: vitest 62/62 (LoginPanel 5 ta yangi test), lint 0, build OK; Edge Playwright: 5 sahifa desktop+mobil, dark, haqiqiy backend xatosi (INVALID_CREDENTIALS -> o'zbekcha xabar), 2FA bosqichi, noto'g'ri rol holati - toshish yo'q, page error yo'q.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
+### 2026-11-16 | LOG-173 | Issue #233 -> Parolni tiklash sahifasi
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: parolni tiklash funksiyasini qo'shish ("ha bajar").
+- **Topilma**: backendda xavfsiz recovery oqimi (IAM.md) allaqachon bor edi - OTP + mustaqil omil (TOTP/zaxira kod); omilsiz -> PENDING_REVIEW (hisob bor-yo'qligi oshkor qilinmaydi). Frontend/BFF yo'q edi. Xavfsizlik qarori o'zgartirilmadi (faqat OTP bilan parol tiklanmaydi).
+- **Qilindi**: `/parolni-tiklash` (`components/auth/PasswordRecovery.tsx`): 4 bosqich + progress, SMS/Telegram (TelegramVerification qayta ishlatildi)/email, 6 xonali kod avtomatik tekshiruvi, qayta yuborish taymeri, TOTP yoki zaxira kod, yangi parol (>=12, harf+raqam, takrorlash), PENDING_REVIEW uchun so'rov raqami va holatni yangilash. BFF `api/bff/auth/recovery*` (tokenlar faqat body/X-Recovery-Token). `lib/recovery.ts`, yangi o'zbekcha xato xabarlari. LoginPanel va AuthModal'dagi "Parolni unutdingizmi?" shu sahifaga.
+- **Tekshiruv**: vitest 66/66 (PasswordRecovery 3 + normalizatsiya), lint 0, build OK; Edge Playwright: haqiqiy staging backend kod so'rovini qabul qildi, mock bilan to'liq oqim (kod -> TOTP -> yangi parol -> tayyor) va PENDING_REVIEW (mobil, dark) - toshish/xato yo'q.
+- **Ochiq**: PENDING_REVIEW so'rovlarini ko'rib chiqadigan operator navbati yo'q - OPS/siyosat qarori kerak.
 ### 2026-11-16 | LOG-174 | Issue #235 -> Universitetning maxsus akkaunti va xodimlari
 - **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "universitet uchun maxsus akkaunt bo'ladi, u o'z xodimlarini kiritishi mumkin".
 - **Topilma**: backend modeli bor edi (FIRST_COORDINATOR = universitet akkaunti, STAFF_TEACHER = xodim; moderator tekshiruvi + nomlangan xodim roziligi, MFA). Frontendda ulash arizasi ham, xodim qo'shish ham yo'q edi; staff uchun PDF yuklash yo'li ham yo'q edi.

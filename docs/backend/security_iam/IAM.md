@@ -142,6 +142,14 @@ saqlaydi. Yangi to'plam eski to'plamni bekor qiladi. Ularni xodimga/chatga berma
    o'rnatmaguncha biznes amallariga kira olmaydi. Reset token yana ishlamaydi.
 
 Qo'lda identity review — OPSning keyingi ishi. PENDING_REVIEW o'z-o'zidan APPROVED bo'lmaydi.
+
+Frontend (2026-11-16, Issue #233): `/parolni-tiklash` sahifasi shu oqimni bosqichma-bosqich
+bajaradi (kontakt -> RECOVERY OTP (SMS/Telegram/email) -> TOTP yoki zaxira kod -> yangi parol).
+Kirish sahifalari va AuthModal'dagi "Parolni unutdingizmi?" shu sahifaga olib boradi. BFF:
+`POST /api/bff/auth/recovery`, `GET /api/bff/auth/recovery/{id}` (`X-Recovery-Token` sarlavhada),
+`POST /api/bff/auth/recovery/{id}/complete`; tokenlar faqat brauzer xotirasida turadi, URL yoki
+cookie'ga yozilmaydi. Ikkinchi omilsiz foydalanuvchi PENDING_REVIEW raqamini oladi; uni ko'rib
+chiqadigan operator navbati hali yo'q (OPS qarori kerak).
 Telefon qayta boshqa hisobga bog'lansa, avvalgi kontaktga chiqarilgan proof/reset token
 eski shaxsning hisobini ochish uchun ishlamaydi.
 
