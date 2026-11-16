@@ -192,6 +192,7 @@ class SavedOpportunitiesService:
             t_saved = table("saved_opportunities")
             t_opp = table("opportunities")
             t_rev = table("opportunity_revisions")
+            t_org = table("organizations")
 
             total = conn.execute(
                 select(func.count(t_saved.c.id)).where(t_saved.c.candidate_id == c_id)
@@ -212,11 +213,12 @@ class SavedOpportunitiesService:
                     t_rev.c.work_mode,
                     t_rev.c.contract_type,
                     t_rev.c.is_paid,
+                    t_org.c.public_name.label("organization_name"),
                 )
                 .select_from(
-                    t_saved.join(t_opp, t_opp.c.id == t_saved.c.opportunity_id).outerjoin(
-                        t_rev, t_rev.c.id == t_opp.c.current_revision_id
-                    )
+                    t_saved.join(t_opp, t_opp.c.id == t_saved.c.opportunity_id)
+                    .outerjoin(t_rev, t_rev.c.id == t_opp.c.current_revision_id)
+                    .outerjoin(t_org, t_org.c.id == t_opp.c.organization_id)
                 )
                 .where(t_saved.c.candidate_id == c_id)
                 .order_by(t_saved.c.created_at.desc())
@@ -242,6 +244,7 @@ class SavedOpportunitiesService:
                         "opportunity": {
                             "id": row["opportunity_id"],
                             "organization_id": row["organization_id"],
+                            "organization_name": row["organization_name"],
                             "kind": row["kind"],
                             "status": status,
                             "is_closed": is_closed,

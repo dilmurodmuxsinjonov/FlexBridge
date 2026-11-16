@@ -670,7 +670,22 @@ export async function fetchCandidateApplicationsSummary(): Promise<CandidateAppl
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
-  return data as CandidateApplicationsSummary;
+  // Missing counters become 0 so totals never render as NaN.
+  const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  return {
+    ...data,
+    total_applications: n(data.total_applications),
+    submitted: n(data.submitted),
+    under_review: n(data.under_review),
+    interview_scheduled: n(data.interview_scheduled),
+    interviews_total: n(data.interviews_total),
+    offered: n(data.offered),
+    offers_total: n(data.offers_total),
+    accepted: n(data.accepted),
+    rejected: n(data.rejected),
+    withdrawn: n(data.withdrawn),
+    expired: n(data.expired),
+  } as CandidateApplicationsSummary;
 }
 
 export async function fetchCandidateApplications(params?: {
@@ -2412,7 +2427,14 @@ export async function fetchCandidateRatings(): Promise<CandidateRatingsResponse>
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
-  return data as CandidateRatingsResponse;
+  // Missing lists must not crash the page (they render as empty tabs).
+  return {
+    ...data,
+    submissions_received: Array.isArray(data.submissions_received) ? data.submissions_received : [],
+    submissions_given: Array.isArray(data.submissions_given) ? data.submissions_given : [],
+    eligible_relations: Array.isArray(data.eligible_relations) ? data.eligible_relations : [],
+    available_rubrics: Array.isArray(data.available_rubrics) ? data.available_rubrics : [],
+  } as CandidateRatingsResponse;
 }
 
 export async function submitEngagementRating(
@@ -2471,6 +2493,7 @@ export interface SavedOpportunityItem {
   opportunity: {
     id: string;
     organization_id?: string;
+    organization_name?: string | null;
     kind: string;
     status: string;
     is_closed: boolean;
@@ -2681,20 +2704,20 @@ export interface InstitutionExportReceipt {
 
 export interface StudentSupervisionItem {
   id: string;
+  institution_id?: string;
   enrollment_id: string;
-  agreement_id: string;
   purpose: string;
-  legal_basis?: string;
-  status?: string;
-  created_at?: string;
+  student_name?: string | null;
+  coordinator_accepted_at?: string | null;
 }
 
+/** The institution's platform agreement (API returns only current ACTIVE ones). */
 export interface AcademicAgreementItem {
   id: string;
-  institution_id: string;
-  organization_id: string;
-  status: string;
-  created_at?: string;
+  version?: number | string | null;
+  purposes?: string[] | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
 }
 
 export async function generateInstitutionExport(

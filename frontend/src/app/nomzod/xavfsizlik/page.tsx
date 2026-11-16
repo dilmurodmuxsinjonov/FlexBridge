@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { describeRequestError } from "@/lib/errors";
 import { useAsyncData } from "@/lib/useAsyncData";
 import {
-  Shield,
   ShieldCheck,
   KeyRound,
   Smartphone,
@@ -269,10 +268,7 @@ export default function CandidateSecurityPage() {
         {/* Header Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <Shield className="w-6 h-6 text-primary" />
-              Xavfsizlik, Ikki Bosqichli Autentifikatsiya (MFA) & Sessiyalar
-            </h1>
+            <h1 className="fb-display">Xavfsizlik</h1>
             <p className="text-xs text-[var(--fb-ink-secondary)] mt-1">
               Parol bilan qo‘shimcha tasdiqlash, ikki bosqichli autentifikatsiya, zaxira kodlari va faol qurilmalarni boshqarish.
             </p>
@@ -325,8 +321,8 @@ export default function CandidateSecurityPage() {
           />
           <SkeuoStatCard
             title="Ishonch darajasi"
-            value={securityData?.totp_enabled ? "A2" : "A1"}
-            subtitle={securityData?.totp_enabled ? "MFA-LEVEL himoya" : "Faqat parol darajasi"}
+            value={securityData?.totp_enabled ? "Yuqori" : "Oddiy"}
+            subtitle={securityData?.totp_enabled ? "Parol + bir martalik kod" : "Faqat parol"}
             icon={Lock}
             tone="sky"
           />
@@ -403,12 +399,12 @@ export default function CandidateSecurityPage() {
               </p>
             </div>
             <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-1">
-              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Standart</span>
-              <p className="text-sm font-medium text-white">RFC 6238 TOTP (SHA-1 / 30 soniya)</p>
+              <span className="text-[11px] font-semibold text-zinc-400">Qaysi ilova</span>
+              <p className="text-sm font-medium text-white">Google Authenticator, Microsoft Authenticator va shu kabi ilovalar (kod har 30 soniyada yangilanadi)</p>
             </div>
             <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-1">
-              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Himoya Qamrovi</span>
-              <p className="text-sm font-medium text-white">Barcha portal sessiyalari & API amallari</p>
+              <span className="text-[11px] font-semibold text-zinc-400">Nimani himoya qiladi</span>
+              <p className="text-sm font-medium text-white">Kirish, parolni tiklash va muhim amallar</p>
             </div>
           </div>
         </div>
@@ -421,7 +417,7 @@ export default function CandidateSecurityPage() {
             <div>
               <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-amber-400" />
-                Favqulodda Zaxira Tiklash Kodlari (Recovery Codes)
+                Zaxira tiklash kodlari
               </h2>
               <p className="text-xs text-zinc-400 mt-1">
                 Telefoningiz yoki authenticator ilovangizga kirish imkoni bo‘lmaganda hisobni tiklash uchun bir martalik zaxira kodlari.

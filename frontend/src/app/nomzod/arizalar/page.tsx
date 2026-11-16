@@ -335,9 +335,7 @@ export default function CandidateApplicationsPage() {
             <ChevronRight className="h-3 w-3 text-zinc-600" />
             <span className="text-xs font-medium text-primary">Nomzod arizalari</span>
           </div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold text-white tracking-tight">
-            Mening arizalarim va tanlov holati
-          </h1>
+          <h1 className="fb-display">Arizalarim</h1>
           <p className="mt-1 text-sm text-zinc-400">
             Topshirilgan arizalarning real vaqt holati, suhbatlar jadvali va takliflarni boshqarish.
           </p>

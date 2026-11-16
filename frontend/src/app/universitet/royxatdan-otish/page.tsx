@@ -36,6 +36,7 @@ import { isAcademicRoles } from "@/lib/roles";
 
 interface AppointmentInboxItem {
   id: string;
+  institution_name?: string | null;
   institution_id: string;
   status: string;
   case_status: string;
@@ -651,8 +652,8 @@ function UniversitetRegistrationContent() {
                     className="rounded-xl border border-indigo-500/25 bg-indigo-500/[0.06] p-4 space-y-3 text-xs"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-[11px] text-indigo-300">
-                        #{item.id.slice(0, 8)} • Rev {item.current_revision}
+                      <span className="text-[11px] text-indigo-300">
+                        {item.institution_name || "Universitet"}
                       </span>
                       <span className="rounded-full border border-indigo-500/30 bg-indigo-500/15 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-300">
                         {STATUS_LABELS[item.status] ?? item.status}

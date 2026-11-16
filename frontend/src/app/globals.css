@@ -1109,3 +1109,25 @@ html.dark .fb-bar.fb-bar-today { background: var(--fb-accent); color: #fff; bord
 }
 @keyframes fb-ring-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .fb-ring { animation: none; } }
+
+/* Legacy portal modules: solid blue/indigo/sky action buttons follow the mono
+   system (ink pill; light pill in dark mode). Only buttons and links - fills,
+   dots and progress bars keep their colour. */
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent) {
+  background: var(--fb-pill-active-bg) !important;
+  color: var(--fb-pill-active-fg) !important;
+  border-color: transparent !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.55) !important;
+}
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent) * {
+  color: inherit !important;
+}
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent):hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+/* Legacy cards: same generous radius as the new panels. */
+html :is(.bg-surface-card, .bg-\[\#121214\], .bg-\[\#141417\], .bg-zinc-900, .bg-surface):is(.rounded-lg, .rounded-xl) {
+  border-radius: 20px;
+}

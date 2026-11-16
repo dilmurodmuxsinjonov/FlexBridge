@@ -1396,7 +1396,7 @@ export default function EmployerPortal() {
                   </span>
                 </div>
                 <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
-                  Arizalarni Bosqichma-bosqich Boshqarish va Suhbat Belgilash
+                  Nomzodlar kanbani
                 </h2>
                 <p className="text-xs text-[var(--fb-ink-secondary)]">
                   Vakansiyaga topshirilgan nomzodlarni saralash, suhbat tayinlash va rasmiy ish takliflari yuborish.
@@ -1585,20 +1585,15 @@ export default function EmployerPortal() {
                             >
                               {/* Candidate header info */}
                               <div className="flex items-center justify-between gap-1">
-                                <span className="text-[11px] font-mono text-zinc-300 font-medium">
-                                  #{app.candidate_id.slice(0, 8)}
+                                <span className="min-w-0 truncate text-xs font-semibold text-[var(--fb-ink)]">
+                                  {app.headline || "Nomzod"}
                                 </span>
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-white/[0.04]">
-                                  #{app.attempt_no}-urinish
-                                </span>
+                                {app.attempt_no > 1 && (
+                                  <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
+                                    {app.attempt_no}-ariza
+                                  </span>
+                                )}
                               </div>
-
-                              {/* Headline / Region */}
-                              {app.headline && (
-                                <p className="text-xs font-medium text-zinc-100 line-clamp-1">
-                                  {app.headline}
-                                </p>
-                              )}
                               {app.region && (
                                 <div className="flex items-center gap-1 text-[11px] text-zinc-400">
                                   <MapPin className="w-3 h-3 text-zinc-500" />
@@ -1794,7 +1789,7 @@ export default function EmployerPortal() {
                     </span>
                   </div>
                   <h2 className="font-heading text-base md:text-lg font-bold text-white">
-                    Amaliyot Kundaliklarini Baholash va Mentorlik Boshqaruvi
+                    Mentorlik va kundaliklar
                   </h2>
                   <p className="text-xs text-zinc-400">
                     Amaliyotchi talabalarning kunlik topshiriqlarini tekshirish, tasdiqlash yoki tuzatish talab qilish hamda biriktirilgan amaliyotchilarni kuzatish.
@@ -2064,7 +2059,7 @@ export default function EmployerPortal() {
                             className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-2"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-semibold text-white">Amaliyot #{asg.placement_id.slice(0, 8)}</span>
+                              <span className="text-xs font-semibold text-white">Amaliyot · {new Date(asg.assigned_at).toLocaleDateString("uz-UZ")} dan</span>
                               <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                 {asg.revoked_at ? "Tugallangan" : asg.accepted_at ? "Faol Mentorlik" : "Kutilmoqda"}
                               </span>
@@ -2092,13 +2087,12 @@ export default function EmployerPortal() {
                             className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-2"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-semibold text-white font-mono">#{plc.id.slice(0, 8)}</span>
+                              <span className="text-xs font-semibold text-white">{plc.start_date} — {plc.end_date}</span>
                               <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                {plc.status}
+                                {enumLabel(plc.status)}
                               </span>
                             </div>
                             <div className="text-xs text-zinc-400 flex flex-col gap-1 mt-1">
-                              <div>Nomzod ID: <span className="font-mono text-zinc-300">#{plc.candidate_id.slice(0, 8)}...</span></div>
                               <div>Davomiyligi: <span className="font-mono text-zinc-300">{plc.start_date} ~ {plc.end_date}</span></div>
                               <div>Akademik trek: <span className="font-semibold text-zinc-200">{plc.academic_track ? "Mavjud (Dual ta'lim)" : "Yo'q"}</span></div>
                             </div>
@@ -2129,12 +2123,12 @@ export default function EmployerPortal() {
                     >
                       {mentorAssignments.map((asg) => (
                         <option key={`m-${asg.placement_id}`} value={asg.placement_id}>
-                          Mentorlik: #{asg.placement_id.slice(0, 8)}
+                          Mentorlik amaliyoti ({new Date(asg.assigned_at).toLocaleDateString("uz-UZ")} dan)
                         </option>
                       ))}
                       {orgPlacements.map((plc) => (
                         <option key={`o-${plc.id}`} value={plc.id}>
-                          Amaliyot: #{plc.id.slice(0, 8)} ({plc.start_date} ~ {plc.end_date})
+                          Amaliyot: {plc.start_date} — {plc.end_date} ({enumLabel(plc.status)})
                         </option>
                       ))}
                     </select>
@@ -2168,7 +2162,7 @@ export default function EmployerPortal() {
                     </span>
                   </div>
                   <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
-                    Tashkilot Huquqlari, Tekshiruv Holati va Jamoa Boshqaruvi
+                    Tashkilot va jamoa
                   </h2>
                   <p className="text-xs text-[var(--fb-ink-secondary)]">
                     Tashkilot vakolatlari, rasmiy tekshiruv holati, jamoa a’zolari ro‘yxati va 24 soatlik taklifnomalar yuborish.
@@ -2244,7 +2238,7 @@ export default function EmployerPortal() {
                     <div className="flex items-center gap-2">
                       <Building className="w-4 h-4 text-primary" />
                       <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
-                        Tashkilot Tekshiruvi (STIR / Soliq)
+                        Tashkilot tekshiruvi (STIR)
                       </h3>
                     </div>
                   </div>
@@ -2549,7 +2543,7 @@ export default function EmployerPortal() {
                     </span>
                   </div>
                   <h3 className="text-base font-semibold text-[var(--fb-ink)]">
-                    Tarif Rejalari, Xizmat Huquqlari & Tranzaksiyalar
+                    To‘lovlar va tariflar
                   </h3>
                   <p className="text-xs text-[var(--fb-ink-secondary)]">
                     Tashkilot faol obunasi, e’lon kvotalari, hisob-fakturalar va to‘lovni qaytarish so‘rovlari boshqaruvi.
@@ -2926,7 +2920,7 @@ export default function EmployerPortal() {
                     <span className="text-zinc-500 text-xs font-mono">• O‘zR MK 118-modda</span>
                   </div>
                   <h2 className="text-lg font-bold text-white font-heading">
-                    Iste’dodlar Bazasi & Aqlli Moslashtirish
+                    Nomzod qidirish
                   </h2>
                   <p className="text-xs text-zinc-400">
                     Ko‘nikmalar (ANY/ALL), hududlar va talabalarning dars jadvali bo‘sh vaqtlari bo‘yicha aqlli saralash.
@@ -3889,7 +3883,7 @@ export default function EmployerPortal() {
                 <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" />
                 <h3 className="mt-4 text-base font-bold text-white">{createSuccess}</h3>
                 <p className="mt-2 text-xs text-zinc-400">
-                  E’lon qoralama (DRAFT) holatida saqlandi. Moderatsiyadan so‘ng e’lon qilinadi.
+                  E’lon qoralama sifatida saqlandi. Tekshiruvdan so‘ng e’lon qilinadi.
                 </p>
                 <div className="mt-6">
                   <button
@@ -4165,7 +4159,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <Send className="w-5 h-5 text-emerald-400" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Rasmiy Ish Taklifi Yuborish
+                  Ish taklifi yuborish
                 </h3>
               </div>
               <button
@@ -4353,7 +4347,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Nomzod Profili & Holat Tarixi
+                  Nomzod profili va tarixi
                 </h3>
               </div>
               <button
@@ -4464,7 +4458,7 @@ export default function EmployerPortal() {
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
                 <h3 className="font-heading text-base font-bold text-white">
-                  Kundalikni Tekshirish va Baholash
+                  Kundalikni tekshirish
                 </h3>
               </div>
               <button

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import { enumLabel } from "@/lib/labels";
 import {
   Star,
   ShieldCheck,
@@ -13,7 +14,6 @@ import {
   Send,
   X,
   Building2,
-  Award,
   HelpCircle,
 } from "lucide-react";
 import {
@@ -157,10 +157,7 @@ export default function CandidateRatingsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-[var(--fb-ink)] flex items-center gap-2">
-              <Award className="w-6 h-6 text-amber-500" />
-              Baholar, Ko‘rib Chiqish & E’tirozlar Markazi
-            </h1>
+            <h1 className="fb-display">Baholar</h1>
             <p className="text-sm text-[var(--fb-ink-secondary)] mt-1">
               Ikki tomonlama maxfiy himoya va mezonlar jadvali asosidagi mustaqil baholash tizimi.
             </p>
@@ -359,7 +356,6 @@ export default function CandidateRatingsPage() {
                           <CheckCircle2 className="w-3 h-3" /> Nashr etilgan
                         </span>
                       )}
-                      <span className="text-xs text-zinc-500 font-mono">ID: {sub.id.slice(0, 8)}...</span>
                     </div>
 
                     {sub.blind_window_active ? (
@@ -433,9 +429,6 @@ export default function CandidateRatingsPage() {
                   {sub.comment && (
                     <p className="text-xs text-zinc-300 italic">&ldquo;{sub.comment}&rdquo;</p>
                   )}
-                  <div className="text-[11px] text-zinc-500">
-                    <span>Bog‘liq munosabat ID: {sub.engagement_id || sub.placement_id || "—"}</span>
-                  </div>
                 </div>
               ))
             )}
@@ -474,12 +467,11 @@ export default function CandidateRatingsPage() {
                         </span>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-zinc-800 text-zinc-300">
-                        {rel.status}
+                        {enumLabel(rel.status)}
                       </span>
                     </div>
 
                     <div className="mt-3 text-xs text-zinc-400 space-y-1">
-                      <p>Munosabat ID: <span className="font-mono text-zinc-300">{rel.relation_id.slice(0, 12)}...</span></p>
                       {rel.start_date && (
                         <p>Davr: {rel.start_date} &rarr; {rel.end_date || "Hozirga qadar"}</p>
                       )}

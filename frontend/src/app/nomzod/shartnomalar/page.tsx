@@ -255,9 +255,7 @@ function ShartnomalarHubContent() {
             <ChevronRight className="h-3 w-3 text-zinc-600" />
             <span className="text-xs font-medium text-primary">Shartnomalar & Amaliyot</span>
           </div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold text-white tracking-tight">
-            Amaliyot & Ish Shartnomalari Markazi
-          </h1>
+          <h1 className="fb-display">Shartnomalar</h1>
           <p className="mt-1 text-sm text-[var(--fb-ink-secondary)]">
             Amaliyot o‘quv rejalari, shartnomalarni qabul qilish va ikki tomonlama ish boshlanishini tasdiqlash markazi.
           </p>
@@ -403,8 +401,8 @@ function ShartnomalarHubContent() {
                       >
                         <div>
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-[11px] font-mono text-zinc-400">
-                              ID: {plc.id.slice(0, 8)}...
+                            <span className="min-w-0 truncate text-sm font-semibold text-[var(--fb-ink)]">
+                              {plc.opportunity_title || "Amaliyot"}
                             </span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${badge.cls}`}>
                               {badge.label}
@@ -414,7 +412,7 @@ function ShartnomalarHubContent() {
                           <div className="space-y-2 mb-4 text-xs text-zinc-300">
                             <div className="flex items-center gap-2 text-zinc-400">
                               <Building2 className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-                              <span className="truncate">Tashkilot ID: {plc.organization_id ? `${plc.organization_id.slice(0, 12)}...` : "—"}</span>
+                              <span className="truncate">{plc.organization_name || "Korxona"}</span>
                             </div>
                             <div className="flex items-center gap-2 text-zinc-400">
                               <Calendar className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
@@ -422,7 +420,7 @@ function ShartnomalarHubContent() {
                             </div>
                             <div className="flex items-center gap-2 text-zinc-400">
                               <FileText className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-                              <span className="font-mono text-[11px]">Shartlar ID: {plc.current_terms_id ? `${plc.current_terms_id.slice(0, 8)}...` : "—"}</span>
+                              <span>{plc.current_terms_id ? "Shartlar kelishilgan" : "Shartlar hali kelishilmagan"}</span>
                             </div>
                           </div>
                         </div>
@@ -711,8 +709,11 @@ function ShartnomalarHubContent() {
                   <BookOpen className="h-5 w-5 text-primary" />
                   <span>Amaliyot O‘quv Rejasi & Shartlari</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-0.5 font-mono">
-                  Placement ID: {selectedPlacementId}
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  {(() => {
+                    const p = placements.find((x) => x.id === selectedPlacementId);
+                    return p ? [p.opportunity_title, p.organization_name].filter(Boolean).join(" · ") : "Amaliyot";
+                  })()}
                 </p>
               </div>
               <button
