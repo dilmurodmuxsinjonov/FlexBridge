@@ -61,6 +61,25 @@ class CandidateService:
                     entity_type='candidate_profile', entity_id=profile['id'], metadata={'fields': sorted(changes)})
             return self._render_profile(conn,own_profile(conn,actor.user_id))
 
+    def set_visibility(self, actor:ActorContext, visibility:str):
+        """Explicit, audited consent to appear in employer search (EMPLOYERS) or not (PRIVATE).
+
+        Not part of PATCH /me/candidate on purpose: it is a privacy decision, so it
+        has its own endpoint and audit action. Search only lists non-PRIVATE profiles.
+        """
+        if visibility not in ('PRIVATE', 'EMPLOYERS'):
+            raise AuthError('INVALID_VISIBILITY', 'Visibility must be PRIVATE or EMPLOYERS', 422)
+        with candidate_transaction() as conn:
+            profile = own_profile(conn, actor.user_id, True)
+            account_authority(conn,actor)
+            if profile['visibility'] != visibility:
+                conn.execute(table('candidate_profiles').update().where(
+                    table('candidate_profiles').c.id == profile['id']).values(visibility=visibility, updated_at=now()))
+                audit.append_audit_event(actor_id=actor.user_id, action='CANDIDATE_VISIBILITY_CHANGED',
+                    entity_type='candidate_profile', entity_id=profile['id'],
+                    metadata={'from': profile['visibility'], 'to': visibility})
+            return self._render_profile(conn,own_profile(conn,actor.user_id))
+
     def update_skills(self, actor:ActorContext, skills, remove_skill_ids):
         ids = [str(s['skill_id']) for s in skills]
         removals = [str(value) for value in remove_skill_ids]
