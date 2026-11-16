@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
@@ -233,7 +234,7 @@ export default function OpportunityDetailPage({
                 )}
                 {rev.work_mode && (
                   <span className="inline-flex items-center gap-1.5">
-                    <BriefcaseBusiness className="h-4 w-4 text-zinc-500" /> {rev.work_mode}
+                    <BriefcaseBusiness className="h-4 w-4 text-zinc-500" /> {enumLabel(rev.work_mode)}
                   </span>
                 )}
                 {opportunity.published_at && (
@@ -285,8 +286,8 @@ export default function OpportunityDetailPage({
             </div>
             <div className="rounded-xl border border-white/[0.08] bg-surface-card p-4">
               <span className="text-xs text-zinc-500">Shartnoma formati</span>
-              <p className="mt-1 font-heading text-lg font-bold text-white">
-                {rev.contract_type || "Rasmiy mehnat"}
+              <p className="mt-1 font-heading text-lg font-bold text-white break-words">
+                {rev.contract_type ? enumLabel(rev.contract_type) : "Rasmiy mehnat"}
               </p>
             </div>
           </section>

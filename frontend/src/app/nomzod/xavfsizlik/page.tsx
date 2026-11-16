@@ -324,7 +324,7 @@ export default function CandidateSecurityPage() {
             tone={securityData?.totp_enabled ? "emerald" : "amber"}
           />
           <SkeuoStatCard
-            title="Assurance darajasi"
+            title="Ishonch darajasi"
             value={securityData?.totp_enabled ? "A2" : "A1"}
             subtitle={securityData?.totp_enabled ? "MFA-LEVEL himoya" : "Faqat parol darajasi"}
             icon={Lock}

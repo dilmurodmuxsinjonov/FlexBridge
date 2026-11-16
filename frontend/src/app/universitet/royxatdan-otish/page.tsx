@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect, useEffectEvent } from "react";
+import { errorText } from "@/lib/errorText";
 import UniversityConnectForm from "@/components/university/UniversityConnectForm";
 import { STATUS_LABELS } from "@/lib/universityStaff";
 import Link from "next/link";
@@ -301,7 +302,7 @@ function UniversitetRegistrationContent() {
       );
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorMessage(data.message || data.error || "Tayinlov qarorini saqlab bo‘lmadi.");
+        setErrorMessage(errorText(data, "Tayinlov qarorini saqlab bo‘lmadi."));
         return;
       }
 

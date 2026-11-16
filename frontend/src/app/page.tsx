@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
@@ -52,7 +53,7 @@ function paymentLabel(job: Opportunity): string {
 
 function VacancyCard({ job }: { job: Opportunity }) {
   const place = job.region || job.organization_region;
-  const mode = job.work_mode ? modeLabels[job.work_mode] || job.work_mode : null;
+  const mode = job.work_mode ? modeLabels[job.work_mode] || enumLabel(job.work_mode) : null;
   const posted = job.published_at ? new Date(job.published_at) : null;
   const postedLabel = posted && !Number.isNaN(posted.getTime())
     ? posted.toLocaleDateString("uz-UZ")
@@ -96,7 +97,7 @@ function VacancyCard({ job }: { job: Opportunity }) {
           </div>
         </div>
         <span className="shrink-0 self-start skeuo-badge-recessed text-[var(--fb-ink)]">
-          {job.kind === "PART_TIME" ? "Yarim stavka" : job.kind === "INTERNSHIP" ? "Amaliyot" : job.kind}
+          {enumLabel(job.kind)}
         </span>
       </div>
 

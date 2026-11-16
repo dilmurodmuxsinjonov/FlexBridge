@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SimpleMarkdown from "@/components/SimpleMarkdown";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -217,9 +218,7 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-lg font-bold text-white border-b border-white/[0.08] pb-3">
                 {policyData.title}
               </h2>
-              <div className="prose prose-invert prose-xs sm:prose-sm max-w-none text-zinc-300 whitespace-pre-line leading-relaxed font-sans">
-                {policyData.content_markdown}
-              </div>
+              <SimpleMarkdown source={policyData.content_markdown} skipFirstHeading />
             </div>
           </div>
         ) : null}

@@ -1,4 +1,5 @@
 import { fromBackendResume, toBackendResume } from "./resumeContract";
+import { errorText } from "./errorText";
 export interface Opportunity {
   id: string;
   organization_id: string;
@@ -389,7 +390,7 @@ export async function fetchEmployerDashboard(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || "DASHBOARD_REQUEST_FAILED");
+    const err = new Error(errorText(data, "DASHBOARD_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -404,7 +405,7 @@ export async function fetchUniversityReviewQueue(): Promise<AcademicReviewQueueI
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || "REVIEW_QUEUE_REQUEST_FAILED");
+    const err = new Error(errorText(data, "REVIEW_QUEUE_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -419,7 +420,7 @@ export async function fetchOperatorAuditEvents(): Promise<OperatorAuditEventItem
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || "AUDIT_EVENTS_REQUEST_FAILED");
+    const err = new Error(errorText(data, "AUDIT_EVENTS_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -486,7 +487,7 @@ export async function fetchOpportunityDetail(id: string): Promise<OpportunityDet
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.error || "OPPORTUNITY_NOT_FOUND");
+    const err = new Error(errorText(data, "OPPORTUNITY_NOT_FOUND"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -508,7 +509,7 @@ export async function submitOpportunityApplication(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "APPLICATION_FAILED");
+    const err = new Error(errorText(data, "APPLICATION_FAILED"));
     (err as unknown as { status: number; code?: string }).status = res.status;
     (err as unknown as { code?: string }).code = data.detail?.code || data.error;
     throw err;
@@ -541,7 +542,7 @@ export async function createEmployerOpportunity(payload: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "CREATION_FAILED");
+    const err = new Error(errorText(data, "CREATION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -662,7 +663,7 @@ export async function fetchCandidateApplicationsSummary(): Promise<CandidateAppl
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUMMARY_FETCH_FAILED");
+    const err = new Error(errorText(data, "SUMMARY_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -687,7 +688,7 @@ export async function fetchCandidateApplications(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "APPLICATIONS_FETCH_FAILED");
+    const err = new Error(errorText(data, "APPLICATIONS_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -702,7 +703,7 @@ export async function fetchCandidateApplicationDetail(id: string): Promise<Candi
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "APPLICATION_DETAIL_FETCH_FAILED");
+    const err = new Error(errorText(data, "APPLICATION_DETAIL_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -724,7 +725,7 @@ export async function withdrawCandidateApplication(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "WITHDRAW_FAILED");
+    const err = new Error(errorText(data, "WITHDRAW_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -746,7 +747,7 @@ export async function reapplyCandidateApplication(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "REAPPLY_FAILED");
+    const err = new Error(errorText(data, "REAPPLY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -868,7 +869,7 @@ export async function fetchEmployerOpportunityApplications(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "FETCH_APPLICATIONS_FAILED");
+    const err = new Error(errorText(data, "FETCH_APPLICATIONS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -890,7 +891,7 @@ export async function transitionApplicationStatus(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "TRANSITION_FAILED");
+    const err = new Error(errorText(data, "TRANSITION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -905,7 +906,7 @@ export async function fetchApplicationHRDetail(appId: string): Promise<Applicati
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "FETCH_HR_DETAIL_FAILED");
+    const err = new Error(errorText(data, "FETCH_HR_DETAIL_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -927,7 +928,7 @@ export async function scheduleApplicationInterview(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "SCHEDULE_INTERVIEW_FAILED");
+    const err = new Error(errorText(data, "SCHEDULE_INTERVIEW_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -949,7 +950,7 @@ export async function issueApplicationOffer(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "ISSUE_OFFER_FAILED");
+    const err = new Error(errorText(data, "ISSUE_OFFER_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -964,7 +965,7 @@ export async function fetchAcademicLogRevision(revisionId: string): Promise<Acad
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.detail || data.message || data.error || "FETCH_REVISION_FAILED");
+    const err = new Error(errorText(data, "FETCH_REVISION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -986,7 +987,7 @@ export async function submitAcademicLogReview(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.detail || data.message || data.error || "SUBMIT_ACADEMIC_REVIEW_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_ACADEMIC_REVIEW_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1077,7 +1078,7 @@ export async function fetchCandidatePlacements(): Promise<CandidatePlacementsRes
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_PLACEMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_PLACEMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1101,7 +1102,7 @@ export async function fetchPlacementLogs(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_LOGS_FAILED");
+    const err = new Error(errorText(data, "FETCH_LOGS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1124,7 +1125,7 @@ export async function saveDraftDailyLog(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "SAVE_DRAFT_LOG_FAILED");
+    const err = new Error(errorText(data, "SAVE_DRAFT_LOG_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1142,7 +1143,7 @@ export async function submitDailyLog(logId: string): Promise<SubmitDailyLogResul
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail?.message || data.message || data.error || "SUBMIT_DAILY_LOG_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_DAILY_LOG_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1236,7 +1237,7 @@ export async function fetchOperatorVerificationCases(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || "FETCH_CASES_FAILED");
+    const err = new Error(errorText(data, "FETCH_CASES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1256,7 +1257,7 @@ export async function claimVerificationCase(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CLAIM_CASE_FAILED");
+    const err = new Error(errorText(data, "CLAIM_CASE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1278,7 +1279,7 @@ export async function decideVerificationCase(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "DECIDE_CASE_FAILED");
+    const err = new Error(errorText(data, "DECIDE_CASE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1299,7 +1300,7 @@ export async function requestBreakGlassAccess(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "BREAK_GLASS_FAILED");
+    const err = new Error(errorText(data, "BREAK_GLASS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1321,7 +1322,7 @@ export async function emergencyRevokeUserSessions(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "REVOKE_SESSIONS_FAILED");
+    const err = new Error(errorText(data, "REVOKE_SESSIONS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1447,7 +1448,7 @@ export async function fetchOperatorSupportTickets(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_TICKETS_FAILED");
+    const err = new Error(errorText(data, "FETCH_TICKETS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1469,7 +1470,7 @@ export async function postOperatorTicketMessage(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "POST_MESSAGE_FAILED");
+    const err = new Error(errorText(data, "POST_MESSAGE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1490,7 +1491,7 @@ export async function declareOperatorIncident(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "DECLARE_INCIDENT_FAILED");
+    const err = new Error(errorText(data, "DECLARE_INCIDENT_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1513,7 +1514,7 @@ export async function fetchOperatorRestoreRuns(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_RESTORE_RUNS_FAILED");
+    const err = new Error(errorText(data, "FETCH_RESTORE_RUNS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1538,7 +1539,7 @@ export async function fetchOperatorAnalytics(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ANALYTICS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ANALYTICS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1624,7 +1625,7 @@ export async function fetchCandidateProfile(): Promise<CandidateProfileData> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_PROFILE_FAILED");
+    const err = new Error(errorText(data, "FETCH_PROFILE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1645,7 +1646,7 @@ export async function updateCandidateProfile(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "UPDATE_PROFILE_FAILED");
+    const err = new Error(errorText(data, "UPDATE_PROFILE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1664,7 +1665,7 @@ export async function fetchCatalogSkills(q = ""): Promise<CatalogSkillItem[]> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_SKILLS_FAILED");
+    const err = new Error(errorText(data, "FETCH_SKILLS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1685,7 +1686,7 @@ export async function updateCandidateSkills(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "UPDATE_SKILLS_FAILED");
+    const err = new Error(errorText(data, "UPDATE_SKILLS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1707,7 +1708,7 @@ export async function fetchCandidateAvailability(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_AVAILABILITY_FAILED");
+    const err = new Error(errorText(data, "FETCH_AVAILABILITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1728,7 +1729,7 @@ export async function saveCandidateAvailability(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SAVE_AVAILABILITY_FAILED");
+    const err = new Error(errorText(data, "SAVE_AVAILABILITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1793,7 +1794,7 @@ export async function fetchTeacherAcademicAssignments(limit = 50): Promise<Teach
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ASSIGNMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ASSIGNMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1814,7 +1815,7 @@ export async function fetchPlacementDecisionContext(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_CONTEXT_FAILED");
+    const err = new Error(errorText(data, "FETCH_CONTEXT_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1843,7 +1844,7 @@ export async function submitAcademicPlacementConclusion(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUBMIT_CONCLUSION_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_CONCLUSION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1863,7 +1864,7 @@ export async function fetchCoordinatorAssignmentQueue(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_QUEUE_FAILED");
+    const err = new Error(errorText(data, "FETCH_QUEUE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -1893,7 +1894,7 @@ export async function assignTeacherToPlacement(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ASSIGN_TEACHER_FAILED");
+    const err = new Error(errorText(data, "ASSIGN_TEACHER_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2005,7 +2006,7 @@ export async function fetchMentorReviewQueue(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_MENTOR_QUEUE_FAILED");
+    const err = new Error(errorText(data, "FETCH_MENTOR_QUEUE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2026,7 +2027,7 @@ export async function fetchWorkplaceRevisionDetail(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_WORKPLACE_REVISION_FAILED");
+    const err = new Error(errorText(data, "FETCH_WORKPLACE_REVISION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2051,7 +2052,7 @@ export async function submitWorkplaceReview(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUBMIT_WORKPLACE_REVIEW_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_WORKPLACE_REVIEW_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2068,7 +2069,7 @@ export async function fetchMentorAssignments(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_MENTOR_ASSIGNMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_MENTOR_ASSIGNMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2086,7 +2087,7 @@ export async function fetchOrganizationPlacements(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ORG_PLACEMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ORG_PLACEMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2194,7 +2195,7 @@ export async function respondToCandidateOffer(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "RESPOND_TO_OFFER_FAILED");
+    const err = new Error(errorText(data, "RESPOND_TO_OFFER_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2211,7 +2212,7 @@ export async function fetchCandidateEngagement(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ENGAGEMENT_FAILED");
+    const err = new Error(errorText(data, "FETCH_ENGAGEMENT_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2233,7 +2234,7 @@ export async function submitEngagementConfirmation(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUBMIT_ENGAGEMENT_CONFIRMATION_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_ENGAGEMENT_CONFIRMATION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2254,7 +2255,7 @@ export async function fetchCandidatePlacementsList(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_CANDIDATE_PLACEMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_CANDIDATE_PLACEMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2271,7 +2272,7 @@ export async function fetchPlacementPlanDetail(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_PLACEMENT_PLAN_FAILED");
+    const err = new Error(errorText(data, "FETCH_PLACEMENT_PLAN_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2293,7 +2294,7 @@ export async function acceptCandidatePlacementTerms(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ACCEPT_PLACEMENT_TERMS_FAILED");
+    const err = new Error(errorText(data, "ACCEPT_PLACEMENT_TERMS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2403,7 +2404,7 @@ export async function fetchCandidateRatings(): Promise<CandidateRatingsResponse>
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_RATINGS_FAILED");
+    const err = new Error(errorText(data, "FETCH_RATINGS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2425,7 +2426,7 @@ export async function submitEngagementRating(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUBMIT_RATING_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_RATING_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2447,7 +2448,7 @@ export async function submitRatingAppeal(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SUBMIT_APPEAL_FAILED");
+    const err = new Error(errorText(data, "SUBMIT_APPEAL_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2551,7 +2552,7 @@ export async function fetchOrgCapabilities(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ORG_CAPABILITIES_FAILED");
+    const err = new Error(errorText(data, "FETCH_ORG_CAPABILITIES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2568,7 +2569,7 @@ export async function fetchOrgMemberships(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ORG_MEMBERSHIPS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ORG_MEMBERSHIPS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2590,7 +2591,7 @@ export async function inviteOrgMember(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "INVITE_ORG_MEMBER_FAILED");
+    const err = new Error(errorText(data, "INVITE_ORG_MEMBER_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2613,7 +2614,7 @@ export async function revokeOrgMembership(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "REVOKE_ORG_MEMBERSHIP_FAILED");
+    const err = new Error(errorText(data, "REVOKE_ORG_MEMBERSHIP_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2630,7 +2631,7 @@ export async function fetchOrgVerificationStatus(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ORG_VERIFICATION_STATUS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ORG_VERIFICATION_STATUS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2707,7 +2708,7 @@ export async function generateInstitutionExport(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "GENERATE_EXPORT_FAILED");
+    const err = new Error(errorText(data, "GENERATE_EXPORT_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2725,7 +2726,7 @@ export async function fetchInstitutionSupervisions(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_SUPERVISIONS_FAILED");
+    const err = new Error(errorText(data, "FETCH_SUPERVISIONS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2743,7 +2744,7 @@ export async function fetchInstitutionAcademicAgreements(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_AGREEMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_AGREEMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2863,7 +2864,7 @@ export async function fetchOrgEntitlements(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ENTITLEMENTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ENTITLEMENTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2880,7 +2881,7 @@ export async function fetchOrgBillingOverview(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_BILLING_FAILED");
+    const err = new Error(errorText(data, "FETCH_BILLING_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2901,7 +2902,7 @@ export async function createOrgOrder(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CREATE_ORDER_FAILED");
+    const err = new Error(errorText(data, "CREATE_ORDER_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -2922,7 +2923,7 @@ export async function requestOrderRefund(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "REQUEST_REFUND_FAILED");
+    const err = new Error(errorText(data, "REQUEST_REFUND_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3022,7 +3023,7 @@ export async function fetchOperatorFinanceSummary(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_FINANCE_SUMMARY_FAILED");
+    const err = new Error(errorText(data, "FETCH_FINANCE_SUMMARY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3052,7 +3053,7 @@ export async function fetchOperatorReconciliation(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_RECONCILIATION_FAILED");
+    const err = new Error(errorText(data, "FETCH_RECONCILIATION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3070,7 +3071,7 @@ export async function approveOperatorRefund(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "APPROVE_REFUND_FAILED");
+    const err = new Error(errorText(data, "APPROVE_REFUND_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3187,7 +3188,7 @@ export async function fetchMySupportTickets(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_MY_TICKETS_FAILED");
+    const err = new Error(errorText(data, "FETCH_MY_TICKETS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3207,7 +3208,7 @@ export async function createSupportTicket(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CREATE_TICKET_FAILED");
+    const err = new Error(errorText(data, "CREATE_TICKET_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3229,7 +3230,7 @@ export async function fetchSupportTicketMessages(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_MESSAGES_FAILED");
+    const err = new Error(errorText(data, "FETCH_MESSAGES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3250,7 +3251,7 @@ export async function postCustomerSupportMessage(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "POST_MESSAGE_FAILED");
+    const err = new Error(errorText(data, "POST_MESSAGE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3276,7 +3277,7 @@ export async function fetchMyPrivacyRequests(params?: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_PRIVACY_REQUESTS_FAILED");
+    const err = new Error(errorText(data, "FETCH_PRIVACY_REQUESTS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3298,7 +3299,7 @@ export async function createPrivacyRequest(payload: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CREATE_PRIVACY_REQUEST_FAILED");
+    const err = new Error(errorText(data, "CREATE_PRIVACY_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3319,7 +3320,7 @@ export async function resolveOperatorPrivacyRequest(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "RESOLVE_PRIVACY_REQUEST_FAILED");
+    const err = new Error(errorText(data, "RESOLVE_PRIVACY_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3334,7 +3335,7 @@ export async function fetchMyNotificationPreferences(): Promise<NotificationPref
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_PREFERENCES_FAILED");
+    const err = new Error(errorText(data, "FETCH_PREFERENCES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3354,7 +3355,7 @@ export async function updateMyNotificationPreferences(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "UPDATE_PREFERENCES_FAILED");
+    const err = new Error(errorText(data, "UPDATE_PREFERENCES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3406,7 +3407,7 @@ export async function publishEmployerOpportunity(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "PUBLISH_OPPORTUNITY_FAILED");
+    const err = new Error(errorText(data, "PUBLISH_OPPORTUNITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3427,7 +3428,7 @@ export async function transitionOpportunityStatus(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "TRANSITION_OPPORTUNITY_FAILED");
+    const err = new Error(errorText(data, "TRANSITION_OPPORTUNITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3448,7 +3449,7 @@ export async function respondToInterview(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "RESPOND_INTERVIEW_FAILED");
+    const err = new Error(errorText(data, "RESPOND_INTERVIEW_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3506,7 +3507,7 @@ export async function fetchMySavedOpportunities(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SAVED_OPPORTUNITIES_FETCH_FAILED");
+    const err = new Error(errorText(data, "SAVED_OPPORTUNITIES_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3527,7 +3528,7 @@ export async function saveOpportunity(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SAVE_OPPORTUNITY_FAILED");
+    const err = new Error(errorText(data, "SAVE_OPPORTUNITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3543,7 +3544,7 @@ export async function deleteSavedOpportunity(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "DELETE_SAVED_OPPORTUNITY_FAILED");
+    const err = new Error(errorText(data, "DELETE_SAVED_OPPORTUNITY_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3563,7 +3564,7 @@ export async function fetchMyNotifications(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "NOTIFICATIONS_FETCH_FAILED");
+    const err = new Error(errorText(data, "NOTIFICATIONS_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3579,7 +3580,7 @@ export async function markNotificationRead(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "MARK_NOTIFICATION_READ_FAILED");
+    const err = new Error(errorText(data, "MARK_NOTIFICATION_READ_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3665,7 +3666,7 @@ export async function fetchCandidateEnrollments(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ENROLLMENTS_FETCH_FAILED");
+    const err = new Error(errorText(data, "ENROLLMENTS_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3685,7 +3686,7 @@ export async function createCandidateEnrollment(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ENROLLMENT_CREATE_FAILED");
+    const err = new Error(errorText(data, "ENROLLMENT_CREATE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3702,7 +3703,7 @@ export async function fetchCandidateEnrollmentDetail(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ENROLLMENT_DETAIL_FAILED");
+    const err = new Error(errorText(data, "ENROLLMENT_DETAIL_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3723,7 +3724,7 @@ export async function endCandidateEnrollment(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ENROLLMENT_END_FAILED");
+    const err = new Error(errorText(data, "ENROLLMENT_END_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3738,7 +3739,7 @@ export async function fetchVerifiedInstitutions(): Promise<VerifiedInstitutionIt
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "INSTITUTIONS_FETCH_FAILED");
+    const err = new Error(errorText(data, "INSTITUTIONS_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3758,7 +3759,7 @@ export async function saveCandidateAvailabilityExceptions(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "AVAILABILITY_EXCEPTIONS_SAVE_FAILED");
+    const err = new Error(errorText(data, "AVAILABILITY_EXCEPTIONS_SAVE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3862,7 +3863,7 @@ export async function fetchCandidatePortfolios(limit = 50, afterId?: string): Pr
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "PORTFOLIO_FETCH_FAILED");
+    const err = new Error(errorText(data, "PORTFOLIO_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3881,7 +3882,7 @@ export async function createCandidatePortfolio(payload: CreatePortfolioPayload):
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "PORTFOLIO_CREATE_FAILED");
+    const err = new Error(errorText(data, "PORTFOLIO_CREATE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3900,7 +3901,7 @@ export async function updateCandidatePortfolio(id: string, payload: Partial<Crea
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "PORTFOLIO_UPDATE_FAILED");
+    const err = new Error(errorText(data, "PORTFOLIO_UPDATE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3915,7 +3916,7 @@ export async function deleteCandidatePortfolio(id: string): Promise<void> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    const err = new Error(data.message || data.error || "PORTFOLIO_DELETE_FAILED");
+    const err = new Error(errorText(data, "PORTFOLIO_DELETE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3933,7 +3934,7 @@ export async function fetchCandidateCertificates(limit = 50, afterId?: string): 
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CERTIFICATES_FETCH_FAILED");
+    const err = new Error(errorText(data, "CERTIFICATES_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3952,7 +3953,7 @@ export async function createCandidateCertificate(payload: CreateCertificatePaylo
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CERTIFICATE_CREATE_FAILED");
+    const err = new Error(errorText(data, "CERTIFICATE_CREATE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3967,7 +3968,7 @@ export async function deleteCandidateCertificate(id: string): Promise<void> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    const err = new Error(data.message || data.error || "CERTIFICATE_DELETE_FAILED");
+    const err = new Error(errorText(data, "CERTIFICATE_DELETE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -3992,7 +3993,7 @@ export async function exportCandidateResume(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "RESUME_EXPORT_FAILED");
+    const err = new Error(errorText(data, "RESUME_EXPORT_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4068,7 +4069,7 @@ export async function fetchUserSecurityOverview(): Promise<UserSecurityOverview>
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SECURITY_OVERVIEW_FETCH_FAILED");
+    const err = new Error(errorText(data, "SECURITY_OVERVIEW_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4095,7 +4096,7 @@ export async function requestTotpEnrollment(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "TOTP_ENROLLMENT_REQUEST_FAILED");
+    const err = new Error(errorText(data, "TOTP_ENROLLMENT_REQUEST_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4113,7 +4114,7 @@ export async function confirmTotpEnrollment(code: string): Promise<ConfirmTotpRe
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "TOTP_CONFIRMATION_FAILED");
+    const err = new Error(errorText(data, "TOTP_CONFIRMATION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4140,7 +4141,7 @@ export async function disableTotp(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "TOTP_DISABLE_FAILED");
+    const err = new Error(errorText(data, "TOTP_DISABLE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4166,7 +4167,7 @@ export async function generateRecoveryCodes(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "RECOVERY_CODES_GENERATION_FAILED");
+    const err = new Error(errorText(data, "RECOVERY_CODES_GENERATION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4180,7 +4181,7 @@ export async function revokeUserSession(sessionId: string): Promise<RevokeSessio
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "REVOKE_SESSION_FAILED");
+    const err = new Error(errorText(data, "REVOKE_SESSION_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4232,7 +4233,7 @@ export async function fetchPublicPolicy(document: string): Promise<PolicyDocumen
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "POLICY_FETCH_FAILED");
+    const err = new Error(errorText(data, "POLICY_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4246,7 +4247,7 @@ export async function fetchPublicHelp(document: string): Promise<HelpDocumentRes
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "HELP_FETCH_FAILED");
+    const err = new Error(errorText(data, "HELP_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4347,7 +4348,7 @@ export async function fetchAuthOptions(): Promise<AuthOptionsResponse> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "OPTIONS_FETCH_FAILED");
+    throw new Error(errorText(data, "OPTIONS_FETCH_FAILED"));
   }
   return data as AuthOptionsResponse;
 }
@@ -4370,7 +4371,7 @@ export async function issueAuthChallenge(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "CHALLENGE_FAILED");
+    throw new Error(errorText(data, "CHALLENGE_FAILED"));
   }
   return data as ChallengeIssueResponse;
 }
@@ -4385,7 +4386,7 @@ export async function fetchAuthChallengeStatus(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "CHALLENGE_STATUS_FAILED");
+    throw new Error(errorText(data, "CHALLENGE_STATUS_FAILED"));
   }
   return data as ChallengeStatusResponse;
 }
@@ -4410,7 +4411,7 @@ export async function sendTelegramBotUpdate(payload: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "TELEGRAM_WEBHOOK_FAILED");
+    const err = new Error(errorText(data, "TELEGRAM_WEBHOOK_FAILED"));
     (err as unknown as { code?: string; status?: number }).code = data.error;
     (err as unknown as { code?: string; status?: number }).status = res.status;
     throw err;
@@ -4430,7 +4431,7 @@ export async function consumeAuthChallenge(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "CODE_VERIFICATION_FAILED");
+    throw new Error(errorText(data, "CODE_VERIFICATION_FAILED"));
   }
   return data as ChallengeConsumeResponse;
 }
@@ -4445,7 +4446,7 @@ export async function registerCandidateUser(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "REGISTRATION_FAILED");
+    throw new Error(errorText(data, "REGISTRATION_FAILED"));
   }
   notifyAuthChanged();
   return data as RegisterUserResponse;
@@ -4575,7 +4576,7 @@ export async function searchEmployerCandidates(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "SEARCH_CANDIDATES_FAILED");
+    const err = new Error(errorText(data, "SEARCH_CANDIDATES_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4728,7 +4729,7 @@ export async function fetchUniversityAnalytics(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "FETCH_ANALYTICS_FAILED");
+    const err = new Error(errorText(data, "FETCH_ANALYTICS_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -4813,7 +4814,7 @@ export async function fetchCandidateResumeDetails(): Promise<CandidateResumeDeta
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "RESUME_DETAILS_FETCH_FAILED");
+    throw new Error(errorText(data, "RESUME_DETAILS_FETCH_FAILED"));
   }
   return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
@@ -4838,7 +4839,7 @@ export async function saveCandidateResumeDetails(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "RESUME_DETAILS_UPDATE_FAILED");
+    throw new Error(errorText(data, "RESUME_DETAILS_UPDATE_FAILED"));
   }
   return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
@@ -4873,7 +4874,7 @@ export async function uploadCandidatePdfFile(payload: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "CANDIDATE_FILE_UPLOAD_FAILED");
+    throw new Error(errorText(data, "CANDIDATE_FILE_UPLOAD_FAILED"));
   }
   return data as CandidatePdfUploadResponse;
 }
@@ -4916,7 +4917,7 @@ export async function fetchOrganizationDirectoryProfile(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "ORG_DIRECTORY_FETCH_FAILED");
+    throw new Error(errorText(data, "ORG_DIRECTORY_FETCH_FAILED"));
   }
   return data as OrganizationDirectoryProfile;
 }
@@ -4936,7 +4937,7 @@ export async function saveOrganizationDirectoryProfile(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "ORG_DIRECTORY_UPDATE_FAILED");
+    throw new Error(errorText(data, "ORG_DIRECTORY_UPDATE_FAILED"));
   }
   return data as OrganizationDirectoryProfile;
 }
@@ -5005,7 +5006,7 @@ export async function fetchInstitutionDirectoryProfile(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "INSTITUTION_DIRECTORY_FETCH_FAILED");
+    throw new Error(errorText(data, "INSTITUTION_DIRECTORY_FETCH_FAILED"));
   }
   return data as InstitutionDirectoryProfile;
 }
@@ -5025,7 +5026,7 @@ export async function saveInstitutionDirectoryProfile(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "INSTITUTION_DIRECTORY_UPDATE_FAILED");
+    throw new Error(errorText(data, "INSTITUTION_DIRECTORY_UPDATE_FAILED"));
   }
   return data as InstitutionDirectoryProfile;
 }
@@ -5053,7 +5054,7 @@ export async function createInstitutionPartnerAgreement(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.error || "CREATE_AGREEMENT_FAILED");
+    throw new Error(errorText(data, "CREATE_AGREEMENT_FAILED"));
   }
   return data as UniversityPartnerAgreementItem;
 }
@@ -5143,11 +5144,7 @@ export async function fetchInstitutionTimetable(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(
-      typeof data.error === "object" && data.error?.code
-        ? data.error.code
-        : data.message || data.error || "TIMETABLE_FETCH_FAILED"
-    );
+    throw new Error(errorText(data, "TIMETABLE_FETCH_FAILED"));
   }
   return data as UniversityTimetableResponse;
 }
@@ -5179,11 +5176,7 @@ export async function saveInstitutionTimetable(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(
-      typeof data.error === "object" && data.error?.code
-        ? data.error.code
-        : data.message || data.error || "TIMETABLE_SAVE_FAILED"
-    );
+    throw new Error(errorText(data, "TIMETABLE_SAVE_FAILED"));
   }
   return data as UniversityTimetableResponse;
 }
@@ -5202,11 +5195,7 @@ export async function fetchInstitutionTimetableTemplate(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(
-      typeof data.error === "object" && data.error?.code
-        ? data.error.code
-        : data.message || data.error || "TIMETABLE_TEMPLATE_FETCH_FAILED"
-    );
+    throw new Error(errorText(data, "TIMETABLE_TEMPLATE_FETCH_FAILED"));
   }
   return data as UniversityTimetableTemplateResponse;
 }
@@ -5237,11 +5226,7 @@ export async function importInstitutionTimetable(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(
-      typeof data.error === "object" && data.error?.code
-        ? data.error.code
-        : data.message || data.error || "TIMETABLE_IMPORT_FAILED"
-    );
+    throw new Error(errorText(data, "TIMETABLE_IMPORT_FAILED"));
   }
   return data as UniversityTimetableResponse;
 }
@@ -5440,7 +5425,7 @@ async function fetchBffJson<T>(url: string, init?: RequestInit, fallbackErr = "R
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const detailMsg = typeof data?.detail === "object" ? data.detail?.message || data.detail?.code : data?.detail;
-    throw new Error(detailMsg || data?.message || data?.error || fallbackErr);
+    throw new Error(detailMsg && !/^[A-Z0-9_]+$/.test(String(detailMsg)) ? String(detailMsg) : errorText(data, fallbackErr));
   }
   return data as T;
 }
@@ -5557,7 +5542,7 @@ export async function fetchMyWorkspaces(): Promise<MyWorkspaces> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "WORKSPACES_FETCH_FAILED");
+    const err = new Error(errorText(data, "WORKSPACES_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -5591,7 +5576,7 @@ export async function fetchManagedOpportunities(organizationId: string, status?:
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "ORG_OPPORTUNITIES_FETCH_FAILED");
+    const err = new Error(errorText(data, "ORG_OPPORTUNITIES_FETCH_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -5632,7 +5617,7 @@ export interface EnrollmentRequestDetail {
 async function enrollmentJson<T>(res: Response, fallback: string): Promise<T> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || fallback);
+    const err = new Error(errorText(data, fallback));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -5700,7 +5685,7 @@ export async function setCandidateVisibility(visibility: CandidateVisibility): P
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "VISIBILITY_UPDATE_FAILED");
+    const err = new Error(errorText(data, "VISIBILITY_UPDATE_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
@@ -5723,7 +5708,7 @@ export async function fetchEmployerCandidateDetail(candidateId: string): Promise
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || data.error || "CANDIDATE_DETAIL_FAILED");
+    const err = new Error(errorText(data, "CANDIDATE_DETAIL_FAILED"));
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }

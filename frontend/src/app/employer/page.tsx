@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
@@ -1186,7 +1187,7 @@ export default function EmployerPortal() {
                     const current = workspaceOrgs.find((o) => o.id === orgId);
                     return current ? (
                       <span className="text-[11px] text-[var(--fb-ink-secondary)]">
-                        {current.region} · Rolingiz: {current.roles.join(", ")}
+                        {current.region} · Rolingiz: {current.roles.map((r) => enumLabel(r)).join(", ")}
                       </span>
                     ) : null;
                   })()}
@@ -2888,7 +2889,7 @@ export default function EmployerPortal() {
                               #{order.id.slice(0, 8)}
                             </td>
                             <td className="py-2.5 px-3 font-semibold text-zinc-200">
-                              {order.plan_code || "XIZMAT_PAKETI"}
+                              {enumLabel(order.plan_code || "XIZMAT_PAKETI")}
                             </td>
                             <td className="py-2.5 px-3 font-bold text-zinc-100 tabular-nums">
                               {order.amount.toLocaleString()} UZS
@@ -3241,7 +3242,7 @@ export default function EmployerPortal() {
                       >
                         <option value="">Barchasi</option>
                         <option value="BEGINNER">Boshlang‘ich (BEGINNER)</option>
-                        <option value="INTERMEDIATE">O‘rta (INTERMEDIATE)</option>
+                        <option value="INTERMEDIATE">O‘rta</option>
                         <option value="ADVANCED">Ilg‘or (ADVANCED)</option>
                       </select>
                     </div>

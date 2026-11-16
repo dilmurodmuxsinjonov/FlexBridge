@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import ResumeBuilder from "@/components/resume/ResumeBuilder";
@@ -883,7 +884,7 @@ export default function CandidateProfileHub() {
             <SkeuoStatCard
               title="Jadval qoidalari"
               value={rules.length}
-              subtitle="MK 118-modda mosligi"
+              subtitle="Dars jadvali bilan moslik"
               icon={Calendar}
               tone="orange"
               active={activeTab === "AVAILABILITY"}
@@ -1054,7 +1055,7 @@ export default function CandidateProfileHub() {
                     <span>Mening Tasdiqlangan va E&apos;lon Qilingan Ko‘nikmalarim</span>
                   </h3>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    Self-declared va verified ko‘nikmalar ajratiladi. Moslik formulasi ushbu ro‘yxat asosida ishlaydi.
+                    O‘zingiz ko‘rsatgan va tasdiqlangan ko‘nikmalar alohida belgilanadi. Vakansiyalarga moslik shu ro‘yxat asosida hisoblanadi.
                   </p>
                 </div>
 
@@ -1095,16 +1096,16 @@ export default function CandidateProfileHub() {
                             {s.verified ? (
                               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                                 <ShieldCheck className="w-3 h-3" />
-                                <span>Verified</span>
+                                <span>Tasdiqlangan</span>
                               </span>
                             ) : (
                               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
-                                Self-declared
+                                O‘zi ko‘rsatgan
                               </span>
                             )}
                           </div>
                           <span className="text-[11px] text-zinc-400 font-mono">
-                            Daraja: {s.level}
+                            Daraja: {enumLabel(s.level)}
                           </span>
                         </div>
 
@@ -1159,7 +1160,7 @@ export default function CandidateProfileHub() {
                     ) : (
                       catalogSkills.map((sk) => (
                         <option key={sk.id} value={sk.id} className="bg-surface text-white">
-                          {sk.name_uz || sk.code} ({sk.category || sk.code})
+                          {sk.name_uz || sk.code}{sk.category && !/^[A-Z]{2}_[0-9a-f]+$/i.test(sk.category) ? ` (${sk.category})` : ""}
                         </option>
                       ))
                     )}
@@ -1174,13 +1175,13 @@ export default function CandidateProfileHub() {
                     className="w-full px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
                   >
                     <option value="BEGINNER" className="bg-surface text-white">
-                      BEGINNER — Boshlang‘ich
+                      Boshlang‘ich
                     </option>
                     <option value="INTERMEDIATE" className="bg-surface text-white">
-                      INTERMEDIATE — O‘rta (Mustaqil ishlay oladi)
+                      O‘rta (mustaqil ishlay oladi)
                     </option>
                     <option value="ADVANCED" className="bg-surface text-white">
-                      ADVANCED — Yuqori (Katta amaliy tajriba)
+                      Yuqori (katta amaliy tajriba)
                     </option>
                   </select>
                 </div>
@@ -1420,8 +1421,8 @@ export default function CandidateProfileHub() {
                         onChange={(e) => setNewExcKind(e.target.value as "AVAILABLE" | "UNAVAILABLE")}
                         className="px-3 py-1.5 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white focus:outline-none"
                       >
-                        <option value="UNAVAILABLE">UNAVAILABLE — Band (Imtihon / Tadbir)</option>
-                        <option value="AVAILABLE">AVAILABLE — Bo&apos;sh (Qo&apos;shimcha smena)</option>
+                        <option value="UNAVAILABLE">Band (imtihon / tadbir)</option>
+                        <option value="AVAILABLE">Bo&apos;sh (qo&apos;shimcha smena)</option>
                       </select>
                     </div>
 
@@ -1480,7 +1481,7 @@ export default function CandidateProfileHub() {
                                     : "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
                                 }`}
                               >
-                                {exc.kind}
+                                {enumLabel(exc.kind)}
                               </span>
                             </div>
                             <span className="text-[11px] text-zinc-400 font-mono">

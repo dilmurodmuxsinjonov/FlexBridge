@@ -2722,7 +2722,7 @@ export default function UniversityPortal() {
                       1. Dars Jadvalini Qo&apos;lda Kiritish
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500">MANUAL ENTRY</span>
+                  <span className="text-[10px] font-mono text-zinc-500">Qo‘lda kiritish</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
@@ -2899,7 +2899,7 @@ export default function UniversityPortal() {
                       2. Shablon Jadvalni Yuklash (.CSV / .JSON)
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-400">TEMPLATE IMPORT</span>
+                  <span className="text-[10px] font-mono text-emerald-400">Shablondan yuklash</span>
                 </div>
 
                 <p className="text-[11px] text-zinc-400 leading-relaxed">

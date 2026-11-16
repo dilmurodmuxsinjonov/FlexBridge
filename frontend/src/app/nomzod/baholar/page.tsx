@@ -214,7 +214,7 @@ export default function CandidateRatingsPage() {
                 <div>
                   {agg.score_status === "PUBLISHED" && (
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Tasdiqlangan (Published)
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Tasdiqlangan
                     </span>
                   )}
                   {agg.score_status === "WITHHELD_INSUFFICIENT_SAMPLE" && (
@@ -224,14 +224,14 @@ export default function CandidateRatingsPage() {
                   )}
                   {agg.score_status === "UNRATED" && (
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700 flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5" /> Yangi Profil (Unrated)
+                      <HelpCircle className="w-3.5 h-3.5" /> Hali baholanmagan
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Explanatory Note (AC-023) */}
-              <p className="text-xs text-zinc-400 mt-4 leading-relaxed bg-black/30 p-3.5 rounded-xl border border-zinc-800/60">
+              <p className="text-xs text-[var(--fb-ink-secondary)] mt-4 leading-relaxed skeuo-well p-3.5 rounded-xl">
                 {agg.explanation}
               </p>
 

@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -21,7 +22,6 @@ import {
   Layers,
   X,
   Loader2,
-  LogOut,
   RefreshCw,
 } from "lucide-react";
 import {
@@ -36,7 +36,6 @@ import {
   respondToCandidateOffer,
   respondToInterview,
   fetchAuthMe,
-  logoutUser,
   AuthUser,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
@@ -324,13 +323,6 @@ export default function CandidateApplicationsPage() {
     }
   };
 
-  const handleLogout = async () => {
-    await logoutUser();
-    setUser(null);
-    setSummary(null);
-    setApplications([]);
-  };
-
   return (
     <main className="w-full flex flex-col gap-6">
       {/* Page Header */}
@@ -354,10 +346,6 @@ export default function CandidateApplicationsPage() {
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col text-right">
-                <span className="text-xs font-semibold text-zinc-200">Faol hisob</span>
-                <span className="text-[11px] text-zinc-400">{user.user_id.slice(0, 8)}...</span>
-              </div>
               <button
                 onClick={() => loadData(activeTab)}
                 disabled={isLoading}
@@ -365,13 +353,6 @@ export default function CandidateApplicationsPage() {
                 className="p-2 rounded-lg border border-white/[0.08] bg-surface-card text-zinc-300 hover:text-white hover:border-primary/40 transition-colors"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin text-primary" : ""}`} />
-              </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-card px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.04] hover:text-rose-400 transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Chiqish</span>
               </button>
             </div>
           ) : (
@@ -592,7 +573,7 @@ export default function CandidateApplicationsPage() {
                             {app.opportunity?.work_mode && (
                               <span className="inline-flex items-center gap-1">
                                 <Briefcase className="h-3.5 w-3.5 text-zinc-500" />
-                                {app.opportunity.work_mode}
+                                {enumLabel(app.opportunity.work_mode)}
                               </span>
                             )}
                           </div>

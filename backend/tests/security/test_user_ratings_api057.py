@@ -124,7 +124,8 @@ def test_low_count_user_withholds_score(client, identities):
     assert agg["score"] is None  # Strictly withheld!
     assert agg["score_status"] == "WITHHELD_INSUFFICIENT_SAMPLE"
     assert "n = 3 < 5" in agg["explanation"]
-    assert "AC-023" in agg["explanation"]
+    assert "yashirilgan" in agg["explanation"]
+    assert "AC-0" not in agg["explanation"]  # spec IDs are not user-facing text
 
 
 def test_sufficient_count_user_reveals_published_score(client, identities):

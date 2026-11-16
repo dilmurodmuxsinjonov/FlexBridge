@@ -14,7 +14,6 @@ import {
   Save,
   Send,
   RefreshCw,
-  LogOut,
   ShieldCheck,
   FileCheck,
   Award,
@@ -23,7 +22,6 @@ import {
 import {
   AuthUser,
   fetchAuthMe,
-  logoutUser,
   CandidatePlacementItem,
   DailyLogItem,
   fetchCandidatePlacements,
@@ -333,23 +331,7 @@ export default function CandidateKundalikPage() {
           )}
           {authLoading ? (
             <div className="w-20 h-7 bg-zinc-800 animate-pulse rounded" />
-          ) : user ? (
-            <div className="flex items-center gap-2.5">
-              <span className="text-xs text-zinc-400 font-mono">
-                ID: {user.user_id.slice(0, 8)}...
-              </span>
-              <button
-                onClick={async () => {
-                  await logoutUser();
-                  auth.mutate(() => null);
-                }}
-                className="text-xs text-zinc-400 hover:text-rose-400 transition-colors flex items-center gap-1"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Chiqish
-              </button>
-            </div>
-          ) : (
+          ) : user ? null : (
             <button
               onClick={() => setAuthModalOpen(true)}
               className="text-xs px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors"
@@ -453,7 +435,8 @@ export default function CandidateKundalikPage() {
           </div>
         ) : null}
 
-        {/* Main Content Layout: Editor (Left) & Log History (Right) */}
+        {/* Main Content Layout: Editor (Left) & Log History (Right) — only with an active placement */}
+        {selectedPlacement && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Daily Log Editor */}
           <div className="lg:col-span-7 space-y-6">
@@ -871,6 +854,7 @@ export default function CandidateKundalikPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* 1-Hujjat (Standart Kundalik) va 2-Hujjat (Yakuniy Xulosa) E-Imzo & PDF Yuklash Markazi */}
         {selectedPlacement && (
