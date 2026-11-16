@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz" suppressHydrationWarning className={`${outfit.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen flex flex-col bg-background text-on-surface antialiased bg-grid-pattern selection:bg-[#D95F2B]/20 selection:text-[#D95F2B]">
+      <body className="min-h-screen flex flex-col bg-background text-on-surface antialiased">
         <ThemeProvider>
           <Navbar />
           <div className="flex-1 w-full pb-28 lg:pb-10">{children}</div>

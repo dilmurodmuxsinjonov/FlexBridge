@@ -49,8 +49,10 @@ export async function POST(request: Request) {
     }
 
     const errorMessage =
-      typeof data.detail === "object" && data.detail?.message
-        ? data.detail.message
+      backendRes.status === 429
+        ? "RATE_LIMITED"
+        : typeof data.detail === "object" && (data.detail?.code || data.detail?.message)
+        ? data.detail.code || data.detail.message
         : typeof data.detail === "string"
         ? data.detail
         : "MFA_VERIFICATION_FAILED";

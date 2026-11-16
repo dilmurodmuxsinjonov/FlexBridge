@@ -563,20 +563,20 @@ export default function OperatorPortal() {
                 Xavfsizlik va Nazorat Markazi
               </span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   Operator vakolati faol
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
-              Platforma Operatori va Xavfsizlik Boshqaruv Markazi
+              Platforma boshqaruvi
             </h1>
             <p className="text-xs text-[var(--fb-ink-secondary)]">
-              Tashkilotlarni tekshirish navbati, 4-ko‘z tamoyilidagi favqulodda ruxsatlar va o‘zgartirib bo‘lmas audit jurnali.
+              Tashkilotlarni tekshirish, maxsus ruxsatlar (ikki kishi tasdig‘i bilan) va o‘zgarmas audit jurnali.
             </p>
           </div>
 

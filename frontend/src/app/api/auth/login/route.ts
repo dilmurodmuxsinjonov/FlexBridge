@@ -82,8 +82,10 @@ export async function POST(request: Request) {
 
     // Handle Errors (401, 403, 404, 422, etc.)
     const errorMessage =
-      typeof data.detail === "object" && data.detail?.message
-        ? data.detail.message
+      backendRes.status === 429
+        ? "RATE_LIMITED"
+        : typeof data.detail === "object" && (data.detail?.code || data.detail?.message)
+        ? data.detail.code || data.detail.message
         : typeof data.detail === "string"
         ? data.detail
         : "LOGIN_FAILED";

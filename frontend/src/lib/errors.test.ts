@@ -18,3 +18,16 @@ describe("describeRequestError", () => {
     expect(describeRequestError(null, "fallback")).toBe("fallback");
   });
 });
+
+describe("describeLoginError", () => {
+  it("maps known codes and hides unknown machine codes", async () => {
+    const { describeLoginError } = await import("./errors");
+    expect(describeLoginError("INVALID_CREDENTIALS")).toMatch(/parol noto‘g‘ri/);
+    expect(describeLoginError("RATE_LIMITED")).toMatch(/Juda ko‘p urinish/);
+    expect(describeLoginError("SOMETHING_NEW")).not.toContain("SOMETHING_NEW");
+    expect(describeLoginError("Ushbu kirish sahifasi faqat Talaba hisoblari uchun.")).toBe(
+      "Ushbu kirish sahifasi faqat Talaba hisoblari uchun."
+    );
+    expect(describeLoginError("Failed to fetch")).toMatch(/Server bilan bog‘lanib/);
+  });
+});

@@ -392,11 +392,8 @@ export default function Navbar() {
     router.refresh();
   };
 
-  const headerGreeting = currentUser
-    ? `${theme.greetingPrefix}, ${theme.badgeText}`
-    : personaKey === "PUBLIC"
-      ? "FlexBridge"
-      : `${theme.greetingPrefix}, FlexBridge`;
+  // Guests (including on role-specific sign-in pages) just see the brand.
+  const headerGreeting = currentUser ? `${theme.greetingPrefix}, ${theme.badgeText}` : "FlexBridge";
 
   return (
     <>

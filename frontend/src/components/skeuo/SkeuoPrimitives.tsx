@@ -240,7 +240,7 @@ export function SkeuoStatCard({
       )}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--fb-ink-muted)] truncate">
+          <p className="text-xs font-medium text-[var(--fb-ink-secondary)] truncate">
             {title}
           </p>
           <p className="font-heading text-2xl sm:text-[28px] leading-none font-bold tracking-tight text-[var(--fb-ink)] tabular-nums pt-0.5">
@@ -248,7 +248,7 @@ export function SkeuoStatCard({
           </p>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border skeuo-well-sm ${palette.badgeBg} ${palette.iconText}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${palette.badgeBg} ${palette.iconText}`}
         >
           <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
         </div>
@@ -300,16 +300,16 @@ export function SkeuoToggle({
   disabled = false,
   tone = "orange",
 }: SkeuoToggleProps) {
-  const ledColor =
+  const trackOn =
     tone === "emerald"
-      ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.75)]"
+      ? "bg-emerald-500"
       : tone === "sky"
-        ? "bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.75)]"
+        ? "bg-sky-500"
         : tone === "indigo"
-          ? "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.75)]"
+          ? "bg-indigo-500"
           : tone === "amber"
-            ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.75)]"
-            : "bg-[#EA580C] shadow-[0_0_8px_rgba(234,88,12,0.75)]";
+            ? "bg-amber-500"
+            : "bg-[var(--fb-accent)]";
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl skeuo-well px-3.5 py-2.5">
@@ -332,26 +332,18 @@ export function SkeuoToggle({
         aria-label={label || "Holatni almashtirish"}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-7 shrink-0 items-center rounded-full p-1 transition-colors skeuo-well-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fb-accent)] disabled:opacity-50 ${
-          checked
-            ? "bg-[#1A1A1D] dark:bg-white/20"
-            : "bg-[var(--fb-well-deep)]"
+        className={`relative inline-flex h-7 shrink-0 items-center rounded-full p-1 transition-colors duration-200 shadow-[inset_0_1px_2px_rgba(15,23,42,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fb-accent)] disabled:opacity-50 ${
+          checked ? trackOn : "bg-[var(--fb-well-deep)]"
         }`}
         style={{ width: "52px" }}
       >
         <motion.span
           layout
-          transition={{ duration: 0.15, ease: "easeOut" }}
-          className={`flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-white to-stone-200 ring-1 ring-black/10 shadow-[0_2px_6px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,1)] ${
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          className={`block h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(15,23,42,0.3),0_0_0_0.5px_rgba(15,23,42,0.08)] ${
             checked ? "ml-auto" : "mr-auto"
           }`}
-        >
-          <span
-            className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              checked ? ledColor : "bg-stone-300"
-            }`}
-          />
-        </motion.span>
+        />
       </button>
     </div>
   );
@@ -463,8 +455,8 @@ export function SkeuoSegmented<T extends string>({
             {isActive && (
               <motion.span
                 layoutId={`skeuo-seg-${layoutName}-${uid}`}
-                transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                className="absolute inset-0 rounded-xl skeuo-card shadow-[0_3px_10px_rgba(24,20,14,0.12)]"
+                transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.9 }}
+                className="absolute inset-0 rounded-xl skeuo-card"
               />
             )}
             <span className="relative z-10 inline-flex items-center gap-1.5">
@@ -507,7 +499,7 @@ export function SkeuoLiveFeed({
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <h3 className="font-heading text-sm font-bold text-[var(--fb-ink)]">{title}</h3>
         </div>
-        <span className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+        <span className="rounded-full skeuo-badge-recessed px-2.5 py-0.5 text-[11px] font-medium">
           Jonli oqim
         </span>
       </div>
@@ -521,14 +513,14 @@ export function SkeuoLiveFeed({
           {items.map((item) => {
             const dotClass =
               item.status === "warn"
-                ? "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.6)]"
+                ? "bg-amber-500"
                 : item.status === "ok"
-                  ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
-                  : "bg-[#D95F2B] shadow-[0_0_6px_rgba(217,95,43,0.6)]";
+                  ? "bg-emerald-500"
+                  : "bg-[var(--fb-accent)]";
             return (
               <div
                 key={item.id}
-                className="rounded-xl skeuo-well px-3.5 py-2.5 flex items-start justify-between gap-3 transition-transform hover:translate-x-0.5"
+                className="rounded-xl skeuo-well px-3.5 py-2.5 flex items-start justify-between gap-3"
               >
                 <div className="flex items-start gap-2.5 min-w-0">
                   <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotClass}`} />
@@ -575,7 +567,7 @@ export function SkeuoAreaChart({
   title,
   subtitle,
   series,
-  accentHex = "#D95F2B",
+  accentHex = "#E0622D",
 }: {
   title: string;
   subtitle?: string;

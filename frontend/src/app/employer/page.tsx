@@ -1138,20 +1138,20 @@ export default function EmployerPortal() {
                 Korxona HR &amp; Mentorlik Markazi
               </span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                  <span>Korxona hisobi faol</span>
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                  <span>Hisob faol</span>
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-[var(--fb-ink)]">
-              Tashkilot HR va Vakansiyalar Boshqaruvi
+              Vakansiyalar va nomzodlar
             </h1>
             <p className="text-xs text-[var(--fb-ink-secondary)]">
-              Tashkilot statistikasi, vakansiyalar va nomzodlar bosqichlarini real vaqtda boshqarish.
+              E’lon joylang, kelgan arizalarni ko‘ring va mos talabalarni qidiring.
             </p>
           </div>
 
@@ -1667,7 +1667,7 @@ export default function EmployerPortal() {
             {!targetOppId.trim() ? (
               <div className="p-8 text-center text-zinc-400 text-xs flex flex-col items-center justify-center gap-2 border border-dashed border-white/[0.08] rounded-xl my-4">
                 <Users className="w-8 h-8 text-zinc-500" />
-                <span>Nomzodlar jadvalini ko‘rish uchun yuqoriga Vakansiya ID (UUID) kiriting va &quot;Nomzodlarni yuklash&quot; tugmasini bosing.</span>
+                <span>Yuqoridan vakansiyani tanlang va «Nomzodlarni yuklash» tugmasini bosing — arizalar shu yerda bosqichlar bo‘yicha ko‘rinadi.</span>
               </div>
             ) : isLoadingApps ? (
               <div className="p-12 flex flex-col items-center justify-center gap-2 text-zinc-400 text-xs">
@@ -3682,16 +3682,21 @@ export default function EmployerPortal() {
 
                     <div className="flex items-center gap-1.5 ml-auto">
                       <label htmlFor="match-opp" className="text-xs text-zinc-400">
-                        Vakansiya ID:
+                        Moslik uchun vakansiya:
                       </label>
-                      <input
+                      <select
                         id="match-opp"
-                        type="text"
                         value={selectedOpportunityId}
                         onChange={(e) => setSelectedOpportunityId(e.target.value)}
-                        placeholder="Vakansiya UUID (ixtiyoriy)..."
-                        className="w-48 px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-primary"
-                      />
+                        className="w-56 px-2.5 py-1 rounded-lg bg-surface-card border border-white/[0.08] text-xs text-zinc-300 focus:outline-none focus:border-primary"
+                      >
+                        <option value="">Tanlanmagan (umumiy qidiruv)</option>
+                        {managedOpps.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.title}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
