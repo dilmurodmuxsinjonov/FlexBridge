@@ -1380,3 +1380,9 @@ Keyingi kichik qadam:
 - **Holat**: **CI KUTILMOQDA**. LOG-169 dagi ochiq masala yopildi: servis mavjud bo'lmagan `antivirus.scan_bytes` ni chaqirib xatoni yutardi (hech bir fayl skanerlanmagan); saqlash xatosi yutilardi (obyekt yo'q, lekin CLEAN yozuv); kontentsiz so'rov bo'sh PDF yaratardi ("Elektron PDF tasdiqnoma yaratish" tugmasi).
 - **Endi**: `content_base64` majburiy; `antivirus.scan` fail-closed (503 `ANTIVIRUS_UNAVAILABLE`, 422 `MALWARE_DETECTED_QUARANTINED`); saqlash xatosi 503 `FILE_STORAGE_UNAVAILABLE`, yozuv yaratilmaydi; skan DB tranzaksiyasidan tashqarida. Testlar: `backend/tests/security/test_candidate_pdf_upload.py` (6 ta).
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-171 | Issue #231 -> "Liquid Glass" dizayn qatlami
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi so'rovi: dizayn tushunarliroq, tozaroq va liquid effektli bo'lsin.
+- **O'zgarishlar**: `globals.css` qayta yozildi - sovuq neytral fon + sekin suzuvchi 4 rangli dog' (48s, reduced-motion'da o'chadi), xira-shisha kartalar (blur 22px), yaltiroq "suyuq" tugmalar (sakrash/sweep yo'q), popover/modal uchun deyarli shaffof bo'lmagan shisha, yengil modal parda, `prefers-reduced-transparency` va backdrop-filter yo'q brauzerlar uchun zaxira. Primitivlar: oddiy yozuvli statistik sarlavhalar, accent toggle, yumshoq segment. 4 portal sarlavhalari oddiy tilda; korxona moslik filtri UUID o'rniga vakansiya tanlagich.
+- **Tekshiruv**: lokal `next start` (3100) + Edge Playwright: 58 sahifa (desktop+mobil), light/dark, modal - gorizontal toshish yo'q, yangi xato yo'q (faqat kutilgan 401 mehmon va eski staging backend 404 `/me/workspaces`). Lint 0, vitest 56/56, build OK.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

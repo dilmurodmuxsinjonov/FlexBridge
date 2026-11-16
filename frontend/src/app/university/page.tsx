@@ -801,20 +801,20 @@ export default function UniversityPortal() {
                 Universitet Akademik Dekanati
               </span>
               {currentUser ? (
-                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   Dekanat hisobi faol
                 </span>
               ) : (
-                <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-zinc-100">
-              Akademik Nazorat, Amaliyotlar &amp; Xulosalar Markazi
+              Talabalar va amaliyot nazorati
             </h1>
             <p className="text-xs text-zinc-400">
-              Kafedra o‘qituvchilari va mas’ul koordinatorlar uchun talabalar amaliyotini to‘liq ilmiy-akademik boshqarish.
+              Talabalik so‘rovlarini tasdiqlang, amaliyotlarni kuzating va baholarni qo‘ying.
             </p>
           </div>
 

@@ -1045,24 +1045,23 @@ export default function CandidateProfileHub() {
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-300 border border-sky-500/25">
-                Talaba & Nomzod Kabineti
+                Talaba kabineti
               </span>
-              <span className="text-[var(--fb-ink-muted)] text-xs">• Profil, HEMIS va Amaliyot Rezyumesi</span>
               {currentUser ? (
                 <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2.5 py-0.5 rounded-full border border-emerald-500/25">
                   Talaba hisobi faol
                 </span>
               ) : (
-                <span className="text-[11px] font-mono font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/12 px-2.5 py-0.5 rounded-full border border-amber-500/25">
+                <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/12 px-2.5 py-0.5 rounded-full border border-amber-500/25">
                   Avtorizatsiyadan o‘tilmagan
                 </span>
               )}
             </div>
             <h1 className="font-display text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
-              Nomzod Profili, Ta’lim (HEMIS) va Vaqt Taqsimoti Markazi
+              Mening profilim va rezyumem
             </h1>
             <p className="text-xs text-[var(--fb-ink-muted)]">
-              Kasbiy rezyume, tasdiqlangan ko‘nikmalar, OTM talabalik hisobi (HEMIS) va O‘zR MK 118-moddasi bo‘yicha grafik boshqaruvi.
+              Rezyume, ko‘nikmalar va dars jadvalingizni shu yerda to‘ldiring — ish beruvchilar sizni aynan shu ma’lumotlar orqali topadi.
             </p>
           </div>
 
