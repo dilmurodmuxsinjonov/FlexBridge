@@ -1,5 +1,6 @@
 import { fromBackendResume, toBackendResume } from "./resumeContract";
 import { errorText } from "./errorText";
+import { normalizeLog } from "./diary";
 export interface Opportunity {
   id: string;
   organization_id: string;
@@ -1095,6 +1096,7 @@ export async function fetchPlacementLogs(
   if (params?.from_date) searchParams.set("from_date", params.from_date);
   if (params?.to_date) searchParams.set("to_date", params.to_date);
   if (params?.status) searchParams.set("status", params.status);
+  searchParams.set("page_size", "100");
   const qs = searchParams.toString();
 
   const res = await fetch(`/api/bff/candidate/placements/${encodeURIComponent(placementId)}/logs${qs ? `?${qs}` : ""}`, {
@@ -1108,7 +1110,7 @@ export async function fetchPlacementLogs(
     (err as unknown as { status: number }).status = res.status;
     throw err;
   }
-  return data as PlacementLogsResponse;
+  return { ...data, items: Array.isArray(data.items) ? data.items.map(normalizeLog) : [] } as PlacementLogsResponse;
 }
 
 export async function saveDraftDailyLog(

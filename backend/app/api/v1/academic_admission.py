@@ -195,6 +195,11 @@ class TimetableTemplateImportInput(BaseModel):
     sync_student_availability:bool=True
 
 
+@router.get('/me/timetable')
+def get_my_timetable(actor:ActorContext=Depends(require_actor_context)):
+    return university_timetable_service.get_my_timetable(actor)
+
+
 @router.get('/institutions/{inst}/timetables')
 def get_institution_timetable(
     inst:UUID,

@@ -19,6 +19,7 @@ import {
   LogOut,
   ShieldAlert,
   ArrowRight,
+  CalendarDays,
 } from "lucide-react";
 import { fetchAuthMe, logoutUser, type AuthUser } from "@/lib/api";
 import { isStudentOnlyRoles, resolvePortalDashboard } from "@/lib/roles";
@@ -56,8 +57,9 @@ const STUDENT_NAV_GROUPS: SidebarGroup[] = [
     ],
   },
   {
-    title: "Amaliyot & Natijalar",
+    title: "O‘qish & Amaliyot",
     items: [
+      { href: "/nomzod/jadval", label: "O‘quv jadvali", icon: CalendarDays },
       { href: "/nomzod/kundalik", label: "Kundalik & E-Imzo", icon: BookOpen },
       { href: "/nomzod/baholar", label: "Baholar & Apellyatsiya", icon: Award },
     ],

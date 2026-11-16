@@ -2724,6 +2724,9 @@ export default function UniversityPortal() {
                   </div>
                   <span className="text-[10px] font-mono text-zinc-500">Qo‘lda kiritish</span>
                 </div>
+                <p className="text-[11px] leading-relaxed text-zinc-400">
+                  Jadvalni faqat ikki bosqichli himoya bilan kirgan koordinator o‘zgartira oladi: saqlanganda tasdiqlangan talabalarning ish uchun bo‘sh vaqtlari shu jadvaldan qayta hisoblanadi.
+                </p>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="flex flex-col gap-1">

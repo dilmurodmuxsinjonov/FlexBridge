@@ -1,23 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  Calendar,
-  Clock,
+  AlertTriangle,
   Briefcase,
-  Building2,
   CheckCircle2,
   AlertCircle,
+  Lock,
+  MessageSquareText,
   Plus,
-  Trash2,
+  RefreshCw,
   Save,
   Send,
-  RefreshCw,
-  ShieldCheck,
-  FileCheck,
-  Award,
-  Layers,
+  Trash2,
 } from "lucide-react";
 import {
   AuthUser,
@@ -26,6 +22,7 @@ import {
   DailyLogItem,
   fetchCandidatePlacements,
   fetchPlacementLogs,
+  fetchStandardizedDiary,
   saveDraftDailyLog,
   submitDailyLog,
   saveStandardizedDiary,
@@ -33,10 +30,26 @@ import {
 import AuthModal from "@/components/AuthModal";
 import { useAsyncData } from "@/lib/useAsyncData";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
+import DiaryCalendar from "@/components/diary/DiaryCalendar";
+import { DECISION_LABEL, STATUS_LABEL, localISODate, longDate, reviewsOf, weekdayOf } from "@/lib/diary";
+import { classesOn, fetchMyTimetable, workClashes } from "@/lib/timetable";
 
 // Stable empty values: the form sync below compares `logs` by identity.
 const EMPTY_PLACEMENTS: CandidatePlacementItem[] = [];
 const EMPTY_LOGS: DailyLogItem[] = [];
+const DAILY_LIMIT = 480; // Labour Code art. 118: at most 8 hours a day
+const EMPTY_TASK = { title: "", minutes: 0 };
+
+type Task = { title: string; minutes: number };
+type Standard = {
+  workStart: string;
+  workEnd: string;
+  department: string;
+  tools: string;
+  skills: string;
+  artifact: string;
+  safety: boolean;
+};
 
 async function loadCurrentUser(): Promise<AuthUser | null> {
   try {
@@ -46,825 +59,498 @@ async function loadCurrentUser(): Promise<AuthUser | null> {
   }
 }
 
-async function loadPlacementItems(): Promise<CandidatePlacementItem[]> {
-  try {
-    const res = await fetchCandidatePlacements();
-    return res.items || [];
-  } catch (err: unknown) {
-    console.error("Failed to load placements:", err);
-    throw err;
-  }
-}
+const loadPlacementItems = async () => (await fetchCandidatePlacements()).items || [];
 
-async function loadPlacementLogItems(placementId: string): Promise<DailyLogItem[]> {
-  try {
-    const res = await fetchPlacementLogs(placementId);
-    return res.items || [];
-  } catch (err: unknown) {
-    console.error("Failed to load logs:", err);
-    throw err;
-  }
-}
+const clampDate = (iso: string, min: string, max: string) => (iso < min ? min : iso > max ? max : iso);
 
 export default function CandidateKundalikPage() {
   const auth = useAsyncData("auth-me", loadCurrentUser);
   const user = auth.data ?? null;
-  const authLoading = auth.isLoading;
-  const loadUser = auth.reload;
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const placementsQuery = useAsyncData(user ? `placements:${user.user_id}` : null, loadPlacementItems);
   const placements = placementsQuery.data ?? EMPTY_PLACEMENTS;
-  // Explicit choice wins; otherwise default to the first placement.
-  const [chosenPlacement, setSelectedPlacement] = useState<CandidatePlacementItem | null>(null);
-  const selectedPlacement = chosenPlacement ?? placements[0] ?? null;
+  const [chosenPlacementId, setChosenPlacementId] = useState<string | null>(null);
+  const placement = placements.find((p) => p.id === chosenPlacementId) ?? placements[0] ?? null;
+  const placementId = placement?.id ?? null;
 
-  const selectedPlacementId = selectedPlacement?.id ?? null;
-  const logsQuery = useAsyncData(selectedPlacementId ? `logs:${selectedPlacementId}` : null, () =>
-    loadPlacementLogItems(selectedPlacementId ?? "")
+  const logsQuery = useAsyncData(placementId ? `logs:${placementId}` : null, async () =>
+    (await fetchPlacementLogs(placementId ?? "")).items
   );
   const logs = logsQuery.data ?? EMPTY_LOGS;
-  const isLoadingLogs = logsQuery.isLoading;
-  const reloadLogs = logsQuery.reload;
+  const diaryQuery = useAsyncData(placementId ? `diary:${placementId}` : null, () =>
+    fetchStandardizedDiary(placementId ?? "").catch(() => null)
+  );
+  const diary = diaryQuery.data ?? null;
+  const timetableQuery = useAsyncData(user ? `my-timetable:${user.user_id}` : null, () =>
+    fetchMyTimetable().catch(() => null)
+  );
+  const timetable = timetableQuery.data?.status === "OK" ? timetableQuery.data : null;
+
+  // Date window: the placement period, never in the future (local time, not UTC).
+  const today = useMemo(() => localISODate(), []);
+  const minDate = placement?.start_date ?? today;
+  const maxDate = placement ? (placement.end_date < today ? placement.end_date : today) : today;
+  const [pickedDate, setPickedDate] = useState<string | null>(null);
+  const selectedDate = clampDate(pickedDate ?? today, minDate, maxDate);
+  const [pickedMonth, setPickedMonth] = useState<string | null>(null);
+  const month = pickedMonth ?? selectedDate.slice(0, 7);
 
   // Form state
-  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [dayType, setDayType] = useState<"WORKED" | "ABSENT">("WORKED");
   const [summaryText, setSummaryText] = useState("");
-  const [tasks, setTasks] = useState<Array<{ title: string; minutes: number }>>([
-    { title: "Kafedra va amaliyot rejasi bo'yicha vazifalar", minutes: 240 },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([EMPTY_TASK]);
+  const [std, setStd] = useState<Standard>({ workStart: "09:00", workEnd: "17:00", department: "", tools: "", skills: "", artifact: "", safety: true });
 
-  // Standardized Uzbek OTM daily entry fields
-  const [workStartTime, setWorkStartTime] = useState("09:00");
-  const [workEndTime, setWorkEndTime] = useState("18:00");
-  const [departmentUnit, setDepartmentUnit] = useState("");
-  const [toolsUsed, setToolsUsed] = useState("");
-  const [skillsPracticed, setSkillsPracticed] = useState("");
-  const [outcomeArtifact, setOutcomeArtifact] = useState("");
-  const [safetyInstructed, setSafetyInstructed] = useState(true);
+  const [busy, setBusy] = useState<"save" | "submit" | null>(null);
+  const [notification, setNotification] = useState<{ type: "success" | "error" | "warning"; message: string } | null>(null);
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const activeLog = logs.find((l) => l.local_date === selectedDate);
+  const locked = Boolean(activeLog && activeLog.status !== "DRAFT");
+  const weekday = weekdayOf(selectedDate);
+  const dayClasses = timetable ? classesOn(timetable.slots, weekday) : [];
 
-
-  // Synchronize form when selectedDate or logs change. Adjusted during render
-  // (react.dev "You Might Not Need an Effect") instead of a cascading effect.
-  const [formSyncSource, setFormSyncSource] = useState<{ date: string; logs: DailyLogItem[] } | null>(null);
-  if (formSyncSource === null || formSyncSource.date !== selectedDate || formSyncSource.logs !== logs) {
-    setFormSyncSource({ date: selectedDate, logs });
-    const existingLog = logs.find((l) => l.local_date === selectedDate);
-    if (existingLog) {
-      setDayType(existingLog.day_type || "WORKED");
-      setSummaryText(existingLog.summary || "");
-      if (existingLog.tasks && existingLog.tasks.length > 0) {
-        setTasks(existingLog.tasks.map((t) => ({ title: t.title, minutes: t.minutes })));
-      } else {
-        setTasks([{ title: existingLog.summary || "Amaliyot vazifasi", minutes: existingLog.total_minutes || 240 }]);
-      }
+  // Sync the form when the date, logs, diary or timetable change. Adjusted during
+  // render (react.dev "You Might Not Need an Effect") instead of a cascading effect.
+  const [syncKey, setSyncKey] = useState<{ date: string; logs: DailyLogItem[]; diary: unknown; tt: unknown } | null>(null);
+  if (!syncKey || syncKey.date !== selectedDate || syncKey.logs !== logs || syncKey.diary !== diary || syncKey.tt !== timetable) {
+    setSyncKey({ date: selectedDate, logs, diary, tt: timetable });
+    const entry = diary?.entries.find((e) => e.log_date === selectedDate)?.standard_entry;
+    const freeToday = timetable?.free_windows.find((d) => d.weekday === weekday)?.free_intervals[0];
+    setStd({
+      workStart: entry?.work_start_time || freeToday?.start_time || "09:00",
+      workEnd: entry?.work_end_time || freeToday?.end_time || "17:00",
+      department: entry?.department_unit || "",
+      tools: entry?.tools_used || "",
+      skills: entry?.skills_practiced || "",
+      artifact: entry?.outcome_artifact || "",
+      safety: entry ? entry.safety_instructed : true,
+    });
+    if (activeLog) {
+      setDayType(activeLog.day_type || "WORKED");
+      setSummaryText(activeLog.summary || "");
+      setTasks(activeLog.tasks && activeLog.tasks.length > 0 ? activeLog.tasks.map((t) => ({ title: t.title, minutes: t.minutes })) : [EMPTY_TASK]);
     } else {
       setDayType("WORKED");
       setSummaryText("");
-      setTasks([{ title: "Kafedra va amaliyot rejasi bo'yicha vazifalar", minutes: 240 }]);
+      setTasks([EMPTY_TASK]);
     }
   }
 
-  const activeLogForDate = useMemo(() => {
-    return logs.find((l) => l.local_date === selectedDate);
-  }, [logs, selectedDate]);
+  const totalMinutes = dayType === "ABSENT" ? 0 : tasks.reduce((sum, t) => sum + (Number(t.minutes) || 0), 0);
+  const clashes = timetable && dayType === "WORKED" ? workClashes(timetable.slots, weekday, std.workStart, std.workEnd) : [];
 
-  const totalCalculatedMinutes = useMemo(() => {
-    if (dayType === "ABSENT") return 0;
-    return tasks.reduce((sum, t) => sum + (Number(t.minutes) || 0), 0);
-  }, [dayType, tasks]);
-
-  const totalCompletedHours = useMemo(() => {
-    const totalMins = logs
-      .filter((l) => l.status === "REVIEWED" || l.status === "SUBMITTED")
-      .reduce((sum, l) => sum + (l.total_minutes || 0), 0);
-    return (totalMins / 60).toFixed(1);
+  const counts = useMemo(() => {
+    const c = { DRAFT: 0, SUBMITTED: 0, REVIEWED: 0, NEEDS_REVISION: 0 } as Record<DailyLogItem["status"], number>;
+    logs.forEach((l) => (c[l.status] += 1));
+    return c;
   }, [logs]);
+  const loggedHours = logs.filter((l) => l.status !== "DRAFT").reduce((s, l) => s + (l.total_minutes || 0), 0) / 60;
+  const normative = diary?.stats.normative_hours || 0;
 
-  const handleAddTask = () => {
-    setTasks([...tasks, { title: "", minutes: 120 }]);
-  };
+  const setTask = (i: number, patch: Partial<Task>) => setTasks((ts) => ts.map((t, j) => (j === i ? { ...t, ...patch } : t)));
 
-  const handleRemoveTask = (index: number) => {
-    setTasks(tasks.filter((_, i) => i !== index));
-  };
-
-  const handleTaskChange = (index: number, field: "title" | "minutes", value: string | number) => {
-    const updated = [...tasks];
-    if (field === "minutes") {
-      updated[index].minutes = Number(value) || 0;
-    } else {
-      updated[index].title = String(value);
+  async function persist(submit: boolean) {
+    if (!placement) return;
+    if (dayType === "WORKED" && totalMinutes > DAILY_LIMIT) {
+      setNotification({ type: "error", message: "Kunlik amaliyot vaqti 8 soatdan (480 daqiqa) oshmasligi kerak (Mehnat kodeksi, 118-modda)." });
+      return;
     }
-    setTasks(updated);
-  };
-
-  const handleSaveDraft = async () => {
-    if (!selectedPlacement) return;
+    if (submit && dayType === "WORKED" && totalMinutes <= 0) {
+      setNotification({ type: "error", message: "Yuborishdan oldin kamida bitta vazifa va unga sarflangan vaqtni kiriting." });
+      return;
+    }
+    setBusy(submit ? "submit" : "save");
+    setNotification(null);
     try {
-      setIsSaving(true);
-      setNotification(null);
-
-      if (dayType === "WORKED" && totalCalculatedMinutes > 480) {
-        setNotification({
-          type: "error",
-          message: "O'zbekiston Respublikasi Mehnat Kodeksi (118-modda) bo'yicha kunlik amaliyot vaqti 8 soatdan (480 daqiqa) oshishi mumkin emas.",
-        });
-        setIsSaving(false);
-        return;
-      }
-
-      const savedDraft = await saveDraftDailyLog(selectedPlacement.id, selectedDate, {
+      const draft = await saveDraftDailyLog(placement.id, selectedDate, {
         day_type: dayType,
         summary_text: summaryText,
-        total_minutes: totalCalculatedMinutes,
-        tasks: tasks.map((t) => ({
-          title: t.title || "Amaliyot vazifasi",
-          minutes: t.minutes,
-        })),
+        total_minutes: totalMinutes,
+        tasks:
+          dayType === "ABSENT"
+            ? []
+            : tasks.filter((t) => t.minutes > 0).map((t) => ({ title: t.title.trim() || "Amaliyot vazifasi", minutes: t.minutes })),
       });
-
-      await saveStandardizedDiary(selectedPlacement.id, {
+      let extrasError: string | null = null;
+      await saveStandardizedDiary(placement.id, {
         daily_entry: {
-          daily_log_id: savedDraft?.id,
+          daily_log_id: draft?.id,
           log_date: selectedDate,
-          work_start_time: workStartTime,
-          work_end_time: workEndTime,
-          department_unit: departmentUnit,
-          tools_used: toolsUsed,
-          skills_practiced: skillsPracticed,
-          outcome_artifact: outcomeArtifact,
-          safety_instructed: safetyInstructed,
+          work_start_time: std.workStart,
+          work_end_time: std.workEnd,
+          department_unit: std.department,
+          tools_used: std.tools,
+          skills_practiced: std.skills,
+          outcome_artifact: std.artifact,
+          safety_instructed: std.safety,
         },
-      }).catch(() => null);
-
-      setNotification({
-        type: "success",
-        message: `${selectedDate} sanasi uchun qoralama kundalik muvaffaqiyatli saqlandi.`,
+      }).catch((err: unknown) => {
+        extrasError = err instanceof Error ? err.message : "noma’lum xato";
       });
-
-      await reloadLogs();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Qoralamani saqlashda xatolik yuz berdi";
-      setNotification({ type: "error", message: msg });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSubmitForReview = async () => {
-    if (!selectedPlacement) return;
-    try {
-      setIsSubmitting(true);
-      setNotification(null);
-
-      // Save draft first if not yet created or modified
-      const draftResult = await saveDraftDailyLog(selectedPlacement.id, selectedDate, {
-        day_type: dayType,
-        summary_text: summaryText,
-        total_minutes: totalCalculatedMinutes,
-        tasks: tasks.map((t) => ({
-          title: t.title || "Amaliyot vazifasi",
-          minutes: t.minutes,
-        })),
-      });
-
-      await saveStandardizedDiary(selectedPlacement.id, {
-        daily_entry: {
-          daily_log_id: draftResult?.id,
-          log_date: selectedDate,
-          work_start_time: workStartTime,
-          work_end_time: workEndTime,
-          department_unit: departmentUnit,
-          tools_used: toolsUsed,
-          skills_practiced: skillsPracticed,
-          outcome_artifact: outcomeArtifact,
-          safety_instructed: safetyInstructed,
-        },
-      }).catch(() => null);
-
-      // Submit
-      const logIdToSubmit = draftResult.id || activeLogForDate?.id;
-      if (!logIdToSubmit) {
-        throw new Error("Kundalik identifikatori aniqlanmadi.");
+      if (submit) {
+        const id = draft?.id || activeLog?.id;
+        if (!id) throw new Error("Kundalik yozuvi topilmadi. Sahifani yangilab, qayta urinib ko‘ring.");
+        await submitDailyLog(id);
       }
-
-      await submitDailyLog(logIdToSubmit);
-
-      setNotification({
-        type: "success",
-        message: `${selectedDate} sanasidagi kundalik o'qituvchi va mentor tekshiruviga muvaffaqiyatli topshirildi.`,
-      });
-
-      await reloadLogs();
+      setNotification(
+        extrasError
+          ? { type: "warning", message: `Asosiy yozuv saqlandi, lekin qo‘shimcha maydonlar saqlanmadi: ${extrasError}` }
+          : {
+              type: "success",
+              message: submit
+                ? `${longDate(selectedDate)} — mentor va o‘qituvchi tekshiruviga yuborildi.`
+                : `${longDate(selectedDate)} — qoralama saqlandi.`,
+            }
+      );
+      await Promise.all([logsQuery.reload(), diaryQuery.reload()]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Kundalikni topshirishda xatolik yuz berdi";
-      setNotification({ type: "error", message: msg });
+      setNotification({ type: "error", message: err instanceof Error ? err.message : "Saqlab bo‘lmadi." });
     } finally {
-      setIsSubmitting(false);
+      setBusy(null);
     }
-  };
+  }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "SUBMITTED":
-        return {
-          label: "Ko'rib chiqilmoqda",
-          className: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-          icon: Clock,
-        };
-      case "REVIEWED":
-        return {
-          label: "Tasdiqlandi",
-          className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-          icon: CheckCircle2,
-        };
-      case "NEEDS_REVISION":
-        return {
-          label: "Qaytarildi (Tuzatish)",
-          className: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-          icon: AlertCircle,
-        };
-      case "DRAFT":
-      default:
-        return {
-          label: "Qoralama",
-          className: "bg-zinc-800 text-zinc-400 border-zinc-700",
-          icon: FileCheck,
-        };
-    }
-  };
+  const input = "skeuo-input w-full rounded-2xl px-3.5 py-2.5 text-sm disabled:opacity-60";
+  const reviews = activeLog ? reviewsOf(activeLog) : [];
 
   return (
-    <div className="w-full flex flex-col gap-6 font-sans text-zinc-100">
-      {/* Page Status Bar */}
-      <section className="rounded-xl border border-sky-500/20 bg-surface-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-sky-400 font-semibold uppercase tracking-wider mb-1">
-            <FileCheck className="w-3.5 h-3.5" />
-            <span>Amaliyot Kundaligi & E-Imzo</span>
-          </div>
-          <h1 className="font-heading text-lg md:text-xl font-bold text-white tracking-tight">
-            Elektron Amaliyot Kundaligi
-          </h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            Kunlik bajarilgan vazifalar hisoboti, mentor bahosi va universitet akademik tasdig‘i
-          </p>
+    <div className="flex w-full flex-col gap-5 text-[var(--fb-ink)]">
+      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm text-[var(--fb-ink-muted)]">{placement?.organization_name || "Amaliyot"}</p>
+          <h1 className="fb-display mt-1">Kundalik</h1>
+          {placement && (
+            <p className="mt-2 text-sm text-[var(--fb-ink-secondary)]">
+              {placement.opportunity_title || "Amaliyot"} · {placement.start_date} — {placement.end_date}
+            </p>
+          )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {selectedPlacement && (
-            <div className="flex items-center gap-2.5 bg-surface-lowest border border-sky-500/20 rounded-xl px-3.5 py-2">
-              <Clock className="w-4 h-4 text-sky-400" />
-              <div>
-                <div className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">Bajarilgan soat</div>
-                <div className="text-sm font-bold text-white tabular-nums">
-                  {totalCompletedHours} <span className="text-xs text-zinc-500 font-normal">/ 200 soat</span>
-                </div>
-              </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {placements.length > 1 && (
+            <div className="fb-seg" role="group" aria-label="Amaliyotni tanlash">
+              {placements.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={p.id === placementId}
+                  onClick={() => {
+                    setChosenPlacementId(p.id);
+                    setPickedDate(null);
+                    setPickedMonth(null);
+                  }}
+                >
+                  {p.organization_name || "Korxona"}
+                </button>
+              ))}
             </div>
           )}
-          {authLoading ? (
-            <div className="w-20 h-7 bg-zinc-800 animate-pulse rounded" />
-          ) : user ? null : (
+          {placement && (
             <button
-              onClick={() => setAuthModalOpen(true)}
-              className="text-xs px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors"
+              type="button"
+              onClick={() => void Promise.all([logsQuery.reload(), diaryQuery.reload()])}
+              className="fb-icon-btn fb-icon-btn-light"
+              aria-label="Yangilash"
             >
-              Kirish
+              <RefreshCw className={`h-4 w-4 ${logsQuery.isLoading ? "animate-spin" : ""}`} />
             </button>
           )}
         </div>
-      </section>
+      </header>
 
-      <div className="w-full">
-        {/* Notifications */}
-        {notification && (
-          <div
-            className={`mb-6 p-4 rounded-xl border flex items-center gap-3 ${
-              notification.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : "bg-red-500/10 border-red-500/20 text-red-400"
-            }`}
-          >
-            {notification.type === "success" ? (
-              <CheckCircle2 className="w-5 h-5 shrink-0" />
-            ) : (
-              <AlertCircle className="w-5 h-5 shrink-0" />
-            )}
-            <p className="text-sm font-medium">{notification.message}</p>
-          </div>
-        )}
+      {notification && (
+        <div
+          role={notification.type === "error" ? "alert" : "status"}
+          className={`fb-panel skeuo-card flex items-start gap-3 px-4 py-3 text-sm ${
+            notification.type === "success"
+              ? "text-emerald-700 dark:text-emerald-300"
+              : notification.type === "warning"
+                ? "text-amber-800 dark:text-amber-300"
+                : "text-rose-700 dark:text-rose-300"
+          }`}
+        >
+          {notification.type === "success" ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> : <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />}
+          <p>{notification.message}</p>
+        </div>
+      )}
 
-        {/* Placement Selection (if multiple) */}
-        {placements.length > 1 && (
-          <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-            {placements.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPlacement(p)}
-                className={`px-4 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-2 ${
-                  selectedPlacement?.id === p.id
-                    ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
-                    : "bg-[#121214] border-white/5 text-zinc-400 hover:text-zinc-200"
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                {p.organization_name || "Korxona"} ({p.start_date} - {p.end_date})
-              </button>
-            ))}
-          </div>
-        )}
+      {!auth.isLoading && !user && (
+        <section className="fb-panel skeuo-card mx-auto flex max-w-md flex-col items-center gap-3 p-10 text-center">
+          <h2 className="text-lg font-semibold">Kundalikni yuritish uchun kiring</h2>
+          <button type="button" onClick={() => setAuthModalOpen(true)} className="rounded-full skeuo-btn-obsidian px-4 py-2 text-xs font-semibold">
+            Talaba kirishi
+          </button>
+        </section>
+      )}
 
-        {/* Active Placement Card */}
-        {selectedPlacement ? (
-          <div className="mb-8 bg-[#121214] border border-white/5 rounded-2xl p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                  <Briefcase className="w-6 h-6" />
+      {user && placementsQuery.error && (
+        <p role="alert" className="fb-panel skeuo-card px-4 py-3 text-sm text-rose-700 dark:text-rose-300">
+          Amaliyotlarni yuklab bo‘lmadi: {placementsQuery.error.message}
+        </p>
+      )}
+
+      {user && !placementsQuery.isLoading && !placementsQuery.error && !placement && (
+        <section className="fb-panel skeuo-card flex flex-col items-center gap-3 px-6 py-14 text-center">
+          <span className="fb-avatar h-14 w-14" aria-hidden="true">
+            <Briefcase className="h-6 w-6" />
+          </span>
+          <h2 className="text-lg font-semibold">Faol amaliyot topilmadi</h2>
+          <p className="max-w-md text-sm text-[var(--fb-ink-secondary)]">Kundalik amaliyot shartnomasi rasmiylashtirilgandan keyin ochiladi.</p>
+          <Link href="/" className="rounded-full skeuo-btn-obsidian px-4 py-2 text-xs font-semibold">
+            Vakansiyalarni ko‘rish
+          </Link>
+        </section>
+      )}
+
+      {placement && (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.75fr)]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <section className="fb-panel skeuo-card p-5" aria-label="Kundalik kalendari">
+              <DiaryCalendar
+                month={month}
+                onMonthChange={setPickedMonth}
+                logs={logs}
+                selected={selectedDate}
+                onSelect={(d) => {
+                  setPickedDate(d);
+                  setNotification(null);
+                }}
+                minDate={minDate}
+                maxDate={maxDate}
+                today={today}
+                classDays={timetable ? new Set(timetable.slots.map((s) => s.weekday)) : undefined}
+              />
+            </section>
+
+            <section data-skeuo-dark="true" className="fb-ink-card flex flex-col gap-4 p-5" aria-labelledby="diary-hours">
+              <h2 id="diary-hours" className="text-sm font-semibold fb-muted">Amaliyot soatlari</h2>
+              <p className="font-display text-4xl font-bold tabular-nums">
+                {Math.round(loggedHours * 10) / 10}
+                <span className="ml-1 text-base font-semibold fb-muted">{normative ? `/ ${normative} soat` : "soat yuborilgan"}</span>
+              </p>
+              {normative > 0 && (
+                <div className="fb-progress" role="img" aria-label={`Me’yorning ${Math.min(100, Math.round((loggedHours / normative) * 100))} foizi`}>
+                  <span style={{ width: `${Math.min(100, (loggedHours / normative) * 100)}%` }} />
                 </div>
-                <div>
-                  <h3 className="text-base font-medium text-white">
-                    {selectedPlacement.opportunity_title || "Dasturiy injiniring amaliyoti"}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-zinc-400 mt-1">
-                    <span className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-zinc-500" />
-                      {selectedPlacement.organization_name || "Tashkilot"}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-zinc-500" />
-                      {selectedPlacement.start_date} — {selectedPlacement.end_date}
-                    </span>
-                    {selectedPlacement.academic_track && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-medium">
-                        Akademik uch tomonlama shartnoma
-                      </span>
-                    )}
+              )}
+              <dl className="grid grid-cols-2 gap-3 text-xs">
+                {(["REVIEWED", "SUBMITTED", "NEEDS_REVISION", "DRAFT"] as const).map((k) => (
+                  <div key={k}>
+                    <dt className="fb-muted">{STATUS_LABEL[k]}</dt>
+                    <dd className="text-lg font-bold tabular-nums">{counts[k]}</dd>
                   </div>
-                </div>
-              </div>
+                ))}
+              </dl>
+            </section>
+          </div>
 
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Faol amaliyot
+          <div className="flex min-w-0 flex-col gap-5">
+            <section className="fb-panel skeuo-card flex flex-col gap-5 p-5 sm:p-6" aria-labelledby="diary-day">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 id="diary-day" className="text-xl font-semibold tracking-tight">{longDate(selectedDate)}</h2>
+                  <p className="text-xs text-[var(--fb-ink-muted)]">{selectedDate === today ? "Bugun" : "Kunlik hisobot"}</p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    activeLog?.status === "REVIEWED" ? "fb-nav-active" : activeLog?.status === "NEEDS_REVISION" ? "bg-[var(--fb-accent)] text-white" : "fb-capsule"
+                  }`}
+                >
+                  {activeLog ? STATUS_LABEL[activeLog.status] : "Yozilmagan"}
                 </span>
               </div>
-            </div>
-          </div>
-        ) : !authLoading && user ? (
-          <div className="mb-8 p-8 bg-[#121214] border border-white/5 rounded-2xl text-center">
-            <Briefcase className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-            <h3 className="text-base font-medium text-zinc-200">Faol amaliyot topilmadi</h3>
-            <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
-              Sizda hozircha rasmiylashtirilgan amaliyot biriktiruvi mavjud emas. Avval vakansiyalarga ariza topshiring.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
-            >
-              Vakansiyalarni ko‘rish
-            </Link>
-          </div>
-        ) : null}
 
-        {/* Main Content Layout: Editor (Left) & Log History (Right) — only with an active placement */}
-        {selectedPlacement && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Daily Log Editor */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 sm:p-6">
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
-                <div>
-                  <h2 className="text-base font-semibold text-white flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-blue-400" />
-                    Kunlik hisobot kiritish
-                  </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Kunlik bajargan amaliy vazifalaringizni batafsil yozib boring
-                  </p>
+              {timetable && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs font-medium text-[var(--fb-ink-muted)]">Shu kuni darslaringiz</p>
+                  {dayClasses.length === 0 ? (
+                    <p className="text-xs text-[var(--fb-ink-secondary)]">Dars yo‘q.</p>
+                  ) : (
+                    <ul className="flex flex-wrap gap-2">
+                      {dayClasses.map((c) => (
+                        <li key={c.start_minute} className="fb-capsule px-3 py-1 text-[11px] font-medium tabular-nums">
+                          {c.start_time}–{c.end_time} · {c.subject_name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              {locked && (
+                <p className="flex items-start gap-2 rounded-2xl skeuo-well px-3.5 py-3 text-xs text-[var(--fb-ink-secondary)]">
+                  <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  Bu kun tekshiruvga yuborilgan — yozuvni endi o‘zgartirib bo‘lmaydi.
+                </p>
+              )}
+
+              <fieldset disabled={locked || busy !== null} className="flex min-w-0 flex-col gap-5">
+                <div className="fb-seg w-fit" role="group" aria-label="Kun turi">
+                  <button type="button" aria-pressed={dayType === "WORKED"} onClick={() => setDayType("WORKED")}>
+                    Ish kuni
+                  </button>
+                  <button type="button" aria-pressed={dayType === "ABSENT"} onClick={() => setDayType("ABSENT")}>
+                    Kelmadim (sababli)
+                  </button>
                 </div>
 
-                {activeLogForDate && (
-                  <div>
-                    {(() => {
-                      const badge = getStatusBadge(activeLogForDate.status);
-                      const Icon = badge.icon;
-                      return (
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${badge.className}`}
-                        >
-                          <Icon className="w-3.5 h-3.5" />
-                          {badge.label}
+                {dayType === "WORKED" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
+                      <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--fb-ink-secondary)]">
+                        Kelish
+                        <input type="time" value={std.workStart} onChange={(e) => setStd({ ...std, workStart: e.target.value })} className={input} />
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--fb-ink-secondary)]">
+                        Ketish
+                        <input type="time" value={std.workEnd} onChange={(e) => setStd({ ...std, workEnd: e.target.value })} className={input} />
+                      </label>
+                    </div>
+                    {clashes.length > 0 && (
+                      <p role="alert" className="flex items-start gap-2 rounded-2xl bg-amber-500/12 px-3.5 py-3 text-xs text-amber-800 dark:text-amber-300">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span>
+                          Bu vaqt darsingiz bilan to‘qnashadi: {clashes.map((c) => `${c.subject_name} (${c.start_time}–${c.end_time})`).join(", ")}. Amaliyot
+                          dars vaqtiga to‘g‘ri kelmasligi kerak.
                         </span>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
+                      </p>
+                    )}
 
-              {/* Date & Day Type Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                    Sana (Kun)
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    max={todayStr}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#09090b] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                    Kun turi
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setDayType("WORKED")}
-                      className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${
-                        dayType === "WORKED"
-                          ? "bg-blue-600/10 border-blue-500 text-blue-400"
-                          : "bg-[#09090b] border-white/10 text-zinc-400 hover:text-zinc-200"
-                      }`}
-                    >
-                      Ish kuni
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDayType("ABSENT")}
-                      className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${
-                        dayType === "ABSENT"
-                          ? "bg-amber-500/10 border-amber-500 text-amber-400"
-                          : "bg-[#09090b] border-white/10 text-zinc-400 hover:text-zinc-200"
-                      }`}
-                    >
-                      Dam olish / Sababli
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Day Summary */}
-              <div className="mb-5">
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                  Kunning umumiy xulosasi / asosiy natijasi
-                </label>
-                <textarea
-                  rows={2}
-                  value={summaryText}
-                  onChange={(e) => setSummaryText(e.target.value)}
-                  placeholder="Masalan: Bugun backend arxitekturasi va REST API integratsiyasi bo'yicha amaliy ishlar olib borildi..."
-                  className="w-full px-3.5 py-2.5 bg-[#09090b] border border-white/10 rounded-xl text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
-                />
-              </div>
-
-              {/* Standardized Diary Entry Details */}
-              <div className="mb-5 p-3.5 rounded-xl bg-[#09090b] border border-white/5 space-y-3">
-                <div className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">
-                  Standart Amaliyot Kundaligi Maydonlari
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 mb-1">Kelish / Ketish vaqti</label>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="time"
-                        value={workStartTime}
-                        onChange={(e) => setWorkStartTime(e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs font-mono"
-                      />
-                      <span className="text-zinc-500">-</span>
-                      <input
-                        type="time"
-                        value={workEndTime}
-                        onChange={(e) => setWorkEndTime(e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 mb-1">Ish joyi / Bo&apos;lim</label>
-                    <input
-                      type="text"
-                      value={departmentUnit}
-                      onChange={(e) => setDepartmentUnit(e.target.value)}
-                      placeholder="Masalan: Dasturiy ta'minot bo'limi"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 mb-1">Ishlatilgan uskunalar / Texnologiyalar</label>
-                    <input
-                      type="text"
-                      value={toolsUsed}
-                      onChange={(e) => setToolsUsed(e.target.value)}
-                      placeholder="Python, PostgreSQL, Docker..."
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 mb-1">Egallangan amaliy ko&apos;nikmalar</label>
-                    <input
-                      type="text"
-                      value={skillsPracticed}
-                      onChange={(e) => setSkillsPracticed(e.target.value)}
-                      placeholder="REST API integratsiyasi..."
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-zinc-500 mb-1">Natija / Hujjat (Artifact)</label>
-                    <input
-                      type="text"
-                      value={outcomeArtifact}
-                      onChange={(e) => setOutcomeArtifact(e.target.value)}
-                      placeholder="PR #42 yoki laboratoriya moduli"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-xs"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 pt-4">
-                    <input
-                      id="safety-instructed"
-                      type="checkbox"
-                      checked={safetyInstructed}
-                      onChange={(e) => setSafetyInstructed(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 bg-zinc-900"
-                    />
-                    <label htmlFor="safety-instructed" className="text-[11px] text-zinc-300 cursor-pointer">
-                      Texnika xavfsizligi yo&apos;riqnomasi o&apos;tildi
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tasks Breakdown */}
-              {dayType === "WORKED" && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs font-medium text-zinc-400">
-                      Bajarilgan aniq vazifalar va sarflangan vaqt
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleAddTask}
-                      className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Vazifa qo‘shish
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {tasks.map((task, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 bg-[#09090b] border border-white/5 rounded-xl p-2.5"
-                      >
-                        <input
-                          type="text"
-                          value={task.title}
-                          onChange={(e) => handleTaskChange(idx, "title", e.target.value)}
-                          placeholder="Vazifa tavsifi..."
-                          className="flex-1 bg-transparent border-0 text-sm text-white placeholder:text-zinc-600 focus:outline-none"
-                        />
-                        <div className="flex items-center gap-1 shrink-0">
-                          <input
-                            type="number"
-                            min={15}
-                            max={480}
-                            step={15}
-                            value={task.minutes}
-                            onChange={(e) => handleTaskChange(idx, "minutes", e.target.value)}
-                            className="w-16 px-2 py-1 bg-zinc-900 border border-white/10 rounded-lg text-xs text-white text-right focus:outline-none focus:border-blue-500 tabular-nums"
-                          />
-                          <span className="text-xs text-zinc-500">daq</span>
-                        </div>
-                        {tasks.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTask(idx)}
-                            className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium text-[var(--fb-ink-secondary)]">Bajarilgan vazifalar</p>
+                        <button
+                          type="button"
+                          onClick={() => setTasks([...tasks, EMPTY_TASK])}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold hover:bg-[var(--fb-well-deep)]"
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Vazifa
+                        </button>
                       </div>
+                      {tasks.map((t, i) => (
+                        <div key={i} className="fb-file-row !gap-2 !p-2 !pl-3.5">
+                          <input
+                            aria-label={`${i + 1}-vazifa`}
+                            value={t.title}
+                            onChange={(e) => setTask(i, { title: e.target.value })}
+                            placeholder="Masalan: Buyurtmalar sahifasi uchun API yozdim"
+                            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--fb-ink-muted)]"
+                          />
+                          <input
+                            aria-label={`${i + 1}-vazifa vaqti, daqiqa`}
+                            type="number"
+                            min={0}
+                            max={DAILY_LIMIT}
+                            step={15}
+                            value={t.minutes || ""}
+                            placeholder="0"
+                            onChange={(e) => setTask(i, { minutes: Math.max(0, Number(e.target.value) || 0) })}
+                            className="w-16 rounded-xl bg-[var(--fb-card-top)] px-2 py-1.5 text-right text-xs tabular-nums outline-none"
+                          />
+                          <span className="text-[11px] text-[var(--fb-ink-muted)]">daq</span>
+                          {tasks.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => setTasks(tasks.filter((_, j) => j !== i))}
+                              className="rounded-full p-1.5 text-[var(--fb-ink-muted)] hover:text-rose-600"
+                              aria-label={`${i + 1}-vazifani o‘chirish`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-3 pt-1">
+                        <div className="fb-progress flex-1" aria-hidden="true">
+                          <span
+                            style={{
+                              width: `${Math.min(100, (totalMinutes / DAILY_LIMIT) * 100)}%`,
+                              background: totalMinutes > DAILY_LIMIT ? "var(--fb-accent)" : undefined,
+                            }}
+                          />
+                        </div>
+                        <span className={`text-xs tabular-nums ${totalMinutes > DAILY_LIMIT ? "font-bold text-rose-600" : "text-[var(--fb-ink-secondary)]"}`}>
+                          {Math.floor(totalMinutes / 60)} soat {totalMinutes % 60} daq / 8 soat
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--fb-ink-secondary)]">
+                  {dayType === "WORKED" ? "Kun xulosasi" : "Kelmaslik sababi"}
+                  <textarea
+                    rows={3}
+                    value={summaryText}
+                    onChange={(e) => setSummaryText(e.target.value)}
+                    placeholder={dayType === "WORKED" ? "Bugun nimani o‘rgandingiz va qanday natijaga erishdingiz?" : "Masalan: imtihon, kasallik (ma’lumotnoma bor)"}
+                    className={`${input} resize-none`}
+                  />
+                </label>
+
+                <details className="rounded-2xl skeuo-well px-4 py-3">
+                  <summary className="cursor-pointer text-xs font-semibold text-[var(--fb-ink-secondary)]">Universitet shakli uchun qo‘shimcha maydonlar</summary>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {(
+                      [
+                        ["department", "Bo‘lim / ish joyi", "Masalan: Dasturiy ta’minot bo‘limi"],
+                        ["tools", "Uskunalar va texnologiyalar", "Python, PostgreSQL, Figma"],
+                        ["skills", "O‘zlashtirilgan ko‘nikmalar", "REST API, kod sharhi"],
+                        ["artifact", "Natija / hujjat", "PR #42, hisobot, maket"],
+                      ] as const
+                    ).map(([key, label, ph]) => (
+                      <label key={key} className="flex flex-col gap-1.5 text-xs font-medium text-[var(--fb-ink-secondary)]">
+                        {label}
+                        <input value={std[key]} onChange={(e) => setStd({ ...std, [key]: e.target.value })} placeholder={ph} className={input} />
+                      </label>
                     ))}
+                    <label className="flex items-center gap-2 text-xs text-[var(--fb-ink-secondary)] sm:col-span-2">
+                      <input type="checkbox" checked={std.safety} onChange={(e) => setStd({ ...std, safety: e.target.checked })} className="h-4 w-4" />
+                      Xavfsizlik texnikasi bo‘yicha yo‘riqnomadan o‘tdim
+                    </label>
                   </div>
+                </details>
 
-                  <div className="mt-3 flex items-center justify-between text-xs text-zinc-400 px-1">
-                    <span>Jami sarflangan vaqt:</span>
-                    <span
-                      className={`font-mono font-medium tabular-nums ${
-                        totalCalculatedMinutes > 480 ? "text-red-400 font-bold" : "text-white"
-                      }`}
-                    >
-                      {totalCalculatedMinutes} daqiqa ({(totalCalculatedMinutes / 60).toFixed(1)} soat) / 480 daq me&apos;yor
-                    </span>
-                  </div>
+                <div className="flex flex-wrap justify-end gap-2 border-t border-[var(--fb-border)] pt-4">
+                  <button type="button" onClick={() => void persist(false)} className="inline-flex items-center gap-2 rounded-full skeuo-btn-secondary px-4 py-2.5 text-xs font-semibold disabled:opacity-50">
+                    <Save className="h-4 w-4" /> {busy === "save" ? "Saqlanmoqda…" : "Qoralamani saqlash"}
+                  </button>
+                  <button type="button" onClick={() => void persist(true)} className="inline-flex items-center gap-2 rounded-full skeuo-btn-obsidian px-5 py-2.5 text-xs font-semibold disabled:opacity-50">
+                    <Send className="h-4 w-4" /> {busy === "submit" ? "Yuborilmoqda…" : "Tekshiruvga yuborish"}
+                  </button>
                 </div>
-              )}
+              </fieldset>
+            </section>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-white/5">
-                <button
-                  type="button"
-                  disabled={isSaving || isSubmitting || activeLogForDate?.status === "SUBMITTED" || activeLogForDate?.status === "REVIEWED"}
-                  onClick={handleSaveDraft}
-                  className="px-4 py-2.5 rounded-xl text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  {isSaving ? "Saqlanmoqda..." : "Qoralamani saqlash"}
-                </button>
-
-                <button
-                  type="button"
-                  disabled={
-                    isSaving ||
-                    isSubmitting ||
-                    activeLogForDate?.status === "SUBMITTED" ||
-                    activeLogForDate?.status === "REVIEWED" ||
-                    (dayType === "WORKED" && totalCalculatedMinutes <= 0)
-                  }
-                  onClick={handleSubmitForReview}
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                >
-                  <Send className="w-4 h-4" />
-                  {isSubmitting ? "Topshirilmoqda..." : "Tekshiruvga topshirish"}
-                </button>
-              </div>
-
-              {/* Immutable note if submitted */}
-              {(activeLogForDate?.status === "SUBMITTED" || activeLogForDate?.status === "REVIEWED") && (
-                <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl flex items-center gap-2 text-xs text-blue-300">
-                  <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  Ushbu kundalik allaqachon tekshiruvga topshirilgan. O&apos;zgarmaslik (immutability) qoidasiga ko&apos;ra tahrirlash cheklangan.
-                </div>
-              )}
-            </div>
-
-            {/* Mentor & Academic Review Details (if available for selected date) */}
-            {activeLogForDate && (
-              <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 sm:p-6 space-y-4">
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <Award className="w-4 h-4 text-emerald-400" />
-                  Taqrizlar va Xulosalar
-                </h3>
-
-                {activeLogForDate.workplace_reviews && activeLogForDate.workplace_reviews.length > 0 ? (
-                  <div className="p-3.5 bg-[#09090b] border border-white/5 rounded-xl">
-                    <div className="text-xs font-medium text-zinc-300 flex items-center justify-between mb-1">
-                      <span>Ish beruvchi (Mentor) xulosasi:</span>
-                      <span className="text-[11px] text-zinc-500">
-                        {activeLogForDate.workplace_reviews[0].decided_at}
-                      </span>
-                    </div>
-                    <div className="text-xs text-emerald-400 font-medium">
-                      Qaror: {activeLogForDate.workplace_reviews[0].decision}
-                    </div>
-                    {activeLogForDate.workplace_reviews[0].comment && (
-                      <p className="text-xs text-zinc-400 mt-1 italic">
-                        &quot;{activeLogForDate.workplace_reviews[0].comment}&quot;
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-xs text-zinc-500 italic">
-                    Mentor xulosasi hali kiritilmagan
-                  </div>
+            {reviews.length > 0 && (
+              <section data-skeuo-dark="true" className="fb-ink-card flex flex-col gap-3 p-5 sm:p-6" aria-labelledby="diary-reviews">
+                <h2 id="diary-reviews" className="flex items-center gap-2 text-sm font-semibold">
+                  <MessageSquareText className="h-4 w-4" aria-hidden="true" /> Mentor va universitet izohlari
+                </h2>
+                <ul className="flex flex-col gap-3">
+                  {reviews.map((r, i) => (
+                    <li key={`${r.by}-${r.decided_at}-${i}`} className="rounded-2xl bg-white/5 px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span className="font-semibold">
+                          {r.by === "MENTOR" ? "Mentor" : "Universitet o‘qituvchisi"} · {DECISION_LABEL[r.decision] || r.decision}
+                        </span>
+                        <span className="fb-muted tabular-nums">{r.decided_at ? new Date(r.decided_at).toLocaleDateString("uz-UZ") : ""}</span>
+                      </div>
+                      {r.comment && <p className="mt-1.5 text-sm leading-relaxed">“{r.comment}”</p>}
+                    </li>
+                  ))}
+                </ul>
+                {activeLog?.status === "NEEDS_REVISION" && (
+                  <p className="text-xs fb-muted">Yuborilgan yozuvni o‘zgartirib bo‘lmaydi — izoh bo‘yicha mentoringiz bilan kelishib oling.</p>
                 )}
-
-                {activeLogForDate.academic_reviews && activeLogForDate.academic_reviews.length > 0 ? (
-                  <div className="p-3.5 bg-[#09090b] border border-white/5 rounded-xl">
-                    <div className="text-xs font-medium text-zinc-300 flex items-center justify-between mb-1">
-                      <span>Universitet o&apos;qituvchisi taqrizi:</span>
-                      <span className="text-[11px] text-zinc-500">
-                        {activeLogForDate.academic_reviews[0].decided_at}
-                      </span>
-                    </div>
-                    <div className="text-xs text-purple-400 font-medium">
-                      Qaror: {activeLogForDate.academic_reviews[0].decision}
-                    </div>
-                    {activeLogForDate.academic_reviews[0].comment && (
-                      <p className="text-xs text-zinc-400 mt-1 italic">
-                        &quot;{activeLogForDate.academic_reviews[0].comment}&quot;
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-xs text-zinc-500 italic">
-                    O&apos;qituvchi taqrizi hali kiritilmagan
-                  </div>
-                )}
-              </div>
+              </section>
             )}
           </div>
-
-          {/* Right Column: Log History Table */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 sm:p-6">
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
-                <div>
-                  <h2 className="text-base font-semibold text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-blue-400" />
-                    Kundaliklar tarixi
-                  </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Kiritilgan va topshirilgan kunlik hisobotlar
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => void reloadLogs()}
-                  disabled={isLoadingLogs}
-                  className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-800"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingLogs ? "animate-spin" : ""}`} />
-                </button>
-              </div>
-
-              {isLoadingLogs ? (
-                <div className="py-12 text-center text-zinc-500 text-xs">
-                  Yuklanmoqda...
-                </div>
-              ) : logs.length === 0 ? (
-                <div className="py-12 text-center">
-                  <Calendar className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-400">Hozircha kundalik yozuvlari mavjud emas.</p>
-                  <p className="text-[11px] text-zinc-600 mt-1">
-                    Chapdagi forma orqali birinchi kunlik hisobotingizni kiriting.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
-                  {logs.map((log) => {
-                    const badge = getStatusBadge(log.status);
-                    const isSelected = log.local_date === selectedDate;
-                    return (
-                      <button
-                        key={log.id}
-                        type="button"
-                        onClick={() => setSelectedDate(log.local_date)}
-                        className={`w-full text-left p-3.5 rounded-xl border transition-all ${
-                          isSelected
-                            ? "bg-blue-600/10 border-blue-500/40"
-                            : "bg-[#09090b] border-white/5 hover:border-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-semibold text-white font-mono">
-                            {log.local_date}
-                          </span>
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${badge.className}`}
-                          >
-                            {badge.label}
-                          </span>
-                        </div>
-
-                        <p className="text-xs text-zinc-400 line-clamp-1 mb-2">
-                          {log.summary || "Amaliyot vazifalari bajarildi"}
-                        </p>
-
-                        <div className="flex items-center justify-between text-[11px] text-zinc-500">
-                          <span>
-                            {log.day_type === "WORKED" ? "Ish kuni" : "Dam olish"}
-                          </span>
-                          <span className="tabular-nums font-mono text-zinc-400">
-                            {log.total_minutes} daq ({(log.total_minutes / 60).toFixed(1)} soat)
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
-        )}
+      )}
 
-        {/* 1-Hujjat (Standart Kundalik) va 2-Hujjat (Yakuniy Xulosa) E-Imzo & PDF Yuklash Markazi */}
-        {selectedPlacement && (
-          <div className="mt-8">
-            <InternshipDocumentsHub party="CANDIDATE" placementId={selectedPlacement.id} />
-          </div>
-        )}
-      </div>
+      {placement && <InternshipDocumentsHub party="CANDIDATE" placementId={placement.id} />}
 
-      {/* Auth Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
@@ -873,7 +559,7 @@ export default function CandidateKundalikPage() {
         subtitle="Amaliyot kundaligi va e-imzo uchun talaba hisobingizga kiring"
         onSuccess={() => {
           setAuthModalOpen(false);
-          loadUser();
+          void auth.reload();
         }}
       />
     </div>

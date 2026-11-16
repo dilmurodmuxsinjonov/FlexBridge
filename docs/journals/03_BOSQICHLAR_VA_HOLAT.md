@@ -1445,7 +1445,7 @@ Keyingi kichik qadam:
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-16 | LOG-179 | Issue #245 -> Dizayn prototipi: foydalanuvchi profili va elementlar
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi namuna rasm yubordi (monoxrom bento dashboard: katta sarlavha, avatarli pill-taymlayn, qora kartalar, chap pastda profil kartasi) va "profil ko'rinishi hamda element qismlariga chuqurroq yondash" dedi.
+- **Holat**: **MERGED** (#246, 419639d). Foydalanuvchi namuna rasm yubordi (monoxrom bento dashboard: katta sarlavha, avatarli pill-taymlayn, qora kartalar, chap pastda profil kartasi) va "profil ko'rinishi hamda element qismlariga chuqurroq yondash" dedi.
 - **Yechim**:
   - `globals.css` "Mono bento" qatlami: `fb-display` (katta sarlavha), `fb-ink-card` (qora karta, dark rejimda ham), `fb-nav-item` (faol bo'lim - qora pill, dark rejimda oq pill), `fb-capsule`, `fb-bar` (taymlayn), `fb-seg`, `fb-avatar` (bosh harflar), `fb-progress`, `fb-file-row`, `fb-icon-btn`, dekorativ `fb-ring` (reduced-motion'da to'xtaydi).
   - `components/profile/ProfileOverview.tsx`: "Salom, {ism}" + "Mening profilim"; haftalik bo'sh vaqt taymlayni (hafta kunlari x soatlar, bugungi kun ajratilgan, haftalik soat jami); profil tayyorligi % (5 bo'lim, har biri tegishli tabni ochadi); qora "Rezyume" kartasi (PDF yuklab olish, tahrirlash); "Hujjatlarim" (sertifikat + portfolio, "+"); arizalar statistikasi (jami / ko'rib chiqilmoqda / suhbat / taklif, yuklanmasa xabar - nol emas); qora panel: ko'nikmalar (tasdiqlangan ulushi), tajriba (oylar), talabalik (ariza -> tekshiruv -> tasdiq). Faqat haqiqiy ma'lumot, soxta grafik yo'q.
@@ -1453,4 +1453,16 @@ Keyingi kichik qadam:
   - Nomzod sidebar'i oq panel + qora faol pill; korxona va universitet yon menyulari ham shu elementga o'tkazildi. Navbar salomlashuvi ism bilan.
   - Backend `/auth/me` endi foydalanuvchining o'z `display_name`ini qaytaradi (+ test `test_auth_me_profile.py`), BFF uzatadi.
 - **Tekshiruv**: eslint 0, tsc 0, vitest 100/100 (+10), next build OK; Edge'da nomzod API'lari mock qilingan holda desktop yorug'/qorong'i va mobil suratlar (konsol xatosi yo'q, gorizontal toshish yo'q). Korxona/universitet menyulari suratga olinmadi (sessiya kerak), lint/build bilan tekshirildi. Backend testi faqat CI'da.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-180 | Issue #247 -> Kundalik va o'quv jadvali
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "Kundalik hamda o'quv jadvali bo'yicha ishla".
+- **Topilgan xatolar**:
+  - Kundalik: backend API-053 yozuvni `current_revision` ichida qaytaradi, frontend esa tekis maydonlarni o'qirdi -> tarixda hamma kun "Qoralama, 0 daqiqa", mentor/OTM qarorlari ko'rinmasdi ("REVIEWED"/"NEEDS_REVISION" backendda yo'q). Standart maydonlar qayta yuklanmasdi, saqlash xatosi `.catch(() => null)` bilan yutilardi; sana UTC bo'yicha; "200 soat" qattiq yozilgan.
+  - O'quv jadvali: talaba o'z jadvalini ko'ra olmasdi (faqat xodim endpointlari). Jadvalni har qanday faol xodim (o'qituvchi ham) qayta yoza olardi va bu barcha talabalarning bo'sh vaqt qoidalarini o'chirib qayta yozadi. Sinxronlash tasdiqlanmagan (DECLARED/PENDING) talabalarga ham tegardi, tugash sanasi bor talabalarni esa umuman o'tkazib yuborardi (`end_date IS NULL`).
+- **Yechim**:
+  - Backend: `GET /api/v1/me/timetable` (faqat joriy VERIFIED talabalik + VERIFIED OTM; guruh dastur nomidan, aks holda DEFAULT; slotlarda guruh kodi/ID yo'q), `_match_group` umumiy funksiya; jadval yozish/import uchun MFA COORDINATOR; sinxronlash faqat joriy VERIFIED talabalik (start<=bugun, end null yoki >=bugun). Testlar `test_my_timetable.py` (4).
+  - Frontend: `/nomzod/jadval` "O'quv jadvali" (keyingi dars qora kartada, bugungi darslar, haftalik yuklama, para x kun setkasi, mobil kun tanlagich, ish uchun bo'sh oynalar; holat bo'yicha bo'sh holatlar). `lib/diary.ts` normalizatori (API-053 -> UI, sharh qarorlaridan holat). Kundalik sahifasi qayta qurildi: oy kalendari (tasdiqlangan/tekshiruvda/izoh bor/qoralama, dars kunlari belgisi, amaliyot davridan tashqari kunlar yopiq), tanlangan kun darslari + ish vaqti dars bilan to'qnashsa ogohlantirish, kelish/ketish standart qiymati jadvaldagi bo'sh oynadan, 8 soat chegarasi progress bilan, standart maydonlar qayta yuklanadi, qo'shimcha maydonlar saqlanmasa ogohlantirish, me'yor soati diary stats'dan, mentor/OTM izohlari qora kartada. Profil taymlayniga darslar kulrang chiziq bilan qo'shildi. InternshipDocumentsHub bo'sh imzo xaritasida yiqilmaydi.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 110/110 (+10), next build OK; Edge'da mock API bilan kundalik va jadval desktop yorug'/qorong'i + mobil (konsol xatosi yo'q, gorizontal toshish yo'q). Backend testlari faqat CI'da.
+- **Qolgan bo'shliq (backend workflow)**: mentor "tuzatish so'radi" desa ham yozuv SUBMITTED holatda qoladi va talaba uni o'zgartira olmaydi (SUBMITTED_LOG_IMMUTABLE) - UI buni ochiq aytadi; qayta topshirish oqimi alohida qaror talab qiladi.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
