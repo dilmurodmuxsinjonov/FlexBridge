@@ -91,6 +91,8 @@ const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   7: { start: "18:00", end: "19:20" },
 };
 
+const UZ_WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"];
+
 export default function UniversityPortal() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -1254,79 +1256,54 @@ export default function UniversityPortal() {
 
       {/* TAB 3: COORDINATOR ASSIGNMENT QUEUE & TEACHER NOMINATION */}
       {currentUser && activeTab === "coordinator" && (
-        <div className="flex flex-col gap-6">
-          {coordError && (
-            <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-              <span>{coordError}</span>
-            </div>
-          )}
-
-          {isLoadingCoord ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-xs">Kafedra taqsimot navbati yuklanmoqda...</span>
-            </div>
-          ) : coordinatorQueue.length === 0 ? (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center gap-2 text-center">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-1" />
-              <h3 className="text-sm font-semibold text-white">Taqsimot navbati bo‘sh</h3>
-              <p className="text-xs text-zinc-400 max-w-md">
-                Barcha talabalar amaliyotlariga o‘qituvchi tayinlangan yoki hozirda yangi kutilayotgan so‘rovlar yo‘q.
+        <section className="fb-panel skeuo-card flex flex-col gap-4 p-5 sm:p-6" aria-labelledby="uni-coord-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 id="uni-coord-title" className="text-lg font-semibold text-[var(--fb-ink)]">Ilmiy rahbar tayinlash</h2>
+              <p className="text-xs text-[var(--fb-ink-muted)]">
+                Amaliyotga chiqayotgan talabaga kafedradan o‘qituvchi biriktiring — u kundaliklarni ko‘rib, yakuniy xulosa yozadi
               </p>
             </div>
-          ) : (
-            <div className="w-full bg-surface-card border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
-              <div className="px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-white">
-                    Biriktirish kutilayotgan talabalar ({coordinatorQueue.length} ta)
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={loadCoordinatorQueue}
-                  className="text-xs text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Yangilash</span>
-                </button>
-              </div>
-
-              <div className="divide-y divide-white/[0.06]">
-                {coordinatorQueue.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 hover:bg-white/[0.02] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">
-                          {item.student_name || "Talaba"}
-                        </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                          Taqsimot kutilmoqda
-                        </span>
-                      </div>
-                      <div className="text-xs text-zinc-400">Amaliyot boshlanishidan oldin ilmiy rahbar tayinlang</div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenNominateModal(item)}
-                        className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
-                      >
-                        <UserCheck className="w-3.5 h-3.5" />
-                        <span>O‘qituvchi tayinlash</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <button type="button" onClick={loadCoordinatorQueue} className="fb-icon-btn fb-icon-btn-light" aria-label="Ro‘yxatni yangilash">
+              <RefreshCw className={`h-4 w-4 ${isLoadingCoord ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+          {coordError && (
+            <p role="alert" className="flex items-start gap-2 rounded-2xl bg-rose-500/10 px-4 py-3 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {coordError}
+            </p>
           )}
-        </div>
+          {isLoadingCoord ? (
+            <div className="flex items-center justify-center gap-2 py-12 text-xs text-[var(--fb-ink-muted)]">
+              <Loader2 className="h-4 w-4 animate-spin" /> Yuklanmoqda…
+            </div>
+          ) : coordinatorQueue.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 rounded-[22px] skeuo-well px-6 py-12 text-center">
+              <CheckCircle2 className="h-7 w-7 text-[var(--fb-ink)]" />
+              <p className="text-sm font-semibold text-[var(--fb-ink)]">Hamma talabaga rahbar tayinlangan</p>
+              <p className="max-w-md text-xs text-[var(--fb-ink-secondary)]">Yangi amaliyot so‘rovi kelganda shu yerda chiqadi.</p>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {coordinatorQueue.map((item) => (
+                <li key={item.id} className="fb-file-row flex-wrap sm:flex-nowrap">
+                  <span className="fb-avatar h-9 w-9 shrink-0 text-xs" aria-hidden="true">{initials(item.student_name)}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-[var(--fb-ink)]">{item.student_name || "Talaba"}</span>
+                    <span className="block text-[11px] text-[var(--fb-ink-muted)]">Ilmiy rahbar kutmoqda</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenNominateModal(item)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full skeuo-btn-obsidian px-4 py-2 text-xs font-semibold"
+                  >
+                    <UserCheck className="h-3.5 w-3.5" /> O‘qituvchi tayinlash
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       )}
 
       {/* TAB 4: REPORTS & ACADEMIC AGREEMENTS (API-100, API-098, API-101) */}
@@ -1337,7 +1314,7 @@ export default function UniversityPortal() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-emerald-700 dark:text-emerald-400">
-                  Hisobot & Shartnomalar Markazi
+                  Hisobotlar
                 </span>
               </div>
               <h2 className="font-heading text-base md:text-lg font-bold text-[var(--fb-ink)]">
@@ -1567,7 +1544,7 @@ export default function UniversityPortal() {
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-400" />
                     <h3 className="text-xs font-bold text-[var(--fb-ink)] uppercase tracking-wider">
-                      Hamkorlik Shartnomalari ({academicAgreements.length})
+                      Platforma kelishuvlari ({academicAgreements.length})
                     </h3>
                   </div>
                 </div>
@@ -1618,7 +1595,7 @@ export default function UniversityPortal() {
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <GraduationCap className="w-4 h-4 text-primary" />
-                  <span>OTM Pasporti, Fakultetlar & Ta&apos;lim Yo&apos;nalishlari va Hamkorlik Shartnomalari</span>
+                  <span>Universitet ma&apos;lumotlari</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
                   Universitet rekvizitlari, Karera markazi mas&apos;ullari, fakultetlar tarkibi va korxonalar bilan tuzilgan amaliyot shartnomalari.
@@ -2142,7 +2119,7 @@ export default function UniversityPortal() {
                   <div>
                     <h3 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span>Talabalar Davomati Monitoringi</span>
+                      <span>Davomat</span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-0.5">
                       Dushanba–Shanba kunlari doirasidagi kutilgan va amaldagi kundaliklar hisobi
@@ -2311,7 +2288,7 @@ export default function UniversityPortal() {
                   <div>
                     <h3 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-primary" />
-                      <span>Haftalik Soatlar Monitoringi & O&apos;zR MK 118 Muvofiqligi</span>
+                      <span>Haftalik soatlar</span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-0.5">
                       Kalendar haftalari bo&apos;yicha kiritilgan soatlar dinamikasi va qonuniy me&apos;yorlar nazorati
@@ -2361,7 +2338,7 @@ export default function UniversityPortal() {
                     </div>
                   ) : (
                     <div className="p-4 rounded-lg bg-surface border border-white/[0.04] flex items-end gap-3 h-44 overflow-x-auto pt-6">
-                      {analyticsData.weekly_hours_monitoring.weekly_trend.map((item) => {
+                      {analyticsData.weekly_hours_monitoring.weekly_trend.map((item, idx, arr) => {
                         const maxH = Math.max(
                           ...analyticsData.weekly_hours_monitoring.weekly_trend.map((w) => w.logged_hours),
                           1
@@ -2375,10 +2352,10 @@ export default function UniversityPortal() {
                             <span className="text-[10px] font-mono text-zinc-400 opacity-80 group-hover:opacity-100 transition-opacity">
                               {item.logged_hours}s
                             </span>
-                            <div className="w-full bg-zinc-800 rounded-t overflow-hidden flex items-end h-full">
+                            <div className="flex h-full w-full max-w-[34px] items-end">
                               <div
-                                className="w-full bg-primary/80 hover:bg-primary transition-all rounded-t"
-                                style={{ height: `${barHeight}%` }}
+                                className={`fb-bar w-full ${idx === arr.length - 1 ? "fb-bar-today" : ""}`}
+                                style={{ height: `${Math.max(barHeight, 6)}%` }}
                               />
                             </div>
                             <span className="text-[10px] font-mono text-zinc-400 whitespace-nowrap">
@@ -2449,7 +2426,7 @@ export default function UniversityPortal() {
                   <div>
                     <h3 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
                       <Award className="w-4 h-4 text-amber-400" />
-                      <span>Amaliyot Natijalari & Baholash Tahlili</span>
+                      <span>Natijalar va baholar</span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-0.5">
                       Yakuniy xulosalar, mentor baholari va dasturlar bo&apos;yicha natijalar
@@ -2569,7 +2546,7 @@ export default function UniversityPortal() {
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-indigo-700 dark:text-indigo-300">
-                  Dars Jadvali Boshqaruvi
+                  Dars jadvali
                 </span>
                 <span className="text-[var(--fb-ink-muted)] text-xs font-mono">
                   • Qo‘lda Kiritish & Shablon Import (CSV / JSON)
@@ -2830,7 +2807,7 @@ export default function UniversityPortal() {
                 </div>
 
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Rasmiy shablon ustunlari: <code className="text-zinc-200 font-mono">group_code, program_name, study_year, weekday, para_number, start_time, end_time, subject_name, lesson_type, room, teacher_name</code>.
+                  Avval «CSV shablon»ni yuklab oling: unda guruh, yo‘nalish, kurs, hafta kuni, para, vaqt, fan, mashg‘ulot turi, xona va o‘qituvchi ustunlari bor. To‘ldirib, shu yerga yuklang.
                 </p>
 
                 <div className="flex items-center gap-2">
@@ -2840,8 +2817,8 @@ export default function UniversityPortal() {
                     onChange={(e) => setImportMode(e.target.value as "REPLACE" | "APPEND")}
                     className="px-2.5 py-1.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
                   >
-                    <option value="REPLACE">To&apos;liq yangilash (REPLACE)</option>
-                    <option value="APPEND">Mavjud jadvalga qo&apos;shish (APPEND)</option>
+                    <option value="REPLACE">Jadvalni to&apos;liq almashtirish</option>
+                    <option value="APPEND">Mavjud jadvalga qo&apos;shish</option>
                   </select>
                 </div>
 
@@ -2929,7 +2906,7 @@ export default function UniversityPortal() {
                               </div>
                             </td>
                             <td className="py-2.5 px-3 text-white font-medium">
-                              {slot.weekday_name}
+                              {slot.weekday_name || UZ_WEEKDAYS[slot.weekday - 1] || slot.weekday}
                             </td>
                             <td className="py-2.5 px-3 font-mono text-emerald-400">
                               {slot.start_time}–{slot.end_time}
@@ -3004,7 +2981,7 @@ export default function UniversityPortal() {
                         <div className="space-y-1 text-[11px]">
                           {days.map((d) => (
                             <div key={d.weekday} className="flex items-center justify-between gap-2">
-                              <span className="text-zinc-400">{d.weekday_name}:</span>
+                              <span className="text-zinc-400">{d.weekday_name || UZ_WEEKDAYS[d.weekday - 1]}:</span>
                               <span className="font-mono text-zinc-200">
                                 {d.free_intervals.length > 0
                                   ? d.free_intervals.map((w) => `${w.start_time}–${w.end_time}`).join(", ")

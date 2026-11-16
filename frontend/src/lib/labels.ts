@@ -28,6 +28,12 @@ const LABELS: Record<string, string> = {
   UNAVAILABLE: "Band",
   // Organization / institution roles
   OWNER: "Asosiy egasi",
+  OPERATOR: "Operator",
+  AUDITOR: "Auditor",
+  FINANCE: "Moliya",
+  MODERATOR: "Moderator",
+  SECURITY_LEAD: "Xavfsizlik rahbari",
+  SUPPORT: "Yordam xizmati",
   ADMIN: "Administrator",
   RECRUITER: "Rekruter",
   HR_MANAGER: "HR menejer",
@@ -90,6 +96,12 @@ const LABELS: Record<string, string> = {
   BEPUL_KIRISH: "Bepul boshlang‘ich",
   FREE: "Bepul",
   XIZMAT_PAKETI: "Xizmat paketi",
+  // Academic agreement / supervision purposes
+  ACADEMIC_VIEW: "Akademik nazorat",
+  ACADEMIC_NOMINATION: "Ilmiy rahbar tayinlash",
+  ACADEMIC_REVOKE: "Rahbarlikni bekor qilish",
+  INTERNSHIP_SUPERVISION: "Amaliyot rahbarligi",
+  ENROLLMENT_VERIFICATION: "Talabalikni tasdiqlash",
   // University report sources
   MANUAL_ENTRY: "Qo‘lda kiritilgan",
   TEMPLATE_IMPORT: "Shablondan yuklangan",
