@@ -7,7 +7,7 @@ import io
 from typing import Any
 from uuid import uuid4
 
-from pypdf import PdfReader, PdfWriter
+from pypdf import PdfReader
 from sqlalchemy import select
 
 from app.adapters import antivirus, storage
@@ -289,90 +289,71 @@ class CandidateResumeBuilderService:
         actor: ActorContext,
         payload: dict[str, Any],
     ) -> dict[str, Any]:
-        """Direct PDF upload & ClamAV scan pipeline for candidate certificates and CVs."""
+        """Direct candidate PDF upload. Fail-closed: the bytes must be a real PDF the
+        student supplied, the antivirus must confirm it clean and the private object
+        must be stored before a CLEAN file record exists (no generated blank PDFs).
+        The scan and the object write run outside any database transaction."""
         with transaction() as conn:
             cand_id = str(candidate_id_for(actor))
             account_authority(conn, actor)
 
-            filename = str(payload.get("filename") or "document.pdf").strip()
-            if not filename.lower().endswith(".pdf"):
-                filename = filename + ".pdf"
-            if len(filename) > 200:
-                filename = filename[-200:]
+        filename = str(payload.get("filename") or "document.pdf").strip()
+        if not filename.lower().endswith(".pdf"):
+            filename = filename + ".pdf"
+        if len(filename) > 200:
+            filename = filename[-200:]
 
-            purpose = str(payload.get("purpose") or "CERTIFICATE").upper().strip()
-            content_b64 = payload.get("content_base64")
-            title_hint = str(payload.get("title") or filename).strip()
+        purpose = str(payload.get("purpose") or "CERTIFICATE").upper().strip()
+        content_b64 = str(payload.get("content_base64") or "").strip()
+        if not content_b64:
+            raise AuthError("FILE_CONTENT_REQUIRED", "Attach the PDF file itself", 422)
+        try:
+            # Strip optional data:application/pdf;base64, prefix
+            if content_b64.startswith("data:") and "," in content_b64:
+                content_b64 = content_b64.split(",", 1)[1]
+            raw_bytes = base64.b64decode(content_b64, validate=True)
+        except Exception as exc:
+            raise AuthError("INVALID_BASE64_FILE", "Invalid base64 file content", 422) from exc
 
-            if content_b64:
-                try:
-                    # Strip optional data:application/pdf;base64, prefix
-                    if "," in str(content_b64) and str(content_b64).startswith("data:"):
-                        content_b64 = str(content_b64).split(",", 1)[1]
-                    raw_bytes = base64.b64decode(content_b64)
-                except Exception as exc:
-                    raise AuthError("INVALID_BASE64_FILE", "Invalid base64 file content", 422) from exc
-            else:
-                # Generate a clean, valid PDF document if user creates an electronic certificate/CV attachment
-                writer = PdfWriter()
-                writer.add_blank_page(width=612, height=792)
-                writer.add_metadata(
-                    {
-                        "/Title": title_hint[:120],
-                        "/Author": str(actor.user_id),
-                        "/Subject": f"FlexBridge {purpose} Document",
-                        "/Creator": "FlexBridge Candidate Document Engine",
-                    }
-                )
-                buf = io.BytesIO()
-                writer.write(buf)
-                raw_bytes = buf.getvalue()
+        if len(raw_bytes) < 16 or len(raw_bytes) > 20 * 1024 * 1024:
+            raise AuthError("INVALID_FILE_SIZE", "PDF file size must be between 16B and 20MB", 422)
 
-            if len(raw_bytes) < 16 or len(raw_bytes) > 20 * 1024 * 1024:
-                raise AuthError("INVALID_FILE_SIZE", "PDF file size must be between 16B and 20MB", 422)
+        # Cheap local signature check first, then the real scanner (fail-closed).
+        if b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR" in raw_bytes:
+            raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file failed antivirus inspection", 422)
+        try:
+            antivirus.scan(raw_bytes)
+        except ValueError as exc:
+            raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file quarantined by antivirus", 422) from exc
+        except Exception as exc:
+            raise AuthError("ANTIVIRUS_UNAVAILABLE", "File scanning is temporarily unavailable, try again later", 503) from exc
 
-            # Antivirus check (ClamAV or EICAR detection)
-            if b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR" in raw_bytes:
-                raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file failed antivirus inspection", 422)
+        # Validate PDF header and structure
+        if not raw_bytes.startswith(b"%PDF-"):
+            raise AuthError("INVALID_PDF_FORMAT", "Only valid PDF files (%PDF-) are accepted", 422)
+        try:
+            reader = PdfReader(io.BytesIO(raw_bytes))
+            if len(reader.pages) < 1 or len(reader.pages) > 50:
+                raise AuthError("INVALID_PDF_PAGES", "PDF must contain between 1 and 50 pages", 422)
+        except AuthError:
+            raise
+        except Exception as exc:
+            raise AuthError("INVALID_PDF_FORMAT", "Corrupted or invalid PDF file", 422) from exc
 
-            try:
-                av_result = antivirus.scan_bytes(raw_bytes)
-                if getattr(av_result, "status", "CLEAN") not in ("CLEAN", "OK", None):
-                    raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file quarantined by ClamAV", 422)
-            except AuthError:
-                raise
-            except Exception:
-                # If local ClamAV socket is not needed because PDF structure is verified below
-                pass
+        file_id = str(uuid4())
+        storage_key = f"private/candidates/{cand_id}/{file_id}.pdf"
+        sha256_hash = hashlib.sha256(raw_bytes).hexdigest()
+        byte_size = len(raw_bytes)
 
-            # Validate PDF header and structure
-            if not raw_bytes.startswith(b"%PDF-"):
-                raise AuthError("INVALID_PDF_FORMAT", "Only valid PDF files (%PDF-) are accepted", 422)
+        try:
+            ref = storage.write_private(storage_key, raw_bytes)
+            ref.check_bucket()
+        except Exception as exc:
+            raise AuthError("FILE_STORAGE_UNAVAILABLE", "File storage is temporarily unavailable, try again later", 503) from exc
+        bucket_name, version_id, etag = ref.bucket, ref.version_id, ref.etag
 
-            try:
-                reader = PdfReader(io.BytesIO(raw_bytes))
-                if len(reader.pages) < 1 or len(reader.pages) > 50:
-                    raise AuthError("INVALID_PDF_PAGES", "PDF must contain between 1 and 50 pages", 422)
-            except AuthError:
-                raise
-            except Exception as exc:
-                raise AuthError("INVALID_PDF_FORMAT", "Corrupted or invalid PDF file", 422) from exc
-
-            file_id = str(uuid4())
-            storage_key = f"private/candidates/{cand_id}/{file_id}.pdf"
-            sha256_hash = hashlib.sha256(raw_bytes).hexdigest()
-            byte_size = len(raw_bytes)
-
-            try:
-                ref = storage.write_private(storage_key, raw_bytes)
-                bucket_name = getattr(ref, "bucket", None) or "flexbridge-private"
-                version_id = getattr(ref, "version_id", None) or str(uuid4())
-                etag = getattr(ref, "etag", None) or sha256_hash[:32]
-            except Exception:
-                bucket_name = "flexbridge-private"
-                version_id = str(uuid4())
-                etag = sha256_hash[:32]
-
+        with transaction() as conn:
+            account_authority(conn, actor)
             ts = now()
             conn.execute(
                 files_table.insert().values(

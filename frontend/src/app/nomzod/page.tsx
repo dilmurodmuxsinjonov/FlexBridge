@@ -995,18 +995,12 @@ export default function CandidateProfileHub() {
       reader.readAsDataURL(file);
     });
 
-  const handleUploadCertificatePdf = async (file?: File | null) => {
+  const handleUploadCertificatePdf = async (file: File) => {
     setIsUploadingCertPdf(true);
     setCertErrorMsg(null);
     try {
-      let b64: string | undefined;
-      let fname = "certificate.pdf";
-      if (file) {
-        fname = file.name.endsWith(".pdf") ? file.name : `${file.name}.pdf`;
-        b64 = await fileToBase64(file);
-      } else {
-        fname = `${(certTitle || "sertifikat").toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`;
-      }
+      const fname = file.name.endsWith(".pdf") ? file.name : `${file.name}.pdf`;
+      const b64 = await fileToBase64(file);
       const res = await uploadCandidatePdfFile({
         filename: fname,
         purpose: "CERTIFICATE",
@@ -1022,16 +1016,12 @@ export default function CandidateProfileHub() {
     }
   };
 
-  const handleUploadCvPdf = async (file?: File | null) => {
+  const handleUploadCvPdf = async (file: File) => {
     setIsUploadingCvPdf(true);
     setCvUploadMsg(null);
     try {
-      let b64: string | undefined;
-      let fname = "candidate_cv.pdf";
-      if (file) {
-        fname = file.name.endsWith(".pdf") ? file.name : `${file.name}.pdf`;
-        b64 = await fileToBase64(file);
-      }
+      const fname = file.name.endsWith(".pdf") ? file.name : `${file.name}.pdf`;
+      const b64 = await fileToBase64(file);
       const res = await uploadCandidatePdfFile({
         filename: fname,
         purpose: "CV",
@@ -3370,7 +3360,7 @@ export default function CandidateProfileHub() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-300">Yuklangan Fayl (PDF Sertifikat) — Bevosita yuklash yoki File ID</label>
+                <label className="text-xs font-medium text-zinc-300">Sertifikat fayli (PDF)</label>
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="px-3 py-2 rounded-lg bg-yellow-500/15 hover:bg-yellow-500/25 border border-yellow-500/30 text-yellow-300 text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5" />
@@ -3386,14 +3376,9 @@ export default function CandidateProfileHub() {
                       }}
                     />
                   </label>
-                  <button
-                    type="button"
-                    disabled={isUploadingCertPdf}
-                    onClick={() => handleUploadCertificatePdf(null)}
-                    className="px-3 py-2 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.1] text-zinc-200 text-xs font-semibold transition-all"
-                  >
-                    Elektron PDF tasdiqnoma yaratish
-                  </button>
+                  <span className="text-[11px] text-zinc-400">
+                    Sertifikatning asl PDF nusxasi — antivirus tekshiruvidan o‘tadi.
+                  </span>
                 </div>
                 {uploadedCertFilename && (
                   <span className="text-[11px] font-mono text-emerald-400">

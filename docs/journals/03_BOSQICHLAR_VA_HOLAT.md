@@ -1375,3 +1375,8 @@ Keyingi kichik qadam:
 - **Holat**: **CI KUTILMOQDA**. UI/backend maydon nomlari mos emasligi sababli rezyume saqlanmasdi (422) va qiymatlar buzilardi -> `lib/resumeContract.ts`. Profillar doim PRIVATE edi va o'zgartirib bo'lmasdi -> `PUT /me/candidate/visibility` (audit). Korxona endi rezyume bo'limlari va "talabaligi tasdiqlangan" belgisini ko'radi (kontaktlarsiz). Ko'nikma `verified` faqat APPROVED case uchun.
 - **Ochiq masala**: nomzod PDF yuklashda antivirus xatosi e'tiborsiz qoldiriladi va bo'sh PDF yaratilishi mumkin - alohida tuzatish kerak.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-170 | PR #229 -> Nomzod PDF yuklash fail-closed
+- **Holat**: **CI KUTILMOQDA**. LOG-169 dagi ochiq masala yopildi: servis mavjud bo'lmagan `antivirus.scan_bytes` ni chaqirib xatoni yutardi (hech bir fayl skanerlanmagan); saqlash xatosi yutilardi (obyekt yo'q, lekin CLEAN yozuv); kontentsiz so'rov bo'sh PDF yaratardi ("Elektron PDF tasdiqnoma yaratish" tugmasi).
+- **Endi**: `content_base64` majburiy; `antivirus.scan` fail-closed (503 `ANTIVIRUS_UNAVAILABLE`, 422 `MALWARE_DETECTED_QUARANTINED`); saqlash xatosi 503 `FILE_STORAGE_UNAVAILABLE`, yozuv yaratilmaydi; skan DB tranzaksiyasidan tashqarida. Testlar: `backend/tests/security/test_candidate_pdf_upload.py` (6 ta).
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

@@ -4860,7 +4860,7 @@ export async function uploadCandidatePdfFile(payload: {
   filename: string;
   purpose: "CERTIFICATE" | "CV" | "PORTFOLIO";
   title?: string;
-  content_base64?: string;
+  content_base64: string;
 }): Promise<CandidatePdfUploadResponse> {
   const res = await fetch("/api/bff/candidate/files/upload", {
     method: "POST",
