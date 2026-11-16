@@ -367,6 +367,69 @@ html.dark .skeuo-card-interactive:hover {
     0 10px 26px -8px rgba(224, 98, 45, 0.75);
 }
 
+/* Portal-tinted primary button (sign-in pages): <button data-tone="sky"> */
+.skeuo-btn-tone {
+  --tone-from: #f07a45;
+  --tone-to: #c94f1d;
+  --tone-glow: rgba(224, 98, 45, 0.55);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(180deg, var(--tone-from) 0%, var(--tone-to) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+    0 10px 24px -10px var(--tone-glow);
+  transition: filter 200ms ease-out, box-shadow 260ms ease-out, transform 120ms ease-out;
+}
+.skeuo-btn-tone::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 50% 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  z-index: -1;
+  pointer-events: none;
+}
+.skeuo-btn-tone:hover {
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+    0 12px 28px -10px var(--tone-glow);
+}
+.skeuo-btn-tone:active {
+  transform: scale(0.985);
+}
+.skeuo-btn-tone[data-tone="sky"] {
+  --tone-from: #38a9e8;
+  --tone-to: #0369a1;
+  --tone-glow: rgba(3, 105, 161, 0.55);
+}
+.skeuo-btn-tone[data-tone="emerald"] {
+  --tone-from: #22b07d;
+  --tone-to: #047857;
+  --tone-glow: rgba(4, 120, 87, 0.5);
+}
+.skeuo-btn-tone[data-tone="indigo"] {
+  --tone-from: #7173f0;
+  --tone-to: #4338ca;
+  --tone-glow: rgba(67, 56, 202, 0.5);
+}
+.skeuo-btn-tone[data-tone="amber"] {
+  --tone-from: #e0912a;
+  --tone-to: #b45309;
+  --tone-glow: rgba(180, 83, 9, 0.5);
+}
+
 .skeuo-btn-obsidian {
   background: linear-gradient(180deg, rgba(44, 48, 60, 0.96) 0%, rgba(18, 20, 27, 0.96) 100%);
   color: #ffffff;

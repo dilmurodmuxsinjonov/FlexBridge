@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, Mail, KeyRound, AlertCircle, Loader2, X, ShieldCheck } from "lucide-react";
 import { loginUser, verifyMfa, AuthUser } from "@/lib/api";
+import { describeLoginError } from "@/lib/errors";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export default function AuthModal({
           });
           onClose();
         } else if (!result.ok) {
-          setErrorMessage(result.error);
+          setErrorMessage(describeLoginError(result.error));
         }
       } else {
         // Initial Login step
@@ -66,11 +67,11 @@ export default function AuthModal({
             onClose();
           }
         } else {
-          setErrorMessage(result.error);
+          setErrorMessage(describeLoginError(result.error));
         }
       }
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Xatolik yuz berdi");
+      setErrorMessage(describeLoginError(err instanceof Error ? err.message : null));
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +109,7 @@ export default function AuthModal({
         </div>
 
         {errorMessage && (
-          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+          <div role="alert" className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-sm">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <span>{errorMessage}</span>
           </div>
@@ -118,36 +119,43 @@ export default function AuthModal({
           {!mfaTicket ? (
             <>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-300">
-                  Email yoki Telefon raqam
+                <label htmlFor="auth-modal-id" className="text-sm font-semibold text-[var(--fb-ink)]">
+                  Telefon raqam yoki elektron pochta
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
+                    id="auth-modal-id"
                     type="text"
+                    inputMode="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
                     required
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    placeholder="user@example.com yoki +998901234567"
+                    placeholder="+998 90 123 45 67 yoki pochta@misol.uz"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-300">Parol</label>
+                <label htmlFor="auth-modal-pw" className="text-sm font-semibold text-[var(--fb-ink)]">Parol</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
                     <KeyRound className="w-4 h-4" />
                   </div>
                   <input
+                    id="auth-modal-pw"
                     type="password"
+                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="Parolingiz"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
                   />
                 </div>
@@ -157,25 +165,29 @@ export default function AuthModal({
             <div className="flex flex-col gap-3">
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span>2-bosqichli tasdiqlash: Authenticator ilovangizdagi 6 xonali kodni kiriting.</span>
+                <span>Authenticator ilovangizdagi 6 xonali kodni kiriting.</span>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-300">MFA / TOTP Kod</label>
+                <label htmlFor="auth-modal-code" className="text-sm font-semibold text-[var(--fb-ink)]">Tasdiqlash kodi</label>
                 <input
+                  id="auth-modal-code"
                   type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  autoFocus
                   required
                   pattern="^[0-9]{6}$"
                   maxLength={6}
                   value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value)}
-                  placeholder="123456"
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="••••••"
                   className="w-full text-center tracking-widest text-lg font-mono py-2.5 rounded-xl skeuo-input"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-zinc-400 hover:text-white underline text-left"
+                className="text-xs text-[var(--fb-ink-secondary)] hover:text-[var(--fb-ink)] underline underline-offset-2 text-left"
               >
                 ← Boshqa hisob bilan kirish
               </button>
@@ -193,9 +205,9 @@ export default function AuthModal({
                 <span>Tekshirilmoqda...</span>
               </>
             ) : mfaTicket ? (
-              <span>Tasdiqlash va Kirish</span>
+              <span>Tasdiqlash</span>
             ) : (
-              <span>Tizimga kirish</span>
+              <span>Kirish</span>
             )}
           </button>
         </form>
