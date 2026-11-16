@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import ResumeBuilder from "@/components/resume/ResumeBuilder";
 import {
   User,
   Sparkles,
   Calendar,
   Clock,
-  MapPin,
-  Briefcase,
   Save,
   Plus,
   Trash2,
@@ -35,7 +34,6 @@ import {
 import {
   fetchAuthMe,
   fetchCandidateProfile,
-  updateCandidateProfile,
   fetchCatalogSkills,
   updateCandidateSkills,
   fetchCandidateAvailability,
@@ -54,7 +52,6 @@ import {
   deleteCandidateCertificate,
   exportCandidateResume,
   fetchCandidateResumeDetails,
-  saveCandidateResumeDetails,
   uploadCandidatePdfFile,
   AuthUser,
   CandidateProfileSkill,
@@ -65,41 +62,14 @@ import {
   VerifiedInstitutionItem,
   PortfolioItem,
   CertificateItem,
-  CandidateAchievementItem,
   CandidateWorkExperienceItem,
-  CandidateLanguageItem,
-  CandidateEducationDetails,
-  CandidateCareerPreferences,
-  setCandidateVisibility,
-  type CandidateVisibility,
-  type EmployerResumeView,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import {
   SkeuoStatCard,
-  SkeuoToggle,
-  SkeuoVerticalMeter,
   SkeuoSegmented,
 } from "@/components/skeuo/SkeuoPrimitives";
-import ResumePreview from "@/components/ResumePreview";
-import { toBackendResume } from "@/lib/resumeContract";
 
-const UZBEKISTAN_REGIONS = [
-  "Toshkent shahri",
-  "Toshkent viloyati",
-  "Samarqand",
-  "Farg‘ona",
-  "Andijon",
-  "Namangan",
-  "Buxoro",
-  "Xorazm",
-  "Qashqadaryo",
-  "Surxondaryo",
-  "Jizzax",
-  "Sirdaryo",
-  "Navoiy",
-  "Qoraqalpog‘iston Respublikasi",
-];
 
 const WEEKDAY_NAMES = [
   { id: 1, name: "Dushanba" },
@@ -128,17 +98,9 @@ export default function CandidateProfileHub() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Active Tab: PROFILE, FULL_RESUME, SKILLS, AVAILABILITY, ENROLLMENTS, PORTFOLIO, CERTIFICATES
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "FULL_RESUME" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES">("PROFILE");
+  const [activeTab, setActiveTab] = useState<"PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES">("PROFILE");
 
   // Tab 1: Profile state
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [profileHeadline, setProfileHeadline] = useState("");
-  const [profileRegion, setProfileRegion] = useState("Toshkent shahri");
-  const [profileBio, setProfileBio] = useState("");
-  const [profileExpMonths, setProfileExpMonths] = useState<number>(0);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [profileSuccessMsg, setProfileSuccessMsg] = useState<string | null>(null);
-  const [profileErrorMsg, setProfileErrorMsg] = useState<string | null>(null);
 
   // Tab 2: Skills state
   const [catalogSkills, setCatalogSkills] = useState<CatalogSkillItem[]>([]);
@@ -229,83 +191,19 @@ export default function CandidateProfileHub() {
 
   // Full Resume Details state (API-026-RESUME-DETAILS & API-026-DIRECT-UPLOAD)
   // Consent to appear in employer search (PRIVATE by default).
-  const [profileVisibility, setProfileVisibility] = useState<CandidateVisibility>("PRIVATE");
-  const [isSavingVisibility, setIsSavingVisibility] = useState(false);
-  const [showEmployerPreview, setShowEmployerPreview] = useState(false);
-  const [achievements, setAchievements] = useState<CandidateAchievementItem[]>([]);
   const [workExperiences, setWorkExperiences] = useState<CandidateWorkExperienceItem[]>([]);
-  const [languages, setLanguages] = useState<CandidateLanguageItem[]>([]);
-  const [educationDetails, setEducationDetails] = useState<CandidateEducationDetails>({
-    university_name: "",
-    faculty: "",
-    major: "",
-    degree_level: "BAKALAVR",
-    study_year: 3,
-    gpa: "4.5",
-    graduation_year: 2027,
-    thesis_or_research_topic: "",
-  });
-  const [careerPreferences, setCareerPreferences] = useState<CandidateCareerPreferences>({
-    desired_roles: [],
-    work_mode: "HYBRID",
-    preferred_weekly_hours: 20,
-    expected_stipend_uzs: 3500000,
-    career_objective: "",
-    linkedin_url: "",
-    telegram_username: "",
-    github_username: "",
-  });
-  const [desiredRolesInput, setDesiredRolesInput] = useState("");
-  const [isLoadingResumeDetails, setIsLoadingResumeDetails] = useState(false);
-  const [isSavingResumeDetails, setIsSavingResumeDetails] = useState(false);
-  const [resumeDetailsSuccessMsg, setResumeDetailsSuccessMsg] = useState<string | null>(null);
-  const [resumeDetailsErrorMsg, setResumeDetailsErrorMsg] = useState<string | null>(null);
-
-  // New work experience item draft
-  const [newWorkCompany, setNewWorkCompany] = useState("");
-  const [newWorkRole, setNewWorkRole] = useState("");
-  const [newWorkType, setNewWorkType] = useState("INTERNSHIP");
-  const [newWorkLocation, setNewWorkLocation] = useState("Toshkent");
-  const [newWorkStartDate, setNewWorkStartDate] = useState("2025-09-01");
-  const [newWorkEndDate, setNewWorkEndDate] = useState("");
-  const [newWorkDesc, setNewWorkDesc] = useState("");
-  const [newWorkTechInput, setNewWorkTechInput] = useState("");
-
-  // New achievement item draft
-  const [newAchTitle, setNewAchTitle] = useState("");
-  const [newAchCategory, setNewAchCategory] = useState("OLYMPIAD");
-  const [newAchIssuer, setNewAchIssuer] = useState("");
-  const [newAchDate, setNewAchDate] = useState("2026-05-01");
-  const [newAchDesc, setNewAchDesc] = useState("");
-
-  // New language item draft
-  const [newLangName, setNewLangName] = useState("Ingliz tili");
-  const [newLangLevel, setNewLangLevel] = useState("B2");
-  const [newLangCert, setNewLangCert] = useState("IELTS");
-  const [newLangScore, setNewLangScore] = useState("7.0");
 
   // Direct PDF Upload state
   const [isUploadingCertPdf, setIsUploadingCertPdf] = useState(false);
   const [uploadedCertFilename, setUploadedCertFilename] = useState<string | null>(null);
-  const [isUploadingCvPdf, setIsUploadingCvPdf] = useState(false);
-  const [cvUploadMsg, setCvUploadMsg] = useState<string | null>(null);
 
   // Load Profile & Skills
   const loadProfileData = useCallback(async () => {
-    setIsLoadingProfile(true);
-    setProfileErrorMsg(null);
     try {
       const data = await fetchCandidateProfile();
-      setProfileHeadline(data.headline || "");
-      setProfileVisibility(data.visibility === "EMPLOYERS" ? "EMPLOYERS" : "PRIVATE");
-      setProfileRegion(data.region || "Toshkent shahri");
-      setProfileBio(data.bio || "");
-      setProfileExpMonths(data.experience_months || 0);
       setMySkills(data.skills || []);
-    } catch (err: unknown) {
-      setProfileErrorMsg(err instanceof Error ? err.message : "Profil ma'lumotlarini yuklashda xatolik");
-    } finally {
-      setIsLoadingProfile(false);
+    } catch {
+      // The resume tab loads and reports its own errors; these only feed the summary cards.
     }
   }, []);
 
@@ -387,24 +285,11 @@ export default function CandidateProfileHub() {
 
   // Load Full Resume Details (API-026-RESUME-DETAILS)
   const loadResumeDetailsData = useCallback(async () => {
-    setIsLoadingResumeDetails(true);
-    setResumeDetailsErrorMsg(null);
     try {
       const res = await fetchCandidateResumeDetails();
-      setAchievements(res.achievements || []);
       setWorkExperiences(res.work_experiences || []);
-      setLanguages(res.languages || []);
-      if (res.education_details) {
-        setEducationDetails(res.education_details);
-      }
-      if (res.career_preferences) {
-        setCareerPreferences(res.career_preferences);
-        setDesiredRolesInput((res.career_preferences.desired_roles || []).join(", "));
-      }
-    } catch (err: unknown) {
-      setResumeDetailsErrorMsg(err instanceof Error ? err.message : "Rezyume bo'limlarini yuklashda xatolik");
-    } finally {
-      setIsLoadingResumeDetails(false);
+    } catch {
+      // Summary cards only; the resume builder shows load errors.
     }
   }, []);
 
@@ -447,27 +332,6 @@ export default function CandidateProfileHub() {
   }, [skillSearchQuery, loadCatalog]);
 
   // Save Profile (API-026)
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSavingProfile(true);
-    setProfileSuccessMsg(null);
-    setProfileErrorMsg(null);
-    try {
-      await updateCandidateProfile({
-        headline: profileHeadline,
-        region: profileRegion,
-        bio: profileBio,
-        experience_months: Number(profileExpMonths),
-      });
-      setProfileSuccessMsg("Profil ma’lumotlari muvaffaqiyatli saqlandi!");
-      setTimeout(() => setProfileSuccessMsg(null), 4000);
-    } catch (err: unknown) {
-      setProfileErrorMsg(err instanceof Error ? err.message : "Saqlashda xatolik yuz berdi");
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
-
   // Add Skill (API-032)
   const handleAddSkill = async () => {
     if (!selectedCatalogSkillId) return;
@@ -870,118 +734,6 @@ export default function CandidateProfileHub() {
   };
 
   // Full Resume Builder Handlers (API-026-RESUME-DETAILS)
-  const handleAddWorkExperience = () => {
-    if (newWorkCompany.trim().length < 2 || newWorkRole.trim().length < 2) {
-      setResumeDetailsErrorMsg("Korxona nomi va lavozim kamida 2 ta belgidan iborat bo'lishi kerak.");
-      return;
-    }
-    setResumeDetailsErrorMsg(null);
-    const techs = newWorkTechInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-    setWorkExperiences((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        company_name: newWorkCompany.trim(),
-        role_title: newWorkRole.trim(),
-        employment_type: newWorkType,
-        location: newWorkLocation.trim() || "Toshkent",
-        start_date: newWorkStartDate || "2025-09-01",
-        end_date: newWorkEndDate || null,
-        is_current: !newWorkEndDate,
-        description: newWorkDesc.trim(),
-        technologies: techs,
-      },
-    ]);
-    setNewWorkCompany("");
-    setNewWorkRole("");
-    setNewWorkDesc("");
-    setNewWorkTechInput("");
-  };
-
-  const handleRemoveWorkExperience = (idx: number) => {
-    setWorkExperiences((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleAddAchievement = () => {
-    if (newAchTitle.trim().length < 2) {
-      setResumeDetailsErrorMsg("Yutuq / mukofot nomi kamida 2 ta belgidan iborat bo'lishi kerak.");
-      return;
-    }
-    setResumeDetailsErrorMsg(null);
-    setAchievements((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        title: newAchTitle.trim(),
-        category: newAchCategory,
-        issuer: newAchIssuer.trim() || "Respublika tanlovi",
-        awarded_date: newAchDate || null,
-        description: newAchDesc.trim(),
-      },
-    ]);
-    setNewAchTitle("");
-    setNewAchIssuer("");
-    setNewAchDesc("");
-  };
-
-  const handleRemoveAchievement = (idx: number) => {
-    setAchievements((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleAddLanguage = () => {
-    if (newLangName.trim().length < 2) return;
-    setLanguages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        language: newLangName.trim(),
-        proficiency: newLangLevel,
-        certificate_name: newLangCert.trim() || null,
-        score: newLangScore.trim() || null,
-      },
-    ]);
-  };
-
-  const handleRemoveLanguage = (idx: number) => {
-    setLanguages((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleSaveFullResumeDetails = async () => {
-    setIsSavingResumeDetails(true);
-    setResumeDetailsSuccessMsg(null);
-    setResumeDetailsErrorMsg(null);
-    try {
-      const rolesList = desiredRolesInput
-        .split(",")
-        .map((r) => r.trim())
-        .filter(Boolean);
-      const res = await saveCandidateResumeDetails({
-        achievements,
-        work_experiences: workExperiences,
-        languages,
-        education_details: educationDetails,
-        career_preferences: {
-          ...careerPreferences,
-          desired_roles: rolesList,
-        },
-      });
-      setAchievements(res.achievements || []);
-      setWorkExperiences(res.work_experiences || []);
-      setLanguages(res.languages || []);
-      setResumeDetailsSuccessMsg(
-        "To‘liq rezyume bo‘limlari (yutuqlar, tajriba, tillar va ta’lim) muvaffaqiyatli saqlandi!"
-      );
-      setTimeout(() => setResumeDetailsSuccessMsg(null), 5000);
-    } catch (err: unknown) {
-      setResumeDetailsErrorMsg(err instanceof Error ? err.message : "Rezyume ma'lumotlarini saqlashda xatolik");
-    } finally {
-      setIsSavingResumeDetails(false);
-    }
-  };
-
   // Direct PDF Upload for Certificates or CV (API-026-DIRECT-UPLOAD)
   const fileToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -1013,27 +765,6 @@ export default function CandidateProfileHub() {
       setCertErrorMsg(err instanceof Error ? err.message : "PDF faylni yuklashda xatolik");
     } finally {
       setIsUploadingCertPdf(false);
-    }
-  };
-
-  const handleUploadCvPdf = async (file: File) => {
-    setIsUploadingCvPdf(true);
-    setCvUploadMsg(null);
-    try {
-      const fname = file.name.endsWith(".pdf") ? file.name : `${file.name}.pdf`;
-      const b64 = await fileToBase64(file);
-      const res = await uploadCandidatePdfFile({
-        filename: fname,
-        purpose: "CV",
-        title: profileHeadline || "Nomzod Rezyumesi (CV)",
-        content_base64: b64,
-      });
-      setCvUploadMsg(`CV PDF fayli yuklandi va profilga biriktirildi: ${res.filename} (ID: ${res.file_id.slice(0, 8)}...)`);
-      await loadProfileData();
-    } catch (err: unknown) {
-      setResumeDetailsErrorMsg(err instanceof Error ? err.message : "CV yuklashda xatolik");
-    } finally {
-      setIsUploadingCvPdf(false);
     }
   };
 
@@ -1136,23 +867,6 @@ export default function CandidateProfileHub() {
 
       {/* AUTHENTICATED TABS & PANELS */}
       {currentUser && (() => {
-        const profileChecklist = [
-          Boolean(profileHeadline.trim()),
-          Boolean(profileBio.trim()),
-          mySkills.length > 0,
-          rules.length > 0,
-          enrollments.length > 0,
-          portfolios.length > 0,
-          workExperiences.length + achievements.length + certificates.length > 0,
-        ];
-        const doneCount = profileChecklist.filter(Boolean).length;
-        const completionPct = Math.round((doneCount / profileChecklist.length) * 100);
-        const profileTextPct = (profileHeadline.trim() ? 50 : 0) + (profileBio.trim() ? 50 : 0);
-        const skillsPct = Math.min(100, Math.round((mySkills.length / 5) * 100));
-        const schedulePct = Math.min(100, Math.round((rules.length / 3) * 100));
-        const hemisPct = enrollments.length > 0 ? 100 : 0;
-        const showcaseCount = portfolios.length + workExperiences.length + achievements.length + certificates.length;
-        const portfolioPct = Math.min(100, Math.round((showcaseCount / 3) * 100));
         return (
         <div className="flex flex-col gap-6">
           {/* ROW A: COMPACT EXECUTIVE KPI STRIP */}
@@ -1195,100 +909,6 @@ export default function CandidateProfileHub() {
             />
           </section>
 
-          {/* ROW B: HARDWARE LIQUID METER POD (5 LIVE COMPLETION TUBES) */}
-          <section
-            aria-label="Rezyume va profil tayyorligi"
-            className="grid gap-6 rounded-[28px] skeuo-card p-5 sm:p-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center"
-          >
-            <div className="space-y-4">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-300">
-                  HR Reyting Indeksi
-                </span>
-                <div className="mt-2.5 flex items-baseline gap-2.5">
-                  <span className="font-mono text-4xl font-bold tracking-tight text-[var(--fb-ink)]">
-                    {completionPct}%
-                  </span>
-                  <span className="text-xs font-semibold text-[var(--fb-ink-muted)]">
-                    ({doneCount} / {profileChecklist.length} band)
-                  </span>
-                </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-[var(--fb-ink-muted)]">
-                  Rezyume bo‘limlaringizning to‘ldirilganlik holati ish beruvchilar qidiruvidagi o‘rningizni belgilaydi.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("PROFILE")}
-                  className="rounded-full skeuo-btn-obsidian px-3.5 py-1.5 text-xs font-semibold"
-                >
-                  Profilni to‘ldirish
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("SKILLS")}
-                  className="rounded-full skeuo-btn-secondary px-3.5 py-1.5 text-xs font-semibold"
-                >
-                  Ko‘nikma qo‘shish
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <SkeuoVerticalMeter
-                compact
-                title="Profil matni"
-                percentage={profileTextPct}
-                amountLabel={`${profileTextPct}%`}
-                subtitle="Sarlavha & bio"
-                tone="sky"
-                onAction={() => setActiveTab("PROFILE")}
-                actionLabel="Tahrir"
-              />
-              <SkeuoVerticalMeter
-                compact
-                title="Ko‘nikmalar"
-                percentage={skillsPct}
-                amountLabel={`${mySkills.length} ta`}
-                subtitle="Maqsad: 5+"
-                tone="emerald"
-                onAction={() => setActiveTab("SKILLS")}
-                actionLabel="Qo‘shish"
-              />
-              <SkeuoVerticalMeter
-                compact
-                title="Jadval"
-                percentage={schedulePct}
-                amountLabel={`${rules.length} ta`}
-                subtitle="Bo‘sh vaqt"
-                tone="orange"
-                onAction={() => setActiveTab("AVAILABILITY")}
-                actionLabel="Sozlash"
-              />
-              <SkeuoVerticalMeter
-                compact
-                title="HEMIS"
-                percentage={hemisPct}
-                amountLabel={enrollments.length > 0 ? "Tasdiqlangan" : "Kutilmoqda"}
-                subtitle="Talaba maqomi"
-                tone="indigo"
-                onAction={() => setActiveTab("ENROLLMENTS")}
-                actionLabel="Ochish"
-              />
-              <SkeuoVerticalMeter
-                compact
-                title="Portfolio"
-                percentage={portfolioPct}
-                amountLabel={`${showcaseCount} ta`}
-                subtitle="Loyiha & yutuq"
-                tone="amber"
-                onAction={() => setActiveTab("PORTFOLIO")}
-                actionLabel="Yuklash"
-              />
-            </div>
-          </section>
-
           {/* SKEUOMORPHIC SLIDING SEGMENTED TABS */}
           <SkeuoSegmented
             layoutName="candidateWorkspaceTabs"
@@ -1297,7 +917,6 @@ export default function CandidateProfileHub() {
               setActiveTab(
                 next as
                   | "PROFILE"
-                  | "FULL_RESUME"
                   | "SKILLS"
                   | "AVAILABILITY"
                   | "ENROLLMENTS"
@@ -1306,13 +925,7 @@ export default function CandidateProfileHub() {
               )
             }
             options={[
-              { id: "PROFILE", label: "Kasbiy Profil", icon: User },
-              {
-                id: "FULL_RESUME",
-                label: "To‘liq Rezyume",
-                icon: Briefcase,
-                badge: workExperiences.length + achievements.length || undefined,
-              },
+              { id: "PROFILE", label: "Rezyume", icon: User },
               { id: "SKILLS", label: "Ko‘nikmalar", icon: Sparkles, badge: mySkills.length || undefined },
               { id: "AVAILABILITY", label: "Jadval", icon: Calendar, badge: rules.length || undefined },
               { id: "ENROLLMENTS", label: "HEMIS", icon: GraduationCap, badge: enrollments.length || undefined },
@@ -1334,24 +947,6 @@ export default function CandidateProfileHub() {
             >
               <User className="w-4 h-4 text-primary" />
               <span>Kasbiy Profil</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("FULL_RESUME")}
-              className={`px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                activeTab === "FULL_RESUME"
-                  ? "border-primary text-white bg-primary/5"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Briefcase className="w-4 h-4 text-cyan-400" />
-              <span>To‘liq Rezyume: Yutuqlar & Qilingan Ishlar</span>
-              {workExperiences.length + achievements.length > 0 && (
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300">
-                  {workExperiences.length + achievements.length}
-                </span>
-              )}
             </button>
 
             <button
@@ -1445,659 +1040,8 @@ export default function CandidateProfileHub() {
             </button>
           </div>
 
-          {/* TAB 1: PROFILE TAB */}
-          {activeTab === "PROFILE" && (
-            <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-5 shadow-sm max-w-3xl">
-              <div>
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <User className="w-4 h-4 text-primary" />
-                  <span>Asosiy Rezyume Ma&apos;lumotlari</span>
-                </h3>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Ushbu ma&apos;lumotlar ish beruvchilarga arizalaringiz bilan birga taqdim etiladi.
-                </p>
-              </div>
-
-              <SkeuoToggle
-                checked={profileVisibility === "EMPLOYERS"}
-                disabled={isSavingVisibility}
-                label="Ish beruvchilar meni qidiruvda topa olsin"
-                description="Yoqilsa, tasdiqlangan korxonalar rezyumengizni ko‘radi (telefon va Telegram ko‘rinmaydi). Istalgan payt o‘chirishingiz mumkin."
-                tone="emerald"
-                onChange={async (next) => {
-                  setIsSavingVisibility(true);
-                  setProfileErrorMsg(null);
-                  try {
-                    setProfileVisibility(await setCandidateVisibility(next ? "EMPLOYERS" : "PRIVATE"));
-                  } catch (err: unknown) {
-                    setProfileErrorMsg(err instanceof Error ? err.message : "Sozlamani saqlab bo‘lmadi.");
-                  } finally {
-                    setIsSavingVisibility(false);
-                  }
-                }}
-              />
-
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEmployerPreview((v) => !v)}
-                  aria-expanded={showEmployerPreview}
-                  className="self-start px-3.5 py-1.5 rounded-full skeuo-btn-secondary text-xs font-semibold"
-                >
-                  {showEmployerPreview ? "Ko‘rinishni yopish" : "Ish beruvchi meni qanday ko‘radi?"}
-                </button>
-                {showEmployerPreview && (
-                  <div className="p-4 rounded-2xl skeuo-well">
-                    <ResumePreview
-                      resume={
-                        toBackendResume({
-                          work_experiences: workExperiences,
-                          achievements,
-                          languages,
-                          education_details: educationDetails,
-                          career_preferences: careerPreferences,
-                        }) as unknown as EmployerResumeView
-                      }
-                    />
-                    <p className="mt-3 text-[11px] text-[var(--fb-ink-muted)]">
-                      Ko‘rinish saqlanmagan o‘zgarishlarni ham ko‘rsatadi — o‘zgartirgach «To‘liq rezyume» bo‘limida saqlang.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {profileSuccessMsg && (
-                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span>{profileSuccessMsg}</span>
-                </div>
-              )}
-
-              {profileErrorMsg && (
-                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                  <span>{profileErrorMsg}</span>
-                </div>
-              )}
-
-              {isLoadingProfile ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-400">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  <span className="text-xs">Profil ma&apos;lumotlari yuklanmoqda...</span>
-                </div>
-              ) : (
-                <form onSubmit={handleSaveProfile} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                      <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Kasbiy Sarlavha / Lavozim yo‘nalishi</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={profileHeadline}
-                      onChange={(e) => setProfileHeadline(e.target.value)}
-                      placeholder="Masalan: Frontend Dasturchi, Node.js Backend Injiniring"
-                      className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                        <span>Yashash Hududi</span>
-                      </label>
-                      <select
-                        value={profileRegion}
-                        onChange={(e) => setProfileRegion(e.target.value)}
-                        className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white focus:outline-none focus:border-primary/50"
-                      >
-                        {UZBEKISTAN_REGIONS.map((r) => (
-                          <option key={r} value={r} className="bg-surface text-white">
-                            {r}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                        <span>Umumiy Ish Tajribasi (oyda)</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="600"
-                        value={profileExpMonths}
-                        onChange={(e) => setProfileExpMonths(Number(e.target.value))}
-                        className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono focus:outline-none focus:border-primary/50"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Shaxsiy Bio / Qisqacha Tavsif</span>
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={profileBio}
-                      onChange={(e) => setProfileBio(e.target.value)}
-                      placeholder="Texnologiyalar, loyihalar va qiziqishlaringiz haqida qisqacha ma'lumot bering..."
-                      className="px-3.5 py-2.5 rounded-lg bg-surface border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-y"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-[11px] text-zinc-500 font-mono">
-                      Tajriba: {profileExpMonths} oy | Hudud: {profileRegion}
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={isSavingProfile}
-                      className="px-4 py-2.5 rounded-xl skeuo-btn-accent disabled:opacity-50 text-xs font-semibold text-white flex items-center gap-2"
-                    >
-                      {isSavingProfile ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Save className="w-3.5 h-3.5" />
-                      )}
-                      <span>Saqlash</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          )}
-
-          {/* TAB 1B: FULL RESUME BUILDER (API-026-RESUME-DETAILS & DIRECT PDF UPLOAD) */}
-          {activeTab === "FULL_RESUME" && (
-            <div className="flex flex-col gap-6">
-              {resumeDetailsSuccessMsg && (
-                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span>{resumeDetailsSuccessMsg}</span>
-                </div>
-              )}
-              {resumeDetailsErrorMsg && (
-                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                  <span>{resumeDetailsErrorMsg}</span>
-                </div>
-              )}
-
-              {/* DIRECT CV PDF UPLOAD & SAVE HEADER */}
-              <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-cyan-400" />
-                    <span>To&apos;liq Rezyume Konstruktori & Shaxsiy CV (PDF) Biriktirish</span>
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Qilingan ishlar, erishgan yutuqlar, xorijiy tillar, ta&apos;lim tafsilotlari va tayyor PDF rezyumeni yuklash.
-                  </p>
-                  {cvUploadMsg && (
-                    <p className="text-[11px] font-mono text-emerald-400 mt-1.5">✓ {cvUploadMsg}</p>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                  <label className="px-3.5 py-2 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>{isUploadingCvPdf ? "CV yuklanmoqda..." : "Tayyor CV (PDF) yuklash"}</span>
-                    <input
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      className="hidden"
-                      disabled={isUploadingCvPdf}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUploadCvPdf(f);
-                      }}
-                    />
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={handleSaveFullResumeDetails}
-                    disabled={isSavingResumeDetails || isLoadingResumeDetails}
-                    className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-md shadow-primary/20"
-                  >
-                    {isSavingResumeDetails ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Save className="w-3.5 h-3.5" />
-                    )}
-                    <span>Barcha Rezyume Bo&apos;limlarini Saqlash</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* SECTION 1: QILINGAN ISHLAR VA MEHNAT TAJRIBASI */}
-                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                    <div>
-                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-cyan-400" />
-                        <span>Qilingan Ishlar & Amaliy Tajriba ({workExperiences.length})</span>
-                      </h4>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Amaliyot, yarim stavkali ish, frilans va ilmiy laboratoriyadagi faoliyatlar.
-                      </p>
-                    </div>
-                  </div>
-
-                  {workExperiences.length > 0 && (
-                    <div className="flex flex-col gap-2.5">
-                      {workExperiences.map((w, idx) => (
-                        <div
-                          key={w.id || idx}
-                          className="p-3.5 rounded-xl bg-surface border border-white/[0.06] flex items-start justify-between gap-3"
-                        >
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-bold text-white">{w.role_title}</span>
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                                {w.employment_type}
-                              </span>
-                            </div>
-                            <span className="text-xs text-zinc-300">
-                              {w.company_name} • {w.location}
-                            </span>
-                            <span className="text-[11px] font-mono text-zinc-500">
-                              {w.start_date} — {w.end_date || "Hozirgacha"}
-                            </span>
-                            {w.description && (
-                              <p className="text-xs text-zinc-400 mt-1">{w.description}</p>
-                            )}
-                            {w.technologies && w.technologies.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {w.technologies.map((t, tidx) => (
-                                  <span
-                                    key={tidx}
-                                    className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.05] text-zinc-300"
-                                  >
-                                    {t}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveWorkExperience(idx)}
-                            className="p-1.5 rounded hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="p-4 rounded-xl bg-surface/60 border border-white/[0.06] flex flex-col gap-3">
-                    <span className="text-xs font-semibold text-zinc-200">+ Yangi ish joyi / bajarilgan ish qo&apos;shish</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <input
-                        type="text"
-                        value={newWorkCompany}
-                        onChange={(e) => setNewWorkCompany(e.target.value)}
-                        placeholder="Korxona / Tashkilot nomi *"
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        value={newWorkRole}
-                        onChange={(e) => setNewWorkRole(e.target.value)}
-                        placeholder="Lavozim / Vazifa *"
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        value={newWorkLocation}
-                        onChange={(e) => setNewWorkLocation(e.target.value)}
-                        placeholder="Joylashuv (Toshkent)"
-                        aria-label="Ish joyi joylashuvi"
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      <select
-                        value={newWorkType}
-                        onChange={(e) => setNewWorkType(e.target.value)}
-                        className="px-2.5 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      >
-                        <option value="INTERNSHIP">Amaliyot</option>
-                        <option value="PART_TIME">Part-Time</option>
-                        <option value="PROJECT">Shartnoma / Loyiha</option>
-                        <option value="FREELANCE">Frilans</option>
-                      </select>
-                      <input
-                        type="date"
-                        value={newWorkStartDate}
-                        onChange={(e) => setNewWorkStartDate(e.target.value)}
-                        className="px-2.5 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                      <input
-                        type="date"
-                        value={newWorkEndDate}
-                        onChange={(e) => setNewWorkEndDate(e.target.value)}
-                        placeholder="Tugash sanasi"
-                        className="px-2.5 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      value={newWorkTechInput}
-                      onChange={(e) => setNewWorkTechInput(e.target.value)}
-                      placeholder="Qo'llanilgan texnologiyalar (vergul bilan: Python, SQL, Docker)"
-                      className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                    />
-                    <textarea
-                      rows={2}
-                      value={newWorkDesc}
-                      onChange={(e) => setNewWorkDesc(e.target.value)}
-                      placeholder="Bajarilgan ishlar va erishilgan natijalar tavsifi..."
-                      className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white resize-y"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddWorkExperience}
-                      className="self-start px-3.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white flex items-center gap-1.5"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Ish tajribasini ro&apos;yxatga qo&apos;shish</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SECTION 2: ERISHGAN YUTUQLAR, OLIMPIADALAR VA MUKOFOTLAR */}
-                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                    <div>
-                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                        <Award className="w-4 h-4 text-amber-400" />
-                        <span>Erishgan Yutuqlar, Grantlar & Olimpiadalar ({achievements.length})</span>
-                      </h4>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Fan olimpiadalari, Hackathon g&apos;olibliklari, davlat stipendiyalari va ilmiy maqolalar.
-                      </p>
-                    </div>
-                  </div>
-
-                  {achievements.length > 0 && (
-                    <div className="flex flex-col gap-2.5">
-                      {achievements.map((ach, idx) => (
-                        <div
-                          key={ach.id || idx}
-                          className="p-3.5 rounded-xl bg-surface border border-white/[0.06] flex items-start justify-between gap-3"
-                        >
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-bold text-white">{ach.title}</span>
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                                {ach.category}
-                              </span>
-                            </div>
-                            <span className="text-xs text-zinc-300">
-                              Taqdim etuvchi: {ach.issuer} {ach.awarded_date ? `• ${ach.awarded_date}` : ""}
-                            </span>
-                            {ach.description && (
-                              <p className="text-xs text-zinc-400 mt-0.5">{ach.description}</p>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAchievement(idx)}
-                            className="p-1.5 rounded hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="p-4 rounded-xl bg-surface/60 border border-white/[0.06] flex flex-col gap-3">
-                    <span className="text-xs font-semibold text-zinc-200">+ Yangi yutuq yoki mukofot qo&apos;shish</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <input
-                        type="text"
-                        value={newAchTitle}
-                        onChange={(e) => setNewAchTitle(e.target.value)}
-                        placeholder="Yutuq nomi (Masalan: Beruniy nomidagi davlat stipendiyasi) *"
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                      <select
-                        value={newAchCategory}
-                        onChange={(e) => setNewAchCategory(e.target.value)}
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      >
-                        <option value="OLYMPIAD">Fan Olimpiadasi / ICPC</option>
-                        <option value="HACKATHON">Hackathon / IT Tanlov</option>
-                        <option value="SCHOLARSHIP">Davlat Stipendiyasi / Grant</option>
-                        <option value="PUBLICATION">Ilmiy Maqola / Patent</option>
-                        <option value="AWARD">Faxriy Yorliq / Mukofot</option>
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <input
-                        type="text"
-                        value={newAchIssuer}
-                        onChange={(e) => setNewAchIssuer(e.target.value)}
-                        placeholder="Beruvchi vazirlik / tashkilot"
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                      <input
-                        type="date"
-                        value={newAchDate}
-                        onChange={(e) => setNewAchDate(e.target.value)}
-                        className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white"
-                      />
-                    </div>
-                    <textarea
-                      rows={2}
-                      value={newAchDesc}
-                      onChange={(e) => setNewAchDesc(e.target.value)}
-                      placeholder="Yutuq tafsiloti (egallangan o'rin, loyiha natijasi)..."
-                      className="px-3 py-2 rounded-lg bg-[#121214] border border-white/[0.08] text-xs text-white resize-y"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddAchievement}
-                      className="self-start px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white flex items-center gap-1.5"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Yutuqni ro&apos;yxatga qo&apos;shish</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SECTION 3: XORIJIY TILLAR VA SERTIFIKAT BALLARI */}
-                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                    <div>
-                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-emerald-400" />
-                        <span>Til Bilish Darajalari ({languages.length})</span>
-                      </h4>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Ona tili va xorijiy tillar (IELTS, CEFR, TOEFL, JLPT, TOPIK ko&apos;rsatkichlari).
-                      </p>
-                    </div>
-                  </div>
-
-                  {languages.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {languages.map((l, idx) => (
-                        <div
-                          key={l.id || idx}
-                          className="px-3 py-2 rounded-lg bg-surface border border-white/[0.06] flex items-center gap-2.5 text-xs"
-                        >
-                          <span className="font-bold text-white">{l.language}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300">
-                            {l.proficiency}
-                          </span>
-                          {l.certificate_name && (
-                            <span className="text-[11px] text-zinc-400">
-                              ({l.certificate_name}{l.score ? `: ${l.score}` : ""})
-                            </span>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveLanguage(idx)}
-                            className="text-zinc-500 hover:text-rose-400"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    <input
-                      type="text"
-                      value={newLangName}
-                      onChange={(e) => setNewLangName(e.target.value)}
-                      placeholder="Til (Ingliz tili)"
-                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                    />
-                    <select
-                      value={newLangLevel}
-                      onChange={(e) => setNewLangLevel(e.target.value)}
-                      className="px-2.5 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                    >
-                      <option value="NATIVE">Ona tili</option>
-                      <option value="C2">C2 (Mukammal)</option>
-                      <option value="C1">C1 (Ilg&apos;or)</option>
-                      <option value="B2">B2 (Mustaqil)</option>
-                      <option value="B1">B1 (O&apos;rta)</option>
-                      <option value="A2">A2 (Boshlang&apos;ich+)</option>
-                    </select>
-                    <input
-                      type="text"
-                      value={newLangCert}
-                      onChange={(e) => setNewLangCert(e.target.value)}
-                      placeholder="Sertifikat (IELTS)"
-                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                    />
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={newLangScore}
-                      onChange={(e) => setNewLangScore(e.target.value)}
-                      placeholder="Ball (7.0)"
-                      aria-label="Sertifikat bali"
-                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddLanguage}
-                      className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white flex items-center justify-center gap-1"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Til qo&apos;shish</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SECTION 4: TA'LIM TAFSILOTLARI VA KARERA MAQSADI */}
-                <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4">
-                  <div className="border-b border-white/[0.06] pb-3">
-                    <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-blue-400" />
-                      <span>Akademik Ko&apos;rsatkichlar (GPA) & Karera Maqsadi</span>
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] text-zinc-400">Oliygoh / Fakultet</label>
-                      <input
-                        type="text"
-                        value={educationDetails.faculty}
-                        onChange={(e) => setEducationDetails({ ...educationDetails, faculty: e.target.value })}
-                        placeholder="Masalan: Dasturiy injiniring fakulteti"
-                        className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] text-zinc-400">O&apos;rtacha ball (GPA) va Bosqich (Kurs)</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={educationDetails.gpa}
-                          onChange={(e) => setEducationDetails({ ...educationDetails, gpa: e.target.value })}
-                          placeholder="GPA: 4.8 / 5.0"
-                          className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
-                        />
-                        <input
-                          type="number"
-                          min={1}
-                          max={6}
-                          value={educationDetails.study_year}
-                          onChange={(e) => setEducationDetails({ ...educationDetails, study_year: Number(e.target.value) })}
-                          className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] text-zinc-400">Kutilayotgan yo&apos;nalishlar (vergul bilan)</label>
-                      <input
-                        type="text"
-                        value={desiredRolesInput}
-                        onChange={(e) => setDesiredRolesInput(e.target.value)}
-                        placeholder="Backend Developer, Data Analyst"
-                        className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] text-zinc-400">Ish formati va haftalik soat</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <select
-                          value={careerPreferences.work_mode}
-                          onChange={(e) => setCareerPreferences({ ...careerPreferences, work_mode: e.target.value })}
-                          className="px-2.5 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white"
-                        >
-                          <option value="HYBRID">Gibrid (Hybrid)</option>
-                          <option value="REMOTE">Masofaviy (Remote)</option>
-                          <option value="ONSITE">Ofisda (On-site)</option>
-                        </select>
-                        <input
-                          type="number"
-                          min={4}
-                          max={40}
-                          value={careerPreferences.preferred_weekly_hours}
-                          onChange={(e) =>
-                            setCareerPreferences({ ...careerPreferences, preferred_weekly_hours: Number(e.target.value) })
-                          }
-                          className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white font-mono"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[11px] text-zinc-400">Bitiruv malakaviy ishi / Ilmiy mavzu va Karera maqsadi</label>
-                    <textarea
-                      rows={2}
-                      value={careerPreferences.career_objective}
-                      onChange={(e) => setCareerPreferences({ ...careerPreferences, career_objective: e.target.value })}
-                      placeholder="Karera maqsadingiz va amaliyotdan kutayotgan natijalaringiz..."
-                      className="px-3 py-2 rounded-lg bg-surface border border-white/[0.08] text-xs text-white resize-y"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* TAB 1: RESUME BUILDER (Issue #241) */}
+          {activeTab === "PROFILE" && <ResumeBuilder />}
 
           {/* TAB 2: SKILLS TAB */}
           {activeTab === "SKILLS" && (
