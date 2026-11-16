@@ -1,6 +1,8 @@
 "use client";
 
 import { Suspense, useState, useEffect, useEffectEvent } from "react";
+import UniversityConnectForm from "@/components/university/UniversityConnectForm";
+import { STATUS_LABELS } from "@/lib/universityStaff";
 import Link from "next/link";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { useRouter } from "next/navigation";
@@ -50,6 +52,7 @@ function UniversitetRegistrationContent() {
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [showConnect, setShowConnect] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState<"SMS" | "TELEGRAM">("SMS");
@@ -651,7 +654,7 @@ function UniversitetRegistrationContent() {
                         #{item.id.slice(0, 8)} • Rev {item.current_revision}
                       </span>
                       <span className="rounded-full border border-indigo-500/30 bg-indigo-500/15 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-300">
-                        {item.status} / {item.case_status}
+                        {STATUS_LABELS[item.status] ?? item.status}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -676,13 +679,29 @@ function UniversitetRegistrationContent() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-white/[0.08] bg-zinc-900/70 p-4 space-y-2 text-xs text-zinc-400">
-                <p className="font-semibold text-zinc-200">
-                  Hisobingizga hali tayinlov yuborilmagan
-                </p>
-                <p className="leading-relaxed">
-                  Universitet dekanati koordinatori yoki platforma moderatori sizning tasdiqlangan telefon raqamingizga rasmiy tayinlov yuborgach, shu sahifada bir marta bosish bilan tasdiqlab `/university` kabinetiga o‘tasiz.
-                </p>
+              <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                <div className="rounded-2xl skeuo-well p-4 space-y-1.5">
+                  <p className="font-semibold text-[var(--fb-ink)]">Universitetingiz allaqachon ulanganmi?</p>
+                  <p className="text-[var(--fb-ink-secondary)] leading-relaxed">
+                    Universitet koordinatoriga shu hisobdagi telefon yoki pochtangizni ayting. U sizni xodim sifatida qo‘shgach, taklif shu yerda
+                    paydo bo‘ladi va bir bosish bilan tasdiqlaysiz.
+                  </p>
+                </div>
+                <div className="rounded-2xl skeuo-well p-4 space-y-2">
+                  <p className="font-semibold text-[var(--fb-ink)]">Universitet hali ulanmaganmi?</p>
+                  <p className="text-[var(--fb-ink-secondary)] leading-relaxed">
+                    Universitet nomidan ariza bering — tasdiqlangach, siz uning maxsus (koordinator) hisobiga ega bo‘lasiz va xodimlarni o‘zingiz qo‘shasiz.
+                  </p>
+                  <button type="button" onClick={() => setShowConnect(true)} data-tone="indigo" className="skeuo-btn-tone rounded-xl px-4 py-2 text-xs">
+                    Universitetni ulash
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showConnect && (
+              <div className="rounded-2xl skeuo-card p-4 sm:p-5">
+                <UniversityConnectForm onSubmitted={loadAppointmentInbox} />
               </div>
             )}
           </div>
