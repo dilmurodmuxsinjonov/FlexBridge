@@ -25,7 +25,7 @@ export async function GET() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return NextResponse.json(
-        { ok: false, error: data?.detail || data?.error || "RESUME_DETAILS_FETCH_FAILED" },
+        { ok: false, error: (data?.detail && typeof data.detail === "object" ? data.detail.code : data?.detail) || data?.error || "RESUME_DETAILS_FETCH_FAILED" },
         { status: res.status }
       );
     }
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return NextResponse.json(
-        { ok: false, error: data?.detail || data?.error || "RESUME_DETAILS_UPDATE_FAILED" },
+        { ok: false, error: (data?.detail && typeof data.detail === "object" ? data.detail.code : data?.detail) || data?.error || "RESUME_DETAILS_UPDATE_FAILED" },
         { status: res.status }
       );
     }

@@ -494,7 +494,7 @@ html.dark .skeuo-btn-secondary:hover {
 }
 
 /* Consistent, visible focus for every form control. */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([data-chip-input]):focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 .skeuo-input:focus-visible {
@@ -640,7 +640,7 @@ html:not(.dark) .border-zinc-800\/80 {
   border-color: var(--fb-hairline);
 }
 
-html:not(.dark) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([data-chip-input]),
 html:not(.dark) select,
 html:not(.dark) textarea {
   background-color: rgba(255, 255, 255, 0.7);
