@@ -295,7 +295,7 @@ class CandidatePdfUploadInput(Input):
     filename: str = Field(default='document.pdf', min_length=1, max_length=240)
     purpose: Literal['CERTIFICATE', 'CV', 'PORTFOLIO'] = 'CERTIFICATE'
     title: str | None = Field(default=None, max_length=240)
-    content_base64: str | None = Field(default=None, max_length=15_000_000)
+    content_base64: str = Field(min_length=24, max_length=15_000_000)
 
 
 # Candidate Full Resume Details (API-026-RESUME-DETAILS)
