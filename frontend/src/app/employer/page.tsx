@@ -1,5 +1,8 @@
 "use client";
 import { enumLabel } from "@/lib/labels";
+import EmployerOverview from "@/components/employer/EmployerOverview";
+import ProfileCard from "@/components/profile/ProfileCard";
+import { useAsyncData } from "@/lib/useAsyncData";
 
 import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
@@ -54,6 +57,7 @@ import {
   scheduleApplicationInterview,
   issueApplicationOffer,
   fetchMentorReviewQueue,
+  logoutUser,
   fetchWorkplaceRevisionDetail,
   submitWorkplaceReview,
   fetchMentorAssignments,
@@ -88,11 +92,6 @@ import {
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
-import {
-  SkeuoStatCard,
-  SkeuoVerticalMeter,
-  SkeuoLiveFeed,
-} from "@/components/skeuo/SkeuoPrimitives";
 
 const OPPORTUNITY_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Qoralama",
@@ -822,6 +821,18 @@ export default function EmployerPortal() {
   }, []);
 
   // One place that switches the workspace section and loads its data (sidebar + mobile dock).
+  const currentOrg = workspaceOrgs?.find((o) => o.id === orgId) ?? null;
+  const overviewMentorQueue = useAsyncData(currentUser && orgId ? `emp-mentor-queue:${orgId}` : null, () =>
+    fetchMentorReviewQueue(50)
+      .then((r) => r.items || [])
+      .catch(() => null)
+  );
+  const handleEmployerSignOut = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+  };
+
   const switchMainTab = (tab: "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB") => {
     setActiveMainTab(tab);
     if (tab === "SEARCH_HUB" && searchResults.length === 0 && !isLoadingSearch) {
@@ -1030,7 +1041,8 @@ export default function EmployerPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* AUTH STATUS & CORPORATE HR HEADER BAR */}
+      {/* AUTH STATUS & CORPORATE HR HEADER BAR (guests; signed-in staff get the overview) */}
+      {!currentUser && (
       <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
@@ -1090,6 +1102,7 @@ export default function EmployerPortal() {
           </div>
         </div>
       </section>
+      )}
 
       {/* UNAUTHENTICATED STATE */}
       {!currentUser && !isAuthLoading && (
@@ -1133,7 +1146,33 @@ export default function EmployerPortal() {
       {/* AUTHENTICATED WORKSPACE */}
       {currentUser && (
         <div className="flex flex-col gap-6">
-          {/* ORGANIZATION PICKER (from GET /me/workspaces; no UUID typing) */}
+          <EmployerOverview
+            name={currentUser.display_name}
+            orgName={currentOrg?.name}
+            orgRegion={currentOrg?.region}
+            roles={currentOrg?.roles ?? []}
+            metrics={dashboard?.metrics ?? null}
+            opportunities={managedOpps}
+            mentorQueue={overviewMentorQueue.data ?? null}
+            onOpen={(tab) => {
+              switchMainTab(tab);
+              document.getElementById("emp-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            onOpenOpportunity={(id) => {
+              setTargetOppId(id);
+              loadApplications(id);
+              switchMainTab("KANBAN");
+              document.getElementById("emp-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            onCreate={() => {
+              setIsCreateModalOpen(true);
+              setCreateSuccess(null);
+              setCreateError(null);
+            }}
+          />
+
+          {/* ORGANIZATION PICKER (from GET /me/workspaces; no UUID typing) - only when there is a choice to make */}
+          {(workspaceOrgs === null || workspaceOrgs.length !== 1) && (
           <section className="w-full skeuo-card rounded-3xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {workspaceOrgs === null ? (
               <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-secondary)]">
@@ -1204,6 +1243,7 @@ export default function EmployerPortal() {
               </>
             )}
           </section>
+          )}
 
           {/* DASHBOARD ERROR MESSAGE */}
           {dashboardError && (
@@ -1216,90 +1256,12 @@ export default function EmployerPortal() {
             </div>
           )}
 
-          {/* METRICS DISPLAY */}
-          {dashboard?.metrics && (() => {
-            const totalOpps = Math.max(dashboard.metrics.opportunities.total, 1);
-            const activeOppPct = Math.round((dashboard.metrics.opportunities.published / totalOpps) * 100);
-            const feedItems = applications.slice(0, 5).map((app) => ({
-              id: app.application_id,
-              title: app.headline || `Nomzod #${app.candidate_id.slice(0, 8)}`,
-              meta: `${app.status}${app.region ? ` • ${app.region}` : ""}`,
-              time: app.submitted_at
-                ? new Date(app.submitted_at).toLocaleDateString("uz-UZ")
-                : "Yaqinda",
-              status:
-                app.status === "ACCEPTED" || app.status === "OFFERED"
-                  ? ("ok" as const)
-                  : app.status === "REJECTED"
-                    ? ("warn" as const)
-                    : ("info" as const),
-            }));
-            return (
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                  <SkeuoStatCard
-                    title="Vakansiyalar"
-                    value={dashboard.metrics.opportunities.total}
-                    delta={`${dashboard.metrics.opportunities.published} faol`}
-                    deltaPositive={dashboard.metrics.opportunities.published > 0}
-                    subtitle={`${dashboard.metrics.opportunities.draft} qoralama`}
-                    icon={Briefcase}
-                    tone="orange"
-                    onClick={() => switchMainTab("KANBAN")}
-                    active={activeMainTab === "KANBAN"}
-                  />
-                  <SkeuoStatCard
-                    title="Nomzodlar arizalari"
-                    value={dashboard.metrics.applications.total}
-                    delta={`${dashboard.metrics.applications.pending} kutilmoqda`}
-                    subtitle={`${dashboard.metrics.applications.offered} taklif qilingan`}
-                    icon={Users}
-                    tone="emerald"
-                    onClick={() => switchMainTab("SEARCH_HUB")}
-                    active={activeMainTab === "SEARCH_HUB"}
-                  />
-                  <SkeuoStatCard
-                    title="Suhbatlar"
-                    value={dashboard.metrics.interviews.total}
-                    subtitle={`${dashboard.metrics.interviews.scheduled} rejalashtirilgan • ${dashboard.metrics.interviews.completed} yakun`}
-                    icon={Calendar}
-                    tone="amber"
-                  />
-                  <SkeuoStatCard
-                    title="Dual ta’lim & Stajirovka"
-                    value={dashboard.metrics.engagements.total}
-                    delta={`${dashboard.metrics.engagements.active} faol`}
-                    deltaPositive
-                    subtitle={`${dashboard.metrics.engagements.completed} yakunlangan`}
-                    icon={GraduationCap}
-                    tone="indigo"
-                    onClick={() => switchMainTab("MENTOR_HUB")}
-                    active={activeMainTab === "MENTOR_HUB"}
-                  />
-                </div>
-                <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-                  <SkeuoVerticalMeter
-                    title="Faol vakansiyalar"
-                    percentage={activeOppPct}
-                    amountLabel={`${dashboard.metrics.opportunities.published} / ${dashboard.metrics.opportunities.total}`}
-                    subtitle="Nashr etilgan ulush"
-                    tone="emerald"
-                  />
-                  <SkeuoLiveFeed
-                    title="Oxirgi arizalar oqimi"
-                    items={feedItems}
-                    emptyText="Arizalarni ko‘rish uchun e’lon tanlang."
-                  />
-                </div>
-              </div>
-            );
-          })()}
-
           {/* PRIMARY WORKSPACE: CORPORATE LEFT HR RAIL + CONTENT PANEL */}
-          <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
+          <div id="emp-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
+            <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
             <aside
               aria-label="Korxona boshqaruv menyusi"
-              className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+              className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
             >
               <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
                 Rekruting &amp; Qabul
@@ -1410,6 +1372,14 @@ export default function EmployerPortal() {
                 <span>To‘lovlar &amp; Kvotalar</span>
               </button>
             </aside>
+            <div className="hidden lg:block">
+              <ProfileCard
+                name={currentUser?.display_name}
+                roleLabel={[currentOrg?.roles.map((r) => enumLabel(r)).join(", ") || "Xodim", currentOrg?.name].filter(Boolean).join(" · ")}
+                onLogout={handleEmployerSignOut}
+              />
+            </div>
+            </div>
 
             <div className="min-w-0 flex flex-col gap-6">
 

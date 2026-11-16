@@ -87,6 +87,8 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen text-[var(--fb-ink)]">
+      {/* Signed-in staff see their name, role and company in the overview and sidebar card. */}
+      {authResolved && !(currentUser && isEmployer) && (
       <div className="mx-auto max-w-[1440px] px-4 pt-2 md:px-8">
         <div className="skeuo-card rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-semibold">
@@ -121,6 +123,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
           )}
         </div>
       </div>
+      )}
       {children}
     </div>
   );
