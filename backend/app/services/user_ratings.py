@@ -92,13 +92,13 @@ class UserRatingsService:
                 if sample_size == 0:
                     score = None
                     score_status = 'UNRATED'
-                    explanation = 'Yangi foydalanuvchi: hali baholar mavjud emas (baho 0 emas, baholanmagan / unrated, AC-023).'
+                    explanation = 'Yangi foydalanuvchi: hali baholar yo‘q. Bu 0 ball degani emas — profil hali baholanmagan.'
                 elif sample_size < MIN_RATING_SAMPLE_SIZE:
                     score = None
                     score_status = 'WITHHELD_INSUFFICIENT_SAMPLE'
                     explanation = (
                         f'Kam baholar soni (n = {sample_size} < {MIN_RATING_SAMPLE_SIZE}): '
-                        'foydalanuvchi anonimligi va ishonchliligini taminlash uchun umumiy ball yashirilgan (AC-023).'
+                        'baholovchilar anonimligini himoya qilish uchun umumiy ball hozircha yashirilgan.'
                     )
                 else:
                     score = float(raw_score) if raw_score is not None else None
@@ -108,7 +108,7 @@ class UserRatingsService:
                 sample_size = 0
                 score = None
                 score_status = 'UNRATED'
-                explanation = 'Yangi foydalanuvchi: hali baholar mavjud emas (baho 0 emas, baholanmagan / unrated, AC-023).'
+                explanation = 'Yangi foydalanuvchi: hali baholar yo‘q. Bu 0 ball degani emas — profil hali baholanmagan.'
                 rubric_id_str = None
                 window_start = None
                 window_end = None

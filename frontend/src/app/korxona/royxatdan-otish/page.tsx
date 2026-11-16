@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import { errorText } from "@/lib/errorText";
 import OrganizationConnectForm from "@/components/employer/OrganizationConnectForm";
 import Link from "next/link";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
@@ -259,7 +260,7 @@ function KorxonaRegistrationContent() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorMessage(data.message || data.error || "Taklif topilmadi.");
+        setErrorMessage(errorText(data, "Taklif topilmadi."));
         return;
       }
       setInvitePreview(data);
@@ -288,7 +289,7 @@ function KorxonaRegistrationContent() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorMessage(data.message || data.error || "Taklifni qabul qilib bo‘lmadi.");
+        setErrorMessage(errorText(data, "Taklifni qabul qilib bo‘lmadi."));
         return;
       }
       window.dispatchEvent(new Event("flexbridge:auth-changed"));

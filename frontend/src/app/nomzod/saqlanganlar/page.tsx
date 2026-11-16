@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -171,10 +172,10 @@ export default function SavedOpportunitiesPage() {
                         </span>
                       )}
                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] text-zinc-400 border border-white/[0.08]">
-                        {opp.work_mode || "Gibrid"}
+                        {enumLabel(opp.work_mode, "Gibrid")}
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] text-zinc-400 border border-white/[0.08]">
-                        {opp.contract_type || "LABOR_PART_TIME"}
+                        {enumLabel(opp.contract_type, "Mehnat shartnomasi")}
                       </span>
                     </div>
 

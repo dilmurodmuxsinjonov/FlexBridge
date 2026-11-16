@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SimpleMarkdown from "@/components/SimpleMarkdown";
 import Link from "next/link";
 import {
   Compass,
@@ -144,7 +145,7 @@ export default function AboutAndHelpPage() {
             }`}
           >
             <CalendarCheck className="w-4 h-4 text-violet-400" />
-            <span>Jadval Mosligi (Matching Engine)</span>
+            <span>Dars jadvaliga moslik</span>
           </button>
         </div>
 
@@ -153,7 +154,7 @@ export default function AboutAndHelpPage() {
           <div className="p-4 rounded-xl bg-[#121214] border border-white/[0.08] space-y-2">
             <div className="flex items-center gap-2 text-primary">
               <Cpu className="w-4 h-4" />
-              <h3 className="text-xs font-bold uppercase tracking-wider">Matching Engine v1.4</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider">Moslik algoritmi</h3>
             </div>
             <p className="text-[11px] text-zinc-400 leading-relaxed">
               Talabaning dars jadvali, qatnov buferi (commute buffer) va ish smenalarining daqiqama-daqiqa kesishmasligini 100% kafolatlaydi.
@@ -245,9 +246,7 @@ export default function AboutAndHelpPage() {
               <h2 className="text-lg font-bold text-white border-b border-white/[0.08] pb-3">
                 {helpData.title}
               </h2>
-              <div className="prose prose-invert prose-xs sm:prose-sm max-w-none text-zinc-300 whitespace-pre-line leading-relaxed font-sans">
-                {helpData.content_markdown}
-              </div>
+              <SimpleMarkdown source={helpData.content_markdown} skipFirstHeading />
             </div>
           </div>
         ) : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect, useCallback } from "react";
+import { errorText } from "@/lib/errorText";
 import Link from "next/link";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -184,7 +185,7 @@ function RoyxatdanOtishWizard() {
       const data = await res.json();
       if (!res.ok) {
         setInvitePreview(null);
-        setErrorMessage(data.error || data.detail?.code || "Taklif tokeni topilmadi yoki muddati o‘tgan.");
+        setErrorMessage(errorText(data, "Taklif tokeni topilmadi yoki muddati o‘tgan."));
       } else {
         setInvitePreview(data as InvitePreview);
       }
@@ -213,7 +214,7 @@ function RoyxatdanOtishWizard() {
             "Korxona taklifini qabul qilish uchun avval 2FA (TOTP) ni yoqing va qayta tizimga kiring (/nomzod/xavfsizlik)."
           );
         } else {
-          setErrorMessage(data.message || data.error || data.detail?.code || "Taklifni qabul qilib bo‘lmadi.");
+          setErrorMessage(errorText(data, "Taklifni qabul qilib bo‘lmadi."));
         }
       } else {
         window.dispatchEvent(new Event("flexbridge:auth-changed"));
@@ -252,7 +253,7 @@ function RoyxatdanOtishWizard() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorMessage(data.error || data.detail?.code || "Tayinlov qarorini yuborib bo‘lmadi.");
+        setErrorMessage(errorText(data, "Tayinlov qarorini yuborib bo‘lmadi."));
         await loadAppointmentInbox();
       } else if (decision === "ACCEPT") {
         window.dispatchEvent(new Event("flexbridge:auth-changed"));
@@ -639,7 +640,7 @@ function RoyxatdanOtishWizard() {
                       1. Talaba / Nomzod
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-sky-500/12 text-sky-700 dark:text-sky-300 border border-sky-500/25">
-                      /nomzod
+                      Talaba
                     </span>
                   </div>
                   <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
@@ -672,7 +673,7 @@ function RoyxatdanOtishWizard() {
                       2. Korxona / HR Vakili
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
-                      /employer
+                      Korxona
                     </span>
                   </div>
                   <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
@@ -705,7 +706,7 @@ function RoyxatdanOtishWizard() {
                       3. OTM / Universitet Vakili
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 border border-indigo-500/25">
-                      /university
+                      Universitet
                     </span>
                   </div>
                   <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">
@@ -738,7 +739,7 @@ function RoyxatdanOtishWizard() {
                       4. Platforma Operatori
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/12 text-amber-800 dark:text-amber-300 border border-amber-500/25">
-                      /operator
+                      Operator
                     </span>
                   </div>
                   <p className="text-xs text-[var(--fb-ink-muted)] mt-1 leading-relaxed">

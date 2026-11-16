@@ -1425,9 +1425,21 @@ Keyingi kichik qadam:
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-16 | LOG-177 | Issue #241 -> Rezyume to'ldirish qadam-baqadam (yirik saytlar namunasida)
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "katta saytlardan rezyume formasini ko'rib chiq, bizniki tushunarsiz".
+- **Holat**: **MERGED** (#242, 0e9a179). Foydalanuvchi: "katta saytlardan rezyume formasini ko'rib chiq, bizniki tushunarsiz".
 - **Muammo**: rezyume 7 tabga tarqalgan; "To'liq rezyume"da 25 maydon birdan ochiq, ko'pi yorliqsiz (faqat kesilgan placeholder), sanalar nomsiz, ro'yxatga qo'shgach alohida "Barcha bo'limlarni saqlash" kerak edi (aks holda yo'qolardi), "HR reyting indeksi (1/7 band)" kabi jargon; BFF xato kodini "[object Object]" qilib yuborardi.
 - **Namuna**: Handshake (About/Experience/Education/Skills, ta'lim talabalar uchun birinchi), hh/Jooble kabi qadamli builder'lar, multi-step forma amaliyotlari (jarayon ko'rsatkichi, har qadam saqlash, qadam bo'yicha validatsiya).
 - **Yechim**: `components/resume/ResumeBuilder.tsx` + `resumeDraft.ts`: 6 qadam (Asosiy, Ta'lim, Tajriba, Tillar, Yutuqlar, Ko'rib chiqish), har maydonda yorliq + namuna + xato, tajriba/yutuqlar kartochka orqali (oy tanlagich, "Hozir ham shu yerda"), lavozim/texnologiya chiplari, har qadamda avtomatik saqlash ("Saqlandi 12:47"), tayyorlik 0/5, tajriba oylari avtomatik hisoblanadi, ko'rib chiqishda ish beruvchi ko'rinishi + PDF CV + qidiruvga ochish. Nomzod sahifasida "Kasbiy profil" va "To'liq rezyume" bitta "Rezyume" tabiga birlashtirildi, "HR reyting indeksi" bloki va ~70 eski state/handler olib tashlandi. BFF resume-details backend kodini to'g'ri uzatadi.
 - **Tekshiruv**: vitest 85/85 (+6), lint 0, build OK; Edge Playwright haqiqiy staging backend bilan to'liq oqim (PUT 200, profil sarlavhasi va experience_months=15 saqlandi), desktop + mobil-dark, 56 sahifa regressiya - toshish yo'q. Eslatma: lokal staging backend eski kodda, desired_roles/ta'lim maydonlarini saqlamaydi (integration backend #228 dan beri saqlaydi).
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-178 | Issue #243 -> Sahifalar ko'rigi: topilgan xatolarni tuzatish
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "o'zing ko'rib chiq va xatolarni topib to'g'irla" (49 sahifa x 2 ko'rinish galereyasi asosida).
+- **Topildi va tuzatildi**:
+  - Xato matnlari: 50 BFF marshruti backend `detail` obyektini `error` sifatida uzatadi, sahifalar "[object Object]" yoki "INSTITUTIONS_NOT_FOUND" kabi kodni ko'rsatardi. Yangi `lib/errorText.ts` (ma'lum kodlar o'zbekcha, noma'lum kodlar umumiy jumla), `api.ts` dagi 136 joy va 3 ro'yxatdan o'tish sahifasi unga o'tkazildi.
+  - Enum yorliqlari: yangi `lib/labels.ts` (`enumLabel`): INTERNSHIP_AGREEMENT/HYBRID (e'lon kartasidan toshib chiqardi), OWNER, INTERMEDIATE, UNAVAILABLE, BEPUL_KIRISH, murojaat ustuvorligi/turi/holati; "Self-declared/Verified", "MANUAL ENTRY", "Matching Engine", "Assurance", "/nomzod" kabi yo'l belgilar o'zbekchaga.
+  - Yorug' rejim: to'yingan fonli tugmalarda (bg-primary, bg-emerald-500 ...) matn qora bo'lib qolardi -> oq; pastel matnlar (shu jumladan /90 shaffoflik variantlari, masalan xavfsizlikdagi sariq ogohlantirish) 700-tonga; placeholder oldindan to'ldirilgan qiymatga o'xshamaydi; fayl tanlash tugmasi bezatildi; `font-mono` ortiqcha ishlatilishi oddiy shriftga.
+  - Shartlar/Maxfiylik/Haqida: markdown "# ..." xom ko'rinardi -> xavfsiz `SimpleMarkdown` (faqat React tugunlari).
+  - Kundalik: faol amaliyot bo'lmasa kiritish formasi ko'rsatilmaydi; arizalar/shartnomalar/kundalikdagi takroriy "Faol hisob / ID / Chiqish" bloki olib tashlandi (Navbar'da bor).
+  - Baholar: backend izohidan "AC-023" olib tashlandi, og'ir kulrang blok yengil quduqqa.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 90/90 (+5), next build OK; Edge bilan 15 ommaviy sahifa qayta suratga olindi (markdown, enum, tugma matni, placeholder tasdiqlandi). Kabinet sahifalarini qayta suratga olish uchun yangi staging sessiya kerak edi; seed skripti IAM shifrlash kalitini talab qiladi (.env) - unga tegilmadi, kabinet sahifalari CI va kod ko'rigi bilan tekshirildi.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

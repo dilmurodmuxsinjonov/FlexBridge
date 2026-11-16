@@ -17,13 +17,11 @@ import {
   RefreshCw,
   Search,
   Check,
-  LogOut,
   Building2,
   BookOpen,
 } from "lucide-react";
 import {
   fetchAuthMe,
-  logoutUser,
   AuthUser,
   fetchCandidatePlacementsList,
   fetchPlacementPlanDetail,
@@ -209,17 +207,6 @@ function ShartnomalarHubContent() {
     }
   }
 
-  async function handleLogout() {
-    try {
-      await logoutUser();
-      setCurrentUser(null);
-      setPlacements([]);
-      setActiveEngagement(null);
-    } catch {
-      // Ignored
-    }
-  }
-
   function getPlacementStatusBadge(status: string) {
     switch (status) {
       case "ACTIVE":
@@ -279,10 +266,6 @@ function ShartnomalarHubContent() {
         <div className="flex items-center gap-3">
           {currentUser ? (
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col text-right">
-                <span className="text-xs font-semibold text-zinc-200">Faol hisob</span>
-                <span className="text-[11px] text-zinc-400 font-mono">{currentUser.user_id.slice(0, 8)}...</span>
-              </div>
               <button
                 onClick={() => (activeTab === "PLACEMENTS" ? loadPlacements() : loadEngagement())}
                 disabled={isLoadingPlacements || isLoadingEngagement}
@@ -294,13 +277,6 @@ function ShartnomalarHubContent() {
                     isLoadingPlacements || isLoadingEngagement ? "animate-spin text-primary" : ""
                   }`}
                 />
-              </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-card px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.04] hover:text-rose-400 transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Chiqish</span>
               </button>
             </div>
           ) : (

@@ -1,4 +1,5 @@
 "use client";
+import { enumLabel } from "@/lib/labels";
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -1403,13 +1404,13 @@ export default function OperatorPortal() {
                                   : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
                               }`}
                             >
-                              {t.priority}
+                              {enumLabel(t.priority)}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
-                              {t.category}
+                              {enumLabel(t.category)}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              {t.status}
+                              {enumLabel(t.status)}
                             </span>
                             <span className="text-[11px] font-mono text-zinc-500">
                               Tiket ID: #{t.id.slice(0, 8)}...
@@ -1972,7 +1973,7 @@ export default function OperatorPortal() {
                   Murojaatga Javob Berish
                 </h3>
                 <span className="text-[11px] font-mono text-zinc-400">
-                  Tiket ID: #{selectedTicket.id.slice(0, 8)}... | {selectedTicket.category} ({selectedTicket.priority})
+                  Tiket ID: #{selectedTicket.id.slice(0, 8)}... | {enumLabel(selectedTicket.category)} ({enumLabel(selectedTicket.priority)})
                 </span>
               </div>
               <button
