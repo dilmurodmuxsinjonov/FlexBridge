@@ -1,16 +1,12 @@
 """Candidate full resume builder: achievements, work experiences, languages, career preferences & direct PDF file upload (API-026 / CAP-002)."""
 from __future__ import annotations
 
-import base64
-import hashlib
-import io
 from typing import Any
 from uuid import uuid4
 
-from pypdf import PdfReader
 from sqlalchemy import select
 
-from app.adapters import antivirus, storage
+from app.services import pdf_intake
 from app.api.dependencies import ActorContext, candidate_id_for
 from app.core.audit import AppendOnlyAuditStore
 from app.db.storage import (
@@ -297,60 +293,15 @@ class CandidateResumeBuilderService:
             cand_id = str(candidate_id_for(actor))
             account_authority(conn, actor)
 
-        filename = str(payload.get("filename") or "document.pdf").strip()
-        if not filename.lower().endswith(".pdf"):
-            filename = filename + ".pdf"
-        if len(filename) > 200:
-            filename = filename[-200:]
-
+        filename = pdf_intake.clean_filename(payload.get("filename"))
         purpose = str(payload.get("purpose") or "CERTIFICATE").upper().strip()
-        content_b64 = str(payload.get("content_base64") or "").strip()
-        if not content_b64:
-            raise AuthError("FILE_CONTENT_REQUIRED", "Attach the PDF file itself", 422)
-        try:
-            # Strip optional data:application/pdf;base64, prefix
-            if content_b64.startswith("data:") and "," in content_b64:
-                content_b64 = content_b64.split(",", 1)[1]
-            raw_bytes = base64.b64decode(content_b64, validate=True)
-        except Exception as exc:
-            raise AuthError("INVALID_BASE64_FILE", "Invalid base64 file content", 422) from exc
-
-        if len(raw_bytes) < 16 or len(raw_bytes) > 20 * 1024 * 1024:
-            raise AuthError("INVALID_FILE_SIZE", "PDF file size must be between 16B and 20MB", 422)
-
-        # Cheap local signature check first, then the real scanner (fail-closed).
-        if b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR" in raw_bytes:
-            raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file failed antivirus inspection", 422)
-        try:
-            antivirus.scan(raw_bytes)
-        except ValueError as exc:
-            raise AuthError("MALWARE_DETECTED_QUARANTINED", "Uploaded file quarantined by antivirus", 422) from exc
-        except Exception as exc:
-            raise AuthError("ANTIVIRUS_UNAVAILABLE", "File scanning is temporarily unavailable, try again later", 503) from exc
-
-        # Validate PDF header and structure
-        if not raw_bytes.startswith(b"%PDF-"):
-            raise AuthError("INVALID_PDF_FORMAT", "Only valid PDF files (%PDF-) are accepted", 422)
-        try:
-            reader = PdfReader(io.BytesIO(raw_bytes))
-            if len(reader.pages) < 1 or len(reader.pages) > 50:
-                raise AuthError("INVALID_PDF_PAGES", "PDF must contain between 1 and 50 pages", 422)
-        except AuthError:
-            raise
-        except Exception as exc:
-            raise AuthError("INVALID_PDF_FORMAT", "Corrupted or invalid PDF file", 422) from exc
+        raw_bytes = pdf_intake.decode_pdf(payload.get("content_base64"))
+        pdf_intake.scan_and_validate(raw_bytes)
 
         file_id = str(uuid4())
-        storage_key = f"private/candidates/{cand_id}/{file_id}.pdf"
-        sha256_hash = hashlib.sha256(raw_bytes).hexdigest()
-        byte_size = len(raw_bytes)
-
-        try:
-            ref = storage.write_private(storage_key, raw_bytes)
-            ref.check_bucket()
-        except Exception as exc:
-            raise AuthError("FILE_STORAGE_UNAVAILABLE", "File storage is temporarily unavailable, try again later", 503) from exc
-        bucket_name, version_id, etag = ref.bucket, ref.version_id, ref.etag
+        stored = pdf_intake.store(f"private/candidates/{cand_id}/{file_id}.pdf", raw_bytes)
+        storage_key, sha256_hash, byte_size = stored.storage_key, stored.sha256, stored.byte_size
+        bucket_name, version_id, etag = stored.bucket, stored.version_id, stored.etag
 
         with transaction() as conn:
             account_authority(conn, actor)

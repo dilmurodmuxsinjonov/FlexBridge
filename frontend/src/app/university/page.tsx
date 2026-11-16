@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import EnrollmentRequestsPanel from "@/components/EnrollmentRequestsPanel";
+import UniversityStaffPanel from "@/components/university/UniversityStaffPanel";
 import { useEffect, useState, useCallback } from "react";
 import {
   CheckCircle2,
@@ -13,6 +14,7 @@ import {
   BookOpen,
   Award,
   Users,
+  UserCog,
   RefreshCw,
   ShieldCheck,
   Send,
@@ -92,7 +94,7 @@ export default function UniversityPortal() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Active Tab: "queue" | "assignments" | "coordinator" | "exports" | "analytics" | "timetable" | "documents"
-  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents">("queue");
+  const [activeTab, setActiveTab] = useState<"queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents" | "staff">("queue");
   const [selectedDocPlacementId, setSelectedDocPlacementId] = useState<string>("");
 
   // TAB 1: Daily Log Review Queue (API-105)
@@ -774,7 +776,7 @@ export default function UniversityPortal() {
   ]);
 
   // Switch the workspace section and load what it needs (sidebar + mobile dock).
-  const switchTab = (tab: "queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents") => {
+  const switchTab = (tab: "queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents" | "staff") => {
     setActiveTab(tab);
     if (tab === "documents") {
       loadAssignments();
@@ -1042,6 +1044,20 @@ export default function UniversityPortal() {
                 <span>Talabalikni tasdiqlash</span>
               </button>
             )}
+            {(currentUser?.roles || []).includes("COORDINATOR") && (
+              <button
+                type="button"
+                onClick={() => switchTab("staff")}
+                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                  activeTab === "staff"
+                    ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
+                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                }`}
+              >
+                <UserCog className="w-4 h-4 shrink-0" />
+                <span>Xodimlar</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => switchTab("coordinator")}
@@ -1293,6 +1309,7 @@ export default function UniversityPortal() {
 
       {/* STUDENT-STATUS CONFIRMATION (coordinator, until HEMIS) */}
       {currentUser && activeTab === "enrollments" && <EnrollmentRequestsPanel institutionId={institutionId} />}
+      {currentUser && activeTab === "staff" && <UniversityStaffPanel institutionId={institutionId} />}
 
       {/* TAB 3: COORDINATOR ASSIGNMENT QUEUE & TEACHER NOMINATION */}
       {currentUser && activeTab === "coordinator" && (
