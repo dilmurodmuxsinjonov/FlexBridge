@@ -94,6 +94,11 @@ def patch(org: UUID, payload: OrganizationPatch, actor: ActorContext = Depends(r
 def capabilities(org: UUID, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id':'API-072', 'items':service.capabilities(actor, str(org))}
 
+@router.get('/organizations/{org}/team')
+def team(org: UUID, actor: ActorContext = Depends(require_actor_context)):
+    """Owner (main account): members with names/roles, join requests, open invitations."""
+    return {'contract_id':'API-073-TEAM', **service.team(actor, str(org))}
+
 @router.post('/organizations/{org}/memberships/{id}/revoke')
 def revoke(org: UUID, id: UUID, payload: RevokeInput, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id':'API-075', **service.revoke(actor, str(org), str(id), payload.reason)}
