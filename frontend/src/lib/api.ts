@@ -1,3 +1,4 @@
+import { fromBackendResume, toBackendResume } from "./resumeContract";
 export interface Opportunity {
   id: string;
   organization_id: string;
@@ -4520,6 +4521,9 @@ export interface CandidateSearchItem {
   skills: CandidateSearchSkill[];
   schedule_summary: CandidateScheduleSummary;
   schedule_match: CandidateScheduleMatch;
+  /** Detail endpoint only. */
+  student_verified?: boolean;
+  resume?: EmployerResumeView;
 }
 
 export interface CandidateSearchResponse {
@@ -4811,7 +4815,7 @@ export async function fetchCandidateResumeDetails(): Promise<CandidateResumeDeta
   if (!res.ok) {
     throw new Error(data.message || data.error || "RESUME_DETAILS_FETCH_FAILED");
   }
-  return data as CandidateResumeDetailsResponse;
+  return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
 
 export async function saveCandidateResumeDetails(
@@ -4829,14 +4833,14 @@ export async function saveCandidateResumeDetails(
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(toBackendResume(payload)),
     cache: "no-store",
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.message || data.error || "RESUME_DETAILS_UPDATE_FAILED");
   }
-  return data as CandidateResumeDetailsResponse;
+  return { ok: true, contract_id: data.contract_id, candidate_id: data.candidate_id, updated_at: data.updated_at, ...fromBackendResume(data) };
 }
 
 export interface CandidatePdfUploadResponse {
@@ -5683,4 +5687,45 @@ export async function decideEnrollmentRequest(
     }),
     "ENROLLMENT_DECISION_FAILED"
   );
+}
+
+export type CandidateVisibility = "PRIVATE" | "EMPLOYERS";
+
+/** Student consent to appear in employer search (audited on the backend). */
+export async function setCandidateVisibility(visibility: CandidateVisibility): Promise<CandidateVisibility> {
+  const res = await fetch("/api/bff/candidate/visibility", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ visibility }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "VISIBILITY_UPDATE_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data.visibility as CandidateVisibility;
+}
+
+/** Resume sections an employer may see (backend shape; personal contacts excluded). */
+export interface EmployerResumeView {
+  work_experiences: Array<{ company_name: string; position: string; work_type: string; start_date?: string | null; end_date?: string | null; is_current?: boolean; responsibilities?: string; location?: string; technologies?: string[] }>;
+  achievements: Array<{ title: string; issuer: string; category: string; date?: string | null; description?: string }>;
+  languages: Array<{ language_name: string; level: string; certificate_score?: string | null }>;
+  education_details: { university_name?: string; faculty?: string; major?: string; degree_level?: string; study_year?: string; gpa?: string; graduation_year?: string; thesis_topic?: string };
+  career_preferences: { career_objective?: string; desired_roles?: string[]; preferred_work_mode?: string; preferred_weekly_hours?: number | null; github_url?: string; linkedin_url?: string; website_url?: string };
+}
+
+export async function fetchEmployerCandidateDetail(candidateId: string): Promise<CandidateSearchItem> {
+  const res = await fetch(`/api/bff/employer/candidates/${encodeURIComponent(candidateId)}`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || "CANDIDATE_DETAIL_FAILED");
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateSearchItem;
 }

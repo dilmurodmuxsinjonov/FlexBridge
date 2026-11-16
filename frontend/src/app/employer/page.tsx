@@ -2,6 +2,7 @@
 
 import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import ResumePreview from "@/components/ResumePreview";
 import {
   Users,
   Briefcase,
@@ -43,6 +44,7 @@ import {
 } from "lucide-react";
 import {
   fetchAuthMe,
+  fetchEmployerCandidateDetail,
   fetchMyWorkspaces,
   fetchManagedOpportunities,
   type ManagedOpportunityItem,
@@ -3906,6 +3908,14 @@ export default function EmployerPortal() {
                               onClick={() => {
                                 setSelectedCandidateDetail(cand);
                                 setIsCandidateModalOpen(true);
+                                // Enrich with the full resume and verified-student flag.
+                                fetchEmployerCandidateDetail(cand.candidate_id)
+                                  .then((full) =>
+                                    setSelectedCandidateDetail((current) =>
+                                      current && current.candidate_id === cand.candidate_id ? { ...current, ...full } : current
+                                    )
+                                  )
+                                  .catch(() => {});
                               }}
                               className="px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all"
                             >
@@ -4023,11 +4033,20 @@ export default function EmployerPortal() {
                       {selectedCandidateDetail.university.institution_name}
                     </div>
                     <div className="text-zinc-400">
-                      Yo‘nalish: {selectedCandidateDetail.university.program} • Maqom:{" "}
-                      <span className="text-emerald-400 font-medium">
-                        {selectedCandidateDetail.university.status}
-                      </span>
+                      Yo‘nalish: {selectedCandidateDetail.university.program} •{" "}
+                      {selectedCandidateDetail.student_verified ? (
+                        <span className="text-emerald-500 font-semibold">Talabaligi OTM tomonidan tasdiqlangan ✓</span>
+                      ) : (
+                        <span className="text-amber-500 font-medium">Talabaligi hali tasdiqlanmagan</span>
+                      )}
                     </div>
+                  </div>
+                )}
+
+                {/* Resume exactly as employers see it (no personal contacts) */}
+                {selectedCandidateDetail.resume && (
+                  <div className="p-4 rounded-2xl skeuo-well">
+                    <ResumePreview resume={selectedCandidateDetail.resume} />
                   </div>
                 )}
 

@@ -19,7 +19,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Literal
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, or_, select
+from sqlalchemy import and_, desc, func, or_, select, text
 from sqlalchemy.engine import Connection
 
 from app.api.dependencies import ActorContext
@@ -593,7 +593,8 @@ class EmployerCandidateSearchService:
             if not cand:
                 raise EmployerSearchError("CANDIDATE_NOT_FOUND", "Nomzod topilmadi yoki profili maxfiy", 404)
 
-            # Skills
+            # Skills (verified only when the candidate's own verification case was APPROVED)
+            t_cases = table("verification_cases")
             skills = list(
                 conn.execute(
                     select(
@@ -603,11 +604,23 @@ class EmployerCandidateSearchService:
                         t_skills.c.code,
                         t_skills.c.name_uz,
                         t_skills.c.name_ru,
+                        t_cases.c.status.label("case_status"),
+                        t_cases.c.candidate_id.label("case_candidate_id"),
                     )
-                    .select_from(t_cskills.join(t_skills, t_cskills.c.skill_id == t_skills.c.id))
+                    .select_from(
+                        t_cskills.join(t_skills, t_cskills.c.skill_id == t_skills.c.id)
+                        .outerjoin(t_cases, t_cases.c.id == t_cskills.c.verification_case_id)
+                    )
                     .where(t_cskills.c.candidate_id == candidate_id)
                 ).mappings()
             )
+
+            # Current, independently reviewed student status (same predicate as academic binding)
+            student_verified = bool(conn.execute(
+                text("SELECT EXISTS(SELECT 1 FROM flexbridge.enrollments e "
+                     "WHERE e.candidate_id=:cid AND flexbridge.enrollment_is_current(e.id))"),
+                {"cid": str(candidate_id)},
+            ).scalar())
 
             # University
             univ = conn.execute(
@@ -657,10 +670,13 @@ class EmployerCandidateSearchService:
                         "name_uz": s["name_uz"],
                         "name_ru": s["name_ru"],
                         "level": s["level"],
-                        "verified": s["verification_case_id"] is not None,
+                        "verified": s["case_status"] == "APPROVED"
+                        and str(s["case_candidate_id"]) == str(candidate_id),
                     }
                     for s in skills
                 ],
+                "student_verified": student_verified,
+                "resume": employer_resume_view(str(candidate_id)),
                 "availability": {
                     "total_weekly_hours": round(total_weekly_minutes / 60, 1),
                     "rules": [
@@ -673,6 +689,23 @@ class EmployerCandidateSearchService:
                     ],
                 },
             }
+
+
+def employer_resume_view(candidate_id: str) -> dict[str, Any]:
+    """Professional resume sections for employers; personal contacts are never included."""
+    from app.db.storage import load_domain_record
+    from app.services.candidate_resume_builder import RESUME_DETAILS_NAMESPACE
+
+    stored = load_domain_record(RESUME_DETAILS_NAMESPACE, candidate_id) or {}
+    career = dict(stored.get("career_preferences") or {})
+    career.pop("telegram_username", None)
+    return {
+        "work_experiences": list(stored.get("work_experiences") or []),
+        "achievements": list(stored.get("achievements") or []),
+        "languages": list(stored.get("languages") or []),
+        "education_details": dict(stored.get("education_details") or {}),
+        "career_preferences": career,
+    }
 
 
 employer_candidate_search_service = EmployerCandidateSearchService()

@@ -28,6 +28,14 @@ audit = AppendOnlyAuditStore()
 
 RESUME_DETAILS_NAMESPACE = "candidate_resume_details"
 
+
+def _bounded_int(value: Any, low: int, high: int) -> int | None:
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return max(low, min(high, number))
+
 ALLOWED_ACHIEVEMENT_CATEGORIES = {
     "OLYMPIAD",
     "SCHOLARSHIP",
@@ -178,6 +186,8 @@ class CandidateResumeBuilderService:
                             "is_current": is_current,
                             "responsibilities": str(item.get("responsibilities") or "").strip()[:3000],
                             "achievements_summary": str(item.get("achievements_summary") or "").strip()[:2000],
+                            "location": str(item.get("location") or "").strip()[:120],
+                            "technologies": [str(v).strip()[:40] for v in (item.get("technologies") or []) if isinstance(v, str) and str(v).strip()][:20],
                         }
                     )
                 state["work_experiences"] = normalized_work
@@ -219,6 +229,10 @@ class CandidateResumeBuilderService:
                     "gpa": str(ed.get("gpa") or "").strip()[:20],
                     "graduation_year": str(ed.get("graduation_year") or "").strip()[:10],
                     "courses": [str(c).strip()[:150] for c in courses if str(c).strip()][:30],
+                    "university_name": str(ed.get("university_name") or "").strip()[:200],
+                    "major": str(ed.get("major") or "").strip()[:200],
+                    "degree_level": str(ed.get("degree_level") or "").strip()[:40],
+                    "thesis_topic": str(ed.get("thesis_topic") or "").strip()[:300],
                 }
 
             # 5. Career preferences & social links
@@ -243,6 +257,9 @@ class CandidateResumeBuilderService:
                     "telegram_username": str(cp.get("telegram_username") or "").strip()[:100],
                     "website_url": str(cp.get("website_url") or "").strip()[:300],
                     "career_objective": str(cp.get("career_objective") or "").strip()[:2000],
+                    "desired_roles": [str(r).strip()[:80] for r in (cp.get("desired_roles") or [])
+                                      if isinstance(r, str) and str(r).strip()][:10],
+                    "preferred_weekly_hours": _bounded_int(cp.get("preferred_weekly_hours"), 0, 60),
                 }
 
             state["candidate_id"] = cand_id

@@ -105,6 +105,16 @@ def patch_profile(payload: ProfilePatch, actor: ActorContext = Depends(require_a
     return {'contract_id': 'API-026', **candidate_service.update_profile(actor, payload.model_dump(exclude_unset=True))}
 
 
+class VisibilityInput(Input):
+    visibility: Literal['PRIVATE', 'EMPLOYERS']
+
+
+@router.put('/me/candidate/visibility')
+def put_visibility(payload: VisibilityInput, actor: ActorContext = Depends(require_actor_context)):
+    """Candidate consent to be found by verified employers (search hides PRIVATE profiles)."""
+    return {'contract_id': 'API-026-VISIBILITY', **candidate_service.set_visibility(actor, payload.visibility)}
+
+
 @router.patch('/me/candidate/skills')
 def patch_skills(payload: SkillsPatch, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id': 'API-032', **candidate_service.update_skills(actor,
