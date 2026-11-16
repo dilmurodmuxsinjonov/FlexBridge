@@ -940,3 +940,172 @@ textarea::placeholder {
   opacity: 0.6 !important;
   font-weight: 400;
 }
+
+/* ===========================================================================
+   Mono bento layer (profile design prototype, LOG-179)
+   White glass panels + solid ink cards, black active pills, initials avatars.
+   Dark mode inverts the ink accents so the active pill stays the brightest.
+   =========================================================================== */
+:root {
+  --fb-ink-card: #0c0d10;
+  --fb-ink-card-2: #17191f;
+  --fb-ink-card-text: #f5f6f8;
+  --fb-ink-card-muted: rgba(245, 246, 248, 0.62);
+  --fb-pill-active-bg: #0c0d10;
+  --fb-pill-active-fg: #ffffff;
+}
+html.dark {
+  --fb-ink-card: #15171c;
+  --fb-ink-card-2: #1d2027;
+  --fb-ink-card-text: #f5f6f8;
+  --fb-ink-card-muted: rgba(245, 246, 248, 0.6);
+  --fb-pill-active-bg: #f4f4f5;
+  --fb-pill-active-fg: #0c0d10;
+}
+
+.fb-display {
+  font-family: var(--font-outfit), "Outfit", var(--font-jakarta), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 4.2vw, 3.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  color: var(--fb-ink);
+}
+
+.fb-panel {
+  border-radius: 28px;
+}
+
+.fb-ink-card {
+  border-radius: 28px;
+  color: var(--fb-ink-card-text);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(165deg, var(--fb-ink-card-2) 0%, var(--fb-ink-card) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 24px 50px -24px rgba(12, 13, 16, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.fb-ink-card .fb-muted { color: var(--fb-ink-card-muted); }
+
+/* Navigation pills: the active one is a solid ink capsule */
+.fb-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 9999px;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--fb-ink-secondary);
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+}
+.fb-nav-item:hover { background: var(--fb-well-deep); color: var(--fb-ink); }
+.fb-nav-item:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-nav-item[aria-current="page"],
+.fb-nav-item[data-active="true"],
+.fb-nav-active {
+  background: var(--fb-pill-active-bg) !important;
+  color: var(--fb-pill-active-fg) !important;
+  font-weight: 600;
+  box-shadow: 0 10px 22px -12px rgba(12, 13, 16, 0.6);
+}
+.fb-nav-item[aria-current="page"] *,
+.fb-nav-item[data-active="true"] *,
+.fb-nav-active * { color: inherit !important; }
+.fb-nav-idle { color: var(--fb-ink-secondary) !important; }
+.fb-nav-idle:hover { background: var(--fb-well-deep); color: var(--fb-ink) !important; }
+
+/* Light capsule (secondary chip / timeline highlight) */
+.fb-capsule {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0c0d10;
+  border: 1px solid rgba(12, 13, 16, 0.08);
+  box-shadow: 0 8px 18px -12px rgba(12, 13, 16, 0.35);
+}
+html.dark .fb-capsule { background: #f4f4f5; }
+
+/* Timeline bars */
+.fb-bar {
+  border-radius: 9999px;
+  background: var(--fb-pill-active-bg);
+  color: var(--fb-pill-active-fg);
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.55);
+}
+.fb-bar.fb-bar-today {
+  background: #ffffff;
+  color: #0c0d10;
+  border: 1px solid rgba(12, 13, 16, 0.12);
+}
+html.dark .fb-bar { background: #e9eaec; color: #0c0d10; }
+html.dark .fb-bar.fb-bar-today { background: var(--fb-accent); color: #fff; border-color: transparent; }
+
+/* Segmented day/period switch: light track, white raised active */
+.fb-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9999px; background: var(--fb-well-deep); }
+.fb-seg > button { border-radius: 9999px; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 500; color: var(--fb-ink-muted); }
+.fb-seg > button[aria-pressed="true"] { background: var(--fb-card-top); color: var(--fb-ink); font-weight: 600; box-shadow: 0 4px 12px -6px rgba(12, 13, 16, 0.3); }
+
+/* Initials avatar */
+.fb-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  background: radial-gradient(120% 120% at 30% 20%, #4b4f58 0%, #1a1c21 55%, #0c0d10 100%);
+  box-shadow: 0 0 0 3px var(--fb-card-top), 0 12px 24px -12px rgba(12, 13, 16, 0.6);
+}
+.fb-ink-card .fb-avatar { box-shadow: 0 0 0 2px var(--fb-ink-card); background: radial-gradient(120% 120% at 30% 20%, #f4f4f5 0%, #b9bcc3 100%); color: #0c0d10; }
+
+/* Progress line */
+.fb-progress { height: 6px; border-radius: 9999px; background: var(--fb-well-deep); overflow: hidden; }
+.fb-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--fb-ink); transition: width 500ms ease; }
+.fb-ink-card .fb-progress { background: rgba(255, 255, 255, 0.14); }
+.fb-ink-card .fb-progress > span { background: #fff; }
+
+/* File row */
+.fb-file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 18px;
+  padding: 0.7rem 0.85rem;
+  background: var(--fb-well);
+  box-shadow: var(--fb-shadow-well);
+  transition: transform 160ms ease;
+}
+.fb-file-row:hover { transform: translateX(2px); }
+
+/* Circle icon button */
+.fb-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 9999px;
+  background: var(--fb-pill-active-bg);
+  color: var(--fb-pill-active-fg);
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.6);
+  transition: transform 160ms ease;
+}
+.fb-icon-btn:hover { transform: scale(1.05); }
+.fb-icon-btn:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-icon-btn-light { background: var(--fb-card-top); color: var(--fb-ink); box-shadow: var(--fb-shadow-card); }
+
+/* Decorative ring for the resume card (no data meaning) */
+.fb-ring {
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 50% 50%, #e9eaec 0 18%, transparent 19%),
+    repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.85) 0deg 2deg, rgba(255, 255, 255, 0.12) 2deg 7deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 30%, #000 31% 70%, transparent 71%), radial-gradient(circle, #000 0 18%, transparent 19%);
+  mask: radial-gradient(circle, transparent 0 30%, #000 31% 70%, transparent 71%), radial-gradient(circle, #000 0 18%, transparent 19%);
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6));
+  animation: fb-ring-spin 60s linear infinite;
+}
+@keyframes fb-ring-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .fb-ring { animation: none; } }

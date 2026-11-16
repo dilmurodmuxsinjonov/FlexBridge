@@ -53,6 +53,7 @@ import {
   deleteCandidateCertificate,
   exportCandidateResume,
   fetchCandidateResumeDetails,
+  fetchCandidateApplicationsSummary,
   uploadCandidatePdfFile,
   AuthUser,
   CandidateProfileSkill,
@@ -66,10 +67,9 @@ import {
   CandidateWorkExperienceItem,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
-import {
-  SkeuoStatCard,
-  SkeuoSegmented,
-} from "@/components/skeuo/SkeuoPrimitives";
+import { SkeuoSegmented } from "@/components/skeuo/SkeuoPrimitives";
+import ProfileOverview from "@/components/profile/ProfileOverview";
+import { useAsyncData } from "@/lib/useAsyncData";
 
 
 const WEEKDAY_NAMES = [
@@ -95,6 +95,10 @@ function timeStringToMinutes(timeStr: string): number {
 
 export default function CandidateProfileHub() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const applicationsQuery = useAsyncData(
+    currentUser ? `applications-summary:${currentUser.user_id}` : null,
+    fetchCandidateApplicationsSummary
+  );
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
@@ -193,6 +197,9 @@ export default function CandidateProfileHub() {
   // Full Resume Details state (API-026-RESUME-DETAILS & API-026-DIRECT-UPLOAD)
   // Consent to appear in employer search (PRIVATE by default).
   const [workExperiences, setWorkExperiences] = useState<CandidateWorkExperienceItem[]>([]);
+  const [profileHeadline, setProfileHeadline] = useState<string | null>(null);
+  const [profileRegion, setProfileRegion] = useState<string | null>(null);
+  const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
 
   // Direct PDF Upload state
   const [isUploadingCertPdf, setIsUploadingCertPdf] = useState(false);
@@ -203,6 +210,8 @@ export default function CandidateProfileHub() {
     try {
       const data = await fetchCandidateProfile();
       setMySkills(data.skills || []);
+      setProfileHeadline(data.headline ?? null);
+      setProfileRegion(data.region ?? null);
     } catch {
       // The resume tab loads and reports its own errors; these only feed the summary cards.
     }
@@ -289,6 +298,7 @@ export default function CandidateProfileHub() {
     try {
       const res = await fetchCandidateResumeDetails();
       setWorkExperiences(res.work_experiences || []);
+      setResumeUpdatedAt(res.updated_at ?? null);
     } catch {
       // Summary cards only; the resume builder shows load errors.
     }
@@ -771,7 +781,8 @@ export default function CandidateProfileHub() {
 
   return (
     <main className="w-full flex flex-col gap-6">
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION (guests and loading; signed-in users get the profile overview) */}
+      {!currentUser && (
       <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
@@ -832,6 +843,32 @@ export default function CandidateProfileHub() {
           </div>
         </div>
       </section>
+      )}
+
+      {currentUser && (
+        <ProfileOverview
+          name={currentUser.display_name}
+          headline={profileHeadline}
+          region={profileRegion}
+          skills={mySkills}
+          rules={rules}
+          enrollments={enrollments}
+          portfolios={portfolios}
+          certificates={certificates}
+          experiences={workExperiences}
+          resumeUpdatedAt={resumeUpdatedAt}
+          applications={applicationsQuery.data ?? null}
+          applicationsError={Boolean(applicationsQuery.error)}
+          isExporting={isExportingResume}
+          onExport={handleExportResume}
+          onOpenTab={(tab) => {
+            setActiveTab(tab);
+            if (typeof document !== "undefined") {
+              document.getElementById("fb-profile-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }}
+        />
+      )}
 
       {exportSuccessMsg && (
         <div className="p-3.5 rounded-2xl skeuo-card border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2 font-medium">
@@ -870,45 +907,13 @@ export default function CandidateProfileHub() {
       {currentUser && (() => {
         return (
         <div className="flex flex-col gap-6">
-          {/* ROW A: COMPACT EXECUTIVE KPI STRIP */}
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <SkeuoStatCard
-              title="Ko‘nikmalar"
-              value={mySkills.length}
-              subtitle="Tasdiqlangan katalog"
-              icon={Sparkles}
-              tone="emerald"
-              active={activeTab === "SKILLS"}
-              onClick={() => setActiveTab("SKILLS")}
-            />
-            <SkeuoStatCard
-              title="Jadval qoidalari"
-              value={rules.length}
-              subtitle="Dars jadvali bilan moslik"
-              icon={Calendar}
-              tone="orange"
-              active={activeTab === "AVAILABILITY"}
-              onClick={() => setActiveTab("AVAILABILITY")}
-            />
-            <SkeuoStatCard
-              title="OTM / HEMIS"
-              value={enrollments.length}
-              subtitle="Akademik biriktiruv"
-              icon={GraduationCap}
-              tone="sky"
-              active={activeTab === "ENROLLMENTS"}
-              onClick={() => setActiveTab("ENROLLMENTS")}
-            />
-            <SkeuoStatCard
-              title="Loyiha & Yutuqlar"
-              value={portfolios.length + workExperiences.length + certificates.length}
-              subtitle="Portfolio va sertifikat"
-              icon={Award}
-              tone="indigo"
-              active={activeTab === "PORTFOLIO"}
-              onClick={() => setActiveTab("PORTFOLIO")}
-            />
-          </section>
+          {/* EDITOR: the overview cards above open these tabs */}
+          <div id="fb-profile-editor" className="flex flex-wrap items-end justify-between gap-2 scroll-mt-24 pt-2">
+            <div>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--fb-ink)]">Profilni tahrirlash</h2>
+              <p className="text-xs text-[var(--fb-ink-muted)]">Har bir bo‘lim alohida saqlanadi.</p>
+            </div>
+          </div>
 
           {/* SKEUOMORPHIC SLIDING SEGMENTED TABS */}
           <SkeuoSegmented
@@ -1652,7 +1657,7 @@ export default function CandidateProfileHub() {
                                         : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                                     }`}
                                   >
-                                    {enr.status}
+                                    {enumLabel(enr.status)}
                                   </span>
                                 </div>
                                 <span className="text-xs text-zinc-300 font-medium">

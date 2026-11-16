@@ -968,25 +968,25 @@ export default function UniversityPortal() {
         <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
           <aside
             aria-label="Akademik bo‘limlar"
-            className="rounded-3xl skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
+            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-20"
           >
-            <div className="hidden lg:block px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-400/80">
+            <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Amaliyot Nazorati
             </div>
             <button
               type="button"
               onClick={() => switchTab("queue")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center justify-between gap-2 whitespace-nowrap ${
                 activeTab === "queue"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
                 <FileCheck className="w-4 h-4 shrink-0" />
                 <span>Kundaliklar Navbati</span>
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+              <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)]">
                 {queueItems.length}
               </span>
             </button>
@@ -994,17 +994,17 @@ export default function UniversityPortal() {
             <button
               type="button"
               onClick={() => switchTab("assignments")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center justify-between gap-2 whitespace-nowrap ${
                 activeTab === "assignments"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 shrink-0" />
                 <span>Biriktirilganlar</span>
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+              <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)]">
                 {assignments.length}
               </span>
             </button>
@@ -1018,27 +1018,27 @@ export default function UniversityPortal() {
                   loadReportsAndAgreements(institutionId);
                 }
               }}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                 activeTab === "documents"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <ShieldCheck className="w-4 h-4 shrink-0" />
               <span>Hujjatlar &amp; E-Imzo</span>
             </button>
 
-            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Kafedra &amp; Jadval
             </div>
             {(currentUser?.roles || []).includes("COORDINATOR") && (
               <button
                 type="button"
                 onClick={() => switchTab("enrollments")}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "enrollments"
-                    ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <GraduationCap className="w-4 h-4 shrink-0" />
@@ -1049,10 +1049,10 @@ export default function UniversityPortal() {
               <button
                 type="button"
                 onClick={() => switchTab("staff")}
-                className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+                className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "staff"
-                    ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                    : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    ? "fb-nav-active"
+                    : "fb-nav-idle"
                 }`}
               >
                 <UserCog className="w-4 h-4 shrink-0" />
@@ -1062,17 +1062,17 @@ export default function UniversityPortal() {
             <button
               type="button"
               onClick={() => switchTab("coordinator")}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center justify-between gap-2 whitespace-nowrap ${
                 activeTab === "coordinator"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <span className="flex items-center gap-2">
                 <Users className="w-4 h-4 shrink-0" />
                 <span>Kafedra Taqsimoti</span>
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+              <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)]">
                 {coordinatorQueue.length}
               </span>
             </button>
@@ -1087,17 +1087,17 @@ export default function UniversityPortal() {
                   loadCoordinatorQueue();
                 }
               }}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                 activeTab === "timetable"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <Calendar className="w-4 h-4 shrink-0" />
               <span>Dars Jadvali</span>
             </button>
 
-            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+            <div className="hidden lg:block px-2.5 pt-3 pb-1 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Hisobotlar &amp; Tahlil
             </div>
             <button
@@ -1108,10 +1108,10 @@ export default function UniversityPortal() {
                   loadReportsAndAgreements(institutionId);
                 }
               }}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                 activeTab === "exports"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <FileSpreadsheet className="w-4 h-4 shrink-0" />
@@ -1128,10 +1128,10 @@ export default function UniversityPortal() {
                   loadCoordinatorQueue();
                 }
               }}
-              className={`shrink-0 lg:w-full px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 border-l-2 transition-all whitespace-nowrap ${
+              className={`shrink-0 lg:w-full fb-nav-item text-xs flex items-center gap-2 whitespace-nowrap ${
                 activeTab === "analytics"
-                  ? "border-indigo-400 bg-indigo-500/10 text-indigo-300"
-                  : "border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                  ? "fb-nav-active"
+                  : "fb-nav-idle"
               }`}
             >
               <BarChart3 className="w-4 h-4 shrink-0" />

@@ -80,6 +80,11 @@ const LABELS: Record<string, string> = {
   UNPAID: "To‘lanmagan",
   CANCELLED: "Bekor qilindi",
   COMPLETED: "Yakunlandi",
+  // Student enrollment
+  DECLARED: "E’lon qilingan",
+  IN_REVIEW: "Tekshirilmoqda",
+  NEEDS_INFO: "Ma’lumot so‘ralgan",
+  ENDED: "Yakunlangan",
   // Billing plans
   BEPUL_KIRISH: "Bepul boshlang‘ich",
   FREE: "Bepul",
