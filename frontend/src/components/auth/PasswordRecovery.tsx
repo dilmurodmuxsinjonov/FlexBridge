@@ -470,7 +470,8 @@ export default function PasswordRecovery() {
                   </button>
                 </form>
                 <div className="rounded-2xl skeuo-well p-3.5 text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
-                  Ikkalasi ham yo‘qmi? Unda so‘rovingiz shaxsingizni qo‘lda tekshirish uchun yuboriladi — bu ko‘proq vaqt oladi.{" "}
+                  Ikkalasi ham yo‘qmi? So‘rovingiz shaxsingizni tekshirish uchun yuboriladi — talaba bo‘lsangiz, uni universitetingiz
+                  koordinatori tasdiqlaydi.{" "}
                   <button type="button" disabled={busy} onClick={() => void submitFactor(false)} className="font-semibold text-[var(--fb-ink)] underline underline-offset-2">
                     Qo‘lda tekshiruvga yuborish
                   </button>
@@ -562,24 +563,42 @@ export default function PasswordRecovery() {
 
             {step === "review" && (
               <motion.div key="review" {...fade} className="flex flex-col gap-4">
-                <p className="text-sm leading-relaxed text-[var(--fb-ink-secondary)]">
-                  Ikkinchi tasdiq bo‘lmagani uchun so‘rovingiz xavfsizlik xizmati tomonidan qo‘lda tekshiriladi. Bu sizni va hisobingizni boshqa birov
-                  telefon raqamingizga ega bo‘lib qolgan holatlardan himoya qiladi.
-                </p>
+                {reviewStatus === "APPROVED" ? (
+                  <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-sm text-emerald-700 dark:text-emerald-300">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                      Shaxsingiz tasdiqlandi. Endi «Boshidan boshlash»ni bosing va xuddi shu telefon/pochta bilan kod oling — qo‘shimcha tasdiq
+                      so‘ralmaydi. Tasdiq 72 soat amal qiladi.
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed text-[var(--fb-ink-secondary)]">
+                    Ikkinchi tasdiq bo‘lmagani uchun shaxsingiz tekshiriladi. Talaba bo‘lsangiz, universitetingiz koordinatoriga (dekanatga) murojaat
+                    qiling — u sizni tekshirib, so‘rovni tasdiqlaydi. Bu hisobingizni telefon raqamingiz boshqa birovga o‘tib qolgan holatlardan himoya qiladi.
+                  </p>
+                )}
                 <div className="rounded-2xl skeuo-well p-3.5 text-sm">
                   <div className="text-xs text-[var(--fb-ink-muted)]">So‘rov raqami</div>
                   <div className="font-mono font-semibold text-[var(--fb-ink)] break-all">{recoveryId}</div>
                   <div className="mt-2 text-xs text-[var(--fb-ink-muted)]">Holati</div>
                   <div className="font-semibold text-[var(--fb-ink)]">
-                    {reviewStatus === "PENDING_REVIEW" ? "Tekshiruv kutilmoqda" : reviewStatus === "COMPLETED" ? "Yakunlangan" : reviewStatus}
+                    {reviewStatus === "PENDING_REVIEW"
+                      ? "Tekshiruv kutilmoqda"
+                      : reviewStatus === "APPROVED"
+                        ? "Tasdiqlandi"
+                        : reviewStatus === "REJECTED"
+                          ? "Rad etildi"
+                          : reviewStatus === "COMPLETED" || reviewStatus === "CONSUMED"
+                            ? "Yakunlangan"
+                            : reviewStatus}
                   </div>
                 </div>
                 <p className="text-xs leading-relaxed text-[var(--fb-ink-secondary)]">
-                  So‘rov raqamini saqlab qo‘ying va{" "}
+                  Talaba bo‘lmasangiz, so‘rov raqamini saqlab{" "}
                   <Link href="/haqida" className="font-semibold underline underline-offset-2">
                     qo‘llab-quvvatlash xizmatiga
                   </Link>{" "}
-                  yozing. Agar authenticator ilovangiz yoki zaxira kodingiz topilsa, jarayonni boshidan boshlang — bu tezroq.
+                  yozing. Tasdiq kelgach yoki authenticator ilovangiz/zaxira kodingiz topilsa, jarayonni boshidan boshlang.
                 </p>
                 <div className="flex gap-2">
                   <button type="button" onClick={restart} className="skeuo-btn-secondary flex-1 rounded-2xl px-4 py-3 text-sm">

@@ -121,7 +121,29 @@ export function revokeAppointment(id: string, reason: string) {
   return call<{ id: string; status: string }>(`/api/bff/university/appointments/${encodeURIComponent(id)}/revoke`, post({ reason }));
 }
 
+export interface RecoveryRequestItem {
+  id: string;
+  created_at: string;
+  student_name: string;
+  contacts: Array<{ channel: "PHONE" | "EMAIL"; masked: string }>;
+}
+
+export function fetchRecoveryRequests(institutionId: string) {
+  return call<{ items: RecoveryRequestItem[]; approval_valid_hours: number }>(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/recovery-requests`
+  );
+}
+
+export function decideRecoveryRequest(institutionId: string, id: string, decision: "APPROVE" | "REJECT", reason: string) {
+  return call<{ id: string; status: string; valid_until: string | null }>(
+    `/api/bff/university/institutions/${encodeURIComponent(institutionId)}/recovery-requests/${encodeURIComponent(id)}/decide`,
+    post({ decision, reason })
+  );
+}
+
 const STAFF_ERRORS: Record<string, string> = {
+  RECOVERY_REQUEST_NOT_AVAILABLE: "Bu so‘rov endi mavjud emas yoki allaqachon ko‘rib chiqilgan.",
+  RECOVERY_DECISION_REASON_REQUIRED: "Qanday tekshirganingizni kamida 15 belgida yozing.",
   MFA_REQUIRED: "Bu amal uchun ikki bosqichli himoya bilan kirgan bo‘lishingiz kerak. «Xavfsizlik» bo‘limida authenticator’ni yoqing, chiqib qayta kiring.",
   INSTITUTION_SCOPE_FORBIDDEN: "Bu amal faqat universitetning faol koordinatoriga ruxsat etilgan.",
   INSTITUTION_TARGET_UNAVAILABLE: "Bu telefon/pochta bilan tasdiqlangan FlexBridge hisobi topilmadi. Xodim avval ro‘yxatdan o‘tib, kontaktini tasdiqlashi kerak.",
