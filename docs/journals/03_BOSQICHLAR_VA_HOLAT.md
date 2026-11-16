@@ -1358,3 +1358,20 @@ Keyingi kichik qadam:
   * **Birinchi frontend testlari**: Vitest 4.1.12 + Testing Library + jsdom, 45 test (rollar, sessiya shifrlash/CSRF, hook, xatolar), CI'da `npm test`. npm 10.9 vitest 4 + vite 8 ni hal qila olmagani uchun vite 7.3.7 ga qotirildi; lockfile npm 11 da yaratilib, npm 10 `npm ci` bilan tekshirildi.
   * **Xavfsizlik**: `BFF_SESSION_SECRET` yo'q bo'lsa BFF repoda ochiq turgan zaxira kalitdan foydalanardi (staging: `NODE_ENV=production`, sir yo'q) — istalgan rol bilan cookie qalbakilashtirish mumkin edi. Endi production'da tasodifiy jarayon kaliti (qayta ishga tushganda sessiyalar tugaydi); berilgan sir >= 32 belgi; compose `infra/.env` dagi qiymatni uzatadi. **Operator harakati (bajarilmagan)**: barqaror staging sessiyalari uchun `infra/.env` ga >= 32 belgili `BFF_SESSION_SECRET` qo'shish.
   * **Tekshiruv**: eslint 0/0, `tsc` 0, `next build` OK, vitest 45/45, `npm audit --audit-level=high` OK, lokal `next start` 22/22 sahifa HTTP 200, headless Edge 14 sahifa (pageerror/cheksiz render yo'q). Docker qayta build va staging to'plamlari ishga tushirilmadi; pilot qabul emas. `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-16 | LOG-165 | PR #224 -> Skeuomorfik dizayn (#219) va saqlangan WIP integratsiyasi
+- **Holat**: **MERGE QILINDI (973077e), CI YASHIL**. D:/FlexBridge dagi 29 ta commit qilinmagan fayl patch sifatida saqlandi (asl papka o'zgartirilmadi). Dizayn shriftlari next/font orqali.
+
+### 2026-11-16 | LOG-166 | PR #225 -> Xodim kabinetlari, sokin UI, bitta navigatsiya
+- **Holat**: **MERGE QILINDI (df7a4ae), CI YASHIL**. Brauzer auditi (Edge, 4 rol, desktop+mobil) asosida: `GET /me/workspaces`, API-076 vakansiyalar ro'yxati; korxona/OTM UUID kiritish o'rniga tanlagich; operator moduli rolga qarab; liquid kolba/sheen/bounce olib tashlandi; chap dok va takroriy tab qatorlari olib tashlandi; matnlar soddalashtirildi.
+
+### 2026-11-16 | LOG-167 | PR #226 -> Haqiqiy Telegram bot
+- **Holat**: **MERGE QILINDI (fbeb751), CI YASHIL**. Xavfsizlik: webhook OTP ni qaytarardi va sayt botni brauzerda soxtalashtirardi. Endi LIVE/SIMULATION/DISABLED rejimlar, secret header, polling worker, `docs/backend/security_iam/TELEGRAM_BOT.md`. **Operator harakati**: `TELEGRAM_BOT_TOKEN` ni `infra/.env` ga qo'shish.
+
+### 2026-11-16 | LOG-168 | PR #227 -> Talabalikni OTM koordinatori tasdiqlashi (HEMIS ulanguncha)
+- **Holat**: **CI KUTILMOQDA**. Migratsiya `0022_enrollment_inst_review` (birinchi nom 34 belgi bo'lib alembic varchar(32) ga sig'madi, tuzatildi). Har qaror bitta vakolat dalili bilan (MODERATOR yoki o'sha OTMning amaldagi COORDINATOR'i); 0013 invariantlari saqlangan. OTM paneli; talaba PDF ma'lumotnoma biriktiradi (avval `file_ids: []` yuborilardi va ariza hech kimga yetmasdi).
+
+### 2026-11-16 | LOG-169 | PR #228 -> Rezyume ishlaydi, qidiruv roziligi, korxona rezyume ko'rinishi
+- **Holat**: **CI KUTILMOQDA**. UI/backend maydon nomlari mos emasligi sababli rezyume saqlanmasdi (422) va qiymatlar buzilardi -> `lib/resumeContract.ts`. Profillar doim PRIVATE edi va o'zgartirib bo'lmasdi -> `PUT /me/candidate/visibility` (audit). Korxona endi rezyume bo'limlari va "talabaligi tasdiqlangan" belgisini ko'radi (kontaktlarsiz). Ko'nikma `verified` faqat APPROVED case uchun.
+- **Ochiq masala**: nomzod PDF yuklashda antivirus xatosi e'tiborsiz qoldiriladi va bo'sh PDF yaratilishi mumkin - alohida tuzatish kerak.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
