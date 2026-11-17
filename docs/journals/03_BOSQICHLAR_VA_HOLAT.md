@@ -1,13 +1,13 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-191)
+## Joriy holat (2026-11-17, LOG-192)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `fe9c8e0` (PR #268); LOG-191 (suyuq glider) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `5331259` (PR #270); LOG-192 (tomchi izi) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#269).
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#271).
 - **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -196,7 +196,13 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-191 | Issue #269 -> Pastki kapsulada suyuqlik oqimi effekti
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi pastki kapsula skrinshotlarini yubordi: "pastki qismga ko'rsatilganday lekin silliqroq animatsion suyuqlik oqish effektini qo'sh". Skrinshotda o'tish paytida pill yonida uzilgan oq bo'lak bor edi (kenglik va joylashuv bitta sakrovchi CSS easing bilan animatsiya qilingani uchun).
+- **Holat**: **MERGED** (#270, 5331259). Foydalanuvchi natijani ko'rib: "yaxshi, lekin kutgan natija emas — tomchisimon iz qolishi kerak" -> LOG-192. Foydalanuvchi pastki kapsula skrinshotlarini yubordi: "pastki qismga ko'rsatilganday lekin silliqroq animatsion suyuqlik oqish effektini qo'sh". Skrinshotda o'tish paytida pill yonida uzilgan oq bo'lak bor edi (kenglik va joylashuv bitta sakrovchi CSS easing bilan animatsiya qilingani uchun).
 - **Qilingan**: `lib/motion.ts` — glider endi suyuqlik tomchisi: to'rt cheti alohida prujina (harakat yo'nalishidagi chet qattiq va oldinda, orqadagisi yumshoq), shuning uchun tomchi yangi bandga cho'zilib, keyin yig'iladi; cho'zilganda ingichkalashadi (hajm saqlanadi), yengil tebranib joyiga tushadi; tezlik chegarasi 2600 px/s; harakat o'rtasida yo'nalish o'zgarsa joriy holatdan davom etadi. Sahifa/tab almashganda ikki tinch kadrdan (ko'pi 320 ms) keyin boshlanadi, uzun kadr tomchini 24 ms dan ortiq siljitmaydi. Matn rangi tomchi qoplagan bandga qarab har kadrda (`data-under-glider`) — oq ustida oq matn muammosi yo'q. CSS easing olib tashlandi (pozitsiya rAF'dan). Pastki kapsula, chap rels (vertikal) va mobil dock'da bir xil.
 - **Tekshiruv**: eslint 0, tsc 0, vitest 153/153 (+6 fizika testi: cho'zilish, ingichkalashish, 0.9 s ichida aniq tushish, chapga ko'zgu, o'rtada qayta nishonlash, vertikal); glider testi qat'iy kutish o'rniga `waitFor` (5/5 barqaror). Edge'da kadrma-kadr o'lchov (talaba va korxona kapsulasi, 7 o'tish): hammasi aniq tushdi, faqat qoplangan band to'q rangda, kadrdagi eng katta qadam 15–54 px (oldin 132 px), sahifa xatosi 0.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-192 | Issue #271 -> Suyuqlik ortidan tomchisimon iz (goo)
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "YAXSHI LEKIM MEN KUTGAN NATIJA EMAS MEN SENGA TASHLAGAN RASMDA TASHLAGANIMDEK TOMCHISIMON IZ QOLISHI KERAK".
+- **Qilingan**: `components/motion/GooFilter.tsx` — SVG metaball filtri (blur + keskin alfa egri, asl piksellar `atop`, soya suyuq shakldan `feDropShadow`); glider endi `.fb-goo` qatlami ichida (pastki kapsula, chap rels, mobil dock). `lib/motion.ts`: tomchilar havzasi (14), harakat boshlanganda orqa chetdan 2 ta katta tomchi uziladi va sekin tortiladi, tez harakatda har ~45 ms mayda tomchi to'kilib joyida so'nadi; tomchi radiusi umr bo'yi kichrayadi (`dropRadius`, `stepDrop`, `trailingPoint` — sof funksiyalar). Qatlam o'lchami menyu scroll kengligiga moslanadi; reduced-motion'da tomchi yo'q.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 157/157 (+4: tomchi so'nishi, orqaga tortilish, uzilish cheti, havza yaratilishi/tozalanishi), next build OK. Edge: 4 o'tishda 5–9 tomchi, oxirida 0, pill aniq tushdi, sahifa xatosi 0; CDP screencast bilan real vaqt (47 kadr/s) va sekinlashtirilgan video foydalanuvchiga yuborildi; harakat o'lchovi 11/11.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

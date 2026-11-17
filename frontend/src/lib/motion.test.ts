@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLiquid, liquidShape, retarget, stepLiquid, type Box } from "./motion";
+import { createLiquid, dropRadius, liquidShape, retarget, stepDrop, stepLiquid, trailingPoint, type Box, type Drop } from "./motion";
 
 const A: Box = { l: 0, r: 100, t: 0, b: 36 };
 const B: Box = { l: 300, r: 380, t: 0, b: 36 };
@@ -67,5 +67,43 @@ describe("liquid glider", () => {
     const { frames } = run(down, top);
     const early = frames[6];
     expect(early.w).toBeLessThan(40);
+  });
+});
+
+describe("droplet trail", () => {
+  const drop = (over: Partial<Drop> = {}): Drop => ({ x: 0, y: 18, vx: 0, vy: 0, r0: 12, r: 12, age: 0, life: 1, k: 0, ...over });
+
+  it("a shed bead stays where it fell and evaporates", () => {
+    const d = drop();
+    const sizes: number[] = [];
+    let alive = true;
+    for (let i = 0; i < 80 && alive; i++) {
+      alive = stepDrop(d, 300, 18, 0.016);
+      sizes.push(d.r);
+    }
+    expect(d.x).toBe(0);
+    expect(sizes[5]).toBeLessThan(12);
+    expect(sizes[20]).toBeLessThan(sizes[5]);
+    expect(alive).toBe(false);
+  });
+
+  it("a torn-off drop is pulled back toward the trailing edge while shrinking", () => {
+    const d = drop({ k: 26, life: 1.1 });
+    for (let i = 0; i < 20; i++) stepDrop(d, 200, 18, 0.016);
+    expect(d.x).toBeGreaterThan(20);
+    expect(d.x).toBeLessThan(200);
+    expect(d.r).toBeLessThan(12);
+    expect(dropRadius({ ...d, age: 2 })).toBe(0);
+  });
+
+  it("drops tear off the edge opposite to the travel direction", () => {
+    const s = createLiquid({ l: 0, r: 100, t: 0, b: 36 });
+    retarget(s, { l: 300, r: 380, t: 0, b: 36 });
+    expect(trailingPoint(s, 10)).toEqual({ x: 10, y: 18 });
+    retarget(s, { l: -300, r: -200, t: 0, b: 36 });
+    expect(trailingPoint(s, 10)).toEqual({ x: 90, y: 18 });
+    const rail = createLiquid({ l: 0, r: 40, t: 0, b: 40 });
+    retarget(rail, { l: 0, r: 40, t: 200, b: 240 });
+    expect(trailingPoint(rail, 5)).toEqual({ x: 20, y: 5 });
   });
 });

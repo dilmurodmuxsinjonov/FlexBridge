@@ -1,13 +1,13 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
-## Joriy holat (2026-11-17, LOG-191)
+## Joriy holat (2026-11-17, LOG-192)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `fe9c8e0` (PR #268); LOG-191 (suyuq glider) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `5331259` (PR #270); LOG-192 (tomchi izi) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#269).
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#271).
 - **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -457,4 +457,14 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Qilingan ish: `frontend/src/lib/motion.ts` — to'rt chetli prujina fizikasi (`createLiquid`, `retarget`, `stepLiquid`, `liquidShape`), tezlik chegarasi, tinch kadrdan boshlash, har kadrda qoplangan bandni belgilash (`data-under-glider`); `globals.css` — glider easing'i olib tashlandi, matn rangi qoplamaga bog'landi; `frontend/src/lib/motion.test.ts` (6 test); `Motion.test.tsx` glider testi `waitFor` bilan.
 - Tekshiruv: eslint 0, tsc 0, vitest 153/153, next build OK; Edge'da 7 o'tish kadrma-kadr: aniq tushish, qadam 15–54 px (oldin 132), sahifa xatosi 0; kadrlar lentasi va video foydalanuvchiga yuborildi.
 - Muammo va cheklov: qisman (<50%) qoplangan chetdagi band o'tish paytida bir lahza yorug' matnda qoladi — ataylab (oqim effekti).
-- Topshirilgan holat / keyingi qadam: PR #270 CI'dan keyin integration'ga; staging keyingi qayta qurishda yangilanadi.
+- Topshirilgan holat / keyingi qadam: PR #270 merge qilindi (5331259). Foydalanuvchi: kutgan natija emas — tomchisimon iz kerak (LOG-192).
+
+### LOG-192 — 2026-11-17 — Suyuqlik ortidan tomchisimon iz (Issue #271)
+
+- AI / sessiya / model: Claude Code / Claude Opus 5.5 (`claude-opus-5-5`) / sessiya https://claude.ai/code/session_012EiWngRW7f6dkHVrxC2ZwR
+- Vazifa / rol: foydalanuvchi LOG-191 natijasini ko'rib: "kutgan natija emas — yuborgan rasmdagidek tomchisimon iz qolishi kerak". Amalga oshiruvchi.
+- Boshlang'ich holat: pill suyuqlikdek cho'zilib-yig'ilardi, lekin ortida iz qoldirmasdi.
+- Qilingan ish: `frontend/src/components/motion/GooFilter.tsx` (SVG metaball filtri, root layout'da); `.fb-goo` qatlami Navbar (rels, mobil dock) va `SectionDock` da; `frontend/src/lib/motion.ts` — tomchilar (uzilish, to'kilish, so'nish, tortilish) va sof funksiyalar; `globals.css` — `.fb-goo`, `.fb-drop`; testlar `lib/motion.test.ts`, `components/motion/Motion.test.tsx`.
+- Tekshiruv: eslint 0, tsc 0, vitest 157/157, next build OK; Edge'da tomchilar soni (5–9, oxirida 0), aniq tushish, sahifa xatosi 0, harakat o'lchovi 11/11; real vaqt screencast videosi yuborildi.
+- Muammo va cheklov: oq tomchi yorliq ustidan o'tganda yorliq bir lahza past kontrastda qoladi (tomchi matn ortida).
+- Topshirilgan holat / keyingi qadam: PR CI'dan keyin integration'ga; foydalanuvchi fikri bo'yicha tomchi soni/kattaligini sozlash mumkin.
