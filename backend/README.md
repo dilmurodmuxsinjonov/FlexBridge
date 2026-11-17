@@ -1,5 +1,7 @@
 # Backend validation and operation
 
+> Kod xaritasi va agentlar uchun qoidalar: [`AGENTS.md`](AGENTS.md); domen spetsifikatsiyalari indeksi: [`docs/backend/README.md`](../docs/backend/README.md).
+
 Run commands from `D:\FlexBridge`. Python 3.11+ and PostgreSQL 17 are required.
 Dependencies have one source: `backend/requirements.txt`, also used by pyproject and Docker.
 The IAM extension (OTP/contact verification, recovery, MFA tickets, passkeys and its separate worker)

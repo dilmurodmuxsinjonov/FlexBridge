@@ -1,5 +1,7 @@
 # FlexBridge 1.4 — Frontend & Server-Side BFF (`frontend/`)
 
+> To'liq va yangilangan xarita: [`docs/frontend/README.md`](../docs/frontend/README.md); dizayn va harakat: [`docs/frontend/DIZAYN_VA_HARAKAT.md`](../docs/frontend/DIZAYN_VA_HARAKAT.md); agentlar uchun qoidalar: [`AGENTS.md`](AGENTS.md).
+
 Ushbu papka faqat **Next.js 16.4.6 (App Router)**, **TypeScript** va **Tailwind CSS** asosidagi frontend hamda Server-Side BFF (Backend-For-Frontend) kodlarini o‘z ichiga oladi.
 
 ---
