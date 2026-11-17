@@ -11,6 +11,8 @@ FlexBridge — oliy ta'lim muassasalari talabalari va yosh mutaxassislarni dars 
 
 ---
 
+> **Bo'limlar bo'yicha ish (2026-11-17)**: frontend — [`frontend/AGENTS.md`](frontend/AGENTS.md) va [`docs/frontend/`](docs/frontend/README.md); backend — [`backend/AGENTS.md`](backend/AGENTS.md) va [`docs/backend/`](docs/backend/README.md); staging va brauzer E2E — [`docs/operations/STAGING_VA_E2E.md`](docs/operations/STAGING_VA_E2E.md); hujjatlar xaritasi va AI xotirasi tartibi — [`docs/README.md`](docs/README.md).
+
 ## 1. Loyiha Mundarijasi & Fayllar Xaritasi
 
 Loyiha qat'iy modulli arxitekturaga ega bo‘lib, **kod (`frontend/` va `backend/`)** hamda **hujjatlar (`docs/`)** to‘liq alohida papkalarga ajratilgan:
