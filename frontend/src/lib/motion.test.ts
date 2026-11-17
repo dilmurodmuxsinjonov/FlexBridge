@@ -38,7 +38,8 @@ describe("liquid glider", () => {
   it("settles exactly on the target in well under a second", () => {
     const { s, settledAt } = run(B);
     expect(settledAt).toBeGreaterThan(0);
-    expect(settledAt).toBeLessThan(900);
+    // Issue #275: the move must feel quick (was ~0.7 s, user said "too slow").
+    expect(settledAt).toBeLessThan(550);
     expect(s.pos).toEqual(B);
   });
 

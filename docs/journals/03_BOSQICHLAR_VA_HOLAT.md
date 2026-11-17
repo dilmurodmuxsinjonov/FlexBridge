@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-193)
+## Joriy holat (2026-11-17, LOG-194)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `b97b194` (PR #272); LOG-193 (suyuq shisha, yumshatilgan) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `adbefff` (PR #274); LOG-194 (tezroq pill) PR'i CI kutmoqda.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#273).
-- **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#275).
+- **Staging**: 2026-11-17 da `adbefff` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
 
@@ -208,8 +208,16 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-193 | Issue #273 -> Tugmalar bo'rtiq, shaffof suyuq shisha
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "TUGMALAR BO'RTIB CHIQQANROQ, SHAFFOFROQ, LIQUIDGA O'XSHASIN"; yumshatilgan variantni ko'rib: "YAXSHI QO'SHAVER".
+- **Holat**: **MERGED** (#274, adbefff); staging adbefff dan qayta qurildi ("HA RUHSAD"): E2E 21/23, harakat 11/11, 24 skrinshot toza, suyuqlik tomchilari tekshirildi. Foydalanuvchi: "TUGMALAR BO'RTIB CHIQQANROQ, SHAFFOFROQ, LIQUIDGA O'XSHASIN"; yumshatilgan variantni ko'rib: "YAXSHI QO'SHAVER".
 - **Qilingan**: `components/motion/GooFilter.tsx` — `#fb-goo` filtri endi suyuq shisha chizadi: metaball niqobi (SourceAlpha'dan), deyarli shaffof tana (16% oq), xiralashtirilgan balandlik xaritasida `feSpecularLighting` (uzoq yorug'lik) — har bir chet qavariq yaltiraydi, yorug'likdan narigi tomonda ichki soya, yupqa yorug' shisha chekka va suyuq shakldan soya. Pill, tomchilar, ular orasidagi bo'yin va chap rels tugmasi bir xil shishaga aylandi; ranglar faqat yorug'likdan (palitra o'zgarmadi). Suyuqlik ostidagi yorliq endi oq (qalin, yengil soya), mobil dock faol matni ham oq.
 - **Yumshatish**: foydalanuvchi: "OSHIRIB YUBORILGAN" -> tomchi izi va shisha yumshatildi: harakat boshida 1 ta kichik tomchi (0.3×, 0.6 s, tez qaytadi), mayda tomchilar kamroq (har ~85 ms, faqat tez harakatda, 0.36 s), yaltirash 0.8, chekka 0.3, ichki soya 0.16, tana 24%, soya 0.32.
 - **Tekshiruv**: eslint 0, tsc 0, next build OK; Edge'da real vaqt screencast (79 kadr/s) va kattalashtirilgan kadrlar: talaba va korxona kapsulasi, chap rels; sahifa xatosi 0.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-194 | Issue #275 -> Tugmalardagi o'tish animatsiyasi tezlashtirildi
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "adashilibdi o'tish animatsiyalari tugmalardagi juda sekin bo'lib qolgan".
+- **Sabab**: LOG-191 dagi yumshoq prujinalar (joyiga tushish 0.65–0.9 s), 2600 px/s tezlik chegarasi va harakatdan oldin 320 ms gacha kutish.
+- **Qilingan**: `lib/motion.ts` — prujinalar qattiqroq (oldingi chet k=900, orqadagi k=380), tezlik chegarasi 7000 px/s, kutish 1 tinch kadr yoki ko'pi 90 ms; tomchilar yangi tezlikka moslandi (uzilgan tomchi 0.4 s, mayda tomchilar faqat juda tez harakatda, 0.26 s). Test: 300 px o'tish 550 ms ichida tugashi qotirildi.
+- **Tekshiruv**: eslint 0, tsc 0, harakat testlari 17/17, next build OK. Edge'da bosishdan pill tushishigacha o'lchov (staging eski vs yangi build): korxona kapsulasi o'rtacha 592 -> 379 ms, talaba kapsulasi 571 -> 330 ms; sahifa almashinuvi ~26 ms (sekinlik faqat animatsiyada edi); cho'zilish saqlandi (masalan 272 -> 77 px), aniq tushish, xato 0.
+- **Qo'shimcha (D:/FlexBridge)**: foydalanuvchi "frontend nega qizil" deb so'radi: `frontend/tsconfig.json` oxiriga 2026-11-17 13:22 da `1` qatori qo'shilib JSON buzilgan edi (manbasi aniqlanmadi, shu sessiya buyruqlari bo'lishi istisno qilinmagan) — faqat shu qator olib tashlandi (fayl git bilan bir xil, tsc 0). Checkout eski `feature/218` branch'da (integration'dan 78 commit orqada, 29 saqlanmagan WIP fayl; eslint 61 xato shu eski kodda) — WIP'ga tegilmadi, foydalanuvchi ruxsati kutilmoqda.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

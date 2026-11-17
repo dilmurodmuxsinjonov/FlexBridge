@@ -1,14 +1,14 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
-## Joriy holat (2026-11-17, LOG-193)
+## Joriy holat (2026-11-17, LOG-194)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `b97b194` (PR #272); LOG-193 (suyuq shisha, yumshatilgan) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `adbefff` (PR #274); LOG-194 (tezroq pill) PR'i CI kutmoqda.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#273).
-- **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#275).
+- **Staging**: 2026-11-17 da `adbefff` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
 
@@ -478,3 +478,13 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Tekshiruv: eslint 0, tsc 0, next build OK; Edge screencast va kattalashtirilgan kadrlar (talaba/korxona kapsulasi, chap rels), sahifa xatosi 0.
 - Yumshatish: foydalanuvchi "OSHIRIB YUBORILGAN" dedi -> 1 ta kichik tomchi, kamroq va qisqa iz, kuchsizroq yaltirash/chekka/soya, tana biroz to'liqroq.
 - Topshirilgan holat / keyingi qadam: #272 merge qilingach rebase va PR; foydalanuvchi fikri bo'yicha shaffoflik/yaltiroqlikni sozlash mumkin.
+
+### LOG-194 — 2026-11-17 — O'tish animatsiyasi tezlashtirildi (Issue #275)
+
+- AI / sessiya / model: Claude Code / Claude Opus 5.5 (`claude-opus-5-5`) / sessiya https://claude.ai/code/session_012EiWngRW7f6dkHVrxC2ZwR
+- Vazifa / rol: foydalanuvchi — "o'tish animatsiyalari tugmalardagi juda sekin bo'lib qolgan". Amalga oshiruvchi.
+- Boshlang'ich holat: pill harakati o'rtacha ~0.57–0.59 s (staging'da o'lchandi), oldidan 320 ms gacha kutish.
+- Qilingan ish: `frontend/src/lib/motion.ts` (qattiqroq prujinalar, 7000 px/s, 90 ms kutish, tomchilar umri qisqa), `frontend/src/lib/motion.test.ts` (550 ms chegara).
+- Tekshiruv: korxona 592 -> 379 ms, talaba 571 -> 330 ms; cho'zilish va aniq tushish saqlandi; eslint/tsc 0, testlar 17/17, build OK.
+- Qo'shimcha: `D:/FlexBridge/frontend/tsconfig.json` dagi ortiqcha `1` qatori olib tashlandi (frontend VS Code'da qizil bo'lishining sababi); eski branch va 29 WIP faylga tegilmadi.
+- Topshirilgan holat / keyingi qadam: PR CI'dan keyin integration'ga; staging keyingi qayta qurishda yangilanadi.
