@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import CountUp from "./CountUp";
@@ -91,16 +91,11 @@ describe("useGlider", () => {
       );
     }
     const { rerender } = render(<Menu active={0} />);
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 40));
-    });
-    expect(screen.getByTestId("glider").style.opacity).toBe("1");
-    expect(screen.getByRole("navigation")).toHaveAttribute("data-glider", "on");
+    // Two animation frames (measure, then enable) — wait for them instead of a fixed delay.
+    await waitFor(() => expect(screen.getByTestId("glider").style.opacity).toBe("1"));
+    await waitFor(() => expect(screen.getByRole("navigation")).toHaveAttribute("data-glider", "on"));
     rerender(<Menu active={-1} />);
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 40));
-    });
-    expect(screen.getByTestId("glider").style.opacity).toBe("0");
+    await waitFor(() => expect(screen.getByTestId("glider").style.opacity).toBe("0"));
   });
 });
 

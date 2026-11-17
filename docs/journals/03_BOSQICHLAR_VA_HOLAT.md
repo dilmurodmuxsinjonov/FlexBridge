@@ -1,13 +1,13 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-190)
+## Joriy holat (2026-11-17, LOG-191)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `a6c3e01` (PR #266). Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `fe9c8e0` (PR #268); LOG-191 (suyuq glider) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#269).
 - **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -189,8 +189,14 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-190 | Issue #267 -> Hujjatlarni bo'limlarga ajratish va AI xotirasini to'ldirish
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: AI xotirasiga o'z ishlarini qo'shish; loyihani frontend va backend alohida ishlashi uchun bo'limlarga ajratish; jurnallar va hujjatlarni bo'laklab tartibga keltirish.
+- **Holat**: **MERGED** (#268, fe9c8e0). Foydalanuvchi: AI xotirasiga o'z ishlarini qo'shish; loyihani frontend va backend alohida ishlashi uchun bo'limlarga ajratish; jurnallar va hujjatlarni bo'laklab tartibga keltirish.
 - **Qilingan**: 01-faylga LOG-156…190 yozuvlari (manbadan o'zgartirilmasdan). 01/02/03/ANTIGRAVITY_HANDOFF yo'llari saqlandi, ichida qoidalar + yagona «Joriy holat» + so'nggi yozuvlar; eski tarix `docs/journals/archive/` (9 fayl) va `docs/protocols/archive/` (2 fayl) ga o'zgartirilmasdan ko'chirildi (qator yo'qolishi tekshiruvi: 0). Yangi: `frontend/AGENTS.md`, `backend/AGENTS.md`, `docs/frontend/README.md`, `docs/frontend/DIZAYN_VA_HARAKAT.md`, `docs/backend/README.md`, `docs/operations/STAGING_VA_E2E.md`, `scripts/e2e/` (brauzer E2E), `docs/README.md` xaritasi.
 - **Tuzatish (LOG-188)**: loyiha Tailwind 3.4.15 ishlatadi, v4 emas; `display` muammosining sababi — `globals.css` da komponent sinflari `@tailwind utilities` dan keyin kelishi.
 - **Hajm**: 01 376→67 KB, 03 334→38 KB, handoff 185→14 KB, 02 99→21 KB.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-191 | Issue #269 -> Pastki kapsulada suyuqlik oqimi effekti
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi pastki kapsula skrinshotlarini yubordi: "pastki qismga ko'rsatilganday lekin silliqroq animatsion suyuqlik oqish effektini qo'sh". Skrinshotda o'tish paytida pill yonida uzilgan oq bo'lak bor edi (kenglik va joylashuv bitta sakrovchi CSS easing bilan animatsiya qilingani uchun).
+- **Qilingan**: `lib/motion.ts` — glider endi suyuqlik tomchisi: to'rt cheti alohida prujina (harakat yo'nalishidagi chet qattiq va oldinda, orqadagisi yumshoq), shuning uchun tomchi yangi bandga cho'zilib, keyin yig'iladi; cho'zilganda ingichkalashadi (hajm saqlanadi), yengil tebranib joyiga tushadi; tezlik chegarasi 2600 px/s; harakat o'rtasida yo'nalish o'zgarsa joriy holatdan davom etadi. Sahifa/tab almashganda ikki tinch kadrdan (ko'pi 320 ms) keyin boshlanadi, uzun kadr tomchini 24 ms dan ortiq siljitmaydi. Matn rangi tomchi qoplagan bandga qarab har kadrda (`data-under-glider`) — oq ustida oq matn muammosi yo'q. CSS easing olib tashlandi (pozitsiya rAF'dan). Pastki kapsula, chap rels (vertikal) va mobil dock'da bir xil.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 153/153 (+6 fizika testi: cho'zilish, ingichkalashish, 0.9 s ichida aniq tushish, chapga ko'zgu, o'rtada qayta nishonlash, vertikal); glider testi qat'iy kutish o'rniga `waitFor` (5/5 barqaror). Edge'da kadrma-kadr o'lchov (talaba va korxona kapsulasi, 7 o'tish): hammasi aniq tushdi, faqat qoplangan band to'q rangda, kadrdagi eng katta qadam 15–54 px (oldin 132 px), sahifa xatosi 0.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

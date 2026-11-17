@@ -1,13 +1,13 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
-## Joriy holat (2026-11-17, LOG-190)
+## Joriy holat (2026-11-17, LOG-191)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `a6c3e01` (PR #266). Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `fe9c8e0` (PR #268); LOG-191 (suyuq glider) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#269).
 - **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -448,3 +448,13 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Tuzatish yozuvi (LOG-188 ga): u yerda «Tailwind v4 utilitlari qatlamda» deb yozilgan — noto'g'ri. Loyihada Tailwind 3.4.15; `globals.css` da `@tailwind utilities` boshida, komponent sinflari keyin keladi, shuning uchun bir xil specifiklikda komponent sinfidagi `display` utilitadagi `hidden` ni bosib ketadi. Xulosa (display'ni utilitlarda qoldirish) o'zgarmaydi.
 - Tekshiruv: bo'laklash skripti qatorlar to'liqligini tekshirdi; havolalar mavjud fayllarga ishora qilishi tekshirildi; `python scripts/check_publish.py` (sir/`.env` yo'qligi); frontend/backend kodi o'zgarmadi.
 - Topshirilgan holat / keyingi qadam: yangi yozuvlar asosiy faylning oxiriga qo'shiladi va «Joriy holat» bo'limi yangilanadi; asosiy fayl ~150 KB dan oshsa, eski yozuvlar yangi `archive/` bo'lagiga ko'chiriladi.
+
+### LOG-191 — 2026-11-17 — Pastki kapsulada suyuqlik oqimi effekti (Issue #269)
+
+- AI / sessiya / model: Claude Code / Claude Opus 5.5 (`claude-opus-5-5`) / sessiya https://claude.ai/code/session_012EiWngRW7f6dkHVrxC2ZwR
+- Vazifa / rol: foydalanuvchi skrinshot bilan so'radi — "pastki qismga ko'rsatilganday lekin silliqroq animatsion suyuqlik oqish effektini qo'sh". Amalga oshiruvchi.
+- Boshlang'ich holat: glider CSS `transition` (overshoot easing) bilan kenglik va joylashuvni birga animatsiya qilardi; skrinshotda o'tish paytida uzilgan oq bo'lak va oq ustida oq matn ko'ringan.
+- Qilingan ish: `frontend/src/lib/motion.ts` — to'rt chetli prujina fizikasi (`createLiquid`, `retarget`, `stepLiquid`, `liquidShape`), tezlik chegarasi, tinch kadrdan boshlash, har kadrda qoplangan bandni belgilash (`data-under-glider`); `globals.css` — glider easing'i olib tashlandi, matn rangi qoplamaga bog'landi; `frontend/src/lib/motion.test.ts` (6 test); `Motion.test.tsx` glider testi `waitFor` bilan.
+- Tekshiruv: eslint 0, tsc 0, vitest 153/153, next build OK; Edge'da 7 o'tish kadrma-kadr: aniq tushish, qadam 15–54 px (oldin 132), sahifa xatosi 0; kadrlar lentasi va video foydalanuvchiga yuborildi.
+- Muammo va cheklov: qisman (<50%) qoplangan chetdagi band o'tish paytida bir lahza yorug' matnda qoladi — ataylab (oqim effekti).
+- Topshirilgan holat / keyingi qadam: PR #270 CI'dan keyin integration'ga; staging keyingi qayta qurishda yangilanadi.
