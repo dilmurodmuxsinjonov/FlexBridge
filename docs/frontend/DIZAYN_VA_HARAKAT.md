@@ -28,7 +28,7 @@ Bento elementlari: `.fb-panel`, `.fb-ink-card`, `.fb-display`, `.fb-nav-item` (+
 | Bosish chuqurligi | CSS `:active` / `.fb-pressed` | Har bir tugma bosilganda ~2–3% botadi; klaviatura Enter/Space ham |
 | Ripple | `motion/InteractionLayer.tsx` → `.fb-ripple` | Bosilgan nuqtadan tugma rangida; faqat `::before` bo'sh va `overflow:hidden` tugmalarda |
 | Band holat | `watchBusy` → `.fb-busy`, `.fb-busy-sheen`, `aria-busy`, `.fb-settle` | Bosilgan tugma `disabled` bo'lsa (so'rov ketyapti) — avtomatik; sahifa o'zgarishi shart emas |
-| Sirpanuvchi pill/knob | `lib/motion.ts` → `useGlider` + `.fb-glider` | Faol band (`aria-current="page"`, `.fb-nav-active`, `data-active`) ostida bitta pill prujina bilan siljiydi |
+| Suyuq pill/knob | `lib/motion.ts` → `useGlider` + `.fb-glider` | Faol band (`aria-current="page"`, `.fb-nav-active`, `data-active`) ostiga suyuqlik tomchisidek oqadi: to'rt chet alohida prujina (oldingi chet tez, orqadagisi kech), cho'zilganda ingichkalashadi, tezlik ≤ 2600 px/s, og'ir render tugagach boshlanadi; matn rangi tomchi qoplagan bandga qarab (`data-under-glider`). Pozitsiya rAF'dan — CSS easing qo'shmang (LOG-191) |
 | Mavzu almashinuvi | `ThemeProvider.toggleTheme(event)` | View Transitions API: bosilgan tugmadan doira; API bo'lmasa — darhol |
 | Sanovchi raqam | `motion/CountUp.tsx` | Dashboard raqamlari; server HTML'da yakuniy qiymat |
 | Kartalar paydo bo'lishi | `AppStage.revealCards` | Sahifa/tab almashganda ko'rinayotgan tashqi kartalar navbat bilan; qayta mount yo'q |

@@ -10,13 +10,111 @@ export function prefersReducedMotion(): boolean {
 
 export const ACTIVE_ITEM_SELECTOR = '[aria-current="page"], .fb-nav-active';
 
+/* ---------------------------------------------------------------------------
+   Liquid glider physics (Issue #269)
+   The highlight is a drop of liquid: its four edges are separate springs. The
+   edge facing the direction of travel is stiff and runs ahead, the trailing
+   edge is soft and follows, so the drop stretches toward the new item and then
+   pulls itself together. While stretched it thins (volume is kept), and the
+   lightly under-damped leading edge gives a small settle wobble. Interrupting
+   mid-flight just retargets the springs from where the drop currently is.
+   --------------------------------------------------------------------------- */
+
+export interface Box {
+  l: number;
+  r: number;
+  t: number;
+  b: number;
+}
+
+type EdgeKey = keyof Box;
+const EDGES: EdgeKey[] = ["l", "r", "t", "b"];
+
+export interface LiquidState {
+  pos: Box;
+  vel: Box;
+  /** Travel direction per axis at the last retarget: -1, 0 or 1. */
+  dirX: number;
+  dirY: number;
+}
+
+// Tuned: peak ~40 px/frame (speed-capped), settles in ~0.65-0.9 s.
+const LEAD = { k: 300, zeta: 0.68 };
+const TRAIL = { k: 115, zeta: 0.9 };
+const NEUTRAL = { k: 220, zeta: 0.82 };
+const MAX_SPEED = 2600; // px/s; ~42 px per 60 Hz frame
+
+export function createLiquid(at: Box): LiquidState {
+  return { pos: { ...at }, vel: { l: 0, r: 0, t: 0, b: 0 }, dirX: 0, dirY: 0 };
+}
+
+/** Point the springs at a new box; the edge facing the travel direction leads. */
+export function retarget(state: LiquidState, target: Box): void {
+  const cx = (state.pos.l + state.pos.r) / 2;
+  const cy = (state.pos.t + state.pos.b) / 2;
+  const tx = (target.l + target.r) / 2;
+  const ty = (target.t + target.b) / 2;
+  state.dirX = Math.abs(tx - cx) < 0.5 ? 0 : Math.sign(tx - cx);
+  state.dirY = Math.abs(ty - cy) < 0.5 ? 0 : Math.sign(ty - cy);
+}
+
+function springFor(edge: EdgeKey, state: LiquidState) {
+  const dir = edge === "l" || edge === "r" ? state.dirX : state.dirY;
+  if (dir === 0) return NEUTRAL;
+  const leading = (edge === "r" || edge === "b") === dir > 0;
+  return leading ? LEAD : TRAIL;
+}
+
+/** Advance the drop by dt seconds (fixed 4 ms sub-steps). Returns true when settled. */
+export function stepLiquid(state: LiquidState, target: Box, dt: number): boolean {
+  const steps = Math.max(1, Math.ceil(dt / 0.004));
+  const h = dt / steps;
+  for (let s = 0; s < steps; s++) {
+    for (const e of EDGES) {
+      const { k, zeta } = springFor(e, state);
+      const c = 2 * zeta * Math.sqrt(k);
+      const a = k * (target[e] - state.pos[e]) - c * state.vel[e];
+      // Viscosity: a drop never moves faster than MAX_SPEED, so long jumps stay smooth.
+      state.vel[e] = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, state.vel[e] + a * h));
+      state.pos[e] += state.vel[e] * h;
+    }
+  }
+  const settled = EDGES.every((e) => Math.abs(target[e] - state.pos[e]) < 0.25 && Math.abs(state.vel[e]) < 2);
+  if (settled) {
+    for (const e of EDGES) {
+      state.pos[e] = target[e];
+      state.vel[e] = 0;
+    }
+    state.dirX = 0;
+    state.dirY = 0;
+  }
+  return settled;
+}
+
+/** Rendered box: a stretched drop gets thinner across the stretch (keeps its volume). */
+export function liquidShape(state: LiquidState, target: Box): { x: number; y: number; w: number; h: number } {
+  const p = state.pos;
+  let w = Math.max(2, p.r - p.l);
+  let h = Math.max(2, p.b - p.t);
+  const tw = Math.max(1, target.r - target.l);
+  const th = Math.max(1, target.b - target.t);
+  const stretchX = Math.max(0, w - tw) / tw;
+  const stretchY = Math.max(0, h - th) / th;
+  const thinY = Math.min(0.24, stretchX * 0.35);
+  const thinX = Math.min(0.24, stretchY * 0.35);
+  const y = p.t + (h * thinY) / 2;
+  const x = p.l + (w * thinX) / 2;
+  h *= 1 - thinY;
+  w *= 1 - thinX;
+  return { x, y, w, h };
+}
+
 /**
- * Slides one highlight ("glider") under the active item of a menu, so a section
- * change reads as one physical pill moving instead of two pills swapping colour.
- * Works with menus whose items are rendered elsewhere (portal pages): it only
- * watches the DOM for the active marker. The glider is positioned with inline
- * styles, never React state, and transitions are enabled after the first
- * placement so it does not fly in from the corner.
+ * Moves one highlight ("glider") under the active item of a menu as a drop of
+ * liquid. Works with menus whose items are rendered elsewhere (portal pages):
+ * it only watches the DOM for the active marker. Position is written to inline
+ * styles from a requestAnimationFrame loop, never React state; the first
+ * placement and reduced-motion visitors jump straight to the target.
  */
 export function useGlider(
   containerRef: RefObject<HTMLElement | null>,
@@ -29,22 +127,93 @@ export function useGlider(
     const box = containerRef.current;
     const glider = gliderRef.current;
     if (!ready || !box || !glider) return;
-    let frame = 0;
+    let measureFrame = 0;
+    let animFrame = 0;
+    let waitFrame = 0;
+    let lastTime = 0;
     let last: HTMLElement | null = null;
+    let liquid: LiquidState | null = null;
+    let target: Box | null = null;
+
+    // Items the liquid currently covers get dark text; the rest stay light, so
+    // a label changes colour exactly when the drop flows over it.
+    const markCovered = (s: { x: number; y: number; w: number; h: number }) => {
+      for (const el of Array.from(box.children) as HTMLElement[]) {
+        if (el === glider) continue;
+        const ox = Math.min(el.offsetLeft + el.offsetWidth, s.x + s.w) - Math.max(el.offsetLeft, s.x);
+        const oy = Math.min(el.offsetTop + el.offsetHeight, s.y + s.h) - Math.max(el.offsetTop, s.y);
+        const covered = ox > 0 && oy > 0 && (ox * oy) / Math.max(1, el.offsetWidth * el.offsetHeight) >= 0.5;
+        if (covered !== el.hasAttribute("data-under-glider")) el.toggleAttribute("data-under-glider", covered);
+      }
+    };
+
+    const draw = () => {
+      if (!liquid || !target) return;
+      const s = liquidShape(liquid, target);
+      glider.style.width = `${s.w}px`;
+      glider.style.height = `${s.h}px`;
+      glider.style.transform = `translate(${s.x}px, ${s.y}px)`;
+      markCovered(s);
+    };
+
+    const tick = (now: number) => {
+      if (!liquid || !target) return;
+      // A long frame (page busy) advances the drop at most 24 ms, so it never leaps.
+      const dt = Math.min(0.024, lastTime ? (now - lastTime) / 1000 : 0.016);
+      lastTime = now;
+      const settled = stepLiquid(liquid, target, dt);
+      draw();
+      animFrame = settled ? 0 : requestAnimationFrame(tick);
+    };
+
+    // A route or tab change renders a lot at once; start flowing after two calm
+    // frames (or 320 ms at most) so the motion is not chopped by dropped frames.
+    const startWhenSmooth = () => {
+      cancelAnimationFrame(waitFrame);
+      const begin = performance.now();
+      let prev = 0;
+      let calm = 0;
+      const wait = (now: number) => {
+        calm = prev && now - prev < 24 ? calm + 1 : 0;
+        prev = now;
+        if (calm >= 2 || now - begin > 320) {
+          lastTime = 0;
+          animFrame = requestAnimationFrame(tick);
+          return;
+        }
+        waitFrame = requestAnimationFrame(wait);
+      };
+      waitFrame = requestAnimationFrame(wait);
+    };
 
     const place = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
+      cancelAnimationFrame(measureFrame);
+      measureFrame = requestAnimationFrame(() => {
         const active = box.querySelector<HTMLElement>(selector);
         if (!active || active === glider) {
           glider.style.opacity = "0";
           last = null;
           return;
         }
+        const next: Box = {
+          l: active.offsetLeft,
+          r: active.offsetLeft + active.offsetWidth,
+          t: active.offsetTop,
+          b: active.offsetTop + active.offsetHeight,
+        };
         glider.style.opacity = "1";
-        glider.style.width = `${active.offsetWidth}px`;
-        glider.style.height = `${active.offsetHeight}px`;
-        glider.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`;
+        const jump = !liquid || prefersReducedMotion() || typeof requestAnimationFrame !== "function";
+        target = next;
+        if (jump || !liquid) {
+          liquid = createLiquid(next);
+          cancelAnimationFrame(animFrame);
+          cancelAnimationFrame(waitFrame);
+          animFrame = 0;
+          draw();
+        } else {
+          retarget(liquid, next);
+          if (!animFrame) startWhenSmooth();
+        }
         if (!box.hasAttribute("data-glider")) {
           requestAnimationFrame(() => box.setAttribute("data-glider", "on"));
         }
@@ -60,12 +229,14 @@ export function useGlider(
 
     place();
     const mutations = new MutationObserver(place);
-    mutations.observe(box, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "aria-current"] });
+    mutations.observe(box, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "aria-current", "data-active"] });
     const resize = typeof ResizeObserver !== "undefined" ? new ResizeObserver(place) : null;
     resize?.observe(box);
     window.addEventListener("resize", place);
     return () => {
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(measureFrame);
+      cancelAnimationFrame(animFrame);
+      cancelAnimationFrame(waitFrame);
       mutations.disconnect();
       resize?.disconnect();
       window.removeEventListener("resize", place);
