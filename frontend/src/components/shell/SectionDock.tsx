@@ -28,7 +28,9 @@ export default function SectionDock({ label, children }: { label: string; childr
   if (!mounted) return null;
   return createPortal(
     <nav ref={navRef} aria-label={label} data-skeuo-dark="true" className="fb-section-dock no-scrollbar">
-      <span ref={gliderRef} className="fb-glider fb-glider-pill" aria-hidden="true" />
+      <span className="fb-goo" aria-hidden="true">
+        <span ref={gliderRef} className="fb-glider fb-glider-pill" />
+      </span>
       {children}
     </nav>,
     document.body

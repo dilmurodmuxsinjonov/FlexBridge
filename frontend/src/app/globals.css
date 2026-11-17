@@ -1479,9 +1479,34 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
   pointer-events: none;
 }
 /* Position comes from the liquid spring loop in lib/motion.ts (no CSS easing). */
-[data-glider="on"] > .fb-glider { transition: opacity 200ms ease; }
+[data-glider="on"] .fb-glider { transition: opacity 200ms ease; }
 .fb-glider { will-change: transform, width, height; }
-[data-glider] > :not(.fb-glider) { position: relative; z-index: 1; }
+[data-glider] > :not(.fb-glider):not(.fb-goo) { position: relative; z-index: 1; }
+
+/* Liquid layer (Issue #271): the pill and its droplets melt together through the
+   #fb-goo SVG filter (GooFilter.tsx); the filter also draws the shadow, so the
+   pill's own box-shadow is dropped inside the layer. */
+.fb-goo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: url(#fb-goo);
+}
+.fb-goo .fb-glider { box-shadow: none !important; }
+.fb-drop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: #eceef1;
+  will-change: transform, width, height;
+}
+.fb-goo:has(.fb-glider-knob) .fb-drop { background: #cfd2d8; }
 .fb-glider-pill {
   background:
     radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.95), transparent 55%),
@@ -1503,14 +1528,14 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
    (data-under-glider is set every frame by useGlider), light everywhere else. */
 .fb-section-dock[data-glider] .fb-nav-item,
 .fb-rail[data-glider] .fb-rail-btn,
-.fb-main-dock [data-glider] > :not(.fb-glider) { transition: background-color 160ms ease, transform 160ms ease; } /* colour flips with the drop, no lag */
+.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo) { transition: background-color 160ms ease, transform 160ms ease; } /* colour flips with the drop, no lag */
 .fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]) { color: #c3c7cf !important; }
 .fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]):hover { color: #ffffff !important; }
 .fb-rail[data-glider] .fb-rail-btn:not([data-under-glider]):hover { color: #ffffff; }
 .fb-section-dock[data-glider] .fb-nav-item[data-under-glider] { color: #0c0d10 !important; background: transparent !important; }
 .fb-rail[data-glider] .fb-rail-btn:not([data-under-glider]) { color: #c3c7cf; }
 .fb-rail[data-glider] .fb-rail-btn[data-under-glider] { color: #0c0d10; background: transparent; }
-.fb-main-dock [data-glider] > :not(.fb-glider):not([data-under-glider]) { color: #d4d4d8 !important; }
+.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo):not([data-under-glider]) { color: #d4d4d8 !important; }
 .fb-main-dock [data-glider] > [data-under-glider] { color: #161618 !important; }
 
 /* Screen refresh band on the slab when a page or section changes. */

@@ -109,6 +109,61 @@ export function liquidShape(state: LiquidState, target: Box): { x: number; y: nu
   return { x, y, w, h };
 }
 
+/* ---------------------------------------------------------------------------
+   Droplet trail (Issue #271). Inside a ".fb-goo" layer an SVG metaball filter
+   melts nearby shapes together, so drops near the pill hang on it by a liquid
+   neck and drops further away read as separate beads. When the drop starts to
+   move two large drops tear off its trailing edge and are pulled back slowly;
+   while it travels it sheds small beads that stay behind and evaporate.
+   --------------------------------------------------------------------------- */
+
+export interface Drop {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r0: number;
+  r: number;
+  age: number;
+  life: number;
+  /** Spring stiffness toward the pill's trailing edge (0 = stays where shed). */
+  k: number;
+}
+
+const DROP_MAX_SPEED = 1400;
+
+/** Radius shrinks as the drop evaporates; 0 once its life is over. */
+export function dropRadius(d: Drop): number {
+  const left = 1 - d.age / d.life;
+  return left <= 0 ? 0 : d.r0 * Math.pow(left, 0.7);
+}
+
+/** Advance one drop toward (tx, ty); returns false when it has evaporated. */
+export function stepDrop(d: Drop, tx: number, ty: number, dt: number): boolean {
+  d.age += dt;
+  if (d.k > 0) {
+    const c = 2 * 0.85 * Math.sqrt(d.k);
+    d.vx = Math.max(-DROP_MAX_SPEED, Math.min(DROP_MAX_SPEED, d.vx + (d.k * (tx - d.x) - c * d.vx) * dt));
+    d.vy = Math.max(-DROP_MAX_SPEED, Math.min(DROP_MAX_SPEED, d.vy + (d.k * (ty - d.y) - c * d.vy) * dt));
+    d.x += d.vx * dt;
+    d.y += d.vy * dt;
+  }
+  d.r = dropRadius(d);
+  return d.r >= 1.5;
+}
+
+/** Point on the pill's trailing edge (where drops tear off / are pulled back to). */
+export function trailingPoint(state: LiquidState, inset: number): { x: number; y: number } {
+  const p = state.pos;
+  const cx = (p.l + p.r) / 2;
+  const cy = (p.t + p.b) / 2;
+  if (state.dirX > 0) return { x: p.l + inset, y: cy };
+  if (state.dirX < 0) return { x: p.r - inset, y: cy };
+  if (state.dirY > 0) return { x: cx, y: p.t + inset };
+  if (state.dirY < 0) return { x: cx, y: p.b - inset };
+  return { x: cx, y: cy };
+}
+
 /**
  * Moves one highlight ("glider") under the active item of a menu as a drop of
  * liquid. Works with menus whose items are rendered elsewhere (portal pages):
@@ -135,11 +190,56 @@ export function useGlider(
     let liquid: LiquidState | null = null;
     let target: Box | null = null;
 
+    // Droplets live in the ".fb-goo" layer around the glider (if the menu has one).
+    const goo = glider.parentElement?.classList.contains("fb-goo") ? glider.parentElement : null;
+    const pool: HTMLSpanElement[] = [];
+    if (goo) {
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement("span");
+        el.className = "fb-drop";
+        el.setAttribute("aria-hidden", "true");
+        goo.appendChild(el);
+        pool.push(el);
+      }
+    }
+    let drops: (Drop & { el: HTMLSpanElement })[] = [];
+    let shedClock = 0;
+    let shedFlip = false;
+    const thickness = () => (target ? Math.min(target.r - target.l, target.b - target.t) : 30);
+    const hideDrop = (el: HTMLSpanElement) => {
+      el.style.width = "0px";
+      el.style.height = "0px";
+    };
+    const spawn = (x: number, y: number, r0: number, life: number, k: number) => {
+      const el = pool.find((e) => !drops.some((d) => d.el === e));
+      if (!el) return;
+      drops.push({ x, y, vx: 0, vy: 0, r0, r: r0, age: 0, life, k, el });
+    };
+    const clearDrops = () => {
+      drops.forEach((d) => hideDrop(d.el));
+      drops = [];
+    };
+    const stepDrops = (dt: number) => {
+      if (!liquid) return;
+      drops = drops.filter((d) => {
+        const tp = trailingPoint(liquid as LiquidState, d.r0);
+        const alive = stepDrop(d, tp.x, tp.y, dt);
+        if (!alive) {
+          hideDrop(d.el);
+          return false;
+        }
+        d.el.style.width = `${d.r * 2}px`;
+        d.el.style.height = `${d.r * 2}px`;
+        d.el.style.transform = `translate(${d.x - d.r}px, ${d.y - d.r}px)`;
+        return true;
+      });
+    };
+
     // Items the liquid currently covers get dark text; the rest stay light, so
     // a label changes colour exactly when the drop flows over it.
     const markCovered = (s: { x: number; y: number; w: number; h: number }) => {
       for (const el of Array.from(box.children) as HTMLElement[]) {
-        if (el === glider) continue;
+        if (el === glider || el.classList.contains("fb-goo")) continue;
         const ox = Math.min(el.offsetLeft + el.offsetWidth, s.x + s.w) - Math.max(el.offsetLeft, s.x);
         const oy = Math.min(el.offsetTop + el.offsetHeight, s.y + s.h) - Math.max(el.offsetTop, s.y);
         const covered = ox > 0 && oy > 0 && (ox * oy) / Math.max(1, el.offsetWidth * el.offsetHeight) >= 0.5;
@@ -162,8 +262,22 @@ export function useGlider(
       const dt = Math.min(0.024, lastTime ? (now - lastTime) / 1000 : 0.016);
       lastTime = now;
       const settled = stepLiquid(liquid, target, dt);
+      if (goo && !settled) {
+        // While travelling fast the drop sheds small beads from its trailing edge.
+        const speed = Math.max(...Object.values(liquid.vel).map(Math.abs));
+        shedClock += dt;
+        if (speed > 350 && shedClock > 0.045) {
+          shedClock = 0;
+          shedFlip = !shedFlip;
+          const t = thickness();
+          const tp = trailingPoint(liquid, t * 0.3);
+          const wobble = (shedFlip ? 1 : -1) * t * 0.07;
+          spawn(tp.x + (liquid.dirY ? wobble : 0), tp.y + (liquid.dirX ? wobble : 0), t * (shedFlip ? 0.24 : 0.17), 0.62, 0);
+        }
+      }
       draw();
-      animFrame = settled ? 0 : requestAnimationFrame(tick);
+      stepDrops(dt);
+      animFrame = settled && drops.length === 0 ? 0 : requestAnimationFrame(tick);
     };
 
     // A route or tab change renders a lot at once; start flowing after two calm
@@ -202,6 +316,10 @@ export function useGlider(
           b: active.offsetTop + active.offsetHeight,
         };
         glider.style.opacity = "1";
+        if (goo) {
+          goo.style.width = `${box.scrollWidth}px`;
+          goo.style.height = `${box.scrollHeight}px`;
+        }
         const jump = !liquid || prefersReducedMotion() || typeof requestAnimationFrame !== "function";
         target = next;
         if (jump || !liquid) {
@@ -209,9 +327,18 @@ export function useGlider(
           cancelAnimationFrame(animFrame);
           cancelAnimationFrame(waitFrame);
           animFrame = 0;
+          clearDrops();
           draw();
         } else {
+          const wasIdle = liquid.dirX === 0 && liquid.dirY === 0;
           retarget(liquid, next);
+          if (goo && wasIdle && (liquid.dirX || liquid.dirY)) {
+            // Two big drops tear off the trailing edge and are pulled back slowly.
+            const t = Math.min(liquid.pos.r - liquid.pos.l, liquid.pos.b - liquid.pos.t);
+            const tp = trailingPoint(liquid, t * 0.45);
+            spawn(tp.x, tp.y, t * 0.42, 1.1, 26);
+            spawn(tp.x, tp.y, t * 0.3, 0.9, 15);
+          }
           if (!animFrame) startWhenSmooth();
         }
         if (!box.hasAttribute("data-glider")) {
@@ -241,6 +368,7 @@ export function useGlider(
       resize?.disconnect();
       window.removeEventListener("resize", place);
       box.removeAttribute("data-glider");
+      pool.forEach((el) => el.remove());
     };
   }, [containerRef, gliderRef, selector, ready]);
 }

@@ -99,6 +99,31 @@ describe("useGlider", () => {
   });
 });
 
+describe("goo layer", () => {
+  it("creates a droplet pool inside .fb-goo and removes it on unmount", async () => {
+    function Menu() {
+      const box = useRef<HTMLElement>(null);
+      const glider = useRef<HTMLSpanElement>(null);
+      useGlider(box, glider);
+      return (
+        <nav ref={box} aria-label="Suyuq menyu">
+          <span className="fb-goo" data-testid="goo">
+            <span ref={glider} className="fb-glider" />
+          </span>
+          <button type="button" className="fb-nav-item fb-nav-active">Bir</button>
+        </nav>
+      );
+    }
+    const { unmount } = render(<Menu />);
+    const goo = screen.getByTestId("goo");
+    expect(goo.querySelectorAll(".fb-drop").length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getByRole("navigation")).toHaveAttribute("data-glider", "on"));
+    expect(screen.getByRole("button", { name: "Bir" }).style.position).toBe("");
+    unmount();
+    expect(goo.querySelectorAll(".fb-drop").length).toBe(0);
+  });
+});
+
 describe("theme switch", () => {
   it("falls back to an instant switch without the View Transitions API", () => {
     function Toggle() {

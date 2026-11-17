@@ -578,7 +578,9 @@ export default function Navbar() {
 
       {/* Floating left rail with chrome knobs (desktop) */}
       <nav ref={railRef} aria-label="Tezkor amallar" data-skeuo-dark="true" className="fb-rail skeuo-obsidian hidden lg:flex">
-        <span ref={railGliderRef} className="fb-glider fb-glider-knob" aria-hidden="true" />
+        <span className="fb-goo" aria-hidden="true">
+          <span ref={railGliderRef} className="fb-glider fb-glider-knob" />
+        </span>
         {railItems.map((item) => {
           const Icon = item.icon;
           const active = item.exact ? pathname === item.href : Boolean(pathname?.startsWith(item.href));
@@ -632,7 +634,9 @@ export default function Navbar() {
             ref={dockRef}
             className="relative skeuo-obsidian rounded-full p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar max-w-[calc(100vw-60px)] sm:max-w-none"
           >
-            <span ref={dockGliderRef} className="fb-glider fb-glider-pill" aria-hidden="true" />
+            <span className="fb-goo" aria-hidden="true">
+              <span ref={dockGliderRef} className="fb-glider fb-glider-pill" />
+            </span>
             {theme.links.map((item) => {
               const Icon = item.icon;
               const active = isNavItemActive(item);
