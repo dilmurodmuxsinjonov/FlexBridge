@@ -24,7 +24,7 @@ export default function GooFilter() {
 
           {/* 2a. height map -> convex specular highlights along every edge */}
           <feGaussianBlur in="goo" stdDeviation="3" result="height" />
-          <feSpecularLighting in="height" surfaceScale="7" specularConstant="1.25" specularExponent="22" lightingColor="#ffffff" result="spec">
+          <feSpecularLighting in="height" surfaceScale="4" specularConstant="0.8" specularExponent="26" lightingColor="#ffffff" result="spec">
             <feDistantLight azimuth="235" elevation="40" />
           </feSpecularLighting>
           <feComposite in="spec" in2="goo" operator="in" result="gloss" />
@@ -32,15 +32,15 @@ export default function GooFilter() {
           {/* 2b. inner shade on the side away from the light (depth) */}
           <feOffset in="height" dx="-2" dy="-2.5" result="shifted" />
           <feComposite in="goo" in2="shifted" operator="out" result="shadeEdge" />
-          <feColorMatrix in="shadeEdge" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.32 0" result="shade" />
+          <feColorMatrix in="shadeEdge" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.16 0" result="shade" />
 
           {/* 2c. thin bright glass rim */}
           <feMorphology in="goo" operator="erode" radius="1.4" result="inner" />
           <feComposite in="goo" in2="inner" operator="out" result="rimEdge" />
-          <feColorMatrix in="rimEdge" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0" result="rim" />
+          <feColorMatrix in="rimEdge" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.3 0" result="rim" />
 
           {/* 2d. transparent body: a faint milky tint so the drop is visible but see-through */}
-          <feColorMatrix in="goo" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.16 0" result="body" />
+          <feColorMatrix in="goo" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.24 0" result="body" />
 
           <feMerge result="liquid">
             <feMergeNode in="body" />
@@ -50,7 +50,7 @@ export default function GooFilter() {
           </feMerge>
 
           {/* 3. shadow from the liquid shape */}
-          <feDropShadow in="liquid" dx="0" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.45" />
+          <feDropShadow in="liquid" dx="0" dy="3" stdDeviation="3" floodColor="#000000" floodOpacity="0.32" />
         </filter>
       </defs>
     </svg>

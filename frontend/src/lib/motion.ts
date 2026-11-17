@@ -266,13 +266,13 @@ export function useGlider(
         // While travelling fast the drop sheds small beads from its trailing edge.
         const speed = Math.max(...Object.values(liquid.vel).map(Math.abs));
         shedClock += dt;
-        if (speed > 350 && shedClock > 0.045) {
+        if (speed > 600 && shedClock > 0.085) {
           shedClock = 0;
           shedFlip = !shedFlip;
           const t = thickness();
           const tp = trailingPoint(liquid, t * 0.3);
           const wobble = (shedFlip ? 1 : -1) * t * 0.07;
-          spawn(tp.x + (liquid.dirY ? wobble : 0), tp.y + (liquid.dirX ? wobble : 0), t * (shedFlip ? 0.24 : 0.17), 0.62, 0);
+          spawn(tp.x + (liquid.dirY ? wobble : 0), tp.y + (liquid.dirX ? wobble : 0), t * (shedFlip ? 0.17 : 0.13), 0.36, 0);
         }
       }
       draw();
@@ -333,11 +333,10 @@ export function useGlider(
           const wasIdle = liquid.dirX === 0 && liquid.dirY === 0;
           retarget(liquid, next);
           if (goo && wasIdle && (liquid.dirX || liquid.dirY)) {
-            // Two big drops tear off the trailing edge and are pulled back slowly.
+            // One drop tears off the trailing edge and is pulled back quickly (kept subtle).
             const t = Math.min(liquid.pos.r - liquid.pos.l, liquid.pos.b - liquid.pos.t);
-            const tp = trailingPoint(liquid, t * 0.45);
-            spawn(tp.x, tp.y, t * 0.42, 1.1, 26);
-            spawn(tp.x, tp.y, t * 0.3, 0.9, 15);
+            const tp = trailingPoint(liquid, t * 0.4);
+            spawn(tp.x, tp.y, t * 0.3, 0.6, 42);
           }
           if (!animFrame) startWhenSmooth();
         }

@@ -476,4 +476,5 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Boshlang'ich holat: suyuq pill va tomchilar oq, xira (opaque) edi.
 - Qilingan ish: `frontend/src/components/motion/GooFilter.tsx` — suyuq shisha filtri (shaffof tana, specular yorug'lik, ichki soya, shisha chekka, soya); `globals.css` va `Navbar.tsx` — suyuqlik ostidagi yorliqlar oq. Ranglar palitrasi o'zgarmadi.
 - Tekshiruv: eslint 0, tsc 0, next build OK; Edge screencast va kattalashtirilgan kadrlar (talaba/korxona kapsulasi, chap rels), sahifa xatosi 0.
+- Yumshatish: foydalanuvchi "OSHIRIB YUBORILGAN" dedi -> 1 ta kichik tomchi, kamroq va qisqa iz, kuchsizroq yaltirash/chekka/soya, tana biroz to'liqroq.
 - Topshirilgan holat / keyingi qadam: #272 merge qilingach rebase va PR; foydalanuvchi fikri bo'yicha shaffoflik/yaltiroqlikni sozlash mumkin.
