@@ -38,11 +38,12 @@ export interface LiquidState {
   dirY: number;
 }
 
-// Tuned (Issue #275, "too slow"): settles in ~0.35-0.5 s and still stretches.
-const LEAD = { k: 900, zeta: 0.66 };
-const TRAIL = { k: 380, zeta: 0.88 };
-const NEUTRAL = { k: 650, zeta: 0.8 };
-const MAX_SPEED = 7000; // px/s
+// Tuned (Issue #277, "3x faster"): k x9 => 3x shorter, settles in ~0.12-0.17 s
+// with the same stretch shape (damping ratios unchanged).
+const LEAD = { k: 8100, zeta: 0.66 };
+const TRAIL = { k: 3420, zeta: 0.88 };
+const NEUTRAL = { k: 5850, zeta: 0.8 };
+const MAX_SPEED = 21000; // px/s
 
 export function createLiquid(at: Box): LiquidState {
   return { pos: { ...at }, vel: { l: 0, r: 0, t: 0, b: 0 }, dirX: 0, dirY: 0 };
@@ -130,7 +131,7 @@ export interface Drop {
   k: number;
 }
 
-const DROP_MAX_SPEED = 1400;
+const DROP_MAX_SPEED = 4200;
 
 /** Radius shrinks as the drop evaporates; 0 once its life is over. */
 export function dropRadius(d: Drop): number {
@@ -266,13 +267,13 @@ export function useGlider(
         // While travelling fast the drop sheds small beads from its trailing edge.
         const speed = Math.max(...Object.values(liquid.vel).map(Math.abs));
         shedClock += dt;
-        if (speed > 1200 && shedClock > 0.06) {
+        if (speed > 3600 && shedClock > 0.02) {
           shedClock = 0;
           shedFlip = !shedFlip;
           const t = thickness();
           const tp = trailingPoint(liquid, t * 0.3);
           const wobble = (shedFlip ? 1 : -1) * t * 0.07;
-          spawn(tp.x + (liquid.dirY ? wobble : 0), tp.y + (liquid.dirX ? wobble : 0), t * (shedFlip ? 0.17 : 0.13), 0.26, 0);
+          spawn(tp.x + (liquid.dirY ? wobble : 0), tp.y + (liquid.dirX ? wobble : 0), t * (shedFlip ? 0.17 : 0.13), 0.1, 0);
         }
       }
       draw();
@@ -281,7 +282,7 @@ export function useGlider(
     };
 
     // A route or tab change renders a lot at once; start flowing after one calm
-    // frame (or 90 ms at most) so the motion is not chopped by dropped frames.
+    // frame (or 30 ms at most) so the motion is not chopped by dropped frames.
     const startWhenSmooth = () => {
       cancelAnimationFrame(waitFrame);
       const begin = performance.now();
@@ -290,7 +291,7 @@ export function useGlider(
       const wait = (now: number) => {
         calm = prev && now - prev < 24 ? calm + 1 : 0;
         prev = now;
-        if (calm >= 1 || now - begin > 90) {
+        if (calm >= 1 || now - begin > 30) {
           lastTime = 0;
           animFrame = requestAnimationFrame(tick);
           return;
@@ -336,7 +337,7 @@ export function useGlider(
             // One drop tears off the trailing edge and is pulled back quickly (kept subtle).
             const t = Math.min(liquid.pos.r - liquid.pos.l, liquid.pos.b - liquid.pos.t);
             const tp = trailingPoint(liquid, t * 0.4);
-            spawn(tp.x, tp.y, t * 0.3, 0.4, 90);
+            spawn(tp.x, tp.y, t * 0.3, 0.16, 810);
           }
           if (!animFrame) startWhenSmooth();
         }

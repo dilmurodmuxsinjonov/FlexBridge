@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-194)
+## Joriy holat (2026-11-17, LOG-195)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `adbefff` (PR #274); LOG-194 (tezroq pill) PR'i CI kutmoqda.
-- **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `1964324` (PR #276); LOG-195 (animatsiyalar 3x tez) PR'i CI kutmoqda.
+- **main**: foydalanuvchi 2026-11-17 da integration'ni main'ga o'tkazishga aniq ruxsat berdi ("hozirgi holatni main qil, hozirgi main'ni nusxalab qo'y"). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. O'tkazish `1964324` (exact-head CI yashil bo'lgach, fast-forward). Keyingi har bir main o'zgarishi uchun yana aniq ruxsat kerak.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#275).
-- **Staging**: 2026-11-17 da `adbefff` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#277).
+- **Staging**: 2026-11-17 da `1964324` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
 
@@ -215,9 +215,15 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-194 | Issue #275 -> Tugmalardagi o'tish animatsiyasi tezlashtirildi
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "adashilibdi o'tish animatsiyalari tugmalardagi juda sekin bo'lib qolgan".
+- **Holat**: **MERGED** (#276, 1964324); staging 1964324 dan qayta qurildi (korxona pill o'rtacha 445 ms, harakat 11/11). Foydalanuvchi: "adashilibdi o'tish animatsiyalari tugmalardagi juda sekin bo'lib qolgan".
 - **Sabab**: LOG-191 dagi yumshoq prujinalar (joyiga tushish 0.65–0.9 s), 2600 px/s tezlik chegarasi va harakatdan oldin 320 ms gacha kutish.
 - **Qilingan**: `lib/motion.ts` — prujinalar qattiqroq (oldingi chet k=900, orqadagi k=380), tezlik chegarasi 7000 px/s, kutish 1 tinch kadr yoki ko'pi 90 ms; tomchilar yangi tezlikka moslandi (uzilgan tomchi 0.4 s, mayda tomchilar faqat juda tez harakatda, 0.26 s). Test: 300 px o'tish 550 ms ichida tugashi qotirildi.
 - **Tekshiruv**: eslint 0, tsc 0, harakat testlari 17/17, next build OK. Edge'da bosishdan pill tushishigacha o'lchov (staging eski vs yangi build): korxona kapsulasi o'rtacha 592 -> 379 ms, talaba kapsulasi 571 -> 330 ms; sahifa almashinuvi ~26 ms (sekinlik faqat animatsiyada edi); cho'zilish saqlandi (masalan 272 -> 77 px), aniq tushish, xato 0.
 - **Qo'shimcha (D:/FlexBridge)**: foydalanuvchi "frontend nega qizil" deb so'radi: `frontend/tsconfig.json` oxiriga 2026-11-17 13:22 da `1` qatori qo'shilib JSON buzilgan edi (manbasi aniqlanmadi, shu sessiya buyruqlari bo'lishi istisno qilinmagan) — faqat shu qator olib tashlandi (fayl git bilan bir xil, tsc 0). Checkout eski `feature/218` branch'da (integration'dan 78 commit orqada, 29 saqlanmagan WIP fayl; eslint 61 xato shu eski kodda) — WIP'ga tegilmadi, foydalanuvchi ruxsati kutilmoqda.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-195 | Issue #277 -> Barcha animatsiyalar 3 barobar tez
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "animatsiyalarni hozirgidan 3 barobar tezlashtirish kerak, haliham sekin".
+- **Qilingan**: `lib/motion.ts` — prujina qattiqligi ×9 (vaqt ×1/3, so'nish nisbatlari o'zgarmadi — cho'zilish shakli saqlandi), tezlik chegarasi 21000 px/s, kutish ≤ 30 ms, tomchilar umri ×1/3; `AppStage` (kartalar 175 ms, qadam 15 ms; ekran chizig'i 240 ms), `CountUp` 240 ms, mavzu doirasi 190 ms, ripple 200 ms, settle 240 ms, bosish 55/25 ms, modal 100 ms, scrim 70 ms, alert 90 ms, progress 240 ms, band holat aylanishi 0.37 s, rels yorlig'i 50 ms. Testlar vaqt nuqtalari yangi tezlikka moslandi; 300 px o'tish 200 ms ichida tugashi qotirildi.
+- **Tekshiruv**: eslint 0, tsc 0, vitest 157/157, next build OK. Edge'da bosishdan tushishgacha: korxona 379 -> 157 ms, talaba 333 -> 148 ms (o'lchov 3 barqaror kadr ≈ 50 ms qo'shadi; harakatning o'zi ~3x); cho'zilish va aniq tushish saqlandi, xato 0.
+- `main`: foydalanuvchi ruxsati bilan 1964324 ga o'tkazilmoqda (LOG-195 bu PR'dan keyin integration'da).

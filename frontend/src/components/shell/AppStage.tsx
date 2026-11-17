@@ -13,7 +13,7 @@ export function sweepScreen(sheen: HTMLElement | null): void {
       { opacity: 1, offset: 0.2 },
       { backgroundPosition: "0 140%", opacity: 0 },
     ],
-    { duration: 700, easing: "cubic-bezier(0.4, 0, 0.2, 1)" }
+    { duration: 240, easing: "cubic-bezier(0.4, 0, 0.2, 1)" }
   );
 }
 
@@ -43,7 +43,7 @@ export function revealCards(root: HTMLElement): number {
         { opacity: 0, transform: "translateY(14px) scale(0.985)" },
         { opacity: 1, transform: "none" },
       ],
-      { duration: 520, delay: i * 45, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" }
+      { duration: 175, delay: i * 15, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" }
     );
   });
   return cards.length;
