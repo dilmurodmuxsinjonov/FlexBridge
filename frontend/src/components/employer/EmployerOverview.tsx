@@ -5,6 +5,7 @@ import { ArrowUpRight, Briefcase, CalendarDays, GraduationCap, MessageSquareText
 import type { EmployerDashboardMetrics, ManagedOpportunityItem, MentorReviewQueueItem } from "@/lib/api";
 import { enumLabel } from "@/lib/labels";
 import { firstName, uzDate } from "@/lib/person";
+import CountUp from "@/components/motion/CountUp";
 
 export type EmployerTab = "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB";
 
@@ -103,7 +104,7 @@ function OpportunitiesCard({ metrics, onCreate }: EmployerOverviewProps) {
         </button>
       </div>
       <p className="font-display text-5xl font-bold tracking-tight tabular-nums text-[var(--fb-ink)]">
-        {o.published}
+        <CountUp value={o.published} />
         <span className="ml-1 text-xl font-semibold text-[var(--fb-ink-muted)]">/ {o.total}</span>
       </p>
       <p className="-mt-3 text-xs text-[var(--fb-ink-muted)]">e’lon qilingan</p>
@@ -136,7 +137,7 @@ function TopOpportunityCard({ opportunities, onOpenOpportunity, onCreate }: Empl
             <p className="font-display text-2xl font-bold leading-tight">{top.title}</p>
             <p className="mt-1 text-xs fb-muted">{[enumLabel(top.kind), top.region, top.work_mode && enumLabel(top.work_mode)].filter(Boolean).join(" · ")}</p>
           </div>
-          <p className="text-sm"><span className="font-display text-3xl font-bold tabular-nums">{top.applications_count}</span> <span className="fb-muted">ariza</span></p>
+          <p className="text-sm"><span className="font-display text-3xl font-bold tabular-nums"><CountUp value={top.applications_count} /></span> <span className="fb-muted">ariza</span></p>
           {top.capacity > 0 && (
             <div>
               <div className="mb-1.5 flex justify-between text-[11px] fb-muted">
@@ -242,7 +243,7 @@ function InkPanel({ metrics, mentorQueue, onOpen }: EmployerOverviewProps) {
     <section data-skeuo-dark="true" className="fb-ink-card grid grid-cols-1 divide-y divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0" aria-label="Korxona ko‘rsatkichlari">
       <div className={col}>
         {head("Suhbatlar", "Nomzodlar bilan uchrashuvlar", "KANBAN", "Kanbanni ochish")}
-        <p className="font-display text-3xl font-bold tabular-nums">{i.total}</p>
+        <p className="font-display text-3xl font-bold tabular-nums"><CountUp value={i.total} /></p>
         <div className="mt-auto">
           <div className="mb-1.5 flex justify-between text-[11px] fb-muted">
             <span>O‘tkazilgan</span>
@@ -257,7 +258,7 @@ function InkPanel({ metrics, mentorQueue, onOpen }: EmployerOverviewProps) {
       </div>
       <div className={col}>
         {head("Amaliyot va dual ta’lim", "Ish o‘rinlaridagi talabalar", "MENTOR_HUB", "Mentorlik bo‘limini ochish")}
-        <p className="font-display text-3xl font-bold tabular-nums">{e.active} <span className="text-base font-semibold fb-muted">faol</span></p>
+        <p className="font-display text-3xl font-bold tabular-nums"><CountUp value={e.active} /> <span className="text-base font-semibold fb-muted">faol</span></p>
         <div className="mt-auto">
           <div className="mb-1.5 flex justify-between text-[11px] fb-muted">
             <span>Yakunlangan</span>
@@ -271,7 +272,7 @@ function InkPanel({ metrics, mentorQueue, onOpen }: EmployerOverviewProps) {
       </div>
       <div className={col}>
         {head("Mentorlik", "Talabalar kundaliklari", "MENTOR_HUB", "Kundaliklar navbatini ochish")}
-        <p className="font-display text-3xl font-bold tabular-nums">{mentorQueue ? mentorQueue.length : "—"}</p>
+        <p className="font-display text-3xl font-bold tabular-nums">{mentorQueue ? <CountUp value={mentorQueue.length} /> : "—"}</p>
         <p className="-mt-2 text-xs fb-muted">kundalik ko‘rik kutmoqda</p>
         <div className="mt-auto flex flex-wrap gap-4 text-xs fb-muted">
           <span className="inline-flex items-center gap-1.5"><MessageSquareText className="h-3.5 w-3.5" /> {escalated ? `${escalated} tasi muddati o‘tgan` : "Muddati o‘tgan yo‘q"}</span>

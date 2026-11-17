@@ -32,6 +32,7 @@ import { enumLabel } from "@/lib/labels";
 import { firstName, initials, isoWeekday, uzDate } from "@/lib/person";
 import { experienceMonths } from "@/components/resume/resumeDraft";
 import type { ClassSlot } from "@/lib/timetable";
+import CountUp from "@/components/motion/CountUp";
 
 export type OverviewTab = "PROFILE" | "SKILLS" | "AVAILABILITY" | "ENROLLMENTS" | "PORTFOLIO" | "CERTIFICATES";
 
@@ -200,7 +201,7 @@ function ReadinessCard(props: ProfileOverviewProps) {
       <h2 id="fb-ready-title" className="text-base font-semibold text-[var(--fb-ink)]">Profil tayyorligi</h2>
       <div>
         <p className="font-display text-5xl font-bold tracking-tight text-[var(--fb-ink)] tabular-nums">
-          {pct}
+          <CountUp value={pct} />
           <span className="text-2xl align-top">%</span>
         </p>
         <p className="mt-1 text-xs text-[var(--fb-ink-muted)]">

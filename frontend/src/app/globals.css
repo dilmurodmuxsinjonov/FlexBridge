@@ -1365,8 +1365,8 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 }
 .fb-section-dock .fb-nav-item,
 .fb-section-dock .fb-nav-idle { color: #c3c7cf !important; background: transparent; }
-.fb-section-dock .fb-nav-item:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.09); }
-.fb-section-dock .fb-nav-item[aria-current="page"],
+.fb-section-dock .fb-nav-item:not(.fb-nav-active):not([aria-current="page"]):hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.09); }
+.fb-section-dock .fb-nav-item:is([aria-current="page"], .fb-nav-active),
 .fb-section-dock .fb-nav-active {
   background: linear-gradient(180deg, #ffffff, #e9ebee) !important;
   color: #0c0d10 !important;
@@ -1382,3 +1382,168 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 
 /* Active chat knob in the top capsule */
 .fb-topbar .fb-nav-active.rounded-full { background: var(--fb-accent) !important; color: #ffffff !important; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 4px 12px -3px color-mix(in srgb, var(--fb-accent) 70%, transparent) !important; }
+
+/* ===========================================================================
+   Motion & tactile layer (Issue #265): every control behaves like a physical
+   key. Press depth, pointer ripple, busy sheen and settle glow come from
+   InteractionLayer; gliders from useGlider; the theme switch from the View
+   Transitions API. The global prefers-reduced-motion rule above turns the
+   animations off.
+   =========================================================================== */
+:root {
+  --fb-ease-spring: cubic-bezier(0.3, 1.3, 0.4, 1);
+  --fb-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --fb-press-depth: translateY(1px) scale(0.97);
+}
+
+/* Keys: lift a hair on hover, sink on press (mouse, touch and keyboard). */
+:where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip, .fb-rail-btn) {
+  -webkit-tap-highlight-color: transparent;
+  transition-property: transform, background-color, color, box-shadow, filter, opacity, border-color;
+  transition-duration: 160ms;
+  transition-timing-function: var(--fb-ease-out);
+}
+:where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip):not(:disabled):is(:active, .fb-pressed) {
+  transform: var(--fb-press-depth);
+  transition-duration: 70ms;
+}
+:is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-tone):not(:disabled):hover { transform: translateY(-1px); }
+:is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-secondary, .skeuo-btn-tone):not(:disabled):is(:active, .fb-pressed) {
+  transform: var(--fb-press-depth);
+  filter: brightness(0.96);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.fb-icon-btn:not(:disabled):hover { transform: translateY(-1px) scale(1.05); }
+.fb-icon-btn:not(:disabled):is(:active, .fb-pressed) { transform: scale(0.92); }
+.fb-rail-btn:hover { transform: scale(1.08); }
+.fb-rail-btn:is(:active, .fb-pressed) { transform: scale(0.9); transition-duration: 70ms; }
+:where(button, [role="button"]):disabled { cursor: not-allowed; }
+
+/* One focus ring for keyboard users (zero specificity: components may override). */
+:where(button, [role="button"], [role="tab"], [role="switch"], a):focus-visible {
+  outline: 2px solid var(--fb-accent);
+  outline-offset: 2px;
+}
+
+/* Pointer ripple in the button colour (InteractionLayer sets the origin). */
+.fb-ripple::before {
+  content: "";
+  position: absolute;
+  left: var(--fb-rx, 50%);
+  top: var(--fb-ry, 50%);
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, color-mix(in srgb, currentColor 34%, transparent) 0%, transparent 70%);
+  animation: fb-ripple 600ms var(--fb-ease-out) forwards;
+}
+@keyframes fb-ripple {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(var(--fb-rs, 8)); opacity: 0; }
+}
+
+/* Waiting on the server: a light sweep across the key, then a settle glow. */
+.fb-busy { cursor: progress !important; }
+.fb-busy-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, currentColor 22%, transparent) 50%, transparent 70%);
+  background-size: 250% 100%;
+  animation: fb-busy-sweep 1.1s linear infinite;
+}
+@keyframes fb-busy-sweep {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+.fb-settle { animation: fb-settle 700ms var(--fb-ease-out); }
+@keyframes fb-settle {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--fb-accent) 55%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Gliders: one physical pill or knob slides to the active item. */
+.fb-glider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  opacity: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+[data-glider="on"] > .fb-glider {
+  transition:
+    transform 420ms var(--fb-ease-spring),
+    width 420ms var(--fb-ease-spring),
+    height 420ms var(--fb-ease-spring),
+    opacity 200ms ease;
+}
+[data-glider] > :not(.fb-glider) { position: relative; z-index: 1; }
+.fb-glider-pill {
+  background: linear-gradient(180deg, #ffffff, #e9ebee);
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+}
+.fb-glider-knob {
+  background: radial-gradient(circle at 35% 28%, #ffffff 0%, #e4e6ea 40%, #a6abb3 100%);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.22), inset 0 1px 1px #ffffff, 0 4px 10px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.fb-section-dock[data-glider] :is(.fb-nav-item[aria-current="page"], .fb-nav-active) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fb-rail .fb-rail-btn[aria-current="page"] { color: #0c0d10; }
+.fb-rail .fb-rail-btn[aria-current="page"]:hover { background: transparent; }
+
+/* Screen refresh band on the slab when a page or section changes. */
+.fb-slab-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--fb-glass-sheen) 70%, transparent) 50%, transparent 100%);
+  background-size: 100% 22%;
+  background-repeat: no-repeat;
+}
+
+/* Dialogs and their scrims fade and pop in when they appear. */
+.fixed.inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70, .bg-black\/60, .bg-black\/55, .bg-black\/50, .bg-black\/40) {
+  animation: fb-scrim-in 200ms ease-out both;
+}
+.fixed.inset-0 > :is(.skeuo-card, [role="dialog"]),
+[role="dialog"][aria-modal="true"]:not(.fixed) {
+  animation: fb-pop-in 300ms var(--fb-ease-spring) both;
+}
+@keyframes fb-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fb-pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Inline alerts slide in instead of popping. */
+[role="alert"], [role="status"]:not(:empty) { animation: fb-alert-in 260ms var(--fb-ease-out) both; }
+@keyframes fb-alert-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Progress fills grow from empty. */
+.fb-progress > span { animation: fb-fill-in 700ms var(--fb-ease-out) both; transform-origin: left center; }
+@keyframes fb-fill-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Theme switch: the new theme grows as a circle out of the pressed button. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }

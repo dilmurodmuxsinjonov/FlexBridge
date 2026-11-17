@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useGlider } from "@/lib/motion";
 
 const subscribeNoop = () => () => {};
 
@@ -14,6 +15,10 @@ const subscribeNoop = () => () => {};
  */
 export default function SectionDock({ label, children }: { label: string; children: ReactNode }) {
   const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  const navRef = useRef<HTMLElement>(null);
+  const gliderRef = useRef<HTMLSpanElement>(null);
+  // The light pill slides between sections instead of jumping.
+  useGlider(navRef, gliderRef, undefined, mounted);
 
   useEffect(() => {
     document.body.setAttribute("data-section-dock", "");
@@ -22,7 +27,8 @@ export default function SectionDock({ label, children }: { label: string; childr
 
   if (!mounted) return null;
   return createPortal(
-    <nav aria-label={label} data-skeuo-dark="true" className="fb-section-dock no-scrollbar">
+    <nav ref={navRef} aria-label={label} data-skeuo-dark="true" className="fb-section-dock no-scrollbar">
+      <span ref={gliderRef} className="fb-glider fb-glider-pill" aria-hidden="true" />
       {children}
     </nav>,
     document.body

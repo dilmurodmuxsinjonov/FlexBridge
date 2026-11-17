@@ -49,6 +49,7 @@ import {
   resolvePortalDashboard,
 } from "@/lib/roles";
 import { useSkeuoTheme } from "@/components/ThemeProvider";
+import { useGlider } from "@/lib/motion";
 
 type WorkspacePersona = "PUBLIC" | "CANDIDATE" | "EMPLOYER" | "UNIVERSITY" | "OPERATOR";
 
@@ -258,6 +259,11 @@ export default function Navbar() {
   const [portalsOpenPath, setPortalsOpenPath] = useState<string | null>(null);
   const [portalTabState, setPortalTabState] = useState<{ path: string | null; tab: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLElement>(null);
+  const railGliderRef = useRef<HTMLSpanElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  const dockGliderRef = useRef<HTMLSpanElement>(null);
+  useGlider(railRef, railGliderRef);
 
   const portalsOpen = portalsOpenPath === pathname;
   const activePortalTab = portalTabState?.path === pathname ? portalTabState.tab : null;
@@ -312,6 +318,8 @@ export default function Navbar() {
     Boolean(pathname?.startsWith("/korxona/")) ||
     Boolean(pathname?.startsWith("/universitet/")) ||
     Boolean(pathname?.startsWith("/operator/"));
+  // The mobile dock only exists off the sign-in pages; attach its glider when it does.
+  useGlider(dockRef, dockGliderRef, '[data-active="true"]', !isAuthPage);
 
   const personaKey = resolvePersonaFromRouteAndUser(pathname, currentUser);
   const theme = PERSONA_THEMES[personaKey];
@@ -569,7 +577,8 @@ export default function Navbar() {
       </header>
 
       {/* Floating left rail with chrome knobs (desktop) */}
-      <nav aria-label="Tezkor amallar" data-skeuo-dark="true" className="fb-rail skeuo-obsidian hidden lg:flex">
+      <nav ref={railRef} aria-label="Tezkor amallar" data-skeuo-dark="true" className="fb-rail skeuo-obsidian hidden lg:flex">
+        <span ref={railGliderRef} className="fb-glider fb-glider-knob" aria-hidden="true" />
         {railItems.map((item) => {
           const Icon = item.icon;
           const active = item.exact ? pathname === item.href : Boolean(pathname?.startsWith(item.href));
@@ -580,7 +589,7 @@ export default function Navbar() {
               aria-label={item.label}
               data-tip={item.label}
               aria-current={active ? "page" : undefined}
-              className={`fb-rail-btn ${active ? "fb-knob" : ""}`}
+              className="fb-rail-btn"
             >
               <Icon className="h-4 w-4" />
             </Link>
@@ -620,16 +629,15 @@ export default function Navbar() {
         >
           <div
             data-skeuo-dark="true"
-            className="skeuo-obsidian rounded-full p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar max-w-[calc(100vw-60px)] sm:max-w-none"
+            ref={dockRef}
+            className="relative skeuo-obsidian rounded-full p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar max-w-[calc(100vw-60px)] sm:max-w-none"
           >
+            <span ref={dockGliderRef} className="fb-glider fb-glider-pill" aria-hidden="true" />
             {theme.links.map((item) => {
               const Icon = item.icon;
               const active = isNavItemActive(item);
               const content = (
                 <>
-                  {active && (
-                    <span className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.28)]" />
-                  )}
                   <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
                   <span className="relative z-10 whitespace-nowrap">{item.shortLabel}</span>
                 </>
@@ -641,6 +649,7 @@ export default function Navbar() {
                     key={item.id}
                     type="button"
                     onClick={() => handleNavAction(item)}
+                    data-active={active ? "true" : undefined}
                     className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
                       active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
                     }`}
@@ -654,6 +663,8 @@ export default function Navbar() {
                 <Link
                   key={item.id}
                   href={item.href}
+                  data-active={active ? "true" : undefined}
+                  aria-current={active ? "page" : undefined}
                   className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
                     active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
                   }`}
