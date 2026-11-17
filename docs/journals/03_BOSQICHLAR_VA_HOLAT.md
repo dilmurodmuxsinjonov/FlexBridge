@@ -1,13 +1,13 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-192)
+## Joriy holat (2026-11-17, LOG-193)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `5331259` (PR #270); LOG-192 (tomchi izi) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `b97b194` (PR #272); LOG-193 (suyuq shisha, yumshatilgan) PR'i CI kutmoqda. Barcha yangi PR'lar faqat shu branch'ga, exact-head CI yashil bo'lgandan keyin merge qilinadi.
 - **main/master**: `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan; foydalanuvchining aniq ruxsatisiz hech qanday o'zgartirish yo'q.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#271).
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#273).
 - **Staging**: 2026-11-17 da `a6c3e01` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -202,7 +202,14 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-192 | Issue #271 -> Suyuqlik ortidan tomchisimon iz (goo)
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "YAXSHI LEKIM MEN KUTGAN NATIJA EMAS MEN SENGA TASHLAGAN RASMDA TASHLAGANIMDEK TOMCHISIMON IZ QOLISHI KERAK".
+- **Holat**: **MERGED** (#272, b97b194). Foydalanuvchi: "YAXSHI LEKIM MEN KUTGAN NATIJA EMAS MEN SENGA TASHLAGAN RASMDA TASHLAGANIMDEK TOMCHISIMON IZ QOLISHI KERAK".
 - **Qilingan**: `components/motion/GooFilter.tsx` — SVG metaball filtri (blur + keskin alfa egri, asl piksellar `atop`, soya suyuq shakldan `feDropShadow`); glider endi `.fb-goo` qatlami ichida (pastki kapsula, chap rels, mobil dock). `lib/motion.ts`: tomchilar havzasi (14), harakat boshlanganda orqa chetdan 2 ta katta tomchi uziladi va sekin tortiladi, tez harakatda har ~45 ms mayda tomchi to'kilib joyida so'nadi; tomchi radiusi umr bo'yi kichrayadi (`dropRadius`, `stepDrop`, `trailingPoint` — sof funksiyalar). Qatlam o'lchami menyu scroll kengligiga moslanadi; reduced-motion'da tomchi yo'q.
 - **Tekshiruv**: eslint 0, tsc 0, vitest 157/157 (+4: tomchi so'nishi, orqaga tortilish, uzilish cheti, havza yaratilishi/tozalanishi), next build OK. Edge: 4 o'tishda 5–9 tomchi, oxirida 0, pill aniq tushdi, sahifa xatosi 0; CDP screencast bilan real vaqt (47 kadr/s) va sekinlashtirilgan video foydalanuvchiga yuborildi; harakat o'lchovi 11/11.
+- `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
+
+### 2026-11-17 | LOG-193 | Issue #273 -> Tugmalar bo'rtiq, shaffof suyuq shisha
+- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "TUGMALAR BO'RTIB CHIQQANROQ, SHAFFOFROQ, LIQUIDGA O'XSHASIN"; yumshatilgan variantni ko'rib: "YAXSHI QO'SHAVER".
+- **Qilingan**: `components/motion/GooFilter.tsx` — `#fb-goo` filtri endi suyuq shisha chizadi: metaball niqobi (SourceAlpha'dan), deyarli shaffof tana (16% oq), xiralashtirilgan balandlik xaritasida `feSpecularLighting` (uzoq yorug'lik) — har bir chet qavariq yaltiraydi, yorug'likdan narigi tomonda ichki soya, yupqa yorug' shisha chekka va suyuq shakldan soya. Pill, tomchilar, ular orasidagi bo'yin va chap rels tugmasi bir xil shishaga aylandi; ranglar faqat yorug'likdan (palitra o'zgarmadi). Suyuqlik ostidagi yorliq endi oq (qalin, yengil soya), mobil dock faol matni ham oq.
+- **Yumshatish**: foydalanuvchi: "OSHIRIB YUBORILGAN" -> tomchi izi va shisha yumshatildi: harakat boshida 1 ta kichik tomchi (0.3×, 0.6 s, tez qaytadi), mayda tomchilar kamroq (har ~85 ms, faqat tez harakatda, 0.36 s), yaltirash 0.8, chekka 0.3, ichki soya 0.16, tana 24%, soya 0.32.
+- **Tekshiruv**: eslint 0, tsc 0, next build OK; Edge'da real vaqt screencast (79 kadr/s) va kattalashtirilgan kadrlar: talaba va korxona kapsulasi, chap rels; sahifa xatosi 0.
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.

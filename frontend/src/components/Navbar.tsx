@@ -655,7 +655,7 @@ export default function Navbar() {
                     onClick={() => handleNavAction(item)}
                     data-active={active ? "true" : undefined}
                     className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
-                      active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
+                      active ? "text-white" : "text-zinc-300 hover:text-white"
                     }`}
                   >
                     {content}
@@ -670,7 +670,7 @@ export default function Navbar() {
                   data-active={active ? "true" : undefined}
                   aria-current={active ? "page" : undefined}
                   className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${
-                    active ? "text-[#161618]" : "text-zinc-300 hover:text-white"
+                    active ? "text-white" : "text-zinc-300 hover:text-white"
                   }`}
                 >
                   {content}
