@@ -64,4 +64,28 @@ describe("OperatorOverview", () => {
   it("reports nothing urgent when there is nothing to do", () => {
     expect(attentionItems({ cases: [], tickets: [], discrepancies: 0, visible: ["VERIFICATION", "SUPPORT_OPS", "FINANCE"] })).toEqual([]);
   });
+
+  it("shows Super Admin quick navigation cards and opens governance sections", () => {
+    const onOpen = vi.fn();
+    const onOpenGovernance = vi.fn();
+    render(
+      <OperatorOverview
+        {...props({
+          roles: ["ADMIN"],
+          visible: ["STAFF_ROLES", "FEATURE_FLAGS", "DIRECTORY", "GOVERNANCE", "AUDIT"],
+          activeStaffGrantsCount: 4,
+          enabledR1FlagsCount: 2,
+          pendingRecoveryCount: 3,
+          onOpen,
+          onOpenGovernance,
+        })}
+      />
+    );
+    expect(screen.getByText("4 ta faol vakolat")).toBeInTheDocument();
+    expect(screen.getByText("2 ta R1 flag faol")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Xodim rollari va matritsa/ }));
+    expect(onOpen).toHaveBeenCalledWith("STAFF_ROLES");
+    fireEvent.click(screen.getByRole("button", { name: /parol tiklash so‘rovi/ }));
+    expect(onOpenGovernance).toHaveBeenCalledWith("RECOVERY");
+  });
 });
