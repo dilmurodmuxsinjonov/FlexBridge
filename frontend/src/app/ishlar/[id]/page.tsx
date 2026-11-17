@@ -197,8 +197,9 @@ export default function OpportunityDetailPage({
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="mb-6">
         <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 transition-colors hover:text-primary"
+          href="/elonlar"
+          prefetch={false}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink-muted)] transition-colors hover:text-[var(--fb-accent)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Barcha e’lonlarga qaytish
         </Link>

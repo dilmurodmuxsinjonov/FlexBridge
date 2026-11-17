@@ -63,12 +63,15 @@ describe("watchBusy", () => {
   });
 
   it("only paints ripples inside clipped, positioned buttons with a free ::before", () => {
+    const spy = vi.spyOn(window, "getComputedStyle");
     const plain = document.createElement("button");
     document.body.appendChild(plain);
     expect(canPaintInside(plain)).toBe(false);
+    expect(spy.mock.calls.some(([, pseudo]) => pseudo === "::before")).toBe(false);
     plain.style.overflow = "hidden";
     plain.style.position = "relative";
     expect(canPaintInside(plain)).toBe(true);
+    expect(spy.mock.calls.some(([, pseudo]) => pseudo === "::before")).toBe(true);
     plain.remove();
   });
 });

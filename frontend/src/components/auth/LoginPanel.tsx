@@ -111,6 +111,15 @@ function safeInternalPath(value: string | null): string | null {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
 }
 
+function RedirectParamReader({ onChange }: { onChange: (path: string | null) => void }) {
+  const searchParams = useSearchParams();
+  const nextValue = safeInternalPath(searchParams.get("redirect") ?? searchParams.get("next"));
+  useEffect(() => {
+    onChange(nextValue);
+  }, [nextValue, onChange]);
+  return null;
+}
+
 /**
  * The one sign-in experience for every portal: identifier + password, then an
  * authenticator code when the account has 2FA. Scoped portals send their
@@ -119,8 +128,7 @@ function safeInternalPath(value: string | null): string | null {
  */
 export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requested = safeInternalPath(searchParams.get("redirect") ?? searchParams.get("next"));
+  const [requested, setRequested] = useState<string | null>(null);
   const prefersReduced = useReducedMotion();
   const ids = useId();
 
@@ -238,6 +246,9 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
 
   return (
     <div className="w-full max-w-5xl mx-auto grid gap-6 lg:grid-cols-[0.95fr_1.05fr] items-stretch">
+      <Suspense fallback={null}>
+        <RedirectParamReader onChange={setRequested} />
+      </Suspense>
       {/* About this portal */}
       <aside className="order-2 lg:order-1 skeuo-card rounded-[28px] p-6 sm:p-8 flex flex-col gap-5">
         <div className="space-y-2">
@@ -263,7 +274,10 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
         <nav aria-label="Boshqa kirish sahifalari" className="mt-auto pt-4 border-t border-[var(--fb-hairline)]">
           <p className="text-xs text-[var(--fb-ink-muted)] mb-2">Boshqa turdagi hisob bilan kirasizmi?</p>
           <div className="flex flex-wrap gap-1.5">
-            {OTHER_PORTALS.filter((p) => p.portal !== (config.portal ?? "ALL")).map((p) => (
+            {(config.portal
+              ? OTHER_PORTALS.filter((p) => p.portal === "ALL")
+              : OTHER_PORTALS.filter((p) => p.portal !== "ALL")
+            ).map((p) => (
               <Link key={p.href} href={p.href} className="rounded-full skeuo-btn-secondary px-3 py-1.5 text-xs">
                 {p.label}
               </Link>
@@ -476,7 +490,7 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
   );
 }
 
-/** Page shell: back link + Suspense (useSearchParams) around the panel. */
+/** Page shell: back link + panel (search params isolated so portal SSR links always emit). */
 export function LoginScreen({ config, back = { href: "/", label: "Bosh sahifa" } }: { config: LoginPanelConfig; back?: { href: string; label: string } }) {
   return (
     <div className="w-full px-4 sm:px-6 py-6 sm:py-10">
@@ -486,16 +500,7 @@ export function LoginScreen({ config, back = { href: "/", label: "Bosh sahifa" }
           {back.label}
         </Link>
       </div>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center gap-2 p-10 text-sm text-[var(--fb-ink-secondary)]">
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            Yuklanmoqda…
-          </div>
-        }
-      >
-        <LoginPanel config={config} />
-      </Suspense>
+      <LoginPanel config={config} />
     </div>
   );
 }
