@@ -2,6 +2,20 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { prefersReducedMotion } from "@/lib/motion";
+
+/** A soft light band sweeps down the screen, like a display refreshing. */
+export function sweepScreen(sheen: HTMLElement | null): void {
+  if (!sheen || typeof sheen.animate !== "function" || prefersReducedMotion()) return;
+  sheen.animate(
+    [
+      { backgroundPosition: "0 -40%", opacity: 0 },
+      { opacity: 1, offset: 0.2 },
+      { backgroundPosition: "0 140%", opacity: 0 },
+    ],
+    { duration: 700, easing: "cubic-bezier(0.4, 0, 0.2, 1)" }
+  );
+}
 
 const CARD_SELECTOR = ".skeuo-card, .skeuo-stage, .fb-panel, .fb-ink-card";
 
@@ -13,7 +27,7 @@ const CARD_SELECTOR = ".skeuo-card, .skeuo-stage, .fb-panel, .fb-ink-card";
  */
 export function revealCards(root: HTMLElement): number {
   if (typeof window === "undefined" || typeof root.animate !== "function") return 0;
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return 0;
+  if (prefersReducedMotion()) return 0;
   const viewport = window.innerHeight || 800;
   const cards = Array.from(root.querySelectorAll<HTMLElement>(CARD_SELECTOR))
     .filter((el) => {
@@ -38,6 +52,7 @@ export function revealCards(root: HTMLElement): number {
 /** The single screen slab (with corner screws) every page renders into. */
 export default function AppStage({ children }: { children: ReactNode }) {
   const slabRef = useRef<HTMLDivElement>(null);
+  const sheenRef = useRef<HTMLSpanElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -46,6 +61,7 @@ export default function AppStage({ children }: { children: ReactNode }) {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (slabRef.current) revealCards(slabRef.current);
+        sweepScreen(sheenRef.current);
       });
     };
     schedule();
@@ -59,6 +75,7 @@ export default function AppStage({ children }: { children: ReactNode }) {
   return (
     <div className="fb-stage-shell">
       <div ref={slabRef} className="fb-slab">
+        <span ref={sheenRef} className="fb-slab-sheen" aria-hidden="true" />
         {children}
       </div>
     </div>

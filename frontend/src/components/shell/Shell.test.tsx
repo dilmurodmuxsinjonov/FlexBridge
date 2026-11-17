@@ -32,6 +32,8 @@ describe("SectionDock", () => {
 
 describe("revealCards", () => {
   it("animates only outermost visible cards, staggered", () => {
+    const original = window.matchMedia;
+    window.matchMedia = (() => ({ matches: false }) as MediaQueryList) as typeof window.matchMedia;
     const root = document.createElement("div");
     root.innerHTML = '<section class="skeuo-card"><div class="skeuo-card"></div></section><div class="fb-ink-card"></div><p></p>';
     document.body.appendChild(root);
@@ -48,6 +50,7 @@ describe("revealCards", () => {
     expect(calls.map((c) => c.el.tagName)).toEqual(["SECTION", "DIV"]);
     expect(calls[1].delay).toBeGreaterThan(calls[0].delay);
     root.remove();
+    window.matchMedia = original;
   });
 
   it("does nothing when the visitor prefers reduced motion", () => {

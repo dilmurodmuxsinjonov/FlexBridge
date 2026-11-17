@@ -5,6 +5,7 @@ import { ArrowUpRight, CalendarDays, CreditCard, FileCheck2, ShieldAlert } from 
 import type { OperatorAuditEventItem, OperatorSupportTicketItem, OperatorVerificationCaseItem } from "@/lib/api";
 import { enumLabel } from "@/lib/labels";
 import { firstName, uzDate } from "@/lib/person";
+import CountUp from "@/components/motion/CountUp";
 
 export type OperatorTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
@@ -56,7 +57,7 @@ function CasesCard({ cases, onOpen }: OperatorOverviewProps) {
           <ArrowUpRight className="h-4 w-4" />
         </button>
       </div>
-      <p className="font-display text-5xl font-bold tabular-nums text-[var(--fb-ink)]">{open}</p>
+      <p className="font-display text-5xl font-bold tabular-nums text-[var(--fb-ink)]"><CountUp value={open} /></p>
       <p className="-mt-3 text-xs text-[var(--fb-ink-muted)]">ko‘rib chiqilishi kerak</p>
       <div className="fb-progress" role="img" aria-label={`${cases.length} tadan ${done} tasi hal qilingan`}>
         <span style={{ width: `${pct}%` }} />
@@ -184,14 +185,14 @@ function InkPanel({ auditEvents, discrepancies, visible, onOpen }: OperatorOverv
     visible.includes("AUDIT") && (
       <div key="audit" className={col}>
         {head("Audit jurnali", "O‘zgartirib bo‘lmaydigan yozuvlar", "AUDIT", FileCheck2)}
-        <p className="font-display text-3xl font-bold tabular-nums">{auditEvents.length}</p>
+        <p className="font-display text-3xl font-bold tabular-nums"><CountUp value={auditEvents.length} /></p>
         <p className="-mt-2 text-xs fb-muted">yuklangan hodisa</p>
       </div>
     ),
     visible.includes("FINANCE") && (
       <div key="fin" className={col}>
         {head("Moliya", "To‘lovlar solishtiruvi", "FINANCE", CreditCard)}
-        <p className="font-display text-3xl font-bold tabular-nums">{discrepancies ?? "—"}</p>
+        <p className="font-display text-3xl font-bold tabular-nums">{discrepancies == null ? "—" : <CountUp value={discrepancies} />}</p>
         <p className="-mt-2 text-xs fb-muted">nomuvofiqlik</p>
       </div>
     ),

@@ -9,6 +9,7 @@ import type {
   UniversityTimetableResponse,
 } from "@/lib/api";
 import { firstName, initials, uzDate } from "@/lib/person";
+import CountUp from "@/components/motion/CountUp";
 
 export type UniversityTab = "queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents" | "staff";
 
@@ -105,7 +106,7 @@ function CoverageCard({ isCoordinator, assignments, coordinatorQueue, onOpen }: 
     <section className="fb-panel skeuo-card flex flex-col gap-4 p-5 sm:p-6" aria-labelledby="uni-cover">
       <h2 id="uni-cover" className="text-base font-semibold text-[var(--fb-ink)]">{parts.title}</h2>
       <p className="font-display text-5xl font-bold tracking-tight tabular-nums text-[var(--fb-ink)]">
-        {total ? pct : "—"}
+        {total ? <CountUp value={pct} /> : "—"}
         {total > 0 && <span className="align-top text-2xl">%</span>}
       </p>
       <div className="flex h-2 gap-1" aria-hidden="true">
@@ -241,7 +242,7 @@ function InkPanel({ assignments, coordinatorQueue, teachersCount, timetable, isC
     <section data-skeuo-dark="true" className="fb-ink-card grid grid-cols-1 divide-y divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0" aria-label="Akademik ko‘rsatkichlar">
       <div className={col}>
         {head("Amaliyot nazorati", "O‘qituvchi rahbarligidagi talabalar", "assignments", "Amaliyotlarni ochish")}
-        <p className="font-display text-3xl font-bold tabular-nums">{assignments.length}</p>
+        <p className="font-display text-3xl font-bold tabular-nums"><CountUp value={assignments.length} /></p>
         <div className="mt-auto">
           <div className="mb-1.5 flex justify-between text-[11px] fb-muted">
             <span>Rahbar qabul qilgan</span>
@@ -252,7 +253,7 @@ function InkPanel({ assignments, coordinatorQueue, teachersCount, timetable, isC
       </div>
       <div className={col}>
         {head("Kafedra", isCoordinator ? "Rahbar tayinlash va xodimlar" : "Faqat koordinatorga ochiq", isCoordinator ? "coordinator" : "staff", "Kafedra bo‘limini ochish")}
-        <p className="font-display text-3xl font-bold tabular-nums">{isCoordinator ? coordinatorQueue.length : "—"}</p>
+        <p className="font-display text-3xl font-bold tabular-nums">{isCoordinator ? <CountUp value={coordinatorQueue.length} /> : "—"}</p>
         <p className="-mt-2 text-xs fb-muted">rahbar kutayotgan talaba</p>
         <div className="mt-auto flex items-center gap-4 text-xs fb-muted">
           <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {teachersCount} o‘qituvchi</span>
@@ -262,7 +263,7 @@ function InkPanel({ assignments, coordinatorQueue, teachersCount, timetable, isC
         {head("O‘quv jadvali", timetable?.academic_semester || "Semestr jadvali", "timetable", "Jadvalni ochish")}
         {timetable && timetable.total_slots > 0 ? (
           <>
-            <p className="font-display text-3xl font-bold tabular-nums">{timetable.groups.length} <span className="text-base font-semibold fb-muted">guruh</span></p>
+            <p className="font-display text-3xl font-bold tabular-nums"><CountUp value={timetable.groups.length} /> <span className="text-base font-semibold fb-muted">guruh</span></p>
             <div className="mt-auto flex flex-wrap items-center gap-4 text-xs fb-muted">
               <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> {timetable.total_slots} dars</span>
               <span className="inline-flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> {timetable.students_synced_count} talaba</span>
