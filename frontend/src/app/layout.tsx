@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import AppStage from "@/components/shell/AppStage";
 
 // Self-hosted at build time by next/font: no runtime request to Google Fonts.
 const outfit = Outfit({
@@ -42,7 +43,9 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-background text-on-surface antialiased">
         <ThemeProvider>
           <Navbar />
-          <div className="flex-1 w-full pb-28 lg:pb-10">{children}</div>
+          <div className="flex-1 w-full pb-28">
+            <AppStage>{children}</AppStage>
+          </div>
           <Footer />
         </ThemeProvider>
       </body>

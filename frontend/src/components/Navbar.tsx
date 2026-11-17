@@ -35,7 +35,10 @@ import {
   KeyRound,
   LifeBuoy,
   Sparkles,
+  LayoutDashboard,
+  MessageCircle,
 } from "lucide-react";
+import { initials, uzDate } from "@/lib/person";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
 import ChatNavButton from "@/components/chat/ChatNavButton";
 import {
@@ -43,6 +46,7 @@ import {
   isEmployerOnlyRoles,
   isOperatorOnlyRoles,
   isStudentOnlyRoles,
+  resolvePortalDashboard,
 } from "@/lib/roles";
 import { useSkeuoTheme } from "@/components/ThemeProvider";
 
@@ -240,17 +244,9 @@ function resolvePersonaFromRouteAndUser(
 }
 
 function getDashboardForRoles(roles: string[]): { href: string; label: string; badgeClass: string } {
-  const norm = new Set(roles.map((r) => r.toUpperCase()));
-  if (norm.has("PLATFORM_OPERATOR") || norm.has("SECURITY_OFFICER") || norm.has("OPERATOR")) {
-    return { href: "/operator", label: "Operator Paneli", badgeClass: "border-amber-500/35 bg-amber-500/12 text-amber-700 dark:text-amber-300" };
-  }
-  if (norm.has("UNIVERSITY_ADMIN") || norm.has("ACADEMIC_SUPERVISOR") || norm.has("ACADEMIC_DEAN")) {
-    return { href: "/university", label: "Universitet Paneli", badgeClass: "border-indigo-500/35 bg-indigo-500/12 text-indigo-700 dark:text-indigo-300" };
-  }
-  if (norm.has("EMPLOYER_OWNER") || norm.has("EMPLOYER_ADMIN") || norm.has("EMPLOYER_RECRUITER") || norm.has("EMPLOYER_MENTOR")) {
-    return { href: "/employer", label: "Korxona Paneli", badgeClass: "border-emerald-500/35 bg-emerald-500/12 text-emerald-700 dark:text-emerald-300" };
-  }
-  return { href: "/nomzod", label: "Talaba Kabineti", badgeClass: "border-sky-500/35 bg-sky-500/12 text-sky-700 dark:text-sky-300" };
+  // Same priority and role codes as sign-in routing (lib/roles), so staff land in their own portal.
+  const dash = resolvePortalDashboard(roles);
+  return { href: dash.href, label: dash.label, badgeClass: dash.badgeClass };
 }
 
 export default function Navbar() {
@@ -393,6 +389,27 @@ export default function Navbar() {
     router.refresh();
   };
 
+  // Left rail: quick destinations that exist for this kind of visitor.
+  const railItems: { href: string; label: string; icon: typeof Search; exact?: boolean }[] = currentUser
+    ? [
+        ...(userDashboard ? [{ href: userDashboard.href, label: userDashboard.label, icon: LayoutDashboard, exact: true }] : []),
+        { href: "/", label: "E’lonlar katalogi", icon: Search, exact: true },
+        { href: "/xabarlar", label: "Xabarlar", icon: MessageCircle },
+        ...(isStudentOnlyUser(currentUser)
+          ? [
+              { href: "/nomzod/jadval", label: "O‘quv jadvali", icon: CalendarDays },
+              { href: "/nomzod/bildirishnomalar", label: "Bildirishnomalar", icon: Bell },
+            ]
+          : []),
+      ]
+    : [
+        { href: "/", label: "E’lonlar katalogi", icon: Search, exact: true },
+        { href: "/haqida", label: "Platforma haqida", icon: Compass },
+        { href: "/maxfiylik", label: "Maxfiylik siyosati", icon: FileCheck2 },
+        { href: "/shartlar", label: "Foydalanish shartlari", icon: FileText },
+      ];
+  const statusText = currentUser ? `${theme.label} · ${uzDate()}` : `${theme.label} · ochiq katalog`;
+
   // Guests (including on role-specific sign-in pages) just see the brand.
   const ownFirstName = currentUser?.display_name?.trim().split(/\s+/)[0];
   const headerGreeting = currentUser
@@ -401,224 +418,205 @@ export default function Navbar() {
 
   return (
     <>
-      {/* 1. Floating Top Pill Bar (Video Chrome Part 1) */}
-      <header className="sticky top-0 z-40 w-full px-3 sm:px-6 pt-3 pb-2 pointer-events-none">
-        <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
-          {/* Left Floating Greeting & Brand Pill */}
-          <div className="pointer-events-auto skeuo-card rounded-full px-3 sm:px-4 py-1.5 flex items-center gap-2.5">
-            <Link href="/" className="flex items-center gap-2.5 select-none group">
-              <div className="w-8 h-8 rounded-full skeuo-obsidian flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
-                <BrandIcon className={`w-4 h-4 ${theme.brandAccent}`} />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-display font-bold tracking-tight text-sm text-[var(--fb-ink)]">
-                  {headerGreeting}
-                </span>
-                <span className="text-[10px] font-medium text-[var(--fb-ink-muted)] mt-0.5 hidden sm:block">
-                  {theme.subtitle}
-                </span>
-              </div>
-            </Link>
-            <span
-              className={`hidden md:inline-flex items-center text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border tracking-wider ${theme.badgeClass}`}
-            >
-              {theme.badgeText}
+      {/* Device shell top capsule (Issue #263): identity left, inset status well, chrome knobs right */}
+      <header className="sticky top-0 z-40 w-full px-3 pt-3 pb-3 sm:px-6 lg:pl-[6.5rem]">
+        <div data-skeuo-dark="true" className="fb-topbar skeuo-obsidian">
+          <Link href={currentUser && userDashboard ? userDashboard.href : "/"} className="group flex min-w-0 items-center gap-2.5 pr-2">
+            <span className="fb-topbar-avatar transition-transform group-hover:scale-105" aria-hidden="true">
+              {currentUser ? initials(currentUser.display_name, theme.badgeText.slice(0, 2)) : <BrandIcon className="h-4 w-4" />}
             </span>
-          </div>
-
-          {/* Center Dark Obsidian Dynamic Island Pill */}
-          <div
-            data-skeuo-dark="true"
-            className="pointer-events-auto hidden xl:flex items-center gap-2.5 px-4 py-2 rounded-full skeuo-obsidian text-xs font-medium text-zinc-200"
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${theme.islandDotClass}`} />
-            <span className="font-display font-semibold tracking-tight text-white">
-              {theme.label}
+            <span className="flex min-w-0 flex-col leading-none">
+              <span className="truncate font-display text-sm font-semibold tracking-tight text-white">{headerGreeting}</span>
+              <span className="mt-1 hidden truncate text-[10px] font-medium text-zinc-400 sm:block">{theme.subtitle}</span>
             </span>
-            {!currentUser && (
-              <>
-                <span className="text-zinc-500">•</span>
-                <span className="text-[11px] text-zinc-400">Ochiq katalog</span>
-              </>
-            )}
-            {!isAuthPage && !hidePortalSwitcher && (
-              <div className="relative pl-2 border-l border-white/10" ref={dropdownRef}>
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setPortalsOpenPath((prev) => (prev === pathname ? null : pathname))}
-                  aria-expanded={portalsOpen}
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <Sparkles className="w-3 h-3 text-[#D95F2B]" />
-                  <span>Portallar</span>
-                  <ChevronDown
-                    className={`h-3 w-3 transition-transform duration-200 ${portalsOpen ? "rotate-180" : ""}`}
-                  />
-                </motion.button>
+          </Link>
 
-                <AnimatePresence>
-                  {portalsOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                      transition={{ duration: 0.16 }}
-                      className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-64 rounded-2xl skeuo-card p-2 z-50 text-left"
-                      data-skeuo-dark={colorMode === "dark" ? "true" : undefined}
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
+            <div className="fb-topbar-well w-full max-w-[480px]">
+              <span className="fb-orb" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-zinc-200">
+                {statusText}
+                <span className="ml-0.5 inline-block h-3 w-px animate-pulse bg-zinc-300 align-middle" aria-hidden="true" />
+              </span>
+                {!isAuthPage && !hidePortalSwitcher && (
+                  <div className="relative pl-2 border-l border-white/10" ref={dropdownRef}>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => setPortalsOpenPath((prev) => (prev === pathname ? null : pathname))}
+                      aria-expanded={portalsOpen}
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
                     >
-                      <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--fb-ink-muted)]">
-                        Maxsus Rol Kabinetlari
-                      </div>
-                      <Link
-                        href="/nomzod"
-                        onClick={() => setPortalsOpenPath(null)}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                      >
-                        <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
-                          <User className="h-3.5 w-3.5 text-sky-500" />
-                          Talaba Kabineti
-                        </span>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
-                      </Link>
-                      <Link
-                        href="/employer"
-                        onClick={() => setPortalsOpenPath(null)}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                      >
-                        <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
-                          <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-                          Korxona HR Kabineti
-                        </span>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
-                      </Link>
-                      <Link
-                        href="/university"
-                        onClick={() => setPortalsOpenPath(null)}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                      >
-                        <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
-                          <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
-                          Universitet Dekanati
-                        </span>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
-                      </Link>
-                      <div className="my-1 border-t border-[var(--fb-border)]" />
-                      <Link
-                        href="/operator"
-                        onClick={() => setPortalsOpenPath(null)}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                      >
-                        <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
-                          <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
-                          Platforma Operator Terminal
-                        </span>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
-                      </Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                      <Sparkles className="w-3 h-3 text-[#D95F2B]" />
+                      <span>Portallar</span>
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform duration-200 ${portalsOpen ? "rotate-180" : ""}`}
+                      />
+                    </motion.button>
+
+                    <AnimatePresence>
+                      {portalsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                          transition={{ duration: 0.16 }}
+                          className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-64 rounded-2xl skeuo-card p-2 z-50 text-left"
+                          data-skeuo-dark={colorMode === "dark" ? "true" : undefined}
+                        >
+                          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--fb-ink-muted)]">
+                            Maxsus Rol Kabinetlari
+                          </div>
+                          <Link
+                            href="/nomzod"
+                            onClick={() => setPortalsOpenPath(null)}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
+                              <User className="h-3.5 w-3.5 text-sky-500" />
+                              Talaba Kabineti
+                            </span>
+                            <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
+                          </Link>
+                          <Link
+                            href="/employer"
+                            onClick={() => setPortalsOpenPath(null)}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
+                              <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
+                              Korxona HR Kabineti
+                            </span>
+                            <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
+                          </Link>
+                          <Link
+                            href="/university"
+                            onClick={() => setPortalsOpenPath(null)}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
+                              <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+                              Universitet Dekanati
+                            </span>
+                            <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
+                          </Link>
+                          <div className="my-1 border-t border-[var(--fb-border)]" />
+                          <Link
+                            href="/operator"
+                            onClick={() => setPortalsOpenPath(null)}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
+                              <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
+                              Platforma Operator Terminal
+                            </span>
+                            <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
+                          </Link>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+            </div>
           </div>
 
-          {/* Right Floating Action Pills & Circular Theme Switcher */}
-          <div className="pointer-events-auto flex items-center gap-2">
-            <motion.button
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <button
               type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.93 }}
               onClick={toggleTheme}
-              title={
-                colorMode === "light"
-                  ? "Qorong‘i Obsidian rejimiga o‘tish"
-                  : "Yorug‘ Warm Skeuomorphism rejimiga o‘tish"
-              }
+              title={colorMode === "light" ? "Qorong‘i rejimga o‘tish" : "Yorug‘ rejimga o‘tish"}
               aria-label="Rang mavzusini almashtirish"
-              className="w-10 h-10 rounded-full skeuo-btn-secondary flex items-center justify-center shrink-0"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
             >
-              <AnimatePresence mode="wait" initial={false}>
-                {colorMode === "light" ? (
-                  <motion.span
-                    key="moon"
-                    initial={{ opacity: 0, rotate: -35, scale: 0.7 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: 35, scale: 0.7 }}
-                    transition={{ duration: 0.16 }}
-                  >
-                    <Moon className="w-4 h-4 text-[var(--fb-ink)]" />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="sun"
-                    initial={{ opacity: 0, rotate: -35, scale: 0.7 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: 35, scale: 0.7 }}
-                    transition={{ duration: 0.16 }}
-                  >
-                    <Sun className="w-4 h-4 text-amber-300" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
+              {colorMode === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </button>
 
             {currentUser && <ChatNavButton active={pathname?.startsWith("/xabarlar") ?? false} />}
 
             {currentUser && userDashboard ? (
-              <div className="skeuo-card rounded-full p-1 pl-2.5 flex items-center gap-2">
-                {pathname !== userDashboard.href ? (
-                  <Link
-                    href={userDashboard.href}
-                    className={`hidden sm:inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${userDashboard.badgeClass}`}
-                  >
+              <>
+                {pathname !== userDashboard.href && (
+                  <Link href={userDashboard.href} className="fb-topbar-chip hidden items-center sm:inline-flex">
+                    <LayoutDashboard className="h-3.5 w-3.5" />
                     <span>{userDashboard.label}</span>
                   </Link>
-                ) : (
-                  <div className="hidden md:flex items-center gap-1.5 px-2 text-xs text-[var(--fb-ink)]">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-                    <span className="max-w-[140px] truncate font-semibold">
-                      {userDashboard.label}
-                    </span>
-                  </div>
                 )}
                 <button
                   type="button"
                   onClick={handleLogout}
                   title="Tizimdan chiqish"
-                  className="inline-flex items-center gap-1.5 rounded-full skeuo-btn-obsidian px-3 py-1.5 text-xs font-semibold"
+                  aria-label="Tizimdan chiqish"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Chiqish</span>
+                  <LogOut className="h-4 w-4" />
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="skeuo-card rounded-full p-1 flex items-center gap-1.5">
-                <Link
-                  href={loginHref}
-                  className="skeuo-btn-secondary !rounded-full px-3.5 py-1.5 text-xs"
-                >
+              <>
+                <Link href={loginHref} className="fb-topbar-chip inline-flex items-center">
                   <Lock className="h-3.5 w-3.5" />
                   <span>Kirish</span>
                 </Link>
                 {personaKey !== "OPERATOR" && (
-                  <Link
-                    href={registerHref}
-                    className="skeuo-btn-accent !rounded-full px-4 py-1.5 text-xs"
-                  >
+                  <Link href={registerHref} className="fb-topbar-chip fb-topbar-chip-accent inline-flex items-center">
                     <span>Ro‘yxatdan o‘tish</span>
                   </Link>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
       </header>
 
+      {/* Floating left rail with chrome knobs (desktop) */}
+      <nav aria-label="Tezkor amallar" data-skeuo-dark="true" className="fb-rail skeuo-obsidian hidden lg:flex">
+        {railItems.map((item) => {
+          const Icon = item.icon;
+          const active = item.exact ? pathname === item.href : Boolean(pathname?.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-label={item.label}
+              data-tip={item.label}
+              aria-current={active ? "page" : undefined}
+              className={`fb-rail-btn ${active ? "fb-knob" : ""}`}
+            >
+              <Icon className="h-4 w-4" />
+            </Link>
+          );
+        })}
+        <span className="fb-rail-sep" aria-hidden="true" />
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label="Rang mavzusini almashtirish"
+          data-tip={colorMode === "light" ? "Qorong‘i rejim" : "Yorug‘ rejim"}
+          className="fb-rail-btn"
+        >
+          {colorMode === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Sahifa yuqorisiga chiqish"
+          data-tip="Yuqoriga"
+          className="fb-rail-btn"
+        >
+          <ArrowUp className="h-4 w-4" />
+        </button>
+        {currentUser && (
+          <button type="button" onClick={handleLogout} aria-label="Tizimdan chiqish" data-tip="Chiqish" className="fb-rail-btn">
+            <LogOut className="h-4 w-4" />
+          </button>
+        )}
+      </nav>
+
       {/* Bottom navigation capsule: phones and tablets only. Desktop portals use their own sidebar. */}
       {!isAuthPage && (
         <nav
           aria-label="Asosiy navigatsiya"
-          className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 max-w-[98vw] pointer-events-auto"
+          className="fb-main-dock lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2 max-w-[98vw] pointer-events-auto"
         >
           <div
             data-skeuo-dark="true"
