@@ -1,0 +1,1586 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   FlexBridge "Liquid Glass" design layer (2026-11-16, Issue #231)
+   Frosted translucent surfaces over a soft, slowly drifting colour field.
+   Class names keep the historic `skeuo-*` prefix so every portal picks the
+   new look up without markup churn. Motion stays calm: no lifts, no sweeps.
+   =========================================================================== */
+@layer base {
+  :root {
+    --background: 238 241 246;
+    --foreground: 15 23 42;
+
+    /* Canvas + ambient liquid colour field */
+    --fb-canvas: #edf0f5;
+    --fb-blob-1: rgba(255, 138, 76, 0.42);
+    --fb-blob-2: rgba(96, 165, 250, 0.40);
+    --fb-blob-3: rgba(167, 139, 250, 0.34);
+    --fb-blob-4: rgba(52, 211, 153, 0.26);
+
+    /* Glass surfaces */
+    --fb-glass-top: rgba(255, 255, 255, 0.74);
+    --fb-glass-bottom: rgba(255, 255, 255, 0.46);
+    --fb-glass-sheen: rgba(255, 255, 255, 0.70);
+    --fb-glass-border: rgba(255, 255, 255, 0.78);
+    --fb-glass-edge: rgba(15, 23, 42, 0.075);
+    --fb-glass-blur: 22px;
+    --fb-popover: rgba(255, 255, 255, 0.96);
+
+    /* Legacy tokens (Tailwind `surface-*`, inline vars) mapped onto glass */
+    --fb-stage: rgba(255, 255, 255, 0.62);
+    --fb-card-top: rgba(255, 255, 255, 0.86);
+    --fb-card-bottom: rgba(248, 250, 252, 0.78);
+    --fb-well: rgba(255, 255, 255, 0.58);
+    --fb-well-deep: rgba(15, 23, 42, 0.08);
+    --fb-obsidian: #12141b;
+    --fb-obsidian-elevated: #1d212b;
+
+    /* Ink — slate scale, AA on glass */
+    --fb-ink: #0f172a;
+    --fb-ink-secondary: #3f4b5e;
+    --fb-ink-muted: #5f6b7d;
+    --fb-hairline: rgba(15, 23, 42, 0.09);
+    --fb-border: rgba(15, 23, 42, 0.1);
+    --fb-bevel: rgba(255, 255, 255, 0.9);
+    --fb-accent: #e0622d;
+    --fb-accent-strong: #c94f1d;
+    --fb-focus: rgba(224, 98, 45, 0.28);
+    --fb-key-chamfer: transparent;
+
+    --fb-shadow-stage:
+      inset 0 1px 1px rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.35),
+      0 0 0 1px var(--fb-glass-edge),
+      0 24px 60px -24px rgba(15, 23, 42, 0.22);
+    --fb-shadow-card:
+      inset 0 1px 1px rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.3),
+      0 0 0 1px var(--fb-glass-edge),
+      0 12px 32px -16px rgba(15, 23, 42, 0.22);
+    --fb-shadow-well:
+      inset 0 1px 2px rgba(15, 23, 42, 0.06),
+      0 0 0 1px rgba(15, 23, 42, 0.06);
+    --fb-shadow-dock:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 0 0 1px rgba(15, 23, 42, 0.2),
+      0 18px 40px -14px rgba(15, 23, 42, 0.45);
+  }
+
+  html.dark {
+    --background: 10 12 17;
+    --foreground: 244 245 247;
+
+    --fb-canvas: #0a0c11;
+    --fb-blob-1: rgba(249, 115, 22, 0.24);
+    --fb-blob-2: rgba(59, 130, 246, 0.24);
+    --fb-blob-3: rgba(139, 92, 246, 0.22);
+    --fb-blob-4: rgba(16, 185, 129, 0.14);
+
+    --fb-glass-top: rgba(38, 42, 54, 0.62);
+    --fb-glass-bottom: rgba(22, 25, 33, 0.52);
+    --fb-glass-sheen: rgba(255, 255, 255, 0.07);
+    --fb-glass-border: rgba(255, 255, 255, 0.1);
+    --fb-glass-edge: rgba(0, 0, 0, 0.35);
+    --fb-popover: rgba(26, 29, 38, 0.97);
+
+    --fb-stage: rgba(22, 25, 33, 0.6);
+    --fb-card-top: rgba(34, 38, 49, 0.9);
+    --fb-card-bottom: rgba(24, 27, 36, 0.86);
+    --fb-well: rgba(255, 255, 255, 0.045);
+    --fb-well-deep: rgba(255, 255, 255, 0.09);
+    --fb-obsidian: #0e1016;
+    --fb-obsidian-elevated: #1a1d26;
+
+    --fb-ink: #f3f5f8;
+    --fb-ink-secondary: #b3bac7;
+    --fb-ink-muted: #8a93a3;
+    --fb-hairline: rgba(255, 255, 255, 0.09);
+    --fb-border: rgba(255, 255, 255, 0.1);
+    --fb-bevel: rgba(255, 255, 255, 0.08);
+    --fb-accent: #f47a3d;
+    --fb-accent-strong: #e0622d;
+    --fb-focus: rgba(244, 122, 61, 0.35);
+
+    --fb-shadow-stage:
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      0 0 0 1px var(--fb-glass-edge),
+      0 30px 70px -24px rgba(0, 0, 0, 0.75);
+    --fb-shadow-card:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 0 1px var(--fb-glass-edge),
+      0 14px 34px -16px rgba(0, 0, 0, 0.7);
+    --fb-shadow-well:
+      inset 0 1px 2px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    --fb-shadow-dock:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.5),
+      0 20px 44px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  * {
+    border-color: var(--fb-hairline);
+  }
+
+  body {
+    position: relative;
+    background-color: var(--fb-canvas);
+    color: var(--fb-ink);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.55;
+    transition: background-color 220ms ease-out, color 220ms ease-out;
+  }
+
+  /* Ambient liquid colour field: four soft blobs that drift very slowly. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -12vmax;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(44vmax 34vmax at 10% 8%, var(--fb-blob-1), transparent 70%),
+      radial-gradient(42vmax 36vmax at 92% 18%, var(--fb-blob-2), transparent 70%),
+      radial-gradient(48vmax 38vmax at 62% 92%, var(--fb-blob-3), transparent 72%),
+      radial-gradient(38vmax 34vmax at 4% 70%, var(--fb-blob-4), transparent 70%);
+    animation: fb-liquid-drift 48s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--fb-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgba(224, 98, 45, 0.2);
+  }
+}
+
+@keyframes fb-liquid-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.5vmax, -1.5vmax, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-2vmax, 2vmax, 0) scale(1.02);
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* The old dot grid is gone; the class stays as a harmless hook. */
+.bg-grid-pattern {
+  background-image: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Glass surfaces
+   --------------------------------------------------------------------------- */
+.skeuo-stage,
+.skeuo-card {
+  background:
+    radial-gradient(120% 70% at 0% 0%, var(--fb-glass-sheen), transparent 55%),
+    linear-gradient(160deg, var(--fb-glass-top) 0%, var(--fb-glass-bottom) 100%);
+  border: 1px solid var(--fb-glass-border);
+  box-shadow: var(--fb-shadow-card);
+  -webkit-backdrop-filter: blur(var(--fb-glass-blur)) saturate(170%);
+  backdrop-filter: blur(var(--fb-glass-blur)) saturate(170%);
+}
+
+.skeuo-stage {
+  box-shadow: var(--fb-shadow-stage);
+}
+
+/* Glass inside glass: the parent already blurs, so skip the costly re-blur. */
+:is(.skeuo-stage, .skeuo-card, .skeuo-obsidian) :is(.skeuo-stage, .skeuo-card) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Floating layers (menus, popovers, modal dialogs) sit over arbitrary content,
+   so they use a near-opaque glass for legibility. */
+.skeuo-card:is(.absolute, .fixed):not(.inset-0),
+.fixed.inset-0 :is(.skeuo-card, .skeuo-stage, .bg-zinc-900, .bg-surface-card, .bg-\[\#121214\], .bg-\[\#141417\]) {
+  background:
+    radial-gradient(120% 70% at 0% 0%, var(--fb-glass-sheen), transparent 55%),
+    var(--fb-popover);
+}
+
+/* Modal scrims: a light frosted veil instead of a near-black wall. */
+.fixed.inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70, .bg-black\/60, .bg-black\/55) {
+  background-color: rgba(15, 23, 42, 0.42);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+}
+
+html.dark .fixed.inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70, .bg-black\/60, .bg-black\/55) {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.skeuo-well {
+  background-color: var(--fb-well);
+  border: 1px solid transparent;
+  box-shadow: var(--fb-shadow-well);
+}
+
+.skeuo-well-sm {
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+html.dark .skeuo-well-sm {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.skeuo-obsidian {
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    rgba(14, 16, 22, 0.82);
+  color: #f4f5f7;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--fb-shadow-dock);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+
+.skeuo-badge-recessed {
+  background-color: rgba(255, 255, 255, 0.62);
+  color: var(--fb-ink-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.07);
+}
+
+html.dark .skeuo-badge-recessed {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.skeuo-card-interactive {
+  transition: border-color 220ms ease-out, box-shadow 260ms ease-out, background-color 220ms ease-out;
+}
+
+.skeuo-card-interactive:hover {
+  border-color: rgba(224, 98, 45, 0.4);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.95),
+    0 0 0 1px rgba(224, 98, 45, 0.18),
+    0 16px 36px -18px rgba(224, 98, 45, 0.35);
+}
+
+html.dark .skeuo-card-interactive:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(244, 122, 61, 0.28),
+    0 16px 36px -18px rgba(0, 0, 0, 0.8);
+}
+
+.skeuo-input {
+  background-color: var(--fb-well);
+  color: var(--fb-ink);
+  border: 1px solid var(--fb-hairline);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.skeuo-input::placeholder {
+  color: var(--fb-ink-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons — glossy liquid pills. Feedback: soft glow on hover, 0.98 press.
+   --------------------------------------------------------------------------- */
+.skeuo-btn-obsidian,
+.skeuo-btn-accent,
+.skeuo-btn-secondary {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-weight: 600;
+  isolation: isolate;
+  transition: filter 200ms ease-out, box-shadow 260ms ease-out, background-color 200ms ease-out, transform 120ms ease-out;
+}
+
+/* Liquid highlight: a soft specular band along the top edge of every button. */
+.skeuo-btn-obsidian::after,
+.skeuo-btn-accent::after,
+.skeuo-btn-secondary::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 50% 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0));
+  opacity: 0.9;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 260ms ease-out;
+}
+
+.skeuo-btn-obsidian:hover::after,
+.skeuo-btn-accent:hover::after,
+.skeuo-btn-secondary:hover::after {
+  opacity: 1;
+}
+
+.skeuo-btn-obsidian:active,
+.skeuo-btn-accent:active,
+.skeuo-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.skeuo-btn-accent {
+  background: linear-gradient(180deg, #f07a45 0%, var(--fb-accent) 55%, var(--fb-accent-strong) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(120, 40, 8, 0.25),
+    0 8px 20px -8px rgba(224, 98, 45, 0.65);
+}
+
+.skeuo-btn-accent:hover {
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(120, 40, 8, 0.25),
+    0 10px 26px -8px rgba(224, 98, 45, 0.75);
+}
+
+/* Portal-tinted primary button (sign-in pages): <button data-tone="sky"> */
+.skeuo-btn-tone {
+  --tone-from: #f07a45;
+  --tone-to: #c94f1d;
+  --tone-glow: rgba(224, 98, 45, 0.55);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(180deg, var(--tone-from) 0%, var(--tone-to) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+    0 10px 24px -10px var(--tone-glow);
+  transition: filter 200ms ease-out, box-shadow 260ms ease-out, transform 120ms ease-out;
+}
+.skeuo-btn-tone::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 50% 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  z-index: -1;
+  pointer-events: none;
+}
+.skeuo-btn-tone:hover {
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+    0 12px 28px -10px var(--tone-glow);
+}
+.skeuo-btn-tone:active {
+  transform: scale(0.985);
+}
+.skeuo-btn-tone[data-tone="sky"] {
+  --tone-from: #38a9e8;
+  --tone-to: #0369a1;
+  --tone-glow: rgba(3, 105, 161, 0.55);
+}
+.skeuo-btn-tone[data-tone="emerald"] {
+  --tone-from: #22b07d;
+  --tone-to: #047857;
+  --tone-glow: rgba(4, 120, 87, 0.5);
+}
+.skeuo-btn-tone[data-tone="indigo"] {
+  --tone-from: #7173f0;
+  --tone-to: #4338ca;
+  --tone-glow: rgba(67, 56, 202, 0.5);
+}
+.skeuo-btn-tone[data-tone="amber"] {
+  --tone-from: #e0912a;
+  --tone-to: #b45309;
+  --tone-glow: rgba(180, 83, 9, 0.5);
+}
+
+.skeuo-btn-obsidian {
+  background: linear-gradient(180deg, rgba(44, 48, 60, 0.96) 0%, rgba(18, 20, 27, 0.96) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 20px -10px rgba(15, 23, 42, 0.6);
+}
+
+.skeuo-btn-obsidian::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+}
+
+.skeuo-btn-obsidian:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 10px 26px -10px rgba(15, 23, 42, 0.7);
+}
+
+html.dark .skeuo-btn-obsidian {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+
+.skeuo-btn-secondary {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.6) 100%);
+  color: var(--fb-ink);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.08),
+    0 4px 12px -6px rgba(15, 23, 42, 0.18);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  backdrop-filter: blur(12px) saturate(170%);
+}
+
+.skeuo-btn-secondary::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+}
+
+.skeuo-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(224, 98, 45, 0.25),
+    0 6px 16px -6px rgba(15, 23, 42, 0.22);
+}
+
+html.dark .skeuo-btn-secondary {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 4px 12px -6px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .skeuo-btn-secondary::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+}
+
+html.dark .skeuo-btn-secondary:hover {
+  box-shadow: 0 0 0 1px rgba(244, 122, 61, 0.35), 0 6px 16px -6px rgba(0, 0, 0, 0.7);
+}
+
+/* Consistent, visible focus for every form control. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([data-chip-input]):focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.skeuo-input:focus-visible {
+  outline: none;
+  border-color: var(--fb-accent) !important;
+  box-shadow: 0 0 0 3px var(--fb-focus) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Legacy surface bridge: older portal modules still use zinc/hex dark utility
+   classes. Map them onto glass in both themes so every screen reads as one
+   system (light: frosted white, dark: frosted graphite).
+   --------------------------------------------------------------------------- */
+
+html .bg-\[\#121214\],
+html .bg-\[\#121214\]\/80,
+html .bg-\[\#141417\],
+html .bg-surface-card,
+html .bg-surface-card\/70,
+html .bg-surface,
+html .bg-zinc-900,
+html .bg-zinc-900\/80,
+html .bg-zinc-900\/70,
+html .bg-zinc-900\/60,
+html .bg-zinc-900\/50,
+html .bg-zinc-900\/40 {
+  background:
+    radial-gradient(120% 70% at 0% 0%, var(--fb-glass-sheen), transparent 55%),
+    linear-gradient(160deg, var(--fb-card-top) 0%, var(--fb-card-bottom) 100%);
+  border-color: var(--fb-glass-border);
+  box-shadow: var(--fb-shadow-card);
+  color: var(--fb-ink);
+}
+
+html .bg-\[\#09090b\],
+html .bg-\[\#18181b\],
+html .bg-zinc-950,
+html .bg-zinc-950\/80,
+html .bg-zinc-950\/60,
+html .bg-zinc-950\/40,
+html .bg-surface-lowest {
+  background-color: var(--fb-well);
+  border-color: var(--fb-hairline);
+  box-shadow: var(--fb-shadow-well);
+  color: var(--fb-ink);
+}
+
+/* Dark chips/counters (zinc-800) become soft slate chips on light glass. */
+html:not(.dark) .bg-zinc-800,
+html:not(.dark) .bg-zinc-800\/60,
+html:not(.dark) .bg-zinc-800\/70,
+html:not(.dark) .bg-zinc-800\/80 {
+  background-color: rgba(15, 23, 42, 0.07);
+  color: var(--fb-ink-secondary);
+}
+
+html:not(.dark) .bg-sky-950\/25 {
+  background-color: rgba(14, 165, 233, 0.1);
+}
+html:not(.dark) .bg-emerald-950\/25 {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+html:not(.dark) .bg-indigo-950\/25 {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+html:not(.dark) .bg-amber-950\/25 {
+  background-color: rgba(245, 158, 11, 0.11);
+}
+
+html:not(.dark) [data-skeuo-dark="true"],
+html:not(.dark) [data-skeuo-dark="true"] .text-white,
+html:not(.dark) .skeuo-obsidian,
+html:not(.dark) .skeuo-obsidian .text-white {
+  color: #ffffff;
+}
+
+html:not(.dark) [class*="bg-primary"].text-white,
+html:not(.dark) [class~="bg-emerald-500"].text-white,
+html:not(.dark) [class~="bg-emerald-600"].text-white,
+html:not(.dark) [class~="bg-emerald-700"].text-white,
+html:not(.dark) [class~="bg-emerald-800"].text-white,
+html:not(.dark) [class~="bg-emerald-900"].text-white,
+html:not(.dark) [class~="bg-green-500"].text-white,
+html:not(.dark) [class~="bg-green-600"].text-white,
+html:not(.dark) [class~="bg-green-700"].text-white,
+html:not(.dark) [class~="bg-green-800"].text-white,
+html:not(.dark) [class~="bg-green-900"].text-white,
+html:not(.dark) [class~="bg-teal-500"].text-white,
+html:not(.dark) [class~="bg-teal-600"].text-white,
+html:not(.dark) [class~="bg-teal-700"].text-white,
+html:not(.dark) [class~="bg-teal-800"].text-white,
+html:not(.dark) [class~="bg-teal-900"].text-white,
+html:not(.dark) [class~="bg-cyan-500"].text-white,
+html:not(.dark) [class~="bg-cyan-600"].text-white,
+html:not(.dark) [class~="bg-cyan-700"].text-white,
+html:not(.dark) [class~="bg-cyan-800"].text-white,
+html:not(.dark) [class~="bg-cyan-900"].text-white,
+html:not(.dark) [class~="bg-sky-500"].text-white,
+html:not(.dark) [class~="bg-sky-600"].text-white,
+html:not(.dark) [class~="bg-sky-700"].text-white,
+html:not(.dark) [class~="bg-sky-800"].text-white,
+html:not(.dark) [class~="bg-sky-900"].text-white,
+html:not(.dark) [class~="bg-blue-500"].text-white,
+html:not(.dark) [class~="bg-blue-600"].text-white,
+html:not(.dark) [class~="bg-blue-700"].text-white,
+html:not(.dark) [class~="bg-blue-800"].text-white,
+html:not(.dark) [class~="bg-blue-900"].text-white,
+html:not(.dark) [class~="bg-indigo-500"].text-white,
+html:not(.dark) [class~="bg-indigo-600"].text-white,
+html:not(.dark) [class~="bg-indigo-700"].text-white,
+html:not(.dark) [class~="bg-indigo-800"].text-white,
+html:not(.dark) [class~="bg-indigo-900"].text-white,
+html:not(.dark) [class~="bg-violet-500"].text-white,
+html:not(.dark) [class~="bg-violet-600"].text-white,
+html:not(.dark) [class~="bg-violet-700"].text-white,
+html:not(.dark) [class~="bg-violet-800"].text-white,
+html:not(.dark) [class~="bg-violet-900"].text-white,
+html:not(.dark) [class~="bg-purple-500"].text-white,
+html:not(.dark) [class~="bg-purple-600"].text-white,
+html:not(.dark) [class~="bg-purple-700"].text-white,
+html:not(.dark) [class~="bg-purple-800"].text-white,
+html:not(.dark) [class~="bg-purple-900"].text-white,
+html:not(.dark) [class~="bg-fuchsia-500"].text-white,
+html:not(.dark) [class~="bg-fuchsia-600"].text-white,
+html:not(.dark) [class~="bg-fuchsia-700"].text-white,
+html:not(.dark) [class~="bg-fuchsia-800"].text-white,
+html:not(.dark) [class~="bg-fuchsia-900"].text-white,
+html:not(.dark) [class~="bg-pink-500"].text-white,
+html:not(.dark) [class~="bg-pink-600"].text-white,
+html:not(.dark) [class~="bg-pink-700"].text-white,
+html:not(.dark) [class~="bg-pink-800"].text-white,
+html:not(.dark) [class~="bg-pink-900"].text-white,
+html:not(.dark) [class~="bg-rose-500"].text-white,
+html:not(.dark) [class~="bg-rose-600"].text-white,
+html:not(.dark) [class~="bg-rose-700"].text-white,
+html:not(.dark) [class~="bg-rose-800"].text-white,
+html:not(.dark) [class~="bg-rose-900"].text-white,
+html:not(.dark) [class~="bg-red-500"].text-white,
+html:not(.dark) [class~="bg-red-600"].text-white,
+html:not(.dark) [class~="bg-red-700"].text-white,
+html:not(.dark) [class~="bg-red-800"].text-white,
+html:not(.dark) [class~="bg-red-900"].text-white,
+html:not(.dark) [class~="bg-orange-500"].text-white,
+html:not(.dark) [class~="bg-orange-600"].text-white,
+html:not(.dark) [class~="bg-orange-700"].text-white,
+html:not(.dark) [class~="bg-orange-800"].text-white,
+html:not(.dark) [class~="bg-orange-900"].text-white,
+html:not(.dark) [class~="bg-amber-500"].text-white,
+html:not(.dark) [class~="bg-amber-600"].text-white,
+html:not(.dark) [class~="bg-amber-700"].text-white,
+html:not(.dark) [class~="bg-amber-800"].text-white,
+html:not(.dark) [class~="bg-amber-900"].text-white,
+html:not(.dark) [class~="bg-yellow-500"].text-white,
+html:not(.dark) [class~="bg-yellow-600"].text-white,
+html:not(.dark) [class~="bg-yellow-700"].text-white,
+html:not(.dark) [class~="bg-yellow-800"].text-white,
+html:not(.dark) [class~="bg-yellow-900"].text-white,
+html:not(.dark) [class~="bg-lime-500"].text-white,
+html:not(.dark) [class~="bg-lime-600"].text-white,
+html:not(.dark) [class~="bg-lime-700"].text-white,
+html:not(.dark) [class~="bg-lime-800"].text-white,
+html:not(.dark) [class~="bg-lime-900"].text-white,
+html:not(.dark) .bg-\[\#161618\] .text-white,
+html:not(.dark) .bg-primary,
+html:not(.dark) .skeuo-btn-accent,
+html:not(.dark) .skeuo-btn-accent .text-white,
+html:not(.dark) .bg-sky-500,
+html:not(.dark) .bg-sky-600,
+html:not(.dark) .bg-emerald-600,
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-amber-600,
+html:not(.dark) .bg-rose-600 {
+  color: #ffffff;
+}
+
+/* Light mode: legacy white text becomes ink on light glass, except on
+   saturated fills (buttons, chips), dark docks and accent buttons. */
+html:not(.dark) .text-white:not(.skeuo-btn-accent):not(.skeuo-btn-accent *):not(.skeuo-btn-tone):not(.skeuo-btn-tone *):not([data-skeuo-dark="true"]):not([data-skeuo-dark="true"] *):not(.skeuo-obsidian):not(.skeuo-obsidian *):not(.skeuo-btn-obsidian):not(.skeuo-btn-obsidian *):not([class*="bg-primary"]):not([class*="bg-primary"] *):not([class~="bg-emerald-500"]):not([class~="bg-emerald-500"] *):not([class~="bg-emerald-600"]):not([class~="bg-emerald-600"] *):not([class~="bg-emerald-700"]):not([class~="bg-emerald-700"] *):not([class~="bg-emerald-800"]):not([class~="bg-emerald-800"] *):not([class~="bg-emerald-900"]):not([class~="bg-emerald-900"] *):not([class~="bg-green-500"]):not([class~="bg-green-500"] *):not([class~="bg-green-600"]):not([class~="bg-green-600"] *):not([class~="bg-green-700"]):not([class~="bg-green-700"] *):not([class~="bg-green-800"]):not([class~="bg-green-800"] *):not([class~="bg-green-900"]):not([class~="bg-green-900"] *):not([class~="bg-teal-500"]):not([class~="bg-teal-500"] *):not([class~="bg-teal-600"]):not([class~="bg-teal-600"] *):not([class~="bg-teal-700"]):not([class~="bg-teal-700"] *):not([class~="bg-teal-800"]):not([class~="bg-teal-800"] *):not([class~="bg-teal-900"]):not([class~="bg-teal-900"] *):not([class~="bg-cyan-500"]):not([class~="bg-cyan-500"] *):not([class~="bg-cyan-600"]):not([class~="bg-cyan-600"] *):not([class~="bg-cyan-700"]):not([class~="bg-cyan-700"] *):not([class~="bg-cyan-800"]):not([class~="bg-cyan-800"] *):not([class~="bg-cyan-900"]):not([class~="bg-cyan-900"] *):not([class~="bg-sky-500"]):not([class~="bg-sky-500"] *):not([class~="bg-sky-600"]):not([class~="bg-sky-600"] *):not([class~="bg-sky-700"]):not([class~="bg-sky-700"] *):not([class~="bg-sky-800"]):not([class~="bg-sky-800"] *):not([class~="bg-sky-900"]):not([class~="bg-sky-900"] *):not([class~="bg-blue-500"]):not([class~="bg-blue-500"] *):not([class~="bg-blue-600"]):not([class~="bg-blue-600"] *):not([class~="bg-blue-700"]):not([class~="bg-blue-700"] *):not([class~="bg-blue-800"]):not([class~="bg-blue-800"] *):not([class~="bg-blue-900"]):not([class~="bg-blue-900"] *):not([class~="bg-indigo-500"]):not([class~="bg-indigo-500"] *):not([class~="bg-indigo-600"]):not([class~="bg-indigo-600"] *):not([class~="bg-indigo-700"]):not([class~="bg-indigo-700"] *):not([class~="bg-indigo-800"]):not([class~="bg-indigo-800"] *):not([class~="bg-indigo-900"]):not([class~="bg-indigo-900"] *):not([class~="bg-violet-500"]):not([class~="bg-violet-500"] *):not([class~="bg-violet-600"]):not([class~="bg-violet-600"] *):not([class~="bg-violet-700"]):not([class~="bg-violet-700"] *):not([class~="bg-violet-800"]):not([class~="bg-violet-800"] *):not([class~="bg-violet-900"]):not([class~="bg-violet-900"] *):not([class~="bg-purple-500"]):not([class~="bg-purple-500"] *):not([class~="bg-purple-600"]):not([class~="bg-purple-600"] *):not([class~="bg-purple-700"]):not([class~="bg-purple-700"] *):not([class~="bg-purple-800"]):not([class~="bg-purple-800"] *):not([class~="bg-purple-900"]):not([class~="bg-purple-900"] *):not([class~="bg-fuchsia-500"]):not([class~="bg-fuchsia-500"] *):not([class~="bg-fuchsia-600"]):not([class~="bg-fuchsia-600"] *):not([class~="bg-fuchsia-700"]):not([class~="bg-fuchsia-700"] *):not([class~="bg-fuchsia-800"]):not([class~="bg-fuchsia-800"] *):not([class~="bg-fuchsia-900"]):not([class~="bg-fuchsia-900"] *):not([class~="bg-pink-500"]):not([class~="bg-pink-500"] *):not([class~="bg-pink-600"]):not([class~="bg-pink-600"] *):not([class~="bg-pink-700"]):not([class~="bg-pink-700"] *):not([class~="bg-pink-800"]):not([class~="bg-pink-800"] *):not([class~="bg-pink-900"]):not([class~="bg-pink-900"] *):not([class~="bg-rose-500"]):not([class~="bg-rose-500"] *):not([class~="bg-rose-600"]):not([class~="bg-rose-600"] *):not([class~="bg-rose-700"]):not([class~="bg-rose-700"] *):not([class~="bg-rose-800"]):not([class~="bg-rose-800"] *):not([class~="bg-rose-900"]):not([class~="bg-rose-900"] *):not([class~="bg-red-500"]):not([class~="bg-red-500"] *):not([class~="bg-red-600"]):not([class~="bg-red-600"] *):not([class~="bg-red-700"]):not([class~="bg-red-700"] *):not([class~="bg-red-800"]):not([class~="bg-red-800"] *):not([class~="bg-red-900"]):not([class~="bg-red-900"] *):not([class~="bg-orange-500"]):not([class~="bg-orange-500"] *):not([class~="bg-orange-600"]):not([class~="bg-orange-600"] *):not([class~="bg-orange-700"]):not([class~="bg-orange-700"] *):not([class~="bg-orange-800"]):not([class~="bg-orange-800"] *):not([class~="bg-orange-900"]):not([class~="bg-orange-900"] *):not([class~="bg-amber-500"]):not([class~="bg-amber-500"] *):not([class~="bg-amber-600"]):not([class~="bg-amber-600"] *):not([class~="bg-amber-700"]):not([class~="bg-amber-700"] *):not([class~="bg-amber-800"]):not([class~="bg-amber-800"] *):not([class~="bg-amber-900"]):not([class~="bg-amber-900"] *):not([class~="bg-yellow-500"]):not([class~="bg-yellow-500"] *):not([class~="bg-yellow-600"]):not([class~="bg-yellow-600"] *):not([class~="bg-yellow-700"]):not([class~="bg-yellow-700"] *):not([class~="bg-yellow-800"]):not([class~="bg-yellow-800"] *):not([class~="bg-yellow-900"]):not([class~="bg-yellow-900"] *):not([class~="bg-lime-500"]):not([class~="bg-lime-500"] *):not([class~="bg-lime-600"]):not([class~="bg-lime-600"] *):not([class~="bg-lime-700"]):not([class~="bg-lime-700"] *):not([class~="bg-lime-800"]):not([class~="bg-lime-800"] *):not([class~="bg-lime-900"]):not([class~="bg-lime-900"] *) {
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .text-zinc-100:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink);
+}
+
+html:not(.dark) .text-zinc-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-zinc-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-on-surface-variant:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink-secondary);
+}
+
+html:not(.dark) .text-zinc-500:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: var(--fb-ink-muted);
+}
+
+/* Pastel semantic text -> readable tones on light glass */
+html:not(.dark) .text-sky-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-sky-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-sky-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #0369a1;
+}
+html:not(.dark) .text-emerald-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-emerald-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-emerald-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #047857;
+}
+html:not(.dark) .text-indigo-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-indigo-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-indigo-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #4338ca;
+}
+html:not(.dark) .text-amber-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-amber-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #b45309;
+}
+html:not(.dark) .text-rose-200:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-rose-300:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *),
+html:not(.dark) .text-rose-400:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *) {
+  color: #be123c;
+}
+
+html:not(.dark) .border-white\/\[0\.08\],
+html:not(.dark) .border-white\/\[0\.06\],
+html:not(.dark) .border-white\/\[0\.1\],
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-zinc-800,
+html:not(.dark) .border-zinc-800\/80 {
+  border-color: var(--fb-hairline);
+}
+
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([data-chip-input]),
+html:not(.dark) select,
+html:not(.dark) textarea {
+  background-color: rgba(255, 255, 255, 0.7);
+  color: var(--fb-ink);
+  border-color: var(--fb-hairline);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.55);
+}
+
+/* Without backdrop-filter support, or when the user asks for less
+   transparency, surfaces become solid so text never sits on colour noise. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .skeuo-stage,
+  .skeuo-card {
+    background: var(--fb-card-top);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .skeuo-stage,
+  .skeuo-card,
+  .skeuo-btn-secondary {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #ffffff;
+  }
+  html.dark .skeuo-stage,
+  html.dark .skeuo-card,
+  html.dark .skeuo-btn-secondary {
+    background: #1a1d26;
+  }
+  .skeuo-obsidian {
+    background: #12141b;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeuo-btn-obsidian:active,
+  .skeuo-btn-accent:active,
+  .skeuo-btn-secondary:active {
+    transform: none;
+  }
+}
+
+/* Monospace was used for ordinary UI text (statuses, counts, footers). Use the
+   body face with tabular digits instead; real codes stay readable. */
+.font-mono {
+  font-family: var(--font-outfit), "Outfit", var(--font-jakarta), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* Native file inputs: give the picker button the secondary-button look. */
+input[type="file"] {
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--fb-ink-secondary);
+  max-width: 100%;
+}
+input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--fb-hairline);
+  background: var(--fb-well);
+  color: var(--fb-ink);
+  font: 600 0.8125rem/1.2 var(--font-outfit), system-ui, sans-serif;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+  border-color: var(--fb-accent);
+}
+
+/* Light glass: every pastel text shade (incl. /opacity and hover variants) -> its readable 700 tone */
+html:not(.dark) [class*="text-sky-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-sky-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-sky-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-sky-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #0369a1;
+}
+html:not(.dark) [class*="text-blue-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-blue-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-blue-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-blue-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #1d4ed8;
+}
+html:not(.dark) [class*="text-cyan-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-cyan-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-cyan-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-cyan-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #0e7490;
+}
+html:not(.dark) [class*="text-teal-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-teal-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-teal-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-teal-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #0f766e;
+}
+html:not(.dark) [class*="text-emerald-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-emerald-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-emerald-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-emerald-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #047857;
+}
+html:not(.dark) [class*="text-green-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-green-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-green-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-green-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #15803d;
+}
+html:not(.dark) [class*="text-lime-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-lime-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-lime-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-lime-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #4d7c0f;
+}
+html:not(.dark) [class*="text-indigo-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-indigo-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-indigo-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-indigo-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #4338ca;
+}
+html:not(.dark) [class*="text-violet-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-violet-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-violet-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-violet-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #6d28d9;
+}
+html:not(.dark) [class*="text-purple-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-purple-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-purple-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-purple-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #7e22ce;
+}
+html:not(.dark) [class*="text-fuchsia-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-fuchsia-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-fuchsia-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-fuchsia-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #a21caf;
+}
+html:not(.dark) [class*="text-pink-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-pink-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-pink-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-pink-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #be185d;
+}
+html:not(.dark) [class*="text-amber-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-amber-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-amber-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-amber-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #b45309;
+}
+html:not(.dark) [class*="text-yellow-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-yellow-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-yellow-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-yellow-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #a16207;
+}
+html:not(.dark) [class*="text-orange-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-orange-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-orange-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-orange-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #c2410c;
+}
+html:not(.dark) [class*="text-rose-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-rose-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-rose-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-rose-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #be123c;
+}
+html:not(.dark) [class*="text-red-100"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-red-200"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-red-300"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone),
+html:not(.dark) [class*="text-red-400"]:not([data-skeuo-dark="true"] *):not(.skeuo-obsidian *):not(.skeuo-btn-accent):not(.skeuo-btn-tone) {
+  color: #b91c1c;
+}
+
+/* Placeholders must never look like a pre-filled value */
+input::placeholder,
+textarea::placeholder {
+  color: var(--fb-ink-muted) !important;
+  opacity: 0.6 !important;
+  font-weight: 400;
+}
+
+/* ===========================================================================
+   Mono bento layer (profile design prototype, LOG-179)
+   White glass panels + solid ink cards, black active pills, initials avatars.
+   Dark mode inverts the ink accents so the active pill stays the brightest.
+   =========================================================================== */
+:root {
+  --fb-ink-card: #0c0d10;
+  --fb-ink-card-2: #17191f;
+  --fb-ink-card-text: #f5f6f8;
+  --fb-ink-card-muted: rgba(245, 246, 248, 0.62);
+  --fb-pill-active-bg: #0c0d10;
+  --fb-pill-active-fg: #ffffff;
+}
+html.dark {
+  --fb-ink-card: #15171c;
+  --fb-ink-card-2: #1d2027;
+  --fb-ink-card-text: #f5f6f8;
+  --fb-ink-card-muted: rgba(245, 246, 248, 0.6);
+  --fb-pill-active-bg: #f4f4f5;
+  --fb-pill-active-fg: #0c0d10;
+}
+
+.fb-display {
+  font-family: var(--font-outfit), "Outfit", var(--font-jakarta), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 4.2vw, 3.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  color: var(--fb-ink);
+}
+
+.fb-panel {
+  border-radius: 28px;
+}
+
+.fb-ink-card {
+  border-radius: 28px;
+  color: var(--fb-ink-card-text);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(165deg, var(--fb-ink-card-2) 0%, var(--fb-ink-card) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 24px 50px -24px rgba(12, 13, 16, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.fb-ink-card .fb-muted { color: var(--fb-ink-card-muted); }
+
+/* Navigation pills: the active one is a solid ink capsule */
+.fb-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 9999px;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--fb-ink-secondary);
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+}
+.fb-nav-item:hover { background: var(--fb-well-deep); color: var(--fb-ink); }
+.fb-nav-item:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-nav-item[aria-current="page"],
+.fb-nav-item[data-active="true"],
+.fb-nav-active {
+  background: var(--fb-pill-active-bg) !important;
+  color: var(--fb-pill-active-fg) !important;
+  font-weight: 600;
+  box-shadow: 0 10px 22px -12px rgba(12, 13, 16, 0.6);
+}
+.fb-nav-item[aria-current="page"] *,
+.fb-nav-item[data-active="true"] *,
+.fb-nav-active * { color: inherit !important; }
+.fb-nav-idle { color: var(--fb-ink-secondary) !important; }
+.fb-nav-idle:hover { background: var(--fb-well-deep); color: var(--fb-ink) !important; }
+
+/* Light capsule (secondary chip / timeline highlight) */
+.fb-capsule {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0c0d10;
+  border: 1px solid rgba(12, 13, 16, 0.08);
+  box-shadow: 0 8px 18px -12px rgba(12, 13, 16, 0.35);
+}
+html.dark .fb-capsule { background: #f4f4f5; }
+
+/* Timeline bars */
+.fb-bar {
+  border-radius: 9999px;
+  background: var(--fb-pill-active-bg);
+  color: var(--fb-pill-active-fg);
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.55);
+}
+.fb-bar.fb-bar-today {
+  background: #ffffff;
+  color: #0c0d10;
+  border: 1px solid rgba(12, 13, 16, 0.12);
+}
+html.dark .fb-bar { background: #e9eaec; color: #0c0d10; }
+html.dark .fb-bar.fb-bar-today { background: var(--fb-accent); color: #fff; border-color: transparent; }
+
+/* Segmented day/period switch: light track, white raised active */
+.fb-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9999px; background: var(--fb-well-deep); }
+.fb-seg > button { border-radius: 9999px; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 500; color: var(--fb-ink-muted); }
+.fb-seg > button[aria-pressed="true"] { background: var(--fb-card-top); color: var(--fb-ink); font-weight: 600; box-shadow: 0 4px 12px -6px rgba(12, 13, 16, 0.3); }
+
+/* Initials avatar */
+.fb-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  background: radial-gradient(120% 120% at 30% 20%, #4b4f58 0%, #1a1c21 55%, #0c0d10 100%);
+  box-shadow: 0 0 0 3px var(--fb-card-top), 0 12px 24px -12px rgba(12, 13, 16, 0.6);
+}
+.fb-ink-card .fb-avatar { box-shadow: 0 0 0 2px var(--fb-ink-card); background: radial-gradient(120% 120% at 30% 20%, #f4f4f5 0%, #b9bcc3 100%); color: #0c0d10; }
+
+/* Progress line */
+.fb-progress { height: 6px; border-radius: 9999px; background: var(--fb-well-deep); overflow: hidden; }
+.fb-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--fb-ink); transition: width 500ms ease; }
+.fb-ink-card .fb-progress { background: rgba(255, 255, 255, 0.14); }
+.fb-ink-card .fb-progress > span { background: #fff; }
+
+/* File row */
+.fb-file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 18px;
+  padding: 0.7rem 0.85rem;
+  background: var(--fb-well);
+  box-shadow: var(--fb-shadow-well);
+  transition: transform 160ms ease;
+}
+.fb-file-row:hover { transform: translateX(2px); }
+
+/* Circle icon button */
+.fb-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 9999px;
+  background: var(--fb-pill-active-bg);
+  color: var(--fb-pill-active-fg);
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.6);
+  transition: transform 160ms ease;
+}
+.fb-icon-btn:hover { transform: scale(1.05); }
+.fb-icon-btn:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-icon-btn-light { background: var(--fb-card-top); color: var(--fb-ink); box-shadow: var(--fb-shadow-card); }
+
+/* Decorative ring for the resume card (no data meaning) */
+.fb-ring {
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 50% 50%, #e9eaec 0 18%, transparent 19%),
+    repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.85) 0deg 2deg, rgba(255, 255, 255, 0.12) 2deg 7deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 30%, #000 31% 70%, transparent 71%), radial-gradient(circle, #000 0 18%, transparent 19%);
+  mask: radial-gradient(circle, transparent 0 30%, #000 31% 70%, transparent 71%), radial-gradient(circle, #000 0 18%, transparent 19%);
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6));
+  animation: fb-ring-spin 60s linear infinite;
+}
+@keyframes fb-ring-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .fb-ring { animation: none; } }
+
+/* Legacy portal modules: solid blue/indigo/sky action buttons follow the mono
+   system (ink pill; light pill in dark mode). Only buttons and links - fills,
+   dots and progress bars keep their colour. */
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent) {
+  background: var(--fb-pill-active-bg) !important;
+  color: var(--fb-pill-active-fg) !important;
+  border-color: transparent !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 20px -12px rgba(12, 13, 16, 0.55) !important;
+}
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent) * {
+  color: inherit !important;
+}
+html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg-sky-600, .bg-indigo-600):not(.fb-keep-accent):hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+/* Legacy cards: same generous radius as the new panels. */
+html :is(.bg-surface-card, .bg-\[\#121214\], .bg-\[\#141417\], .bg-zinc-900, .bg-surface):is(.rounded-lg, .rounded-xl) {
+  border-radius: 20px;
+}
+
+/* ===========================================================================
+   Device shell (Issue #263): skeuomorphic "hardware" frame from the
+   reference video: dark top capsule, floating left rail with chrome knobs,
+   one screen slab with corner screws, floating section capsule at the bottom
+   and a staggered power-on reveal. Colours come from the existing tokens.
+   =========================================================================== */
+:root {
+  --fb-metal-hi: #ffffff;
+  --fb-metal-mid: #dfe2e7;
+  --fb-metal-lo: #9ca1aa;
+  --fb-screw-slot: rgba(15, 23, 42, 0.38);
+}
+html.dark {
+  --fb-metal-hi: #c9ccd3;
+  --fb-metal-mid: #7c818b;
+  --fb-metal-lo: #3a3e46;
+  --fb-screw-slot: rgba(0, 0, 0, 0.6);
+}
+
+/* Screen slab: never uses transform/filter so fixed descendants stay fixed. */
+.fb-stage-shell { width: 100%; padding: 0 0.75rem; }
+@media (min-width: 640px) { .fb-stage-shell { padding: 0 1.5rem; } }
+@media (min-width: 1024px) { .fb-stage-shell { padding-left: 6.5rem; padding-right: 1.5rem; } }
+.fb-slab {
+  position: relative;
+  max-width: 1480px;
+  margin: 0 auto;
+  min-height: calc(100vh - 9rem);
+  border-radius: 30px;
+  background:
+    radial-gradient(140% 60% at 50% 0%, var(--fb-glass-sheen), transparent 60%),
+    linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-stage) 100%);
+  border: 1px solid var(--fb-glass-border);
+  box-shadow: var(--fb-shadow-stage), inset 0 0 0 6px color-mix(in srgb, var(--fb-card-top) 40%, transparent);
+}
+.fb-slab::before,
+.fb-slab::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(45deg, transparent 42%, var(--fb-screw-slot) 43% 57%, transparent 58%),
+    radial-gradient(circle at 35% 30%, var(--fb-metal-hi) 0%, var(--fb-metal-mid) 45%, var(--fb-metal-lo) 100%);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.18), 0 1px 0 var(--fb-bevel);
+}
+.fb-slab::before { left: 14px; }
+.fb-slab::after { right: 14px; }
+@media (max-width: 639px) {
+  .fb-slab { border-radius: 24px; }
+  .fb-slab::before, .fb-slab::after { top: 10px; width: 7px; height: 7px; }
+  .fb-slab::before { left: 10px; }
+  .fb-slab::after { right: 10px; }
+}
+
+/* Dark top capsule */
+.fb-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0.4rem 0.45rem;
+  border-radius: 9999px;
+  box-shadow: var(--fb-shadow-dock), inset 0 -1px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.fb-topbar-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0c0d10 !important;
+  background: radial-gradient(circle at 35% 28%, #ffffff, #d7dae0 50%, #8f949d);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 4px 10px -3px rgba(0, 0, 0, 0.6);
+}
+.fb-topbar-avatar * { color: #0c0d10 !important; }
+.fb-topbar-well {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.3rem 0.9rem 0.3rem 0.3rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+}
+.fb-orb {
+  position: relative;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), transparent 38%),
+    conic-gradient(from 0deg, var(--fb-accent), #ffffff, #8b93a3, var(--fb-accent));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--fb-accent) 55%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  animation: fb-orb-spin 9s linear infinite;
+}
+@keyframes fb-orb-spin { to { transform: rotate(360deg); } }
+.fb-topbar-chip {
+  /* display comes from utilities (inline-flex / hidden sm:inline-flex) */
+  gap: 0.4rem;
+  border-radius: 9999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f4f5f7;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: background-color 160ms ease;
+}
+.fb-topbar-chip:hover { background: rgba(255, 255, 255, 0.15); }
+.fb-topbar-chip.fb-topbar-chip-accent { background: var(--fb-accent); color: #ffffff; }
+.fb-topbar-chip.fb-topbar-chip-accent:hover { background: var(--fb-accent-strong); }
+
+/* Chrome knob buttons (theme, chat, logout, active rail item) */
+.fb-knob,
+.fb-topbar .skeuo-btn-secondary.rounded-full {
+  background: radial-gradient(circle at 35% 28%, #ffffff 0%, #e4e6ea 40%, #a6abb3 100%) !important;
+  color: #0c0d10 !important;
+  border: 0 !important;
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.22), inset 0 1px 1px #ffffff, 0 4px 10px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.45) !important;
+}
+.fb-knob *,
+.fb-topbar .skeuo-btn-secondary.rounded-full > svg { color: #0c0d10 !important; }
+
+/* Floating left rail (desktop) */
+.fb-rail {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-radius: 9999px;
+}
+.fb-rail-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: #c3c7cf;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.fb-rail-btn:hover { background: rgba(255, 255, 255, 0.09); color: #ffffff; }
+.fb-rail-btn:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-rail-btn[aria-current="page"] { transform: scale(1.04); }
+.fb-rail-btn[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  right: -0.45rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 9999px;
+  background: var(--fb-accent);
+  box-shadow: 0 0 6px var(--fb-accent);
+}
+.fb-rail-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 0.9rem);
+  top: 50%;
+  transform: translate(-4px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #0c0d10;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -8px rgba(12, 13, 16, 0.45), 0 0 0 1px rgba(12, 13, 16, 0.08);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.fb-rail-btn[data-tip]:hover::after,
+.fb-rail-btn[data-tip]:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+.fb-rail-sep { width: 1.25rem; height: 1px; margin: 0.2rem 0; background: rgba(255, 255, 255, 0.14); }
+
+/* Floating section capsule at the bottom: a portal sidebar re-housed */
+body[data-section-dock] .fb-main-dock { display: none !important; }
+.fb-section-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 44;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: calc(100vw - 1.5rem);
+  overflow-x: auto;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  color: #f4f5f7;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    rgba(14, 16, 22, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--fb-shadow-dock), inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+@media (min-width: 1024px) { .fb-section-dock { left: calc(50% + 2.5rem); max-width: calc(100vw - 9rem); } }
+.fb-section-dock > div { display: none !important; }
+.fb-section-dock .fb-nav-item {
+  flex-shrink: 0;
+  width: auto !important;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.75rem;
+  justify-content: center;
+}
+.fb-section-dock .fb-nav-item,
+.fb-section-dock .fb-nav-idle { color: #c3c7cf !important; background: transparent; }
+.fb-section-dock .fb-nav-item:not(.fb-nav-active):not([aria-current="page"]):hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.09); }
+.fb-section-dock .fb-nav-item:is([aria-current="page"], .fb-nav-active),
+.fb-section-dock .fb-nav-active {
+  background: linear-gradient(180deg, #ffffff, #e9ebee) !important;
+  color: #0c0d10 !important;
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.6) !important;
+}
+.fb-section-dock .fb-nav-item > span:first-child { gap: 0.4rem; }
+
+/* Cylinder bars and recessed segments */
+.fb-bar { background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.22) 38%, rgba(255, 255, 255, 0.05) 60%, rgba(0, 0, 0, 0.22)); }
+.fb-seg { box-shadow: var(--fb-shadow-well); }
+
+@media (prefers-reduced-motion: reduce) { .fb-orb { animation: none; } }
+
+/* Active chat knob in the top capsule */
+.fb-topbar .fb-nav-active.rounded-full { background: var(--fb-accent) !important; color: #ffffff !important; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 4px 12px -3px color-mix(in srgb, var(--fb-accent) 70%, transparent) !important; }
+
+/* ===========================================================================
+   Motion & tactile layer (Issue #265): every control behaves like a physical
+   key. Press depth, pointer ripple, busy sheen and settle glow come from
+   InteractionLayer; gliders from useGlider; the theme switch from the View
+   Transitions API. The global prefers-reduced-motion rule above turns the
+   animations off.
+   =========================================================================== */
+:root {
+  --fb-ease-spring: cubic-bezier(0.3, 1.3, 0.4, 1);
+  --fb-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --fb-press-depth: translateY(1px) scale(0.97);
+}
+
+/* Keys: lift a hair on hover, sink on press (mouse, touch and keyboard). */
+:where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip, .fb-rail-btn) {
+  -webkit-tap-highlight-color: transparent;
+  transition-property: transform, background-color, color, box-shadow, filter, opacity, border-color;
+  transition-duration: 160ms;
+  transition-timing-function: var(--fb-ease-out);
+}
+:where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip):not(:disabled):is(:active, .fb-pressed) {
+  transform: var(--fb-press-depth);
+  transition-duration: 70ms;
+}
+:is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-tone):not(:disabled):hover { transform: translateY(-1px); }
+:is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-secondary, .skeuo-btn-tone):not(:disabled):is(:active, .fb-pressed) {
+  transform: var(--fb-press-depth);
+  filter: brightness(0.96);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.fb-icon-btn:not(:disabled):hover { transform: translateY(-1px) scale(1.05); }
+.fb-icon-btn:not(:disabled):is(:active, .fb-pressed) { transform: scale(0.92); }
+.fb-rail-btn:hover { transform: scale(1.08); }
+.fb-rail-btn:is(:active, .fb-pressed) { transform: scale(0.9); transition-duration: 70ms; }
+:where(button, [role="button"]):disabled { cursor: not-allowed; }
+
+/* One focus ring for keyboard users (zero specificity: components may override). */
+:where(button, [role="button"], [role="tab"], [role="switch"], a):focus-visible {
+  outline: 2px solid var(--fb-accent);
+  outline-offset: 2px;
+}
+
+/* Pointer ripple in the button colour (InteractionLayer sets the origin). */
+.fb-ripple::before {
+  content: "";
+  position: absolute;
+  left: var(--fb-rx, 50%);
+  top: var(--fb-ry, 50%);
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, color-mix(in srgb, currentColor 34%, transparent) 0%, transparent 70%);
+  animation: fb-ripple 600ms var(--fb-ease-out) forwards;
+}
+@keyframes fb-ripple {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(var(--fb-rs, 8)); opacity: 0; }
+}
+
+/* Waiting on the server: a light sweep across the key, then a settle glow. */
+.fb-busy { cursor: progress !important; }
+.fb-busy-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, currentColor 22%, transparent) 50%, transparent 70%);
+  background-size: 250% 100%;
+  animation: fb-busy-sweep 1.1s linear infinite;
+}
+@keyframes fb-busy-sweep {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+.fb-settle { animation: fb-settle 700ms var(--fb-ease-out); }
+@keyframes fb-settle {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--fb-accent) 55%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Gliders: one physical pill or knob slides to the active item. */
+.fb-glider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  opacity: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+/* Position comes from the liquid spring loop in lib/motion.ts (no CSS easing). */
+[data-glider="on"] .fb-glider { transition: opacity 200ms ease; }
+.fb-glider { will-change: transform, width, height; }
+[data-glider] > :not(.fb-glider):not(.fb-goo) { position: relative; z-index: 1; }
+
+/* Liquid layer (Issue #271): the pill and its droplets melt together through the
+   #fb-goo SVG filter (GooFilter.tsx); the filter also draws the shadow, so the
+   pill's own box-shadow is dropped inside the layer. */
+.fb-goo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: url(#fb-goo);
+}
+.fb-goo .fb-glider { box-shadow: none !important; }
+.fb-drop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: #eceef1;
+  will-change: transform, width, height;
+}
+.fb-goo:has(.fb-glider-knob) .fb-drop { background: #cfd2d8; }
+.fb-glider-pill {
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.95), transparent 55%),
+    linear-gradient(180deg, #ffffff, #e6e8ec);
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+}
+.fb-glider-knob {
+  background: radial-gradient(circle at 35% 28%, #ffffff 0%, #e4e6ea 40%, #a6abb3 100%);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.22), inset 0 1px 1px #ffffff, 0 4px 10px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.fb-section-dock[data-glider] :is(.fb-nav-item[aria-current="page"], .fb-nav-active) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fb-rail .fb-rail-btn[aria-current="page"] { color: #ffffff; }
+.fb-rail .fb-rail-btn[aria-current="page"]:hover { background: transparent; }
+
+/* Text follows the liquid: dark only where the drop actually covers an item
+   (data-under-glider is set every frame by useGlider), light everywhere else. */
+.fb-section-dock[data-glider] .fb-nav-item,
+.fb-rail[data-glider] .fb-rail-btn,
+.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo) { transition: background-color 160ms ease, transform 160ms ease; } /* colour flips with the drop, no lag */
+.fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]) { color: #c3c7cf !important; }
+.fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]):hover { color: #ffffff !important; }
+.fb-rail[data-glider] .fb-rail-btn:not([data-under-glider]):hover { color: #ffffff; }
+.fb-section-dock[data-glider] .fb-nav-item[data-under-glider] { color: #ffffff !important; background: transparent !important; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+.fb-rail[data-glider] .fb-rail-btn:not([data-under-glider]) { color: #c3c7cf; }
+.fb-rail[data-glider] .fb-rail-btn[data-under-glider] { color: #ffffff; background: transparent; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }
+.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo):not([data-under-glider]) { color: #d4d4d8 !important; }
+.fb-main-dock [data-glider] > [data-under-glider] { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+
+/* Screen refresh band on the slab when a page or section changes. */
+.fb-slab-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--fb-glass-sheen) 70%, transparent) 50%, transparent 100%);
+  background-size: 100% 22%;
+  background-repeat: no-repeat;
+}
+
+/* Dialogs and their scrims fade and pop in when they appear. */
+.fixed.inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70, .bg-black\/60, .bg-black\/55, .bg-black\/50, .bg-black\/40) {
+  animation: fb-scrim-in 200ms ease-out both;
+}
+.fixed.inset-0 > :is(.skeuo-card, [role="dialog"]),
+[role="dialog"][aria-modal="true"]:not(.fixed) {
+  animation: fb-pop-in 300ms var(--fb-ease-spring) both;
+}
+@keyframes fb-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fb-pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Inline alerts slide in instead of popping. */
+[role="alert"], [role="status"]:not(:empty) { animation: fb-alert-in 260ms var(--fb-ease-out) both; }
+@keyframes fb-alert-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Progress fills grow from empty. */
+.fb-progress > span { animation: fb-fill-in 700ms var(--fb-ease-out) both; transform-origin: left center; }
+@keyframes fb-fill-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Theme switch: the new theme grows as a circle out of the pressed button. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }

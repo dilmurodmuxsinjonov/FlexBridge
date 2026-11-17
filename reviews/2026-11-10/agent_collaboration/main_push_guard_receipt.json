@@ -1,0 +1,13 @@
+{
+  "scope": "Local Git push guard only; GitHub API merges still require controller base verification",
+  "hook_sha256": "bb2593fd2f708a69ed2434e626ce148c25590a5a980f676a805b9186c91e751b",
+  "hooks_path": "D:\\Codex\\FlexBridge-agents\\hooks",
+  "manual_non_network_checks": {
+    "main": 1,
+    "master": 1,
+    "integration/r1-agent-collaboration": 0,
+    "feature/70-legacy-academic-notices": 0
+  },
+  "main_freeze_sha": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "integration_branch": "integration/r1-agent-collaboration"
+}

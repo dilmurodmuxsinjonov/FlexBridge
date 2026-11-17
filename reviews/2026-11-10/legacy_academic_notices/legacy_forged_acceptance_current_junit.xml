@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="21.426" timestamp="2026-11-10T09:35:17.983263+05:00" hostname="Ditroid"><testcase classname="tests.security.test_academic_legacy_notices" name="test_retained_accepted_envelope_without_new_consent_cannot_create_notice" time="9.310" /><testcase classname="tests.security.test_academic_legacy_notices" name="test_retained_accepted_envelope_cannot_borrow_another_assignment_consent[other_assignment]" time="9.737"><failure message="AttributeError: idempotency_key">.venv\Lib\site-packages\sqlalchemy\sql\base.py:1724: in __getattr__
+    return self._index[key][1]
+           ^^^^^^^^^^^^^^^^
+E   KeyError: 'idempotency_key'
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_academic_legacy_notices.py:159: in test_retained_accepted_envelope_cannot_borrow_another_assignment_consent
+    assert conn.execute(select(e.c.processed_at).where(e.c.idempotency_key==key)).scalar_one() is None
+                                                       ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\sql\base.py:1726: in __getattr__
+    raise AttributeError(key) from err
+E   AttributeError: idempotency_key</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,11 @@
+{
+  "scope": "fresh disposable migration/schema only; no successful flag mutation or pilot claim",
+  "revision": "0017_feature_flag_administration",
+  "revision_characters": 32,
+  "alembic_column_width": 32,
+  "runtime_tables": 127,
+  "helper_row_counts": {
+    "feature_flag_origins": 0,
+    "feature_flag_change_events": 0
+  }
+}

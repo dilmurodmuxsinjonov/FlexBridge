@@ -1,0 +1,81 @@
+{
+  "head": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+  "base": "1f717899242e97e7c1fce3cddda2df44dd7953b1",
+  "changed_code_test_blobs": 16,
+  "reviewed_runtime_files": 7,
+  "matching_files": [
+    "backend/alembic/versions/0016_academic_reviews.py",
+    "backend/app/api/v1/academic_admission.py",
+    "backend/app/api/v1/internship_logs.py",
+    "backend/app/db/academic_admission.py",
+    "backend/app/db/storage.py",
+    "backend/app/services/academic_reviews.py",
+    "backend/app/services/internship_logs.py",
+    "backend/tests/security/academic_review_observer.py",
+    "backend/tests/security/test_academic_admission.py",
+    "backend/tests/security/test_academic_authority.py",
+    "backend/tests/security/test_academic_migration.py",
+    "backend/tests/security/test_academic_review_intents.py",
+    "backend/tests/security/test_academic_review_migration.py",
+    "backend/tests/security/test_academic_reviews.py",
+    "backend/tests/security/test_enrollment_migration.py",
+    "backend/tests/security/test_regressions.py"
+  ],
+  "pr": {
+    "baseRefOid": "1f717899242e97e7c1fce3cddda2df44dd7953b1",
+    "comments": [],
+    "headRefOid": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+    "isDraft": true,
+    "mergeStateStatus": "CLEAN",
+    "reviews": [],
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-10T04:41:07Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42756093057/job/129630714618",
+        "name": "backend",
+        "startedAt": "2026-11-10T04:28:33Z",
+        "status": "COMPLETED",
+        "workflowName": "PostgreSQL backend regressions"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-10T04:40:32Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42756086124/job/129630691664",
+        "name": "backend",
+        "startedAt": "2026-11-10T04:28:29Z",
+        "status": "COMPLETED",
+        "workflowName": "PostgreSQL backend regressions"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 42756093057,
+      "event": "pull_request",
+      "headSha": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+      "status": "completed",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42756093057",
+      "pytest_summaries": [
+        "1084 passed, 1 warning in 723.27s"
+      ],
+      "failed_tests": []
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42756086124,
+      "event": "push",
+      "headSha": "2928425b77ba41db633038a1c6f419e12fb6b2e8",
+      "status": "completed",
+      "url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/actions/runs/42756086124",
+      "pytest_summaries": [
+        "1084 passed, 1 warning in 692.20s"
+      ],
+      "failed_tests": []
+    }
+  ]
+}

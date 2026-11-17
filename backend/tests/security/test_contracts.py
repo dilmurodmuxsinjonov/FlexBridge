@@ -53,14 +53,14 @@ def test_submitted_log_summary_database_immutable(client,identities,organization
     owner=identities('OWNER',organization);candidate=identities();p=placement_fixture(candidate,owner,organization)
     from datetime import date
     from app.services.internship_logs import internship_log_service
-    log=internship_log_service.create_daily_log_with_revision(placement_id=p['id'],author_id=candidate['user_id'],log_date=date.today().isoformat(),summary_text='Test work',total_minutes=60)
+    log=internship_log_service.create_daily_log_with_revision(actor=billing_actor(candidate),placement_id=p['id'],log_date=date.today().isoformat(),summary_text='Test work',total_minutes=60)
     with pytest.raises(IntegrityError),transaction() as conn:
         conn.execute(table('log_revisions').update().where(table('log_revisions').c.id==log['current_revision_id']).values(summary='Mutated'))
 
 def test_unimplemented_contract_never_claims_success(client,identities):
     user=identities()
     # An endpoint outside this remediation remains explicitly unimplemented.
-    r=client.put('/api/v1/me/notification-preferences',json={},headers=user['headers'])
+    r=client.post('/api/v1/unimplemented-contract-test',headers=user['headers'])
     assert r.status_code==501,r.text
     assert r.json()['status']=='NOT_IMPLEMENTED'
 

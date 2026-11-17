@@ -1,0 +1,134 @@
+{
+  "base_sha": "e5068a07bc4b94f9238883b80e817fd62cc6e709",
+  "base_branch": "integration/r1-agent-collaboration",
+  "main_frozen_sha": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "files": {
+    "backend/app/core/iam_http.py": {
+      "raw_sha256": "a961e2f425d2710f0e4bf4c46f80fd5b4b33f8cdfe3b40e6f2292efb5f1fc80d",
+      "normalized_sha256": "4206fa126208a8646ed4adb1e1bbc1de70259949e67c795e3497f139c92ea072",
+      "index_blob": "e0a29b9b91089134e8f987390fb693a3c46f0f38"
+    },
+    "backend/app/db/storage.py": {
+      "raw_sha256": "a481f2d2bb656c0055c805aa1ad1b7614f9336ceec8ded1cf69a3be180acf975",
+      "normalized_sha256": "62acf5683ae6b41a66cbdb06c5decb3a542632fcaf2461bb0d4e15aa34ab0865",
+      "index_blob": "281c4d2cb470b384c818c67d9a372c078b4bae37"
+    },
+    "backend/app/main.py": {
+      "raw_sha256": "6d38c31106e0e3ea5488af4e66f116853ccaeb72f07968cbdf4390562688cbc3",
+      "normalized_sha256": "4cab14a282f36d8b0a2dc594058548a9425dea0f74ca0b854e99872ce782c658",
+      "index_blob": "54ae84b11f940dfc16dd3262711b523b735c44a6"
+    },
+    "backend/app/services/feature_flags.py": {
+      "raw_sha256": "8c9c5c548a4af92e729815424759eaf6b4c72dc9baf4a6be8da6a61975fdb203",
+      "normalized_sha256": "2b0ea75ae67d3cdc42fa3a86d11e476f770a39f535ee715be60bd8e6f15def85",
+      "index_blob": "938299f28278d3b1b2626cd0d36968301bd9c492"
+    },
+    "backend/app/services/operations.py": {
+      "raw_sha256": "b8cea114a1e4240d9270905eb6626dcc7f5d3208797bcc1c48b705c72297aefb",
+      "normalized_sha256": "7072017c02a0b3ed378f74be0a055d6e95d34c1669aae0420f6b474d379ba7da",
+      "index_blob": "b5c8e962ee4f79ddc005bce742e624f5323164d6"
+    },
+    "backend/tests/security/test_academic_migration.py": {
+      "raw_sha256": "2907f135792a3af27232fd57143bdf8de0ce590308a492c6ae3469eed425eba1",
+      "normalized_sha256": "8d08a4bafe9439f4cb63d4879bb0c91e304e7cfa597604e079ded49d64ad8a79",
+      "index_blob": "56f684344b32e589c01e02e5814b90317f5d6a1a"
+    },
+    "backend/tests/security/test_academic_review_migration.py": {
+      "raw_sha256": "438ef702d0938e58fe3a2960f50977ef592a3237012393c8c5197755c8647892",
+      "normalized_sha256": "d9b56019943fc6f4a2ce00548c0bb2925317653df7ca0b750fc95c811dde455c",
+      "index_blob": "a0c59db40a7cf01f8f133d2e0677d65f6cda3e71"
+    },
+    "backend/tests/security/test_enrollment_migration.py": {
+      "raw_sha256": "b85386fa4c58997435a06b7972c08329b6f2e5f74424e4c29bd26c222b385d2a",
+      "normalized_sha256": "4535dbc9baa595727716e78c6ba1bec6ec57596588e87b136bffe13a19b91fb4",
+      "index_blob": "834a088623af3d0946444f5d35e2fde27a690d81"
+    },
+    "backend/tests/security/test_regressions.py": {
+      "raw_sha256": "82c7c4aab76e5b58a5051ccf612d74b4115cad3137eafde2f4a22c3c4c5bb3c9",
+      "normalized_sha256": "e1e20f64da2406b0e8a5b895a73b963e468fd93fcc2abf918f13ce88e13f9bda",
+      "index_blob": "380632877554713adae2b20e51b32c3664f5301b"
+    },
+    "backend/tests/test_s2_1_3_retention_flags.py": {
+      "raw_sha256": "71654213bf92aa2e674c309abeae5e6552cf6bd0209a260a5b13169079fe7d31",
+      "normalized_sha256": "846e979fee4801719206d8403238eb508327f515f222a8c6b2148e9aa69201f1",
+      "index_blob": "cf98936e7578aeb47d81afda0aa6b0924d3150db"
+    },
+    "backend/FEATURE_FLAG_ADMINISTRATION.md": {
+      "raw_sha256": "c2f610351d63f4d1058eeb8c7ff5aef95a2d3e73e740e3f9d7bcf7507b229988",
+      "normalized_sha256": "c2f610351d63f4d1058eeb8c7ff5aef95a2d3e73e740e3f9d7bcf7507b229988",
+      "index_blob": "54e3a27d89fdf494ff08d126e58d8fdaee60aca0"
+    },
+    "backend/alembic/versions/0017_feature_flag_administration.py": {
+      "raw_sha256": "9479cdc809be256ed09272bc9fd1b0ffb1c379f63830bb223ca20b229075e50a",
+      "normalized_sha256": "9479cdc809be256ed09272bc9fd1b0ffb1c379f63830bb223ca20b229075e50a",
+      "index_blob": "456454029bc30c4fcf8012676c2040ce3b40a4e1"
+    },
+    "backend/app/api/v1/feature_flags.py": {
+      "raw_sha256": "6d23f27591d2a8f97f1b897765c97d196aaa1fd0e6bceddc52ca52b473a1a585",
+      "normalized_sha256": "6d23f27591d2a8f97f1b897765c97d196aaa1fd0e6bceddc52ca52b473a1a585",
+      "index_blob": "32444122af534bac7c1d852830c65b0cc3f085fb"
+    },
+    "backend/app/db/feature_flag_admin.py": {
+      "raw_sha256": "044e5d88d6a039d2c9171235848551abe7c8c0abb1e177e52e347e6b32fbeb81",
+      "normalized_sha256": "044e5d88d6a039d2c9171235848551abe7c8c0abb1e177e52e347e6b32fbeb81",
+      "index_blob": "3edb375eb6a844f70a8c9f2b3c55988ada0e93f6"
+    },
+    "backend/app/services/feature_flag_admin.py": {
+      "raw_sha256": "1e56974e6de1994972348d8221a54431695d5bd88020f7defa37670af9cff546",
+      "normalized_sha256": "1e56974e6de1994972348d8221a54431695d5bd88020f7defa37670af9cff546",
+      "index_blob": "39a7a05ad3641c8c9e757a254340eb23a0c895c8"
+    },
+    "backend/tests/security/test_feature_flag_admin_api121.py": {
+      "raw_sha256": "18b45092f9b67c019e6a5f2c12e641083376164e705f6955836ab45e21f7f59b",
+      "normalized_sha256": "18b45092f9b67c019e6a5f2c12e641083376164e705f6955836ab45e21f7f59b",
+      "index_blob": "116999ad70a672edbfb1a462dcbb65f9b15d4b6b"
+    },
+    "backend/tests/security/test_feature_flag_http_boundary.py": {
+      "raw_sha256": "04fdc962fc6ec9d87ea3682f70f3ebd994b323592e9343106d7214e56ed83a26",
+      "normalized_sha256": "04fdc962fc6ec9d87ea3682f70f3ebd994b323592e9343106d7214e56ed83a26",
+      "index_blob": "c4acf25e9c9909e5ca794d4c46e24c0f05c5946f"
+    },
+    "backend/tests/security/test_feature_flag_readiness_and_transactions.py": {
+      "raw_sha256": "15cbb5055d20f03e0d1fb599e556348a5b1dd65b9e819d6e5840851b170eb34f",
+      "normalized_sha256": "15cbb5055d20f03e0d1fb599e556348a5b1dd65b9e819d6e5840851b170eb34f",
+      "index_blob": "b89ee6c02a62583617382c64ff0917edd12337c6"
+    },
+    "backend/tests/security/test_feature_flag_proof_controls.py": {
+      "raw_sha256": "d1107f99338e65e019a7ec3952de34cacf2664443505124b623a1d1225ceb626",
+      "normalized_sha256": "d1107f99338e65e019a7ec3952de34cacf2664443505124b623a1d1225ceb626",
+      "index_blob": "e362ac9ac6af8eeee25c1d230faea584d0753dcd"
+    }
+  },
+  "native_distinct_cases": 55,
+  "native_selections": [
+    {
+      "file": "flags_broad_corrected_junit.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "49",
+      "time": "214.831",
+      "timestamp": "2026-11-10T10:54:19.128165+05:00",
+      "hostname": "Ditroid"
+    },
+    {
+      "file": "proof_controls_initial_junit.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "6",
+      "time": "23.095",
+      "timestamp": "2026-11-10T10:56:17.780052+05:00",
+      "hostname": "Ditroid"
+    }
+  ],
+  "review_status": "successful Copilot service5; final AGY007 pending; OpenCode assessed; full CI pending",
+  "registration_only": {
+    "baseline_explicit": 70,
+    "baseline_placeholder": 62,
+    "current_explicit": 71,
+    "current_placeholder": 61
+  }
+}

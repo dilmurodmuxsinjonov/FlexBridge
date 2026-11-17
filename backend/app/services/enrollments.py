@@ -12,7 +12,7 @@ from app.core.audit import AppendOnlyAuditStore
 from app.core.iam_security import digest, rate_limit
 from app.db.institution_scope import TASHKENT
 from app.db.storage import now, table
-from app.services.authority import account_authority, moderator_authority
+from app.services.authority import account_authority, institution_authority, moderator_authority
 from app.services.candidates import candidate_transaction, own_profile
 from app.services.governance import GovernanceError
 from app.services.organizations import evidence_files
@@ -259,6 +259,45 @@ class EnrollmentService:
             roles.c.code=='MODERATOR',roles.c.scope_kind=='PLATFORM').order_by(grants.c.id).limit(1)
             .with_for_update(read=True,of=(grants,roles))).scalar_one()
 
+    def _reviewer(self,conn,actor,institution_id):
+        """Review authority proof for one enrollment.
+
+        A platform MODERATOR (unchanged), or - until a HEMIS/registry integration
+        exists - a current, MFA-verified COORDINATOR of the enrollment's own
+        institution (0022). Returns the event column carrying the proof.
+        """
+        try:
+            return {'platform_grant_id':self._moderator(conn,actor)}
+        except GovernanceError:
+            row=institution_authority(conn,actor,institution_id,'COORDINATOR',require_mfa=True)
+            return {'institution_grant_id':row['_authority_grant_id']}
+
+    def institution_queue(self,actor,institution_id,*,mine=False,limit=50):
+        """Open enrollment requests that name this institution (coordinator view)."""
+        if not 1<=limit<=100:raise fail('ENROLLMENT_LIMIT_INVALID',422)
+        with candidate_transaction() as conn:
+            institution_authority(conn,actor,institution_id,'COORDINATOR',require_mfa=True)
+            cases,enrollments,profiles,users,versions=(table(n) for n in (
+                'verification_cases','enrollments','candidate_profiles','users','enrollment_submissions'))
+            query=(select(cases.c.id.label('case_id'),cases.c.enrollment_id,cases.c.status,cases.c.current_revision,
+                          cases.c.due_at,cases.c.assigned_reviewer_id,users.c.display_name.label('student_name'),
+                          versions.c.program,versions.c.start_date,versions.c.end_date,versions.c.created_at.label('submitted_at'))
+                .select_from(cases.join(enrollments,enrollments.c.id==cases.c.enrollment_id)
+                    .join(profiles,profiles.c.id==enrollments.c.candidate_id).join(users,users.c.id==profiles.c.user_id)
+                    .join(versions,(versions.c.case_id==cases.c.id)&(versions.c.revision==cases.c.current_revision)))
+                .where(cases.c.kind=='ENROLLMENT',cases.c.status.in_(OPEN),enrollments.c.institution_id==institution_id,
+                       cases.c.requester_id!=actor.user_id))
+            if mine:query=query.where(cases.c.assigned_reviewer_id==actor.user_id)
+            rows=conn.execute(query.order_by(cases.c.due_at,cases.c.id).limit(limit)).mappings()
+            out=[]
+            for row in rows:
+                item=dict(row)
+                item['assigned_to_me']=row['assigned_reviewer_id']==actor.user_id
+                item['claimed_by_other']=row['assigned_reviewer_id'] not in (None,actor.user_id)
+                item.pop('assigned_reviewer_id')
+                out.append(item)
+            return out
+
     def _operator_locked(self,conn,case_id):
         first=get_row(conn,'verification_cases',case_id)
         if first['kind']!='ENROLLMENT' or not first['enrollment_id']:raise fail('UNSUPPORTED_VERIFICATION_CASE',422)
@@ -284,31 +323,31 @@ class EnrollmentService:
     def claim(self,actor,case_id):
         with candidate_transaction() as conn:
             _,_,enrollment,source,case=self._operator_locked(conn,case_id)
-            grant=self._moderator(conn,actor)
+            grant=self._reviewer(conn,actor,enrollment['institution_id'])
             if actor.user_id==source['actor_user_id']:raise fail('SELF_REVIEW_FORBIDDEN',403)
             if enrollment['status'] in ('ENDED','WITHDRAWN') or case['status'] not in OPEN:raise fail('CASE_ALREADY_DECIDED')
             if case['assigned_reviewer_id'] not in (None,actor.user_id):raise fail('CASE_ASSIGNED_TO_OTHER',403)
             if case['assigned_reviewer_id']==actor.user_id:
                 return {'id':case_id,'status':case['status'],'revision':case['current_revision']}
             proof_insert(conn,'enrollment_events',enrollment_id=enrollment['id'],case_id=case_id,revision=case['current_revision'],action='CLAIM',
-                         actor_id=actor.user_id,session_id=actor.session_id,auth_version=user_version(conn,actor.user_id),platform_grant_id=grant,
+                         actor_id=actor.user_id,session_id=actor.session_id,auth_version=user_version(conn,actor.user_id),**grant,
                          reason='Independent enrollment review assignment.',receipt={})
             conn.execute(table('verification_cases').update().where(table('verification_cases').c.id==case_id)
                          .values(assigned_reviewer_id=actor.user_id,status='IN_REVIEW',updated_at=now()))
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ENROLLMENT_REVIEW_CLAIMED',entity_type='verification_case',entity_id=case_id)
             return {'id':case_id,'status':'IN_REVIEW','revision':case['current_revision']}
 
-    def case_detail(self,actor,case_id):
+    def case_detail(self,actor,case_id,*,files_base='/api/v1/operator/verification-cases/'):
         with candidate_transaction() as conn:
             _,_,enrollment,source,case=self._operator_locked(conn,case_id)
-            self._moderator(conn,actor);self._assigned(actor,source,case)
+            self._reviewer(conn,actor,enrollment['institution_id']);self._assigned(actor,source,case)
             versions=table('enrollment_submissions');events=table('enrollment_events')
             submissions=[]
             for row in conn.execute(select(versions).where(versions.c.case_id==case_id).order_by(versions.c.revision)).mappings():
                 submissions.append({key:row[key] for key in ('revision','created_at','program','start_date','end_date','evidence_note')})
                 submissions[-1]['files']=[{'id':fid,'sha256':row['file_snapshots'][fid]['sha256'],
                     'byte_size':row['file_snapshots'][fid]['byte_size'],
-                    'download_path':'/api/v1/operator/verification-cases/'+case_id+'/files/'+fid+'/download'
+                    'download_path':files_base+case_id+'/files/'+fid+'/download'
                         if row['revision']==case['current_revision'] else None} for fid in row['file_ids']]
             decisions=[dict(row) for row in conn.execute(select(events.c.revision,events.c.action,events.c.reason,events.c.created_at)
                 .where(events.c.case_id==case_id,events.c.action.in_(('APPROVE','REJECT','NEEDS_INFO')))
@@ -317,10 +356,10 @@ class EnrollmentService:
 
     def download_evidence(self,actor,case_id,file_id):
         with candidate_transaction() as conn:
-            _,_,_,source,case=self._operator_locked(conn,case_id);version=current_submission(conn,case)
+            _,_,enrollment,source,case=self._operator_locked(conn,case_id);version=current_submission(conn,case)
             if file_id not in version['file_ids']:raise fail('EVIDENCE_ACCESS_DENIED',403)
             snapshots=pin_material(conn,source['actor_user_id'],[file_id])
-            self._moderator(conn,actor);self._assigned(actor,source,case)
+            self._reviewer(conn,actor,enrollment['institution_id']);self._assigned(actor,source,case)
             if snapshots[file_id]!=version['file_snapshots'][file_id]:raise fail('ENROLLMENT_EVIDENCE_CHANGED')
             file=get_row(conn,'files',file_id)
             self.audit_store.append_audit_event(actor_id=actor.user_id,action='ENROLLMENT_EVIDENCE_DOWNLOAD_AUTHORIZED',
@@ -337,7 +376,7 @@ class EnrollmentService:
             if decision=='APPROVE' and case['status']=='IN_REVIEW' and enrollment['status'] not in ('ENDED','WITHDRAWN'):
                 version=current_submission(conn,case)
                 snapshots=pin_material(conn,source['actor_user_id'],version['file_ids'])
-            grant=self._moderator(conn,actor)
+            grant=self._reviewer(conn,actor,enrollment['institution_id'])
             if actor.user_id==source['actor_user_id']:raise fail('SELF_REVIEW_FORBIDDEN',403)
             if case['assigned_reviewer_id']!=actor.user_id:raise fail('ASSIGNED_REVIEW_REQUIRED',403)
             if case['current_revision']!=expected_revision:raise fail('ENROLLMENT_REVISION_CONFLICT')
@@ -364,7 +403,7 @@ class EnrollmentService:
             status={'APPROVE':'APPROVED','REJECT':'REJECTED','NEEDS_INFO':'NEEDS_INFO'}[decision]
             receipt={'case_id':case_id,'enrollment_id':enrollment['id'],'revision':expected_revision,'decision':decision,'case_status':status}
             event=proof_insert(conn,'enrollment_events',enrollment_id=enrollment['id'],case_id=case_id,revision=expected_revision,action=decision,
-                               actor_id=actor.user_id,session_id=actor.session_id,auth_version=user_version(conn,actor.user_id),platform_grant_id=grant,
+                               actor_id=actor.user_id,session_id=actor.session_id,auth_version=user_version(conn,actor.user_id),**grant,
                                reason=reason,receipt=receipt)
             conn.execute(table('verification_cases').update().where(table('verification_cases').c.id==case_id)
                          .values(status=status,decision_reason=reason,decided_at=event['created_at'],updated_at=now()))

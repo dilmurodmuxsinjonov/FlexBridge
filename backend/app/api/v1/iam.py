@@ -1,10 +1,14 @@
 """IAM challenge, recovery and WebAuthn contracts. Secrets never enter URL parameters."""
+import hmac
 import os
 from typing import Literal,Any
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header,Request
 from pydantic import BaseModel,ConfigDict,Field
+from sqlalchemy import select
 from app.api.dependencies import ActorContext,require_actor_context
+from app.db.storage import table,transaction
+from app.services.auth import AuthError
 from app.services.identity import identity_service
 from app.services.passkeys import passkey_service
 
@@ -15,6 +19,13 @@ class ChallengeInput(Input):
     channel:Literal['PHONE','EMAIL']
     destination:str=Field(min_length=3,max_length=254)
     purpose:Literal['REGISTER','LOGIN','RECOVERY','CONTACT']
+    delivery_method:Literal['SMS','TELEGRAM','EMAIL']|None=None
+class TelegramWebhookInput(BaseModel):
+    model_config=ConfigDict(extra='allow')
+    update_id:int|None=None
+    message:dict[str,Any]|None=None
+    update:dict[str,Any]|None=None
+    challenge_id:UUID|None=None
 class ResendInput(Input):purpose:Literal['REGISTER','LOGIN','RECOVERY','CONTACT']
 class ConsumeInput(ResendInput):code:str=Field(pattern=r'^[0-9]{6}$')
 class MFAInput(Input):
@@ -40,13 +51,51 @@ def ip(request):return request.client.host if request.client else 'unknown'
 
 @router.get('/auth/options')
 def options():
-    return {'channels':['PHONE','EMAIL'],'otp_expires_in':300,'otp_max_attempts':5,'resend_after':60,
+    from app.services.telegram_bot import get_bot_username, telegram_mode
+    mode=telegram_mode()
+    return {'channels':['PHONE','EMAIL'],'delivery_methods':['SMS','TELEGRAM'] if mode!='DISABLED' else ['SMS'],
+        'telegram_mode':mode,
+        'telegram_bot_username':get_bot_username(),'otp_expires_in':300,'otp_max_attempts':5,'resend_after':60,
         'terms_version':os.environ.get('TERMS_POLICY_VERSION'),'privacy_version':os.environ.get('PRIVACY_POLICY_VERSION')}
 
 @router.post('/auth/challenges',status_code=202)
 def challenge(payload:ChallengeInput,request:Request,authorization:str|None=Header(default=None)):
     actor=require_actor_context(authorization) if payload.purpose=='CONTACT' else None
     return identity_service.issue_challenge(**payload.model_dump(),ip=ip(request),bound_user=actor.user_id if actor else None)
+
+@router.get('/auth/challenges/{id}/status')
+def challenge_status(id:UUID,request:Request):
+    return identity_service.challenge_status(challenge_id=str(id),ip=ip(request))
+
+@router.post('/auth/telegram/webhook')
+def telegram_webhook(payload:TelegramWebhookInput,request:Request,
+        x_telegram_bot_api_secret_token:str|None=Header(default=None)):
+    """Telegram Bot API webhook.
+
+    LIVE: only Telegram may call it (setWebhook secret_token checked in constant
+    time); the OTP is sent to the user's chat and never returned; errors answer
+    200 so Telegram does not retry (the bot already told the user what to do).
+    SIMULATION (local staging tests only): legacy unauthenticated echo.
+    """
+    from app.services.telegram_bot import public_result, telegram_bot_service, telegram_mode
+    mode=telegram_mode()
+    if mode=='DISABLED':
+        raise AuthError('TELEGRAM_DISABLED','Telegram verification is not configured',503)
+    raw_update=payload.update if isinstance(payload.update,dict) else payload.model_dump(exclude={'update','challenge_id'},exclude_none=True)
+    if mode=='SIMULATION':
+        return telegram_bot_service.handle_update(update=raw_update,ip=ip(request),
+            explicit_challenge_id=str(payload.challenge_id) if payload.challenge_id else None)
+    secret=os.environ.get('TELEGRAM_WEBHOOK_SECRET','')
+    if not secret:
+        raise AuthError('TELEGRAM_WEBHOOK_NOT_CONFIGURED','Set TELEGRAM_WEBHOOK_SECRET or use the polling worker',503)
+    if not x_telegram_bot_api_secret_token or not hmac.compare_digest(x_telegram_bot_api_secret_token,secret):
+        raise AuthError('TELEGRAM_WEBHOOK_FORBIDDEN','Invalid Telegram webhook secret',403)
+    sender=((raw_update.get('message') or {}).get('from') or {}).get('id')
+    try:
+        result=telegram_bot_service.handle_update(update=raw_update,ip=f'tg:{sender}' if sender else ip(request))
+    except AuthError as exc:
+        return {'ok':False,'code':exc.code}
+    return public_result(result)
 
 @router.post('/auth/challenges/{id}/resend',status_code=202)
 def resend(id:UUID,payload:ResendInput,request:Request,authorization:str|None=Header(default=None)):
@@ -60,6 +109,26 @@ def consume(id:UUID,payload:ConsumeInput,request:Request):
 @router.post('/auth/mfa/verify')
 def verify_mfa(payload:MFAInput,request:Request):
     return identity_service.verify_mfa(**payload.model_dump(),ip=ip(request))
+
+@router.get('/me/contacts')
+def list_contacts(actor:ActorContext=Depends(require_actor_context)):
+    contacts=table('user_contacts')
+    with transaction() as conn:
+        rows=conn.execute(select(contacts.c.id,contacts.c.channel,contacts.c.normalized_value,contacts.c.is_primary,contacts.c.verified_at)
+            .where(contacts.c.user_id==actor.user_id,contacts.c.verified_at.is_not(None),contacts.c.revoked_at.is_(None))
+            .order_by(contacts.c.is_primary.desc(),contacts.c.created_at.desc())).mappings().all()
+        items=[]
+        for r in rows:
+            val=str(r['normalized_value'] or '')
+            if '@' in val:
+                local,domain=val.split('@',1)
+                masked=(local[:2]+'***@'+domain) if len(local)>2 else ('***@'+domain)
+            elif len(val)>=7:
+                masked=val[:6]+'***'+val[-4:]
+            else:
+                masked='***'
+            items.append({'id':str(r['id']),'channel':r['channel'],'masked_destination':masked,'is_primary':bool(r['is_primary']),'verified_at':r['verified_at']})
+        return {'items':items}
 
 @router.post('/me/contacts',status_code=201)
 def bind_contact(payload:ContactInput,actor:ActorContext=Depends(require_actor_context)):

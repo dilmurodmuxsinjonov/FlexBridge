@@ -6,10 +6,11 @@ from typing import Any
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Response
 from pydantic import BaseModel
 
 from app.api.dependencies import ActorContext, require_actor_context, candidate_id_for
+from app.services.application_hr import ApplicationHRError, application_hr_service
 from app.services.opportunities import OpportunityConstraintError, opportunity_service
 
 router = APIRouter(prefix="/api/v1/opportunities", tags=["opportunities"])
@@ -113,4 +114,180 @@ def api_003_opportunity_feed(
         raise HTTPException(
             status_code=exc.status_code,
             detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.get("", status_code=200)
+@router.get("/", status_code=200, include_in_schema=False)
+def search_public_opportunities_endpoint(
+    response: Response,
+    region: str | None = Query(default=None),
+    kind: str | None = Query(default=None),
+    is_paid: bool | None = Query(default=None),
+    min_hourly_pay: int | None = Query(default=None),
+    schedule_policy: str | None = Query(default=None),
+    query: str | None = Query(default=None),
+    skill_id: UUID | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    after: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """API-001: Public opportunity search and discovery catalog (`CAP-001`, `PUBLIC_SEARCH`)."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_SHORT
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_SHORT
+    try:
+        return opportunity_service.search_public_opportunities(
+            region=region,
+            kind=kind,
+            is_paid=is_paid,
+            min_hourly_pay=min_hourly_pay,
+            schedule_policy=schedule_policy,
+            query=query,
+            skill_id=str(skill_id) if skill_id else None,
+            limit=limit,
+            after=after,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+class UpdateOpportunityDraftRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    region: str | None = None
+    work_mode: str | None = None
+    eligibility: str | None = None
+    capacity: int | None = None
+    contract_type: str | None = None
+    program_required: str | None = None
+
+
+class UpdateOpportunityTermsRequest(BaseModel):
+    is_paid: bool
+    salary_min: float | int | None = None
+    salary_max: float | int | None = None
+    currency: str = "UZS"
+    salary_period: str | None = None
+    salary_basis: str | None = None
+    start_date: date | str | None = None
+    end_date: date | str | None = None
+    program_required: str | None = None
+    fee_terms_note: str | None = None
+
+
+class ShiftIntervalItem(BaseModel):
+    weekday: int
+    start_minute: int
+    end_minute: int
+    group_code: str = "GROUP_A"
+    timezone: str = "Asia/Tashkent"
+
+
+class UpdateOpportunityScheduleRequest(BaseModel):
+    schedule_policy: str = "STRICT"
+    shift_match_mode: str = "ALL"
+    shifts: list[ShiftIntervalItem] | None = None
+
+
+@router.put("/{id}/draft", status_code=200)
+def api_078_update_opportunity_draft(
+    id: UUID,
+    payload: UpdateOpportunityDraftRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-078: Update opportunity draft core metadata (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_draft_api_078(
+            opportunity_id=str(id),
+            actor=actor,
+            title=payload.title,
+            description=payload.description,
+            region=payload.region,
+            work_mode=payload.work_mode,
+            eligibility=payload.eligibility,
+            capacity=payload.capacity,
+            contract_type=payload.contract_type,
+            program_required=payload.program_required,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.put("/{id}/draft/terms", status_code=200)
+def api_079_update_opportunity_terms(
+    id: UUID,
+    payload: UpdateOpportunityTermsRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-079: Update opportunity draft financial and duration terms (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_terms_api_079(
+            opportunity_id=str(id),
+            actor=actor,
+            is_paid=payload.is_paid,
+            salary_min=payload.salary_min,
+            salary_max=payload.salary_max,
+            currency=payload.currency,
+            salary_period=payload.salary_period,
+            salary_basis=payload.salary_basis,
+            start_date=payload.start_date,
+            end_date=payload.end_date,
+            program_required=payload.program_required,
+            fee_terms_note=payload.fee_terms_note,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.put("/{id}/draft/schedule", status_code=200)
+def api_080_update_opportunity_schedule(
+    id: UUID,
+    payload: UpdateOpportunityScheduleRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-080: Update opportunity draft schedule policy, match mode, and shift intervals (`CAP-016`, `JOB_PUBLISH`)."""
+    try:
+        return opportunity_service.update_opportunity_schedule_api_080(
+            opportunity_id=str(id),
+            actor=actor,
+            schedule_policy=payload.schedule_policy,
+            shift_match_mode=payload.shift_match_mode,
+            shifts=[s.model_dump() for s in payload.shifts] if payload.shifts is not None else None,
+        )
+    except OpportunityConstraintError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/{id}/applications", status_code=200)
+def api_082_list_opportunity_applications(
+    id: UUID,
+    status: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """API-082: List applications for this opportunity (`CAP-008`, `APPLICATION_HR`)."""
+    try:
+        return application_hr_service.list_opportunity_applications(
+            actor=actor,
+            opportunity_id=str(id),
+            status=status,
+            limit=limit,
+            cursor=cursor,
+        )
+    except ApplicationHRError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
         ) from exc

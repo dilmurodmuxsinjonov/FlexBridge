@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.226" timestamp="2026-11-10T10:21:45.069006+05:00" hostname="Ditroid"><testcase classname="tests.security.test_feature_flag_diagnostic" name="test_admin_creation_reports_only_safe_postgres_constraint_diagnostic" time="6.027"><failure message="Failed: domain=FEATURE_FLAG_PROOF_REJECTED sqlstate=23514 constraint=None primary=feature flag first event must match its public origin">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.CheckViolation: feature flag first event must match its public origin
+E   CONTEXT:  PL/pgSQL function guard_feature_flag_change_event() line 30 at RAISE
+
+The above exception was the direct cause of the following exception:
+backend\app\services\feature_flag_admin.py:136: in administer
+    return self._commit_change(conn, authority, row, prior, before, code, enabled, reason,
+backend\app\services\feature_flag_admin.py:251: in _commit_change
+    conn.execute(events.insert().values(id=event_id, flag_id=flag_id, code=code, version=version,
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.CheckViolation) feature flag first event must match its public origin
+E   CONTEXT:  PL/pgSQL function guard_feature_flag_change_event() line 30 at RAISE
+E   [SQL: INSERT INTO flexbridge.feature_flag_change_events (id, flag_id, code, version, prior_event_id, enabled, rule_schema, reason, before_snapshot, after_snapshot, before_digest, after_digest, actor_id, session_id, auth_version, admin_grant_id, decided_at, idempotency_key, request_fingerprint, audit_event_id, receipt) VALUES (%(id)s::UUID, %(flag_id)s::UUID, %(code)s::VARCHAR, %(version)s::INTEGER, %(prior_event_id)s::UUID, %(enabled)s, %(rule_schema)s::JSONB, %(reason)s::VARCHAR, %(before_snapshot)s::JSONB, %(after_snapshot)s::JSONB, %(before_digest)s::VARCHAR, %(after_digest)s::VARCHAR, %(actor_id)s::UUID, %(session_id)s::UUID, %(auth_version)s::INTEGER, %(admin_grant_id)s::UUID, %(decided_at)s::TIMESTAMP WITH TIME ZONE, %(idempotency_key)s::VARCHAR, %(request_fingerprint)s::VARCHAR, %(audit_event_id)s::UUID, %(receipt)s::JSONB)]
+E   [SQL parameters hidden due to hide_parameters=True]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_feature_flag_diagnostic.py:12: in test_admin_creation_reports_only_safe_postgres_constraint_diagnostic
+    flag_admin_service.administer(actor=actor(admin),code='R1_PART_TIME_JOBS',enabled=True,
+backend\app\services\feature_flag_admin.py:139: in administer
+    raise self._proof_error(exc) from exc
+E   app.services.governance.GovernanceError: FEATURE_FLAG_PROOF_REJECTED
+
+During handling of the above exception, another exception occurred:
+backend\tests\security\test_feature_flag_diagnostic.py:17: in test_admin_creation_reports_only_safe_postgres_constraint_diagnostic
+    pytest.fail('domain='+error.code+' sqlstate='+str(getattr(original,'sqlstate',None))+
+E   Failed: domain=FEATURE_FLAG_PROOF_REJECTED sqlstate=23514 constraint=None primary=feature flag first event must match its public origin</failure></testcase></testsuite></testsuites>

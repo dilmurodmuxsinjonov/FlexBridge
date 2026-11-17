@@ -1,0 +1,32 @@
+{
+  "scope": "only nonsecret structured error/status fields from actual CLI outcomes; no prompts/response/config",
+  "samples": [
+    {
+      "name": "actual_print_timeout",
+      "returncode": 3,
+      "data": {
+        "status": "ERROR",
+        "finished_reason": "print_timeout",
+        "error": "print timeout after 3m0s with the turn still in progress; the response is partial"
+      }
+    },
+    {
+      "name": "actual_quota",
+      "returncode": 3,
+      "data": {
+        "status": "ERROR",
+        "finished_reason": "error",
+        "error": "Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 4h33m24s."
+      }
+    },
+    {
+      "name": "actual_stale_zero_exit_error",
+      "returncode": 0,
+      "data": {
+        "status": "ERROR",
+        "finished_reason": "error",
+        "error": "Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 4h32m51s."
+      }
+    }
+  ]
+}

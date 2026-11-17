@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError, ProgrammingError
@@ -24,6 +24,8 @@ from app.adapters.storage import StorageReferenceError
 from botocore.exceptions import BotoCoreError,ClientError
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.workspaces import router as workspaces_router
+from app.api.v1.institution_enrollments import router as institution_enrollments_router
 from app.api.v1.iam import router as iam_router
 from app.api.v1.candidates import router as candidates_router
 from app.api.v1.organizations import router as organizations_router
@@ -34,6 +36,7 @@ from app.api.v1.canonical_routes import register_remaining_canonical_model_route
 from app.api.v1.files import router as files_router
 from app.api.v1.governance import router as governance_router
 from app.api.v1.internship_logs import router as internship_logs_router
+from app.api.v1.internship_documents import router as internship_documents_router
 from app.api.v1.operations import router as operations_router
 from app.api.v1.moderation_appeals import router as moderation_appeals_router
 from app.api.v1.owner_additions import router as owner_additions_router
@@ -46,6 +49,9 @@ from app.api.v1.placements import router as placements_router
 from app.api.v1.placement_admission import router as placement_admission_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.academic_admission import router as academic_admission_router
+from app.api.v1.academic_decisions import router as academic_decisions_router
+from app.api.v1.feature_flags import router as feature_flags_router
+from app.api.v1.chat import router as chat_router
 from app.services.placements import PlacementScopeError
 from app.services.internship_logs import InternshipLogScopeError
 from app.services.governance import GovernanceError
@@ -67,17 +73,20 @@ async def authentication_boundary(request: Request, call_next):
     import re
     from app.core.iam_security import SENSITIVE_ROLES
     public = {'/api/v1/auth/register','/api/v1/auth/login','/api/v1/health/live','/api/v1/health/ready',
-        '/api/v1/auth/options','/api/v1/auth/challenges','/api/v1/auth/recovery','/api/v1/auth/mfa/verify','/api/v1/auth/passkeys/options','/api/v1/auth/passkeys/verify'}
-    public_path=request.url.path in public or bool(re.fullmatch(r'/api/v1/auth/(?:challenges/[^/]+/(?:consume|resend)|recovery/[^/]+(?:/complete)?)',request.url.path))
-    public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/organizations/[^/]+/public',request.url.path)))
+        '/api/v1/auth/options','/api/v1/auth/challenges','/api/v1/auth/telegram/webhook','/api/v1/auth/recovery','/api/v1/auth/mfa/verify','/api/v1/auth/passkeys/options','/api/v1/auth/passkeys/verify',
+        '/api/v1/onboarding/options','/api/v1/services/public','/api/v1/prices/public'}
+    public_path=request.url.path in public or bool(re.fullmatch(r'/api/v1/auth/(?:challenges/[^/]+/(?:consume|resend|status)|recovery/[^/]+(?:/complete)?)',request.url.path))
+    public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/organizations/[^/]+/(?:public|opportunities|rating-summary)',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/invitations/[^/]+',request.url.path)))
-    if request.url.path.startswith('/api/v1/') and not public_path and not request.url.path.startswith('/api/v1/webhooks/payments/'):
+    public_path = public_path or (request.method in ('GET','HEAD') and request.url.path != '/api/v1/opportunities/feed' and bool(re.fullmatch(r'/api/v1/opportunities(?:/[^/]+)?',request.url.path)))
+    public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/(?:help|policies)/[^/]+',request.url.path)))
+    if request.url.path.startswith('/api/v1/') and not public_path and not request.url.path.startswith(('/api/v1/webhooks/payments/', '/api/v1/internal/workers/')):
         value=request.headers.get('authorization','')
         if not value.startswith('Bearer '):
             return JSONResponse(status_code=401,content={'detail':{'code':'AUTH_REQUIRED'}})
         try:
             session=await run_in_threadpool(auth_service.validate_session,value[7:].strip())
-            self_service=request.url.path.startswith(('/api/v1/me/security','/api/v1/me/sessions/','/api/v1/auth/sessions/')) or request.url.path=='/api/v1/auth/me'
+            self_service=request.url.path.startswith(('/api/v1/me/security','/api/v1/me/contacts','/api/v1/me/sessions/','/api/v1/auth/sessions/')) or request.url.path=='/api/v1/auth/me'
             if set(session['roles']) & SENSITIVE_ROLES and session['assurance']!='MFA' and not self_service:
                 return JSONResponse(status_code=403,content={'detail':{'code':'MFA_ENROLLMENT_REQUIRED'}})
         except AuthError as exc:
@@ -87,6 +96,8 @@ async def authentication_boundary(request: Request, call_next):
     return await call_next(request)
 
 from app.core.iam_http import IAMHTTPMiddleware
+from app.core.http_cache import HTTPCacheMiddleware
+app.add_middleware(HTTPCacheMiddleware)
 app.add_middleware(IAMHTTPMiddleware)
 
 @app.exception_handler(PlacementScopeError)
@@ -150,6 +161,8 @@ async def finance_circuit_open_exception_handler(
 
 
 app.include_router(auth_router)
+app.include_router(workspaces_router)
+app.include_router(institution_enrollments_router)
 app.include_router(iam_router)
 app.include_router(candidates_router)
 app.include_router(organizations_router)
@@ -161,8 +174,12 @@ app.include_router(placements_router)
 app.include_router(placement_admission_router)
 app.include_router(notifications_router)
 app.include_router(academic_admission_router)
+app.include_router(academic_decisions_router)
+app.include_router(feature_flags_router)
 app.include_router(internship_logs_router)
+app.include_router(internship_documents_router)
 app.include_router(files_router)
+app.include_router(chat_router)
 app.include_router(billing_router)
 app.include_router(operations_router)
 app.include_router(moderation_appeals_router)
@@ -175,8 +192,10 @@ app.include_router(canonical_router)
 
 
 @app.get("/api/v1/health/live", tags=["health"])
-def health_live() -> dict[str, Any]:
+def health_live(response: Response) -> dict[str, Any]:
     """API-X05: Liveness probe endpoint."""
+    from app.core.http_cache import apply_no_store
+    apply_no_store(response)
     return {
         "status": "alive",
         "service": settings.app_name,
@@ -187,8 +206,10 @@ def health_live() -> dict[str, Any]:
 
 
 @app.get("/api/v1/health/ready", tags=["health"])
-def health_ready() -> dict[str, Any]:
+def health_ready(response: Response) -> dict[str, Any]:
     """API-X06: Readiness probe verifying 1.4 schema artifacts and PostgreSQL invariant checks."""
+    from app.core.http_cache import apply_no_store
+    apply_no_store(response)
     from app.core.readiness import dependency_readiness
     report=dependency_readiness()
     if not report['ready']: raise HTTPException(503,detail={'code':'SERVICE_NOT_READY',**report})
@@ -196,8 +217,10 @@ def health_ready() -> dict[str, Any]:
 
 
 @app.get("/api/v1/meta/schema-summary", tags=["meta"])
-def meta_schema_summary() -> dict[str, Any]:
+def meta_schema_summary(response: Response) -> dict[str, Any]:
     """Return the verified 1.4 schema summary and DB-083 retention policies."""
+    from app.core.http_cache import CACHE_CONTROL_PUBLIC_MEDIUM
+    response.headers["Cache-Control"] = CACHE_CONTROL_PUBLIC_MEDIUM
     return {
         "summary": get_schema_summary(),
         "retention_policies_v1": get_retention_policies_v1(),

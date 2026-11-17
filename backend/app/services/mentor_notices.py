@@ -76,18 +76,29 @@ class NotificationService:
             account_authority(conn,actor)
             n,e=table('notifications'),table('outbox_events')
             query=select(n.c.id,n.c.created_at,n.c.template_code,n.c.placement_id,n.c.read_at,
+                n.c.opportunity_id,n.c.application_id,n.c.ticket_id,
                 e.c.id.label('_notice_event_id'),e.c.payload.label('_notice_payload'),
                 e.c.event_type.label('_notice_type'),e.c.schema_version.label('_notice_version'))
-            query=query.join(e,e.c.id==n.c.event_id).where(n.c.user_id==actor.user_id)
+            query=query.outerjoin(e,e.c.id==n.c.event_id).where(n.c.user_id==actor.user_id)
             all_owned=query
             if unread_only:query=query.where(n.c.read_at.is_(None))
             result=page(conn,query,n.c.id,n.c.created_at,limit=limit,after=after,cursor_query=all_owned)
             for row in result['items']:
                 for field in ('created_at','read_at'):
                     if row[field] is not None:row[field]=row[field].astimezone(timezone.utc)
-                event=dict(id=row.pop('_notice_event_id'),payload=row.pop('_notice_payload'),
-                           event_type=row.pop('_notice_type'),schema_version=row.pop('_notice_version'))
+                row['is_read'] = row['read_at'] is not None
+                for uuid_field in ('id', 'placement_id', 'opportunity_id', 'application_id', 'ticket_id'):
+                    if row.get(uuid_field) is not None:
+                        row[uuid_field] = str(row[uuid_field])
+                event_id = row.pop('_notice_event_id')
+                event_payload = row.pop('_notice_payload')
+                event_type = row.pop('_notice_type')
+                event_version = row.pop('_notice_version')
                 row['notice']=None
+                if not event_id or not event_type:
+                    continue
+                event=dict(id=event_id,payload=event_payload,
+                           event_type=event_type,schema_version=event_version)
                 try:
                     if event['event_type']==EVENT_TYPE:
                         parse,source,prefix=run_notice,notice_source,'PLACEMENT_MENTOR_'

@@ -1,0 +1,19 @@
+{
+  "task": "AGY-006",
+  "attempts": [
+    {
+      "requested_model": "gemini-3.8-flash-high",
+      "reported_model": null,
+      "exit_code": 0,
+      "status": "SUCCESS",
+      "conversation_id": "7705a385-6b4b-417a-a6fd-89234188e6c1",
+      "seconds": 526.08,
+      "actual_quota_error": false,
+      "finished_reason": null,
+      "response_chars": 3362
+    }
+  ],
+  "owned_before_sha256": null,
+  "owned_after_sha256": "d1107f99338e65e019a7ec3952de34cacf2664443505124b623a1d1225ceb626",
+  "policy": "main frozen; integration only; actual quota fallback; fresh conversation context"
+}

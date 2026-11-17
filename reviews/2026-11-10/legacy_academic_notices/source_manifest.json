@@ -1,0 +1,41 @@
+{
+  "scope": "Issue70 local fresh legacy acceptance notice, not full R1/pilot",
+  "parent_commit": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "target_branch": "integration/r1-agent-collaboration",
+  "main_frozen": true,
+  "runtime_files": 1,
+  "code_test_files": 2,
+  "native_final": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 77.815
+  },
+  "manual_test_delta": {
+    "scope": "Manual Codex test-only correction after source opinion; runtime unchanged",
+    "file": "backend/tests/security/test_academic_legacy_notices.py",
+    "reviewed_before_sha256": "9d697d81299691766c559b47e5e7b47b24edf6d68c49f2b4e2e388a17436b4d4",
+    "corrected_sha256": "8353b5f8c004e7510d24d1fb05f7b19d8ee019a24b976a04acb86dec431f1b8e",
+    "exact_replacement": {
+      "old": "e.c.idempotency_key==key",
+      "new": "e.c.dedupe_key==key"
+    },
+    "reason": "Actual native execution reached the final outbox assertion and failed on nonexistent idempotency_key; canonical outbox column is dedupe_key. Preserve failure; full final10 rerun required."
+  },
+  "files": {
+    "backend/app/services/academic_notices.py": {
+      "normalized_sha256": "508f869a9c2fb39dfb178091f11c3dfa05187724020f801ef0358c497a220a1c",
+      "working_sha256": "508f869a9c2fb39dfb178091f11c3dfa05187724020f801ef0358c497a220a1c",
+      "index_sha256": "508f869a9c2fb39dfb178091f11c3dfa05187724020f801ef0358c497a220a1c",
+      "index_blob": "52550fd06e68e38d82cce988ffd462e0910e4770"
+    },
+    "backend/tests/security/test_academic_legacy_notices.py": {
+      "normalized_sha256": "8353b5f8c004e7510d24d1fb05f7b19d8ee019a24b976a04acb86dec431f1b8e",
+      "working_sha256": "8353b5f8c004e7510d24d1fb05f7b19d8ee019a24b976a04acb86dec431f1b8e",
+      "index_sha256": "8353b5f8c004e7510d24d1fb05f7b19d8ee019a24b976a04acb86dec431f1b8e",
+      "index_blob": "07bd15131c3d7aea7bc75dfee32ea124f7cb7b10"
+    }
+  },
+  "limits": "Read-only opinions; one test field manually corrected and final10 executed. No model/legal/provider certification. New exact-head full CI pending."
+}

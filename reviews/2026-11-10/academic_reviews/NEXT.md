@@ -18,7 +18,7 @@ running process handles and matching-head CI instead of assuming this note is li
    invent imported notification intent. A bounded repair can precede API108.
 3. Durable privileged flag administration is canonical API121 PATCH
    /api/v1/operator/feature-flags/{code}; API122 is incidents, not flags. Inspect
-   CAP036/SUPER_ADMIN source and DB092 before implementing. Existing RAM/UID
+   CAP037/ADMIN source and DB092 before implementing. Existing RAM/UID
    FeatureFlagService cannot authorize official grading/signature or paid privilege.
    Audit/current actual MFA admin, durable version/receipt, race/revocation controls
    and no R2 activation from R1 are real work. No live switch/provider action implied.

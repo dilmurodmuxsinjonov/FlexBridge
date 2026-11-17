@@ -25,10 +25,20 @@ x-app: &app
     PAYMENT_GATEWAY_URL: ${PAYMENT_GATEWAY_URL:-}
     PAYMENT_GATEWAY_TOKEN: ${PAYMENT_GATEWAY_TOKEN:-}
     FLEXBRIDGE_ENV: production
+    # Telegram phone verification. Put TELEGRAM_BOT_TOKEN (from @BotFather) in infra/.env
+    # to switch to the real bot (LIVE); the telegram-bot service then polls Telegram.
+    # Without a token this local staging stack keeps the scripted SIMULATION mode
+    # (unauthenticated webhook that echoes the OTP) - never enable that on a public host.
+    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+    TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+    TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    TELEGRAM_SIMULATION_MODE: ${TELEGRAM_SIMULATION_MODE:-true}
 
 services:
   postgres:
     image: postgres:17-alpine
+    mem_limit: 1024m
+    cpus: 1.0
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-flexbridge}
       POSTGRES_USER: ${POSTGRES_USER:-flexbridge_owner}
@@ -42,6 +52,8 @@ services:
 
   migrate:
     <<: *app
+    mem_limit: 512m
+    cpus: 0.5
     environment:
       <<: *app-env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-flexbridge_owner}:${POSTGRES_PASSWORD:?required}@postgres:5432/${POSTGRES_DB:-flexbridge}
@@ -50,21 +62,27 @@ services:
       postgres: {condition: service_healthy}
 
   pgbouncer:
-    image: edoburu/pgbouncer:1.23.1-p0
+    image: edoburu/pgbouncer:latest
     depends_on:
       postgres: {condition: service_healthy}
+    ports: ["127.0.0.1:5432:5432"]
+    mem_limit: 256m
+    cpus: 0.5
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${POSTGRES_DB:-flexbridge}
       DB_USER: ${POSTGRES_USER:-flexbridge_owner}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      AUTH_TYPE: scram-sha-256
       POOL_MODE: transaction
       DEFAULT_POOL_SIZE: 20
       MAX_CLIENT_CONN: 400
 
   minio:
-    image: minio/minio:RELEASE.2025-02-18T16-25-55Z
+    image: elestio/minio:latest
+    mem_limit: 512m
+    cpus: 1.0
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-flexbridge_minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?required}
@@ -73,7 +91,9 @@ services:
     volumes: ["miniodata:/data"]
 
   storage-init:
-    image: minio/mc:RELEASE.2025-02-08T19-14-21Z
+    image: elestio/minio:latest
+    mem_limit: 256m
+    cpus: 0.5
     depends_on: [minio]
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-flexbridge_minio}
@@ -91,16 +111,26 @@ services:
 
   clamav:
     image: clamav/clamav:1.4
+    mem_limit: 2048m
+    cpus: 1.5
     volumes: ["clamavdata:/var/lib/clamav"]
+    healthcheck:
+      test: ["CMD-SHELL", "clamdcheck.sh || echo PING | nc -w 2 127.0.0.1 3310 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   backend:
     <<: *app
     restart: unless-stopped
+    mem_limit: 1024m
+    cpus: 1.5
     depends_on:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
       storage-init: {condition: service_completed_successfully}
-      clamav: {condition: service_started}
+      clamav: {condition: service_healthy}
     ports: ["127.0.0.1:8000:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready',timeout=10)"]
@@ -121,7 +151,7 @@ services:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
       storage-init: {condition: service_completed_successfully}
-      clamav: {condition: service_started}
+      clamav: {condition: service_healthy}
 
   identity-worker:
     <<: *app
@@ -136,6 +166,39 @@ services:
     depends_on:
       pgbouncer: {condition: service_started}
       migrate: {condition: service_completed_successfully}
+
+  telegram-bot:
+    <<: *app
+    restart: unless-stopped
+    command: ["python", "-m", "app.workers.telegram_bot_poller"]
+    environment:
+      <<: *app-env
+    mem_limit: 256m
+    cpus: 0.25
+    depends_on:
+      pgbouncer: {condition: service_started}
+      migrate: {condition: service_completed_successfully}
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
+    restart: unless-stopped
+    mem_limit: 1024m
+    cpus: 1.0
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      BACKEND_INTERNAL_URL: http://backend:8000
+      # Optional in infra/.env (>= 32 chars). When unset, the BFF uses a random
+      # per-process key: sessions cannot be forged but end on container restart.
+      BFF_SESSION_SECRET: ${BFF_SESSION_SECRET:-}
+    depends_on:
+      backend: {condition: service_healthy}
 
 volumes:
   pgdata:

@@ -1,0 +1,19 @@
+{
+  "conversation_id": "3ed58526-4a7c-4e8e-b905-42568c7d3e41",
+  "status": "SUCCESS",
+  "error": null,
+  "duration_seconds": 547.9489202,
+  "num_turns": 2,
+  "finished_reason": null,
+  "usage": {
+    "input_tokens": 272578,
+    "output_tokens": 25628,
+    "thinking_tokens": 4930,
+    "cache_read_tokens": 1381423,
+    "total_tokens": 298206
+  },
+  "requested_model": "gemini-4-argon-high",
+  "reported_model": null,
+  "response_chars": 36941,
+  "worktree_status": ""
+}

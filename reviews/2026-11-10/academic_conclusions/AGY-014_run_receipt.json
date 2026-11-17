@@ -1,0 +1,20 @@
+{
+  "task": "AGY-014",
+  "attempts": [
+    {
+      "requested_model": "gemini-4-argon-high",
+      "reported_model": null,
+      "exit_code": 3,
+      "status": "ERROR",
+      "conversation_id": "0d246251-7bc5-454e-8f36-6dafafd824a0",
+      "seconds": 544.39,
+      "actual_quota_error": false,
+      "finished_reason": "print_timeout",
+      "response_chars": 0,
+      "classification": "continuing_timeout"
+    }
+  ],
+  "owned_before_sha256": null,
+  "owned_after_sha256": null,
+  "policy": "main frozen; integration only; actual quota fallback; fresh conversation context"
+}

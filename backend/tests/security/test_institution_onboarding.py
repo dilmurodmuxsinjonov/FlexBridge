@@ -147,6 +147,7 @@ def test_existing_coordinator_requests_named_teacher_without_granting_coordinato
     assert count('institution_role_grants')==1
     inbox=client.get('/api/v1/me/institution-appointments',headers=teacher['headers']);assert inbox.status_code==200,inbox.text
     assert [item['id'] for item in inbox.json()['items']]==[request['id']]
+    assert inbox.json()['items'][0]['institution_name']  # the invitee sees which university asks for consent
     assert accept(client,f,request['id']).status_code==403
     accepted=accept(client,f,request['id'],user=teacher,contact_id=verified['id']);assert accepted.status_code==200,accepted.text
     assert count('institution_role_grants')==1

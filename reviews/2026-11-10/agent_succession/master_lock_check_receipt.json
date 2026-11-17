@@ -1,0 +1,7 @@
+{
+  "os_exclusive_lock_second_process_denied": true,
+  "lock_released_after_owner_exit": true,
+  "coordinator_state_unchanged": true,
+  "live_master_started": false,
+  "quota_detection_claimed": false
+}

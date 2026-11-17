@@ -1,0 +1,145 @@
+# FlexBridge — takliflar va foydalanuvchi tanlovlari
+
+Current LOG-122 / Decision (2026-11-14): Accept PR141 into integration only after matching-head 1669-test backend and Windows CI; keep Issue139 open because Docker E2E and credential rotation have not happened. Deliver FB-140A as a bounded real public catalog with explicit loading/empty/error and visible maket labeling for disconnected portals; do not silently show demo entities on the homepage or false HEMIS/legal/profile status in shared chrome. Require frontend build CI and current feedback before merging the frontend PR into integration. Keep Issue140 open for authenticated tenant-scoped portals and browser staging evidence. Preserve frozen main at 764fb98496fa40857acb07844fd09fcafa99b7d6 and pg_live.
+
+Current LOG-121 / Staging E2E pre-run correction (2026-11-14): Coordinator owner CODEX generation2; main/master frozen at 764fb98496fa40857acb07844fd09fcafa99b7d6; all new PRs target integration/r1-agent-collaboration (baseline 65a9ea8). PR137 delivered a five-phase staging script, but no actual five-phase container run is evidenced: the current Docker daemon returned HTTP 500 on /info and WSL2 reports virtualization inactive pending Windows restart. Compose config --quiet parsed; Docker CLI 29.9.3/Compose v5.7.0 exist. The accepted script had a hardcoded staging DB credential, printed the DB URL, and used unqualified direct SQL names for flexbridge tables. The isolated fix/139-staging-e2e-readiness draft reads the ignored infra/.env, restricts direct SQL to localhost:5432/flexbridge, masks output, qualifies SQL, constrains all three HTTP targets to localhost staging ports, and has eleven independent config-safety cases passed locally (pytest --confcutdir). AGY046 returned a static seven-finding review, assessed in reviews/2026-11-14/staging_runtime_guard/AGY046_CODEX_REVIEW.md; final source/full CI/PR acceptance and actual post-restart container run remain pending. The earlier 'victory' and 100% readiness claims were static/source and CI claims, not a successful Docker E2E run. Current Phase 2 seeds only one candidate; Phase 3 uses sequential SELECTs, so employer/university boundaries and concurrent PgBouncer behavior are unproved. The frontend currently contains hardcoded opportunity/portal data; live UI behavior needs separate verification and remediation. No pilot acceptance, no pg_live mutation, no main change. Decision: keep real Docker execution as an open gate; do not equate static assertions with runtime proof.
+
+
+Taklif avtomatik ravishda tanlovga aylanmaydi. Foydalanuvchining aniq javobi, sanasi va tegishli taklif IDsi saqlanadi. Eski qaror o'zgarsa o'chirilmaydi, uni almashtirgan yangi qaror ko'rsatiladi.
+
+## Foydalanuvchi belgilagan qarorlar
+
+Manba: ushbu suhbatdagi 2026-11-06 topshirig'i va loyiha uchun berilgan AGENTS.md ko'rsatmalari.
+
+| ID | Tanlov | Holat |
+| --- | --- | --- |
+| Q-001 | 4 ta maxsus boshqaruv fayli: AI xotirasi/qoidalar, texnik modellar, bosqichlar, taklif/tanlovlar | Tasdiqlangan, yaratildi |
+| Q-002 | Codex tekshiruvchi va tuzatish kirituvchi bo'ladi; asosiy ishni boshqa AI bajaradi | Tasdiqlangan; amalga oshiruvchi AI nomi ochiq |
+| Q-003 | Har AI o'z ishi uchun mas'ul, o'zini belgilab nima qilganini yozadi | Tasdiqlangan |
+| Q-004 | AI hamma qismlarni birdan yozmaydi, ish kichik bo'laklarda bajariladi | Tasdiqlangan |
+| Q-005 | Bosqichlar ichki bo'limlari bilan, bajarilgan va keyingi qismlar ajratib yuritiladi | Tasdiqlangan |
+| Q-006 | Qolgan loyiha konteksti mavjud fayllardan olinadi | Tasdiqlangan |
+| Q-007 | Yangi loyiha fayllari va natijalar D: diskda saqlanadi | Tasdiqlangan; manzil D:\FlexBridge |
+| Q-008 | Git va GitHub (`https://github.com/dilmurodmuxsinjonov/FlexBridge.git`) orqali Issue → Branch → Commit → PR → Code Review → Merge tartibida ishlanadi | Tasdiqlangan (2026-11-06); `origin/main` ulandi |
+| Q-009 | Amalga oshiruvchi AI sifatida `Antigravity` (`Gemini 4 Argon (High)`, sessiya `ad6fc32d-f9d1-4120-bfe5-3f332b8fcc76`) ishni boshlaydi | Tasdiqlangan (2026-11-06); `O-001` hal qilindi |
+| Q-010 | Foydalanuvchi (`2026-11-06`) texnik va me'moriy qarorlarni AI ixtiyoriga topshirdi va qurishni davom ettirishni tasdiqladi | Tasdiqlangan; `T-007` (Variant A) va `T-008` (Variant A) qabul qilindi |
+| Q-011 | Frilanserlik keyinchalik (`R2` bosqichida) qo'shiladi; hozir (`R1` doirasida) frilanserlik qo'shilmaydi (`"eslab qol keyinchalik firlanserlik qoshiladi lekin hozir uni qoshmaymiz"`, 2026-11-07) | Tasdiqlangan (2026-11-07); arxitektura va `DB-092 feature_flags` (`R2_FREELANCE_MARKETPLACE=False`) keyinchalik kengaytirishga tayyor holda saqlanadi, R1 kodida frilans oqimlari yozilmaydi |
+| Q-013 | “github bilan bikga ishla va tohtashni aytmagnimcha nabatma nabat ishlashni davom etir” — GitHub Issue/branch/commit/PR/CI bilan paketlarni ketma-ket davom ettirish, foydalanuvchi to'xtatmaguncha har paketdan keyin keyingisiga o'tish | Tasdiqlangan (2026-11-08); production deployment yoki jonli maxfiy kalit rotatsiyasi bajarildi deb talqin qilinmaydi |
+
+### Q-014 - Kerakli vositalarni o'rnatish va Antigravity eslatmasi (2026-11-10)
+
+- Foydalanuvchi kerak bo'ladigan vositalarni, jumladan Docker'ni, o'rnatishni va joriy ish tugagach eslatmalarni yangilab Antigravity uchun keyingi vazifalarni aniq yozishni topshirdi.
+- Natija: ANTIGRAVITY_HANDOFF.md, project .venv va reviewable Windows setup script tayyorlandi. Installerlar D: da verified; Windows system features/admin tasdig'i/reboot va haqiqiy Docker engine checks hali yakunlanmagan. Ruxsat production deployment/live money/credential rotation yoki avtomatik reboot bajarildi degan ma'noni bermaydi. Q-013 ketma-ket GitHub ish tartibi saqlanadi.
+
+## Mavjud hujjatlardagi takliflar
+
+Quyidagilar avvalgi materiallarda ishchi taklif deb berilgan. Ushbu suhbatda foydalanuvchi ularni alohida tasdiqlamagan.
+
+| ID | Taklif | Manba | Tanlov holati |
+| --- | --- | --- | --- |
+| T-001 | Bitta e'lon: 149 000 so'm / 30 kun | Ustoz uchun loyiha izohi, daromad modeli | Ishchi taklif |
+| T-002 | Korxona: 599 000 so'm / 30 kun, 5 faol e'longacha | Ustoz uchun loyiha izohi, daromad modeli | Ishchi taklif; texnik kvota 1.4 PDFda ham bor |
+| T-003 | Frilansda qabul qilingan buyurtmadan 10% xizmat haqi | Kelgusi bosqichlar, frilans xizmat haqi | Ishchi taklif |
+| T-004 | R1 uchun 62,72 mln so'm, yaxlit 63 mln, olti oylik budjet | Ustoz uchun loyiha izohi; kelgusi bosqichlar | Ishchi hisob; investitsiya tasdig'i emas |
+| T-005 | R1–R5 uchun 24 oylik rivojlanish | Kelgusi bosqichlar | Shartlarga bog'liq ishchi reja |
+| T-006 | Pilot maqsadi: 10 korxona, 30 e'lon, 200 profil; 2 muassasa bilan muhokama | Ustoz uchun loyiha izohi, pilot taklifi | Kelajak maqsadi; mavjud natija emas |
+
+## Ochiq tanlovlar
+
+### Q-012 — bo'limlarni ketma-ket tayyorlash (2026-11-07)
+
+- Foydalanuvchi: “birinmakatin tayorlashni davom rtir”. Codex ro'yxat tartibida IAMdan davom etadi.
+- Birinchi tekshiriladigan paket: `IAM-CODEX-001` — OTP, contact isolation/recovery, MFA va passkey backend.
+- SMS/emailning aniq tijoriy provayderi ushbu xabarda tanlanmagan. HTTPS adapter shartnomasi implementatsiya qarori sifatida yozildi; jonli yuborish yoki barcha modullar tayyorligi deb talqin qilinmaydi.
+
+| ID | Aniqlanadigan masala | Hozirgi holat |
+| --- | --- | --- |
+| O-001 | Asosiy ishni bajaradigan AI va aniq modeli | Hal qilindi (`Q-009`, 2026-11-06): `Antigravity` / `Gemini 4 Argon (High)` |
+| O-002 | Frontend, backend, worker/navbat, deploy va provayder tanlovlari | Hal qilindi (`Q-010`, `T-008` Variant A, 2026-11-06): Python 3.12 + FastAPI, Next.js + Tailwind CSS, Redis, MinIO/S3, Argon2id + PyOTP + WebAuthn |
+| O-003 | PDFda ko'rsatilgan SQL sxema va 1.3 to'liq atlasning manzili | Hal qilindi (`Q-010`, `T-007` Variant A, 2026-11-06): `specs/v1_3/` (25 fayl SHA-256 tasdiqlandi) va `FlexBridge_1_4_schema.sql` (`specs/v1_4/`) yaratildi hamda PGlite/PostgreSQL da 17/17 invariant sinovidan o'tdi |
+
+## Yangi taklif va javob shakli
+
+```text
+Taklif ID / sana / taklif qilgan AI:
+Qaysi muammo uchun / bog'liq vazifa:
+Variantlar va ularning foyda-xarajati:
+AI tavsiyasi va sababi:
+Holat: taklif / tanlangan / rad etilgan / keyinga qoldirilgan
+Foydalanuvchining aniq javobi / sana:
+Tanlov ta'sir qiladigan fayllar va vazifalar:
+Oldingi qarorni almashtirsa uning IDsi:
+```
+
+### T-007 — 1.3 texnik artefaktlarni ko'chirish va `FlexBridge_1_4_schema.sql`ni yaratish (`S1.2` / `O-003`)
+
+- Taklif ID / sana / taklif qilgan AI: `T-007` / `2026-11-06` / `Antigravity` (`Gemini 4 Argon (High)`)
+- Qaysi muammo uchun / bog'liq vazifa: `O-003` — `D:\FlexBridge` ichida `1.3` TZ/Atlas/SQL va `FlexBridge_1_4_schema.sql` yo'qligi / `S1.2` va `S2.1`
+- Variantlar va ularning foyda-xarajati:
+  - **Variant A (Tavsiya)**: Lokal `D:\Codex\2026-10-26\sh\outputs\FlexBridge\` katalogidan topilgan va SHA-256 (`checksums.json`) bilan tasdiqlangan `1.3` artefaktlarni (`schema_loyihasi.sql`, `FlexBridge_model_1_3.json`, `FlexBridge_baza_va_API_atlas.pdf`, `FlexBridge_ishga_tayyorgarlik_va_texnik_topshiriq.pdf`, CSV/MD lug'atlar) `D:\FlexBridge\specs\v1_3\` ichiga nusxalash hamda `FlexBridge_1_4_tuzatilgan_texnik_topshiriq.pdf` (1–5 va 8-betlar) dagi barcha 12 ta ustun, 9 ta composite/deferred FK, GiST `EXCLUDE` va trigger o'zgarishlarini qo'llab `D:\FlexBridge\specs\v1_4\FlexBridge_1_4_schema.sql` (94 jadval / 935 maydon / 214 FK) ni yaratish va lokal PostgreSQL 17.11 / PGlite da avtomatlashtirilgan testdan o'tkazish. *Foydasi*: hech qanday taxminsiz 100% asl manbaga asoslanadi, `AC-001..042` va barcha 124+8 API kontraktlari to'liq tiklanadi.
+  - **Variant B**: Faqat `1.4 PDF`da tilga olingan ~20 ta jadvalni noldan yozish. *Kamchiligi*: qolgan ~74 ta jadval, `AC-001..038` va `API-001..124` shartnomalari uzilib qoladi.
+- AI tavsiyasi va sababi: **Variant A**, chunki `D:\Codex\2026-10-26\sh\outputs\FlexBridge\` dagi 41/41 faylning SHA-256 nazorat summasi 100% tasdiqlandi va `1.4 PDF` aynan shu `1.3` paket ustiga qurilgan.
+- Holat: `tanlangan`
+- Foydalanuvchining aniq javobi / sana: `"qarorlarni toliq ihtiyoringa qol;diraman qurishni davom etir"` / `2026-11-06` (`Q-010`)
+- Tanlov ta'sir qiladigan fayllar va vazifalar: `02_TEXNIK_MODELLAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md`, `specs/v1_3/*`, `specs/v1_4/FlexBridge_1_4_schema.sql`, `FlexBridge_1_4_schema.sql`, `S1.2`, `S1.4`, `S2.1`
+- Oldingi qarorni almashtirsa uning IDsi: `Yo'q (O-003 ni yopadi)`
+
+### T-008 — Ochiq texnik stek tanlovlari (`S1.3` / `O-002`)
+
+- Taklif ID / sana / taklif qilgan AI: `T-008` / `2026-11-06` / `Antigravity` (`Gemini 4 Argon (High)`)
+- Qaysi muammo uchun / bog'liq vazifa: `O-002` — `02_TEXNIK_MODELLAR.md` da ochiq qolgan Backend, Frontend, Worker/navbat, S3 ombori, Auth/TOTP va lokal/production muhit tanlovlari / `S1.3`, `S1.4`, `S2.1..S2.10`
+- Variantlar va ularning foyda-xarajati:
+  - **Variant A (Python FastAPI + Next.js/TypeScript + Redis/Dramatiq yoki Celery + MinIO/S3)**:
+    - *Backend*: **Python 3.12 + FastAPI + SQLAlchemy 2.0 (asyncpg/psycopg) + Pydantic v2 + Alembic**. (`1.4 PDF`da PDF strukturaviy filtri sifatida Python `pypdf` allaqachon belgilangan; backend va skaner worker bitta tilda va yagona tipizatsiyada ishlaydi).
+    - *Worker va Navbat*: **Redis + Python asinxron worker (Celery/ARQ)** — `ClamAV` (`clamd`) + `pypdf` fayl skaneri va retention/eksport vazifalari uchun.
+    - *Kesh*: **Redis** (L1 in-memory + Redis invalidation, TTL = 15s, `INV-15` darhol revoke uchun).
+    - *Fayl ombori*: **MinIO** (lokal/pilot S3-mos xususiy obyekt ombori, `quarantine/` prefiksi va signed URL TTL = 60s bilan).
+    - *Autentifikatsiya*: **Argon2id** (parol xeshi) + **PyOTP** (TOTP) + **py_webauthn** (Passkey/WebAuthn).
+    - *Frontend*: **Next.js (App Router, TypeScript) + Tailwind CSS** (`PG-001..048` sahifalar uchun).
+    - *Infratuzilma*: **Docker Compose** (PostgreSQL 17, PgBouncer, Redis, MinIO, ClamAV) hamda lokal `D:\Codex\.tools\postgresql-17.11` / `PGlite` sinov muhiti.
+  - **Variant B (Node.js/NestJS TypeScript Backend + alohida Python `pypdf` microservice + Next.js)**:
+    - *Foydasi*: Frontend va Backend yagona TypeScript tilida.
+    - *Kamchiligi*: `1.4 PDF` talab qilgan Python `pypdf` skaneri uchun baribir ikkinchi til (Python worker) saqlashga to'g'ri keladi.
+- AI tavsiyasi va sababi: **Variant A**, chunki `1.4 PDF` da Python `pypdf` majburiy komponent sifatida ko'rsatilgan; FastAPI + asyncpg PostgreSQLning `int4range`, `GiST`, `DEFERRABLE` tranzaksiyalari va `pypdf`/`clamd` workerlari bilan bitta ekotizimda eng kam murakkablik bilan ishlaydi.
+- Holat: `tanlangan`
+- Foydalanuvchining aniq javobi / sana: `"qarorlarni toliq ihtiyoringa qol;diraman qurishni davom etir"` / `2026-11-06` (`Q-010`)
+- Tanlov ta'sir qiladigan fayllar va vazifalar: `02_TEXNIK_MODELLAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md`, `S1.3`, `S1.4`, `S2.1..S2.10`
+- Oldingi qarorni almashtirsa uning IDsi: `Yo'q (O-002 ni yopadi)`
+
+
+## Q-015 - Antigravity hamkorligi, model tanlovi va yangi umumiy branch (2026-11-10)
+
+- Manba: foydalanuvchining joriy topshirig'i: terminaldagi `agy`ni Copilot kabi
+  qo'shish, vazifalar berish, natijalarni tekshirish, navbatdagi vazifani aniq berish,
+  ishga mos model va haqiqiy limitda boshqa mos modelga o'tish; barcha yangi ish
+  katta yangi branchda, main'ga tegilmasin.
+- Yangi umumiy branch integration/r1-agent-collaboration. Main/master freeze
+  boshi764fb98496fa40857acb07844fd09fcafa99b7d6; PR69 topshiriq kelishidan oldin
+  birlashtirilgan. Q013 davomiy ishlash tartibi saqlanadi, ammo keyingi PR/merge
+  faqatintegration branchga. Foydalanuvchi aniq bekor qilmaguncha main mutatsiyasi yo'q.
+- Codex boshqaradi/tekshiradi; actual agy va Copilot qatnashadi. Har vazifaga ID,
+  isolated branch/worktree, fayl egaligi, talab/dalil/qabul va navbatdagi topshiriq.
+  Model listi ijro tasdig'i emas; requested/reported model ajratiladi. Haqiqiy quota
+  bo'lsa mos mavjud modelga o'tiladi; timeout yoki transport xatosi quota deyilmaydi.
+- Hammasi D:da; AGENTS.md/handoff, actual receipts va jurnallar davom nuqtasidir.
+  Raw credentials, .env/.data va shaxsiy dalillar agent/publish kontekstiga yuborilmaydi.
+
+
+### Issue72 technical choices under existing Q010 authority (Codex, not new user quotes)
+
+- Missing If-Match400, stale412, key conflict409; strict server global schema;
+  protected/R2 enable remains blocked until actual separate prerequisites exist.
+- Legacy R1_PAID_ORG_PLANS PATCH alias denied, read maps to protected paid_checkout.
+  Immutable original provenance remains legacy even after a new genuine ADMIN event.
+- Actor/key advisory precedes code advisory/canonical row/current authority; no
+  actor FK is inserted before business locks. Committed state survives author logout.
+- These choices do not authorize live paid/provider/official grade/signature action
+  or claim downstream integration. Q015/main freeze and Q011/R2 exclusion persist.
+
+### Q-016 - Antigravity master succession (2026-11-10)
+
+User authorized Antigravity to assume all ongoing work and Copilot/OpenCode coordination if Codex reaches its limit. Preserve Q015 frozen main/master and integration-only workflow. Explicit takeover and exclusive ownership follow ANTIGRAVITY_MASTER_PROTOCOL.md; idle timeout is not quota evidence. Prepared terminal launcher is dormant until supplied trigger, automatic authoritative Codex quota detection is not available. This supersedes sole-Codex coordination only during takeover; fullR1/pilot acceptance still needs actual evidence.
+
+### T-API108-WHOLESET / new technical design under Q010 (Issue76)
+
+Codex chooses a placement-wide server-derived current diary/review digest and minimal scoped contextGET for API108, rather than treating one revision review as a final placement conclusion. New declared vocabulary ACADEMIC_REVIEW_COMPLETE / ACADEMIC_REVISION_REQUIRED, no official grade/credit/signature or automatic COMPLETED. Positive requires all current academic reviews complete; hours/workplace/remaining completion rules remain separate. This is a technical design choice, not a source-mandated enum or new user approval. PLAN.md/AGY014 task records ownership/acceptance; forward0018/one helper proposed. Q016 conditional succession and Q015 main freeze apply to this sibling worktree from the session/global current policy.

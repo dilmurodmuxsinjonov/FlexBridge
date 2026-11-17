@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.260" timestamp="2026-11-10T10:43:04.469525+05:00" hostname="Ditroid"><testcase classname="tests.security.test_feature_flag_readiness_and_transactions" name="test_fail_closed_read_keeps_an_implicit_ambient_transaction_usable" time="4.677"><failure message="sqlalchemy.exc.InternalError: (psycopg.errors.InFailedSqlTransaction) current transaction is aborted, commands ignored until end of transaction block&#10;[SQL: SELECT 1]&#10;(Background on this error at: https://sqlalche.me/e/20/2j85)">D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+
+The above exception was the direct cause of the following exception:
+backend\tests\security\test_feature_flag_readiness_and_transactions.py:54: in test_fail_closed_read_keeps_an_implicit_ambient_transaction_usable
+    assert conn.execute(text('SELECT 1')).scalar_one()==1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1848: in _execute_context
+    return self._exec_single_context(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+D:\FlexBridge\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+D:\FlexBridge\.venv\Lib\site-packages\psycopg\cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.InternalError: (psycopg.errors.InFailedSqlTransaction) current transaction is aborted, commands ignored until end of transaction block
+E   [SQL: SELECT 1]
+E   (Background on this error at: https://sqlalche.me/e/20/2j85)</failure></testcase></testsuite></testsuites>

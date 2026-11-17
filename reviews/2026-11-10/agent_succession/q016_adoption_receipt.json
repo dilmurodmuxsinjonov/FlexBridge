@@ -1,0 +1,12 @@
+{
+  "issue": 74,
+  "issue_url": "https://github.com/dilmurodmuxsinjonov/FlexBridge/issues/74",
+  "root_branch": "feature/74-antigravity-master",
+  "accepted_base": "d72462e705df5d45a91963679301bb377b3755c5",
+  "main_frozen_sha": "764fb98496fa40857acb07844fd09fcafa99b7d6",
+  "root_WIP_files_preserved": 7,
+  "agent_source_files_preserved": 19,
+  "retained_agent_source_stash": "fdfa466984e6439aebe37c8f007f24d7d8049722",
+  "agent_policy_WIP_preserved": 2,
+  "no_reset_or_discard": true
+}

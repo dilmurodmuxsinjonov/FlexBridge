@@ -89,7 +89,7 @@ def create_daily_log_endpoint(payload: CreateDailyLogRequest, actor: ActorContex
     try:
         return internship_log_service.create_daily_log_with_revision(
             placement_id=payload.placement_id,
-            author_id=actor.user_id,
+            actor=actor,
             log_date=payload.log_date,
             summary_text=payload.summary_text,
             total_minutes=payload.total_minutes,

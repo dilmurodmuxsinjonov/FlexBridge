@@ -1,0 +1,19 @@
+{
+  "requested_model": "opencode/nemotron-3.5-lightning-free",
+  "exit_code": 0,
+  "source_pins": {
+    "backend/alembic/versions/0017_feature_flag_administration.py": "9479cdc809be256ed09272bc9fd1b0ffb1c379f63830bb223ca20b229075e50a",
+    "backend/app/services/feature_flag_admin.py": "1e56974e6de1994972348d8221a54431695d5bd88020f7defa37670af9cff546",
+    "backend/tests/security/test_feature_flag_readiness_and_transactions.py": "15cbb5055d20f03e0d1fb599e556348a5b1dd65b9e819d6e5840851b170eb34f"
+  },
+  "event_types": [
+    "step_finish",
+    "step_start",
+    "text",
+    "tool_use"
+  ],
+  "sessions": [
+    "ses_e3bff1204ffeoyuyLtDbp5HJLN"
+  ],
+  "scope": "source snapshot opinion only; no native tests; initial CLI argument error preserved"
+}

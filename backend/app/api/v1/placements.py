@@ -49,6 +49,21 @@ class ConfirmPlacementStartRequest(TermsRequest):
     party: str  # CANDIDATE | ORGANIZATION
 
 
+class PlacementCompletionRequest(StrictDTO):
+    terms_id: UUID
+    version: int
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    decision: str = Field(default='REQUEST_COMPLETION', pattern='^(REQUEST_COMPLETION|CONFIRM_COMPLETION|REJECT_COMPLETION)$')
+    reason: str | None = Field(default=None, max_length=2000)
+    early_reason: str | None = Field(default=None, max_length=2000)
+
+
+class PlacementExportRequest(StrictDTO):
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    format: str = Field(default='PDF', pattern='^(PDF|JSON)$')
+    include_reviews: bool = True
+
+
 @router.post("/applications", status_code=201)
 def create_application_endpoint(payload: CreateApplicationRequest, actor: ActorContext = Depends(require_actor_context)) -> dict[str, Any]:
     return placement_service.create_application(
@@ -125,6 +140,86 @@ def confirm_placement_start_endpoint(
             placement_id=placement_id,
             actor=actor,
             **payload.arguments(),
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.post("/placements/{placement_id}/completion-requests", status_code=201)
+def request_placement_completion_endpoint(
+    placement_id: str,
+    payload: PlacementCompletionRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    try:
+        from app.services.placement_completion import completion_service
+        return completion_service.request_or_confirm_completion(
+            actor=actor,
+            placement_id=placement_id,
+            terms_id=str(payload.terms_id),
+            version=payload.version,
+            idempotency_key=payload.idempotency_key,
+            decision=payload.decision,
+            reason=payload.reason,
+            early_reason=payload.early_reason,
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.post("/placements/{placement_id}/exports", status_code=201)
+def export_placement_endpoint(
+    placement_id: str,
+    payload: PlacementExportRequest,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    try:
+        from app.services.placement_export import export_service
+        return export_service.export_placement(
+            actor=actor,
+            placement_id=placement_id,
+            idempotency_key=payload.idempotency_key,
+            export_format=payload.format,
+            include_reviews=payload.include_reviews,
+        )
+    except PlacementScopeError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "sqlstate": exc.sqlstate, "message": str(exc)},
+        ) from exc
+
+
+@router.get("/placements/{placement_id}/logs")
+def get_placement_logs_endpoint(
+    placement_id: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    include_tasks: bool = True,
+    include_reviews: bool = True,
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Single Placement Diary Logs View (API-053 / CAP-022 / PG-022.S01)."""
+    try:
+        from app.services.placement_logs import placement_logs_service
+        return placement_logs_service.get_placement_logs_api_053(
+            actor=actor,
+            placement_id=placement_id,
+            from_date=from_date,
+            to_date=to_date,
+            status=status,
+            page=page,
+            page_size=page_size,
+            include_tasks=include_tasks,
+            include_reviews=include_reviews,
         )
     except PlacementScopeError as exc:
         raise HTTPException(

@@ -1,0 +1,271 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Lock, Mail, KeyRound, AlertCircle, Loader2, X, ShieldCheck } from "lucide-react";
+import { loginUser, verifyMfa, AuthUser } from "@/lib/api";
+import { describeLoginError } from "@/lib/errors";
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: (user: AuthUser) => void;
+  title?: string;
+  subtitle?: string;
+  requiredPortal?: "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR";
+}
+
+export default function AuthModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  title = "Tizimga kirish",
+  subtitle = "Hisobingiz orqali FlexBridge xizmatlaridan foydalaning",
+  requiredPortal,
+}: AuthModalProps) {
+  const [destination, setDestination] = useState("");
+  const [password, setPassword] = useState("");
+  const [mfaTicket, setMfaTicket] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      if (mfaTicket) {
+        // MFA Verification step
+        const result = await verifyMfa(mfaTicket, mfaCode, requiredPortal);
+        if (result.ok && !result.mfa_required) {
+          onSuccess({
+            user_id: result.user_id,
+            session_id: "active",
+            roles: result.roles,
+          });
+          onClose();
+        } else if (!result.ok) {
+          setErrorMessage(describeLoginError(result.error));
+        }
+      } else {
+        // Initial Login step
+        const result = await loginUser(destination.trim(), password, undefined, requiredPortal);
+        if (result.ok) {
+          if (result.mfa_required) {
+            setMfaTicket(result.mfa_ticket);
+          } else {
+            onSuccess({
+              user_id: result.user_id,
+              session_id: "active",
+              roles: result.roles,
+            });
+            onClose();
+          }
+        } else {
+          setErrorMessage(describeLoginError(result.error));
+        }
+      }
+    } catch (err: unknown) {
+      setErrorMessage(describeLoginError(err instanceof Error ? err.message : null));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setMfaTicket(null);
+    setMfaCode("");
+    setErrorMessage(null);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-md skeuo-card rounded-3xl p-6 sm:p-8 flex flex-col gap-5"
+      >
+        <button
+          onClick={onClose}
+          type="button"
+          aria-label="Yopish"
+          className="absolute top-4 right-4 w-9 h-9 rounded-full skeuo-btn-secondary flex items-center justify-center text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="flex flex-col gap-1.5 text-center sm:text-left">
+          <div className="w-11 h-11 rounded-2xl skeuo-well flex items-center justify-center text-[#D95F2B] mb-1">
+            <Lock className="w-5 h-5" />
+          </div>
+          <h2 className="text-xl font-display font-bold text-[var(--fb-ink)] tracking-tight">{title}</h2>
+          <p className="text-xs text-[var(--fb-ink-muted)]">{subtitle}</p>
+        </div>
+
+        {errorMessage && (
+          <div role="alert" className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {!mfaTicket ? (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="auth-modal-id" className="text-sm font-semibold text-[var(--fb-ink)]">
+                  Telefon raqam yoki elektron pochta
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="auth-modal-id"
+                    type="text"
+                    inputMode="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    required
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    placeholder="+998 90 123 45 67 yoki pochta@misol.uz"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="auth-modal-pw" className="text-sm font-semibold text-[var(--fb-ink)]">Parol</label>
+                  <Link href="/parolni-tiklash" className="text-xs font-medium text-[var(--fb-ink-secondary)] underline-offset-2 hover:underline">
+                    Parolni unutdingizmi?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                    <KeyRound className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="auth-modal-pw"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Parolingiz"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl skeuo-input text-sm"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span>Authenticator ilovangizdagi 6 xonali kodni kiriting.</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="auth-modal-code" className="text-sm font-semibold text-[var(--fb-ink)]">Tasdiqlash kodi</label>
+                <input
+                  id="auth-modal-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  required
+                  pattern="^[0-9]{6}$"
+                  maxLength={6}
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="••••••"
+                  className="w-full text-center tracking-widest text-lg font-mono py-2.5 rounded-xl skeuo-input"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-xs text-[var(--fb-ink-secondary)] hover:text-[var(--fb-ink)] underline underline-offset-2 text-left"
+              >
+                ← Boshqa hisob bilan kirish
+              </button>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-2 py-3 px-4 rounded-2xl skeuo-btn-accent font-semibold text-xs md:text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Tekshirilmoqda...</span>
+              </>
+            ) : mfaTicket ? (
+              <span>Tasdiqlash</span>
+            ) : (
+              <span>Kirish</span>
+            )}
+          </button>
+        </form>
+
+        {requiredPortal === "CANDIDATE" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>Hisobingiz yo‘qmi?</span>
+            <Link
+              href="/talaba/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              Talaba sifatida ro‘yxatdan o‘tish →
+            </Link>
+          </div>
+        )}
+        {requiredPortal === "EMPLOYER" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>Korxona vakili hisobingiz yo‘qmi?</span>
+            <Link
+              href="/korxona/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Korxona vakili sifatida ulanish →
+            </Link>
+          </div>
+        )}
+        {requiredPortal === "ACADEMIC" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>OTM vakili hisobingiz yo‘qmi?</span>
+            <Link
+              href="/universitet/royxatdan-otish"
+              onClick={onClose}
+              className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              OTM vakili sifatida ulanish →
+            </Link>
+          </div>
+        )}
+        {requiredPortal === "OPERATOR" && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+            <span>SOC maxsus kirish sahifasi:</span>
+            <Link
+              href="/operator/kirish"
+              onClick={onClose}
+              className="font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Operator alohida kirishi →
+            </Link>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}

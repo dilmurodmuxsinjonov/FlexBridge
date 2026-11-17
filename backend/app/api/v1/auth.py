@@ -50,7 +50,12 @@ def login(payload:LoginRequest,request:HTTPRequest):
 
 @router.get('/auth/me')
 def me(actor:ActorContext=Depends(require_actor_context)):
-    return {'user_id':actor.user_id,'session_id':actor.session_id,'roles':actor.roles}
+    # display_name is the caller's own name, shown on their profile card.
+    from sqlalchemy import select
+    users=table('users')
+    with transaction() as conn:
+        display_name=conn.execute(select(users.c.display_name).where(users.c.id==actor.user_id)).scalar()
+    return {'user_id':actor.user_id,'session_id':actor.session_id,'roles':actor.roles,'display_name':display_name}
 
 @router.delete('/me/sessions/{id}')
 def revoke(id:UUID,actor:ActorContext=Depends(require_actor_context)):
@@ -87,3 +92,60 @@ def confirm(payload:ConfirmMFA,actor:ActorContext=Depends(require_actor_context)
     rate_limit('totp-confirm',actor.user_id,10,600)
     auth_service.confirm_totp(actor.user_id,payload.code)
     return {'totp_enabled':True,'reauthentication_required':True}
+
+@router.get('/me/security')
+def get_security_overview(actor:ActorContext=Depends(require_actor_context)):
+    from sqlalchemy import select, func
+    with transaction() as conn:
+        t_mfa = table('mfa_credentials')
+        totp_cred = conn.execute(select(t_mfa.c.id).where(
+            t_mfa.c.user_id == actor.user_id,
+            t_mfa.c.kind == 'TOTP',
+            t_mfa.c.verified_at.is_not(None),
+            t_mfa.c.revoked_at.is_(None)
+        )).first()
+        totp_enabled = totp_cred is not None
+
+        rec_count = conn.execute(select(func.count(t_mfa.c.id)).where(
+            t_mfa.c.user_id == actor.user_id,
+            t_mfa.c.kind == 'RECOVERY_CODE',
+            t_mfa.c.verified_at.is_not(None),
+            t_mfa.c.revoked_at.is_(None)
+        )).scalar() or 0
+
+        t_sess = table('sessions')
+        sessions_rows = conn.execute(select(
+            t_sess.c.id,
+            t_sess.c.created_at,
+            t_sess.c.expires_at,
+            t_sess.c.last_seen_at,
+            t_sess.c.assurance
+        ).where(
+            t_sess.c.user_id == actor.user_id,
+            t_sess.c.revoked_at.is_(None),
+            t_sess.c.expires_at > now()
+        ).order_by(t_sess.c.created_at.desc())).mappings().all()
+
+        sessions_list = []
+        for s in sessions_rows:
+            sessions_list.append({
+                'id': str(s['id']),
+                'created_at': s['created_at'].isoformat() if s['created_at'] else None,
+                'expires_at': s['expires_at'].isoformat() if s['expires_at'] else None,
+                'last_seen_at': s['last_seen_at'].isoformat() if s['last_seen_at'] else None,
+                'assurance': s['assurance'],
+                'is_current': str(s['id']) == str(actor.session_id)
+            })
+
+        return {
+            'user_id': str(actor.user_id),
+            'totp_enabled': totp_enabled,
+            'recovery_codes_count': int(rec_count),
+            'current_session_id': str(actor.session_id),
+            'sessions': sessions_list
+        }
+
+@router.get('/me/sessions')
+def list_sessions(actor:ActorContext=Depends(require_actor_context)):
+    return get_security_overview(actor)
+

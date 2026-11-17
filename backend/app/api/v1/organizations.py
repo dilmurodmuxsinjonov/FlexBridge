@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from app.api.dependencies import ActorContext, require_actor_context
 from app.services.organizations import organization_service as service
+from app.services.employer_directory import employer_directory_service
 from app.services.institution_onboarding import institution_onboarding_service
 from app.services.enrollments import enrollment_service
 from app.api.dependencies import require_platform
@@ -93,6 +94,11 @@ def patch(org: UUID, payload: OrganizationPatch, actor: ActorContext = Depends(r
 def capabilities(org: UUID, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id':'API-072', 'items':service.capabilities(actor, str(org))}
 
+@router.get('/organizations/{org}/team')
+def team(org: UUID, actor: ActorContext = Depends(require_actor_context)):
+    """Owner (main account): members with names/roles, join requests, open invitations."""
+    return {'contract_id':'API-073-TEAM', **service.team(actor, str(org))}
+
 @router.post('/organizations/{org}/memberships/{id}/revoke')
 def revoke(org: UUID, id: UUID, payload: RevokeInput, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id':'API-075', **service.revoke(actor, str(org), str(id), payload.reason)}
@@ -125,3 +131,48 @@ def join_detail(org: UUID, id: UUID, actor: ActorContext = Depends(require_actor
 @router.get('/organizations/{org}/membership-requests/{id}/files/{file_id}/download')
 def join_download(org: UUID, id: UUID, file_id: UUID, actor: ActorContext = Depends(require_actor_context)):
     return service.join_download(actor, str(org), str(id), str(file_id))
+
+
+class OrganizationDirectoryInput(BaseModel):
+    model_config = ConfigDict(extra='allow')
+    official_name: str | None = None
+    brand_name: str | None = None
+    tax_id: str | None = None
+    industry: str | None = None
+    region: str | None = None
+    legal_address: str | None = None
+    company_size: str | None = None
+    founded_year: int | None = None
+    website_url: str | None = None
+    hr_contact_name: str | None = None
+    hr_contact_phone: str | None = None
+    hr_contact_email: str | None = None
+    director_name: str | None = None
+    bank_name: str | None = None
+    bank_mfo: str | None = None
+    bank_account: str | None = None
+    about_company: str | None = None
+    internship_conditions: str | None = None
+    student_perks: list[str] | None = None
+
+
+@router.get('/organizations/{org}/directory-profile')
+def get_org_directory_profile(
+    org: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return employer_directory_service.get_directory_profile(actor, str(org))
+
+
+@router.put('/organizations/{org}/directory-profile')
+def put_org_directory_profile(
+    org: UUID,
+    payload: OrganizationDirectoryInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return employer_directory_service.update_directory_profile(
+        actor,
+        str(org),
+        payload.model_dump(exclude_unset=True),
+    )
+

@@ -10,6 +10,10 @@ from app.api.dependencies import ActorContext, require_actor_context, candidate_
 from app.services.candidates import candidate_service
 from app.services.availability import availability_service
 from app.services.schedule import local_today
+from app.services.candidate_portfolio import candidate_portfolio_service
+from app.services.candidate_certificates import candidate_certificates_service
+from app.services.candidate_resume_export import candidate_resume_export_service
+from app.services.candidate_resume_builder import candidate_resume_builder_service
 
 router = APIRouter(prefix='/api/v1', tags=['candidate'])
 
@@ -101,6 +105,16 @@ def patch_profile(payload: ProfilePatch, actor: ActorContext = Depends(require_a
     return {'contract_id': 'API-026', **candidate_service.update_profile(actor, payload.model_dump(exclude_unset=True))}
 
 
+class VisibilityInput(Input):
+    visibility: Literal['PRIVATE', 'EMPLOYERS']
+
+
+@router.put('/me/candidate/visibility')
+def put_visibility(payload: VisibilityInput, actor: ActorContext = Depends(require_actor_context)):
+    """Candidate consent to be found by verified employers (search hides PRIVATE profiles)."""
+    return {'contract_id': 'API-026-VISIBILITY', **candidate_service.set_visibility(actor, payload.visibility)}
+
+
 @router.patch('/me/candidate/skills')
 def patch_skills(payload: SkillsPatch, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id': 'API-032', **candidate_service.update_skills(actor,
@@ -134,3 +148,184 @@ def get_availability(from_date: date | None = None, days: int = Query(default=28
 def put_exceptions(payload: ExceptionsInput, actor: ActorContext = Depends(require_actor_context)):
     return {'contract_id': 'API-036', **availability_service.replace_exceptions(actor,
         payload.from_date, payload.to_date, [item.model_dump() for item in payload.exceptions])}
+
+
+class PortfolioInput(Input):
+    title: str = Field(min_length=2, max_length=200)
+    description: str = Field(min_length=2, max_length=5000)
+    project_url: str | None = Field(default=None, max_length=1000)
+    github_url: str | None = Field(default=None, max_length=1000)
+    skills: list[str] = Field(default_factory=list, max_length=50)
+    start_date: date | None = None
+    end_date: date | None = None
+    file_id: UUID | None = None
+
+    @model_validator(mode='after')
+    def date_bounds(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('End date must be greater than or equal to start date')
+        return self
+
+
+class PortfolioUpdateInput(Input):
+    title: str | None = Field(default=None, min_length=2, max_length=200)
+    description: str | None = Field(default=None, min_length=2, max_length=5000)
+    project_url: str | None = Field(default=None, max_length=1000)
+    github_url: str | None = Field(default=None, max_length=1000)
+    skills: list[str] | None = Field(default=None, max_length=50)
+    start_date: date | None = None
+    end_date: date | None = None
+    file_id: UUID | None = None
+
+    @model_validator(mode='after')
+    def date_bounds(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('End date must be greater than or equal to start date')
+        return self
+
+
+class CertificateInput(Input):
+    title: str = Field(min_length=2, max_length=200)
+    issuer: str = Field(min_length=2, max_length=200)
+    issue_date: date
+    expiry_date: date | None = None
+    credential_id: str | None = Field(default=None, max_length=200)
+    credential_url: str | None = Field(default=None, max_length=1000)
+    file_id: UUID | None = None
+    verification_case_id: UUID | None = None
+
+    @model_validator(mode='after')
+    def date_bounds(self):
+        if self.expiry_date and self.expiry_date < self.issue_date:
+            raise ValueError('Expiry date must be greater than or equal to issue date')
+        return self
+
+
+class ResumeExportInput(Input):
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    export_format: Literal['PDF', 'JSON'] = 'PDF'
+
+
+# Candidate Portfolio (API-026-PORTFOLIO)
+@router.get('/me/candidate/portfolio')
+def list_portfolio(
+    limit: int = Query(default=50, ge=1, le=100),
+    after_id: UUID | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_portfolio_service.list_portfolio(actor, limit, str(after_id) if after_id else None)
+
+
+@router.post('/me/candidate/portfolio', status_code=201)
+def create_portfolio(
+    payload: PortfolioInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_portfolio_service.create_portfolio(actor, payload.model_dump())
+
+
+@router.put('/me/candidate/portfolio/{id}')
+def update_portfolio(
+    id: UUID,
+    payload: PortfolioUpdateInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_portfolio_service.update_portfolio(actor, str(id), payload.model_dump(exclude_unset=True))
+
+
+@router.delete('/me/candidate/portfolio/{id}', status_code=204)
+def delete_portfolio(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    candidate_portfolio_service.delete_portfolio(actor, str(id))
+    return None
+
+
+# Candidate Certificates (API-026-CERT)
+@router.get('/me/candidate/certificates')
+def list_certificates(
+    limit: int = Query(default=50, ge=1, le=100),
+    after_id: UUID | None = None,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_certificates_service.list_certificates(actor, limit, str(after_id) if after_id else None)
+
+
+@router.post('/me/candidate/certificates', status_code=201)
+def create_certificate(
+    payload: CertificateInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_certificates_service.create_certificate(actor, payload.model_dump())
+
+
+@router.delete('/me/candidate/certificates/{id}', status_code=204)
+def delete_certificate(
+    id: UUID,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    candidate_certificates_service.delete_certificate(actor, str(id))
+    return None
+
+
+# Candidate Resume Export (API-026-RESUME)
+@router.post('/me/candidate/resume/export', status_code=201)
+def export_resume(
+    payload: ResumeExportInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_export_service.export_resume(
+        actor=actor,
+        idempotency_key=payload.idempotency_key,
+        export_format=payload.export_format,
+    )
+
+
+class ResumeDetailsPayload(BaseModel):
+    model_config = ConfigDict(extra='allow')
+    achievements: list[dict] | None = None
+    work_experiences: list[dict] | None = None
+    languages: list[dict] | None = None
+    education_details: dict | None = None
+    career_preferences: dict | None = None
+
+
+class CandidatePdfUploadInput(Input):
+    filename: str = Field(default='document.pdf', min_length=1, max_length=240)
+    purpose: Literal['CERTIFICATE', 'CV', 'PORTFOLIO'] = 'CERTIFICATE'
+    title: str | None = Field(default=None, max_length=240)
+    content_base64: str = Field(min_length=24, max_length=15_000_000)
+
+
+# Candidate Full Resume Details (API-026-RESUME-DETAILS)
+@router.get('/me/candidate/resume-details')
+def get_resume_details(
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.get_resume_details(actor)
+
+
+@router.put('/me/candidate/resume-details')
+def update_resume_details(
+    payload: ResumeDetailsPayload,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.update_resume_details(
+        actor,
+        payload.model_dump(exclude_unset=True),
+    )
+
+
+# Candidate Direct PDF File Upload (API-026-DIRECT-UPLOAD)
+@router.post('/me/candidate/files/upload', status_code=201)
+def upload_candidate_pdf_file(
+    payload: CandidatePdfUploadInput,
+    actor: ActorContext = Depends(require_actor_context),
+):
+    return candidate_resume_builder_service.upload_candidate_pdf_file(
+        actor,
+        payload.model_dump(),
+    )
+
+

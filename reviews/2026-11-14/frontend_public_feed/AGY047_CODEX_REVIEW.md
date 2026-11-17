@@ -1,0 +1,9 @@
+# FB-140A independent review assessment — 2026-11-14
+
+AGY047 reviewed `fix/140-public-feed` at `2da7387cb1aa5b12d16c005467e16693983b316d` in read-only plan mode. Requested listed model `gemini-3.8-flash-high`; actual CLI exit 0/status SUCCESS, conversation `dd1f1c5e-1e2b-433b-8e9d-5bbfb9fd5b63`, reported model field absent. The pinned hashes of `frontend/src/app/page.tsx`, `frontend/src/lib/api.ts` and `.github/workflows/frontend-build.yml` were identical before and after review. Raw receipt and report are under `D:/Codex/FlexBridge-agents/runs/AGY-047` and `D:/Codex/FlexBridge-agents/AGY-047_REPORT.md`.
+
+Codex checked the review against the API-001 endpoint and service. The page's `query`, `region`, `is_paid`, `after` and `limit` parameters, response fields, and same-origin rewrite match backend source. The backend filters public results to published opportunities owned by verified organizations. Local `npm run build` passed after the reviewed source and again after the shared shell change.
+
+The reviewer found no blocking defect in its **bounded source scope**. Its optional `htmlFor` suggestion is unnecessary for labels that already wrap their controls. The four-region dropdown is limited but the unfiltered catalog remains available; broader region selection remains open. Equal minimum/maximum salary display is cosmetic. A nullable `published_at` cursor guard belongs to a separate backend review if a reproducible published-null row exists.
+
+The report's broad phrase that all fake data were eliminated applies only to the homepage. Employer, university and operator pages still contain demo records and remain in Issue #140. After AGY047 completed, Codex separately removed unverified status/legal/profile claims in shared `Navbar.tsx` and `Footer.tsx`, added visible maket labels on those three portals, and reran the production build. AGY047 did not review those later edits. No actual browser/backend/Docker E2E or pilot verification occurred.
