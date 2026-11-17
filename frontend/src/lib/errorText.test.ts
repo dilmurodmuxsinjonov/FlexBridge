@@ -15,6 +15,12 @@ describe("errorText", () => {
     expect(errorText({ detail: { code: "PLACEMENT_NOT_FOUND" } }, "Yuklab bo‘lmadi.")).toBe("Ma’lumot topilmadi.");
   });
 
+  it("explains validation conflicts found in the staging run instead of asking to retry", () => {
+    expect(errorText({ ok: false, error: { code: "TIMETABLE_SLOT_OVERLAP" } }, "TIMETABLE_SAVE_FAILED")).toMatch(/shu vaqtda boshqa dars bor/);
+    expect(errorText({ error: "APPLICATION_ALREADY_EXISTS", message: "Active application exists" }, "APPLY_FAILED")).toMatch(/allaqachon ariza/);
+    expect(errorText({ error: "SHIFT_OVERLAP" }, "X_FAILED")).toMatch(/to‘qnashadi/);
+  });
+
   it("keeps a human message and a human fallback", () => {
     expect(errorText({ message: "Parol noto‘g‘ri." }, "LOGIN_FAILED")).toBe("Parol noto‘g‘ri.");
     expect(errorText({}, "Shartnomalarni yuklab bo‘lmadi.")).toBe("Shartnomalarni yuklab bo‘lmadi.");

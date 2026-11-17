@@ -85,8 +85,11 @@ function FunnelCard({ metrics, onOpen }: EmployerOverviewProps) {
 function OpportunitiesCard({ metrics, onCreate }: EmployerOverviewProps) {
   if (!metrics) return null;
   const o = metrics.opportunities;
+  // API-068 has no "approved" bucket: approved-but-unpublished vacancies are the remainder.
+  const approved = Math.max(0, o.total - o.published - o.draft - o.paused - o.closed);
   const parts = [
     { key: "PUBLISHED", value: o.published, cls: "bg-[var(--fb-ink)]" },
+    ...(approved ? [{ key: "APPROVED", value: approved, cls: "bg-emerald-500" }] : []),
     { key: "DRAFT", value: o.draft, cls: "bg-[color-mix(in_srgb,var(--fb-ink-muted)_60%,transparent)]" },
     { key: "PAUSED", value: o.paused, cls: "bg-[var(--fb-accent)]" },
     { key: "CLOSED", value: o.closed, cls: "bg-[var(--fb-well-deep)]" },
@@ -110,7 +113,7 @@ function OpportunitiesCard({ metrics, onCreate }: EmployerOverviewProps) {
       <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
         {parts.map((p) => (
           <li key={p.key} className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[var(--fb-ink-secondary)]"><span className={`h-2.5 w-2.5 rounded-full ${p.cls}`} />{enumLabel(p.key)}</span>
+            <span className="inline-flex items-center gap-1.5 text-[var(--fb-ink-secondary)]"><span className={`h-2.5 w-2.5 rounded-full ${p.cls}`} />{p.key === "APPROVED" ? "Nashrga tayyor" : p.key === "DRAFT" ? "Moderatsiyada" : enumLabel(p.key)}</span>
             <span className="font-semibold tabular-nums">{p.value}</span>
           </li>
         ))}
