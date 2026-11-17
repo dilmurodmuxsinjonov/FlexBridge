@@ -1,13 +1,13 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-195)
+## Joriy holat (2026-11-17, LOG-196)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `1964324` (PR #276); LOG-195 (animatsiyalar 3x tez) PR'i CI kutmoqda.
-- **main**: foydalanuvchi 2026-11-17 da integration'ni main'ga o'tkazishga aniq ruxsat berdi ("hozirgi holatni main qil, hozirgi main'ni nusxalab qo'y"). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. O'tkazish `1964324` (exact-head CI yashil bo'lgach, fast-forward). Keyingi har bir main o'zgarishi uchun yana aniq ruxsat kerak.
+- **Integratsiya**: `integration/r1-agent-collaboration` — `b5be16a` (PR #278, animatsiyalar 3x tez; main'da yo'q — main 1964324 holatida).
+- **main**: 2026-11-17 da foydalanuvchining aniq ruxsati bilan bir marta yangilandi — PR #279 (merge `03c09cb`, daraxti integration `1964324` bilan aynan bir xil; foydalanuvchi pre-push hook'ni chetlab o'tmasdan "GitHub PR orqali" yo'lini tanladi). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. Muzlatish `03c09cb` dan qayta amal qiladi — keyingi har bir main o'zgarishi uchun yangi aniq ruxsat kerak.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#277).
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279).
 - **Staging**: 2026-11-17 da `1964324` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
@@ -223,7 +223,14 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - `main` `764fb98496fa40857acb07844fd09fcafa99b7d6` da muzlatilgan.
 
 ### 2026-11-17 | LOG-195 | Issue #277 -> Barcha animatsiyalar 3 barobar tez
-- **Holat**: **CI KUTILMOQDA**. Foydalanuvchi: "animatsiyalarni hozirgidan 3 barobar tezlashtirish kerak, haliham sekin".
+- **Holat**: **MERGED** (#278, b5be16a). Foydalanuvchi: "animatsiyalarni hozirgidan 3 barobar tezlashtirish kerak, haliham sekin".
 - **Qilingan**: `lib/motion.ts` — prujina qattiqligi ×9 (vaqt ×1/3, so'nish nisbatlari o'zgarmadi — cho'zilish shakli saqlandi), tezlik chegarasi 21000 px/s, kutish ≤ 30 ms, tomchilar umri ×1/3; `AppStage` (kartalar 175 ms, qadam 15 ms; ekran chizig'i 240 ms), `CountUp` 240 ms, mavzu doirasi 190 ms, ripple 200 ms, settle 240 ms, bosish 55/25 ms, modal 100 ms, scrim 70 ms, alert 90 ms, progress 240 ms, band holat aylanishi 0.37 s, rels yorlig'i 50 ms. Testlar vaqt nuqtalari yangi tezlikka moslandi; 300 px o'tish 200 ms ichida tugashi qotirildi.
 - **Tekshiruv**: eslint 0, tsc 0, vitest 157/157, next build OK. Edge'da bosishdan tushishgacha: korxona 379 -> 157 ms, talaba 333 -> 148 ms (o'lchov 3 barqaror kadr ≈ 50 ms qo'shadi; harakatning o'zi ~3x); cho'zilish va aniq tushish saqlandi, xato 0.
-- `main`: foydalanuvchi ruxsati bilan 1964324 ga o'tkazilmoqda (LOG-195 bu PR'dan keyin integration'da).
+- `main`: 1964324 holatida (LOG-196); bu o'zgarish main'ga kirmagan.
+
+### 2026-11-17 | LOG-196 | PR #279 -> main integration holatiga o'tkazildi (foydalanuvchi ruxsati bilan)
+- **Holat**: **BAJARILDI** — `main` = `03c09cb` (merge), daraxti `1964324` bilan aynan bir xil (`git diff` bo'sh); eski `764fb98` main tarixida ham bor.
+- **Ruxsat**: foydalanuvchi: "qo'shimcha main'ga o'tishga ruxsat beraman, hozirgi holatni main qil, hozirgi main'ni nusxalab qo'y". To'g'ridan-to'g'ri fast-forward push'ni agentlarning pre-push hook'i (`D:/Codex/FlexBridge-agents/hooks/pre-push`) blokladi; hook chetlab o'tilmadi, foydalanuvchi "GitHub PR orqali" yo'lini tanladi. Hook o'zgartirilmadi.
+- **Zaxira**: branch `backup/main-2026-11-17-764fb98`, annotated tag `main-backup-2026-11-17`, oflayn bundle `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle` (`git bundle verify` OK).
+- **Tekshiruv**: integration'da `1964324` uchun exact-head CI (backend, frontend build, protocol) yashil; PR #279 ning o'z CI'si 6/6 yashil; staging `1964324` dan qayta qurilgan (4 rol kirdi, harakat 11/11).
+- **Keyin**: `release/main-2026-11-17` branch'i qayd uchun qoldirildi. #278 (3x animatsiya) faqat integration'da. AGENTS.md ga o'tkazish yozuvi qo'shildi; muzlatish `03c09cb` dan qayta amal qiladi.
