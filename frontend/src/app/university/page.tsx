@@ -64,7 +64,6 @@ import {
   createInstitutionPartnerAgreement,
   InstitutionDirectoryProfile,
   fetchInstitutionTimetable,
-  logoutUser,
   type WorkspaceItem,
   saveInstitutionTimetable,
   fetchInstitutionTimetableTemplate,
@@ -76,7 +75,7 @@ import AuthModal from "@/components/AuthModal";
 import AcademicReviewModal from "@/components/AcademicReviewModal";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 import UniversityOverview, { type UniversityTab } from "@/components/university/UniversityOverview";
-import ProfileCard from "@/components/profile/ProfileCard";
+import SectionDock from "@/components/shell/SectionDock";
 import { initials } from "@/lib/person";
 import { enumLabel } from "@/lib/labels";
 import { useAsyncData } from "@/lib/useAsyncData";
@@ -790,11 +789,6 @@ export default function UniversityPortal() {
   const isCoordinator = Boolean(
     workspace?.roles.includes("COORDINATOR") || (currentUser?.roles || []).includes("COORDINATOR")
   );
-  const handleSignOut = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
 
   // Switch the workspace section and load what it needs (sidebar + mobile dock).
   const switchTab = (tab: "queue" | "assignments" | "coordinator" | "enrollments" | "exports" | "analytics" | "timetable" | "documents" | "staff") => {
@@ -946,12 +940,9 @@ export default function UniversityPortal() {
 
       {/* ACADEMIC WORKSPACE: LEFT REGISTRY RAIL + ACTIVE TAB */}
       {currentUser && (
-        <div id="uni-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start">
-          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
-          <aside
-            aria-label="Akademik bo‘limlar"
-            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
-          >
+        <div id="uni-workspace" className="grid scroll-mt-24 gap-6">
+          <div className="contents">
+          <SectionDock label="Akademik bo‘limlar">
             <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Amaliyot Nazorati
             </div>
@@ -1119,14 +1110,7 @@ export default function UniversityPortal() {
               <BarChart3 className="w-4 h-4 shrink-0" />
               <span>Analitika &amp; Monitoring</span>
             </button>
-          </aside>
-          <div className="hidden lg:block">
-            <ProfileCard
-              name={currentUser?.display_name}
-              roleLabel={`${isCoordinator ? "Koordinator" : "O‘qituvchi"}${workspace?.name ? ` · ${workspace.name}` : ""}`}
-              onLogout={handleSignOut}
-            />
-          </div>
+          </SectionDock>
           </div>
 
           <div className="min-w-0 flex flex-col gap-6">

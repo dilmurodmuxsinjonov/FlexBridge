@@ -1131,3 +1131,254 @@ html :is(button, a):is(.bg-primary, .bg-blue-500, .bg-blue-600, .bg-sky-500, .bg
 html :is(.bg-surface-card, .bg-\[\#121214\], .bg-\[\#141417\], .bg-zinc-900, .bg-surface):is(.rounded-lg, .rounded-xl) {
   border-radius: 20px;
 }
+
+/* ===========================================================================
+   Device shell (Issue #263): skeuomorphic "hardware" frame from the
+   reference video: dark top capsule, floating left rail with chrome knobs,
+   one screen slab with corner screws, floating section capsule at the bottom
+   and a staggered power-on reveal. Colours come from the existing tokens.
+   =========================================================================== */
+:root {
+  --fb-metal-hi: #ffffff;
+  --fb-metal-mid: #dfe2e7;
+  --fb-metal-lo: #9ca1aa;
+  --fb-screw-slot: rgba(15, 23, 42, 0.38);
+}
+html.dark {
+  --fb-metal-hi: #c9ccd3;
+  --fb-metal-mid: #7c818b;
+  --fb-metal-lo: #3a3e46;
+  --fb-screw-slot: rgba(0, 0, 0, 0.6);
+}
+
+/* Screen slab: never uses transform/filter so fixed descendants stay fixed. */
+.fb-stage-shell { width: 100%; padding: 0 0.75rem; }
+@media (min-width: 640px) { .fb-stage-shell { padding: 0 1.5rem; } }
+@media (min-width: 1024px) { .fb-stage-shell { padding-left: 6.5rem; padding-right: 1.5rem; } }
+.fb-slab {
+  position: relative;
+  max-width: 1480px;
+  margin: 0 auto;
+  min-height: calc(100vh - 9rem);
+  border-radius: 30px;
+  background:
+    radial-gradient(140% 60% at 50% 0%, var(--fb-glass-sheen), transparent 60%),
+    linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-stage) 100%);
+  border: 1px solid var(--fb-glass-border);
+  box-shadow: var(--fb-shadow-stage), inset 0 0 0 6px color-mix(in srgb, var(--fb-card-top) 40%, transparent);
+}
+.fb-slab::before,
+.fb-slab::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(45deg, transparent 42%, var(--fb-screw-slot) 43% 57%, transparent 58%),
+    radial-gradient(circle at 35% 30%, var(--fb-metal-hi) 0%, var(--fb-metal-mid) 45%, var(--fb-metal-lo) 100%);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.18), 0 1px 0 var(--fb-bevel);
+}
+.fb-slab::before { left: 14px; }
+.fb-slab::after { right: 14px; }
+@media (max-width: 639px) {
+  .fb-slab { border-radius: 24px; }
+  .fb-slab::before, .fb-slab::after { top: 10px; width: 7px; height: 7px; }
+  .fb-slab::before { left: 10px; }
+  .fb-slab::after { right: 10px; }
+}
+
+/* Dark top capsule */
+.fb-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0.4rem 0.45rem;
+  border-radius: 9999px;
+  box-shadow: var(--fb-shadow-dock), inset 0 -1px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.fb-topbar-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0c0d10 !important;
+  background: radial-gradient(circle at 35% 28%, #ffffff, #d7dae0 50%, #8f949d);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 4px 10px -3px rgba(0, 0, 0, 0.6);
+}
+.fb-topbar-avatar * { color: #0c0d10 !important; }
+.fb-topbar-well {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.3rem 0.9rem 0.3rem 0.3rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+}
+.fb-orb {
+  position: relative;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), transparent 38%),
+    conic-gradient(from 0deg, var(--fb-accent), #ffffff, #8b93a3, var(--fb-accent));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--fb-accent) 55%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  animation: fb-orb-spin 9s linear infinite;
+}
+@keyframes fb-orb-spin { to { transform: rotate(360deg); } }
+.fb-topbar-chip {
+  /* display comes from utilities (inline-flex / hidden sm:inline-flex) */
+  gap: 0.4rem;
+  border-radius: 9999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f4f5f7;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: background-color 160ms ease;
+}
+.fb-topbar-chip:hover { background: rgba(255, 255, 255, 0.15); }
+.fb-topbar-chip.fb-topbar-chip-accent { background: var(--fb-accent); color: #ffffff; }
+.fb-topbar-chip.fb-topbar-chip-accent:hover { background: var(--fb-accent-strong); }
+
+/* Chrome knob buttons (theme, chat, logout, active rail item) */
+.fb-knob,
+.fb-topbar .skeuo-btn-secondary.rounded-full {
+  background: radial-gradient(circle at 35% 28%, #ffffff 0%, #e4e6ea 40%, #a6abb3 100%) !important;
+  color: #0c0d10 !important;
+  border: 0 !important;
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.22), inset 0 1px 1px #ffffff, 0 4px 10px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.45) !important;
+}
+.fb-knob *,
+.fb-topbar .skeuo-btn-secondary.rounded-full > svg { color: #0c0d10 !important; }
+
+/* Floating left rail (desktop) */
+.fb-rail {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-radius: 9999px;
+}
+.fb-rail-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: #c3c7cf;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.fb-rail-btn:hover { background: rgba(255, 255, 255, 0.09); color: #ffffff; }
+.fb-rail-btn:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
+.fb-rail-btn[aria-current="page"] { transform: scale(1.04); }
+.fb-rail-btn[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  right: -0.45rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 9999px;
+  background: var(--fb-accent);
+  box-shadow: 0 0 6px var(--fb-accent);
+}
+.fb-rail-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 0.9rem);
+  top: 50%;
+  transform: translate(-4px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #0c0d10;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -8px rgba(12, 13, 16, 0.45), 0 0 0 1px rgba(12, 13, 16, 0.08);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.fb-rail-btn[data-tip]:hover::after,
+.fb-rail-btn[data-tip]:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+.fb-rail-sep { width: 1.25rem; height: 1px; margin: 0.2rem 0; background: rgba(255, 255, 255, 0.14); }
+
+/* Floating section capsule at the bottom: a portal sidebar re-housed */
+body[data-section-dock] .fb-main-dock { display: none !important; }
+.fb-section-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 44;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: calc(100vw - 1.5rem);
+  overflow-x: auto;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  color: #f4f5f7;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    rgba(14, 16, 22, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--fb-shadow-dock), inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+@media (min-width: 1024px) { .fb-section-dock { left: calc(50% + 2.5rem); max-width: calc(100vw - 9rem); } }
+.fb-section-dock > div { display: none !important; }
+.fb-section-dock .fb-nav-item {
+  flex-shrink: 0;
+  width: auto !important;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.75rem;
+  justify-content: center;
+}
+.fb-section-dock .fb-nav-item,
+.fb-section-dock .fb-nav-idle { color: #c3c7cf !important; background: transparent; }
+.fb-section-dock .fb-nav-item:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.09); }
+.fb-section-dock .fb-nav-item[aria-current="page"],
+.fb-section-dock .fb-nav-active {
+  background: linear-gradient(180deg, #ffffff, #e9ebee) !important;
+  color: #0c0d10 !important;
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.6) !important;
+}
+.fb-section-dock .fb-nav-item > span:first-child { gap: 0.4rem; }
+
+/* Cylinder bars and recessed segments */
+.fb-bar { background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.22) 38%, rgba(255, 255, 255, 0.05) 60%, rgba(0, 0, 0, 0.22)); }
+.fb-seg { box-shadow: var(--fb-shadow-well); }
+
+@media (prefers-reduced-motion: reduce) { .fb-orb { animation: none; } }
+
+/* Active chat knob in the top capsule */
+.fb-topbar .fb-nav-active.rounded-full { background: var(--fb-accent) !important; color: #ffffff !important; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 4px 12px -3px color-mix(in srgb, var(--fb-accent) 70%, transparent) !important; }

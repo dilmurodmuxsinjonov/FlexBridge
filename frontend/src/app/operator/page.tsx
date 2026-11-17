@@ -33,7 +33,6 @@ import {
 } from "lucide-react";
 import {
   fetchAuthMe,
-  logoutUser,
   fetchOperatorAuditEvents,
   fetchOperatorVerificationCases,
   claimVerificationCase,
@@ -65,7 +64,7 @@ import OperatorOverview from "@/components/operator/OperatorOverview";
 import ModerationPanel from "@/components/operator/ModerationPanel";
 import { fetchModerationQueue } from "@/lib/moderation";
 import { useAsyncData } from "@/lib/useAsyncData";
-import ProfileCard from "@/components/profile/ProfileCard";
+import SectionDock from "@/components/shell/SectionDock";
 
 type ActiveTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
 
@@ -367,11 +366,6 @@ export default function OperatorPortal() {
     () => fetchModerationQueue().catch(() => [])
   );
 
-  const handleOperatorSignOut = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
 
   const selectTab = (tab: ActiveTab) => {
     if (tab === activeTab) return;
@@ -675,12 +669,9 @@ export default function OperatorPortal() {
 
       {/* AUTHENTICATED SOC COMMAND CONSOLE */}
       {currentUser && (
-        <div id="op-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
-          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
-          <aside
-            aria-label="Nazorat terminali bo‘limlari"
-            className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
-          >
+        <div id="op-workspace" className="grid scroll-mt-24 gap-6">
+          <div className="contents">
+          <SectionDock label="Nazorat terminali bo‘limlari">
             <div className="hidden lg:block px-3 pb-1 pt-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Bo‘limlar
             </div>
@@ -786,14 +777,7 @@ export default function OperatorPortal() {
                 </span>
               ) : null}
             </button>
-          </aside>
-          <div className="hidden lg:block">
-            <ProfileCard
-              name={currentUser.display_name}
-              roleLabel={(currentUser.roles || []).map((r) => enumLabel(r)).join(", ") || "Operator"}
-              onLogout={handleOperatorSignOut}
-            />
-          </div>
+          </SectionDock>
           </div>
 
           <div className="min-w-0 flex flex-col gap-6">

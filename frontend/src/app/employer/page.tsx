@@ -1,7 +1,7 @@
 "use client";
 import { enumLabel } from "@/lib/labels";
 import EmployerOverview from "@/components/employer/EmployerOverview";
-import ProfileCard from "@/components/profile/ProfileCard";
+import SectionDock from "@/components/shell/SectionDock";
 import { useAsyncData } from "@/lib/useAsyncData";
 
 import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react";
@@ -57,7 +57,6 @@ import {
   scheduleApplicationInterview,
   issueApplicationOffer,
   fetchMentorReviewQueue,
-  logoutUser,
   fetchWorkplaceRevisionDetail,
   submitWorkplaceReview,
   fetchMentorAssignments,
@@ -827,11 +826,6 @@ export default function EmployerPortal() {
       .then((r) => r.items || [])
       .catch(() => null)
   );
-  const handleEmployerSignOut = async () => {
-    await logoutUser();
-    setCurrentUser(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
-  };
 
   const switchMainTab = (tab: "KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB") => {
     setActiveMainTab(tab);
@@ -1257,12 +1251,9 @@ export default function EmployerPortal() {
           )}
 
           {/* PRIMARY WORKSPACE: CORPORATE LEFT HR RAIL + CONTENT PANEL */}
-          <div id="emp-workspace" className="grid scroll-mt-24 gap-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
-            <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
-            <aside
-              aria-label="Korxona boshqaruv menyusi"
-              className="fb-panel skeuo-card p-3 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
-            >
+          <div id="emp-workspace" className="grid scroll-mt-24 gap-6">
+            <div className="contents">
+            <SectionDock label="Korxona boshqaruv menyusi">
               <div className="hidden lg:block px-2.5 py-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
                 Rekruting &amp; Qabul
               </div>
@@ -1371,14 +1362,7 @@ export default function EmployerPortal() {
                 <CreditCard className="w-4 h-4 shrink-0" />
                 <span>To‘lovlar &amp; Kvotalar</span>
               </button>
-            </aside>
-            <div className="hidden lg:block">
-              <ProfileCard
-                name={currentUser?.display_name}
-                roleLabel={[currentOrg?.roles.map((r) => enumLabel(r)).join(", ") || "Xodim", currentOrg?.name].filter(Boolean).join(" · ")}
-                onLogout={handleEmployerSignOut}
-              />
-            </div>
+            </SectionDock>
             </div>
 
             <div className="min-w-0 flex flex-col gap-6">
