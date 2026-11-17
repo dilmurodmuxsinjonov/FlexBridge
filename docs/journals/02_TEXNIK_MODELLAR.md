@@ -1,16 +1,16 @@
 # FlexBridge — texnik modellar va vositalar
 
-## Joriy holat (2026-11-17, LOG-197)
+## Joriy holat (2026-11-18, LOG-198)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — main bilan bir xil kod (`ab33277`), ustiga faqat hujjat yozuvlari.
-- **main**: `2018d7b` (PR #281, 2026-11-17, foydalanuvchi: "mainni yangila"), daraxti integration `ab33277` bilan aynan bir xil — 3x animatsiyalar bilan. Oldingi holatlar zaxirada: `764fb98` (branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`) va `03c09cb` (branch `backup/main-2026-11-17-03c09cb`, tag `main-backup-2026-11-17-03c09cb`); bundle'lar `D:/Codex/FlexBridge-backups/`. Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi; muzlatish `2018d7b` dan amal qiladi.
+- **Integratsiya**: `integration/r1-agent-collaboration` (asos `a353e32`). Joriy ish branchi: `feature/283-landing-superadmin-perf` (PR `integration/r1-agent-collaboration` ga).
+- **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279); LOG-197 staging va main ab33277 holatiga yangilandi (#281).
-- **Staging**: 2026-11-17 da `ab33277` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
-- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
+- **So'nggi ishlar**: **LOG-198** (`feature/283-landing-superadmin-perf`): Pre-auth `/` + `/elonlar`, 4 qamrovli Rol va Vakolat Matritsasi (`docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`), Super Admin (`ADMIN`) API `API-126`..`API-135` + `bootstrap_super_admin.py` + 14 BFF route + `/operator` Bento panellari, BFF `authMe` kesh/dedup, GPU/compositor optimallashtirish, `uvicorn --workers 2`.
+- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`). `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **184/184**, Pytest **83/83**, Edge Playwright **toza**.
+- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish; staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
+- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 ## Joriy texnik stek (qisqa xulosa, 2026-11-17)
@@ -142,6 +142,16 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Hardware Primitives (`SkeuoPrimitives.tsx`)**: Added Catmull-Rom smooth cubic spline curves (`buildSmoothSpline`) in `SkeuoAreaChart`, 3D glass cylindrical reflections & clamped floating percentage badge + `compact` variant in `SkeuoVerticalMeter`, compact proportional `SkeuoStatCard` with tonal bottom strip, and hover LED accents on `SkeuoToggle`.
   - **Responsive Grid & Bento Pods**: Fixed `390px` horizontal overflow (`min-w-0` + `flex-wrap`) in `page.tsx`, fit mobile capsule dock inside `390px` (`Navbar.tsx`), added live `Katalog balansi` toggle/cylinder Bento pod (`/`) and 5-tube `HR Reyting Indeksi` (`/nomzod`), and decoupled horizontal `SkeuoStatCard` strips from vertical meters/feeds/charts across `/nomzod`, `/employer`, `/university`, and `/operator`.
 - **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on core/public/auth files (0 errors, 0 warnings), Docker `frontend` rebuild, Playwright Edge visual + contrast verification (`1440x900` Light/Dark + `390x844` Mobile `scrollWidth=390`), `scripts/run_all_staging_tests.py` (**36/36 PASSED in 124.8s**). Frozen-main constraint retained (`integration/r1-agent-collaboration`).
+
+## LOG-198 — Pre-auth Bosh sahifa (/ + /elonlar), Role Authority Matrix, Super Admin (ADMIN) & Tezlik Optimizatsiyasi (2026-11-18)
+
+- **Contracts & Auth Architecture**:
+  - Added `API-126`..`API-135` (`backend/app/services/platform_admin.py`, `backend/app/api/v1/platform_admin.py`, `contracts/r1_api_matrix.csv`, `backend/app/core/iam_http.py`) with strict self-grant/self-revoke/last-admin guards and masked contact directory listings.
+  - Added idempotent CLI `backend/scripts/bootstrap_super_admin.py` using non-login System Authority anchor (`00000000-0000-0000-0000-000000000001`) + `ROLE_AUTHORITY_MATRIX.md`.
+- **Frontend & Performance**:
+  - Split pre-auth Monochrome Bento Bosh sahifa (`/`) and `/elonlar` catalog (`VacancyCard.tsx`); fixed `LoginPanel.tsx` SSR portal isolation via `<RedirectParamReader>`; added 14 operator BFF routes + 4 `/operator` Super Admin panels.
+  - Added `fetchAuthMe` 5s TTL + in-flight dedup (`api.ts`), stopped `fb-liquid-drift` and inline `backdrop-filter: blur` stacking (`37 -> 4`), removed `InteractionLayer` forced reflow, added `<Link prefetch={false}>`, `backend/Dockerfile --workers 2`, and `390px` mobile header compaction.
+- **Verification**: Pytest `83/83` (port `55440`), ESLint `0`, `tsc` `0`, Vitest `29/29` (`184/184`), `next build` OK, `check_publish.py` `errors: []`, `run_all_staging_tests.py` `36/36 PASSED (144.41s)`, Edge Playwright Light/Dark/`390x844` + Super Admin TOTP E2E (`authMeCalls: 1`, `requests: 72->24`, `networkIdle: 1346ms->751ms`).
 
 
 ## Arxiv: vazifa bo'yicha texnik qarorlar

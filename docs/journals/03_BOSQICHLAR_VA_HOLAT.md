@@ -1,16 +1,16 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-197)
+## Joriy holat (2026-11-18, LOG-198)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — main bilan bir xil kod (`ab33277`), ustiga faqat hujjat yozuvlari.
-- **main**: `2018d7b` (PR #281, 2026-11-17, foydalanuvchi: "mainni yangila"), daraxti integration `ab33277` bilan aynan bir xil — 3x animatsiyalar bilan. Oldingi holatlar zaxirada: `764fb98` (branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`) va `03c09cb` (branch `backup/main-2026-11-17-03c09cb`, tag `main-backup-2026-11-17-03c09cb`); bundle'lar `D:/Codex/FlexBridge-backups/`. Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi; muzlatish `2018d7b` dan amal qiladi.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`a353e32`). Joriy ish branchi: `feature/283-landing-superadmin-perf`.
+- **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279); LOG-197 staging va main ab33277 holatiga yangilandi (#281).
-- **Staging**: 2026-11-17 da `ab33277` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
-- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
+- **So'nggi ishlar**: LOG-195 3x animatsiya (#278); LOG-196 main 1964324 (#279); LOG-197 staging/main ab33277 (#281); **LOG-198 (`feature/283-landing-superadmin-perf`): Pre-auth Bosh sahifa `/` + `/elonlar`, Rol va Vakolat Matritsasi, to'liq Super Admin (`ADMIN`, `API-126`..`API-135`, `bootstrap_super_admin.py`, 14 BFF, `/operator` panellari), `authMe` kesh/dedup + compositor tezligi + `uvicorn --workers 2`**.
+- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`). `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **184/184**, ESLint 0, `tsc` 0, `next build` OK, Pytest **83/83**, Edge Playwright Light/Dark/`390x844` + Super Admin E2E **toza**.
+- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish; staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
+- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
@@ -239,3 +239,14 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - **Holat**: **BAJARILDI**. Foydalanuvchi: "staging'ni integration'ning yangi holatidan qayta qurish", keyin "mainni yangila".
 - **Staging**: `ab33277` dan qayta qurildi — migrate exit 0, 4/4 rol kirdi, E2E 21/23 (2 tasi kutilgan), harakat 11/11, pill korxona 163 ms / talaba 146 ms, 24 skrinshot toza.
 - **main**: oldingi `03c09cb` zaxiralandi (branch `backup/main-2026-11-17-03c09cb`, tag `main-backup-2026-11-17-03c09cb`, bundle `D:/Codex/FlexBridge-backups/main-03c09cb-2026-11-17.bundle`, verify OK); `release/main-2026-11-17b` (`ab33277` ga qotirilgan) -> PR #281 (CI 5/5 yashil) -> merge `2018d7b`; daraxt `ab33277` bilan aynan bir xil, oldingi main tarixda. Pre-push hook chetlab o'tilmadi.
+
+
+### 2026-11-18 | LOG-198 | PR -> Pre-auth Bosh sahifa (/ + /elonlar), Rol Vakolatlari, Super Admin (ADMIN) va Tezlik
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. Foydalanuvchi so'rovi: bosh sahifadan super admingacha qolib ketgan qismlarni to'ldirish, rollar ruxsatini kim berishini aniqlash, sekinlik va dizayn kamchiliklarini tuzatish, lokal faylni yangilash.
+- **Bajarildi (`feature/283-landing-superadmin-perf`)**:
+  - **Pre-auth Bosh sahifa (`/`) + `/elonlar`**: `/` alohida pre-auth Bosh sahifaga aylantirildi (`app/page.tsx`), barcha 4 rol kirish/kabinet havolalari saqlandi; to'liq qidiriladigan katalog `/elonlar` ga chiqarildi; `LoginPanel.tsx` `<RedirectParamReader>` izolyatsiyasi bilan `/kirish` va 4 izolyatsiyalangan portal kirishi SSR talablarini to'liq qondirdi.
+  - **Rol Ruxsatlari Matritsasi**: `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md` + UI (`StaffRolesPanel.tsx`, `roles.ts` — 16 `OperatorModule`). Har bir `SELF`, `ORG`, `INSTITUTION`, `PLATFORM` rolini kim tayinlashi va qanday cheklovi borligi aniq belgilandi.
+  - **Super Admin (`ADMIN`) + Governance navbatlari (`API-126`..`API-135`)**: `services/platform_admin.py`, `api/v1/platform_admin.py`, `scripts/bootstrap_super_admin.py`, 14 BFF route, `/operator` Bento panellari (`StaffRolesPanel`, `DirectoryPanel`, `FeatureFlagsPanel`, `GovernanceOpsPanel` — GDPR, OTP-siz recovery `PENDING_REVIEW`, apellyatsiyalar, vorislik, pilot-readiness/retention).
+  - **Tezlik va Mobil Dizayn**: `fetchAuthMe` 5s dedup kesh, `fb-liquid-drift` va 37 -> 4 ta `blurFilterEls`, `InteractionLayer` sinxron reflow olib tashlandi, `<Link prefetch={false}>`, `backend/Dockerfile` `--workers 2`, `390px` mobil `"Fle..."` clipping tuzatildi.
+- **Tekshiruv**: `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **29/29 (`184/184`)**, ESLint 0, `tsc` 0, `next build` OK, Backend Pytest **83/83** (port `55440`), `check_publish.py` `errors: []`, Edge Playwright Light/Dark/`390x844` + Super Admin E2E toza (`authMeCalls: 1`, `requests: 72->24`, `networkIdle: 1346ms->751ms`).
+- **`main`**: `2018d7b` da qat'iyan muzlatilgan (o'zgartirilmadi).
