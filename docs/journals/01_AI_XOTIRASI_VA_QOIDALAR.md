@@ -1,14 +1,14 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
-## Joriy holat (2026-11-17, LOG-196)
+## Joriy holat (2026-11-17, LOG-197)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `b5be16a` (PR #278, animatsiyalar 3x tez; main'da yo'q — main 1964324 holatida).
-- **main**: 2026-11-17 da foydalanuvchining aniq ruxsati bilan bir marta yangilandi — PR #279 (merge `03c09cb`, daraxti integration `1964324` bilan aynan bir xil; foydalanuvchi pre-push hook'ni chetlab o'tmasdan "GitHub PR orqali" yo'lini tanladi). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. Muzlatish `03c09cb` dan qayta amal qiladi — keyingi har bir main o'zgarishi uchun yangi aniq ruxsat kerak.
+- **Integratsiya**: `integration/r1-agent-collaboration` — main bilan bir xil kod (`ab33277`), ustiga faqat hujjat yozuvlari.
+- **main**: `2018d7b` (PR #281, 2026-11-17, foydalanuvchi: "mainni yangila"), daraxti integration `ab33277` bilan aynan bir xil — 3x animatsiyalar bilan. Oldingi holatlar zaxirada: `764fb98` (branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`) va `03c09cb` (branch `backup/main-2026-11-17-03c09cb`, tag `main-backup-2026-11-17-03c09cb`); bundle'lar `D:/Codex/FlexBridge-backups/`. Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi; muzlatish `2018d7b` dan amal qiladi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279).
-- **Staging**: 2026-11-17 da `1964324` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
+- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279); LOG-197 staging va main ab33277 holatiga yangilandi (#281).
+- **Staging**: 2026-11-17 da `ab33277` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
 - **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
 
@@ -504,3 +504,11 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Qilingan ish: eski main zaxiralandi (branch, tag, bundle); pre-push hook to'g'ridan-to'g'ri push'ni blokladi — chetlab o'tilmadi, foydalanuvchi so'raldi va "GitHub PR orqali" tanlandi; `release/main-2026-11-17` (`1964324` ga qotirilgan) -> PR #279 -> merge `03c09cb`; AGENTS.md va jurnallardagi «Joriy holat» yangilandi.
 - Tekshiruv: main daraxti `1964324` bilan aynan bir xil; exact-head CI va PR CI yashil; zaxira ref'lar GitHub'da mavjud.
 - Topshirilgan holat / keyingi qadam: muzlatish `03c09cb` dan qayta amal qiladi; #278 (3x animatsiya) main'ga faqat yangi ruxsat bilan.
+
+### LOG-197 — 2026-11-17 — staging va main ab33277 holatiga yangilandi (PR #281)
+
+- AI / sessiya / model: Claude Code / Claude Opus 5.5 (`claude-opus-5-5`) / sessiya https://claude.ai/code/session_012EiWngRW7f6dkHVrxC2ZwR
+- Vazifa / rol: foydalanuvchi — staging'ni qayta qurish va "mainni yangila". Amalga oshiruvchi.
+- Qilingan ish: staging `ab33277` dan; main zaxirasi (`03c09cb`: branch, tag, bundle); release branch + PR #281 -> merge `2018d7b`; AGENTS.md va «Joriy holat» yangilandi.
+- Tekshiruv: staging 4/4 kirish, E2E 21/23, harakat 11/11, 24 skrinshot toza; PR #281 CI 5/5; main daraxti `ab33277` bilan bir xil.
+- Topshirilgan holat / keyingi qadam: muzlatish `2018d7b` dan; main'ning keyingi o'zgarishi uchun yangi aniq ruxsat kerak.

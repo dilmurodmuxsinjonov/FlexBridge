@@ -14,6 +14,11 @@
   The previous main is kept as branch `backup/main-2026-11-17-764fb98` and tag
   `main-backup-2026-11-17`. The freeze applies again from `03c09cb`: any further
   main change needs a new explicit user approval.
+- 2026-11-17 (later): on the user's explicit request ("mainni yangila") main was
+  updated to integration `ab332775a1ec29b39f4d6fb4909d100b43d8e1b3` via PR #281
+  (merge `2018d7b`). The previous main is kept as branch
+  `backup/main-2026-11-17-03c09cb` and tag `main-backup-2026-11-17-03c09cb`.
+  The freeze applies again from `2018d7b`.
 - Bounded feature/fix/agent branches start from the integration branch. All new
   PRs target `integration/r1-agent-collaboration`; verified units may merge only
   there. Confirm the current PR base before publishing, readying or merging.
