@@ -84,6 +84,9 @@ const LABELS: Record<string, string> = {
   SUBMITTED: "Yuborildi",
   WITHDRAWN: "Qaytarib olindi",
   PAID: "To‘langan",
+  PENDING_PAYMENT: "To‘lov kutilmoqda",
+  PENDING_PROVIDER: "To‘lov tizimi javobini kutmoqda",
+  REFUNDED: "Qaytarildi",
   UNPAID: "To‘lanmagan",
   CANCELLED: "Bekor qilindi",
   COMPLETED: "Yakunlandi",
@@ -96,6 +99,8 @@ const LABELS: Record<string, string> = {
   BEPUL_KIRISH: "Bepul boshlang‘ich",
   FREE: "Bepul",
   XIZMAT_PAKETI: "Xizmat paketi",
+  ORG_PLAN_30D: "Kompaniya oylik tarifi",
+  SINGLE_POST_30D: "Bittalik e’lon (30 kun)",
   // Academic agreement / supervision purposes
   ACADEMIC_VIEW: "Akademik nazorat",
   ACADEMIC_NOMINATION: "Ilmiy rahbar tayinlash",

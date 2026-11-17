@@ -34,6 +34,13 @@ const MESSAGES: Record<string, string> = {
   INVALID_FILE_SIZE: "Fayl hajmi juda katta.",
   ENTITLEMENT_REQUIRED: "Bu amal uchun tarif yoki kvota kerak.",
   QUOTA_EXCEEDED: "Kvota tugagan. Tarifni yangilang.",
+  TIMETABLE_SLOT_OVERLAP: "Bu guruhda shu kuni va shu vaqtda boshqa dars bor. Boshqa para yoki vaqtni tanlang.",
+  INVALID_TIMETABLE_TIME_RANGE: "Dars vaqti noto‘g‘ri: tugash boshlanishdan keyin va 06:00–23:00 oralig‘ida bo‘lsin.",
+  INVALID_TIMETABLE_GROUP_CODE: "Guruh kodini kiriting (2–60 belgi).",
+  INVALID_TIMETABLE_SUBJECT_NAME: "Fan nomini kiriting (2–200 belgi).",
+  TIMETABLE_SLOTS_LIMIT_EXCEEDED: "Jadvalda 500 tadan ortiq dars bo‘lishi mumkin emas.",
+  APPLICATION_ALREADY_EXISTS: "Siz bu e’longa allaqachon ariza topshirgansiz — holatini «Arizalarim» bo‘limida kuzating.",
+  ALREADY_APPLIED: "Siz bu e’longa allaqachon ariza topshirgansiz — holatini «Arizalarim» bo‘limida kuzating.",
   MODERATION_APPROVAL_REQUIRED: "E’lon hali moderatordan o‘tmagan. Tasdiqlangach e’lon qilishingiz mumkin.",
   ACTIVE_ENTITLEMENT_REQUIRED: "E’lon qilish uchun faol tarif kerak — «To‘lovlar va tariflar» bo‘limidan tanlang.",
 };
@@ -48,6 +55,8 @@ function byPattern(code: string): string | null {
   if (/_REQUIRED$/.test(code)) return "Majburiy ma’lumot yetishmayapti.";
   if (/_UNAVAILABLE$/.test(code)) return "Xizmat vaqtincha ishlamayapti. Birozdan so‘ng qayta urinib ko‘ring.";
   if (/(_CONFLICT|_BUSY|_BUSY_RETRY|_CHANGED)$/.test(code)) return "Ma’lumot boshqa joyda o‘zgargan. Sahifani yangilab, qayta urinib ko‘ring.";
+  if (/_OVERLAP$/.test(code)) return "Vaqt boshqa yozuv bilan to‘qnashadi. Boshqa vaqtni tanlang.";
+  if (/(_ALREADY_EXISTS|_EXISTS|_DUPLICATE)$/.test(code)) return "Bu yozuv allaqachon mavjud.";
   return null;
 }
 

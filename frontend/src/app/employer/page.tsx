@@ -2789,7 +2789,7 @@ export default function EmployerPortal() {
                   <div className="flex flex-col gap-2 text-xs">
                     <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
                       <span className="text-zinc-400">Faol Xizmat Turi:</span>
-                      <span className="font-mono text-zinc-200">{entitlements?.active_entitlement?.service_kind || "BEPUL_KIRISH"}</span>
+                      <span className="text-zinc-200">{enumLabel(entitlements?.active_entitlement?.service_kind || "BEPUL_KIRISH")}</span>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-white/[0.05]">
                       <span className="text-zinc-400">Boshlanish Sanasi:</span>
@@ -2868,8 +2868,13 @@ export default function EmployerPortal() {
                                     : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
                                 }`}
                               >
-                                {order.status}
+                                {enumLabel(order.status)}
                               </span>
+                              {order.status === "PENDING_PAYMENT" && (
+                                <span className="mt-1 block text-[10px] leading-snug text-zinc-400">
+                                  Onlayn to‘lov tizimi hali ulanmagan — to‘lov tasdiqlangach tarif avtomatik faollashadi.
+                                </span>
+                              )}
                             </td>
                             <td className="py-2.5 px-3 text-zinc-400">
                               {order.created_at ? new Date(order.created_at).toLocaleDateString() : "—"}
