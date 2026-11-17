@@ -1290,7 +1290,7 @@ html.dark {
   height: 2.5rem;
   border-radius: 9999px;
   color: #c3c7cf;
-  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  transition: background-color 55ms ease, color 55ms ease, transform 55ms ease;
 }
 .fb-rail-btn:hover { background: rgba(255, 255, 255, 0.09); color: #ffffff; }
 .fb-rail-btn:focus-visible { outline: 2px solid var(--fb-focus); outline-offset: 2px; }
@@ -1323,7 +1323,7 @@ html.dark {
   font-size: 0.6875rem;
   font-weight: 600;
   box-shadow: 0 8px 20px -8px rgba(12, 13, 16, 0.45), 0 0 0 1px rgba(12, 13, 16, 0.08);
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition: opacity 50ms ease, transform 50ms ease;
 }
 .fb-rail-btn[data-tip]:hover::after,
 .fb-rail-btn[data-tip]:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
@@ -1400,12 +1400,12 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 :where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip, .fb-rail-btn) {
   -webkit-tap-highlight-color: transparent;
   transition-property: transform, background-color, color, box-shadow, filter, opacity, border-color;
-  transition-duration: 160ms;
+  transition-duration: 55ms;
   transition-timing-function: var(--fb-ease-out);
 }
 :where(button, [role="button"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, .fb-nav-item, .fb-icon-btn, .fb-topbar-chip):not(:disabled):is(:active, .fb-pressed) {
   transform: var(--fb-press-depth);
-  transition-duration: 70ms;
+  transition-duration: 25ms;
 }
 :is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-tone):not(:disabled):hover { transform: translateY(-1px); }
 :is(.skeuo-btn-obsidian, .skeuo-btn-accent, .skeuo-btn-secondary, .skeuo-btn-tone):not(:disabled):is(:active, .fb-pressed) {
@@ -1416,7 +1416,7 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 .fb-icon-btn:not(:disabled):hover { transform: translateY(-1px) scale(1.05); }
 .fb-icon-btn:not(:disabled):is(:active, .fb-pressed) { transform: scale(0.92); }
 .fb-rail-btn:hover { transform: scale(1.08); }
-.fb-rail-btn:is(:active, .fb-pressed) { transform: scale(0.9); transition-duration: 70ms; }
+.fb-rail-btn:is(:active, .fb-pressed) { transform: scale(0.9); transition-duration: 25ms; }
 :where(button, [role="button"]):disabled { cursor: not-allowed; }
 
 /* One focus ring for keyboard users (zero specificity: components may override). */
@@ -1438,7 +1438,7 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
   pointer-events: none;
   z-index: 0;
   background: radial-gradient(circle, color-mix(in srgb, currentColor 34%, transparent) 0%, transparent 70%);
-  animation: fb-ripple 600ms var(--fb-ease-out) forwards;
+  animation: fb-ripple 200ms var(--fb-ease-out) forwards;
 }
 @keyframes fb-ripple {
   from { transform: scale(0); opacity: 1; }
@@ -1456,13 +1456,13 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
   border-radius: inherit;
   background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, currentColor 22%, transparent) 50%, transparent 70%);
   background-size: 250% 100%;
-  animation: fb-busy-sweep 1.1s linear infinite;
+  animation: fb-busy-sweep 0.37s linear infinite;
 }
 @keyframes fb-busy-sweep {
   from { background-position: 120% 0; }
   to { background-position: -120% 0; }
 }
-.fb-settle { animation: fb-settle 700ms var(--fb-ease-out); }
+.fb-settle { animation: fb-settle 240ms var(--fb-ease-out); }
 @keyframes fb-settle {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--fb-accent) 55%, transparent); }
   100% { box-shadow: 0 0 0 10px transparent; }
@@ -1479,7 +1479,7 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
   pointer-events: none;
 }
 /* Position comes from the liquid spring loop in lib/motion.ts (no CSS easing). */
-[data-glider="on"] .fb-glider { transition: opacity 200ms ease; }
+[data-glider="on"] .fb-glider { transition: opacity 70ms ease; }
 .fb-glider { will-change: transform, width, height; }
 [data-glider] > :not(.fb-glider):not(.fb-goo) { position: relative; z-index: 1; }
 
@@ -1528,7 +1528,7 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
    (data-under-glider is set every frame by useGlider), light everywhere else. */
 .fb-section-dock[data-glider] .fb-nav-item,
 .fb-rail[data-glider] .fb-rail-btn,
-.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo) { transition: background-color 160ms ease, transform 160ms ease; } /* colour flips with the drop, no lag */
+.fb-main-dock [data-glider] > :not(.fb-glider):not(.fb-goo) { transition: background-color 55ms ease, transform 55ms ease; } /* colour flips with the drop, no lag */
 .fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]) { color: #c3c7cf !important; }
 .fb-section-dock[data-glider] .fb-nav-item:not([data-under-glider]):hover { color: #ffffff !important; }
 .fb-rail[data-glider] .fb-rail-btn:not([data-under-glider]):hover { color: #ffffff; }
@@ -1553,11 +1553,11 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 
 /* Dialogs and their scrims fade and pop in when they appear. */
 .fixed.inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70, .bg-black\/60, .bg-black\/55, .bg-black\/50, .bg-black\/40) {
-  animation: fb-scrim-in 200ms ease-out both;
+  animation: fb-scrim-in 70ms ease-out both;
 }
 .fixed.inset-0 > :is(.skeuo-card, [role="dialog"]),
 [role="dialog"][aria-modal="true"]:not(.fixed) {
-  animation: fb-pop-in 300ms var(--fb-ease-spring) both;
+  animation: fb-pop-in 100ms var(--fb-ease-spring) both;
 }
 @keyframes fb-scrim-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fb-pop-in {
@@ -1566,14 +1566,14 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 }
 
 /* Inline alerts slide in instead of popping. */
-[role="alert"], [role="status"]:not(:empty) { animation: fb-alert-in 260ms var(--fb-ease-out) both; }
+[role="alert"], [role="status"]:not(:empty) { animation: fb-alert-in 90ms var(--fb-ease-out) both; }
 @keyframes fb-alert-in {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
 }
 
 /* Progress fills grow from empty. */
-.fb-progress > span { animation: fb-fill-in 700ms var(--fb-ease-out) both; transform-origin: left center; }
+.fb-progress > span { animation: fb-fill-in 240ms var(--fb-ease-out) both; transform-origin: left center; }
 @keyframes fb-fill-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 /* Theme switch: the new theme grows as a circle out of the pressed button. */

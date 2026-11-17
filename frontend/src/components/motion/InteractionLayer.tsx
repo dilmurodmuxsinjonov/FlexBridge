@@ -38,7 +38,7 @@ export function ripple(el: HTMLElement, clientX: number, clientY: number) {
   el.style.setProperty("--fb-rx", `${x}px`);
   el.style.setProperty("--fb-ry", `${y}px`);
   el.style.setProperty("--fb-rs", String(Math.max(1, reach / 6)));
-  restartClass(el, "fb-ripple", 620);
+  restartClass(el, "fb-ripple", 220);
 }
 
 /**
@@ -61,7 +61,7 @@ export function watchBusy(el: HTMLElement): () => void {
       busy = false;
       el.classList.remove("fb-busy", "fb-busy-sheen");
       el.removeAttribute("aria-busy");
-      if (!prefersReducedMotion() && el.isConnected) restartClass(el, "fb-settle", 700);
+      if (!prefersReducedMotion() && el.isConnected) restartClass(el, "fb-settle", 240);
       stop();
     }
   };

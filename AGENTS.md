@@ -8,6 +8,12 @@
   must explicitly lift this restriction before any future main mutation.
 - Main freeze began at `764fb98496fa40857acb07844fd09fcafa99b7d6`, after PR69
   was merged before the user's restriction. Reading main is permitted.
+- 2026-11-17: with the user's explicit approval main was promoted once to the
+  verified integration state `19643248c3215c74dfbb6dc6ef448568fb71ba43` via
+  PR #279 (merge `03c09cb`; the pre-push hook still blocks direct pushes).
+  The previous main is kept as branch `backup/main-2026-11-17-764fb98` and tag
+  `main-backup-2026-11-17`. The freeze applies again from `03c09cb`: any further
+  main change needs a new explicit user approval.
 - Bounded feature/fix/agent branches start from the integration branch. All new
   PRs target `integration/r1-agent-collaboration`; verified units may merge only
   there. Confirm the current PR base before publishing, readying or merging.

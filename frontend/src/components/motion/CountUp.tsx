@@ -9,7 +9,7 @@ import { prefersReducedMotion } from "@/lib/motion";
  * directly (no re-render per frame) and server HTML already holds the final
  * value, so screen readers and no-JS views always read the real number.
  */
-export default function CountUp({ value, duration = 700 }: { value: number; duration?: number }) {
+export default function CountUp({ value, duration = 240 }: { value: number; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useRef(0);
 
