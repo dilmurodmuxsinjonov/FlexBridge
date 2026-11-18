@@ -193,6 +193,13 @@ const LABELS: Record<string, string> = {
   SPAM_OR_SCAM: "Spam yoki firibgarlik belgisi",
   HARASSMENT_OR_ABUSE: "Haqorat yoki noqonuniy talab",
   OTHER_VIOLATION: "Boshqa qoidabuzarlik",
+  // Opportunity draft / ownership self-service
+  ALL_CANDIDATES: "Barcha nomzodlar",
+  STUDENTS_ONLY: "Faqat talabalar",
+  ACADEMIC_TRIPARTITE: "Uch tomonlama akademik",
+  RELINQUISH_OWNER: "Rahbarlikni o‘tkazish",
+  ADD_OWNER: "Hamrahbar qo‘shish",
+  STAFF_OWNER_CONTINUITY: "Rahbarlik vorisligi",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]+$/.test(s);

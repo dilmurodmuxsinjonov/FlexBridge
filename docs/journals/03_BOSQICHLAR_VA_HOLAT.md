@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-18, LOG-199)
+## Joriy holat (2026-11-18, LOG-200)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`215eddf`). Joriy ish branchi: `feature/public-org-pricing-reporting`.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`e970174`). Joriy ish branchi: `feature/employer-draft-edit-and-continuity`.
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-197 staging/main ab33277 (#281); LOG-198 Pre-auth `/` + `/elonlar`, Rol Matritsasi, Super Admin (`ADMIN`), tezlik optimizatsiyasi (#283 -> `215eddf`); **LOG-199 (`feature/public-org-pricing-reporting`): `/tashkilot/[id]` (`API-008/009/010`), `/tariflar` (`API-011/012`), `ModerationReportModal` (`API-007`), `proxyPublic` + `/ishlar/[id]` yorug‘/qorong‘i dizayn va havolalar**.
-- **Staging**: 2026-11-18 da `feature/public-org-pricing-reporting` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Vitest **30/30 (`188/188`)**, ESLint 0, `tsc` 0, `next build` OK, Edge Playwright `/tariflar`, `/tashkilot/[id]`, `/ishlar/[id]` **toza**.
+- **So'nggi ishlar**: LOG-198 (#283 -> `215eddf`); LOG-199 `/tashkilot/[id]`, `/tariflar`, `ModerationReportModal` (#284 -> `e970174`); **LOG-200 (`feature/employer-draft-edit-and-continuity`): Korxona qoralamani tahrirlash (`DraftOpportunityEditorModal`, `API-078..080`), tashkilot rekviziti (`API-071`), hamrahbar/o‘tkazish/vorislik (`OwnerGovernancePanel`) va `14` ta BFF route**.
+- **Staging**: 2026-11-18 da `feature/employer-draft-edit-and-continuity` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, Vitest **31/31 (`190/190`)**, ESLint 0, `tsc` 0, `next build` OK, `11/11` BFF `400/401`, Edge Playwright `/employer` **toza**.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -260,4 +260,12 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - `/tariflar` (`app/tariflar/page.tsx`) — R1 faol xizmatlar, 2-bosqich chegarasi, 30 kunlik UZS tariflar va 24 soatlik qaytarish kafolati; `Footer.tsx` va `haqida/page.tsx` havolalari.
   - `ModerationReportModal.tsx` va `/ishlar/[id]/page.tsx` Silk Skeuomorfik yorug‘/qorong‘i dizayn yangilanishi.
 - **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **30/30 (`188/188`)**, `next build` OK (`103/103`), `check_publish.py` `errors: []`, `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Edge Playwright `/tariflar`, `/tashkilot/[id]` (`Artel LLC`), `/ishlar/[id]` toza (`hScroll=false`, `errs=0`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-200 | PR -> Korxona Qoralama Tahriri (API-078..080), Rekvizit (API-071) & Vorislik Self-Service
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #284 (`e970174`) birlashtirilgach Phase B yakunlandi.
+- **Bajarildi (`feature/employer-draft-edit-and-continuity`, baza `e970174`)**:
+  - `frontend/src/lib/server/proxy.ts` (`readJsonObject`, `proxyJsonBody`, `PUT`), `opportunities/[id]/route.ts` (avtorizatsiyali `no-store`) + `14` ta BFF route (`draft{,/terms,/schedule}`, `organization/[org]{,/owner-requests,/owner-transfers,/owner-continuity{,/[id]/object}}`, `me/{contacts,owner-requests,owner-transfers,owner-continuity}`).
+  - `DraftOpportunityEditorModal.tsx` (`employer/page.tsx` Kanban toolbarida `DRAFT` e’lonlar uchun), `OwnerGovernancePanel.tsx` (`ORG_HUB` da `API-071` va egadorlik/vorislik), `employerGovernance.ts`, `DraftAndGovernance.test.tsx`.
+- **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **31/31 (`190/190`)**, `next build` OK (`106/106`), `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, `11/11` BFF `400/401`, Edge Playwright `/employer` (`hScroll=false`, `errs=0`).
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).

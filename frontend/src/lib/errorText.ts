@@ -79,6 +79,16 @@ const MESSAGES: Record<string, string> = {
   EXACTLY_ONE_TARGET_REQUIRED: "Shikoyat qilinayotgan ob’ekt aniq ko‘rsatilishi shart.",
   MODERATION_REPORT_FAILED: "Murojaatni moderatsiyaga yuborib bo‘lmadi.",
   ORGANIZATION_NOT_FOUND: "Tasdiqlangan tashkilot profili topilmadi.",
+  OPPORTUNITY_NOT_DRAFT: "Faqat qoralama (DRAFT) holatidagi e’lonni tahrirlash mumkin.",
+  HOST_COORDINATOR_INTERNSHIP_ONLY: "Amaliyot koordinatori faqat amaliyot e’lonlarini tahrirlay oladi.",
+  CAPACITY_LESS_THAN_OCCUPIED: "Kvota allaqachon qabul qilingan o‘rinlar sonidan kam bo‘lmasligi kerak.",
+  UNPAID_PART_TIME_FORBIDDEN: "Yarim stavkali ish e’lonlari albatta haq to‘lanadigan bo‘lishi shart.",
+  OVERLAPPING_OPPORTUNITY_SHIFT: "Bir xil guruh va hafta kunida ish smenalari ustma-ust tushmasligi kerak.",
+  OWNER_CONTACT_NOT_VERIFIED: "Rozilik uchun tasdiqlangan telefon yoki elektron pochta tanlanishi shart.",
+  OWNER_TARGET_CONSENT_REQUIRED: "Avval nomzod xodimning shaxsiy roziligi olinishi kerak.",
+  CONTINUITY_APPLICANT_ALREADY_OWNER: "Siz allaqachon ushbu tashkilot rahbari (OWNER) hisoblanasiz.",
+  CONTINUITY_REQUEST_ALREADY_PENDING: "Ushbu tashkilot uchun ochiq vorislik arizasi allaqachon ko‘rib chiqilmoqda.",
+  CONTINUITY_ACTIVE_OWNER_ROSTER_REQUIRED: "Vorislik so‘rovi uchun tashkilotda faol OWNER ro‘yxati mavjud bo‘lishi shart.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());
