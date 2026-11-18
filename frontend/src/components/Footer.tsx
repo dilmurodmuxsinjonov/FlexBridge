@@ -406,6 +406,12 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/tariflar" prefetch={false} className={linkClass}>
+                    <Briefcase className="w-3.5 h-3.5 text-[#c94f1d] dark:text-[#f47a3d]" />
+                    <span>Xizmatlar & Tariflar</span>
+                  </Link>
+                </li>
+                <li>
                   <Link href="/haqida" prefetch={false} className={linkClass}>
                     <Compass className="w-3.5 h-3.5 text-sky-500" />
                     <span>Platforma Haqida & Qo‘llanmalar</span>

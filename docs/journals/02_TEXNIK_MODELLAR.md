@@ -1,14 +1,14 @@
 # FlexBridge — texnik modellar va vositalar
 
-## Joriy holat (2026-11-18, LOG-198)
+## Joriy holat (2026-11-18, LOG-199)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (asos `a353e32`). Joriy ish branchi: `feature/283-landing-superadmin-perf` (PR `integration/r1-agent-collaboration` ga).
+- **Integratsiya**: `integration/r1-agent-collaboration` (asos `215eddf`). Joriy ish branchi: `feature/public-org-pricing-reporting` (PR `integration/r1-agent-collaboration` ga).
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-198** (`feature/283-landing-superadmin-perf`): Pre-auth `/` + `/elonlar`, 4 qamrovli Rol va Vakolat Matritsasi (`docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`), Super Admin (`ADMIN`) API `API-126`..`API-135` + `bootstrap_super_admin.py` + 14 BFF route + `/operator` Bento panellari, BFF `authMe` kesh/dedup, GPU/compositor optimallashtirish, `uvicorn --workers 2`.
-- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` rejimda). `run_all_staging_tests.py` **36/36 PASSED (`132.79s`)**, Vitest **184/184**, Pytest **83/83** + `test_telegram_bot.py` **10/10**, Edge Playwright **toza**.
+- **So'nggi ishlar**: **LOG-199** (`feature/public-org-pricing-reporting`): `/tashkilot/[id]` ochiq tashkilot profili (`API-008/009/010`), `/tariflar` xizmatlar va tariflar katalogi (`API-011/012`), `ModerationReportModal` (`API-007`), `proxyPublic`, `/ishlar/[id]` yorug‘/qorong‘i Skeuomorfik yangilanishi; **LOG-198** (`PR #283` merge `215eddf`): Super Admin (`ADMIN`) + `/`/`/elonlar` + tezlik.
+- **Staging**: 2026-11-18 da `feature/public-org-pricing-reporting` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` rejimda). `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Vitest **30/30 (`188/188`)**, `tsc --noEmit` 0, `eslint` 0, `check_publish.py` `errors: []`, Edge Playwright `/tariflar`, `/tashkilot/[id]`, `/ishlar/[id]` **toza**.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 

@@ -51,9 +51,19 @@ export default function VacancyCard({
           </div>
           <div className="min-w-0">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <span className="truncate text-xs font-semibold text-[var(--fb-ink)]">
-                {job.organization_name}
-              </span>
+              {job.organization_id ? (
+                <Link
+                  href={`/tashkilot/${job.organization_id}`}
+                  prefetch={false}
+                  className="truncate text-xs font-semibold text-[var(--fb-ink)] transition-colors hover:text-[#c94f1d] dark:hover:text-[#f47a3d]"
+                >
+                  {job.organization_name}
+                </Link>
+              ) : (
+                <span className="truncate text-xs font-semibold text-[var(--fb-ink)]">
+                  {job.organization_name}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-600/25 bg-emerald-600/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
                 <ShieldCheck className="h-3 w-3 shrink-0" aria-hidden="true" />
                 <span>Tasdiqlangan</span>
