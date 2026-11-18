@@ -7,6 +7,7 @@ const PRESSABLE =
   'button, [role="button"], [role="switch"], [role="tab"], a.skeuo-btn-obsidian, a.skeuo-btn-accent, a.skeuo-btn-secondary, a.skeuo-btn-tone, a.fb-nav-item, a.fb-rail-btn, a.fb-icon-btn, a.fb-topbar-chip';
 const BUSY_WATCH_MS = 15000;
 const watching = new WeakSet<HTMLElement>();
+const classTimers = new WeakMap<HTMLElement, number>();
 
 function isDisabled(el: Element): boolean {
   return (el as HTMLButtonElement).disabled === true || el.getAttribute("aria-disabled") === "true";
@@ -22,15 +23,34 @@ export function canPaintInside(el: HTMLElement): boolean {
 }
 
 function restartClass(el: HTMLElement, cls: string, ms: number) {
-  el.classList.remove(cls);
-  void el.offsetWidth; // restart the CSS animation
+  const prev = classTimers.get(el);
+  if (prev !== undefined) window.clearTimeout(prev);
+
+  const scheduleClear = () => {
+    const id = window.setTimeout(() => {
+      el.classList.remove(cls);
+      classTimers.delete(el);
+    }, ms);
+    classTimers.set(el, id);
+  };
+
+  if (el.classList.contains(cls)) {
+    el.classList.remove(cls);
+    requestAnimationFrame(() => {
+      if (!el.isConnected) return;
+      el.classList.add(cls);
+      scheduleClear();
+    });
+    return;
+  }
+
   el.classList.add(cls);
-  window.setTimeout(() => el.classList.remove(cls), ms);
+  scheduleClear();
 }
 
 /** Ripple from the pointer, like light spreading across a pressed key. */
 export function ripple(el: HTMLElement, clientX: number, clientY: number) {
-  if (prefersReducedMotion() || !canPaintInside(el)) return;
+  if (isDisabled(el) || prefersReducedMotion() || !canPaintInside(el)) return;
   const box = el.getBoundingClientRect();
   const x = clientX - box.left;
   const y = clientY - box.top;
@@ -81,12 +101,13 @@ export function watchBusy(el: HTMLElement): () => void {
 /** Global, page-agnostic tactile feedback for every button in the app. */
 export default function InteractionLayer() {
   useEffect(() => {
+    let pressedActive = false;
     const target = (ev: Event) => {
       const el = (ev.target as Element | null)?.closest?.(PRESSABLE);
       return el instanceof HTMLElement && !isDisabled(el) ? el : null;
     };
     const onPointerDown = (ev: PointerEvent) => {
-      if (ev.button !== 0) return;
+      if (ev.button !== 0 || prefersReducedMotion()) return;
       const el = target(ev);
       if (el) ripple(el, ev.clientX, ev.clientY);
     };
@@ -98,16 +119,21 @@ export default function InteractionLayer() {
     const onKeyDown = (ev: KeyboardEvent) => {
       if (ev.key !== " " && ev.key !== "Enter") return;
       const el = target(ev);
-      if (el) el.classList.add("fb-pressed");
+      if (el) {
+        pressedActive = true;
+        el.classList.add("fb-pressed");
+      }
     };
     const onKeyUp = () => {
+      if (!pressedActive) return;
+      pressedActive = false;
       document.querySelectorAll(".fb-pressed").forEach((el) => el.classList.remove("fb-pressed"));
     };
     document.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.addEventListener("click", onClick, true);
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("keyup", onKeyUp);
-    window.addEventListener("blur", onKeyUp);
+    document.addEventListener("keydown", onKeyDown, { passive: true });
+    document.addEventListener("keyup", onKeyUp, { passive: true });
+    window.addEventListener("blur", onKeyUp, { passive: true });
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("click", onClick, true);

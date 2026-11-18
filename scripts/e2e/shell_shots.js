@@ -3,7 +3,7 @@ const { chromium } = require("playwright-core");
 const [,, dir] = process.argv;
 const BASE = process.env.E2E_BASE || "http://127.0.0.1:3100";
 const PAGES = [
-  ["GUEST", "/", "home"], ["GUEST", "/kirish", "login"],
+  ["GUEST", "/", "home"], ["GUEST", "/elonlar", "elonlar"], ["GUEST", "/kirish", "login"],
   ["CANDIDATE", "/nomzod", "cand"], ["CANDIDATE", "/nomzod/jadval", "cand_jadval"], ["CANDIDATE", "/xabarlar", "chat"],
   ["EMPLOYER", "/employer", "emp"], ["ACADEMIC", "/university", "uni"], ["OPERATOR", "/operator", "op"],
 ];

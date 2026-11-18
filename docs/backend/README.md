@@ -8,6 +8,7 @@ Kod xaritasi va qoidalar: [`backend/AGENTS.md`](../../backend/AGENTS.md). Ishga 
 | --- | --- |
 | [FILE_AUTHORITY.md](security_iam/FILE_AUTHORITY.md) | Current-session authority for owner file operations |
 | [IAM.md](security_iam/IAM.md) | IAM — hisob, kirish va xavfsizlik |
+| [ROLE_AUTHORITY_MATRIX.md](security_iam/ROLE_AUTHORITY_MATRIX.md) | Role Authority Matrix (IAM & RBAC Governance, API-126..135) |
 | [STORAGE_VERSIONS.md](security_iam/STORAGE_VERSIONS.md) | Explicit versions for scanned private objects |
 | [TELEGRAM_BOT.md](security_iam/TELEGRAM_BOT.md) | Telegram bot orqali telefon raqamni tasdiqlash |
 

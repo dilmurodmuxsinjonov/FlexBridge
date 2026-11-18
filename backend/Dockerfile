@@ -9,4 +9,4 @@ COPY --chown=app:app backend/FlexBridge_1_4_schema.sql /workspace/FlexBridge_1_4
 COPY --chown=app:app specs/ /workspace/specs/
 USER app
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

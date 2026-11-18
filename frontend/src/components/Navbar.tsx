@@ -37,6 +37,7 @@ import {
   Sparkles,
   LayoutDashboard,
   MessageCircle,
+  Home,
 } from "lucide-react";
 import { initials, uzDate } from "@/lib/person";
 import { AuthUser, fetchAuthMe, logoutUser } from "@/lib/api";
@@ -82,7 +83,7 @@ interface PersonaTheme {
 const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
   PUBLIC: {
     id: "PUBLIC",
-    label: "Karyera Katalogi",
+    label: "Asosiy Ekotizim",
     greetingPrefix: "FlexBridge",
     brandName: "FlexBridge",
     brandAccent: "text-[#D95F2B]",
@@ -93,13 +94,15 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
     islandDotClass: "bg-[#D95F2B] shadow-[0_0_8px_rgba(217,95,43,0.8)]",
     icon: Briefcase,
     links: [
-      { id: "pub-home", href: "/", label: "E’lonlar", shortLabel: "E’lonlar", icon: Search, exact: true },
-      { id: "pub-about", href: "/haqida", label: "Platforma haqida", shortLabel: "Platforma", icon: Compass },
+      { id: "pub-home", href: "/", label: "Bosh sahifa", shortLabel: "Bosh sahifa", icon: Home, exact: true },
+      { id: "pub-jobs", href: "/elonlar", label: "E’lonlar", shortLabel: "E’lonlar", icon: Search },
+      { id: "pub-about", href: "/haqida", label: "Platforma haqida", shortLabel: "Haqida", icon: Compass },
       { id: "pub-privacy", href: "/maxfiylik", label: "Maxfiylik", shortLabel: "Maxfiylik", icon: FileCheck2 },
       { id: "pub-terms", href: "/shartlar", label: "Shartlar", shortLabel: "Shartlar", icon: FileText },
     ],
     dockTools: [
-      { id: "pub-home", href: "/", label: "E’lonlar katalogi", shortLabel: "Katalog", icon: Search, exact: true },
+      { id: "pub-home", href: "/", label: "Bosh sahifa", shortLabel: "Bosh sahifa", icon: Home, exact: true },
+      { id: "pub-jobs", href: "/elonlar", label: "E’lonlar katalogi", shortLabel: "Katalog", icon: Search },
       { id: "pub-about", href: "/haqida", label: "Platforma haqida", shortLabel: "Haqida", icon: Compass },
       { id: "pub-privacy", href: "/maxfiylik", label: "Maxfiylik siyosati", shortLabel: "Maxfiylik", icon: FileCheck2 },
       { id: "pub-terms", href: "/shartlar", label: "Foydalanish shartlari", shortLabel: "Shartlar", icon: FileText },
@@ -122,7 +125,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "cand-apps", href: "/nomzod/arizalar", label: "Arizalar", shortLabel: "Arizalar", icon: FileText },
       { id: "cand-log", href: "/nomzod/kundalik", label: "Kundalik & E-Imzo", shortLabel: "Kundalik", icon: BookOpen },
       { id: "cand-contracts", href: "/nomzod/shartnomalar", label: "Shartnomalar", shortLabel: "Shartnoma", icon: FileCheck2 },
-      { id: "cand-jobs", href: "/", label: "E’lonlar", shortLabel: "E’lonlar", icon: Search, exact: true },
+      { id: "cand-jobs", href: "/elonlar", label: "E’lonlar", shortLabel: "E’lonlar", icon: Search },
     ],
     dockTools: [
       { id: "cand-home", href: "/nomzod", label: "Asosiy kabinet", shortLabel: "Kabinet", icon: User, exact: true },
@@ -161,7 +164,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "emp-mentor", href: "/employer", tabId: "MENTOR_HUB", label: "Mentor & Amaliyot nazorati", shortLabel: "Mentor", icon: BookOpen },
       { id: "emp-org", href: "/employer", tabId: "ORG_HUB", label: "Tashkilot, KYB va filiallar", shortLabel: "Tashkilot", icon: Building2 },
       { id: "emp-billing", href: "/employer", tabId: "BILLING_HUB", label: "Tariflar va Billing", shortLabel: "Moliya", icon: CreditCard },
-      { id: "emp-public", href: "/", label: "Ommaviy e’lonlar", shortLabel: "Katalog", icon: Search, exact: true },
+      { id: "emp-public", href: "/elonlar", label: "Ommaviy e’lonlar", shortLabel: "Katalog", icon: Search },
     ],
   },
   UNIVERSITY: {
@@ -393,7 +396,6 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
     router.refresh();
   };
 
@@ -401,7 +403,8 @@ export default function Navbar() {
   const railItems: { href: string; label: string; icon: typeof Search; exact?: boolean }[] = currentUser
     ? [
         ...(userDashboard ? [{ href: userDashboard.href, label: userDashboard.label, icon: LayoutDashboard, exact: true }] : []),
-        { href: "/", label: "E’lonlar katalogi", icon: Search, exact: true },
+        { href: "/", label: "Bosh sahifa", icon: Home, exact: true },
+        { href: "/elonlar", label: "E’lonlar katalogi", icon: Search },
         { href: "/xabarlar", label: "Xabarlar", icon: MessageCircle },
         ...(isStudentOnlyUser(currentUser)
           ? [
@@ -411,12 +414,17 @@ export default function Navbar() {
           : []),
       ]
     : [
-        { href: "/", label: "E’lonlar katalogi", icon: Search, exact: true },
+        { href: "/", label: "Bosh sahifa", icon: Home, exact: true },
+        { href: "/elonlar", label: "E’lonlar katalogi", icon: Search },
         { href: "/haqida", label: "Platforma haqida", icon: Compass },
         { href: "/maxfiylik", label: "Maxfiylik siyosati", icon: FileCheck2 },
         { href: "/shartlar", label: "Foydalanish shartlari", icon: FileText },
       ];
-  const statusText = currentUser ? `${theme.label} · ${uzDate()}` : `${theme.label} · ochiq katalog`;
+  const statusText = currentUser
+    ? `${theme.label} · ${uzDate()}`
+    : pathname === "/elonlar"
+      ? "Ommaviy katalog · faol e’lonlar"
+      : `${theme.label} · rasmiy ekotizim`;
 
   // Guests (including on role-specific sign-in pages) just see the brand.
   const ownFirstName = currentUser?.display_name?.trim().split(/\s+/)[0];
@@ -427,14 +435,24 @@ export default function Navbar() {
   return (
     <>
       {/* Device shell top capsule (Issue #263): identity left, inset status well, chrome knobs right */}
-      <header className="sticky top-0 z-40 w-full px-3 pt-3 pb-3 sm:px-6 lg:pl-[6.5rem]">
+      <header className="sticky top-0 z-40 w-full px-2.5 pt-2.5 pb-2.5 sm:px-6 sm:pt-3 sm:pb-3 lg:pl-[6.5rem]">
         <div data-skeuo-dark="true" className="fb-topbar skeuo-obsidian">
-          <Link href={currentUser && userDashboard ? userDashboard.href : "/"} className="group flex min-w-0 items-center gap-2.5 pr-2">
+          <Link
+            href={currentUser && userDashboard ? userDashboard.href : "/"}
+            prefetch={false}
+            className={`group flex min-w-0 items-center gap-1.5 sm:gap-2.5 pr-1 sm:pr-2 ${currentUser ? "" : "shrink-0"}`}
+          >
             <span className="fb-topbar-avatar transition-transform group-hover:scale-105" aria-hidden="true">
               {currentUser ? initials(currentUser.display_name, theme.badgeText.slice(0, 2)) : <BrandIcon className="h-4 w-4" />}
             </span>
             <span className="flex min-w-0 flex-col leading-none">
-              <span className="truncate font-display text-sm font-semibold tracking-tight text-white">{headerGreeting}</span>
+              <span
+                className={`font-display text-[13px] sm:text-sm font-semibold tracking-tight text-white ${
+                  currentUser ? "truncate" : "whitespace-nowrap"
+                }`}
+              >
+                {headerGreeting}
+              </span>
               <span className="mt-1 hidden truncate text-[10px] font-medium text-zinc-400 sm:block">{theme.subtitle}</span>
             </span>
           </Link>
@@ -477,6 +495,7 @@ export default function Navbar() {
                           </div>
                           <Link
                             href="/nomzod"
+                            prefetch={false}
                             onClick={() => setPortalsOpenPath(null)}
                             className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                           >
@@ -488,6 +507,7 @@ export default function Navbar() {
                           </Link>
                           <Link
                             href="/employer"
+                            prefetch={false}
                             onClick={() => setPortalsOpenPath(null)}
                             className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                           >
@@ -499,6 +519,7 @@ export default function Navbar() {
                           </Link>
                           <Link
                             href="/university"
+                            prefetch={false}
                             onClick={() => setPortalsOpenPath(null)}
                             className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                           >
@@ -511,12 +532,13 @@ export default function Navbar() {
                           <div className="my-1 border-t border-[var(--fb-border)]" />
                           <Link
                             href="/operator"
+                            prefetch={false}
                             onClick={() => setPortalsOpenPath(null)}
                             className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                           >
                             <span className="flex items-center gap-2 text-xs font-semibold text-[var(--fb-ink)]">
                               <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
-                              Platforma Operator Terminal
+                              Operator Nazorat Paneli
                             </span>
                             <ArrowUpRight className="h-3.5 w-3.5 text-[var(--fb-ink-muted)]" />
                           </Link>
@@ -528,15 +550,15 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={toggleTheme}
               title={colorMode === "light" ? "Qorong‘i rejimga o‘tish" : "Yorug‘ rejimga o‘tish"}
               aria-label="Rang mavzusini almashtirish"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
             >
-              {colorMode === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              {colorMode === "light" ? <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             </button>
 
             {currentUser && <ChatNavButton active={pathname?.startsWith("/xabarlar") ?? false} />}
@@ -544,7 +566,7 @@ export default function Navbar() {
             {currentUser && userDashboard ? (
               <>
                 {pathname !== userDashboard.href && (
-                  <Link href={userDashboard.href} className="fb-topbar-chip hidden items-center sm:inline-flex">
+                  <Link href={userDashboard.href} prefetch={false} className="fb-topbar-chip hidden items-center sm:inline-flex">
                     <LayoutDashboard className="h-3.5 w-3.5" />
                     <span>{userDashboard.label}</span>
                   </Link>
@@ -554,19 +576,19 @@ export default function Navbar() {
                   onClick={handleLogout}
                   title="Tizimdan chiqish"
                   aria-label="Tizimdan chiqish"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
+                  className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full skeuo-btn-secondary lg:hidden"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </>
             ) : (
               <>
-                <Link href={loginHref} className="fb-topbar-chip inline-flex items-center">
-                  <Lock className="h-3.5 w-3.5" />
+                <Link href={loginHref} prefetch={false} className="fb-topbar-chip inline-flex items-center whitespace-nowrap">
+                  <Lock className="hidden sm:inline-block h-3.5 w-3.5" aria-hidden="true" />
                   <span>Kirish</span>
                 </Link>
                 {personaKey !== "OPERATOR" && (
-                  <Link href={registerHref} className="fb-topbar-chip fb-topbar-chip-accent inline-flex items-center">
+                  <Link href={registerHref} prefetch={false} className="fb-topbar-chip fb-topbar-chip-accent inline-flex items-center whitespace-nowrap">
                     <span>Ro‘yxatdan o‘tish</span>
                   </Link>
                 )}
@@ -588,6 +610,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               aria-label={item.label}
               data-tip={item.label}
               aria-current={active ? "page" : undefined}
@@ -667,6 +690,7 @@ export default function Navbar() {
                 <Link
                   key={item.id}
                   href={item.href}
+                  prefetch={false}
                   data-active={active ? "true" : undefined}
                   aria-current={active ? "page" : undefined}
                   className={`relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[10.5px] sm:text-xs font-semibold transition-colors ${

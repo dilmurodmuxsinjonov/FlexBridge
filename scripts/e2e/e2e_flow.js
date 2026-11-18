@@ -112,7 +112,7 @@ const open = async (browser, role) => {
     });
   }
   await C.step(cp, "katalogdan e’lon ochib ariza topshirish", async () => {
-    await cp.goto(BASE + "/", { waitUntil: "networkidle" });
+    await cp.goto(BASE + "/elonlar", { waitUntil: "networkidle" });
     await cp.waitForTimeout(1500);
     const mine = cp.getByText(VACANCY);
     if (await mine.count()) await mine.first().click();

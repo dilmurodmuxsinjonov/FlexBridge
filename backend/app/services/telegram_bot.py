@@ -29,6 +29,9 @@ from app.db.storage import load_domain_record, now, save_domain_record, table, t
 from app.services.auth import AuthError
 
 logger = logging.getLogger(__name__)
+# Suppress httpx/httpcore INFO request URL logs so TELEGRAM_BOT_TOKEN never leaks into stdout logs.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 audit = AppendOnlyAuditStore()
 
 TELEGRAM_SESSION_NAMESPACE = "telegram_bot_session"

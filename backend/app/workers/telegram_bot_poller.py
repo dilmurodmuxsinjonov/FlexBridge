@@ -106,6 +106,9 @@ def set_webhook(client: httpx.Client, url: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+    # Never log httpx/httpcore request URLs because Telegram Bot API paths embed the bot token.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--set-webhook", metavar="URL", help="register a webhook instead of polling")
     parser.add_argument("--delete-webhook", action="store_true", help="remove the webhook and exit")

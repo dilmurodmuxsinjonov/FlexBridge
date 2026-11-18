@@ -224,20 +224,75 @@ def main():
                 },
             )
 
+            clean_file_row = conn.execute(
+                text("SELECT id FROM flexbridge.files WHERE scan_status = 'CLEAN' LIMIT 1")
+            ).first()
+            assert clean_file_row, "Clean file required in staging DB for COORDINATOR appointment"
+            doc_file_id = clean_file_row[0]
+            coord_role_id = conn.execute(
+                text("SELECT id FROM flexbridge.role_catalog WHERE code = 'COORDINATOR' AND scope_kind = 'INSTITUTION'")
+            ).scalar_one()
+            for app_uid, app_mid, app_iid in [
+                (univ_user_id, inst_membership_id, inst_id),
+                (outsider_user_id, outsider_membership_id, outsider_inst_id),
+            ]:
+                appt_id = str(uuid4())
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO flexbridge.institution_appointments (
+                            id, created_at, updated_at, institution_id, user_id, document_file_id, status, valid_from, accepted_at
+                        ) VALUES (
+                            :id, :now, :now, :iid, :uid, :fid, 'ACTIVE', :today, :now
+                        )
+                        """
+                    ),
+                    {"id": appt_id, "now": now_dt, "iid": app_iid, "uid": app_uid, "fid": doc_file_id, "today": today},
+                )
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO flexbridge.institution_role_grants (
+                            id, created_at, updated_at, membership_id, role_id, appointment_id
+                        ) VALUES (
+                            :id, :now, :now, :mid, :rid, :aid
+                        )
+                        """
+                    ),
+                    {"id": str(uuid4()), "now": now_dt, "mid": app_mid, "rid": coord_role_id, "aid": appt_id},
+                )
+
+            conn.execute(text("ALTER TABLE flexbridge.enrollments DISABLE TRIGGER USER"))
+            conn.execute(text("ALTER TABLE flexbridge.enrollment_origins DISABLE TRIGGER USER"))
             conn.execute(
                 text(
                     """
                     INSERT INTO flexbridge.enrollments (
                         id, created_at, updated_at, candidate_id, institution_id, program, start_date, end_date, status
                     ) VALUES (
-                        :id, :now, :now, :cid, :iid, 'Dasturiy injiniring DI-21-01', :today, NULL, 'PENDING_VERIFICATION'
+                        :id, :now, :now, :cid, :iid, 'Dasturiy injiniring DI-21-01', :today, NULL, 'VERIFIED'
                     )
                     """
                 ),
                 {"id": enrollment_id, "cid": candidate_id, "iid": inst_id, "today": today, "now": now_dt},
             )
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO flexbridge.enrollment_origins (
+                        enrollment_id, created_at, origin, candidate_id, institution_id, actor_user_id, initial_snapshot
+                    ) VALUES (
+                        :id, :now, 'LEGACY_IMPORT', :cid, :iid, :uid, jsonb_build_object('status', 'VERIFIED')
+                    )
+                    ON CONFLICT (enrollment_id) DO NOTHING
+                    """
+                ),
+                {"id": enrollment_id, "now": now_dt, "cid": candidate_id, "iid": inst_id, "uid": univ_user_id},
+            )
+            conn.execute(text("ALTER TABLE flexbridge.enrollment_origins ENABLE TRIGGER USER"))
+            conn.execute(text("ALTER TABLE flexbridge.enrollments ENABLE TRIGGER USER"))
 
-        def login_session(uid: str, role: str):
+        def login_session(uid: str, role: str, elevate_mfa: bool = False):
             cj = CookieJar()
             op = build_opener(HTTPCookieProcessor(cj))
             code, body = api_request(
@@ -248,10 +303,16 @@ def main():
                 opener=op,
             )
             assert code == 200, f"Login failed for {uid}: {code} {body}"
+            if elevate_mfa:
+                with engine.begin() as conn:
+                    conn.execute(
+                        text("UPDATE flexbridge.sessions SET assurance = 'MFA', updated_at = :now WHERE user_id = :uid AND revoked_at IS NULL"),
+                        {"uid": uid, "now": datetime.now(timezone.utc)},
+                    )
             return op
 
-        univ_opener = login_session(univ_user_id, "UNIVERSITY_REPRESENTATIVE")
-        outsider_opener = login_session(outsider_user_id, "UNIVERSITY_REPRESENTATIVE")
+        univ_opener = login_session(univ_user_id, "UNIVERSITY_REPRESENTATIVE", elevate_mfa=True)
+        outsider_opener = login_session(outsider_user_id, "UNIVERSITY_REPRESENTATIVE", elevate_mfa=True)
         print("  -> University staff, outsider staff, and enrolled student seeded and authenticated.")
 
         # ------------------------------------------------------------------

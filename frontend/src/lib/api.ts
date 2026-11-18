@@ -220,6 +220,8 @@ type OpportunitySearch = {
   region?: string;
   is_paid?: boolean;
   after?: string;
+  /** Page size, 1–50 (default 12). */
+  limit?: number;
   signal?: AbortSignal;
 };
 
@@ -263,7 +265,11 @@ function isOpportunity(value: unknown): value is Opportunity {
 }
 
 export async function fetchOpportunities(params: OpportunitySearch = {}): Promise<OpportunityPage> {
-  const query = new URLSearchParams({ limit: "12" });
+  const limit =
+    params.limit !== undefined && Number.isInteger(params.limit)
+      ? Math.min(Math.max(params.limit, 1), 50)
+      : 12;
+  const query = new URLSearchParams({ limit: String(limit) });
   if (params.query) query.set("query", params.query);
   if (params.region) query.set("region", params.region);
   if (params.is_paid !== undefined) query.set("is_paid", String(params.is_paid));
@@ -300,9 +306,35 @@ export async function fetchOpportunities(params: OpportunitySearch = {}): Promis
 // Client BFF Methods
 // ---------------------------------------------------------------------------
 
+export const AUTH_CHANGED_EVENT = "flexbridge:auth-changed";
+
+/**
+ * `/api/auth/me` is read by the navbar, footer, portal layouts and pages at the
+ * same time. One in-flight request is shared and the answer is reused for a
+ * short window, so a page load costs one session round-trip instead of 2–4.
+ * Any login/logout/MFA or `flexbridge:auth-changed` event drops the cache.
+ */
+const AUTH_ME_TTL_MS = 5000;
+let authMeInFlight: Promise<AuthUser | null> | null = null;
+let authMeCached: { value: AuthUser | null; at: number } | null = null;
+let authMeGeneration = 0;
+
+export function clearAuthMeCache(): void {
+  authMeGeneration += 1;
+  authMeInFlight = null;
+  authMeCached = null;
+}
+
+if (typeof window !== "undefined") {
+  // Registered at module load, i.e. before any component listener, so pages
+  // that re-read the session on this event never see the stale answer.
+  window.addEventListener(AUTH_CHANGED_EVENT, clearAuthMeCache);
+}
+
 function notifyAuthChanged() {
+  clearAuthMeCache();
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+    window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
   }
 }
 
@@ -367,7 +399,29 @@ export async function logoutUser(): Promise<void> {
   notifyAuthChanged();
 }
 
-export async function fetchAuthMe(): Promise<AuthUser | null> {
+export async function fetchAuthMe(options?: { force?: boolean }): Promise<AuthUser | null> {
+  if (options?.force) {
+    clearAuthMeCache();
+  } else {
+    if (authMeCached && Date.now() - authMeCached.at < AUTH_ME_TTL_MS) {
+      return authMeCached.value;
+    }
+    if (authMeInFlight) return authMeInFlight;
+  }
+  const generation = authMeGeneration;
+  const request = requestAuthMe().then((value) => {
+    // A login/logout that happened meanwhile wins over this older answer.
+    if (generation === authMeGeneration) {
+      authMeCached = { value, at: Date.now() };
+      authMeInFlight = null;
+    }
+    return value;
+  });
+  authMeInFlight = request;
+  return request;
+}
+
+async function requestAuthMe(): Promise<AuthUser | null> {
   try {
     const res = await fetch("/api/auth/me", {
       method: "GET",

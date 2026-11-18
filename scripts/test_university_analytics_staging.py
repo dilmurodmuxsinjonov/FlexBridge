@@ -672,11 +672,15 @@ def main():
 
         # 10. Seed Daily Logs and Log Revisions for Candidate 1 (Placement 1)
         # Create 5 WORK logs, 1 SICK_LEAVE log, and 1 late submission (>3 days)
-        for i in range(1, 6):
-            log_date = today_date - timedelta(days=i)
-            # Skip Sunday (EXTRACT(ISODOW FROM d) == 7)
-            if log_date.weekday() == 6:
-                log_date = log_date - timedelta(days=1)
+        non_sunday_dates: list[date] = []
+        cursor_day = 1
+        while len(non_sunday_dates) < 12:
+            d = today_date - timedelta(days=cursor_day)
+            cursor_day += 1
+            if d.weekday() != 6:
+                non_sunday_dates.append(d)
+
+        for i, log_date in enumerate(non_sunday_dates[:5], start=1):
             dl_id = str(uuid4())
             rev_id = str(uuid4())
 
@@ -696,9 +700,7 @@ def main():
             )
 
         # 1 Sick leave log for Candidate 1
-        sick_date = today_date - timedelta(days=7)
-        if sick_date.weekday() == 6:
-            sick_date = sick_date - timedelta(days=1)
+        sick_date = non_sunday_dates[5]
         dl_sick_id = str(uuid4())
         rev_sick_id = str(uuid4())
         seed_conn.execute(
@@ -715,10 +717,7 @@ def main():
 
         # 11. Seed Daily Logs for Candidate 2 (Placement 2)
         # 4 WORK logs, 1 ABSENCE log, and 1 OVERTIME log (510 min > 480 limit)
-        for i in range(10, 14):
-            log_date = today_date - timedelta(days=i)
-            if log_date.weekday() == 6:
-                log_date = log_date - timedelta(days=1)
+        for i, log_date in enumerate(non_sunday_dates[6:10], start=10):
             dl_id = str(uuid4())
             rev_id = str(uuid4())
 
@@ -738,9 +737,7 @@ def main():
             )
 
         # 1 Absence log for Candidate 2
-        abs_date = today_date - timedelta(days=15)
-        if abs_date.weekday() == 6:
-            abs_date = abs_date - timedelta(days=1)
+        abs_date = non_sunday_dates[10]
         dl_abs_id = str(uuid4())
         rev_abs_id = str(uuid4())
         seed_conn.execute(
