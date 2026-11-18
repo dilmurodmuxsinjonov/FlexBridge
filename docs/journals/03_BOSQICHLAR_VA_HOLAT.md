@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-18, LOG-198)
+## Joriy holat (2026-11-18, LOG-199)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`a353e32`). Joriy ish branchi: `feature/283-landing-superadmin-perf`.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`215eddf`). Joriy ish branchi: `feature/public-org-pricing-reporting`.
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-195 3x animatsiya (#278); LOG-196 main 1964324 (#279); LOG-197 staging/main ab33277 (#281); **LOG-198 (`feature/283-landing-superadmin-perf`): Pre-auth Bosh sahifa `/` + `/elonlar`, Rol va Vakolat Matritsasi, to'liq Super Admin (`ADMIN`, `API-126`..`API-135`, `bootstrap_super_admin.py`, 14 BFF, `/operator` panellari), `authMe` kesh/dedup + compositor tezligi + `uvicorn --workers 2`**.
-- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`132.79s`)**, Vitest **184/184**, ESLint 0, `tsc` 0, `next build` OK, Pytest **83/83** + `test_telegram_bot.py` **10/10**, Edge Playwright Light/Dark/`390x844` + Super Admin E2E **toza**.
+- **So'nggi ishlar**: LOG-197 staging/main ab33277 (#281); LOG-198 Pre-auth `/` + `/elonlar`, Rol Matritsasi, Super Admin (`ADMIN`), tezlik optimizatsiyasi (#283 -> `215eddf`); **LOG-199 (`feature/public-org-pricing-reporting`): `/tashkilot/[id]` (`API-008/009/010`), `/tariflar` (`API-011/012`), `ModerationReportModal` (`API-007`), `proxyPublic` + `/ishlar/[id]` yorug‘/qorong‘i dizayn va havolalar**.
+- **Staging**: 2026-11-18 da `feature/public-org-pricing-reporting` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Vitest **30/30 (`188/188`)**, ESLint 0, `tsc` 0, `next build` OK, Edge Playwright `/tariflar`, `/tashkilot/[id]`, `/ishlar/[id]` **toza**.
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -249,4 +249,15 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - **Super Admin (`ADMIN`) + Governance navbatlari (`API-126`..`API-135`)**: `services/platform_admin.py`, `api/v1/platform_admin.py`, `scripts/bootstrap_super_admin.py`, 14 BFF route, `/operator` Bento panellari (`StaffRolesPanel`, `DirectoryPanel`, `FeatureFlagsPanel`, `GovernanceOpsPanel` — GDPR, OTP-siz recovery `PENDING_REVIEW`, apellyatsiyalar, vorislik, pilot-readiness/retention).
   - **Tezlik va Mobil Dizayn**: `fetchAuthMe` 5s dedup kesh, `fb-liquid-drift` va 37 -> 4 ta `blurFilterEls`, `InteractionLayer` sinxron reflow olib tashlandi, `<Link prefetch={false}>`, `backend/Dockerfile` `--workers 2`, `390px` mobil `"Fle..."` clipping tuzatildi.
 - **Tekshiruv**: `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **29/29 (`184/184`)**, ESLint 0, `tsc` 0, `next build` OK, Backend Pytest **83/83** (port `55440`), `check_publish.py` `errors: []`, Edge Playwright Light/Dark/`390x844` + Super Admin E2E toza (`authMeCalls: 1`, `requests: 72->24`, `networkIdle: 1346ms->751ms`).
-- **`main`**: `2018d7b` da qat'iyan muzlatilgan (o'zgartirilmadi).
+- **`main`**: `2018d7b` da qat'iyan muzlatilgan (o'zgartirilmadi). PR #283 `integration/r1-agent-collaboration` ga birlashtirildi (`215eddf`).
+
+### 2026-11-18 | LOG-199 | PR -> Ochiq Tashkilot Profili (/tashkilot/[id]), Xizmatlar & Tariflar (/tariflar) va Shikoyat Modali
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. R1 shartnoma vs UI auditi asosida ochiq kashfiyot va ishonch oqimlari (`API-007`..`API-012`) yakunlandi.
+- **Bajarildi (`feature/public-org-pricing-reporting`, baza `215eddf`)**:
+  - `frontend/src/lib/server/proxy.ts` (`proxyPublic`) + 6 ta BFF route (`public/services`, `public/prices`, `organizations/[id]/public`, `organizations/[id]/opportunities`, `organizations/[id]/rating-summary`, `moderation-cases`).
+  - `frontend/src/lib/publicCatalog.ts` (`safeExternalWebsiteUrl`, BFF klientlar), `labels.ts`, `errorText.ts`.
+  - `/tashkilot/[id]` (`app/tashkilot/[id]/page.tsx`) — KYB tasdiqlangan korxona vitrinasi, n>=5 maxfiylik chegarali reyting va faol e’lonlar; `VacancyCard.tsx` va `/ishlar/[id]/page.tsx` dan tashkilot sahifasiga o‘tish havolalari.
+  - `/tariflar` (`app/tariflar/page.tsx`) — R1 faol xizmatlar, 2-bosqich chegarasi, 30 kunlik UZS tariflar va 24 soatlik qaytarish kafolati; `Footer.tsx` va `haqida/page.tsx` havolalari.
+  - `ModerationReportModal.tsx` va `/ishlar/[id]/page.tsx` Silk Skeuomorfik yorug‘/qorong‘i dizayn yangilanishi.
+- **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **30/30 (`188/188`)**, `next build` OK (`103/103`), `check_publish.py` `errors: []`, `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Edge Playwright `/tariflar`, `/tashkilot/[id]` (`Artel LLC`), `/ishlar/[id]` toza (`hScroll=false`, `errs=0`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).

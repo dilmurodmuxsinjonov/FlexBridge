@@ -76,6 +76,9 @@ const MESSAGES: Record<string, string> = {
   CONTINUITY_CLAIM_NO_LONGER_CURRENT: "Biriktiruv muddati yoki vakolati yangilangan. Ro‘yxatni yangilang.",
   FORBIDDEN_ROLE: "Bu amal uchun joriy rolingizda ruxsat yetarli emas.",
   PERMISSION_DENIED: "Bu amal uchun ruxsatingiz yo‘q.",
+  EXACTLY_ONE_TARGET_REQUIRED: "Shikoyat qilinayotgan ob’ekt aniq ko‘rsatilishi shart.",
+  MODERATION_REPORT_FAILED: "Murojaatni moderatsiyaga yuborib bo‘lmadi.",
+  ORGANIZATION_NOT_FOUND: "Tasdiqlangan tashkilot profili topilmadi.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

@@ -175,6 +175,24 @@ const LABELS: Record<string, string> = {
   OWNER_CONTINUITY_APPROVE: "Korxona egasi vorisligi tasdiqlandi",
   OWNER_CONTINUITY_REJECT: "Vorislik rad etildi",
   RETENTION_DRY_RUN_RECORDED: "Saqlash muddati sinovi qayd etildi",
+  // Public organization capabilities & ratings (API-008/010)
+  JOB_EMPLOYER: "Ish beruvchi (Yarim stavka)",
+  INTERNSHIP_HOST: "Amaliyot bazasi (OTM hamkori)",
+  UNRATED: "Hali baholanmagan",
+  WITHHELD_INSUFFICIENT_SAMPLE: "Kamida 5 ta baho to‘plangach ochiladi",
+  // Public pricing & moderation reporting (API-012/007)
+  SUBSCRIPTION_AND_LISTING: "Obuna va bittalik e’lon modeli",
+  PRORATED_BEFORE_FIRST_APPLICATION: "Birinchi arizagacha to‘liq qaytarish kafolati",
+  PILOT_FREE: "Pilot bepul tarif",
+  ACADEMIC_INTERNSHIP: "Uch tomonlama akademik amaliyot",
+  PART_TIME_EMPLOYMENT: "Moslashuvchan yarim stavkali ish",
+  DOUBLE_BLIND_EVALUATION: "Ikki tomonlama xolis baholash",
+  FREELANCE_MARKETPLACE: "Frilans buyurtmalar bozori",
+  MISLEADING_TERMS: "Noto‘g‘ri yoki chalg‘ituvchi shartlar",
+  UNPAID_VIOLATION: "To‘lovsiz mehnat yoki qonunbuzarlik",
+  SPAM_OR_SCAM: "Spam yoki firibgarlik belgisi",
+  HARASSMENT_OR_ABUSE: "Haqorat yoki noqonuniy talab",
+  OTHER_VIOLATION: "Boshqa qoidabuzarlik",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]+$/.test(s);

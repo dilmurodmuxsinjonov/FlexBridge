@@ -48,3 +48,30 @@ export async function proxyAuthed(
     return NextResponse.json({ ok: false, error: "INTERNAL_ERROR" }, { status: 502 });
   }
 }
+
+/**
+ * Unauthenticated public JSON proxy: validates backend status cleanly and
+ * normalizes error envelopes without exposing backend internals.
+ */
+export async function proxyPublic(
+  path: string,
+  fallbackError: string,
+  cacheControl = "public, max-age=60, stale-while-revalidate=120"
+): Promise<NextResponse> {
+  try {
+    const res = await backendFetch(path, { method: "GET" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return NextResponse.json(
+        { ok: false, error: backendErrorCode(res.status, data, fallbackError) },
+        { status: res.status }
+      );
+    }
+    return NextResponse.json(
+      { ok: true, ...data },
+      { status: 200, headers: { "Cache-Control": cacheControl } }
+    );
+  } catch {
+    return NextResponse.json({ ok: false, error: "BACKEND_UNAVAILABLE" }, { status: 503 });
+  }
+}
