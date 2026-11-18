@@ -8,8 +8,8 @@
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan) — bevosita tegish/push taqiqlanadi; oldingi main zaxiralari `backup/main-2026-11-17-*` saqlangan. Pre-push hook o'z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
 - **So'nggi ishlar**: **LOG-198 (`feature/283-landing-superadmin-perf`)**: Pre-auth `/` + `/elonlar`, 4 qamrovli Rol va Vakolat Matritsasi (`ROLE_AUTHORITY_MATRIX.md`), Super Admin (`ADMIN`) API `API-126`..`API-135` + `bootstrap_super_admin.py` + 14 BFF + `/operator` panellari, `authMe` kesh/dedup + compositor tezligi (`blurFilterEls 37->4`, `requests 72->24`) + `uvicorn --workers 2`.
-- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, `127.0.0.1:3000` / `:8000`). `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **29/29 (`184/184`)**, Backend Pytest **83/83**, `check_publish.py` `errors: []`, Edge Playwright Light/Dark/`390x844` + Super Admin TOTP E2E **toza**.
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish; staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
+- **Staging**: 2026-11-18 da `feature/283-landing-superadmin-perf` dan qayta qurilgan (`flexbridge-r1`, `127.0.0.1:3000` / `:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`132.79s`)**, Vitest **29/29 (`184/184`)**, Backend Pytest **83/83** + `test_telegram_bot.py` **10/10**, `check_publish.py` `errors: []`, Edge Playwright Light/Dark/`390x844` + Super Admin TOTP E2E **toza**.
+- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinchalik vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 

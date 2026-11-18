@@ -101,12 +101,13 @@ def main() -> None:
     print("\n--- Phase 1: Auth Options Delivery Methods (GET /api/bff/auth/options) ---")
     status, body, _ = make_request(f"{FRONTEND_URL}/api/bff/auth/options")
     assert status == 200 and isinstance(body, dict), f"Phase 1 failed ({status}): {body}"
+    options_mode = str(body.get("telegram_mode") or "SIMULATION").upper()
     delivery_methods = body.get("delivery_methods", [])
     assert "SMS" in delivery_methods and "TELEGRAM" in delivery_methods, (
         f"Expected SMS and TELEGRAM in delivery_methods, got {delivery_methods}"
     )
     assert body.get("telegram_bot_username"), f"Expected telegram_bot_username, got {body}"
-    print(f"  OK: delivery_methods={delivery_methods}, bot=@{body.get('telegram_bot_username')}")
+    print(f"  OK: mode={options_mode}, delivery_methods={delivery_methods}, bot=@{body.get('telegram_bot_username')}")
 
     # -------------------------------------------------------------------------
     # Phase 2: Issue TELEGRAM Challenge
@@ -172,6 +173,35 @@ def main() -> None:
     assert status == 403 and isinstance(body, dict), f"Expected 403, got {status}: {body}"
     assert body.get("error") == "TELEGRAM_CONTACT_REQUIRED", f"Expected TELEGRAM_CONTACT_REQUIRED, got {body}"
     print("  OK: Consuming OTP before Telegram contact verification blocked (403 TELEGRAM_CONTACT_REQUIRED).")
+
+    if options_mode == "LIVE":
+        print("\n--- Phase 5 (LIVE): Unauthenticated Webhook Spoof Rejection ---")
+        wh_status, wh_body, _ = make_request(
+            f"{FRONTEND_URL}/api/bff/auth/telegram/webhook",
+            method="POST",
+            headers={"Content-Type": "application/json", "Origin": FRONTEND_URL},
+            data=json.dumps(
+                {
+                    "challenge_id": challenge_id,
+                    "message": {
+                        "from": {"id": tg_user_id, "first_name": "Dilmurod"},
+                        "chat": {"id": tg_user_id, "type": "private"},
+                        "text": f"/start {challenge_id}",
+                    },
+                }
+            ).encode(),
+        )
+        assert wh_status in (403, 503), f"LIVE mode must reject unsigned webhook calls, got {wh_status}: {wh_body}"
+        assert not (isinstance(wh_body, dict) and wh_body.get("otp_code")), "LIVE mode must never echo OTP"
+
+        ssr_status, ssr_html, _ = make_request(f"{FRONTEND_URL}/royxatdan-otish")
+        assert ssr_status == 200 and isinstance(ssr_html, str)
+        assert "Ro‘yxatdan O‘tish" in ssr_html or "FlexBridge" in ssr_html
+        print("  OK: LIVE Telegram bot (@FlexBridgeAuthBot) webhook guards and /royxatdan-otish SSR verified.")
+        print("\n" + "=" * 76)
+        print("  ALL LIVE-MODE TELEGRAM PHONE VERIFICATION CHECKS PASSED 100% GREEN!")
+        print("=" * 76)
+        return
 
     # -------------------------------------------------------------------------
     # Phase 5: Bot Startup Prompt (/start <challenge_id> -> request_contact=True)
