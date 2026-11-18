@@ -89,6 +89,16 @@ const MESSAGES: Record<string, string> = {
   CONTINUITY_APPLICANT_ALREADY_OWNER: "Siz allaqachon ushbu tashkilot rahbari (OWNER) hisoblanasiz.",
   CONTINUITY_REQUEST_ALREADY_PENDING: "Ushbu tashkilot uchun ochiq vorislik arizasi allaqachon ko‘rib chiqilmoqda.",
   CONTINUITY_ACTIVE_OWNER_ROSTER_REQUIRED: "Vorislik so‘rovi uchun tashkilotda faol OWNER ro‘yxati mavjud bo‘lishi shart.",
+  OPEN_LOGS_NEED_REVISION: "Amaliyotni yakunlashdan oldin «Tuzatish kerak» holatidagi kundaliklarni qayta yuboring.",
+  PERSONAL_MENTOR_ACCEPTANCE_REQUIRED: "Boshlashdan oldin biriktirilgan mentor tayinlovni shaxsan qabul qilishi kerak.",
+  CANDIDATE_PLAN_ACCEPTANCE_REQUIRED: "Faollashtirishdan oldin talaba amaliyot rejasini qabul qilishi shart.",
+  ACTIVE_PLAN_AMENDMENT_REQUIRED: "Faol amaliyot rejasi endi to‘g‘ridan-to‘g‘ri o‘zgartirilmaydi.",
+  SUBMITTED_LOG_IMMUTABLE: "Tekshiruvga yuborilgan kundalik vazifasiga endi yangi dalil biriktirib bo‘lmaydi.",
+  EVIDENCE_ALREADY_ATTACHED: "Ushbu fayl dalil sifatida allaqachon biriktirilgan.",
+  FILE_NOT_CLEAN_FOR_EVIDENCE: "Fayl antivirus tekshiruvidan toza (CLEAN) o‘tmagan.",
+  INSUFFICIENT_LOGGED_MINUTES: "Minimal talab qilingan soatlar bajarilmagan — muddatidan oldin yakunlash sababini kiriting.",
+  PLACEMENT_NOT_ACTIVE: "Bu amal faqat faol amaliyot (ACTIVE) holatida bajariladi.",
+  PLACEMENT_ALREADY_COMPLETED: "Amaliyot allaqachon yakunlangan.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

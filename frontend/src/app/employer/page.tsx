@@ -10,6 +10,8 @@ import ResumePreview from "@/components/ResumePreview";
 import OrganizationTeamPanel from "@/components/employer/OrganizationTeamPanel";
 import DraftOpportunityEditorModal from "@/components/employer/DraftOpportunityEditorModal";
 import OwnerGovernancePanel from "@/components/employer/OwnerGovernancePanel";
+import PlacementLifecycleModal from "@/components/employer/PlacementLifecycleModal";
+import { acceptPlacementAssignment, fetchPlacementPlanNeutral } from "@/lib/placementLifecycle";
 import {
   Users,
   Briefcase,
@@ -222,6 +224,8 @@ export default function EmployerPortal() {
   const [orgPlacements, setOrgPlacements] = useState<OrganizationPlacementItem[]>([]);
   const [isLoadingPlacements, setIsLoadingPlacements] = useState(false);
   const [placementsError, setPlacementsError] = useState<string | null>(null);
+  const [acceptingMentorId, setAcceptingMentorId] = useState<string | null>(null);
+  const [lifecyclePlacement, setLifecyclePlacement] = useState<OrganizationPlacementItem | null>(null);
 
   // -------------------------------------------------------------------------
   // FB-168: Organization Settings, Team Management, Capabilities & Verification (API-072..075, 067)
@@ -646,6 +650,20 @@ export default function EmployerPortal() {
       setIsLoadingPlacements(false);
     }
   }, [orgId]);
+
+  const handleAcceptMentorAssignment = async (asg: MentorAssignmentItem) => {
+    setAcceptingMentorId(asg.id);
+    setPlacementsError(null);
+    try {
+      const plan = await fetchPlacementPlanNeutral(asg.placement_id);
+      await acceptPlacementAssignment(asg.placement_id, asg.id, plan.terms_id, plan.version, "MENTOR");
+      await loadPlacements();
+    } catch (err: unknown) {
+      setPlacementsError(err instanceof Error ? err.message : "Mentorlikni qabul qilishda xatolik.");
+    } finally {
+      setAcceptingMentorId(null);
+    }
+  };
 
   const handleOpenReviewModal = async (revisionId: string) => {
     setReviewModalRevisionId(revisionId);
@@ -2070,6 +2088,17 @@ export default function EmployerPortal() {
                                 <div>Qabul qilingan: <span className="font-mono text-zinc-300">{new Date(asg.accepted_at).toLocaleDateString()}</span></div>
                               )}
                             </div>
+                            {!asg.accepted_at && !asg.revoked_at && (
+                              <button
+                                type="button"
+                                disabled={acceptingMentorId === asg.id}
+                                onClick={() => void handleAcceptMentorAssignment(asg)}
+                                className="mt-2 px-3 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-xs font-semibold text-white inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
+                              >
+                                {acceptingMentorId === asg.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                <span>Mentorlikni qabul qilish</span>
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -2096,6 +2125,13 @@ export default function EmployerPortal() {
                               <div>Davomiyligi: <span className="font-mono text-zinc-300">{plc.start_date} ~ {plc.end_date}</span></div>
                               <div>Akademik trek: <span className="font-semibold text-zinc-200">{plc.academic_track ? "Mavjud (Dual ta'lim)" : "Yo'q"}</span></div>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => setLifecyclePlacement(plc)}
+                              className="mt-2 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] text-xs font-semibold text-white transition-colors"
+                            >
+                              Boshqarish
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -4779,6 +4815,15 @@ export default function EmployerPortal() {
         onClose={() => setEditDraftOppId(null)}
         onSaved={() => {
           if (orgId.trim()) loadDashboard(orgId.trim());
+        }}
+      />
+      <PlacementLifecycleModal
+        isOpen={Boolean(lifecyclePlacement)}
+        placement={lifecyclePlacement}
+        orgId={orgId.trim()}
+        onClose={() => setLifecyclePlacement(null)}
+        onUpdated={() => {
+          void loadPlacements();
         }}
       />
     </main>

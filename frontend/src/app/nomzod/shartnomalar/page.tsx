@@ -33,6 +33,7 @@ import {
   JobEngagementDetail,
 } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
+import PlacementCompletionControls from "@/components/placements/PlacementCompletionControls";
 
 function ShartnomalarHubContent() {
   const searchParams = useSearchParams();
@@ -845,6 +846,19 @@ function ShartnomalarHubContent() {
                     </button>
                   </div>
                 )}
+
+                <div className="border-t border-white/10 pt-4">
+                  <PlacementCompletionControls
+                    placementId={placementPlan.placement_id}
+                    status={placementPlan.status}
+                    termsId={placementPlan.terms_id}
+                    version={placementPlan.version}
+                    onUpdated={() => {
+                      void loadPlacements();
+                      void handleOpenPlanModal(placementPlan.placement_id);
+                    }}
+                  />
+                </div>
               </div>
             ) : null}
           </div>

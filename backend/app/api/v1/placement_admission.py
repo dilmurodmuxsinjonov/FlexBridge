@@ -113,6 +113,11 @@ def nominate(id: UUID, payload: NominateRequest, actor: ActorContext = Depends(r
                                   mentor_id=str(payload.mentor_id), idempotency_key=payload.idempotency_key)
 
 
+@router.get('/placements/{id}/mentor-assignments')
+def list_mentor_assignments(id: UUID, actor: ActorContext = Depends(require_actor_context)):
+    return {'contract_id': 'API-087-LIST', **service.mentor_assignments(actor=actor, placement_id=str(id))}
+
+
 @router.post('/placements/{id}/mentor-assignments/{assignment}/revoke')
 def revoke(id: UUID, assignment: UUID, payload: TermsRequest, actor: ActorContext = Depends(require_actor_context)):
     return service.revoke_mentor(actor=actor, placement_id=str(id), assignment_id=str(assignment), **payload.arguments())
