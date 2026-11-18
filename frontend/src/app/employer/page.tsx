@@ -8,6 +8,8 @@ import { useEffect, useEffectEvent, useState, useCallback, useMemo } from "react
 import Link from "next/link";
 import ResumePreview from "@/components/ResumePreview";
 import OrganizationTeamPanel from "@/components/employer/OrganizationTeamPanel";
+import DraftOpportunityEditorModal from "@/components/employer/DraftOpportunityEditorModal";
+import OwnerGovernancePanel from "@/components/employer/OwnerGovernancePanel";
 import {
   Users,
   Briefcase,
@@ -28,6 +30,7 @@ import {
   XCircle,
   RefreshCw,
   FileText,
+  FileEdit,
   MapPin,
   ArrowRight,
   Award,
@@ -171,6 +174,7 @@ export default function EmployerPortal() {
   // FB-162, FB-168 & FB-174: Workspace Tabs & Hub States
   // -------------------------------------------------------------------------
   const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB">("KANBAN");
+  const [editDraftOppId, setEditDraftOppId] = useState<string | null>(null);
   const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS" | "DOCUMENTS">("QUEUE");
   const [selectedDocPlacementId, setSelectedDocPlacementId] = useState<string>("");
 
@@ -1429,7 +1433,19 @@ export default function EmployerPortal() {
                   )}
                 </button>
 
-                {/* FB-180: Lifecycle Action Buttons */}
+                {/* FB-180 / API-078..080: Lifecycle & Draft Edit Action Buttons */}
+                {managedOpps.find((o) => o.id === targetOppId)?.status === "DRAFT" && (
+                  <button
+                    type="button"
+                    onClick={() => setEditDraftOppId(targetOppId)}
+                    title="Qoralama vakansiya matni, maoshi va smenalarini tahrirlash"
+                    className="px-3 py-1.5 rounded-xl skeuo-btn-secondary text-xs font-semibold flex items-center gap-1"
+                  >
+                    <FileEdit className="w-3.5 h-3.5 text-[#c94f1d]" />
+                    <span>Qoralamani tahrirlash</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   disabled={isPublishingOpp || !targetOppId.trim()}
@@ -2285,6 +2301,9 @@ export default function EmployerPortal() {
 
               {/* SECTION 2: TEAM (main OWNER account) — Issue #239 */}
               <OrganizationTeamPanel orgId={orgId.trim() || null} />
+
+              {/* SECTION 2B: OWNER GOVERNANCE, PROFILE CHANGE & CONTINUITY */}
+              <OwnerGovernancePanel orgId={orgId.trim() || null} />
 
               {/* SECTION 3: KORXONA MA'LUMOTNOMASI, REKVIZITLARI VA AMALIYOT SHAROITLARI (API-067-DIRECTORY) */}
               <div className="p-5 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-5">
@@ -4754,6 +4773,14 @@ export default function EmployerPortal() {
           </div>
         </div>
       )}
+      <DraftOpportunityEditorModal
+        isOpen={Boolean(editDraftOppId)}
+        opportunityId={editDraftOppId}
+        onClose={() => setEditDraftOppId(null)}
+        onSaved={() => {
+          if (orgId.trim()) loadDashboard(orgId.trim());
+        }}
+      />
     </main>
   );
 }
