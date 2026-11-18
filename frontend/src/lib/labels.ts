@@ -200,6 +200,18 @@ const LABELS: Record<string, string> = {
   RELINQUISH_OWNER: "Rahbarlikni o‘tkazish",
   ADD_OWNER: "Hamrahbar qo‘shish",
   STAFF_OWNER_CONTINUITY: "Rahbarlik vorisligi",
+  // Placement lifecycle & log evidence
+  PLANNED: "Rejalashtirilgan",
+  PENDING_START_CONFIRMATION: "Boshlash tasdig‘i kutilmoqda",
+  COMPLETION_REQUESTED: "Yakunlash so‘ralgan",
+  HOST_AND_ACADEMIC: "Korxona va OTM ko‘rishi mumkin",
+  HOST_ONLY: "Faqat korxona",
+  ACADEMIC_ONLY: "Faqat OTM",
+  REQUEST_COMPLETION: "Yakunlashni so‘rash",
+  CONFIRM_COMPLETION: "Yakunlashni tasdiqlash",
+  REJECT_COMPLETION: "Yakunlashni rad etish",
+  ACTIVATE: "Faollashtirish",
+  DISPUTE: "Bahs / nizo ochish",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]+$/.test(s);

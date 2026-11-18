@@ -389,5 +389,40 @@ class PlacementAdmissionService:
                     g.c.revoked_at.is_(None), r.c.code == 'MENTOR', r.c.scope_kind == 'ORG', a.c.revoked_at.is_(None))
             return page(conn,query,a.c.id,a.c.assigned_at,limit=limit,after=after)
 
+    def mentor_assignments(self, *, actor, placement_id):
+        """Host view of active (non-revoked) mentor assignments on one placement (`API-087`)."""
+        with transaction() as conn:
+            placement, _ = self._locked(conn, placement_id)
+            self._host(conn, actor, placement, capability=False)
+            a, m, u = table('mentor_assignments'), table('org_memberships'), table('users')
+            rows = conn.execute(
+                select(
+                    a.c.id,
+                    a.c.placement_id,
+                    a.c.membership_id,
+                    m.c.user_id.label('mentor_user_id'),
+                    u.c.display_name,
+                    a.c.assigned_at,
+                    a.c.accepted_at,
+                )
+                .select_from(a.join(m, m.c.id == a.c.membership_id).join(u, u.c.id == m.c.user_id))
+                .where(a.c.placement_id == placement_id, a.c.revoked_at.is_(None))
+                .order_by(a.c.assigned_at.desc(), a.c.id)
+            ).mappings().all()
+            return {
+                'items': [
+                    {
+                        'id': str(r['id']),
+                        'placement_id': str(r['placement_id']),
+                        'membership_id': str(r['membership_id']),
+                        'mentor_user_id': str(r['mentor_user_id']),
+                        'display_name': r['display_name'] or 'Mentor',
+                        'assigned_at': r['assigned_at'].astimezone(timezone.utc).isoformat() if r['assigned_at'] else None,
+                        'accepted_at': r['accepted_at'].astimezone(timezone.utc).isoformat() if r['accepted_at'] else None,
+                    }
+                    for r in rows
+                ]
+            }
+
 
 admission_service = PlacementAdmissionService()

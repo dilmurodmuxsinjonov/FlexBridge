@@ -186,4 +186,5 @@ Quyidagi bo'limlar [archive/02_texnik_qarorlar_2026-11-07_11.md](archive/02_texn
 - SUPPORT-API063-064-TICKETS — User Support Tickets & Messaging (2026-11-10)
 - SAVED-OPPORTUNITIES-API004-037-038 — Candidate Saved Opportunities (2026-11-10)
 - OPPORTUNITY-API005-NOTIFICATIONS-API031 — Opportunity Details & Notification Inbox (2026-11-11)
+- PLACEMENT-PHASE-C-MENTOR-READ-MODELS — Host Organization Mentors (`GET /organizations/{org}/mentors`), Placement Mentor Assignments (`GET /placements/{id}/mentor-assignments`), Bilateral Closure/Export (`API-049/052`), Diary Evidence (`API-055`) & Academic Supervision Lifecycle (`LOG-201`, 2026-11-18)
 - Eski «Current LOG-…» qatorlari (36 ta): [archive/02_joriy_holat_tarixi.md](archive/02_joriy_holat_tarixi.md)

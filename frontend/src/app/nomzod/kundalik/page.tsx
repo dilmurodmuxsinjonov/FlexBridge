@@ -10,6 +10,7 @@ import {
   Lock,
   MessageSquareText,
   Plus,
+  Paperclip,
   RefreshCw,
   Save,
   Send,
@@ -32,15 +33,16 @@ import { useAsyncData } from "@/lib/useAsyncData";
 import InternshipDocumentsHub from "@/components/InternshipDocumentsHub";
 import DiaryCalendar from "@/components/diary/DiaryCalendar";
 import { DECISION_LABEL, STATUS_LABEL, localISODate, longDate, reviewsOf, weekdayOf } from "@/lib/diary";
+import TaskEvidenceDrawer from "@/components/diary/TaskEvidenceDrawer";
 import { classesOn, fetchMyTimetable, workClashes } from "@/lib/timetable";
 
 // Stable empty values: the form sync below compares `logs` by identity.
 const EMPTY_PLACEMENTS: CandidatePlacementItem[] = [];
 const EMPTY_LOGS: DailyLogItem[] = [];
 const DAILY_LIMIT = 480; // Labour Code art. 118: at most 8 hours a day
-const EMPTY_TASK = { title: "", minutes: 0 };
+const EMPTY_TASK: { id?: string; title: string; minutes: number; evidence_count?: number } = { title: "", minutes: 0 };
 
-type Task = { title: string; minutes: number };
+type Task = { id?: string; title: string; minutes: number; evidence_count?: number };
 type Standard = {
   workStart: string;
   workEnd: string;
@@ -103,6 +105,7 @@ export default function CandidateKundalikPage() {
   const [std, setStd] = useState<Standard>({ workStart: "09:00", workEnd: "17:00", department: "", tools: "", skills: "", artifact: "", safety: true });
 
   const [busy, setBusy] = useState<"save" | "submit" | null>(null);
+  const [evidenceTask, setEvidenceTask] = useState<{ id: string; title: string } | null>(null);
   const [notification, setNotification] = useState<{ type: "success" | "error" | "warning"; message: string } | null>(null);
 
   const activeLog = logs.find((l) => l.local_date === selectedDate);
@@ -129,7 +132,11 @@ export default function CandidateKundalikPage() {
     if (activeLog) {
       setDayType(activeLog.day_type || "WORKED");
       setSummaryText(activeLog.summary || "");
-      setTasks(activeLog.tasks && activeLog.tasks.length > 0 ? activeLog.tasks.map((t) => ({ title: t.title, minutes: t.minutes })) : [EMPTY_TASK]);
+      setTasks(
+        activeLog.tasks && activeLog.tasks.length > 0
+          ? activeLog.tasks.map((t) => ({ id: t.id, title: t.title, minutes: t.minutes, evidence_count: t.evidence_count }))
+          : [EMPTY_TASK]
+      );
     } else {
       setDayType("WORKED");
       setSummaryText("");
@@ -448,6 +455,17 @@ export default function CandidateKundalikPage() {
                             className="w-16 rounded-xl bg-[var(--fb-card-top)] px-2 py-1.5 text-right text-xs tabular-nums outline-none"
                           />
                           <span className="text-[11px] text-[var(--fb-ink-muted)]">daq</span>
+                          {t.id && (
+                            <button
+                              type="button"
+                              onClick={() => setEvidenceTask({ id: t.id!, title: t.title || `${i + 1}-vazifa` })}
+                              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold text-[var(--fb-ink-secondary)] hover:bg-[var(--fb-well-deep)]"
+                              aria-label={`${i + 1}-vazifa dalillari`}
+                            >
+                              <Paperclip className="h-3.5 w-3.5" />
+                              <span>{t.evidence_count ? t.evidence_count : "Dalil"}</span>
+                            </button>
+                          )}
                           {tasks.length > 1 && (
                             <button
                               type="button"
@@ -551,6 +569,14 @@ export default function CandidateKundalikPage() {
 
       {placement && <InternshipDocumentsHub party="CANDIDATE" placementId={placement.id} />}
 
+      <TaskEvidenceDrawer
+        isOpen={Boolean(evidenceTask)}
+        entryId={evidenceTask?.id ?? null}
+        taskTitle={evidenceTask?.title ?? ""}
+        locked={locked}
+        onClose={() => setEvidenceTask(null)}
+        onAttached={() => void logsQuery.reload()}
+      />
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

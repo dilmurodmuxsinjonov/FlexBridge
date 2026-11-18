@@ -122,3 +122,47 @@ def list_org_opportunities(organization_id: str, *, status: str | None = None, l
         }
         for row in rows
     ]
+
+
+def list_org_mentors(organization_id: str, *, limit: int = 100) -> list[dict]:
+    """Active members holding a non-revoked MENTOR grant in one organization."""
+    members, grants, roles, users = (
+        table(n) for n in ('org_memberships', 'org_role_grants', 'role_catalog', 'users')
+    )
+    with transaction() as conn:
+        rows = conn.execute(
+            select(
+                members.c.id.label('membership_id'),
+                users.c.id.label('user_id'),
+                users.c.display_name,
+            )
+            .select_from(
+                members.join(users, users.c.id == members.c.user_id)
+                .join(grants, grants.c.membership_id == members.c.id)
+                .join(roles, roles.c.id == grants.c.role_id)
+            )
+            .where(
+                members.c.organization_id == organization_id,
+                members.c.status == 'ACTIVE',
+                members.c.revoked_at.is_(None),
+                grants.c.revoked_at.is_(None),
+                roles.c.scope_kind == 'ORG',
+                roles.c.code == 'MENTOR',
+                users.c.status == 'ACTIVE',
+            )
+            .order_by(users.c.display_name, members.c.id)
+            .limit(limit)
+        ).mappings().all()
+    seen: set[str] = set()
+    items: list[dict] = []
+    for r in rows:
+        uid = str(r['user_id'])
+        if uid in seen:
+            continue
+        seen.add(uid)
+        items.append({
+            'user_id': uid,
+            'membership_id': str(r['membership_id']),
+            'display_name': r['display_name'] or 'Mentor',
+        })
+    return items

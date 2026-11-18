@@ -269,3 +269,11 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - `DraftOpportunityEditorModal.tsx` (`employer/page.tsx` Kanban toolbarida `DRAFT` e’lonlar uchun), `OwnerGovernancePanel.tsx` (`ORG_HUB` da `API-071` va egadorlik/vorislik), `employerGovernance.ts`, `DraftAndGovernance.test.tsx`.
 - **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **31/31 (`190/190`)**, `next build` OK (`106/106`), `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, `11/11` BFF `400/401`, Edge Playwright `/employer` (`hScroll=false`, `errs=0`).
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-201 | PR -> Amaliyot Hayotiy Sikli, Mentor/O‘qituvchi Qabuli, Kundalik Dalillari & OTM Rahbarlik UI (Phase C)
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #285 (`bd91187`) birlashtirilgach Phase C yakunlandi.
+- **Bajarildi (`feature/placement-completion-and-evidence`, baza `bd91187`)**:
+  - Backend: `GET /api/v1/organizations/{org}/mentors`, `GET /api/v1/placements/{id}/mentor-assignments` (`API-087`), `test_phase_c_mentor_read_models.py`.
+  - Frontend (`15` ta BFF route + UI): `PlacementLifecycleModal.tsx` (`employer/page.tsx` da Reja `API-050`, Mentor biriktiruvi/bekor qilish `API-087`, `ACTIVATE`/`CANCEL` qarori `API-088`, Mentor qabuli `API-051`), `PlacementCompletionControls.tsx` (`/nomzod/shartnomalar` va korxona modalida `API-049/052` + `API-X03`), `TaskEvidenceDrawer.tsx` (`/nomzod/kundalik` da `API-055` PDF dalil biriktirish), `/university` o‘qituvchi qabuli (`TEACHER`, `API-051`) hamda ilmiy rahbarlik yaratish va biriktiruvni bekor qilish, `PhaseCLifecycle.test.tsx`.
+- **Tekshiruv**: Backend Pytest **17/17 (`55.19s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **32/32 (`193/193`)**, `next build` OK (`107/107`), `check_publish.py` `errors: []` (`1464` fayl), `check_master_protocol.py` PASS. (Docker Desktop host qayta yuklashdan keyin o‘chirilgan holda qolgan; CI da to‘liq tekshiriladi.)
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).

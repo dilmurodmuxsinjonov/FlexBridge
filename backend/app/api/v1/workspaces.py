@@ -38,3 +38,16 @@ def manage_organization_opportunities(
     from app.services.workspaces import list_org_opportunities
     return {'contract_id': 'API-076', 'organization_id': str(org),
             'items': list_org_opportunities(str(org), status=status, limit=limit)}
+
+
+@router.get('/organizations/{org}/mentors')
+def list_organization_mentors(
+    org: UUID,
+    limit: int = Query(default=100, ge=1, le=200),
+    actor: ActorContext = Depends(require_actor_context),
+) -> dict[str, Any]:
+    """Active MENTOR-role members of an organization for placement nomination (`API-087`)."""
+    require_org(actor, str(org), 'OWNER', 'HOST_COORDINATOR')
+    from app.services.workspaces import list_org_mentors
+    return {'contract_id': 'API-087-MENTORS', 'organization_id': str(org),
+            'items': list_org_mentors(str(org), limit=limit)}

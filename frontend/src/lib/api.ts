@@ -1101,6 +1101,7 @@ export interface DailyLogTaskItem {
   minutes: number;
   start_minute?: number | null;
   end_minute?: number | null;
+  evidence_count?: number;
 }
 
 export interface DailyLogItem {
