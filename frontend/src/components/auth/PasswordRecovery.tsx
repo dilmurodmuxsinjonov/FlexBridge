@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import TelegramVerification, { type TelegramMode } from "@/components/TelegramVerification";
 import { fetchAuthChallengeStatus, fetchAuthOptions } from "@/lib/api";
+import { resendAuthChallenge } from "@/lib/authSecurity";
 import { describeLoginError } from "@/lib/errors";
 import {
   RecoveryError,
@@ -164,8 +165,20 @@ export default function PasswordRecovery() {
       if (res.telegram_bot_username) setBotUsername(res.telegram_bot_username);
       setTelegramVerified(false);
       setCode("");
-      setResendIn(res.resend_after || 60);
+      setResendIn(res.resend_after ?? 60);
       setStep("code");
+    });
+
+  const resendCode = () =>
+    run(async () => {
+      if (!challengeId) return;
+      const res = await resendAuthChallenge(challengeId, "RECOVERY");
+      setChallengeId(res.challenge_id);
+      setDeepLink(res.telegram_deep_link ?? null);
+      if (res.telegram_bot_username) setBotUsername(res.telegram_bot_username);
+      setTelegramVerified(false);
+      setCode("");
+      setResendIn(res.resend_after ?? 60);
     });
 
   const checkCode = (value: string) =>
@@ -397,7 +410,7 @@ export default function PasswordRecovery() {
                   <button
                     type="button"
                     disabled={busy || resendIn > 0}
-                    onClick={() => void sendCode()}
+                    onClick={() => void (challengeId ? resendCode() : sendCode())}
                     className="self-center text-xs font-medium text-[var(--fb-ink-secondary)] underline-offset-2 hover:underline disabled:no-underline disabled:opacity-60"
                   >
                     {resendIn > 0 ? `Qayta yuborish ${resendIn} soniyadan so‘ng` : "Kodni qayta yuborish"}

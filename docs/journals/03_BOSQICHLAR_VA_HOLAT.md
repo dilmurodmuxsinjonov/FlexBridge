@@ -277,3 +277,11 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - Frontend (`15` ta BFF route + UI): `PlacementLifecycleModal.tsx` (`employer/page.tsx` da Reja `API-050`, Mentor biriktiruvi/bekor qilish `API-087`, `ACTIVATE`/`CANCEL` qarori `API-088`, Mentor qabuli `API-051`), `PlacementCompletionControls.tsx` (`/nomzod/shartnomalar` va korxona modalida `API-049/052` + `API-X03`), `TaskEvidenceDrawer.tsx` (`/nomzod/kundalik` da `API-055` PDF dalil biriktirish), `/university` o‘qituvchi qabuli (`TEACHER`, `API-051`) hamda ilmiy rahbarlik yaratish va biriktiruvni bekor qilish, `PhaseCLifecycle.test.tsx`.
 - **Tekshiruv**: Backend Pytest **17/17 (`55.19s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **32/32 (`193/193`)**, `next build` OK (`107/107`), `check_publish.py` `errors: []` (`1464` fayl), `check_master_protocol.py` PASS. (Docker Desktop host qayta yuklashdan keyin o‘chirilgan holda qolgan; CI da to‘liq tekshiriladi.)
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-202 | PR -> Passkeys (WebAuthn), Qo‘shimcha Aloqalar (`me/contacts`) & `API-021` Qayta Yuborish UI (Phase D)
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #287 (`603531c`) birlashtirilgach Phase D yakunlandi.
+- **Bajarildi (`feature/passkey-and-contacts-ux`, baza `603531c`)**:
+  - Backend: `GET /api/v1/me/security` da faol `PASSKEY` metadata (`passkeys`, `passkeys_count`), `test_phase_d_security_read_models.py`.
+  - Frontend (`6` yangi + `2` yangilangan BFF route + UI): `webauthn.ts`, `authSecurity.ts`, `PasskeysPanel.tsx` va `ContactsPanel.tsx` (`/nomzod/xavfsizlik`), `LoginPanel.tsx` (Passkey bilan kirish va MFA tasdiqlash), `PasswordRecovery.tsx` hamda 4 ta ro‘yxatdan o‘tish sahifasida `API-021` `resendAuthChallenge`, `PhaseDSecurityAndAuth.test.tsx`.
+- **Tekshiruv**: Backend Pytest **46/46 (`69.78s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **33/33 (`197/197`)**, `next build` OK (`111/111`), `check_publish.py` `errors: []` (`1465` fayl), `check_master_protocol.py` PASS.
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).

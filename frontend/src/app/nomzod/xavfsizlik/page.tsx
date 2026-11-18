@@ -35,6 +35,8 @@ import {
   ActiveSessionItem,
 } from "@/lib/api";
 import { SkeuoStatCard } from "@/components/skeuo/SkeuoPrimitives";
+import PasskeysPanel from "@/components/security/PasskeysPanel";
+import ContactsPanel from "@/components/security/ContactsPanel";
 
 export default function CandidateSecurityPage() {
   const router = useRouter();
@@ -445,6 +447,17 @@ export default function CandidateSecurityPage() {
             </p>
           </div>
         </div>
+
+        {/* ------------------------------------------------------------------- */}
+        {/* SECTION 2B & 2C: PASSKEYS & VERIFIED CONTACTS                      */}
+        {/* ------------------------------------------------------------------- */}
+        <PasskeysPanel
+          passkeys={securityData?.passkeys ?? []}
+          totpEnabled={Boolean(securityData?.totp_enabled)}
+          onUpdated={loadSecurityOverview}
+        />
+
+        <ContactsPanel totpEnabled={Boolean(securityData?.totp_enabled)} />
 
         {/* ------------------------------------------------------------------- */}
         {/* SECTION 3: ACTIVE SESSIONS & DEVICES (API-061) */}
