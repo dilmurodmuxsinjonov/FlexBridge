@@ -26,7 +26,9 @@ const LABELS: Record<string, string> = {
   // Availability
   AVAILABLE: "Bo‘sh",
   UNAVAILABLE: "Band",
-  // Organization / institution roles
+  // Organization / institution / base roles
+  CANDIDATE: "Nomzod",
+  STUDENT: "Talaba",
   OWNER: "Asosiy egasi",
   OPERATOR: "Operator",
   AUDITOR: "Auditor",

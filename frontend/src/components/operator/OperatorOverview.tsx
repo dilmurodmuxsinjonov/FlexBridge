@@ -375,7 +375,9 @@ function SuperAdminQuickGrid(props: OperatorOverviewProps) {
 export default function OperatorOverview(props: OperatorOverviewProps) {
   const today = props.today ?? new Date();
   const v = props.visible;
-  const roleLabel = props.roles.length ? props.roles.map((r) => enumLabel(r)).join(", ") : "Operator";
+  const platformRoles = props.roles.filter((r) => r.toUpperCase() !== "CANDIDATE");
+  const visibleRoles = platformRoles.length ? platformRoles : props.roles;
+  const roleLabel = visibleRoles.length ? visibleRoles.map((r) => enumLabel(r)).join(", ") : "Operator";
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
