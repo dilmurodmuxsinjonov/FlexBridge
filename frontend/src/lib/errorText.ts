@@ -99,6 +99,16 @@ const MESSAGES: Record<string, string> = {
   INSUFFICIENT_LOGGED_MINUTES: "Minimal talab qilingan soatlar bajarilmagan — muddatidan oldin yakunlash sababini kiriting.",
   PLACEMENT_NOT_ACTIVE: "Bu amal faqat faol amaliyot (ACTIVE) holatida bajariladi.",
   PLACEMENT_ALREADY_COMPLETED: "Amaliyot allaqachon yakunlangan.",
+  PASSKEY_CONFIGURATION_REQUIRED: "Serverda Passkey (WebAuthn) RP sozlamalari yoqilmagan.",
+  PASSKEY_VERIFICATION_FAILED: "Passkey tasdig‘i muvaffaqiyatsiz tugadi. Qayta urinib ko‘ring.",
+  PASSKEY_SCOPE_FORBIDDEN: "Ushbu Passkey boshqa hisobga tegishli.",
+  PASSKEY_NOT_FOUND: "Passkey topilmadi yoki allaqachon bekor qilingan.",
+  PASSKEY_CREDENTIAL_REQUIRED: "Brauzerdan Passkey tasdig‘i olinmadi.",
+  WEBAUTHN_UNSUPPORTED: "Joriy brauzer yoki qurilma Passkey (WebAuthn) ni qo‘llab-quvvatlamaydi.",
+  WEBAUTHN_CANCELLED: "Passkey tasdig‘i bekor qilindi.",
+  CONTACT_SCOPE_FORBIDDEN: "Faqat o‘zingizning hisobingizga aloqa manzilini bog‘lashingiz mumkin.",
+  CONTACT_BIND_FAILED: "Aloqa manzilini bog‘lashda xatolik yuz berdi.",
+  CHALLENGE_RESEND_FAILED: "Kod qayta yuborilmadi. Taymer tugashini kuting.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

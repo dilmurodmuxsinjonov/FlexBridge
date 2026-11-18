@@ -4100,11 +4100,21 @@ export interface ActiveSessionItem {
   is_current: boolean;
 }
 
+export interface PasskeyItemSummary {
+  id: string;
+  device_type?: string | null;
+  backed_up?: boolean;
+  created_at?: string | null;
+  last_used_at?: string | null;
+}
+
 export interface UserSecurityOverview {
   ok: boolean;
   user_id: string;
   totp_enabled: boolean;
   recovery_codes_count: number;
+  passkeys_count?: number;
+  passkeys?: PasskeyItemSummary[];
   current_session_id: string;
   sessions: ActiveSessionItem[];
   contract_id?: string;

@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Fingerprint,
   KeyRound,
   Loader2,
   LogOut,
@@ -19,7 +20,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { fetchAuthMe, loginUser, logoutUser, verifyMfa, type AuthUser } from "@/lib/api";
+import { finishPasskeyLogin, startPasskeyLogin } from "@/lib/authSecurity";
+import { humanizeMessage } from "@/lib/errorText";
 import { describeLoginError } from "@/lib/errors";
+import { getPasskeyAssertion } from "@/lib/webauthn";
 import {
   isAcademicRoles,
   isEmployerRoles,
@@ -231,6 +235,23 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
     }
   };
 
+  const submitPasskey = async (ticket?: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const opts = await startPasskeyLogin(ticket);
+      const assertion = await getPasskeyAssertion(opts.public_key);
+      const verified = await finishPasskeyLogin(opts.ceremony_token, assertion, config.portal);
+      goToDashboard(Array.isArray(verified.roles) ? verified.roles : []);
+    } catch (err: unknown) {
+      const raw = err instanceof Error ? err.message : null;
+      const code = (err as { code?: string })?.code;
+      setError(code ? describeLoginError(code) : humanizeMessage(raw));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const switchAccount = async () => {
     await logoutUser();
     setWrongRoleUser(null);
@@ -390,6 +411,15 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
                   {busy ? "Tekshirilmoqda…" : "Tasdiqlash"}
                 </button>
               </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void submitPasskey(mfaTicket || undefined)}
+                className="skeuo-btn-secondary w-full rounded-2xl px-4 py-2.5 text-xs font-semibold disabled:opacity-60"
+              >
+                <Fingerprint className="h-4 w-4" aria-hidden="true" />
+                Yoki Passkey bilan tasdiqlash
+              </button>
             </motion.form>
           ) : (
             <motion.form key="password" {...fade} onSubmit={submitPassword} className="flex flex-col gap-4" noValidate>
@@ -455,6 +485,16 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
                 {busy || redirecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 {busy ? "Tekshirilmoqda…" : redirecting ? "Ochilmoqda…" : config.submitLabel}
                 {!busy && !redirecting && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+              </button>
+
+              <button
+                type="button"
+                disabled={busy || redirecting}
+                onClick={() => void submitPasskey()}
+                className="skeuo-btn-secondary w-full rounded-2xl px-4 py-3 text-sm font-semibold disabled:opacity-60"
+              >
+                <Fingerprint className="h-4 w-4" aria-hidden="true" />
+                Passkey bilan kirish
               </button>
             </motion.form>
           )}

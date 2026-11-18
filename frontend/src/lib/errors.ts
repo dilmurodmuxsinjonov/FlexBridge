@@ -39,6 +39,12 @@ const LOGIN_ERROR_MESSAGES: Record<string, string> = {
   PASSWORD_TOO_SHORT: "Parol kamida 12 ta belgidan iborat bo‘lishi kerak.",
   INVALID_INPUT: "Kiritilgan ma’lumotlar to‘liq emas yoki noto‘g‘ri.",
   RECOVERY_FAILED: "Parolni tiklab bo‘lmadi. Birozdan so‘ng qayta urinib ko‘ring.",
+  PASSKEY_CONFIGURATION_REQUIRED: "Serverda Passkey (WebAuthn) sozlamalari yoqilmagan.",
+  PASSKEY_VERIFICATION_FAILED: "Passkey tasdig‘i muvaffaqiyatsiz tugadi. Qayta urinib ko‘ring.",
+  PASSKEY_CREDENTIAL_REQUIRED: "Brauzerdan Passkey tasdig‘i olinmadi.",
+  WEBAUTHN_UNSUPPORTED: "Joriy brauzer Passkey (WebAuthn) ni qo‘llab-quvvatlamaydi.",
+  WEBAUTHN_CANCELLED: "Passkey tasdig‘i bekor qilindi.",
+  CHALLENGE_RESEND_FAILED: "Kod qayta yuborilmadi. Taymer tugashini kuting.",
 };
 
 /**
