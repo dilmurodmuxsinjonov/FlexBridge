@@ -1,16 +1,16 @@
 # FlexBridge — texnik modellar va vositalar
 
-## Joriy holat (2026-11-17, LOG-196)
+## Joriy holat (2026-11-19, LOG-204)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `b5be16a` (PR #278, animatsiyalar 3x tez; main'da yo'q — main 1964324 holatida).
-- **main**: 2026-11-17 da foydalanuvchining aniq ruxsati bilan bir marta yangilandi — PR #279 (merge `03c09cb`, daraxti integration `1964324` bilan aynan bir xil; foydalanuvchi pre-push hook'ni chetlab o'tmasdan "GitHub PR orqali" yo'lini tanladi). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. Muzlatish `03c09cb` dan qayta amal qiladi — keyingi har bir main o'zgarishi uchun yangi aniq ruxsat kerak.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`7b81e56`). Joriy ish branchi: `fix/teacher-and-mentor-assignment-flows` (PR `integration/r1-agent-collaboration` ga).
+- **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279).
-- **Staging**: 2026-11-17 da `1964324` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
-- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
+- **So'nggi ishlar**: **LOG-204 (`fix/teacher-and-mentor-assignment-flows`)**: OTM o‘qituvchisi va Korxona mentori tayinlash E2E tuzatishlari (`application_hr.py` `latest_offer`/`placement_id`, `candidate_applications.py` `status == "VERIFIED"`, `institution_onboarding.queue` `institution_name`+`assigned_reviewer_id`, `POST /api/bff/employer/placements`, `/employer` `ACADEMIC_INTERNSHIP`+`Amaliyot ochish`, `/nomzod/arizalar` `OFFERED`/`PENDING` qabul tugmasi, `/operator` `unassigned+assigned` navbat, `/university` real `student_supervisions.id`); **LOG-203 (`PR #291` -> `7b81e56`)**: Phase E R1 oqimlari; **LOG-202 (`PR #289` -> `c0dba37`)**: Passkeys WebAuthn + `me/contacts` + `API-021`.
+- **Staging**: 2026-11-19 da `fix/teacher-and-mentor-assignment-flows` dan qayta qurilgan (`flexbridge-r1`, `9` ishchi konteyner `Up/Healthy`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`). Pytest **96/96 PASSED (`227.39s`, PG `55440`)**, `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, Vitest **34/34 (`201/201`)**, `tsc --noEmit` 0, `eslint --max-warnings=0` 0, `next build` (`112/112`) OK, Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**).
+- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
+- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 ## Joriy texnik stek (qisqa xulosa, 2026-11-17)
@@ -143,6 +143,16 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
   - **Responsive Grid & Bento Pods**: Fixed `390px` horizontal overflow (`min-w-0` + `flex-wrap`) in `page.tsx`, fit mobile capsule dock inside `390px` (`Navbar.tsx`), added live `Katalog balansi` toggle/cylinder Bento pod (`/`) and 5-tube `HR Reyting Indeksi` (`/nomzod`), and decoupled horizontal `SkeuoStatCard` strips from vertical meters/feeds/charts across `/nomzod`, `/employer`, `/university`, and `/operator`.
 - **Verification**: `npx tsc --noEmit` (0 errors), `npx eslint` on core/public/auth files (0 errors, 0 warnings), Docker `frontend` rebuild, Playwright Edge visual + contrast verification (`1440x900` Light/Dark + `390x844` Mobile `scrollWidth=390`), `scripts/run_all_staging_tests.py` (**36/36 PASSED in 124.8s**). Frozen-main constraint retained (`integration/r1-agent-collaboration`).
 
+## LOG-198 — Pre-auth Bosh sahifa (/ + /elonlar), Role Authority Matrix, Super Admin (ADMIN) & Tezlik Optimizatsiyasi (2026-11-18)
+
+- **Contracts & Auth Architecture**:
+  - Added `API-126`..`API-135` (`backend/app/services/platform_admin.py`, `backend/app/api/v1/platform_admin.py`, `contracts/r1_api_matrix.csv`, `backend/app/core/iam_http.py`) with strict self-grant/self-revoke/last-admin guards and masked contact directory listings.
+  - Added idempotent CLI `backend/scripts/bootstrap_super_admin.py` using non-login System Authority anchor (`00000000-0000-0000-0000-000000000001`) + `ROLE_AUTHORITY_MATRIX.md`.
+- **Frontend & Performance**:
+  - Split pre-auth Monochrome Bento Bosh sahifa (`/`) and `/elonlar` catalog (`VacancyCard.tsx`); fixed `LoginPanel.tsx` SSR portal isolation via `<RedirectParamReader>`; added 14 operator BFF routes + 4 `/operator` Super Admin panels.
+  - Added `fetchAuthMe` 5s TTL + in-flight dedup (`api.ts`), stopped `fb-liquid-drift` and inline `backdrop-filter: blur` stacking (`37 -> 4`), removed `InteractionLayer` forced reflow, added `<Link prefetch={false}>`, `backend/Dockerfile --workers 2`, and `390px` mobile header compaction.
+- **Verification**: Pytest `83/83` (port `55440`), ESLint `0`, `tsc` `0`, Vitest `29/29` (`184/184`), `next build` OK, `check_publish.py` `errors: []`, `run_all_staging_tests.py` `36/36 PASSED (144.41s)`, Edge Playwright Light/Dark/`390x844` + Super Admin TOTP E2E (`authMeCalls: 1`, `requests: 72->24`, `networkIdle: 1346ms->751ms`).
+
 
 ## Arxiv: vazifa bo'yicha texnik qarorlar
 
@@ -176,4 +186,9 @@ Quyidagi bo'limlar [archive/02_texnik_qarorlar_2026-11-07_11.md](archive/02_texn
 - SUPPORT-API063-064-TICKETS — User Support Tickets & Messaging (2026-11-10)
 - SAVED-OPPORTUNITIES-API004-037-038 — Candidate Saved Opportunities (2026-11-10)
 - OPPORTUNITY-API005-NOTIFICATIONS-API031 — Opportunity Details & Notification Inbox (2026-11-11)
+- PLACEMENT-PHASE-C-MENTOR-READ-MODELS — Host Organization Mentors (`GET /organizations/{org}/mentors`), Placement Mentor Assignments (`GET /placements/{id}/mentor-assignments`), Bilateral Closure/Export (`API-049/052`), Diary Evidence (`API-055`) & Academic Supervision Lifecycle (`LOG-201`, 2026-11-18)
+- IAM-PHASE-D-PASSKEYS-CONTACTS-RESEND — `/me/security` Safe Passkeys Metadata List (`id, device_type, backed_up`), WebAuthn Login/MFA/Enrollment/Revocation UI, Secondary Contact Binding (`GET/POST /me/contacts`) & `API-021` Challenge Resend (`LOG-202`, 2026-11-18)
+- PHASE-E-REMAINING-R1-FLOWS — `workspaces.py` Rejected Opportunity Action/Appeal Read Model, `confirm-start` UI, `academic-requests` UI, `API-003` Schedule Match Preview (`/api/bff/matching/preview`), Candidate Enrollment Resubmission (`EnrollmentResubmitModal`), Employer Appeal (`RejectedAppealModal`) & `PasskeysPanel` `useSyncExternalStore` SSR Fix (`LOG-203`, 2026-11-19)
+- TEACHER-MENTOR-ASSIGNMENT-FLOWS — `application_hr.py` `latest_offer`/`placement_id`, `candidate_applications.py` `VERIFIED` enrollment status check, `institution_onboarding.py` `queue` metadata + `/operator` queue merge & `INSTITUTION_APPOINTMENT` label, `POST /api/bff/employer/placements`, `/employer` `ACADEMIC_INTERNSHIP` + `Amaliyot ochish`, `/nomzod/arizalar` `OFFERED`/`PENDING` buttons & `/university` real `student_supervisions.id` lookup (`LOG-204`, 2026-11-19)
+- REMAINING-E2E-UX-READ-MODELS — `placement_admission.py` (`plan` `candidate_accepted_at`/`host_accepted_at`, `own_placements` & `host_placements` `academic_track`/`opportunity_title`/`organization_name`, `own_mentor_assignments` `consented_current_terms`), `academic_admission.py` (`own_assignments` `consented_current_terms`), `academic_views.py` (`review_queue` `NOT EXISTS academic_log_reviews`), `roles.ts` (`hasOrgManagementRole`), `nomzod/shartnomalar/page.tsx`, `employer/page.tsx`, `university/page.tsx`, `DraftOpportunityEditorModal.tsx` (`LABOR_PART_TIME`) & `AcademicReviewModal.tsx` (`APPROVED` badge) (`LOG-205`, 2026-11-19)
 - Eski «Current LOG-…» qatorlari (36 ta): [archive/02_joriy_holat_tarixi.md](archive/02_joriy_holat_tarixi.md)

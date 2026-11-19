@@ -1,16 +1,16 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-17, LOG-196)
+## Joriy holat (2026-11-19, LOG-206)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` — `b5be16a` (PR #278, animatsiyalar 3x tez; main'da yo'q — main 1964324 holatida).
-- **main**: 2026-11-17 da foydalanuvchining aniq ruxsati bilan bir marta yangilandi — PR #279 (merge `03c09cb`, daraxti integration `1964324` bilan aynan bir xil; foydalanuvchi pre-push hook'ni chetlab o'tmasdan "GitHub PR orqali" yo'lini tanladi). Eski main `764fb98` zaxirada: branch `backup/main-2026-11-17-764fb98`, tag `main-backup-2026-11-17`, `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`. Muzlatish `03c09cb` dan qayta amal qiladi — keyingi har bir main o'zgarishi uchun yangi aniq ruxsat kerak.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`release/main-2026-11-19` orqali `integration/r1-agent-collaboration` `f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295 holati ko‘chirilmoqda). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+- **Zaxira & tarix**: oldingi `main` (`2018d7b`, PR #281) uchun `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b`, bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` saqlangan (`764fb98` va `03c09cb` zaxiralari ham mavjud); `integration/r1-agent-collaboration` tarix sifatida qoldirildi. Pre-push hook o‘z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-185 universitet ichki tablari va operator bento (#258); LOG-186 e'lonlar moderatsiyasi navbati (#260); LOG-187 staging E2E'dan topilgan xabar/yorliq tuzatishlari (#262); LOG-188 «qurilma» dizayni barcha oynalarda (#264); LOG-189 tugmalar, harakatlar va animatsiyalar qatlami (#266); LOG-190 hujjatlarni bo'limlarga ajratish (#268); LOG-191 pastki kapsulada suyuqlik oqimi effekti (#270); LOG-192 suyuqlik ortidan tomchisimon iz (#272); LOG-193 tugmalar bo'rtiq va shaffof suyuq shisha (#274); LOG-194 o'tish animatsiyasi tezlashtirildi (#276); LOG-195 barcha animatsiyalar 3 barobar tez (#278); LOG-196 main 1964324 holatiga o'tkazildi (#279).
-- **Staging**: 2026-11-17 da `1964324` dan qayta qurilgan (`flexbridge-r1`, frontend 127.0.0.1:3000, backend 127.0.0.1:8000). 4 rolli brauzer E2E 21/23 (2 tasi kutilgan biznes tekshiruvi), harakat o'lchovi 11/11, 24 skrinshot toza. Tartib: `docs/operations/STAGING_VA_E2E.md`.
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona e'lonni UI orqali nashr qila olmaydi; `infra/.env` kalitlarini almashtirish (foydalanuvchi o'zi bajaradi); staging `.env` da `BFF_SESSION_SECRET` va `TELEGRAM_BOT_TOKEN` yo'q.
-- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; frontend ishi — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend ishi — `backend/AGENTS.md` + `docs/backend/README.md`.
+- **So'nggi ishlar**: **LOG-204** (PR #293 `a9ea1aa`, OTM o‘qituvchi & korxona mentor tayinlash E2E + 5 nuqson tuzatishi); **LOG-205** (PR #295 `f3f5469`, qolgan R1 oqimlar E2E + 7 nuqson tuzatishi); **LOG-206 (`Q-017`)**: `main` muzlatishini yechib `f3f5469` ni `main` ga o‘tkazish va `main` ish tartibiga o‘tish.
+- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda. `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, Vitest **34/34 (`203/203`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112` marshrut) OK, Pytest (`Test-Backend.ps1` **1737 passed**, `0` assert fail + MinIO/basetemp bilan **19/19 PASSED**; `LOG-205` targeted **14/14**; PR #295 CI **6/6** yashil), Edge E2E (**21/21** va **17/17 PASSED**, `0 pageErrors`).
+- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish, `BFF_SESSION_SECRET` sozlash va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; `R2` frilanserlik (`Q-011`) hozircha o‘chirilgan (`R2_FREELANCE_MARKETPLACE=False`).
+- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
@@ -234,3 +234,90 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - **Zaxira**: branch `backup/main-2026-11-17-764fb98`, annotated tag `main-backup-2026-11-17`, oflayn bundle `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle` (`git bundle verify` OK).
 - **Tekshiruv**: integration'da `1964324` uchun exact-head CI (backend, frontend build, protocol) yashil; PR #279 ning o'z CI'si 6/6 yashil; staging `1964324` dan qayta qurilgan (4 rol kirdi, harakat 11/11).
 - **Keyin**: `release/main-2026-11-17` branch'i qayd uchun qoldirildi. #278 (3x animatsiya) faqat integration'da. AGENTS.md ga o'tkazish yozuvi qo'shildi; muzlatish `03c09cb` dan qayta amal qiladi.
+
+### 2026-11-17 | LOG-197 | PR #281 -> staging va main integration ab33277 holatiga yangilandi
+- **Holat**: **BAJARILDI**. Foydalanuvchi: "staging'ni integration'ning yangi holatidan qayta qurish", keyin "mainni yangila".
+- **Staging**: `ab33277` dan qayta qurildi — migrate exit 0, 4/4 rol kirdi, E2E 21/23 (2 tasi kutilgan), harakat 11/11, pill korxona 163 ms / talaba 146 ms, 24 skrinshot toza.
+- **main**: oldingi `03c09cb` zaxiralandi (branch `backup/main-2026-11-17-03c09cb`, tag `main-backup-2026-11-17-03c09cb`, bundle `D:/Codex/FlexBridge-backups/main-03c09cb-2026-11-17.bundle`, verify OK); `release/main-2026-11-17b` (`ab33277` ga qotirilgan) -> PR #281 (CI 5/5 yashil) -> merge `2018d7b`; daraxt `ab33277` bilan aynan bir xil, oldingi main tarixda. Pre-push hook chetlab o'tilmadi.
+
+
+### 2026-11-18 | LOG-198 | PR -> Pre-auth Bosh sahifa (/ + /elonlar), Rol Vakolatlari, Super Admin (ADMIN) va Tezlik
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. Foydalanuvchi so'rovi: bosh sahifadan super admingacha qolib ketgan qismlarni to'ldirish, rollar ruxsatini kim berishini aniqlash, sekinlik va dizayn kamchiliklarini tuzatish, lokal faylni yangilash.
+- **Bajarildi (`feature/283-landing-superadmin-perf`)**:
+  - **Pre-auth Bosh sahifa (`/`) + `/elonlar`**: `/` alohida pre-auth Bosh sahifaga aylantirildi (`app/page.tsx`), barcha 4 rol kirish/kabinet havolalari saqlandi; to'liq qidiriladigan katalog `/elonlar` ga chiqarildi; `LoginPanel.tsx` `<RedirectParamReader>` izolyatsiyasi bilan `/kirish` va 4 izolyatsiyalangan portal kirishi SSR talablarini to'liq qondirdi.
+  - **Rol Ruxsatlari Matritsasi**: `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md` + UI (`StaffRolesPanel.tsx`, `roles.ts` — 16 `OperatorModule`). Har bir `SELF`, `ORG`, `INSTITUTION`, `PLATFORM` rolini kim tayinlashi va qanday cheklovi borligi aniq belgilandi.
+  - **Super Admin (`ADMIN`) + Governance navbatlari (`API-126`..`API-135`)**: `services/platform_admin.py`, `api/v1/platform_admin.py`, `scripts/bootstrap_super_admin.py`, 14 BFF route, `/operator` Bento panellari (`StaffRolesPanel`, `DirectoryPanel`, `FeatureFlagsPanel`, `GovernanceOpsPanel` — GDPR, OTP-siz recovery `PENDING_REVIEW`, apellyatsiyalar, vorislik, pilot-readiness/retention).
+  - **Tezlik va Mobil Dizayn**: `fetchAuthMe` 5s dedup kesh, `fb-liquid-drift` va 37 -> 4 ta `blurFilterEls`, `InteractionLayer` sinxron reflow olib tashlandi, `<Link prefetch={false}>`, `backend/Dockerfile` `--workers 2`, `390px` mobil `"Fle..."` clipping tuzatildi.
+- **Tekshiruv**: `run_all_staging_tests.py` **36/36 PASSED (`144.41s`)**, Vitest **29/29 (`184/184`)**, ESLint 0, `tsc` 0, `next build` OK, Backend Pytest **83/83** (port `55440`), `check_publish.py` `errors: []`, Edge Playwright Light/Dark/`390x844` + Super Admin E2E toza (`authMeCalls: 1`, `requests: 72->24`, `networkIdle: 1346ms->751ms`).
+- **`main`**: `2018d7b` da qat'iyan muzlatilgan (o'zgartirilmadi). PR #283 `integration/r1-agent-collaboration` ga birlashtirildi (`215eddf`).
+
+### 2026-11-18 | LOG-199 | PR -> Ochiq Tashkilot Profili (/tashkilot/[id]), Xizmatlar & Tariflar (/tariflar) va Shikoyat Modali
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. R1 shartnoma vs UI auditi asosida ochiq kashfiyot va ishonch oqimlari (`API-007`..`API-012`) yakunlandi.
+- **Bajarildi (`feature/public-org-pricing-reporting`, baza `215eddf`)**:
+  - `frontend/src/lib/server/proxy.ts` (`proxyPublic`) + 6 ta BFF route (`public/services`, `public/prices`, `organizations/[id]/public`, `organizations/[id]/opportunities`, `organizations/[id]/rating-summary`, `moderation-cases`).
+  - `frontend/src/lib/publicCatalog.ts` (`safeExternalWebsiteUrl`, BFF klientlar), `labels.ts`, `errorText.ts`.
+  - `/tashkilot/[id]` (`app/tashkilot/[id]/page.tsx`) — KYB tasdiqlangan korxona vitrinasi, n>=5 maxfiylik chegarali reyting va faol e’lonlar; `VacancyCard.tsx` va `/ishlar/[id]/page.tsx` dan tashkilot sahifasiga o‘tish havolalari.
+  - `/tariflar` (`app/tariflar/page.tsx`) — R1 faol xizmatlar, 2-bosqich chegarasi, 30 kunlik UZS tariflar va 24 soatlik qaytarish kafolati; `Footer.tsx` va `haqida/page.tsx` havolalari.
+  - `ModerationReportModal.tsx` va `/ishlar/[id]/page.tsx` Silk Skeuomorfik yorug‘/qorong‘i dizayn yangilanishi.
+- **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **30/30 (`188/188`)**, `next build` OK (`103/103`), `check_publish.py` `errors: []`, `run_all_staging_tests.py` **36/36 PASSED (`146.33s`)**, Edge Playwright `/tariflar`, `/tashkilot/[id]` (`Artel LLC`), `/ishlar/[id]` toza (`hScroll=false`, `errs=0`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-200 | PR -> Korxona Qoralama Tahriri (API-078..080), Rekvizit (API-071) & Vorislik Self-Service
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #284 (`e970174`) birlashtirilgach Phase B yakunlandi.
+- **Bajarildi (`feature/employer-draft-edit-and-continuity`, baza `e970174`)**:
+  - `frontend/src/lib/server/proxy.ts` (`readJsonObject`, `proxyJsonBody`, `PUT`), `opportunities/[id]/route.ts` (avtorizatsiyali `no-store`) + `14` ta BFF route (`draft{,/terms,/schedule}`, `organization/[org]{,/owner-requests,/owner-transfers,/owner-continuity{,/[id]/object}}`, `me/{contacts,owner-requests,owner-transfers,owner-continuity}`).
+  - `DraftOpportunityEditorModal.tsx` (`employer/page.tsx` Kanban toolbarida `DRAFT` e’lonlar uchun), `OwnerGovernancePanel.tsx` (`ORG_HUB` da `API-071` va egadorlik/vorislik), `employerGovernance.ts`, `DraftAndGovernance.test.tsx`.
+- **Tekshiruv**: ESLint 0, `tsc --noEmit` 0, Vitest **31/31 (`190/190`)**, `next build` OK (`106/106`), `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, `11/11` BFF `400/401`, Edge Playwright `/employer` (`hScroll=false`, `errs=0`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-201 | PR -> Amaliyot Hayotiy Sikli, Mentor/O‘qituvchi Qabuli, Kundalik Dalillari & OTM Rahbarlik UI (Phase C)
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #285 (`bd91187`) birlashtirilgach Phase C yakunlandi.
+- **Bajarildi (`feature/placement-completion-and-evidence`, baza `bd91187`)**:
+  - Backend: `GET /api/v1/organizations/{org}/mentors`, `GET /api/v1/placements/{id}/mentor-assignments` (`API-087`), `test_phase_c_mentor_read_models.py`.
+  - Frontend (`15` ta BFF route + UI): `PlacementLifecycleModal.tsx` (`employer/page.tsx` da Reja `API-050`, Mentor biriktiruvi/bekor qilish `API-087`, `ACTIVATE`/`CANCEL` qarori `API-088`, Mentor qabuli `API-051`), `PlacementCompletionControls.tsx` (`/nomzod/shartnomalar` va korxona modalida `API-049/052` + `API-X03`), `TaskEvidenceDrawer.tsx` (`/nomzod/kundalik` da `API-055` PDF dalil biriktirish), `/university` o‘qituvchi qabuli (`TEACHER`, `API-051`) hamda ilmiy rahbarlik yaratish va biriktiruvni bekor qilish, `PhaseCLifecycle.test.tsx`.
+- **Tekshiruv**: Backend Pytest **17/17 (`55.19s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **32/32 (`193/193`)**, `next build` OK (`107/107`), `check_publish.py` `errors: []` (`1464` fayl), `check_master_protocol.py` PASS. (Docker Desktop host qayta yuklashdan keyin o‘chirilgan holda qolgan; CI da to‘liq tekshiriladi.)
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-18 | LOG-202 | PR -> Passkeys (WebAuthn), Qo‘shimcha Aloqalar (`me/contacts`) & `API-021` Qayta Yuborish UI (Phase D)
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #287 (`603531c`) birlashtirilgach Phase D yakunlandi.
+- **Bajarildi (`feature/passkey-and-contacts-ux`, baza `603531c`)**:
+  - Backend: `GET /api/v1/me/security` da faol `PASSKEY` metadata (`passkeys`, `passkeys_count`), `test_phase_d_security_read_models.py`.
+  - Frontend (`6` yangi + `2` yangilangan BFF route + UI): `webauthn.ts`, `authSecurity.ts`, `PasskeysPanel.tsx` va `ContactsPanel.tsx` (`/nomzod/xavfsizlik`), `LoginPanel.tsx` (Passkey bilan kirish va MFA tasdiqlash), `PasswordRecovery.tsx` hamda 4 ta ro‘yxatdan o‘tish sahifasida `API-021` `resendAuthChallenge`, `PhaseDSecurityAndAuth.test.tsx`.
+- **Tekshiruv**: Backend Pytest **46/46 (`69.78s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **33/33 (`197/197`)**, `next build` OK (`111/111`), `check_publish.py` `errors: []` (`1465` fayl), `check_master_protocol.py` PASS.
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-203 | PR -> Jonli Staging Ishga Tushirish, Qolgan R1 Oqimlar (`Phase E`) & Passkeys Hidratatsiya Tuzatishi
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #289 (`c0dba37`) birlashtirilgach, jonli loyiha ishga tushirilib qolgan barcha R1 oqimlar yakunlandi.
+- **Bajarildi (`feature/r1-final-flows-and-staging`, baza `c0dba37`)**:
+  - Backend: `workspaces.py` (`list_org_opportunities`) da `REJECTED` vakansiyalar uchun `latest_rejection_action_id` va `latest_appeal` qo‘shildi; `test_phase_e_remaining_flows.py` yaratildi.
+  - Frontend (`5` BFF route + UI): `/ishlar/[id]` jadval mosligi (`API-003` `previewScheduleMatch`), `/nomzod` talabalik hujjatini qayta yuborish (`EnrollmentResubmitModal`), `/nomzod/shartnomalar` start tasdig‘i + OTM nazorati so‘rovi (`confirmPlacementStart`, `requestPlacementAcademicTrack`), `PlacementLifecycleModal` korxona tasdig‘i, `/employer` rad etilgan e’lon apellyatsiyasi (`RejectedAppealModal`), `PhaseEFlows.test.tsx`.
+  - Bug fix (Edge CDP): `PasskeysPanel.tsx` da SSR vs mijoz `isWebAuthnSupported()` nomuvofiqligi (`React #418`) `useSyncExternalStore` orqali bartaraf etildi.
+- **Tekshiruv**: Backend Pytest **27/27 (`59.62s`, PG `55440`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`200/200`) (`29.53s`)**, `docker compose -f infra/compose.yaml up -d --build` (`next build` `112/112` marshrut + `9` ishchi konteyner `Up/Healthy`), `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Edge CDP (`1440x900` + `390x844`, 12 marshrut / 24 render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-204 | PR -> OTM O‘qituvchisi va Korxona Mentori Tayinlash Oqimlari Tuzatishi & To‘liq Brauzer E2E
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. Foydalanuvchi savoli bo‘yicha avvalgi brauzer E2E da bajarilmagan har ikkala tayinlash zanjiri (OTM koordinatori -> OTM o‘qituvchisi; Korxona rahbari -> Korxona mentori) real Edge brauzerda bajarildi va topilgan 5 ta nuqson tuzatildi.
+- **Bajarildi (`fix/teacher-and-mentor-assignment-flows`, baza `7b81e56`)**:
+  - `backend/app/services/application_hr.py` (`GET /api/v1/applications/{id}/hr`): `latest_offer` va `placement_id` qo‘shildi; `frontend/src/app/api/bff/employer/placements/route.ts` ga `POST` handler + `placementLifecycle.ts` ga `createOrganizationPlacement`; `/employer` modaliga `ACADEMIC_INTERNSHIP` (`ACADEMIC_TRIPARTITE` / `UNPAID_ACADEMIC`) va `ACCEPTED` kartalarga `Amaliyot ochish` tugmasi qo‘shildi.
+  - `frontend/src/app/university/page.tsx` (`handleSubmitNomination`): `nominatePlacement.id` o‘rniga haqiqiy `student_supervisions.id` topib/yaratib (`fetchInstitutionSupervisions`, `fetchInstitutionAcademicAgreements`, `createStudentSupervision`) yuboradigan qilindi.
+  - Real Edge E2E paytida aniqlangan 3 ta nuqson: `candidate_applications.py` (`enrollments.status == "VERIFIED"`), `institution_onboarding.py` (`queue` + `institution_name` / `assigned_reviewer_id`) + `/operator` (`unassigned=true/false` birlashtirish, `current_revision`, `INSTITUTION_APPOINTMENT` yorlig‘i, bo‘sh navbatda `Yangilash`), hamda `nomzod/arizalar/page.tsx` (`OFFERED`/`ISSUED`/`PENDING` taklif tugmalari).
+  - Testlar: `backend/tests/security/test_teacher_mentor_assignment_read_models.py`, `PhaseEFlows.test.tsx`.
+- **Tekshiruv**: Backend Pytest **96/96 PASSED (`227.39s`, PG `55440`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`201/201`) PASSED (`26.91s`)**, `next build` OK (`112` marshrut), `docker compose -f infra/compose.yaml up -d --build` (`backend` va `frontend` `healthy`), Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**), `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, `check_publish.py` (`1467` fayl, `errors: []`) va `check_master_protocol.py`.
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-205 | PR -> Qolgan R1 Oqimlar To‘liq Brauzer E2E & Topilgan 7 Nuqson Tuzatishi
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR `#293` (`LOG-204`, `a9ea1aa`) birlashtirilgach, qolgan barcha R1 oqimlar (mentor qayta-rozilik, akademik amaliyot to‘liq sikli + 3-tomonlama E-Imzo + ikki tomonlama yakunlash & eksport, yarim stavka ish qoralama/suhbat/offer/engagement, rad etish apellyatsiyasi, shikoyat, saqlash va self-service) Edge brauzerda bajarilib topilgan 7 ta nuqson tuzatildi.
+- **Bajarildi (`fix/remaining-e2e-and-mentor-ux`, baza `a9ea1aa`)**:
+  - `placement_admission.py`: `plan` (`candidate_accepted_at`/`host_accepted_at`), `own_placements` & `host_placements` (`academic_track`, `opportunity_title`, `organization_name`, `created_at` va b.), `own_mentor_assignments` (`consented_current_terms`, `current_terms_version`, `placement_status`).
+  - `academic_admission.py`: `own_assignments` (`consented_current_terms`, `current_terms_version`, `placement_status`).
+  - `academic_views.py`: `review_queue` endi faol `academic_assignments` bo‘yicha allaqachon `academic_log_reviews` kiritilgan reviziyalarni chiqarib tashlaydi.
+  - Frontend: `lib/roles.ts` (`hasOrgManagementRole`), `employer/page.tsx` (`MENTOR`-only 403/404 IDOR banneri o‘rniga to‘g‘ridan-to‘g‘ri `MENTOR_HUB` + `v2` qayta rozilik), `university/page.tsx` (`v2` qayta rozilik), `nomzod/shartnomalar/page.tsx` (`candidate_accepted_at` da takroriy `confirm-start` yashirish), `DraftOpportunityEditorModal.tsx` (`LABOR_PART_TIME`/`PAID_INTERNSHIP_CONTRACT`), `AcademicReviewModal.tsx` (`APPROVED` qarori yashil tasdiq sifatida).
+  - Testlar: `test_teacher_mentor_assignment_read_models.py`, `PhaseEFlows.test.tsx`.
+- **Tekshiruv**: Backend targeted Pytest **14/14**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`203/203`) PASSED**, `next build` OK, Docker (`9` servis faol, `backend`/`frontend` HTTP `200`), Microsoft Edge E2E (**17/17 PASSED + `B5` 1-yugurishda, `0 pageErrors`**), `Test-Backend.ps1` (**1737 passed, `0 failed`, `10` muhit setup xatosi** — keyin o‘sha 2 fayl `MINIO_TEST_BINARY` + `--basetemp` bilan alohida **`19/19 PASSED (59.55s)`**), `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, `check_publish.py` (`1467` fayl, `errors: []`), `check_master_protocol.py` (`11/11` true).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-206 | release/main-2026-11-19 -> integration (f3f5469) ni main ga o‘tkazish va main da ishlash (Q-017)
+- **Holat**: **TAYYOR / PR KUTILMOQDA (`main` ga)**. Foydalanuvchining 2026-11-19 dagi aniq buyrug‘i (`"hozirdan boshlab ishlarni meinga kochirib bundan keyin brechga otishni buyutgunimcha meinda ishla"`) asosida `Q-015` dagi `main` muzlatishi yechildi (`Q-017`).
+- **Zaxira (`2018d7b`)**: oldingi `main` (`2018d7b92149417be45e4370ba0c445979e93a84`) branch `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b` va oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` (`git bundle verify` OK) bilan saqlandi.
+- **Ko‘chirish**: `release/main-2026-11-19` branchi `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) asosida yaratildi, `AGENTS.md` hamda 4 ta boshqaruv/handoff hujjati `Q-017` ga yangilandi, va tashqi `pre-push` hook buzilmasdan PR + CI orqali `main` ga birlashtiriladi.
+- **Qoida (`Q-017`)**: foydalanuvchi qayta branchga o‘tishni buyurguncha barcha keyingi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.

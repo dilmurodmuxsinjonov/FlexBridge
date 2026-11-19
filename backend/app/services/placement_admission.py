@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import select, text
+from sqlalchemy import exists, select, text
 from sqlalchemy.exc import OperationalError
 
 from app.core.audit import AppendOnlyAuditStore
@@ -355,39 +355,133 @@ class PlacementAdmissionService:
                 academic_scope={k:v for k,v in terms['terms_snapshot'].get('academic_scope',{}).items() if k in ('institution_id','purpose')},
                 title=terms['terms_snapshot'].get('title'), objectives=terms['terms_snapshot'].get('objectives'),
                 daily_limit_minutes=terms['daily_limit_minutes'], weekly_limit_minutes=terms['weekly_limit_minutes'],
-                required_minutes=terms['required_minutes'], tasks=tasks)
+                required_minutes=terms['required_minutes'], tasks=tasks,
+                candidate_accepted_at=terms['candidate_accepted_at'].astimezone(timezone.utc).isoformat()
+                if terms.get('candidate_accepted_at') else None,
+                host_accepted_at=terms['host_accepted_at'].astimezone(timezone.utc).isoformat()
+                if terms.get('host_accepted_at') else None)
 
     def own_placements(self, actor, *, limit=50, after=None):
         with transaction() as conn:
             account_authority(conn, actor)
             p, c = table('placements'), table('candidate_profiles')
-            query=select(p.c.id, p.c.organization_id, p.c.status,
-                p.c.start_date, p.c.end_date, p.c.current_terms_id).join(c, c.c.id == p.c.candidate_id)
-            query=query.where(c.c.user_id == actor.user_id)
-            return page(conn,query,p.c.id,p.c.created_at,limit=limit,after=after)
+            org, ofr, rev = table('organizations'), table('offers'), table('opportunity_revisions')
+            query = (
+                select(
+                    p.c.id,
+                    p.c.organization_id,
+                    org.c.public_name.label('organization_name'),
+                    rev.c.opportunity_id.label('opportunity_id'),
+                    rev.c.title.label('opportunity_title'),
+                    p.c.academic_track,
+                    p.c.status,
+                    p.c.start_date,
+                    p.c.end_date,
+                    p.c.current_terms_id,
+                    p.c.created_at,
+                )
+                .select_from(
+                    p.join(c, c.c.id == p.c.candidate_id)
+                    .join(org, org.c.id == p.c.organization_id)
+                    .join(ofr, ofr.c.id == p.c.offer_id)
+                    .join(rev, rev.c.id == ofr.c.revision_id)
+                )
+            )
+            query = query.where(c.c.user_id == actor.user_id)
+            return page(conn, query, p.c.id, p.c.created_at, limit=limit, after=after)
 
     def host_placements(self, actor, organization_id, *, limit=50, after=None):
         with transaction() as conn:
             get_row(conn, 'organizations', organization_id, True)
             account_authority(conn, actor)
             org_authority(conn, actor.user_id, organization_id, 'OWNER', 'HOST_COORDINATOR')
-            p = table('placements')
-            query=select(p.c.id,p.c.candidate_id,p.c.status,p.c.start_date,p.c.end_date,p.c.current_terms_id)
-            query=query.where(p.c.organization_id==organization_id)
-            return page(conn,query,p.c.id,p.c.created_at,limit=limit,after=after)
+            p, ofr, rev = table('placements'), table('offers'), table('opportunity_revisions')
+            query = (
+                select(
+                    p.c.id,
+                    p.c.application_id,
+                    p.c.offer_id,
+                    p.c.candidate_id,
+                    p.c.organization_id,
+                    p.c.enrollment_id,
+                    p.c.academic_track,
+                    rev.c.title.label('opportunity_title'),
+                    p.c.status,
+                    p.c.start_date,
+                    p.c.end_date,
+                    p.c.current_terms_id,
+                    p.c.created_at,
+                )
+                .select_from(
+                    p.join(ofr, ofr.c.id == p.c.offer_id)
+                    .join(rev, rev.c.id == ofr.c.revision_id)
+                )
+            )
+            query = query.where(p.c.organization_id == organization_id)
+            return page(conn, query, p.c.id, p.c.created_at, limit=limit, after=after)
 
     def own_mentor_assignments(self, actor, *, limit=50, after=None):
         with transaction() as conn:
             account_authority(conn, actor)
             a, q, m, g, r = (table(n) for n in ('mentor_assignments', 'mentor_assignment_proofs',
                                                'org_memberships', 'org_role_grants', 'role_catalog'))
-            query=select(a.c.id, a.c.placement_id, a.c.organization_id,
-                a.c.assigned_at, a.c.accepted_at).join(q, q.c.assignment_id == a.c.id).join(m, m.c.id == a.c.membership_id)
-            query=query.join(g,g.c.id==q.c.mentor_grant_id).join(r,r.c.id==g.c.role_id).where(
+            p, t, pc = table('placements'), table('placement_terms'), table('placement_consents')
+            query=select(
+                a.c.id, a.c.placement_id, a.c.organization_id,
+                a.c.assigned_at, a.c.accepted_at,
+                p.c.status.label('placement_status'),
+                t.c.version.label('current_terms_version'),
+                exists().where(
+                    pc.c.placement_id == a.c.placement_id,
+                    pc.c.terms_id == p.c.current_terms_id,
+                    pc.c.side == 'MENTOR',
+                    pc.c.assignment_id == a.c.id,
+                ).label('consented_current_terms'),
+            ).join(q, q.c.assignment_id == a.c.id).join(m, m.c.id == a.c.membership_id)
+            query=query.join(g,g.c.id==q.c.mentor_grant_id).join(r,r.c.id==g.c.role_id).join(
+                p, p.c.id == a.c.placement_id
+            ).join(
+                t, t.c.id == p.c.current_terms_id
+            ).where(
                     q.c.mentor_user_id == actor.user_id, m.c.user_id == actor.user_id,
                     g.c.membership_id == m.c.id, m.c.status == 'ACTIVE', m.c.revoked_at.is_(None),
                     g.c.revoked_at.is_(None), r.c.code == 'MENTOR', r.c.scope_kind == 'ORG', a.c.revoked_at.is_(None))
             return page(conn,query,a.c.id,a.c.assigned_at,limit=limit,after=after)
+
+    def mentor_assignments(self, *, actor, placement_id):
+        """Host view of active (non-revoked) mentor assignments on one placement (`API-087`)."""
+        with transaction() as conn:
+            placement, _ = self._locked(conn, placement_id)
+            self._host(conn, actor, placement, capability=False)
+            a, m, u = table('mentor_assignments'), table('org_memberships'), table('users')
+            rows = conn.execute(
+                select(
+                    a.c.id,
+                    a.c.placement_id,
+                    a.c.membership_id,
+                    m.c.user_id.label('mentor_user_id'),
+                    u.c.display_name,
+                    a.c.assigned_at,
+                    a.c.accepted_at,
+                )
+                .select_from(a.join(m, m.c.id == a.c.membership_id).join(u, u.c.id == m.c.user_id))
+                .where(a.c.placement_id == placement_id, a.c.revoked_at.is_(None))
+                .order_by(a.c.assigned_at.desc(), a.c.id)
+            ).mappings().all()
+            return {
+                'items': [
+                    {
+                        'id': str(r['id']),
+                        'placement_id': str(r['placement_id']),
+                        'membership_id': str(r['membership_id']),
+                        'mentor_user_id': str(r['mentor_user_id']),
+                        'display_name': r['display_name'] or 'Mentor',
+                        'assigned_at': r['assigned_at'].astimezone(timezone.utc).isoformat() if r['assigned_at'] else None,
+                        'accepted_at': r['accepted_at'].astimezone(timezone.utc).isoformat() if r['accepted_at'] else None,
+                    }
+                    for r in rows
+                ]
+            }
 
 
 admission_service = PlacementAdmissionService()

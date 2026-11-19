@@ -95,6 +95,7 @@ def confirm(payload:ConfirmMFA,actor:ActorContext=Depends(require_actor_context)
 
 @router.get('/me/security')
 def get_security_overview(actor:ActorContext=Depends(require_actor_context)):
+    import json
     from sqlalchemy import select, func
     with transaction() as conn:
         t_mfa = table('mfa_credentials')
@@ -112,6 +113,32 @@ def get_security_overview(actor:ActorContext=Depends(require_actor_context)):
             t_mfa.c.verified_at.is_not(None),
             t_mfa.c.revoked_at.is_(None)
         )).scalar() or 0
+
+        passkey_rows = conn.execute(select(
+            t_mfa.c.id,
+            t_mfa.c.public_key,
+            t_mfa.c.created_at,
+            t_mfa.c.updated_at,
+        ).where(
+            t_mfa.c.user_id == actor.user_id,
+            t_mfa.c.kind == 'PASSKEY',
+            t_mfa.c.verified_at.is_not(None),
+            t_mfa.c.revoked_at.is_(None),
+        ).order_by(t_mfa.c.created_at.desc())).mappings().all()
+
+        passkeys_list = []
+        for pk in passkey_rows:
+            try:
+                meta = json.loads(pk['public_key'] or '{}')
+            except Exception:
+                meta = {}
+            passkeys_list.append({
+                'id': str(pk['id']),
+                'device_type': meta.get('device_type') if isinstance(meta, dict) else None,
+                'backed_up': bool(meta.get('backed_up')) if isinstance(meta, dict) else False,
+                'created_at': pk['created_at'].isoformat() if pk['created_at'] else None,
+                'last_used_at': pk['updated_at'].isoformat() if pk['updated_at'] else None,
+            })
 
         t_sess = table('sessions')
         sessions_rows = conn.execute(select(
@@ -141,6 +168,8 @@ def get_security_overview(actor:ActorContext=Depends(require_actor_context)):
             'user_id': str(actor.user_id),
             'totp_enabled': totp_enabled,
             'recovery_codes_count': int(rec_count),
+            'passkeys_count': len(passkeys_list),
+            'passkeys': passkeys_list,
             'current_session_id': str(actor.session_id),
             'sessions': sessions_list
         }

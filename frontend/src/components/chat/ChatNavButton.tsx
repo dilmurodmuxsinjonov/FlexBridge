@@ -26,9 +26,10 @@ export default function ChatNavButton({ active }: { active: boolean }) {
   return (
     <Link
       href="/xabarlar"
+      prefetch={false}
       aria-label={unread ? `Xabarlar, ${unread} ta o‘qilmagan` : "Xabarlar"}
       aria-current={active ? "page" : undefined}
-      className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${active ? "fb-nav-active" : "skeuo-btn-secondary"}`}
+      className={`relative flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full ${active ? "fb-nav-active" : "skeuo-btn-secondary"}`}
     >
       <MessageCircle className="h-4 w-4" />
       {unread > 0 && (

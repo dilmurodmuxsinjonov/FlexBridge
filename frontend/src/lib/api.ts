@@ -220,6 +220,8 @@ type OpportunitySearch = {
   region?: string;
   is_paid?: boolean;
   after?: string;
+  /** Page size, 1–50 (default 12). */
+  limit?: number;
   signal?: AbortSignal;
 };
 
@@ -263,7 +265,11 @@ function isOpportunity(value: unknown): value is Opportunity {
 }
 
 export async function fetchOpportunities(params: OpportunitySearch = {}): Promise<OpportunityPage> {
-  const query = new URLSearchParams({ limit: "12" });
+  const limit =
+    params.limit !== undefined && Number.isInteger(params.limit)
+      ? Math.min(Math.max(params.limit, 1), 50)
+      : 12;
+  const query = new URLSearchParams({ limit: String(limit) });
   if (params.query) query.set("query", params.query);
   if (params.region) query.set("region", params.region);
   if (params.is_paid !== undefined) query.set("is_paid", String(params.is_paid));
@@ -300,9 +306,35 @@ export async function fetchOpportunities(params: OpportunitySearch = {}): Promis
 // Client BFF Methods
 // ---------------------------------------------------------------------------
 
+export const AUTH_CHANGED_EVENT = "flexbridge:auth-changed";
+
+/**
+ * `/api/auth/me` is read by the navbar, footer, portal layouts and pages at the
+ * same time. One in-flight request is shared and the answer is reused for a
+ * short window, so a page load costs one session round-trip instead of 2–4.
+ * Any login/logout/MFA or `flexbridge:auth-changed` event drops the cache.
+ */
+const AUTH_ME_TTL_MS = 5000;
+let authMeInFlight: Promise<AuthUser | null> | null = null;
+let authMeCached: { value: AuthUser | null; at: number } | null = null;
+let authMeGeneration = 0;
+
+export function clearAuthMeCache(): void {
+  authMeGeneration += 1;
+  authMeInFlight = null;
+  authMeCached = null;
+}
+
+if (typeof window !== "undefined") {
+  // Registered at module load, i.e. before any component listener, so pages
+  // that re-read the session on this event never see the stale answer.
+  window.addEventListener(AUTH_CHANGED_EVENT, clearAuthMeCache);
+}
+
 function notifyAuthChanged() {
+  clearAuthMeCache();
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("flexbridge:auth-changed"));
+    window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
   }
 }
 
@@ -367,7 +399,29 @@ export async function logoutUser(): Promise<void> {
   notifyAuthChanged();
 }
 
-export async function fetchAuthMe(): Promise<AuthUser | null> {
+export async function fetchAuthMe(options?: { force?: boolean }): Promise<AuthUser | null> {
+  if (options?.force) {
+    clearAuthMeCache();
+  } else {
+    if (authMeCached && Date.now() - authMeCached.at < AUTH_ME_TTL_MS) {
+      return authMeCached.value;
+    }
+    if (authMeInFlight) return authMeInFlight;
+  }
+  const generation = authMeGeneration;
+  const request = requestAuthMe().then((value) => {
+    // A login/logout that happened meanwhile wins over this older answer.
+    if (generation === authMeGeneration) {
+      authMeCached = { value, at: Date.now() };
+      authMeInFlight = null;
+    }
+    return value;
+  });
+  authMeInFlight = request;
+  return request;
+}
+
+async function requestAuthMe(): Promise<AuthUser | null> {
   try {
     const res = await fetch("/api/auth/me", {
       method: "GET",
@@ -839,6 +893,11 @@ export interface ApplicationHRDetailResponse {
     reason: string | null;
     occurred_at: string;
   }>;
+  latest_offer?: {
+    id: string;
+    status: string;
+  } | null;
+  placement_id?: string | null;
 }
 
 export interface ScheduleInterviewPayload {
@@ -1047,6 +1106,7 @@ export interface DailyLogTaskItem {
   minutes: number;
   start_minute?: number | null;
   end_minute?: number | null;
+  evidence_count?: number;
 }
 
 export interface DailyLogItem {
@@ -1184,6 +1244,7 @@ export interface OperatorVerificationCaseItem {
   entity_id?: string;
   entity_type?: string;
   revision?: number;
+  current_revision?: number;
   status?: string;
   due_at?: string;
   assigned_to_id?: string | null;
@@ -1770,6 +1831,9 @@ export interface TeacherAcademicAssignmentItem {
   institution_id: string;
   assigned_at: string;
   accepted_at: string | null;
+  consented_current_terms?: boolean;
+  current_terms_version?: number;
+  placement_status?: string;
   student_name?: string;
   organization_name?: string;
   status?: string;
@@ -1999,6 +2063,9 @@ export interface MentorAssignmentItem {
   assigned_at: string;
   accepted_at: string | null;
   revoked_at: string | null;
+  consented_current_terms?: boolean;
+  current_terms_version?: number;
+  placement_status?: string;
 }
 
 export interface OrganizationPlacementItem {
@@ -2196,6 +2263,8 @@ export interface PlacementPlanDetail {
   weekly_limit_minutes: number;
   required_minutes: number;
   tasks: PlacementPlanTask[];
+  candidate_accepted_at?: string | null;
+  host_accepted_at?: string | null;
 }
 
 export interface PlacementAcceptPayload {
@@ -3633,6 +3702,8 @@ export interface CandidateEnrollmentItem {
   start_date: string;
   end_date?: string | null;
   student_ref?: string | null;
+  case_status?: string | null;
+  revision?: number | null;
   current_student: boolean;
   reviewed: boolean;
   status: string;
@@ -3761,6 +3832,37 @@ export async function endCandidateEnrollment(
     throw err;
   }
   return data;
+}
+
+export interface ResubmitEnrollmentPayload {
+  expected_revision: number;
+  program: string;
+  start_date: string;
+  end_date?: string | null;
+  student_ref?: string | null;
+  file_ids: string[];
+  evidence_note: string;
+}
+
+export async function resubmitCandidateEnrollmentVerification(
+  id: string,
+  payload: ResubmitEnrollmentPayload
+): Promise<CandidateEnrollmentItem> {
+  const res = await fetch(`/api/bff/candidate/enrollments/${encodeURIComponent(id)}/verification`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(errorText(data, "ENROLLMENT_VERIFICATION_FAILED"));
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateEnrollmentItem;
 }
 
 export async function fetchVerifiedInstitutions(): Promise<VerifiedInstitutionItem[]> {
@@ -4045,11 +4147,21 @@ export interface ActiveSessionItem {
   is_current: boolean;
 }
 
+export interface PasskeyItemSummary {
+  id: string;
+  device_type?: string | null;
+  backed_up?: boolean;
+  created_at?: string | null;
+  last_used_at?: string | null;
+}
+
 export interface UserSecurityOverview {
   ok: boolean;
   user_id: string;
   totp_enabled: boolean;
   recovery_codes_count: number;
+  passkeys_count?: number;
+  passkeys?: PasskeyItemSummary[];
   current_session_id: string;
   sessions: ActiveSessionItem[];
   contract_id?: string;
@@ -5597,6 +5709,13 @@ export interface ManagedOpportunityItem {
   published_at: string | null;
   expires_at: string | null;
   created_at: string | null;
+  latest_rejection_action_id?: string | null;
+  latest_appeal?: {
+    case_id: string;
+    status: string;
+    decision?: string | null;
+    decision_reason?: string | null;
+  } | null;
 }
 
 export async function fetchManagedOpportunities(organizationId: string, status?: string): Promise<ManagedOpportunityItem[]> {

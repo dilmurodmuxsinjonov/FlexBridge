@@ -75,15 +75,24 @@ export default function AboutAndHelpPage() {
         </div>
 
         {/* Page Header */}
-        <div className="border-b border-white/[0.08] pb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Compass className="w-7 h-7 text-primary" />
-            FlexBridge v1.4: Tizim Me&apos;morchiligi & Foydalanuvchi Qo&apos;llanmalari
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-2 max-w-3xl leading-relaxed">
-            Talabalarning dars va ish jadvallarini daqiqama-daqiqa muvofiqlashtiruvchi, O&apos;zR Mehnat Kodeksi
-            118-moddasi (kunlik 8-soatlik chegara) va Oliy ta&apos;lim HEMIS tizimi bilan integratsiyalashgan ekotizim.
-          </p>
+        <div className="border-b border-white/[0.08] pb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+              <Compass className="w-7 h-7 text-primary" />
+              FlexBridge v1.4: Tizim Me&apos;morchiligi & Foydalanuvchi Qo&apos;llanmalari
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-2 max-w-3xl leading-relaxed">
+              Talabalarning dars va ish jadvallarini daqiqama-daqiqa muvofiqlashtiruvchi, O&apos;zR Mehnat Kodeksi
+              118-moddasi (kunlik 8-soatlik chegara) va Oliy ta&apos;lim HEMIS tizimi bilan integratsiyalashgan ekotizim.
+            </p>
+          </div>
+          <Link
+            href="/tariflar"
+            prefetch={false}
+            className="skeuo-btn-obsidian inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
+          >
+            <span>Xizmatlar & Tariflar</span>
+          </Link>
         </div>
 
         {/* Document Selector Tabs */}

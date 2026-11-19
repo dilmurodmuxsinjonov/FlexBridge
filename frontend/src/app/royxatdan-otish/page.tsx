@@ -34,6 +34,7 @@ import {
   fetchAuthMe,
 } from "@/lib/api";
 import { isOperatorRoles, resolvePortalDashboard } from "@/lib/roles";
+import { issueOrResendRegisterChallenge } from "@/lib/authSecurity";
 
 type RoleOption = "CANDIDATE" | "EMPLOYER" | "ACADEMIC" | "OPERATOR";
 type DeliveryMethodOption = "SMS" | "TELEGRAM";
@@ -107,6 +108,7 @@ function RoyxatdanOtishWizard() {
   const [otpCode, setOtpCode] = useState("");
   const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
+  const [lastChallengeKey, setLastChallengeKey] = useState<string | null>(null);
 
   // Telegram Bot Verification State
   const [telegramBotUsername, setTelegramBotUsername] = useState("FlexBridgeAuthBot");
@@ -337,9 +339,17 @@ function RoyxatdanOtishWizard() {
     setTelegramVerified(false);
 
     try {
-      const res = await issueAuthChallenge(channel, phone.trim(), "REGISTER", deliveryMethod);
+      const { res, nextKey } = await issueOrResendRegisterChallenge({
+        challengeId,
+        sentKey: lastChallengeKey,
+        channel,
+        destination: phone.trim(),
+        deliveryMethod,
+        issueFn: () => issueAuthChallenge(channel, phone.trim(), "REGISTER", deliveryMethod),
+      });
       if (res.ok && res.challenge_id) {
         setChallengeId(res.challenge_id);
+        setLastChallengeKey(nextKey);
         setResendTimer(res.resend_after || 60);
         if (res.telegram_bot_username) setTelegramBotUsername(res.telegram_bot_username);
         if (res.telegram_deep_link) setTelegramDeepLink(res.telegram_deep_link);

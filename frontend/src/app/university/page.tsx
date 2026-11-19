@@ -79,6 +79,13 @@ import SectionDock from "@/components/shell/SectionDock";
 import { initials } from "@/lib/person";
 import { enumLabel } from "@/lib/labels";
 import { useAsyncData } from "@/lib/useAsyncData";
+import {
+  acceptPlacementAssignment,
+  createStudentSupervision,
+  fetchPlacementPlanNeutral,
+  fetchSupervisionAssignments,
+  revokeAcademicAssignment,
+} from "@/lib/placementLifecycle";
 
 const PARA_PRESETS: Record<number, { start: string; end: string }> = {
   1: { start: "08:30", end: "09:50" },
@@ -112,6 +119,18 @@ export default function UniversityPortal() {
   const [assignments, setAssignments] = useState<TeacherAcademicAssignmentItem[]>([]);
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false);
   const [assignmentsError, setAssignmentsError] = useState<string | null>(null);
+  const [acceptingAssignmentId, setAcceptingAssignmentId] = useState<string | null>(null);
+  const [showNewSupForm, setShowNewSupForm] = useState(false);
+  const [supEnrollmentId, setSupEnrollmentId] = useState("");
+  const [supAgreementId, setSupAgreementId] = useState("");
+  const [supPurpose, setSupPurpose] = useState("ACADEMIC_VIEW");
+  const [supLegalBasis, setSupLegalBasis] = useState("O‘quv reja va dual ta’lim shartnomasi");
+  const [isCreatingSup, setIsCreatingSup] = useState(false);
+  const [expandedSupId, setExpandedSupId] = useState<string | null>(null);
+  const [supAssignmentsMap, setSupAssignmentsMap] = useState<
+    Record<string, Array<{ id: string; placement_id: string; supervisor_name?: string; accepted_at?: string | null; revoked_at?: string | null }>>
+  >({});
+  const [revokingAcademicId, setRevokingAcademicId] = useState<string | null>(null);
 
   // Placement Conclusion Modal State
   const [selectedPlacementId, setSelectedPlacementId] = useState<string | null>(null);
@@ -275,6 +294,72 @@ export default function UniversityPortal() {
       setIsLoadingInstDirectory(false);
     }
   }, []);
+
+  const handleAcceptTeacherAssignment = async (placementId: string, assignmentId: string) => {
+    setAcceptingAssignmentId(assignmentId);
+    setAssignmentsError(null);
+    try {
+      const plan = await fetchPlacementPlanNeutral(placementId);
+      await acceptPlacementAssignment(placementId, assignmentId, plan.terms_id, plan.version, "TEACHER");
+      await loadAssignments();
+    } catch (err: unknown) {
+      setAssignmentsError(err instanceof Error ? err.message : "Nazoratni qabul qilib bo‘lmadi.");
+    } finally {
+      setAcceptingAssignmentId(null);
+    }
+  };
+
+  const handleToggleSupAssignments = async (supervisionId: string) => {
+    if (expandedSupId === supervisionId) {
+      setExpandedSupId(null);
+      return;
+    }
+    setExpandedSupId(supervisionId);
+    try {
+      const items = await fetchSupervisionAssignments(supervisionId);
+      setSupAssignmentsMap((prev) => ({ ...prev, [supervisionId]: items }));
+    } catch (err: unknown) {
+      setSupervisionsError(err instanceof Error ? err.message : "Biriktiruvlarni yuklab bo‘lmadi.");
+    }
+  };
+
+  const handleCreateSupervision = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!institutionId || !supEnrollmentId.trim() || !supAgreementId.trim()) return;
+    setIsCreatingSup(true);
+    setSupervisionsError(null);
+    try {
+      await createStudentSupervision({
+        institution_id: institutionId,
+        enrollment_id: supEnrollmentId.trim(),
+        agreement_id: supAgreementId.trim(),
+        purpose: supPurpose,
+        legal_basis: supLegalBasis.trim() || "O‘quv reja va dual ta’lim shartnomasi",
+      });
+      setShowNewSupForm(false);
+      setSupEnrollmentId("");
+      await loadReportsAndAgreements(institutionId);
+    } catch (err: unknown) {
+      setSupervisionsError(err instanceof Error ? err.message : "Ilmiy rahbarlik ochilmadi.");
+    } finally {
+      setIsCreatingSup(false);
+    }
+  };
+
+  const handleRevokeAcademicAssignment = async (supervisionId: string, assignmentId: string) => {
+    setRevokingAcademicId(assignmentId);
+    setSupervisionsError(null);
+    try {
+      await revokeAcademicAssignment(assignmentId);
+      const items = await fetchSupervisionAssignments(supervisionId);
+      setSupAssignmentsMap((prev) => ({ ...prev, [supervisionId]: items }));
+      await loadAssignments();
+    } catch (err: unknown) {
+      setSupervisionsError(err instanceof Error ? err.message : "Biriktiruvni bekor qilib bo‘lmadi.");
+    } finally {
+      setRevokingAcademicId(null);
+    }
+  };
 
   const [newFacultyName, setNewFacultyName] = useState("");
   const [newFacultyDean, setNewFacultyDean] = useState("");
@@ -706,10 +791,31 @@ export default function UniversityPortal() {
     setNominateStatusMsg(null);
 
     try {
+      const existingSups = await fetchInstitutionSupervisions(institutionId);
+      const matchedSup = existingSups.find((s) => s.enrollment_id === nominatePlacement.enrollment_id);
+      let supervisionId = matchedSup?.id;
+      if (!supervisionId) {
+        const agreements = await fetchInstitutionAcademicAgreements(institutionId);
+        const activeAg = agreements[0];
+        if (!activeAg) {
+          throw new Error("Muassasa uchun faol akademik kelishuv (Platform agreement) topilmadi.");
+        }
+        const createdSup = await createStudentSupervision({
+          institution_id: institutionId,
+          enrollment_id: nominatePlacement.enrollment_id,
+          agreement_id: activeAg.id,
+          purpose: activeAg.purposes?.[0] || "ACADEMIC_VIEW",
+          legal_basis: "OTM akademik amaliyot rahbarligi tayinlovi",
+        });
+        supervisionId = typeof createdSup.id === "string" ? createdSup.id : "";
+      }
+      if (!supervisionId) {
+        throw new Error("Talaba uchun ilmiy rahbarlik (supervision) yozuvi topilmadi.");
+      }
       await assignTeacherToPlacement(nominatePlacement.placement_id, {
         institution_id: institutionId,
         supervisor_id: selectedTeacherId,
-        supervision_id: nominatePlacement.id,
+        supervision_id: supervisionId,
       });
 
       setNominateStatusMsg({
@@ -1201,7 +1307,10 @@ export default function UniversityPortal() {
             </div>
           ) : (
             <ul className="flex flex-col gap-2">
-              {assignments.map((assignment) => (
+              {assignments.map((assignment) => {
+                const needsConsent =
+                  !assignment.accepted_at || assignment.consented_current_terms === false;
+                return (
                 <li key={assignment.id} className="fb-file-row flex-wrap sm:flex-nowrap">
                   <span className="fb-avatar h-9 w-9 shrink-0 text-xs" aria-hidden="true">
                     {initials(assignment.student_name)}
@@ -1212,9 +1321,24 @@ export default function UniversityPortal() {
                       {[assignment.organization_name, `biriktirilgan ${new Date(assignment.assigned_at).toLocaleDateString("uz-UZ")}`].filter(Boolean).join(" · ")}
                     </span>
                   </span>
-                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${assignment.accepted_at ? "fb-nav-active" : "fb-capsule"}`}>
-                    {assignment.accepted_at ? "Nazoratda" : "Qabul kutmoqda"}
+                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${!needsConsent ? "fb-nav-active" : "fb-capsule"}`}>
+                    {!needsConsent
+                      ? "Nazoratda"
+                      : assignment.accepted_at
+                      ? "Yangi reja tasdig‘i kutilmoqda"
+                      : "Qabul kutmoqda"}
                   </span>
+                  {needsConsent && (
+                    <button
+                      type="button"
+                      disabled={acceptingAssignmentId === assignment.id}
+                      onClick={() => void handleAcceptTeacherAssignment(assignment.placement_id, assignment.id)}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {acceptingAssignmentId === assignment.id && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                      <span>{assignment.accepted_at ? "Yangi shartlarni tasdiqlash" : "Nazoratni qabul qilish"}</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleOpenConclusionModal(assignment.placement_id, assignment.id)}
@@ -1223,7 +1347,8 @@ export default function UniversityPortal() {
                     <Award className="h-3.5 w-3.5" /> Akademik xulosa
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>
@@ -1483,7 +1608,82 @@ export default function UniversityPortal() {
                       Ilmiy Rahbarliklar ({supervisions.length})
                     </h3>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!supAgreementId && academicAgreements[0]?.id) {
+                        setSupAgreementId(academicAgreements[0].id);
+                      }
+                      if (!supEnrollmentId && coordinatorQueue[0]?.enrollment_id) {
+                        setSupEnrollmentId(coordinatorQueue[0].enrollment_id);
+                      }
+                      setShowNewSupForm((prev) => !prev);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[11px] font-semibold text-white"
+                  >
+                    <Plus className="w-3 h-3" /> Yangi ilmiy rahbarlik
+                  </button>
                 </div>
+
+                {showNewSupForm && (
+                  <form onSubmit={handleCreateSupervision} className="p-3 rounded-lg bg-surface border border-white/[0.08] space-y-2.5 text-xs">
+                    <div className="grid grid-cols-1 gap-2">
+                      <input
+                        type="text"
+                        required
+                        value={supEnrollmentId}
+                        onChange={(e) => setSupEnrollmentId(e.target.value)}
+                        placeholder="Talaba ro‘yxatga olish ID (enrollment_id UUID)"
+                        className="px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white font-mono"
+                      />
+                      <select
+                        required
+                        value={supAgreementId}
+                        onChange={(e) => setSupAgreementId(e.target.value)}
+                        className="px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white"
+                      >
+                        <option value="">Platforma kelishuvini tanlang...</option>
+                        {academicAgreements.map((agr) => (
+                          <option key={agr.id} value={agr.id}>
+                            Kelishuv #{agr.id.slice(0, 8)} {agr.valid_to ? `(gacha ${agr.valid_to})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={supPurpose}
+                        onChange={(e) => setSupPurpose(e.target.value)}
+                        className="px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white"
+                      >
+                        <option value="ACADEMIC_VIEW">Akademik kuzatuv (ACADEMIC_VIEW)</option>
+                        <option value="INTERNSHIP_SUPERVISION">Amaliyot rahbarligi (INTERNSHIP_SUPERVISION)</option>
+                      </select>
+                      <input
+                        type="text"
+                        required
+                        value={supLegalBasis}
+                        onChange={(e) => setSupLegalBasis(e.target.value)}
+                        placeholder="Huquqiy asos"
+                        className="px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowNewSupForm(false)}
+                        className="px-3 py-1 rounded-lg bg-white/[0.06] text-zinc-300"
+                      >
+                        Bekor qilish
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isCreatingSup || !institutionId}
+                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold disabled:opacity-50"
+                      >
+                        {isCreatingSup ? "Saqlanmoqda..." : "Yaratish"}
+                      </button>
+                    </div>
+                  </form>
+                )}
 
                 {supervisionsError && (
                   <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
@@ -1501,23 +1701,63 @@ export default function UniversityPortal() {
                     Superviziyalar mavjud emas.
                   </div>
                 ) : (
-                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                    {supervisions.map((sup) => (
-                      <div
-                        key={sup.id}
-                        className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{sup.student_name || "Talaba"}</span>
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            {enumLabel(sup.purpose)}
+                  <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                    {supervisions.map((sup) => {
+                      const subItems = supAssignmentsMap[sup.id] || [];
+                      return (
+                        <div
+                          key={sup.id}
+                          className="p-3 rounded-lg bg-surface border border-white/[0.04] flex flex-col gap-1.5 text-xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-white">{sup.student_name || "Talaba"}</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                {enumLabel(sup.purpose)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => void handleToggleSupAssignments(sup.id)}
+                                className="px-2 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[10px] font-semibold text-zinc-200"
+                              >
+                                {expandedSupId === sup.id ? "Yopish" : "Biriktiruvlar"}
+                              </button>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-zinc-500">
+                            {sup.coordinator_accepted_at ? `Koordinator tasdiqlagan: ${new Date(sup.coordinator_accepted_at).toLocaleDateString("uz-UZ")}` : "Koordinator tasdig‘i kutilmoqda"}
                           </span>
+                          {expandedSupId === sup.id && (
+                            <div className="mt-1 pt-2 border-t border-white/[0.06] space-y-1.5">
+                              {subItems.length === 0 ? (
+                                <p className="text-[11px] text-zinc-500">Biriktirilgan o‘qituvchi topilmadi.</p>
+                              ) : (
+                                subItems.map((it) => (
+                                  <div key={it.id} className="flex items-center justify-between gap-2 text-[11px] bg-black/25 px-2.5 py-1.5 rounded">
+                                    <div>
+                                      <span className="text-zinc-200 font-medium">{it.supervisor_name || it.id.slice(0, 8)}</span>
+                                      <span className="ml-2 text-zinc-400">
+                                        {it.revoked_at ? "Bekor qilingan" : it.accepted_at ? "Qabul qilgan" : "Kutilmoqda"}
+                                      </span>
+                                    </div>
+                                    {!it.revoked_at && (
+                                      <button
+                                        type="button"
+                                        disabled={revokingAcademicId === it.id}
+                                        onClick={() => void handleRevokeAcademicAssignment(sup.id, it.id)}
+                                        className="px-2 py-0.5 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 font-semibold disabled:opacity-50"
+                                      >
+                                        Bekor qilish
+                                      </button>
+                                    )}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-[11px] text-zinc-500">
-                          {sup.coordinator_accepted_at ? `Koordinator tasdiqlagan: ${new Date(sup.coordinator_accepted_at).toLocaleDateString("uz-UZ")}` : "Koordinator tasdig‘i kutilmoqda"}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

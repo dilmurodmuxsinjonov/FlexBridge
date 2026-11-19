@@ -33,6 +33,7 @@ import {
   registerCandidateUser,
 } from "@/lib/api";
 import { isAcademicRoles } from "@/lib/roles";
+import { issueOrResendRegisterChallenge } from "@/lib/authSecurity";
 
 interface AppointmentInboxItem {
   id: string;
@@ -62,6 +63,7 @@ function UniversitetRegistrationContent() {
   const [otpCode, setOtpCode] = useState("");
   const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
+  const [lastChallengeKey, setLastChallengeKey] = useState<string | null>(null);
 
   const [telegramBotUsername, setTelegramBotUsername] = useState("FlexBridgeAuthBot");
   const [telegramMode, setTelegramMode] = useState<TelegramMode>("LIVE");
@@ -176,9 +178,17 @@ function UniversitetRegistrationContent() {
     setTelegramVerified(false);
 
     try {
-      const res = await issueAuthChallenge("PHONE", phone.trim(), "REGISTER", deliveryMethod);
+      const { res, nextKey } = await issueOrResendRegisterChallenge({
+        challengeId,
+        sentKey: lastChallengeKey,
+        channel: "PHONE",
+        destination: phone.trim(),
+        deliveryMethod,
+        issueFn: () => issueAuthChallenge("PHONE", phone.trim(), "REGISTER", deliveryMethod),
+      });
       if (res.ok && res.challenge_id) {
         setChallengeId(res.challenge_id);
+        setLastChallengeKey(nextKey);
         setResendTimer(res.resend_after || 60);
         if (res.telegram_bot_username) setTelegramBotUsername(res.telegram_bot_username);
         if (res.telegram_deep_link) setTelegramDeepLink(res.telegram_deep_link);

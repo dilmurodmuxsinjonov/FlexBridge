@@ -13,7 +13,7 @@ export async function GET() {
       headers: {
         Accept: "application/json",
       },
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
 
     const data = await backendRes.json().catch(() => ({}));

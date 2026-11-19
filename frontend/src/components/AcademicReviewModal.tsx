@@ -255,12 +255,18 @@ export default function AcademicReviewModal({
                         <div className="flex items-center justify-between gap-2">
                           <span
                             className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                              rev.decision === "REVIEWED"
+                              rev.decision === "APPROVED" || rev.decision === "REVIEWED"
                                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : rev.decision === "REJECTED"
+                                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                                 : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                             }`}
                           >
-                            {rev.decision === "REVIEWED" ? "Mentor tomonidan tasdiqlangan" : "Qayta ishlashga qaytarilgan"}
+                            {rev.decision === "APPROVED" || rev.decision === "REVIEWED"
+                              ? "Mentor tomonidan tasdiqlangan"
+                              : rev.decision === "REJECTED"
+                              ? "Mentor tomonidan rad etilgan"
+                              : "Qayta ishlashga qaytarilgan"}
                           </span>
                           <span className="font-mono text-[10px] text-zinc-400">
                             {new Date(rev.decided_at).toLocaleString("uz-UZ")}

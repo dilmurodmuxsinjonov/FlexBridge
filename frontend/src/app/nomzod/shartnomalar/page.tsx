@@ -24,15 +24,23 @@ import {
   fetchAuthMe,
   AuthUser,
   fetchCandidatePlacementsList,
+  fetchCandidateEnrollments,
   fetchPlacementPlanDetail,
   acceptCandidatePlacementTerms,
   fetchCandidateEngagement,
   submitEngagementConfirmation,
+  CandidateEnrollmentItem,
   CandidatePlacementItem,
   PlacementPlanDetail,
   JobEngagementDetail,
 } from "@/lib/api";
+import { enumLabel } from "@/lib/labels";
+import {
+  confirmPlacementStart,
+  requestPlacementAcademicTrack,
+} from "@/lib/placementLifecycle";
 import AuthModal from "@/components/AuthModal";
+import PlacementCompletionControls from "@/components/placements/PlacementCompletionControls";
 
 function ShartnomalarHubContent() {
   const searchParams = useSearchParams();
@@ -60,6 +68,18 @@ function ShartnomalarHubContent() {
   const [planError, setPlanError] = useState<string | null>(null);
   const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
   const [acceptTermsSuccess, setAcceptTermsSuccess] = useState<string | null>(null);
+  const [isConfirmingStart, setIsConfirmingStart] = useState(false);
+  const [startConfirmFeedback, setStartConfirmFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [verifiedEnrollments, setVerifiedEnrollments] = useState<CandidateEnrollmentItem[]>([]);
+  const [selectedEnrollmentId, setSelectedEnrollmentId] = useState("");
+  const [isRequestingAcademic, setIsRequestingAcademic] = useState(false);
+  const [academicFeedback, setAcademicFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   // --- ENGAGEMENTS TAB STATE ---
   const [engagementIdInput, setEngagementIdInput] = useState(initialEngagementId);
@@ -124,11 +144,29 @@ function ShartnomalarHubContent() {
     setPlacementPlan(null);
     setPlanError(null);
     setAcceptTermsSuccess(null);
+    setStartConfirmFeedback(null);
+    setAcademicFeedback(null);
     setIsLoadingPlan(true);
 
     try {
       const plan = await fetchPlacementPlanDetail(placementId);
       setPlacementPlan(plan);
+      if (plan.academic_required) {
+        try {
+          const enrRes = await fetchCandidateEnrollments();
+          const verified = (Array.isArray(enrRes) ? enrRes : []).filter(
+            (item) => item.status === "VERIFIED"
+          );
+          setVerifiedEnrollments(verified);
+          setSelectedEnrollmentId((prev) =>
+            prev && verified.some((item) => item.id === prev) ? prev : verified[0]?.id || ""
+          );
+        } catch {
+          setVerifiedEnrollments([]);
+        }
+      } else {
+        setVerifiedEnrollments([]);
+      }
     } catch (err: unknown) {
       setPlanError(
         err instanceof Error ? err.message : "Amaliyot rejasini yuklashda xatolik yuz berdi"
@@ -150,14 +188,65 @@ function ShartnomalarHubContent() {
         version: placementPlan.version,
       });
       setAcceptTermsSuccess("Amaliyot shartlari muvaffaqiyatli qabul qilindi va tasdiqlandi!");
-      // Reload placements list to reflect state updates
-      loadPlacements();
+      await Promise.all([loadPlacements(), handleOpenPlanModal(selectedPlacementId)]);
     } catch (err: unknown) {
       setPlanError(
         err instanceof Error ? err.message : "Shartlarni qabul qilishda xatolik yuz berdi"
       );
     } finally {
       setIsAcceptingTerms(false);
+    }
+  }
+
+  async function handleConfirmPlacementStart() {
+    if (!selectedPlacementId || !placementPlan) return;
+    setIsConfirmingStart(true);
+    setStartConfirmFeedback(null);
+    try {
+      await confirmPlacementStart(
+        selectedPlacementId,
+        placementPlan.terms_id,
+        placementPlan.version,
+        "CANDIDATE"
+      );
+      setStartConfirmFeedback({
+        type: "success",
+        message: "Nomzod tomonidan amaliyot boshlanishi tasdiqlandi!",
+      });
+      await Promise.all([loadPlacements(), handleOpenPlanModal(selectedPlacementId)]);
+    } catch (err: unknown) {
+      setStartConfirmFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Boshlanishni tasdiqlashda xatolik yuz berdi",
+      });
+    } finally {
+      setIsConfirmingStart(false);
+    }
+  }
+
+  async function handleRequestAcademicTrack() {
+    if (!selectedPlacementId || !placementPlan || !selectedEnrollmentId) return;
+    setIsRequestingAcademic(true);
+    setAcademicFeedback(null);
+    try {
+      await requestPlacementAcademicTrack(
+        selectedPlacementId,
+        selectedEnrollmentId,
+        placementPlan.terms_id,
+        placementPlan.version
+      );
+      setAcademicFeedback({
+        type: "success",
+        message: "OTM akademik rahbarligi uchun so‘rov yuborildi!",
+      });
+      await loadPlacements();
+    } catch (err: unknown) {
+      setAcademicFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Akademik so‘rov yuborishda xatolik yuz berdi",
+      });
+    } finally {
+      setIsRequestingAcademic(false);
     }
   }
 
@@ -814,11 +903,14 @@ function ShartnomalarHubContent() {
                   </div>
                 </div>
 
-                {/* Accept Terms Banner & Action (API-048) */}
-                {acceptTermsSuccess ? (
+                {/* Accept Terms & Start Confirmation (API-048) */}
+                {acceptTermsSuccess || placementPlan.candidate_accepted_at ? (
                   <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300 flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 shrink-0" />
-                    <span>{acceptTermsSuccess}</span>
+                    <span>
+                      {acceptTermsSuccess ||
+                        "Amaliyot shartlari va boshlanishi siz tomoningizdan tasdiqlangan!"}
+                    </span>
                   </div>
                 ) : (
                   <div className="rounded-lg border border-primary/30 bg-primary/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -845,6 +937,132 @@ function ShartnomalarHubContent() {
                     </button>
                   </div>
                 )}
+
+                {(placementPlan.status === "PLANNED" ||
+                  placementPlan.status === "PENDING_START_CONFIRMATION") && (
+                  <div className="space-y-3 border-t border-white/10 pt-4">
+                    {!(acceptTermsSuccess || placementPlan.candidate_accepted_at) && (
+                      <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h5 className="text-xs font-bold text-white">
+                              Ikki tomonlama boshlash tasdig‘i
+                            </h5>
+                            <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono text-zinc-300">
+                              {enumLabel(placementPlan.status)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5">
+                            Shartlarni va boshlanishni tasdiqlash (korxona bilan birgalikda amaliyotni faollashtiradi).
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleConfirmPlacementStart}
+                          disabled={isConfirmingStart}
+                          className="w-full sm:w-auto py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
+                        >
+                          {isConfirmingStart ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ShieldCheck className="h-4 w-4" />
+                          )}
+                          <span>Ish boshlashni tasdiqlash</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {startConfirmFeedback && (
+                      <div
+                        role="status"
+                        className={`rounded-lg border p-3 text-xs ${
+                          startConfirmFeedback.type === "success"
+                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                            : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                        }`}
+                      >
+                        {startConfirmFeedback.message}
+                      </div>
+                    )}
+
+                    {placementPlan.academic_required && (
+                      <div className="rounded-lg border border-sky-500/25 bg-sky-500/5 p-4 space-y-2.5">
+                        <div>
+                          <h5 className="text-xs font-bold text-white flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 text-sky-400" />
+                            <span>OTM akademik rahbarligini so‘rash</span>
+                          </h5>
+                          <p className="text-[11px] text-zinc-300 mt-0.5">
+                            Ushbu dual ta’lim amaliyoti uchun tasdiqlangan talabalik yozuvingizni OTM koordinatoriga yuboring.
+                          </p>
+                        </div>
+
+                        {verifiedEnrollments.length > 0 ? (
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <select
+                              value={selectedEnrollmentId}
+                              onChange={(e) => setSelectedEnrollmentId(e.target.value)}
+                              className="flex-1 rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-xs text-white"
+                            >
+                              {verifiedEnrollments.map((enr) => (
+                                <option key={enr.id} value={enr.id}>
+                                  {enr.institution_name || enr.institution_id.slice(0, 8)} — {enr.program}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              disabled={!selectedEnrollmentId || isRequestingAcademic}
+                              onClick={handleRequestAcademicTrack}
+                              className="py-2 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
+                            >
+                              {isRequestingAcademic ? (
+                                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <BookOpen className="h-3.5 w-3.5" />
+                              )}
+                              <span>OTM nazoratini so‘rash</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-amber-300">
+                            Tasdiqlangan talabalik (VERIFIED) yozuvi topilmadi.{" "}
+                            <Link href="/nomzod" className="underline font-semibold text-white">
+                              Nomzod kabinetida tasdiqlang
+                            </Link>
+                            .
+                          </p>
+                        )}
+
+                        {academicFeedback && (
+                          <div
+                            role="status"
+                            className={`rounded-lg border p-3 text-xs ${
+                              academicFeedback.type === "success"
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                            }`}
+                          >
+                            {academicFeedback.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="border-t border-white/10 pt-4">
+                  <PlacementCompletionControls
+                    placementId={placementPlan.placement_id}
+                    status={placementPlan.status}
+                    termsId={placementPlan.terms_id}
+                    version={placementPlan.version}
+                    onUpdated={() => {
+                      void loadPlacements();
+                      void handleOpenPlanModal(placementPlan.placement_id);
+                    }}
+                  />
+                </div>
               </div>
             ) : null}
           </div>

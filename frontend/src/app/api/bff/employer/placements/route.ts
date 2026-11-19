@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch, getSessionFromCookie } from "@/lib/server/session";
+import { proxyJsonBody } from "@/lib/server/proxy";
 
 export async function GET(request: NextRequest) {
   try {
@@ -60,4 +61,8 @@ export async function GET(request: NextRequest) {
       { status: 503 }
     );
   }
+}
+
+export async function POST(request: Request) {
+  return proxyJsonBody(request, "/api/v1/placements", "POST", "CREATE_PLACEMENT_FAILED");
 }

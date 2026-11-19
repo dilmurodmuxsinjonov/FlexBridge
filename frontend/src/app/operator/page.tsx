@@ -2,7 +2,8 @@
 import { enumLabel } from "@/lib/labels";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { canUseOperatorModule, type OperatorModule } from "@/lib/roles";
 import {
   Lock,
@@ -30,6 +31,11 @@ import {
   Coins,
   Filter,
   CheckCheck,
+  Users,
+  FolderSearch,
+  Sliders,
+  Scale,
+  Search,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -62,14 +68,40 @@ import AuthModal from "@/components/AuthModal";
 
 import OperatorOverview from "@/components/operator/OperatorOverview";
 import ModerationPanel from "@/components/operator/ModerationPanel";
+import StaffRolesPanel from "@/components/operator/StaffRolesPanel";
+import DirectoryPanel from "@/components/operator/DirectoryPanel";
+import FeatureFlagsPanel from "@/components/operator/FeatureFlagsPanel";
+import GovernanceOpsPanel, { type GovernanceSection } from "@/components/operator/GovernanceOpsPanel";
 import { fetchModerationQueue } from "@/lib/moderation";
+import {
+  fetchDirectoryUsers,
+  fetchFeatureFlags,
+  fetchModerationAppeals,
+  fetchPrivacyRequests,
+  fetchRecoveryRequests,
+  fetchStaffGrants,
+} from "@/lib/platformAdmin";
 import { useAsyncData } from "@/lib/useAsyncData";
 import SectionDock from "@/components/shell/SectionDock";
 
-type ActiveTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
+type ActiveTab =
+  | "STAFF_ROLES"
+  | "DIRECTORY"
+  | "FEATURE_FLAGS"
+  | "GOVERNANCE"
+  | "AUDIT"
+  | "VERIFICATION"
+  | "MODERATION"
+  | "BREAK_GLASS"
+  | "SUPPORT_OPS"
+  | "FINANCE";
 
 // Which permission each console tab needs (any one of them opens the tab).
 const TAB_MODULES: Array<[ActiveTab, OperatorModule[]]> = [
+  ["STAFF_ROLES", ["STAFF_ROLES"]],
+  ["DIRECTORY", ["DIRECTORY"]],
+  ["FEATURE_FLAGS", ["FEATURE_FLAGS"]],
+  ["GOVERNANCE", ["PRIVACY_REQUESTS", "RECOVERY_REVIEWS", "APPEALS", "CONTINUITY", "OPERATIONS"]],
   ["AUDIT", ["AUDIT"]],
   ["VERIFICATION", ["VERIFICATION"]],
   ["MODERATION", ["MODERATION"]],
@@ -78,7 +110,10 @@ const TAB_MODULES: Array<[ActiveTab, OperatorModule[]]> = [
   ["FINANCE", ["FINANCE"]],
 ];
 
+const subscribeNoop = () => () => {};
+
 export default function OperatorPortal() {
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   // Roles of the signed-in operator, read by loaders so they skip modules that would answer 403.
   const rolesRef = useRef<string[]>([]);
@@ -86,6 +121,12 @@ export default function OperatorPortal() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("AUDIT");
+  const [governanceSection, setGovernanceSection] = useState<GovernanceSection>("PRIVACY");
+
+  // Break-glass searchable user pickers
+  const [bgTargetSearch, setBgTargetSearch] = useState("");
+  const [bgApproverSearch, setBgApproverSearch] = useState("");
+  const [revokeUserSearch, setRevokeUserSearch] = useState("");
 
   // Tab 1: Audit Events State
   const [auditEvents, setAuditEvents] = useState<OperatorAuditEventItem[]>([]);
@@ -121,14 +162,14 @@ export default function OperatorPortal() {
   const [revokeResult, setRevokeResult] = useState<EmergencyRevokeSessionsResult | null>(null);
   const [revokeError, setRevokeError] = useState<string | null>(null);
 
-  // Tab 4: Support Ops & SLA Monitoring (API-112, API-113, API-122, API-123, API-124)
+  // Support Ops & SLA Monitoring
   const [tickets, setTickets] = useState<OperatorSupportTicketItem[]>([]);
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
   const [ticketsError, setTicketsError] = useState<string | null>(null);
   const [ticketFilterStatus, setTicketFilterStatus] = useState<string>("ALL");
   const [ticketFilterPriority, setTicketFilterPriority] = useState<string>("ALL");
 
-  // Ticket Message Reply Modal State (API-113)
+  // Ticket Message Reply Modal State
   const [selectedTicket, setSelectedTicket] = useState<OperatorSupportTicketItem | null>(null);
   const [replyBody, setReplyBody] = useState("");
   const [isInternalNote, setIsInternalNote] = useState(false);
@@ -137,7 +178,7 @@ export default function OperatorPortal() {
   const [replyError, setReplyError] = useState<string | null>(null);
   const [replySuccessMsg, setReplySuccessMsg] = useState<string | null>(null);
 
-  // Incident Declaration Modal State (API-122)
+  // Incident Declaration Modal State
   const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
   const [incidentSeverity, setIncidentSeverity] = useState<"P1" | "P2" | "P3" | "P4">("P3");
   const [incidentTitle, setIncidentTitle] = useState("");
@@ -146,7 +187,7 @@ export default function OperatorPortal() {
   const [incidentError, setIncidentError] = useState<string | null>(null);
   const [incidentSuccessMsg, setIncidentSuccessMsg] = useState<string | null>(null);
 
-  // Restore Runs & SLA (API-123)
+  // Restore Runs & SLA
   const [restoreRuns, setRestoreRuns] = useState<OperatorRestoreRunItem[]>([]);
   const [runsSummary, setRunsSummary] = useState<{
     rpo_sla_target_minutes?: number;
@@ -157,12 +198,12 @@ export default function OperatorPortal() {
   const [isLoadingRuns, setIsLoadingRuns] = useState(false);
   const [runsError, setRunsError] = useState<string | null>(null);
 
-  // Platform Analytics (API-124)
+  // Platform Analytics
   const [analytics, setAnalytics] = useState<OperatorPlatformAnalytics | null>(null);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
 
-  // Tab 5: Finance & Reconciliation Hub (API-117, API-115, API-078)
+  // Finance & Reconciliation Hub
   const [financeSummary, setFinanceSummary] = useState<OperatorFinanceSummaryResponse | null>(null);
   const [isLoadingFinance, setIsLoadingFinance] = useState(false);
   const [financeError, setFinanceError] = useState<string | null>(null);
@@ -183,7 +224,7 @@ export default function OperatorPortal() {
   const [approveRefundSuccess, setApproveRefundSuccess] = useState<string | null>(null);
   const [approveRefundError, setApproveRefundError] = useState<string | null>(null);
 
-  // Load Audit Events (API-118)
+  // Load Audit Events
   const loadAuditEvents = useCallback(async () => {
     if (!allowed("AUDIT")) return;
     setIsLoadingEvents(true);
@@ -194,7 +235,7 @@ export default function OperatorPortal() {
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (status === 403) {
-        setEventsError("Ruxsat berilmadi: Ushbu bo‘lim faqat platforma AUDITOR yoki ADMIN rollari uchun ruxsat etilgan.");
+        setEventsError("Ruxsat berilmadi: Ushbu bo‘lim faqat tizim auditori yoki bosh administrator uchun.");
       } else {
         setEventsError(err instanceof Error ? err.message : "Audit jurnallarini yuklashda xatolik yuz berdi");
       }
@@ -203,18 +244,27 @@ export default function OperatorPortal() {
     }
   }, [allowed]);
 
-  // Load Verification Cases (API-109)
+  // Load Verification Cases
   const loadVerificationCases = useCallback(async () => {
     if (!allowed("VERIFICATION")) return;
     setIsLoadingCases(true);
     setCasesError(null);
     try {
-      const items = await fetchOperatorVerificationCases({ limit: 50 });
-      setCases(items);
+      const [openItems, assignedItems] = await Promise.all([
+        fetchOperatorVerificationCases({ limit: 50, unassigned: true }),
+        fetchOperatorVerificationCases({ limit: 50, unassigned: false }),
+      ]);
+      const byId = new Map<string, OperatorVerificationCaseItem>();
+      for (const item of openItems) byId.set(item.id, item);
+      for (const item of assignedItems) byId.set(item.id, item);
+      const merged = Array.from(byId.values()).sort((a, b) =>
+        (a.due_at || "").localeCompare(b.due_at || "")
+      );
+      setCases(merged);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (status === 403) {
-        setCasesError("Ruxsat berilmadi: Ushbu bo‘lim faqat platforma OPERATOR yoki ADMIN rollari uchun ruxsat etilgan.");
+        setCasesError("Ruxsat berilmadi: Ushbu bo‘lim faqat moderatorlar uchun.");
       } else {
         setCasesError(err instanceof Error ? err.message : "Tekshiruv navbatini yuklashda xatolik yuz berdi");
       }
@@ -305,7 +355,7 @@ export default function OperatorPortal() {
       setReconciliationItems(res.items || []);
       setReconciliationSummary(res.summary || null);
     } catch (err: unknown) {
-      setReconciliationError(err instanceof Error ? err.message : "Solishtiruv (reconciliation) ma'lumotlarini yuklashda xatolik");
+      setReconciliationError(err instanceof Error ? err.message : "Solishtiruv ma’lumotlarini yuklashda xatolik");
       setReconciliationItems([]);
     } finally {
       setIsLoadingReconciliation(false);
@@ -323,11 +373,11 @@ export default function OperatorPortal() {
     setApproveRefundSuccess(null);
     try {
       const res = await approveOperatorRefund(refundId.trim());
-      setApproveRefundSuccess(`Qaytarish #${refundId.slice(0, 8)} muvaffaqiyatli tasdiqlandi! Yangi holat: ${res.status}`);
+      setApproveRefundSuccess(`Qaytarish #${refundId.slice(0, 8)} muvaffaqiyatli tasdiqlandi! Yangi holat: ${enumLabel(res.status)}`);
       setManualRefundId("");
       await loadFinanceHub();
     } catch (err: unknown) {
-      setApproveRefundError(err instanceof Error ? err.message : "Mablag' qaytarishni tasdiqlashda xatolik");
+      setApproveRefundError(err instanceof Error ? err.message : "Mablag‘ qaytarishni tasdiqlashda xatolik");
     } finally {
       setApprovingRefundId(null);
     }
@@ -365,7 +415,44 @@ export default function OperatorPortal() {
     currentUser && canUseOperatorModule(currentUser.roles || [], "MODERATION") ? `operator-moderation:${currentUser.user_id}` : null,
     () => fetchModerationQueue().catch(() => [])
   );
+  const staffOverviewQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "STAFF_ROLES") ? `operator-staff-ov:${currentUser.user_id}` : null,
+    () => fetchStaffGrants().catch(() => null)
+  );
+  const flagsOverviewQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "FEATURE_FLAGS") ? `operator-flags-ov:${currentUser.user_id}` : null,
+    () => fetchFeatureFlags().catch(() => [])
+  );
+  const privacyOverviewQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "PRIVACY_REQUESTS") ? `operator-priv-ov:${currentUser.user_id}` : null,
+    () => fetchPrivacyRequests({ status: "PENDING", limit: 50 }).catch(() => [])
+  );
+  const recoveryOverviewQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "RECOVERY_REVIEWS") ? `operator-rec-ov:${currentUser.user_id}` : null,
+    () => fetchRecoveryRequests({ status: "PENDING_REVIEW", limit: 50 }).catch(() => [])
+  );
+  const appealsOverviewQuery = useAsyncData(
+    currentUser && canUseOperatorModule(currentUser.roles || [], "APPEALS") ? `operator-app-ov:${currentUser.user_id}` : null,
+    () => fetchModerationAppeals(50).catch(() => [])
+  );
 
+  const bgDirEnabled = Boolean(
+    currentUser &&
+      activeTab === "BREAK_GLASS" &&
+      canUseOperatorModule(currentUser.roles || [], "BREAK_GLASS")
+  );
+  const bgTargetDirQuery = useAsyncData(
+    bgDirEnabled ? `bg-target-dir:${bgTargetSearch.trim()}` : null,
+    () => fetchDirectoryUsers({ q: bgTargetSearch.trim(), limit: 8 }).catch(() => [])
+  );
+  const bgApproverDirQuery = useAsyncData(
+    bgDirEnabled ? `bg-approver-dir:${bgApproverSearch.trim()}` : null,
+    () => fetchDirectoryUsers({ q: bgApproverSearch.trim(), limit: 8 }).catch(() => [])
+  );
+  const revokeDirQuery = useAsyncData(
+    bgDirEnabled ? `bg-revoke-dir:${revokeUserSearch.trim()}` : null,
+    () => fetchDirectoryUsers({ q: revokeUserSearch.trim(), limit: 8 }).catch(() => [])
+  );
 
   const selectTab = (tab: ActiveTab) => {
     if (tab === activeTab) return;
@@ -378,12 +465,15 @@ export default function OperatorPortal() {
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     rolesRef.current = user.roles ?? [];
+    const firstTab = TAB_MODULES.find(([, mods]) => mods.some((m) => canUseOperatorModule(user.roles ?? [], m)));
+    if (firstTab) setActiveTab(firstTab[0]);
     loadAuditEvents();
     loadVerificationCases();
     loadSupportOps();
+    loadFinanceHub();
   };
 
-  // Submit Case Decision (API-110)
+  // Submit Case Decision
   const handleDecisionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCase) return;
@@ -405,7 +495,7 @@ export default function OperatorPortal() {
       }
       await decideVerificationCase(selectedCase.id, {
         decision: decisionType,
-        expected_revision: selectedCase.revision || 1,
+        expected_revision: selectedCase.current_revision ?? selectedCase.revision ?? 1,
         reason: decisionReason.trim(),
       });
       setSelectedCase(null);
@@ -418,7 +508,7 @@ export default function OperatorPortal() {
     }
   };
 
-  // Submit Break-Glass Request (API-119)
+  // Submit Break-Glass Request
   const handleBreakGlassSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBgError(null);
@@ -453,7 +543,7 @@ export default function OperatorPortal() {
     }
   };
 
-  // Submit Emergency Revoke Sessions (API-120)
+  // Submit Emergency Revoke Sessions
   const handleRevokeSessionsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRevokeError(null);
@@ -530,7 +620,7 @@ export default function OperatorPortal() {
         summary: incidentSummary.trim() || incidentTitle.trim(),
         commander_user_id: currentUser?.user_id,
       });
-      setIncidentSuccessMsg(`Insident #${res.incident_id?.slice(0, 8)} muvaffaqiyatli e'lon qilindi!`);
+      setIncidentSuccessMsg(`Insident #${res.incident_id?.slice(0, 8)} muvaffaqiyatli e’lon qilindi!`);
       setIncidentTitle("");
       setIncidentSummary("");
       setTimeout(() => {
@@ -538,7 +628,7 @@ export default function OperatorPortal() {
         setIncidentSuccessMsg(null);
       }, 1500);
     } catch (err: unknown) {
-      setIncidentError(err instanceof Error ? err.message : "Insident e'lon qilishda xatolik");
+      setIncidentError(err instanceof Error ? err.message : "Insident e’lon qilishda xatolik");
     } finally {
       setIsSubmittingIncident(false);
     }
@@ -564,44 +654,33 @@ export default function OperatorPortal() {
 
   return (
     <main className="max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-      {/* SOC COMMAND TERMINAL HEADER */}
+      {/* OPERATOR CENTER UNAUTHENTICATED HEADER */}
       {!currentUser && (
       <section className="w-full skeuo-card rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-amber-700 dark:text-amber-400">
-                Xavfsizlik va Nazorat Markazi
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full skeuo-badge-recessed text-[var(--fb-ink-secondary)]">
+                Operator Markazi
               </span>
-              {currentUser ? (
-                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                  Operator vakolati faol
-                </span>
-              ) : (
-                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                  Avtorizatsiyadan o‘tilmagan
-                </span>
-              )}
+              <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-[color-mix(in_srgb,#f59e0b_14%,transparent)] px-2.5 py-0.5 rounded-full">
+                Avtorizatsiyadan o‘tilmagan
+              </span>
             </div>
             <h1 className="font-heading text-lg md:text-xl font-bold text-[var(--fb-ink)] tracking-tight">
               Platforma boshqaruvi
             </h1>
             <p className="text-xs text-[var(--fb-ink-secondary)]">
-              Tashkilotlarni tekshirish, maxsus ruxsatlar (ikki kishi tasdig‘i bilan) va o‘zgarmas audit jurnali.
+              Xodim rollari, funksional flaglar, tashkilotlarni tekshirish, maxsus ruxsatlar va o‘zgarmas audit jurnali.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {isAuthLoading ? (
-              <div className="flex items-center gap-2 text-xs text-zinc-400">
-                <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                <span>Yuklanmoqda...</span>
+              <div className="flex items-center gap-2 text-xs text-[var(--fb-ink-muted)]">
+                <Loader2 className="w-4 h-4 animate-spin text-[var(--fb-accent)]" />
+                <span>Yuklanmoqda…</span>
               </div>
-            ) : currentUser ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
-                Tizim ishlamoqda
-              </span>
             ) : (
               <Link
                 href="/operator/kirish"
@@ -619,15 +698,15 @@ export default function OperatorPortal() {
       {/* UNAUTHENTICATED NOTICE */}
       {!currentUser && !isAuthLoading && (
         <section className="w-full skeuo-card rounded-[28px] p-8 flex flex-col items-center justify-center text-center gap-4 py-16">
-          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-amber-700 dark:text-amber-400">
+          <div className="w-14 h-14 rounded-2xl skeuo-well flex items-center justify-center text-[var(--fb-ink)]">
             <Lock className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1.5 max-w-md">
             <h2 className="font-display text-lg font-bold text-[var(--fb-ink)]">
-              Xavfsizlik audit va operator boshqaruviga kirish uchun tizimga kiring
+              Operator Markaziga kirish uchun tizimga kiring
             </h2>
             <p className="text-xs leading-relaxed text-[var(--fb-ink-muted)]">
-              Ushbu bo‘lim faqat vakolatli xavfsizlik auditorlari va tizim ma’murlari (ADMIN, AUDITOR, OPERATOR) uchun mo‘ljallangan.
+              Ushbu bo‘lim faqat vakolatli platforma xodimlari, xavfsizlik rahbarlari, komplayens va tizim auditorlari uchun mo‘ljallangan.
             </p>
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
@@ -636,14 +715,14 @@ export default function OperatorPortal() {
               className="px-5 py-2.5 rounded-full skeuo-btn-obsidian text-xs font-semibold flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
-              <span>SOC alohida kirishi</span>
+              <span>Operator alohida kirishi</span>
             </Link>
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold text-amber-800 dark:text-amber-300"
+              className="px-4 py-2.5 rounded-full skeuo-btn-secondary text-xs font-semibold"
             >
-              Tezkor terminal kirishi
+              Tezkor kirish oynasi
             </button>
           </div>
         </section>
@@ -660,127 +739,143 @@ export default function OperatorPortal() {
           auditEvents={auditEvents}
           discrepancies={reconciliationSummary?.total_discrepancies ?? null}
           moderationCount={moderationQuery.data?.length ?? null}
+          activeStaffGrantsCount={staffOverviewQuery.data?.active_grants?.length ?? null}
+          enabledR1FlagsCount={
+            flagsOverviewQuery.data
+              ? flagsOverviewQuery.data.filter((f) => f.category === "R1" && f.enabled).length
+              : null
+          }
+          pendingPrivacyCount={privacyOverviewQuery.data?.length ?? null}
+          pendingRecoveryCount={recoveryOverviewQuery.data?.length ?? null}
+          appealsCount={appealsOverviewQuery.data?.length ?? null}
           onOpen={(tab) => {
             selectTab(tab);
+            document.getElementById("op-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onOpenGovernance={(section) => {
+            setGovernanceSection(section);
+            selectTab("GOVERNANCE");
             document.getElementById("op-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
         />
       )}
 
-      {/* AUTHENTICATED SOC COMMAND CONSOLE */}
+      {/* AUTHENTICATED OPERATOR CONSOLE */}
       {currentUser && (
         <div id="op-workspace" className="grid scroll-mt-24 gap-6">
           <div className="contents">
-          <SectionDock label="Nazorat terminali bo‘limlari">
+          <SectionDock label="Operator Markazi bo‘limlari">
             <div className="hidden lg:block px-3 pb-1 pt-1.5 text-[11px] font-medium text-[var(--fb-ink-muted)]">
               Bo‘limlar
             </div>
-            <button
-              onClick={() => selectTab("AUDIT")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
-                activeTab === "AUDIT"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <FileCheck2 className="w-4 h-4 shrink-0" />
-                <span className="text-xs">Audit jurnali</span>
-              </span>
-              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
-                {auditEvents.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => selectTab("VERIFICATION")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
-                activeTab === "VERIFICATION"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <ClipboardCheck className="w-4 h-4 shrink-0" />
-                <span className="text-xs">Tashkilotlarni tekshirish</span>
-              </span>
-              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
-                {cases.length}
-              </span>
-            </button>
-
-            {currentUser && canUseOperatorModule(currentUser.roles || [], "MODERATION") && (
-            <button
-              onClick={() => selectTab("MODERATION")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
-                activeTab === "MODERATION"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 shrink-0" />
-                <span className="text-xs">E’lonlar moderatsiyasi</span>
-              </span>
-              {(moderationQuery.data?.length ?? 0) > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
-                  {moderationQuery.data?.length}
-                </span>
-              )}
-            </button>
-            )}
-
-            <button
-              onClick={() => selectTab("BREAK_GLASS")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs ${
-                activeTab === "BREAK_GLASS"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <ShieldAlert className="w-4 h-4 shrink-0" />
-              <span className="text-xs">Favqulodda ruxsat</span>
-            </button>
-
-            <button
-              onClick={() => selectTab("SUPPORT_OPS")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
-                activeTab === "SUPPORT_OPS"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <LifeBuoy className="w-4 h-4 shrink-0" />
-                <span className="text-xs">Murojaatlar</span>
-              </span>
-              <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
-                {tickets.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => selectTab("FINANCE")}
-              className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
-                activeTab === "FINANCE"
-                  ? "fb-nav-active"
-                  : "fb-nav-idle"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 shrink-0" />
-                <span className="text-xs">Moliya</span>
-              </span>
-              {reconciliationSummary && reconciliationSummary.total_discrepancies ? (
-                <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-mono">
-                  {reconciliationSummary.total_discrepancies}
-                </span>
-              ) : null}
-            </button>
+            {(
+              [
+                {
+                  tab: "STAFF_ROLES" as ActiveTab,
+                  label: "Xodim rollari",
+                  Icon: Users,
+                  count: staffOverviewQuery.data?.active_grants?.length ?? null,
+                },
+                {
+                  tab: "DIRECTORY" as ActiveTab,
+                  label: "Katalog",
+                  Icon: FolderSearch,
+                  count: null,
+                },
+                {
+                  tab: "FEATURE_FLAGS" as ActiveTab,
+                  label: "Flaglar",
+                  Icon: Sliders,
+                  count: null,
+                },
+                {
+                  tab: "GOVERNANCE" as ActiveTab,
+                  label: "Komplayens",
+                  Icon: Scale,
+                  count:
+                    (privacyOverviewQuery.data?.length ?? 0) +
+                      (recoveryOverviewQuery.data?.length ?? 0) +
+                      (appealsOverviewQuery.data?.length ?? 0) ||
+                    null,
+                },
+                {
+                  tab: "AUDIT" as ActiveTab,
+                  label: "Audit jurnali",
+                  Icon: FileCheck2,
+                  count: auditEvents.length,
+                },
+                {
+                  tab: "VERIFICATION" as ActiveTab,
+                  label: "Tashkilotlarni tekshirish",
+                  Icon: ClipboardCheck,
+                  count: cases.length,
+                },
+                {
+                  tab: "MODERATION" as ActiveTab,
+                  label: "E’lonlar moderatsiyasi",
+                  Icon: Briefcase,
+                  count: moderationQuery.data?.length ?? null,
+                },
+                {
+                  tab: "BREAK_GLASS" as ActiveTab,
+                  label: "Favqulodda ruxsat",
+                  Icon: ShieldAlert,
+                  count: null,
+                },
+                {
+                  tab: "SUPPORT_OPS" as ActiveTab,
+                  label: "Murojaatlar",
+                  Icon: LifeBuoy,
+                  count: tickets.length,
+                },
+                {
+                  tab: "FINANCE" as ActiveTab,
+                  label: "Moliya",
+                  Icon: CreditCard,
+                  count: reconciliationSummary?.total_discrepancies || null,
+                },
+              ] as const
+            )
+              .filter(({ tab }) => {
+                const mods = TAB_MODULES.find(([t]) => t === tab)?.[1] ?? [];
+                return mods.some((m) => canUseOperatorModule(currentUser.roles || [], m));
+              })
+              .map(({ tab, label, Icon, count }) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => selectTab(tab)}
+                  className={`shrink-0 lg:w-full fb-nav-item text-xs justify-between ${
+                    activeTab === tab ? "fb-nav-active" : "fb-nav-idle"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="text-xs">{label}</span>
+                  </span>
+                  {count !== null && count > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-[var(--fb-well-deep)] text-[10px] tabular-nums">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              ))}
           </SectionDock>
           </div>
 
           <div className="min-w-0 flex flex-col gap-6">
+
+          {activeTab === "STAFF_ROLES" && (
+            <StaffRolesPanel currentUserId={currentUser.user_id} roles={currentUser.roles || []} />
+          )}
+
+          {activeTab === "DIRECTORY" && <DirectoryPanel roles={currentUser.roles || []} />}
+
+          {activeTab === "FEATURE_FLAGS" && <FeatureFlagsPanel roles={currentUser.roles || []} />}
+
+          {activeTab === "GOVERNANCE" && (
+            <GovernanceOpsPanel roles={currentUser.roles || []} initialSection={governanceSection} />
+          )}
 
           {/* TAB 1: AUDIT EVENTS */}
           {activeTab === "AUDIT" && (
@@ -888,6 +983,14 @@ export default function OperatorPortal() {
                   <p className="text-xs text-zinc-400 max-w-md">
                     Hozirda tasdiqlashni kutayotgan tashkilot yoki talaba arizalari mavjud emas.
                   </p>
+                  <button
+                    type="button"
+                    onClick={loadVerificationCases}
+                    className="mt-2 px-3 py-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-xs text-zinc-200 flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Yangilash</span>
+                  </button>
                 </div>
               ) : (
                 <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
@@ -924,15 +1027,15 @@ export default function OperatorPortal() {
                               {c.id.slice(0, 8)}...
                             </td>
                             <td className="px-4 py-3 font-medium text-white">
-                              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
-                                {c.kind || c.entity_type || "VERIFICATION"}
+                              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-medium">
+                                {enumLabel(c.kind || c.entity_type, "Tekshiruv")}
                               </span>
                             </td>
                             <td className="px-4 py-3 text-zinc-200">
-                              {c.organization_name || c.institution_name || c.entity_id?.slice(0, 8) || "Noma'lum subyekt"}
+                              {c.organization_name || c.institution_name || c.entity_id?.slice(0, 8) || "Noma’lum subyekt"}
                             </td>
                             <td className="px-4 py-3 font-mono text-zinc-400">
-                              rev-{c.revision || 1}
+                              rev-{c.current_revision || c.revision || 1}
                             </td>
                             <td className="px-4 py-3 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
                               {c.due_at ? new Date(c.due_at).toLocaleString("uz-UZ") : "Muddatsiz"}
@@ -959,10 +1062,10 @@ export default function OperatorPortal() {
             </div>
           )}
 
-          {/* TAB 3: BREAK-GLASS & EMERGENCY CONTROL */}
+          {/* BREAK-GLASS & EMERGENCY CONTROL */}
           {activeTab === "BREAK_GLASS" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* BREAK-GLASS PRIVILEGED ACCESS (API-119) */}
+              {/* BREAK-GLASS PRIVILEGED ACCESS */}
               <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -970,7 +1073,7 @@ export default function OperatorPortal() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-white">
-                      Favqulodda Vaqtinchalik Ruxsat
+                      Favqulodda vaqtinchalik ruxsat
                     </h3>
                     <p className="text-[11px] text-zinc-400">
                       Ikki bosqichli tasdiqlash orqali vaqtinchalik maxsus ruxsat berish.
@@ -989,10 +1092,10 @@ export default function OperatorPortal() {
                   <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex flex-col gap-1">
                     <span className="font-semibold flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      Favqulodda Ruxsat Tasdiqlandi
+                      Favqulodda ruxsat tasdiqlandi
                     </span>
-                    <span className="font-mono text-[11px] text-zinc-400">
-                      Ruxsat ID: {bgResult.grant_id} | Rol: {bgResult.role_code} | Muddati: {bgResult.expires_at}
+                    <span className="text-[11px] text-zinc-300">
+                      Rol: {enumLabel(bgResult.role_code)} · Muddati: {bgResult.expires_at ? new Date(bgResult.expires_at).toLocaleString("uz-UZ") : "—"}
                     </span>
                   </div>
                 )}
@@ -1000,8 +1103,36 @@ export default function OperatorPortal() {
                 <form onSubmit={handleBreakGlassSubmit} className="flex flex-col gap-3">
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Foydalanuvchi identifikatori
+                      Foydalanuvchini tanlash (katalogdan qidirish yoki UUID)
                     </label>
+                    <div className="relative mb-1.5">
+                      <Search className="pointer-events-none absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-500" />
+                      <input
+                        type="text"
+                        value={bgTargetSearch}
+                        onChange={(e) => setBgTargetSearch(e.target.value)}
+                        placeholder="Ism yoki aloqa bo‘yicha qidirish…"
+                        className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                      />
+                    </div>
+                    {(bgTargetDirQuery.data ?? []).length > 0 && (
+                      <div className="mb-1.5 flex flex-wrap gap-1.5">
+                        {(bgTargetDirQuery.data ?? []).map((u) => (
+                          <button
+                            key={u.id}
+                            type="button"
+                            onClick={() => setBgTargetUserId(u.id)}
+                            className={`rounded-full px-2.5 py-1 text-[11px] border transition ${
+                              bgTargetUserId === u.id
+                                ? "border-amber-400 bg-amber-500/20 text-amber-200"
+                                : "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
+                            }`}
+                          >
+                            {u.display_name || "Nomsiz"} {u.masked_contact ? `(${u.masked_contact})` : ""}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <input
                       type="text"
                       value={bgTargetUserId}
@@ -1014,16 +1145,16 @@ export default function OperatorPortal() {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                        Imtiyozli Rol (role_code)
+                        Imtiyozli rol
                       </label>
                       <select
                         value={bgRoleCode}
                         onChange={(e) => setBgRoleCode(e.target.value)}
                         className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
                       >
-                        <option value="OPERATOR">OPERATOR</option>
-                        <option value="AUDITOR">AUDITOR</option>
-                        <option value="ADMIN">ADMIN</option>
+                        <option value="OPERATOR">{enumLabel("OPERATOR")}</option>
+                        <option value="AUDITOR">{enumLabel("AUDITOR")}</option>
+                        <option value="ADMIN">{enumLabel("ADMIN")}</option>
                       </select>
                     </div>
 
@@ -1044,8 +1175,38 @@ export default function OperatorPortal() {
 
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Mustaqil Tasdiqlovchi ID (independent_approver_id)
+                      Mustaqil tasdiqlovchi (katalogdan tanlash yoki UUID)
                     </label>
+                    <div className="relative mb-1.5">
+                      <Search className="pointer-events-none absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-500" />
+                      <input
+                        type="text"
+                        value={bgApproverSearch}
+                        onChange={(e) => setBgApproverSearch(e.target.value)}
+                        placeholder="Tasdiqlovchi ismi yoki aloqasi…"
+                        className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                      />
+                    </div>
+                    {(bgApproverDirQuery.data ?? []).filter((u) => u.id !== currentUser.user_id).length > 0 && (
+                      <div className="mb-1.5 flex flex-wrap gap-1.5">
+                        {(bgApproverDirQuery.data ?? [])
+                          .filter((u) => u.id !== currentUser.user_id)
+                          .map((u) => (
+                            <button
+                              key={u.id}
+                              type="button"
+                              onClick={() => setBgApproverId(u.id)}
+                              className={`rounded-full px-2.5 py-1 text-[11px] border transition ${
+                                bgApproverId === u.id
+                                  ? "border-amber-400 bg-amber-500/20 text-amber-200"
+                                  : "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
+                              }`}
+                            >
+                              {u.display_name || "Nomsiz"} {u.masked_contact ? `(${u.masked_contact})` : ""}
+                            </button>
+                          ))}
+                      </div>
+                    )}
                     <input
                       type="text"
                       value={bgApproverId}
@@ -1060,7 +1221,7 @@ export default function OperatorPortal() {
 
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Favqulodda Asoslantirish (kamida 5 ta belgi)
+                      Favqulodda asoslantirish (kamida 5 ta belgi)
                     </label>
                     <textarea
                       rows={2}
@@ -1081,7 +1242,7 @@ export default function OperatorPortal() {
                     ) : (
                       <KeyRound className="w-3.5 h-3.5" />
                     )}
-                    <span>Imtiyozli Ruxsatni Berish</span>
+                    <span>Imtiyozli ruxsatni berish</span>
                   </button>
                 </form>
               </div>
@@ -1094,7 +1255,7 @@ export default function OperatorPortal() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-white">
-                      Favqulodda Sessiyani Bekor Qilish
+                      Favqulodda sessiyani bekor qilish
                     </h3>
                     <p className="text-[11px] text-zinc-400">
                       Zararlangan yoki shubhali foydalanuvchining barcha faol sessiyalarini darhol to‘xtatish.
@@ -1113,10 +1274,10 @@ export default function OperatorPortal() {
                   <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex flex-col gap-1">
                     <span className="font-semibold flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      Sessiyalar Muvaffaqiyatli Bekor Qilindi
+                      Sessiyalar muvaffaqiyatli bekor qilindi
                     </span>
-                    <span className="font-mono text-[11px] text-zinc-400">
-                      Foydalanuvchi: {revokeResult.target_user_id} | Bekor qilingan sessiyalar soni: {revokeResult.revoked_count}
+                    <span className="text-[11px] text-zinc-300">
+                      Bekor qilingan sessiyalar soni: {revokeResult.revoked_count}
                     </span>
                   </div>
                 )}
@@ -1124,8 +1285,36 @@ export default function OperatorPortal() {
                 <form onSubmit={handleRevokeSessionsSubmit} className="flex flex-col gap-3">
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Foydalanuvchi identifikatori
+                      Foydalanuvchini tanlash (katalogdan qidirish yoki UUID)
                     </label>
+                    <div className="relative mb-1.5">
+                      <Search className="pointer-events-none absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-500" />
+                      <input
+                        type="text"
+                        value={revokeUserSearch}
+                        onChange={(e) => setRevokeUserSearch(e.target.value)}
+                        placeholder="Ism yoki aloqa bo‘yicha qidirish…"
+                        className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50"
+                      />
+                    </div>
+                    {(revokeDirQuery.data ?? []).length > 0 && (
+                      <div className="mb-1.5 flex flex-wrap gap-1.5">
+                        {(revokeDirQuery.data ?? []).map((u) => (
+                          <button
+                            key={u.id}
+                            type="button"
+                            onClick={() => setRevokeTargetUserId(u.id)}
+                            className={`rounded-full px-2.5 py-1 text-[11px] border transition ${
+                              revokeTargetUserId === u.id
+                                ? "border-rose-400 bg-rose-500/20 text-rose-200"
+                                : "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
+                            }`}
+                          >
+                            {u.display_name || "Nomsiz"} {u.masked_contact ? `(${u.masked_contact})` : ""}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <input
                       type="text"
                       value={revokeTargetUserId}
@@ -1137,13 +1326,13 @@ export default function OperatorPortal() {
 
                   <div>
                     <label className="text-[11px] font-medium text-zinc-300 block mb-1">
-                      Bekor Qilish Asosi (kamida 5 ta belgi)
+                      Bekor qilish asosi (kamida 5 ta belgi)
                     </label>
                     <textarea
                       rows={3}
                       value={revokeReason}
                       onChange={(e) => setRevokeReason(e.target.value)}
-                      placeholder="Shubhali faoliyat yoki hisob buzilishi xavfi sababli sessiyalarni to'xtatish..."
+                      placeholder="Shubhali faoliyat yoki hisob buzilishi xavfi sababli sessiyalarni to‘xtatish…"
                       className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 resize-none"
                     />
                   </div>
@@ -1158,17 +1347,17 @@ export default function OperatorPortal() {
                     ) : (
                       <UserX className="w-3.5 h-3.5" />
                     )}
-                    <span>Barcha Faol Sessiyalarni Darhol To‘xtatish</span>
+                    <span>Barcha faol sessiyalarni darhol to‘xtatish</span>
                   </button>
                 </form>
               </div>
             </div>
           )}
 
-          {/* TAB 4: SUPPORT OPS, INCIDENTS & SLA MONITORING (API-112, 113, 122, 123, 124) */}
+          {/* SUPPORT OPS, INCIDENTS & SLA MONITORING */}
           {activeTab === "SUPPORT_OPS" && (
             <div className="flex flex-col gap-6">
-              {/* TOP ACTION BAR & TELEMETRY KPI CARDS (API-124) */}
+              {/* TOP ACTION BAR & TELEMETRY KPI CARDS */}
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
@@ -1251,7 +1440,7 @@ export default function OperatorPortal() {
                 </div>
               </div>
 
-              {/* SECTION 2: DISASTER RECOVERY RESTORE RUNS SLA PROOFS (API-123) */}
+              {/* DISASTER RECOVERY RESTORE RUNS SLA PROOFS */}
               <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
@@ -1320,7 +1509,7 @@ export default function OperatorPortal() {
                 )}
               </div>
 
-              {/* SECTION 3: SUPPORT TICKET QUEUE (API-112) */}
+              {/* SUPPORT TICKET QUEUE */}
               <div className="p-5 rounded-xl bg-surface-card border border-white/[0.08] flex flex-col gap-4 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
@@ -1403,7 +1592,7 @@ export default function OperatorPortal() {
                             </span>
                           </div>
                           <h4 className="font-semibold text-white text-sm">
-                            {t.subject || "Yordam so'rovi"}
+                            {t.subject || "Yordam so‘rovi"}
                           </h4>
                           {t.description && (
                             <p className="text-zinc-400 text-xs line-clamp-2">{t.description}</p>
@@ -1436,7 +1625,7 @@ export default function OperatorPortal() {
             </div>
           )}
 
-          {/* TAB 5: FINANCE & RECONCILIATION HUB (API-117, API-115, API-078) */}
+          {/* FINANCE & RECONCILIATION HUB */}
           {activeTab === "FINANCE" && (
             <div className="flex flex-col gap-6">
               {/* TOP ACTION BAR & REFRESH */}
@@ -1473,7 +1662,7 @@ export default function OperatorPortal() {
                 </div>
               )}
 
-              {/* 1. FINANCIAL SUMMARY KPI CARDS (API-117) */}
+              {/* FINANCIAL SUMMARY KPI CARDS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-2 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -1536,7 +1725,7 @@ export default function OperatorPortal() {
                 </div>
               </div>
 
-              {/* TARIFF PLAN BREAKDOWN (API-117) */}
+              {/* TARIFF PLAN BREAKDOWN */}
               {financeSummary?.plans_breakdown && financeSummary.plans_breakdown.length > 0 && (
                 <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-3 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -1588,7 +1777,7 @@ export default function OperatorPortal() {
                 </div>
               )}
 
-              {/* 2. DUAL-CONTROL REFUND APPROVAL HUB (API-078) */}
+              {/* DUAL-CONTROL REFUND APPROVAL HUB */}
               <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
@@ -1642,7 +1831,7 @@ export default function OperatorPortal() {
                 </div>
               </div>
 
-              {/* 3. GATEWAY VS LEDGER RECONCILIATION HUB (API-115) */}
+              {/* GATEWAY VS LEDGER RECONCILIATION HUB */}
               <div className="bg-[#121214] border border-white/[0.08] rounded-xl p-5 flex flex-col gap-4 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
                   <div>
@@ -1839,22 +2028,26 @@ export default function OperatorPortal() {
         </div>
       )}
 
-      {/* VERIFICATION CASE DECISION MODAL (API-110) */}
-      {selectedCase && (
+      {/* VERIFICATION CASE DECISION MODAL */}
+      {mounted &&
+        selectedCase &&
+        createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">
-                  Tekshiruv Xulosasini Chiqarish
+                  Tekshiruv xulosasini chiqarish
                 </h3>
-                <span className="text-[11px] font-mono text-zinc-400">
-                  Case ID: {selectedCase.id} | Rev-{selectedCase.revision || 1}
+                <span className="text-[11px] text-zinc-400">
+                  {selectedCase.organization_name || selectedCase.institution_name || "Ariza"} · Reviziya {selectedCase.current_revision || selectedCase.revision || 1}
                 </span>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedCase(null)}
                 className="text-zinc-400 hover:text-white transition-colors"
+                aria-label="Oynani yopish"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1870,7 +2063,7 @@ export default function OperatorPortal() {
             <form onSubmit={handleDecisionSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-2">
-                  Qaror Xulosasi
+                  Qaror xulosasi
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
@@ -1882,7 +2075,7 @@ export default function OperatorPortal() {
                         : "bg-surface text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]"
                     }`}
                   >
-                    APPROVE (Tasdiqlash)
+                    Tasdiqlash
                   </button>
                   <button
                     type="button"
@@ -1893,7 +2086,7 @@ export default function OperatorPortal() {
                         : "bg-surface text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]"
                     }`}
                   >
-                    NEEDS_INFO (Hujjat talab)
+                    Hujjat talab
                   </button>
                   <button
                     type="button"
@@ -1904,21 +2097,21 @@ export default function OperatorPortal() {
                         : "bg-surface text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]"
                     }`}
                   >
-                    REJECT (Rad etish)
+                    Rad etish
                   </button>
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Qaror Asoslantirishi (kamida 15 ta belgi)
+                  Qaror asoslantirishi (kamida 15 ta belgi)
                 </label>
                 <textarea
                   rows={4}
                   required
                   value={decisionReason}
                   onChange={(e) => setDecisionReason(e.target.value)}
-                  placeholder="Taqdim etilgan soliq guvohnomasi va yuridik ma'lumotlar to'liq tekshirildi..."
+                  placeholder="Taqdim etilgan soliq guvohnomasi va yuridik ma’lumotlar to‘liq tekshirildi…"
                   className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-none"
                 />
               </div>
@@ -1941,30 +2134,35 @@ export default function OperatorPortal() {
                   ) : (
                     <Send className="w-3.5 h-3.5" />
                   )}
-                  <span>Xulosani Tasdiqlash</span>
+                  <span>Xulosani tasdiqlash</span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* TICKET MESSAGE REPLY MODAL (API-113) */}
-      {selectedTicket && (
+      {/* TICKET MESSAGE REPLY MODAL */}
+      {mounted &&
+        selectedTicket &&
+        createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">
-                  Murojaatga Javob Berish
+                  Murojaatga javob berish
                 </h3>
-                <span className="text-[11px] font-mono text-zinc-400">
-                  Tiket ID: #{selectedTicket.id.slice(0, 8)}... | {enumLabel(selectedTicket.category)} ({enumLabel(selectedTicket.priority)})
+                <span className="text-[11px] text-zinc-400">
+                  {enumLabel(selectedTicket.category)} ({enumLabel(selectedTicket.priority)})
                 </span>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedTicket(null)}
                 className="text-zinc-400 hover:text-white transition-colors"
+                aria-label="Oynani yopish"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1987,7 +2185,7 @@ export default function OperatorPortal() {
             <form onSubmit={handleTicketReplySubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Javob Matni
+                  Javob matni
                 </label>
                 <textarea
                   rows={4}
@@ -2007,7 +2205,7 @@ export default function OperatorPortal() {
                     onChange={(e) => setIsInternalNote(e.target.checked)}
                     className="rounded bg-[#18181b] border-white/[0.1] text-primary focus:ring-primary/20 w-4 h-4"
                   />
-                  <span>Ichki Eslatma (faqat operatorlar ko‘radi)</span>
+                  <span>Ichki eslatma (faqat operatorlar ko‘radi)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
@@ -2018,9 +2216,9 @@ export default function OperatorPortal() {
                     className="bg-[#18181b] border border-white/[0.08] rounded-lg px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-primary/50"
                   >
                     <option value="">O‘zgarishsiz</option>
-                    <option value="IN_PROGRESS">IN_PROGRESS (Jarayonda)</option>
-                    <option value="RESOLVED">RESOLVED (Hal qilindi)</option>
-                    <option value="CLOSED">CLOSED (Yopildi)</option>
+                    <option value="IN_PROGRESS">Jarayonda</option>
+                    <option value="RESOLVED">Hal qilindi</option>
+                    <option value="CLOSED">Yopildi</option>
                   </select>
                 </div>
               </div>
@@ -2043,28 +2241,33 @@ export default function OperatorPortal() {
                   ) : (
                     <Send className="w-3.5 h-3.5" />
                   )}
-                  <span>{isInternalNote ? "Eslatmani Saqlash" : "Javobni Yuborish"}</span>
+                  <span>{isInternalNote ? "Eslatmani saqlash" : "Javobni yuborish"}</span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* OPERATIONAL INCIDENT DECLARATION MODAL (API-122) */}
-      {isIncidentModalOpen && (
+      {/* OPERATIONAL INCIDENT DECLARATION MODAL */}
+      {mounted &&
+        isIncidentModalOpen &&
+        createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg bg-[#121214] border border-white/[0.12] rounded-xl shadow-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-rose-500" />
                 <h3 className="text-sm font-semibold text-white">
-                  Favqulodda Operatsion Hodisa E’lon Qilish
+                  Favqulodda operatsion hodisa e’lon qilish
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setIsIncidentModalOpen(false)}
                 className="text-zinc-400 hover:text-white transition-colors"
+                aria-label="Oynani yopish"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2087,7 +2290,7 @@ export default function OperatorPortal() {
             <form onSubmit={handleIncidentDeclareSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Insident Darajasi (Severity)
+                  Insident darajasi
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   {(["P1", "P2", "P3", "P4"] as const).map((sev) => (
@@ -2113,27 +2316,27 @@ export default function OperatorPortal() {
 
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Insident Sarlavhasi
+                  Insident sarlavhasi
                 </label>
                 <input
                   type="text"
                   required
                   value={incidentTitle}
                   onChange={(e) => setIncidentTitle(e.target.value)}
-                  placeholder="Masalan: SMS provayder ulanishida uzilish yoki kechikish..."
+                  placeholder="Masalan: SMS provayder ulanishida uzilish yoki kechikish…"
                   className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-zinc-300 block mb-1">
-                  Qisqacha Tavsif / Dastlabki Ta’sir
+                  Qisqacha tavsif / dastlabki ta’sir
                 </label>
                 <textarea
                   rows={3}
                   value={incidentSummary}
                   onChange={(e) => setIncidentSummary(e.target.value)}
-                  placeholder="Ta'sir doirasi, xavf darajasi va ko'rilayotgan dastlabki choralar..."
+                  placeholder="Ta’sir doirasi, xavf darajasi va ko‘rilayotgan dastlabki choralar…"
                   className="w-full bg-[#18181b] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 resize-none"
                 />
               </div>
@@ -2156,12 +2359,13 @@ export default function OperatorPortal() {
                   ) : (
                     <Flame className="w-3.5 h-3.5" />
                   )}
-                  <span>Hodisani E’lon Qilish</span>
+                  <span>Hodisani e’lon qilish</span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* LOGIN MODAL */}

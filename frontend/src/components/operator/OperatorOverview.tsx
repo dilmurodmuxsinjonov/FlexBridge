@@ -1,13 +1,35 @@
 "use client";
 
 import React from "react";
-import { ArrowUpRight, CalendarDays, CreditCard, FileCheck2, ShieldAlert } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  CreditCard,
+  FileCheck2,
+  FolderSearch,
+  KeyRound,
+  Scale,
+  ShieldAlert,
+  Sliders,
+  Users,
+} from "lucide-react";
 import type { OperatorAuditEventItem, OperatorSupportTicketItem, OperatorVerificationCaseItem } from "@/lib/api";
 import { enumLabel } from "@/lib/labels";
 import { firstName, uzDate } from "@/lib/person";
 import CountUp from "@/components/motion/CountUp";
+import type { GovernanceSection } from "./GovernanceOpsPanel";
 
-export type OperatorTab = "AUDIT" | "VERIFICATION" | "MODERATION" | "BREAK_GLASS" | "SUPPORT_OPS" | "FINANCE";
+export type OperatorTab =
+  | "STAFF_ROLES"
+  | "DIRECTORY"
+  | "FEATURE_FLAGS"
+  | "GOVERNANCE"
+  | "AUDIT"
+  | "VERIFICATION"
+  | "MODERATION"
+  | "BREAK_GLASS"
+  | "SUPPORT_OPS"
+  | "FINANCE";
 
 export interface OperatorOverviewProps {
   name?: string | null;
@@ -19,7 +41,13 @@ export interface OperatorOverviewProps {
   discrepancies: number | null;
   /** Draft vacancies waiting for a moderator (null when the role cannot moderate). */
   moderationCount?: number | null;
+  activeStaffGrantsCount?: number | null;
+  pendingPrivacyCount?: number | null;
+  pendingRecoveryCount?: number | null;
+  enabledR1FlagsCount?: number | null;
+  appealsCount?: number | null;
   onOpen: (tab: OperatorTab) => void;
+  onOpenGovernance?: (section: GovernanceSection) => void;
   /** Injected for tests; defaults to now. */
   today?: Date;
 }
@@ -31,13 +59,52 @@ const URGENT = new Set(["URGENT", "CRITICAL", "HIGH"]);
 /** "ORG_VERIFICATION_DECIDED" -> "Org verification decided" (operators read these; no raw codes). */
 const actionText = (a: string) => enumLabel(a);
 
-export function attentionItems(p: Pick<OperatorOverviewProps, "cases" | "tickets" | "discrepancies" | "visible" | "moderationCount">) {
-  const items: Array<{ key: string; text: string; tab: OperatorTab; count: number }> = [];
+export function attentionItems(
+  p: Pick<
+    OperatorOverviewProps,
+    | "cases"
+    | "tickets"
+    | "discrepancies"
+    | "visible"
+    | "moderationCount"
+    | "pendingRecoveryCount"
+    | "pendingPrivacyCount"
+    | "appealsCount"
+  >
+) {
+  const items: Array<{ key: string; text: string; tab: OperatorTab; count: number; governanceSection?: GovernanceSection }> = [];
   const urgent = p.tickets.filter((t) => !CLOSED_TICKET.has(t.status) && URGENT.has(t.priority)).length;
   const overdueCases = p.cases.filter((c) => OPEN_CASE.has(c.status || "") && c.due_at && new Date(c.due_at) < new Date()).length;
   if (p.visible.includes("SUPPORT_OPS") && urgent) items.push({ key: "urgent", text: "muhim murojaat (shoshilinch / yuqori)", tab: "SUPPORT_OPS", count: urgent });
   if (p.visible.includes("VERIFICATION") && overdueCases) items.push({ key: "overdue", text: "tekshiruv muddati o‘tgan", tab: "VERIFICATION", count: overdueCases });
   if (p.visible.includes("MODERATION") && p.moderationCount) items.push({ key: "moderation", text: "e’lon moderatsiyani kutmoqda", tab: "MODERATION", count: p.moderationCount });
+  if (p.visible.includes("GOVERNANCE") && p.pendingRecoveryCount) {
+    items.push({
+      key: "recovery",
+      text: "parol tiklash so‘rovi tasdiq kutmoqda",
+      tab: "GOVERNANCE",
+      count: p.pendingRecoveryCount,
+      governanceSection: "RECOVERY",
+    });
+  }
+  if (p.visible.includes("GOVERNANCE") && p.pendingPrivacyCount) {
+    items.push({
+      key: "privacy",
+      text: "ochiq maxfiylik (GDPR) so‘rovi",
+      tab: "GOVERNANCE",
+      count: p.pendingPrivacyCount,
+      governanceSection: "PRIVACY",
+    });
+  }
+  if (p.visible.includes("GOVERNANCE") && p.appealsCount) {
+    items.push({
+      key: "appeals",
+      text: "apellyatsiya ko‘rib chiqilishini kutmoqda",
+      tab: "GOVERNANCE",
+      count: p.appealsCount,
+      governanceSection: "APPEALS",
+    });
+  }
   if (p.visible.includes("FINANCE") && p.discrepancies) items.push({ key: "recon", text: "to‘lovda nomuvofiqlik", tab: "FINANCE", count: p.discrepancies });
   return items;
 }
@@ -125,7 +192,17 @@ function AttentionCard(props: OperatorOverviewProps) {
         <ul className="flex flex-col gap-2">
           {items.map((i) => (
             <li key={i.key}>
-              <button type="button" onClick={() => props.onOpen(i.tab)} className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-left hover:bg-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (i.governanceSection && props.onOpenGovernance) {
+                    props.onOpenGovernance(i.governanceSection);
+                  } else {
+                    props.onOpen(i.tab);
+                  }
+                }}
+                className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-left hover:bg-white/10"
+              >
                 <span className="text-sm">
                   <span className="font-display text-2xl font-bold tabular-nums">{i.count}</span> <span className="fb-muted">{i.text}</span>
                 </span>
@@ -215,18 +292,99 @@ function InkPanel({ auditEvents, discrepancies, visible, onOpen }: OperatorOverv
   );
 }
 
+function SuperAdminQuickGrid(props: OperatorOverviewProps) {
+  const { visible, onOpen, onOpenGovernance } = props;
+  const cards = [
+    visible.includes("STAFF_ROLES") && {
+      key: "STAFF_ROLES" as OperatorTab,
+      title: "Xodim rollari va matritsa",
+      subtitle: "Kim qaysi rolni beradi, doimiy tayinlov",
+      metric:
+        props.activeStaffGrantsCount != null
+          ? `${props.activeStaffGrantsCount} ta faol vakolat`
+          : "Vakolatlar matritsasi",
+      Icon: Users,
+      onClick: () => onOpen("STAFF_ROLES"),
+    },
+    visible.includes("FEATURE_FLAGS") && {
+      key: "FEATURE_FLAGS" as OperatorTab,
+      title: "Funksional flaglar",
+      subtitle: "R1 boshqaruvi va himoyalangan qulflar",
+      metric:
+        props.enabledR1FlagsCount != null
+          ? `${props.enabledR1FlagsCount} ta R1 flag faol`
+          : "Global flaglar holati",
+      Icon: Sliders,
+      onClick: () => onOpen("FEATURE_FLAGS"),
+    },
+    visible.includes("DIRECTORY") && {
+      key: "DIRECTORY" as OperatorTab,
+      title: "Katalog va reyestr",
+      subtitle: "Foydalanuvchilar, korxonalar va OTM",
+      metric: "Yagona tezkor qidiruv",
+      Icon: FolderSearch,
+      onClick: () => onOpen("DIRECTORY"),
+    },
+    visible.includes("GOVERNANCE") && {
+      key: "GOVERNANCE" as OperatorTab,
+      title: "Komplayens va tiklash",
+      subtitle: "GDPR, parol tiklash, apellyatsiya, vorislik",
+      metric:
+        props.pendingRecoveryCount || props.pendingPrivacyCount
+          ? `${(props.pendingRecoveryCount ?? 0) + (props.pendingPrivacyCount ?? 0)} ta kutayotgan ariza`
+          : "Boshqaruv navbatlari",
+      Icon: Scale,
+      onClick: () => (onOpenGovernance ? onOpenGovernance("PRIVACY") : onOpen("GOVERNANCE")),
+    },
+  ].filter((c): c is Exclude<typeof c, false> => Boolean(c));
+
+  if (cards.length === 0) return null;
+
+  return (
+    <section aria-label="Boshqaruv tezkor bo‘limlari" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map(({ key, title, subtitle, metric, Icon, onClick }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={onClick}
+          className="fb-panel skeuo-card skeuo-card-interactive flex flex-col justify-between gap-3 p-4 text-left"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span className="fb-avatar h-9 w-9 shrink-0" aria-hidden="true">
+              <Icon className="h-4 w-4" />
+            </span>
+            <ArrowUpRight className="h-4 w-4 text-[var(--fb-ink-muted)]" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--fb-ink)]">{title}</h2>
+            <p className="mt-0.5 text-xs text-[var(--fb-ink-muted)]">{subtitle}</p>
+          </div>
+          <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fb-ink-secondary)]">
+            {key === "GOVERNANCE" && (props.pendingRecoveryCount ?? 0) > 0 && (
+              <KeyRound className="h-3.5 w-3.5 text-[var(--fb-accent)]" aria-hidden="true" />
+            )}
+            <span>{metric}</span>
+          </p>
+        </button>
+      ))}
+    </section>
+  );
+}
+
 /** Bento overview for platform operators (only the modules their role may open). */
 export default function OperatorOverview(props: OperatorOverviewProps) {
   const today = props.today ?? new Date();
   const v = props.visible;
-  const roleLabel = props.roles.length ? props.roles.map((r) => enumLabel(r)).join(", ") : "Operator";
+  const platformRoles = props.roles.filter((r) => r.toUpperCase() !== "CANDIDATE");
+  const visibleRoles = platformRoles.length ? platformRoles : props.roles;
+  const roleLabel = visibleRoles.length ? visibleRoles.map((r) => enumLabel(r)).join(", ") : "Operator";
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
           <p className="text-sm text-[var(--fb-ink-muted)]">Salom, {firstName(props.name, "hurmatli operator")}</p>
           <h1 className="fb-display mt-1">Operator paneli</h1>
-          <p className="mt-2 max-w-xl text-sm text-[var(--fb-ink-secondary)]">Tekshiruvlar, murojaatlar, to‘lovlar va audit — bitta joyda</p>
+          <p className="mt-2 max-w-xl text-sm text-[var(--fb-ink-secondary)]">Xodim rollari, flaglar, tekshiruvlar, moliya va audit — bitta joyda</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="fb-capsule inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold">
@@ -235,6 +393,7 @@ export default function OperatorOverview(props: OperatorOverviewProps) {
           <span className="fb-nav-active rounded-full px-3.5 py-2 text-xs">{roleLabel}</span>
         </div>
       </header>
+      <SuperAdminQuickGrid {...props} />
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         {v.includes("VERIFICATION") && <CasesCard {...props} />}
         {v.includes("SUPPORT_OPS") && <TicketsCard {...props} />}

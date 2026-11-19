@@ -1,7 +1,7 @@
 """Pending school binding and personally accepted original teacher authority."""
 from uuid import uuid4
 from datetime import datetime,timezone
-from sqlalchemy import select,text
+from sqlalchemy import exists, select, text
 
 from app.core.audit import AppendOnlyAuditStore
 from app.db.storage import table,transaction,now
@@ -295,8 +295,21 @@ class AcademicAdmissionService:
         with transaction() as conn:
             authority.account_authority(conn,actor)
             a,q,g=table('academic_assignments'),table('academic_assignment_proofs'),table('institution_role_grants')
-            query=select(a.c.id,a.c.placement_id,a.c.institution_id,a.c.assigned_at,a.c.accepted_at).join(q,q.c.assignment_id==a.c.id)
-            query=query.join(g,g.c.id==q.c.teacher_grant_id).where(q.c.teacher_user_id==actor.user_id,a.c.revoked_at.is_(None),
+            p,t,ac=table('placements'),table('placement_terms'),table('academic_assignment_consents')
+            query=select(
+                a.c.id,a.c.placement_id,a.c.institution_id,a.c.assigned_at,a.c.accepted_at,
+                p.c.status.label('placement_status'),
+                t.c.version.label('current_terms_version'),
+                exists().where(
+                    ac.c.placement_id==a.c.placement_id,
+                    ac.c.assignment_id==a.c.id,
+                    ac.c.terms_id==p.c.current_terms_id,
+                ).label('consented_current_terms'),
+            ).join(q,q.c.assignment_id==a.c.id).join(g,g.c.id==q.c.teacher_grant_id).join(
+                p,p.c.id==a.c.placement_id
+            ).join(
+                t,t.c.id==p.c.current_terms_id
+            ).where(q.c.teacher_user_id==actor.user_id,a.c.revoked_at.is_(None),
                 g.c.appointment_id==q.c.teacher_appointment_id)
             query=query.where(text("flexbridge.academic_grant_current(:actor,academic_assignments.institution_id,academic_assignment_proofs.teacher_grant_id,'TEACHER')")).params(actor=actor.user_id)
             return page(conn,query,a.c.id,a.c.assigned_at,limit=limit,after=after)

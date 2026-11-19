@@ -45,7 +45,7 @@ const STUDENT_NAV_GROUPS: SidebarGroup[] = [
     title: "Karyera & Rezyume",
     items: [
       { href: "/nomzod", label: "Profil & Rezyume", short: "Profil", icon: User, exact: true },
-      { href: "/", label: "E’lonlar Katalogi", short: "E’lonlar", icon: Search, exact: true },
+      { href: "/elonlar", label: "E’lonlar Katalogi", short: "E’lonlar", icon: Search },
     ],
   },
   {

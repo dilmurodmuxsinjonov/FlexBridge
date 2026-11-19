@@ -1,7 +1,7 @@
 import type { DailyLogItem } from "./api";
 
 type RawReview = { decision?: string; comment?: string | null; decided_at?: string };
-type RawTask = { id?: string; title?: string; result_text?: string; minutes?: number; start_minute?: number | null; end_minute?: number | null };
+type RawTask = { id?: string; title?: string; result_text?: string; minutes?: number; start_minute?: number | null; end_minute?: number | null; evidence_count?: number };
 type RawRevision = {
   id?: string;
   revision?: number;
@@ -56,6 +56,7 @@ export function normalizeLog(raw: RawLog): DailyLogItem {
       id: t.id,
       title: t.title ?? t.result_text ?? "",
       minutes: t.minutes ?? 0,
+      ...(typeof t.evidence_count === "number" ? { evidence_count: t.evidence_count } : {}),
     })),
     workplace_reviews: (rev.workplace_reviews || []).map((r) => ({ decision: r.decision ?? "", comment: r.comment ?? undefined, decided_at: r.decided_at ?? "" })),
     academic_reviews: (rev.academic_reviews || []).map((r) => ({ decision: r.decision ?? "", comment: r.comment ?? undefined, decided_at: r.decided_at ?? "" })),
