@@ -117,6 +117,14 @@ const MESSAGES: Record<string, string> = {
   CURRENT_VERIFIED_ENROLLMENT_REQUIRED: "Faqat joriy va OTM tasdiqlagan talabalik yozuvini ulash mumkin.",
   PENDING_ACADEMIC_PLACEMENT_REQUIRED: "Faqat rejalashtirilgan dual ta’lim amaliyoti uchun akademik kuzatuv so‘raladi.",
   SCHOOL_BINDING_AMENDMENT_REQUIRED: "Bu amaliyotga OTM kuzatuvi allaqachon biriktirilgan.",
+  INVALID_DISPLAY_NAME: "Ism-familiya kamida 2 ta belgidan iborat bo‘lishi kerak.",
+  PASSWORD_UNCHANGED: "Yangi parol joriy paroldan farq qilishi kerak.",
+  LAST_CONTACT_CANNOT_BE_REMOVED: "Hisobda kamida bitta tasdiqlangan telefon yoki e-pochta qolishi shart.",
+  CONTACT_NOT_FOUND: "Aloqa manzili topilmadi yoki allaqachon o‘chirilgan.",
+  PROFILE_UPDATE_FAILED: "Foydalanuvchi nomini yangilab bo‘lmadi.",
+  PASSWORD_CHANGE_FAILED: "Parolni yangilab bo‘lmadi. Joriy parol va tasdiq kodini tekshiring.",
+  CONTACT_PRIMARY_UPDATE_FAILED: "Asosiy kirish manzilini o‘zgartirib bo‘lmadi.",
+  CONTACT_REMOVE_FAILED: "Aloqa manzilini o‘chirib bo‘lmadi.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

@@ -88,7 +88,7 @@ async def authentication_boundary(request: Request, call_next):
             return JSONResponse(status_code=401,content={'detail':{'code':'AUTH_REQUIRED'}})
         try:
             session=await run_in_threadpool(auth_service.validate_session,value[7:].strip())
-            self_service=request.url.path.startswith(('/api/v1/me/security','/api/v1/me/contacts','/api/v1/me/sessions/','/api/v1/auth/sessions/')) or request.url.path=='/api/v1/auth/me'
+            self_service=request.url.path.startswith(('/api/v1/me/profile','/api/v1/me/security','/api/v1/me/contacts','/api/v1/me/sessions/','/api/v1/auth/sessions/')) or request.url.path=='/api/v1/auth/me'
             if set(session['roles']) & SENSITIVE_ROLES and session['assurance']!='MFA' and not self_service:
                 return JSONResponse(status_code=403,content={'detail':{'code':'MFA_ENROLLMENT_REQUIRED'}})
         except AuthError as exc:

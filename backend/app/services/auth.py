@@ -144,11 +144,21 @@ class AuthSessionService:
             return {'session_id':row['id'],'user_id':row['user_id'],'roles':roles_for(conn,row['user_id']),
                 'assurance':row['assurance'],'expires_at':row['expires_at'],'status':'ACTIVE'}
 
-    def rotate_security(self,conn,user_id):
+    def rotate_security(self,conn,user_id,*,keep_session_id=None):
         users,sessions=table('users'),table('sessions')
-        conn.execute(select(users.c.id).where(users.c.id==user_id).with_for_update())
-        conn.execute(users.update().where(users.c.id==user_id).values(auth_version=users.c.auth_version+1,updated_at=now()))
-        conn.execute(sessions.update().where(sessions.c.user_id==user_id,sessions.c.revoked_at.is_(None)).values(revoked_at=now(),updated_at=now()))
+        row=conn.execute(select(users.c.auth_version).where(users.c.id==user_id).with_for_update()).mappings().one()
+        new_version=int(row['auth_version'])+1
+        conn.execute(users.update().where(users.c.id==user_id).values(auth_version=new_version,updated_at=now()))
+        revoke_query=sessions.update().where(sessions.c.user_id==user_id,sessions.c.revoked_at.is_(None))
+        if keep_session_id:
+            conn.execute(sessions.update().where(
+                sessions.c.id==keep_session_id,
+                sessions.c.user_id==user_id,
+                sessions.c.revoked_at.is_(None),
+            ).values(auth_version=new_version,updated_at=now()))
+            revoke_query=revoke_query.where(sessions.c.id!=keep_session_id)
+        revoked=conn.execute(revoke_query.values(revoked_at=now(),updated_at=now()))
+        return {'auth_version':new_version,'revoked_sessions':int(revoked.rowcount or 0)}
 
     def revoke_session(self, *, session_id, actor_id, reason='USER_LOGOUT', require_owner_user_id=None):
         from app.core.audit import AppendOnlyAuditStore

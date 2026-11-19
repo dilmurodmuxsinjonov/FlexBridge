@@ -9,6 +9,8 @@ import {
   Phone,
   Plus,
   RefreshCw,
+  Star,
+  Trash2,
   X,
 } from "lucide-react";
 import { fetchAuthChallengeStatus, fetchAuthOptions } from "@/lib/api";
@@ -17,7 +19,9 @@ import {
   bindSecondaryContact,
   consumeContactChallenge,
   fetchMyContacts,
+  removeMyContact,
   resendAuthChallenge,
+  setPrimaryContact,
   startContactChallenge,
   type UserContactItem,
 } from "@/lib/authSecurity";
@@ -45,6 +49,14 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const [pendingAction, setPendingAction] = useState<{
+    kind: "primary" | "remove";
+    contact: UserContactItem;
+  } | null>(null);
+  const [actionPassword, setActionPassword] = useState("");
+  const [actionTotp, setActionTotp] = useState("");
+  const [actionBusy, setActionBusy] = useState(false);
 
   const isEmail = destination.includes("@");
   const channel: "EMAIL" | "PHONE" = isEmail ? "EMAIL" : "PHONE";
@@ -182,15 +194,54 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
     }
   };
 
+  const openContactAction = (kind: "primary" | "remove", contact: UserContactItem) => {
+    setError(null);
+    setNotice(null);
+    setActionPassword("");
+    setActionTotp("");
+    setPendingAction({ kind, contact });
+  };
+
+  const handleConfirmContactAction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingAction || !actionPassword.trim()) return;
+    setActionBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const totp = actionTotp.trim() || undefined;
+      if (pendingAction.kind === "primary") {
+        await setPrimaryContact(pendingAction.contact.id, actionPassword.trim(), totp);
+        setNotice(`${pendingAction.contact.masked_destination} asosiy kirish aloqasi sifatida belgilandi.`);
+      } else {
+        const res = await removeMyContact(pendingAction.contact.id, actionPassword.trim(), totp);
+        setNotice(
+          res.promoted_primary_contact_id
+            ? `${pendingAction.contact.masked_destination} o‘chirildi va keyingi tasdiqlangan aloqa avtomatik asosiy qilib belgilandi.`
+            : `${pendingAction.contact.masked_destination} hisobdan o‘chirildi.`
+        );
+      }
+      const latest = await fetchMyContacts();
+      setContacts(latest);
+      setPendingAction(null);
+      setActionPassword("");
+      setActionTotp("");
+    } catch (err: unknown) {
+      setError(humanizeMessage(err instanceof Error ? err.message : null));
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
   return (
-    <div className="p-5 md:p-6 rounded-xl bg-[#121214] border border-white/[0.08] shadow-sm space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+    <div className="skeuo-card p-5 md:p-6 rounded-2xl space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--fb-border)] pb-4">
         <div>
-          <h2 className="text-base font-semibold text-white flex items-center gap-2">
-            <Mail className="w-5 h-5 text-sky-400" />
+          <h2 className="text-base font-semibold text-[var(--fb-ink)] flex items-center gap-2">
+            <Mail className="w-5 h-5 text-sky-500" aria-hidden="true" />
             Tasdiqlangan Aloqalar ({contacts.length})
           </h2>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-[var(--fb-ink-secondary)] mt-1">
             Kirish va tiklash uchun bog‘langan telefon raqamlar hamda elektron pochta manzillari.
           </p>
         </div>
@@ -198,40 +249,41 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
           type="button"
           onClick={() => {
             setShowAdd((prev) => !prev);
+            setPendingAction(null);
             setError(null);
           }}
-          className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto"
+          className="skeuo-btn-obsidian px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           <span>Qo‘shimcha aloqa qo‘shish</span>
         </button>
       </div>
 
       {error && (
-        <div role="alert" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+        <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
 
       {notice && (
-        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between gap-2">
+        <div role="status" className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs flex items-center justify-between gap-2">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
             {notice}
           </span>
-          <button type="button" onClick={() => setNotice(null)} aria-label="Yopish" className="text-emerald-400">
-            <X className="w-3.5 h-3.5" />
+          <button type="button" onClick={() => setNotice(null)} aria-label="Yopish" className="text-emerald-600 dark:text-emerald-400">
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       )}
 
       {showAdd && (
-        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-3 text-xs">
+        <div className="skeuo-well p-4 rounded-xl space-y-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-white">Yangi telefon yoki e-pochta ulash</span>
-            <button type="button" onClick={resetWizard} className="text-zinc-400 hover:text-white">
-              <X className="w-4 h-4" />
+            <span className="font-semibold text-[var(--fb-ink)]">Yangi telefon yoki e-pochta ulash</span>
+            <button type="button" onClick={resetWizard} aria-label="Qo‘shish oynasini yopish" className="text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]">
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -243,7 +295,7 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="+998901234567 yoki name@example.com"
-                className="w-full px-3 py-2 rounded-lg bg-[#18181b] border border-white/[0.1] text-xs text-white"
+                className="skeuo-input w-full px-3.5 py-2 rounded-xl text-xs"
               />
               {!isEmail && telegramMode !== "DISABLED" && (
                 <div className="flex gap-2">
@@ -254,8 +306,8 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                       onClick={() => setDeliveryMethod(m)}
                       className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${
                         deliveryMethod === m
-                          ? "bg-sky-500/20 border-sky-500/40 text-sky-300"
-                          : "bg-white/[0.04] border-white/[0.08] text-zinc-400"
+                          ? "bg-sky-500/15 border-sky-500/40 text-sky-700 dark:text-sky-300"
+                          : "skeuo-btn-secondary"
                       }`}
                     >
                       {m}
@@ -266,9 +318,9 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
               <button
                 type="submit"
                 disabled={busy || !destination.trim()}
-                className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="skeuo-btn-obsidian px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />}
                 <span>Kod yuborish</span>
               </button>
             </form>
@@ -296,12 +348,12 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="6 xonali kod"
-                  className="px-3 py-2 rounded-lg bg-[#18181b] border border-white/[0.1] text-xs text-white font-mono"
+                  className="skeuo-input px-3.5 py-2 rounded-xl text-xs font-mono"
                 />
                 <button
                   type="submit"
                   disabled={busy || code.trim().length !== 6}
-                  className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold disabled:opacity-50"
+                  className="skeuo-btn-obsidian px-4 py-2 rounded-xl text-xs font-semibold disabled:opacity-50"
                 >
                   Kodni tasdiqlash
                 </button>
@@ -309,9 +361,9 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                   type="button"
                   disabled={busy || resendIn > 0}
                   onClick={() => void handleResend()}
-                  className="px-3 py-2 rounded-lg bg-white/[0.06] text-zinc-300 text-xs font-semibold inline-flex items-center gap-1 disabled:opacity-50"
+                  className="skeuo-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1 disabled:opacity-50"
                 >
-                  <RefreshCw className="w-3 h-3" />
+                  <RefreshCw className="w-3 h-3" aria-hidden="true" />
                   <span>{resendIn > 0 ? `Qayta yuborish (${resendIn}s)` : "Kodni qayta yuborish"}</span>
                 </button>
               </div>
@@ -325,7 +377,7 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Tasdiqlash uchun joriy parol *"
-                  className="px-3 py-2 rounded-lg bg-[#18181b] border border-white/[0.1] text-xs text-white"
+                  className="skeuo-input px-3.5 py-2 rounded-xl text-xs"
                 />
                 {totpEnabled && (
                   <input
@@ -334,16 +386,16 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
                     placeholder="Joriy 6 xonali TOTP kodi"
-                    className="px-3 py-2 rounded-lg bg-[#18181b] border border-white/[0.1] text-xs text-white font-mono"
+                    className="skeuo-input px-3.5 py-2 rounded-xl text-xs font-mono"
                   />
                 )}
               </div>
               <button
                 type="submit"
                 disabled={busy || !password.trim()}
-                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="skeuo-btn-accent px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />}
                 <span>Aloqani bog‘lash</span>
               </button>
             </form>
@@ -351,41 +403,138 @@ export default function ContactsPanel({ totpEnabled }: { totpEnabled: boolean })
         </div>
       )}
 
+      {pendingAction && (
+        <form onSubmit={handleConfirmContactAction} className="skeuo-well p-4 rounded-xl space-y-3 text-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold text-[var(--fb-ink)]">
+              {pendingAction.kind === "primary"
+                ? `${pendingAction.contact.masked_destination} manzilini asosiy login sifatida belgilash`
+                : `${pendingAction.contact.masked_destination} manzilini hisobdan o‘chirish`}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPendingAction(null)}
+              aria-label="Tasdiqlashni bekor qilish"
+              className="text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              type="password"
+              required
+              value={actionPassword}
+              onChange={(e) => setActionPassword(e.target.value)}
+              placeholder="Tasdiqlash uchun joriy parol *"
+              aria-label="Aloqa amali uchun joriy parol"
+              className="skeuo-input px-3.5 py-2 rounded-xl text-xs"
+            />
+            {totpEnabled && (
+              <input
+                type="text"
+                maxLength={6}
+                value={actionTotp}
+                onChange={(e) => setActionTotp(e.target.value.replace(/\D/g, ""))}
+                placeholder="Joriy 6 xonali TOTP kodi"
+                aria-label="Aloqa amali uchun TOTP kodi"
+                className="skeuo-input px-3.5 py-2 rounded-xl text-xs font-mono"
+              />
+            )}
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingAction(null)}
+              className="skeuo-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold"
+            >
+              Bekor qilish
+            </button>
+            <button
+              type="submit"
+              disabled={actionBusy || !actionPassword.trim()}
+              className={`px-4 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50 ${
+                pendingAction.kind === "remove"
+                  ? "bg-rose-600 hover:bg-rose-500 text-white"
+                  : "skeuo-btn-obsidian"
+              }`}
+            >
+              {actionBusy && <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />}
+              <span>
+                {pendingAction.kind === "primary" ? "Asosiy qilib tasdiqlash" : "O‘chirishni tasdiqlash"}
+              </span>
+            </button>
+          </div>
+        </form>
+      )}
+
       {loading ? (
-        <div className="py-4 flex items-center gap-2 text-xs text-zinc-400">
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <div className="py-4 flex items-center gap-2 text-xs text-[var(--fb-ink-secondary)]">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
           <span>Aloqalar yuklanmoqda...</span>
         </div>
       ) : contacts.length === 0 ? (
-        <p className="text-xs text-zinc-400">Tasdiqlangan aloqa manzili topilmadi.</p>
+        <p className="text-xs text-[var(--fb-ink-secondary)]">Tasdiqlangan aloqa manzili topilmadi.</p>
       ) : (
-        <div className="divide-y divide-white/[0.06]">
-          {contacts.map((c) => (
-            <div key={c.id} className="py-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2.5">
-                {c.channel === "EMAIL" ? (
-                  <Mail className="w-4 h-4 text-sky-400" />
-                ) : (
-                  <Phone className="w-4 h-4 text-emerald-400" />
-                )}
-                <div>
-                  <span className="font-mono font-semibold text-white">{c.masked_destination}</span>
-                  <div className="text-[11px] text-zinc-400">
-                    {c.channel === "EMAIL" ? "Elektron pochta" : "Telefon raqam"}
+        <div className="divide-y divide-[var(--fb-border)]">
+          {contacts.map((c) => {
+            const canRemove = contacts.length > 1;
+            return (
+              <div key={c.id} className="py-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2.5">
+                  {c.channel === "EMAIL" ? (
+                    <Mail className="w-4 h-4 text-sky-500 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <Phone className="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
+                  )}
+                  <div>
+                    <span className="font-mono font-semibold text-[var(--fb-ink)]">{c.masked_destination}</span>
+                    <div className="text-[11px] text-[var(--fb-ink-muted)]">
+                      {c.channel === "EMAIL" ? "Elektron pochta" : "Telefon raqam"}
+                    </div>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                      c.is_primary
+                        ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border-emerald-500/25"
+                        : "skeuo-badge-recessed"
+                    }`}
+                  >
+                    {c.is_primary ? "Asosiy" : "Qo‘shimcha"}
+                  </span>
+                  {!c.is_primary && (
+                    <button
+                      type="button"
+                      onClick={() => openContactAction("primary", c)}
+                      className="skeuo-btn-secondary px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1"
+                    >
+                      <Star className="w-3 h-3" aria-hidden="true" />
+                      <span>Asosiy qilish</span>
+                    </button>
+                  )}
+                  {canRemove ? (
+                    <button
+                      type="button"
+                      onClick={() => openContactAction("remove", c)}
+                      className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/25 text-[11px] font-semibold inline-flex items-center gap-1 transition"
+                    >
+                      <Trash2 className="w-3 h-3" aria-hidden="true" />
+                      <span>O‘chirish</span>
+                    </button>
+                  ) : (
+                    <span
+                      title="Hisobda kamida bitta tasdiqlangan kirish manzili qolishi shart"
+                      className="text-[10px] text-[var(--fb-ink-muted)]"
+                    >
+                      Yagona kirish manzili
+                    </span>
+                  )}
+                </div>
               </div>
-              <span
-                className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                  c.is_primary
-                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                    : "bg-white/[0.06] text-zinc-300 border-white/[0.1]"
-                }`}
-              >
-                {c.is_primary ? "Asosiy" : "Qo‘shimcha"}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

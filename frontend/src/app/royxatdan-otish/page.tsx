@@ -215,7 +215,7 @@ function RoyxatdanOtishWizard() {
       if (!res.ok || !data.ok) {
         if (data.error === "MFA_REQUIRED" || data.detail?.code === "MFA_REQUIRED") {
           setErrorMessage(
-            "Korxona taklifini qabul qilish uchun avval 2FA (TOTP) ni yoqing va qayta tizimga kiring (/nomzod/xavfsizlik)."
+            "Korxona taklifini qabul qilish uchun avval 2FA (TOTP) ni yoqing va qayta tizimga kiring (/hisob)."
           );
         } else {
           setErrorMessage(errorText(data, "Taklifni qabul qilib bo‘lmadi."));
@@ -1294,7 +1294,7 @@ function RoyxatdanOtishWizard() {
                 )}
 
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-800/80 text-xs">
-                  <Link href="/nomzod/xavfsizlik" className="text-amber-300 hover:text-amber-200 transition">
+                  <Link href="/hisob" className="text-amber-300 hover:text-amber-200 transition">
                     2FA (TOTP) ni sozlash
                   </Link>
                   <Link href="/korxona/kirish" className="text-indigo-400 hover:text-indigo-300 transition">
@@ -1414,10 +1414,10 @@ function RoyxatdanOtishWizard() {
                     {activationBusy ? "Tekshirilmoqda..." : "Operator ruxsatini qayta tekshirish"}
                   </button>
                   <Link
-                    href="/nomzod/xavfsizlik"
+                    href="/hisob"
                     className="w-full text-center rounded-xl border border-amber-500/35 bg-zinc-900/80 px-4 py-2.5 text-xs font-semibold text-amber-200 hover:bg-zinc-900 transition"
                   >
-                    2FA (TOTP) ni sozlash (/nomzod/xavfsizlik)
+                    2FA (TOTP) ni sozlash (/hisob)
                   </Link>
                 </div>
 

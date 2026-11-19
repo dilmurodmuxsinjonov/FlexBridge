@@ -122,6 +122,16 @@ Bearer sifatida yuborish yoki public keyni bilish sessiya bermaydi. Synced passk
 zero-counter xulqi library/spec bo'yicha qo'llab-quvvatlanadi; musbat counter ortga qaytsa
 verifier rad etadi. Haqiqiy browser/hardware UX alohida stagingda tekshirilishi kerak.
 
+## Akkaunt o'zini-o'zi boshqarish (`/hisob`, barcha rollar)
+
+Barcha autentifikatsiyadan o'tgan foydalanuvchilar (`CANDIDATE`, `EMPLOYER`, `ACADEMIC`, `OPERATOR` va barcha org/OTM/platforma rollari) rol cheklovisiz `/hisob` (va nomzod kabinetidan `/nomzod/xavfsizlik`) sahifasi orqali o'z hisobini boshqaradi:
+
+- `PATCH /api/v1/me/profile`: `display_name` (2..200 belgi, ortiqcha bo'shliqlar normallanadi) ni yangilaydi; sezgir rollarning MFA o'rnatilmagan sessiyalari ham `self_service` doirasida ruxsat etiladi va `ACCOUNT_PROFILE_UPDATED` audit yozuvi yoziladi (metadata ichiga raw ism kiritilmaydi).
+- `POST /api/v1/me/security/password`: joriy parol + (agar MFA faol bo'lsa) TOTP kodi yoki `<5 min` MFA sessiya tasdig'idan (`require_factor`) so'ng yangi parolni (`12..1024` belgi, avvalgisidan farqli) o'rnatadi; `auth_version` ni oshiradi, joriy sessiyani yangi `auth_version` bilan saqlab qoladi (`reauthentication_required: False`), qolgan barcha faol sessiyalarni darhol bekor qiladi va `ACCOUNT_PASSWORD_CHANGED` audit yozuvini yozadi.
+- `POST /api/v1/me/contacts`: foydalanuvchida allaqachon tasdiqlangan faol asosiy kontakt mavjud bo'lsa, yangi bog'langan kontakt `is_primary=False` holatida qo'shiladi; birinchi kontakt esa `is_primary=True` bo'ladi.
+- `PATCH /api/v1/me/contacts/{id}/primary`: step-up (`require_factor`) tasdig'idan so'ng foydalanuvchining tanlangan tasdiqlangan kontaktini `is_primary=True` qilib belgilaydi (`PRIMARY_CONTACT_CHANGED`). Begona yoki mavjud bo'lmagan ID lar `404 CONTACT_NOT_FOUND` qaytaradi.
+- `DELETE /api/v1/me/contacts/{id}`: step-up (`require_factor`) tasdig'idan so'ng kontaktni yumshoq bekor qiladi (`normalized_value='released:'+uuid4()`, `revoked_at=now()`, `is_primary=False`) — FK tarixi saqlanadi va eski raqam/e-pochta boshqa ro'yxatdan o'tishda qayta ishlatilishi mumkin. Agar o'chirilayotgan kontakt `is_primary=True` bo'lsa, keyingi tasdiqlangan faol kontakt avtomatik `is_primary=True` qilinadi. Oxirgi tasdiqlangan kontaktni o'chirish `409 LAST_CONTACT_CANNOT_BE_REMOVED` bilan bloklanadi.
+
 ## Contact va recovery
 
 Mavjud hisobga boshqa kontakt qo'shish uchun CONTACT challenge o'z sessiyasidan so'raladi,

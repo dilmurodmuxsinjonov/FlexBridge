@@ -148,9 +148,16 @@ class IdentityService:
             auth_service.rotate_security(conn,old['user_id'])
             audit.append_audit_event(actor_id=user_id,action='CONTACT_REBOUND_TO_NEW_ACCOUNT',entity_type='contact',entity_id=old['id'],
                 metadata={'previous_user_id':old['user_id'],'destination_digest':digest('destination',channel+':'+value)})
+        contacts=table('user_contacts')
+        has_primary=conn.execute(select(contacts.c.id).where(
+            contacts.c.user_id==user_id,
+            contacts.c.verified_at.is_not(None),
+            contacts.c.revoked_at.is_(None),
+            contacts.c.is_primary.is_(True),
+        ).limit(1)).first() is not None
         cid=str(uuid4())
-        conn.execute(table('user_contacts').insert().values(id=cid,created_at=now(),updated_at=now(),user_id=user_id,channel=channel,
-            normalized_value=value,verified_at=now(),is_primary=True))
+        conn.execute(contacts.insert().values(id=cid,created_at=now(),updated_at=now(),user_id=user_id,channel=channel,
+            normalized_value=value,verified_at=now(),is_primary=not has_primary))
         return cid
 
     def register(self,*,verification_token,display_name,password,adult_confirmed,terms_version,privacy_version,roles=None,enable_totp=False):
@@ -230,6 +237,102 @@ class IdentityService:
             cid=self._bind_contact(conn,user_id=actor.user_id,channel=proof['payload']['channel'],value=proof['payload']['value'])
             audit.append_audit_event(actor_id=actor.user_id,action='CONTACT_VERIFIED',entity_type='contact',entity_id=cid)
             return {'contact_id':cid,'verified':True}
+
+    def update_profile(self,*,actor,display_name):
+        """Update the authenticated user's account display name across all roles."""
+        rate_limit('security-management',actor.user_id,20,600)
+        clean=' '.join(display_name.split())
+        if len(clean)<2:
+            raise AuthError('INVALID_DISPLAY_NAME','Display name must be at least 2 characters',422)
+        with transaction() as conn:
+            user=lock_user(conn,actor.user_id)
+            if not user or user['status']!='ACTIVE':
+                raise AuthError('INVALID_CREDENTIALS','Account is not active',403)
+            conn.execute(table('users').update().where(table('users').c.id==actor.user_id).values(
+                display_name=clean,updated_at=now()))
+            audit.append_audit_event(actor_id=actor.user_id,action='ACCOUNT_PROFILE_UPDATED',entity_type='user',
+                entity_id=actor.user_id,metadata={'previous_length':len(user['display_name'] or ''),'new_length':len(clean)})
+            return {'user_id':actor.user_id,'display_name':clean}
+
+    def change_password(self,*,actor,current_password,new_password,totp_code=None):
+        """Change password after step-up check, keeping current session alive while revoking all other sessions."""
+        rate_limit('security-management',actor.user_id,10,600)
+        with transaction() as conn:
+            require_factor(conn,actor.user_id,current_password,totp_code,actor.session_id)
+            if hmac.compare_digest(current_password.encode('utf-8'),new_password.encode('utf-8')):
+                raise AuthError('PASSWORD_UNCHANGED','New password must differ from current password',422)
+            conn.execute(table('users').update().where(table('users').c.id==actor.user_id).values(
+                password_hash=hash_password(new_password),updated_at=now()))
+            rotated=auth_service.rotate_security(conn,actor.user_id,keep_session_id=actor.session_id)
+            audit.append_audit_event(actor_id=actor.user_id,action='ACCOUNT_PASSWORD_CHANGED',entity_type='user',
+                entity_id=actor.user_id,metadata={'revoked_other_sessions':rotated['revoked_sessions']})
+            return {'password_updated':True,'revoked_other_sessions':rotated['revoked_sessions'],'reauthentication_required':False}
+
+    def _active_user_contacts(self,conn,user_id):
+        contacts=table('user_contacts')
+        return conn.execute(select(contacts).where(
+            contacts.c.user_id==user_id,
+            contacts.c.verified_at.is_not(None),
+            contacts.c.revoked_at.is_(None),
+        ).order_by(contacts.c.is_primary.desc(),contacts.c.created_at.asc())).mappings().all()
+
+    def set_primary_contact(self,*,actor,contact_id,password,totp_code=None):
+        """Promote one of the account's verified contacts to primary login contact."""
+        rate_limit('security-management',actor.user_id,10,600)
+        with transaction() as conn:
+            require_factor(conn,actor.user_id,password,totp_code,actor.session_id)
+            rows=self._active_user_contacts(conn,actor.user_id)
+            target=next((r for r in rows if str(r['id'])==str(contact_id)),None)
+            if not target:
+                raise AuthError('CONTACT_NOT_FOUND','Contact not found',404)
+            contacts=table('user_contacts')
+            conn.execute(contacts.update().where(
+                contacts.c.user_id==actor.user_id,
+                contacts.c.revoked_at.is_(None),
+                contacts.c.id!=contact_id,
+                contacts.c.is_primary.is_(True),
+            ).values(is_primary=False,updated_at=now()))
+            if not target['is_primary']:
+                conn.execute(contacts.update().where(
+                    contacts.c.id==contact_id,
+                    contacts.c.user_id==actor.user_id,
+                    contacts.c.revoked_at.is_(None),
+                ).values(is_primary=True,updated_at=now()))
+            audit.append_audit_event(actor_id=actor.user_id,action='PRIMARY_CONTACT_CHANGED',entity_type='contact',
+                entity_id=str(contact_id),metadata={'channel':target['channel']})
+            return {'contact_id':str(contact_id),'channel':target['channel'],'is_primary':True}
+
+    def remove_contact(self,*,actor,contact_id,password,totp_code=None):
+        """Soft-revoke a verified login contact while guaranteeing at least one active verified contact remains."""
+        rate_limit('security-management',actor.user_id,10,600)
+        with transaction() as conn:
+            require_factor(conn,actor.user_id,password,totp_code,actor.session_id)
+            rows=self._active_user_contacts(conn,actor.user_id)
+            target=next((r for r in rows if str(r['id'])==str(contact_id)),None)
+            if not target:
+                raise AuthError('CONTACT_NOT_FOUND','Contact not found',404)
+            remaining=[r for r in rows if str(r['id'])!=str(contact_id)]
+            if not remaining:
+                raise AuthError('LAST_CONTACT_CANNOT_BE_REMOVED','At least one verified login contact is required',409)
+            contacts=table('user_contacts')
+            # Soft-revoke + tombstone unique value so FK history remains intact while the handle can be rebound.
+            conn.execute(contacts.update().where(
+                contacts.c.id==contact_id,
+                contacts.c.user_id==actor.user_id,
+                contacts.c.revoked_at.is_(None),
+            ).values(normalized_value='released:'+str(uuid4()),revoked_at=now(),is_primary=False,updated_at=now()))
+            promoted_id=None
+            if target['is_primary']:
+                replacement=remaining[0]
+                promoted_id=str(replacement['id'])
+                conn.execute(contacts.update().where(
+                    contacts.c.id==replacement['id'],
+                    contacts.c.user_id==actor.user_id,
+                    contacts.c.revoked_at.is_(None),
+                ).values(is_primary=True,updated_at=now()))
+            audit.append_audit_event(actor_id=actor.user_id,action='CONTACT_REMOVED',entity_type='contact',
+                entity_id=str(contact_id),metadata={'channel':target['channel'],'promoted_contact_id':promoted_id})
+            return {'contact_id':str(contact_id),'removed':True,'promoted_primary_contact_id':promoted_id}
 
     def recovery_codes(self,*,actor,password,totp_code=None):
         rate_limit('security-management',actor.user_id,10,600)

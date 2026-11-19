@@ -135,7 +135,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "cand-contracts", href: "/nomzod/shartnomalar", label: "Shartnomalar", shortLabel: "Shartnoma", icon: FileCheck2 },
       { id: "cand-grades", href: "/nomzod/baholar", label: "Kredit & Baholar", shortLabel: "Baholar", icon: Award },
       { id: "cand-alerts", href: "/nomzod/bildirishnomalar", label: "Bildirishnomalar", shortLabel: "Xabarlar", icon: Bell },
-      { id: "cand-sec", href: "/nomzod/xavfsizlik", label: "Xavfsizlik", shortLabel: "Himoya", icon: ShieldCheck },
+      { id: "cand-sec", href: "/hisob", label: "Hisob & xavfsizlik", shortLabel: "Hisob", icon: ShieldCheck },
       { id: "cand-help", href: "/nomzod/yordam", label: "Yordam markazi", shortLabel: "Yordam", icon: HelpCircle },
     ],
   },
@@ -164,6 +164,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "emp-mentor", href: "/employer", tabId: "MENTOR_HUB", label: "Mentor & Amaliyot nazorati", shortLabel: "Mentor", icon: BookOpen },
       { id: "emp-org", href: "/employer", tabId: "ORG_HUB", label: "Tashkilot, KYB va filiallar", shortLabel: "Tashkilot", icon: Building2 },
       { id: "emp-billing", href: "/employer", tabId: "BILLING_HUB", label: "Tariflar va Billing", shortLabel: "Moliya", icon: CreditCard },
+      { id: "emp-account", href: "/hisob", label: "Hisob & xavfsizlik", shortLabel: "Hisob", icon: ShieldCheck },
       { id: "emp-public", href: "/elonlar", label: "Ommaviy e’lonlar", shortLabel: "Katalog", icon: Search },
     ],
   },
@@ -194,6 +195,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "uni-timetable", href: "/university", tabId: "timetable", label: "Dars jadvali boshqaruvi", shortLabel: "Jadval", icon: CalendarDays },
       { id: "uni-exports", href: "/university", tabId: "exports", label: "Eksport & HEMIS", shortLabel: "Eksport", icon: Download },
       { id: "uni-analytics", href: "/university", tabId: "analytics", label: "Dekanat analitikasi", shortLabel: "Analitika", icon: BarChart3 },
+      { id: "uni-account", href: "/hisob", label: "Hisob & xavfsizlik", shortLabel: "Hisob", icon: ShieldCheck },
     ],
   },
   OPERATOR: {
@@ -221,6 +223,7 @@ const PERSONA_THEMES: Record<WorkspacePersona, PersonaTheme> = {
       { id: "op-bg", href: "/operator", tabId: "BREAK_GLASS", label: "Favqulodda Kirish Nazorati", shortLabel: "Favqulodda", icon: KeyRound },
       { id: "op-sup", href: "/operator", tabId: "SUPPORT_OPS", label: "Murojaatlar & Yordam Markazi", shortLabel: "Murojaatlar", icon: LifeBuoy },
       { id: "op-fin", href: "/operator", tabId: "FINANCE", label: "Moliya va To‘lov nazorati", shortLabel: "Moliya", icon: CreditCard },
+      { id: "op-account", href: "/hisob", label: "Hisob & xavfsizlik", shortLabel: "Hisob", icon: ShieldCheck },
     ],
   },
 };
@@ -406,6 +409,7 @@ export default function Navbar() {
         { href: "/", label: "Bosh sahifa", icon: Home, exact: true },
         { href: "/elonlar", label: "E’lonlar katalogi", icon: Search },
         { href: "/xabarlar", label: "Xabarlar", icon: MessageCircle },
+        { href: "/hisob", label: "Hisob & xavfsizlik", icon: ShieldCheck },
         ...(isStudentOnlyUser(currentUser)
           ? [
               { href: "/nomzod/jadval", label: "O‘quv jadvali", icon: CalendarDays },
@@ -562,6 +566,23 @@ export default function Navbar() {
             </button>
 
             {currentUser && <ChatNavButton active={pathname?.startsWith("/xabarlar") ?? false} />}
+
+            {currentUser && (
+              <Link
+                href="/hisob"
+                prefetch={false}
+                title="Hisob va xavfsizlik"
+                aria-label="Hisob va xavfsizlik"
+                className={`fb-topbar-chip inline-flex items-center whitespace-nowrap ${
+                  pathname?.startsWith("/hisob") || pathname?.startsWith("/nomzod/xavfsizlik")
+                    ? "fb-topbar-chip-accent"
+                    : ""
+                }`}
+              >
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Hisob</span>
+              </Link>
+            )}
 
             {currentUser && userDashboard ? (
               <>

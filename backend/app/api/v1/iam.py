@@ -34,6 +34,10 @@ class MFAInput(Input):
 class StepUpInput(Input):
     current_password:str=Field(min_length=1,max_length=1024)
     totp_code:str|None=Field(default=None,pattern=r'^[0-9]{6}$')
+class ProfileUpdateInput(Input):
+    display_name:str=Field(min_length=2,max_length=200)
+class ChangePasswordInput(StepUpInput):
+    new_password:str=Field(min_length=12,max_length=1024)
 class ContactInput(StepUpInput):verification_token:str=Field(min_length=32,max_length=128)
 class RecoveryInput(Input):
     verification_token:str=Field(min_length=32,max_length=128)
@@ -130,9 +134,30 @@ def list_contacts(actor:ActorContext=Depends(require_actor_context)):
             items.append({'id':str(r['id']),'channel':r['channel'],'masked_destination':masked,'is_primary':bool(r['is_primary']),'verified_at':r['verified_at']})
         return {'items':items}
 
+@router.patch('/me/profile')
+def update_profile(payload:ProfileUpdateInput,actor:ActorContext=Depends(require_actor_context)):
+    return identity_service.update_profile(actor=actor,display_name=payload.display_name)
+
+@router.post('/me/security/password')
+def change_password(payload:ChangePasswordInput,actor:ActorContext=Depends(require_actor_context)):
+    return identity_service.change_password(
+        actor=actor,
+        current_password=payload.current_password,
+        new_password=payload.new_password,
+        totp_code=payload.totp_code,
+    )
+
 @router.post('/me/contacts',status_code=201)
 def bind_contact(payload:ContactInput,actor:ActorContext=Depends(require_actor_context)):
     return identity_service.bind_contact(actor=actor,verification_token=payload.verification_token,password=payload.current_password,totp_code=payload.totp_code)
+
+@router.patch('/me/contacts/{id}/primary')
+def set_primary_contact(id:UUID,payload:StepUpInput,actor:ActorContext=Depends(require_actor_context)):
+    return identity_service.set_primary_contact(actor=actor,contact_id=str(id),password=payload.current_password,totp_code=payload.totp_code)
+
+@router.delete('/me/contacts/{id}')
+def remove_contact(id:UUID,payload:StepUpInput,actor:ActorContext=Depends(require_actor_context)):
+    return identity_service.remove_contact(actor=actor,contact_id=str(id),password=payload.current_password,totp_code=payload.totp_code)
 
 @router.post('/me/security/recovery-codes')
 def recovery_codes(payload:StepUpInput,actor:ActorContext=Depends(require_actor_context)):

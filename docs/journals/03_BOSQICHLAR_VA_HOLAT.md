@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-19, LOG-207)
+## Joriy holat (2026-11-20, LOG-208)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `../../archive/ai-history/journals/` papkasida.
 
-- **Faol asosiy branch (`Q-017`)**: **`main`** (`31332d9`, PR #296). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`52c9a42`, PR #298; `LOG-208` `#299` `feature/universal-account-settings` -> `main`). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
 - **Zaxira & tarix**: avvalgi `main` (`764fb98`, `03c09cb`, `2018d7b`) zaxiralari va `integration/r1-agent-collaboration` saqlangan; AI arxivi, `reviews/`, `presentations/` va `specs/v1_3/` [`archive/`](../../archive/README.md) ga ajratildi (`Q-017`/`LOG-207`). Pre-push hook o‘z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-204** (PR #293); **LOG-205** (PR #295); **LOG-206 (`Q-017`)** (`main` ga ko‘chirish, PR #296); **LOG-207**: `/tolovlar` to‘lovlar sahifasi (provayder ulanmagan holda), `Q-018` (`@FlexBridgeAuthBot`), `Q-019` (`R2` to‘xtatilgan, kengayish imkoni saqlangan), server deploy tayyorgarligi (`archive/`, `.dockerignore`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md`).
-- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda (`run_all_staging_tests.py` **36/36 PASSED**).
+- **So'nggi ishlar**: **LOG-205** (PR #295); **LOG-206 (`Q-017`)** (`main` ga ko‘chirish, PR #296); **LOG-207** (`/tolovlar`, `Q-018`/`Q-019`, server paketi, PR #298); **LOG-208**: barcha 4 rol (`CANDIDATE`, `EMPLOYER`, `ACADEMIC`, `OPERATOR`) uchun universal `/hisob` sahifasi, nom/parol/asosiy login tahriri va kontakt o‘chirish himoyasi.
+- **Staging & Server paketi**: 2026-11-20 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda (`run_all_staging_tests.py` **36/36 PASSED, 125.96s**); server paketi `D:\Codex\FlexBridge-deploy\flexbridge-server-2026-11-20.tar.gz` (**522 fayl, 1,054,696 bayt**).
 - **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan (`/tolovlar` interfeysi tayyor, buyurtmalar `PENDING_PAYMENT`); serverda `infra/.env` va `BFF_SESSION_SECRET` o‘rnatish; `R2` frilanserlik (`Q-011` / `Q-019`) to‘xtatilgan. Telegram bot (`Q-018`): `@FlexBridgeAuthBot` da qolindi.
 - **Qayerdan boshlash**: `docs/README.md`; serverga yuklash — `docs/operations/SERVER_DEPLOY.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -322,10 +322,17 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - **Ko‘chirish**: `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) `release/main-2026-11-19` PR #296 (`6/6` CI yashil) orqali `main` ga birlashtirildi (`31332d9`).
 - **Qoida (`Q-017`)**: foydalanuvchi qayta branchga o‘tishni buyurguncha barcha keyingi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
 
-### 2026-11-19 | LOG-207 | PR #297 -> `/tolovlar` sahifasi, `Q-018`/`Q-019` qarorlari va serverga yuklash uchun arxiv/fayl tartiblanishi
-- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`main` ga)**. Branch: `chore/server-prep-and-payments-page` (Issue `#297`).
+### 2026-11-19 | LOG-207 | PR #298 (`main` `52c9a42`) -> `/tolovlar` sahifasi, `Q-018`/`Q-019` qarorlari va serverga yuklash uchun arxiv/fayl tartiblanishi
+- **Holat**: **BAJARILDI (`main` `52c9a42`, PR #298)**. Branch: `chore/server-prep-and-payments-page` (Issue `#297`).
 - **Bajarildi**:
   - **To‘lovlar sahifasi (`/tolovlar`)**: `frontend/src/app/tolovlar/page.tsx` va `page.test.tsx`, `Footer.tsx`, `tariflar/page.tsx`, `employer/page.tsx` havolalari (provayder ulanmagan, disabled jonli to‘lov tugmasi va kirgan `OWNER`/`BILLING` uchun `PENDING_PAYMENT` buyurtma yaratish).
   - **Qarorlar**: `Q-018` (`@FlexBridgeAuthBot` da qolish), `Q-019` (`R2_FREELANCE_MARKETPLACE=False` bilan 2-bosqich to‘xtatilgan, kengayish imkoni saqlangan).
   - **Arxiv va Server deploy paketi**: `reviews/`, `docs/presentations/`, `docs/journals/archive/`, `docs/protocols/archive/` va `specs/v1_3/` `archive/` ga ko‘chirildi (`check_publish.py`, `backend/app/core/config.py`, `docs/README.md`, `backend/README.md`, jurnal havolalari yangilandi); lokal `.agents`/`.claude`/`.gemini` va eski `.data` qoldiqlari `D:\Codex\FlexBridge-archive\2026-11-19\` ga ajratildi (`pg_live`/`pg_tests` saqlandi); `.dockerignore`, `frontend/.dockerignore`, `backend/Dockerfile`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md` va `test_server_package_builder.py` qo‘shildi.
 - **Tekshiruv**: `check_publish.py` (`1471`, 0 xato), `check_master_protocol.py` (`11/11`), `build_server_package.py` (`515` fayl, `1,048,379` bayt, SHA-256 `2328b2e9003df52ec28251d65ab9a11802563cbc24538459925db13b6d5892c1`), Pytest **121/121** (PG `55440`), `tsc` 0, `eslint` 0, Vitest **35/35 (`205/205`)**, `next build` (`113/113`), Docker (`9/9`, HTTP `200`), Edge `/tolovlar` (`0 pageErrors`, `0` overflow), `run_all_staging_tests.py` **36/36 PASSED (`128.5s`)**.
+
+### 2026-11-20 | LOG-208 | PR #299 -> Barcha rollar uchun universal `/hisob` akkaunt sozlamalari (nom, parol, asosiy login va kontakt o‘chirish)
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`main` ga, `Q-017` faol)**. Branch: `feature/universal-account-settings` (Issue `#299`).
+- **Bajarildi**:
+  - **Backend (`identity.py`, `auth.py`, `iam.py`, `main.py`, `iam_http.py`)**: `PATCH /api/v1/me/profile` (`update_profile`), `POST /api/v1/me/security/password` (`change_password` — step-up + `rotate_security(..., keep_session_id)` bilan joriy sessiyani saqlab qolgan holda boshqalarni bekor qilish), `PATCH /api/v1/me/contacts/{id}/primary` (`set_primary_contact`), `DELETE /api/v1/me/contacts/{id}` (`remove_contact` — `released:` tombstone, asosiy kontakt o‘chirilsa keyingisini ko‘tarish, oxirgisiga `409 LAST_CONTACT_CANNOT_BE_REMOVED`) va `_bind_contact` da faol asosiy mavjud bo‘lsa `is_primary=False` qoldirish. Regressiya testlari: `backend/tests/security/test_account_self_service.py`.
+  - **Frontend BFF & Universal `/hisob` UI**: `api/bff/me/{profile,security/password,contacts/[id],contacts/[id]/primary}`, `authSecurity.ts`, `errorText.ts`; `AccountProfileAndPasswordPanel.tsx`, kengaytirilgan `ContactsPanel.tsx`, `AccountSecurityWorkspace.tsx`, role-cheklovisiz `/hisob` sahifasi, `/nomzod/xavfsizlik` wrapperi, `Navbar.tsx`/`Footer.tsx`/portal havolalari `/hisob` ga ulandi, `AccountSelfService.test.tsx` qo‘shildi, `IAM.md` yangilandi.
+- **Tekshiruv**: Backend Pytest (**83/83 passed**, PG `55440`), `tsc --noEmit` (0), `eslint --max-warnings=0` (0), Vitest (**36/36 fayl, 208/208 test PASSED**, `30.24s`), `next build` (`○ /hisob`, `116/116`), Docker `backend`+`frontend` rebuild (`9/9` Up/healthy, `/hisob` HTTP `200`), Edge headless `/hisob` (`EMPLOYER HR`: `1440x900` Light/Dark & `390x844` mobil `hScroll=false`, `pageErrors=[]`, `netErrors=[]`, nom va parol UI tahrir+reload tekshiruvi OK), `run_all_staging_tests.py` (**36/36 PASSED, `125.96s`**), `build_server_package.py` (**522 fayl, `5,745,083` -> `1,054,696` bayt, SHA-256 `a38ef43bddf105b81431b43fb06be33cb35a3a3fb8e36d0a641d2e62e8836ad8`**), `check_publish.py`, `check_master_protocol.py`.

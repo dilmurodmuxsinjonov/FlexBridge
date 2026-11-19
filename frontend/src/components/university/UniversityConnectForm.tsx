@@ -136,8 +136,8 @@ export default function UniversityConnectForm({ onSubmitted }: { onSubmitted?: (
           <ul className="list-disc pl-5 space-y-0.5">
             {!prereq.data?.totp && (
               <li>
-                <Link href="/nomzod/xavfsizlik" className="underline underline-offset-2 font-semibold">
-                  Xavfsizlik
+                <Link href="/hisob" className="underline underline-offset-2 font-semibold">
+                  Hisob va xavfsizlik
                 </Link>{" "}
                 bo‘limida ikki bosqichli himoyani (authenticator) yoqing.
               </li>
