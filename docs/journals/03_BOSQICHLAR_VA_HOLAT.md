@@ -1,15 +1,15 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-19, LOG-204)
+## Joriy holat (2026-11-19, LOG-206)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`7b81e56`). Joriy ish branchi: `fix/teacher-and-mentor-assignment-flows`.
-- **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`release/main-2026-11-19` orqali `integration/r1-agent-collaboration` `f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295 holati ko‘chirilmoqda). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+- **Zaxira & tarix**: oldingi `main` (`2018d7b`, PR #281) uchun `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b`, bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` saqlangan (`764fb98` va `03c09cb` zaxiralari ham mavjud); `integration/r1-agent-collaboration` tarix sifatida qoldirildi. Pre-push hook o‘z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-201 (#287 Phase C); LOG-202 (#289 Phase D); LOG-203 (#291 `7b81e56` Phase E); **LOG-204 (`fix/teacher-and-mentor-assignment-flows`): OTM o‘qituvchisi va Korxona mentori tayinlash (staff onboarding + amaliyotga biriktirish) to‘liq brauzer E2E tekshiruvi hamda topilgan 5 ta backend/UI nuqsonni tuzatish**.
-- **Staging**: 2026-11-19 da `fix/teacher-and-mentor-assignment-flows` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `9` ishchi servis `Up/Healthy`). `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, Vitest **34/34 (`201/201`)**, Pytest **96/96 (`227.39s`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112/112`) OK, Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**).
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
+- **So'nggi ishlar**: **LOG-204** (PR #293 `a9ea1aa`, OTM o‘qituvchi & korxona mentor tayinlash E2E + 5 nuqson tuzatishi); **LOG-205** (PR #295 `f3f5469`, qolgan R1 oqimlar E2E + 7 nuqson tuzatishi); **LOG-206 (`Q-017`)**: `main` muzlatishini yechib `f3f5469` ni `main` ga o‘tkazish va `main` ish tartibiga o‘tish.
+- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda. `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, Vitest **34/34 (`203/203`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112` marshrut) OK, Pytest (`Test-Backend.ps1` **1737 passed**, `0` assert fail + MinIO/basetemp bilan **19/19 PASSED**; `LOG-205` targeted **14/14**; PR #295 CI **6/6** yashil), Edge E2E (**21/21** va **17/17 PASSED**, `0 pageErrors`).
+- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish, `BFF_SESSION_SECRET` sozlash va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; `R2` frilanserlik (`Q-011`) hozircha o‘chirilgan (`R2_FREELANCE_MARKETPLACE=False`).
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
@@ -315,3 +315,9 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - Testlar: `test_teacher_mentor_assignment_read_models.py`, `PhaseEFlows.test.tsx`.
 - **Tekshiruv**: Backend targeted Pytest **14/14**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`203/203`) PASSED**, `next build` OK, Docker (`9` servis faol, `backend`/`frontend` HTTP `200`), Microsoft Edge E2E (**17/17 PASSED + `B5` 1-yugurishda, `0 pageErrors`**), `Test-Backend.ps1` (**1737 passed, `0 failed`, `10` muhit setup xatosi** — keyin o‘sha 2 fayl `MINIO_TEST_BINARY` + `--basetemp` bilan alohida **`19/19 PASSED (59.55s)`**), `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, `check_publish.py` (`1467` fayl, `errors: []`), `check_master_protocol.py` (`11/11` true).
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-206 | release/main-2026-11-19 -> integration (f3f5469) ni main ga o‘tkazish va main da ishlash (Q-017)
+- **Holat**: **TAYYOR / PR KUTILMOQDA (`main` ga)**. Foydalanuvchining 2026-11-19 dagi aniq buyrug‘i (`"hozirdan boshlab ishlarni meinga kochirib bundan keyin brechga otishni buyutgunimcha meinda ishla"`) asosida `Q-015` dagi `main` muzlatishi yechildi (`Q-017`).
+- **Zaxira (`2018d7b`)**: oldingi `main` (`2018d7b92149417be45e4370ba0c445979e93a84`) branch `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b` va oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` (`git bundle verify` OK) bilan saqlandi.
+- **Ko‘chirish**: `release/main-2026-11-19` branchi `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) asosida yaratildi, `AGENTS.md` hamda 4 ta boshqaruv/handoff hujjati `Q-017` ga yangilandi, va tashqi `pre-push` hook buzilmasdan PR + CI orqali `main` ga birlashtiriladi.
+- **Qoida (`Q-017`)**: foydalanuvchi qayta branchga o‘tishni buyurguncha barcha keyingi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.

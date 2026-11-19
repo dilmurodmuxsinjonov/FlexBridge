@@ -1,27 +1,36 @@
-# FlexBridge collaboration policy (latest user instruction, 2026-11-10)
+# FlexBridge collaboration policy (latest user instruction, 2026-11-19, Q-017)
 
-## Working branches and frozen main
+## Working branches and main (updated 2026-11-19, Q-017)
 
-- Shared integration branch: `integration/r1-agent-collaboration`.
-- `main`/`master` are frozen. Do not push, merge, rebase, retarget a PR to them,
-  delete/recreate them, change their settings or use an admin override. The user
-  must explicitly lift this restriction before any future main mutation.
-- Main freeze began at `764fb98496fa40857acb07844fd09fcafa99b7d6`, after PR69
-  was merged before the user's restriction. Reading main is permitted.
-- 2026-11-17: with the user's explicit approval main was promoted once to the
-  verified integration state `19643248c3215c74dfbb6dc6ef448568fb71ba43` via
-  PR #279 (merge `03c09cb`; the pre-push hook still blocks direct pushes).
-  The previous main is kept as branch `backup/main-2026-11-17-764fb98` and tag
-  `main-backup-2026-11-17`. The freeze applies again from `03c09cb`: any further
-  main change needs a new explicit user approval.
-- 2026-11-17 (later): on the user's explicit request ("mainni yangila") main was
-  updated to integration `ab332775a1ec29b39f4d6fb4909d100b43d8e1b3` via PR #281
-  (merge `2018d7b`). The previous main is kept as branch
-  `backup/main-2026-11-17-03c09cb` and tag `main-backup-2026-11-17-03c09cb`.
-  The freeze applies again from `2018d7b`.
-- Bounded feature/fix/agent branches start from the integration branch. All new
-  PRs target `integration/r1-agent-collaboration`; verified units may merge only
-  there. Confirm the current PR base before publishing, readying or merging.
+- Active base and integration target branch: **`main`** (per explicit user
+  instruction on 2026-11-19: `"hozirdan boshlab ishlarni meinga kochirib
+  bundan keyin brechga otishni buyutgunimcha meinda ishla"`). Continue working
+  on/into `main` until the user explicitly commands switching back to a separate
+  branch.
+- Historical branch `integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`,
+  covering PR #282–#295 / `LOG-198`–`LOG-205`) is retained for audit history.
+- Prior `main` freeze history preserved:
+  - Freeze began at `764fb98496fa40857acb07844fd09fcafa99b7d6` (2026-11-10, after PR #69).
+  - 2026-11-17: with explicit user approval, `main` was promoted to `19643248c3215c74dfbb6dc6ef448568fb71ba43`
+    via PR #279 (`03c09cb`); backup `backup/main-2026-11-17-764fb98`, tag
+    `main-backup-2026-11-17`, bundle `D:/Codex/FlexBridge-backups/main-764fb98-2026-11-17.bundle`.
+  - 2026-11-17 (later): with explicit user approval (`"mainni yangila"`),
+    `main` was promoted to `ab332775a1ec29b39f4d6fb4909d100b43d8e1b3` via PR #281
+    (`2018d7b`); backup `backup/main-2026-11-17-03c09cb`, tag
+    `main-backup-2026-11-17-03c09cb`, bundle
+    `D:/Codex/FlexBridge-backups/main-03c09cb-2026-11-17.bundle`.
+  - 2026-11-19 (`Q-017` / `LOG-206`): with explicit user instruction, the `main`
+    freeze is lifted, verified `integration/r1-agent-collaboration`
+    (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`) is promoted to `main` via
+    `release/main-2026-11-19`, and previous `main` (`2018d7b92149417be45e4370ba0c445979e93a84`)
+    is backed up as branch `backup/main-2026-11-19-2018d7b`, tag
+    `main-backup-2026-11-19-2018d7b`, and bundle
+    `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle`.
+- Short-lived feature/fix branches start from `main`, open verified PRs
+  targeting `main`, pass exact-head CI, merge into `main`, and return the local
+  checkout to `main` (`D:/Codex/FlexBridge-agents/hooks/pre-push` remains intact
+  so unreviewed direct pushes to `main` stay guarded). Confirm the PR base (`main`)
+  before publishing, readying or merging.
 - Keep existing work; no reset/discard/clean of another agent's or user's edits.
 
 ## Codex, Antigravity and Copilot
@@ -59,8 +68,9 @@
   the prepared terminal takeover records the actual supplied trigger.
 - Before later mutations inspect D:/Codex/FlexBridge-agents/coordinator_state.json.
   If owner is ANTIGRAVITY, do not concurrently write or merge; arrange an orderly
-  handback after the runner/in-flight tasks stop. Main freeze and integration-only
-  policy, source/test/CI verification and user stop instructions always persist.
+  handback after the runner/in-flight tasks stop. Active `main`-based PR/CI
+  policy (`Q-017`, until the user orders a branch switch), source/test/CI
+  verification and user stop instructions always persist.
 
 ## Evidence, continuity and storage
 
@@ -69,7 +79,7 @@
   and acceptance before implementation. Preserve failed stages and old history.
 - Update `01_AI_XOTIRASI_VA_QOIDALAR.md`, `02_TEXNIK_MODELLAR.md`,
   `03_BOSQICHLAR_VA_HOLAT.md`, decisions when changed, and
-  `ANTIGRAVITY_HANDOFF.md`. Explicitly retain the frozen-main constraint.
+  `ANTIGRAVITY_HANDOFF.md`. Explicitly retain the active `Q-017` `main` workflow policy.
 - Full R1 remains active until the user stops work. Small green units do not
   imply full functionality or pilot acceptance. Source hashes, actual native
   results, exact-head CI and current review feedback precede integration merge.
