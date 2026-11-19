@@ -250,8 +250,17 @@ export default function OperatorPortal() {
     setIsLoadingCases(true);
     setCasesError(null);
     try {
-      const items = await fetchOperatorVerificationCases({ limit: 50 });
-      setCases(items);
+      const [openItems, assignedItems] = await Promise.all([
+        fetchOperatorVerificationCases({ limit: 50, unassigned: true }),
+        fetchOperatorVerificationCases({ limit: 50, unassigned: false }),
+      ]);
+      const byId = new Map<string, OperatorVerificationCaseItem>();
+      for (const item of openItems) byId.set(item.id, item);
+      for (const item of assignedItems) byId.set(item.id, item);
+      const merged = Array.from(byId.values()).sort((a, b) =>
+        (a.due_at || "").localeCompare(b.due_at || "")
+      );
+      setCases(merged);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (status === 403) {
@@ -486,7 +495,7 @@ export default function OperatorPortal() {
       }
       await decideVerificationCase(selectedCase.id, {
         decision: decisionType,
-        expected_revision: selectedCase.revision || 1,
+        expected_revision: selectedCase.current_revision ?? selectedCase.revision ?? 1,
         reason: decisionReason.trim(),
       });
       setSelectedCase(null);
@@ -974,6 +983,14 @@ export default function OperatorPortal() {
                   <p className="text-xs text-zinc-400 max-w-md">
                     Hozirda tasdiqlashni kutayotgan tashkilot yoki talaba arizalari mavjud emas.
                   </p>
+                  <button
+                    type="button"
+                    onClick={loadVerificationCases}
+                    className="mt-2 px-3 py-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-xs text-zinc-200 flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Yangilash</span>
+                  </button>
                 </div>
               ) : (
                 <div className="w-full bg-[#121214] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
@@ -1018,7 +1035,7 @@ export default function OperatorPortal() {
                               {c.organization_name || c.institution_name || c.entity_id?.slice(0, 8) || "Noma’lum subyekt"}
                             </td>
                             <td className="px-4 py-3 font-mono text-zinc-400">
-                              rev-{c.revision || 1}
+                              rev-{c.current_revision || c.revision || 1}
                             </td>
                             <td className="px-4 py-3 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
                               {c.due_at ? new Date(c.due_at).toLocaleString("uz-UZ") : "Muddatsiz"}
@@ -2023,7 +2040,7 @@ export default function OperatorPortal() {
                   Tekshiruv xulosasini chiqarish
                 </h3>
                 <span className="text-[11px] text-zinc-400">
-                  {selectedCase.organization_name || selectedCase.institution_name || "Ariza"} · Reviziya {selectedCase.revision || 1}
+                  {selectedCase.organization_name || selectedCase.institution_name || "Ariza"} · Reviziya {selectedCase.current_revision || selectedCase.revision || 1}
                 </span>
               </div>
               <button

@@ -1,14 +1,14 @@
 # Antigravity uchun joriy ish va davom ettirish tartibi
 
-## Joriy holat (2026-11-19, LOG-203)
+## Joriy holat (2026-11-19, LOG-204)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`c0dba37`). Joriy ish branchi: `feature/r1-final-flows-and-staging`.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`7b81e56`). Joriy ish branchi: `fix/teacher-and-mentor-assignment-flows`.
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan) — bevosita tegish/push taqiqlanadi; oldingi main zaxiralari `backup/main-2026-11-17-*` saqlangan. Pre-push hook o'z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-203 (`feature/r1-final-flows-and-staging` Phase E)**: jonli `flexbridge-r1` Docker steki ishga tushirildi + qolgan 5 ta R1 oqim (`confirm-start`, `academic-requests`, `matching/preview`, `me/enrollments/{id}/verification`, `moderation/actions/{id}/appeals`) va `PasskeysPanel.tsx` SSR/CSR hidratatsiya tuzatishi yakunlandi; **LOG-202 (`PR #289` -> `c0dba37`)**: Passkeys WebAuthn + `me/contacts` + `API-021`; **LOG-201 (`PR #287` -> `603531c`)**: Amaliyot hayotiy sikli.
-- **Staging**: 2026-11-19 da `feature/r1-final-flows-and-staging` dan qayta qurilgan (`flexbridge-r1`, `9` ishchi konteyner `Up/Healthy`, `127.0.0.1:3000` / `:8000`). `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Vitest **34/34 (`200/200`)**, Pytest **27/27 (`59.62s`)**, Edge CDP **24/24 render toza** (`overflow: false`, `exceptions: []`, `serverErrors: []`).
+- **So'nggi ishlar**: **LOG-204 (`fix/teacher-and-mentor-assignment-flows`)**: OTM o‘qituvchisi va Korxona mentori tayinlash zanjirlari bo‘yicha 5 ta backend/UI nuqson tuzatildi (`application_hr.py`, `candidate_applications.py`, `institution_onboarding.py`, `POST /api/bff/employer/placements`, `/employer`, `/university`, `/operator`, `/nomzod/arizalar`) va to‘liq real Edge E2E o‘tkazildi; **LOG-203 (`PR #291` -> `7b81e56`)**: Phase E R1 oqimlari; **LOG-202 (`PR #289` -> `c0dba37`)**: Passkeys WebAuthn + `me/contacts` + `API-021`.
+- **Staging**: 2026-11-19 da `fix/teacher-and-mentor-assignment-flows` dan qayta qurilgan (`flexbridge-r1`, `9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`). `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, Vitest **34/34 (`201/201`)**, Pytest **96/96 (`227.39s`)**, Edge E2E (**21/21 PASSED, `0 pageErrors`**).
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinchalik vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 

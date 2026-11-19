@@ -5,6 +5,7 @@ import RejectedAppealModal from "../employer/RejectedAppealModal";
 import PlacementLifecycleModal from "../employer/PlacementLifecycleModal";
 import {
   confirmPlacementStart,
+  createOrganizationPlacement,
   previewScheduleMatch,
   requestPlacementAcademicTrack,
 } from "@/lib/placementLifecycle";
@@ -227,5 +228,46 @@ describe("Phase E remaining R1 user flows", () => {
     const match = await previewScheduleMatch(OPP_ID);
     expect(match.result).toBe("MATCH");
     expect(match.matched_group_codes).toEqual(["SHIFT_1"]);
+  });
+
+  it("creates organization placement from accepted offer via BFF endpoint", async () => {
+    const calls: Array<{ url: string; method: string; body?: Record<string, unknown> }> = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const method = init?.method || "GET";
+      const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : undefined;
+      calls.push({ url, method, body });
+      if (url === "/api/bff/employer/placements" && method === "POST") {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            id: PLC_ID,
+            status: "PLANNED",
+            current_terms_id: TERMS_ID,
+            version: 1,
+          }),
+          { status: 201 }
+        );
+      }
+      return new Response("{}", { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const created = await createOrganizationPlacement({
+      application_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      offer_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      opportunity_id: OPP_ID,
+      candidate_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      organization_id: ORG_ID,
+    });
+
+    expect(created.id).toBe(PLC_ID);
+    expect(created.status).toBe("PLANNED");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.url).toBe("/api/bff/employer/placements");
+    expect(calls[0]?.method).toBe("POST");
+    expect(calls[0]?.body?.offer_id).toBe("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
+    expect(calls[0]?.body?.organization_id).toBe(ORG_ID);
+    expect(typeof calls[0]?.body?.idempotency_key).toBe("string");
   });
 });
