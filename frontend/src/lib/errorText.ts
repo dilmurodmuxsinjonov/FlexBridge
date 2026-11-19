@@ -109,6 +109,14 @@ const MESSAGES: Record<string, string> = {
   CONTACT_SCOPE_FORBIDDEN: "Faqat o‘zingizning hisobingizga aloqa manzilini bog‘lashingiz mumkin.",
   CONTACT_BIND_FAILED: "Aloqa manzilini bog‘lashda xatolik yuz berdi.",
   CHALLENGE_RESEND_FAILED: "Kod qayta yuborilmadi. Taymer tugashini kuting.",
+  ENROLLMENT_RESUBMISSION_STATE_CONFLICT: "Ushbu talabalik holatida hujjatni qayta topshirish mumkin emas.",
+  ENROLLMENT_EVIDENCE_REQUIRED: "Kamida bitta tasdiqlovchi PDF hujjat yuklash talab qilinadi.",
+  ENROLLMENT_EVIDENCE_NOTE_INVALID: "Izoh kamida 15 ta belgidan iborat bo‘lishi kerak.",
+  APPEAL_ALREADY_SUBMITTED: "Ushbu rad qarori bo‘yicha apellyatsiya allaqachon yuborilgan.",
+  APPEAL_REASON_REQUIRED: "Apellyatsiya sababi kamida 15 ta belgidan iborat bo‘lishi kerak.",
+  CURRENT_VERIFIED_ENROLLMENT_REQUIRED: "Faqat joriy va OTM tasdiqlagan talabalik yozuvini ulash mumkin.",
+  PENDING_ACADEMIC_PLACEMENT_REQUIRED: "Faqat rejalashtirilgan dual ta’lim amaliyoti uchun akademik kuzatuv so‘raladi.",
+  SCHOOL_BINDING_AMENDMENT_REQUIRED: "Bu amaliyotga OTM kuzatuvi allaqachon biriktirilgan.",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]{2,}$/.test(s.trim());

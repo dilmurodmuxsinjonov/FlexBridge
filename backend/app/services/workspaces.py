@@ -78,6 +78,7 @@ def list_workspaces(user_id: str) -> dict:
 def list_org_opportunities(organization_id: str, *, status: str | None = None, limit: int = 50) -> list[dict]:
     """Every opportunity of one organization with its current revision title (newest first)."""
     opps, revisions, applications = table('opportunities'), table('opportunity_revisions'), table('applications')
+    cases, actions, appeals = table('moderation_cases'), table('moderation_actions'), table('moderation_appeal_requests')
     with transaction() as conn:
         query = (
             select(
@@ -94,6 +95,8 @@ def list_org_opportunities(organization_id: str, *, status: str | None = None, l
             query = query.where(opps.c.status == status.upper())
         rows = conn.execute(query).mappings().all()
         counts: dict[str, int] = {}
+        rejection_actions: dict[str, str] = {}
+        latest_appeals: dict[str, dict] = {}
         if rows:
             from sqlalchemy import func
             ids = [row['id'] for row in rows]
@@ -105,6 +108,34 @@ def list_org_opportunities(organization_id: str, *, status: str | None = None, l
                     .group_by(applications.c.opportunity_id)
                 ).all()
             }
+            rejected_ids = [row['id'] for row in rows if row['status'] == 'REJECTED']
+            if rejected_ids:
+                action_rows = conn.execute(
+                    select(cases.c.opportunity_id, actions.c.id.label('action_id'))
+                    .select_from(actions.join(cases, cases.c.id == actions.c.case_id))
+                    .where(cases.c.opportunity_id.in_(rejected_ids), actions.c.action == 'REJECT')
+                    .order_by(actions.c.occurred_at.desc(), actions.c.created_at.desc(), actions.c.id.desc())
+                ).mappings().all()
+                for ar in action_rows:
+                    rejection_actions.setdefault(str(ar['opportunity_id']), str(ar['action_id']))
+                if rejection_actions:
+                    appeal_rows = conn.execute(
+                        select(
+                            appeals.c.original_action_id,
+                            appeals.c.case_id,
+                            appeals.c.status,
+                            appeals.c.decision,
+                            appeals.c.decision_reason,
+                        )
+                        .where(appeals.c.original_action_id.in_(list(rejection_actions.values())))
+                    ).mappings().all()
+                    for ap in appeal_rows:
+                        latest_appeals[str(ap['original_action_id'])] = {
+                            'case_id': str(ap['case_id']),
+                            'status': ap['status'],
+                            'decision': ap['decision'],
+                            'decision_reason': ap['decision_reason'],
+                        }
     return [
         {
             'id': str(row['id']),
@@ -119,6 +150,8 @@ def list_org_opportunities(organization_id: str, *, status: str | None = None, l
             'published_at': row['published_at'].isoformat() if row['published_at'] else None,
             'expires_at': row['expires_at'].isoformat() if row['expires_at'] else None,
             'created_at': row['created_at'].isoformat() if row['created_at'] else None,
+            'latest_rejection_action_id': rejection_actions.get(str(row['id'])),
+            'latest_appeal': latest_appeals.get(rejection_actions.get(str(row['id']), '')) if rejection_actions.get(str(row['id'])) else None,
         }
         for row in rows
     ]

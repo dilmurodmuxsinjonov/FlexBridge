@@ -17,6 +17,7 @@ import {
 import type { OrganizationPlacementItem } from "@/lib/api";
 import { enumLabel } from "@/lib/labels";
 import {
+  confirmPlacementStart,
   fetchHostPlacementPlan,
   fetchOrgMentors,
   fetchPlacementMentorAssignments,
@@ -225,6 +226,22 @@ export default function PlacementLifecycleModal({
       onUpdated();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Korxona qarori bajarilmadi.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleConfirmHostStart = async () => {
+    setBusy("CONFIRM_START");
+    setError(null);
+    setNotice(null);
+    try {
+      await confirmPlacementStart(placement.id, termsId, version, "ORGANIZATION");
+      setNotice("Korxona tomonidan boshlanish tasdiqlandi.");
+      triggerReload();
+      onUpdated();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Boshlanishni tasdiqlab bo‘lmadi.");
     } finally {
       setBusy(null);
     }
@@ -535,15 +552,26 @@ export default function PlacementLifecycleModal({
                       <h3 className="text-xs font-bold text-white">Korxona holat qarori (`API-088`)</h3>
                       <div className="flex flex-wrap items-center gap-2">
                         {(status === "PLANNED" || status === "PENDING_START_CONFIRMATION") && (
-                          <button
-                            type="button"
-                            disabled={busy !== null}
-                            onClick={() => void handleHostDecision("ACTIVATE")}
-                            className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white inline-flex items-center gap-1.5 disabled:opacity-50"
-                          >
-                            {busy === "ACTIVATE" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
-                            <span>Amaliyotni faollashtirish</span>
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              disabled={busy !== null}
+                              onClick={() => void handleConfirmHostStart()}
+                              className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white inline-flex items-center gap-1.5 disabled:opacity-50"
+                            >
+                              {busy === "CONFIRM_START" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                              <span>Boshlashni tasdiqlash (Korxona)</span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busy !== null}
+                              onClick={() => void handleHostDecision("ACTIVATE")}
+                              className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white inline-flex items-center gap-1.5 disabled:opacity-50"
+                            >
+                              {busy === "ACTIVATE" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
+                              <span>Amaliyotni faollashtirish</span>
+                            </button>
+                          </>
                         )}
                         {!confirmCancel ? (
                           <button

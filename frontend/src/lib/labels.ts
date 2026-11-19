@@ -212,6 +212,10 @@ const LABELS: Record<string, string> = {
   REJECT_COMPLETION: "Yakunlashni rad etish",
   ACTIVATE: "Faollashtirish",
   DISPUTE: "Bahs / nizo ochish",
+  // Schedule matching preview (API-003)
+  MATCH: "Jadval mos tushadi",
+  CONFLICT: "Jadval to‘qnashuvi mavjud",
+  UNKNOWN: "Jadval ma’lumoti yetarli emas",
 };
 
 const isCode = (s: string) => /^[A-Z][A-Z0-9_]+$/.test(s);

@@ -69,6 +69,7 @@ import {
 import AuthModal from "@/components/AuthModal";
 import { SkeuoSegmented } from "@/components/skeuo/SkeuoPrimitives";
 import ProfileOverview from "@/components/profile/ProfileOverview";
+import EnrollmentResubmitModal from "@/components/nomzod/EnrollmentResubmitModal";
 import { useAsyncData } from "@/lib/useAsyncData";
 import { fetchMyTimetable } from "@/lib/timetable";
 
@@ -157,6 +158,7 @@ export default function CandidateProfileHub() {
 
   // End Enrollment Modal state
   const [endingEnrollment, setEndingEnrollment] = useState<CandidateEnrollmentItem | null>(null);
+  const [resubmittingEnrollment, setResubmittingEnrollment] = useState<CandidateEnrollmentItem | null>(null);
   const [endReason, setEndReason] = useState<string>("");
   const [endEffectiveDate, setEndEffectiveDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [isSubmittingEnd, setIsSubmittingEnd] = useState(false);
@@ -1664,21 +1666,40 @@ export default function CandidateProfileHub() {
                                   >
                                     {enumLabel(enr.status)}
                                   </span>
+                                  {enr.case_status && (
+                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.06] text-zinc-300 border border-white/10">
+                                      {enumLabel(enr.case_status)}
+                                    </span>
+                                  )}
                                 </div>
                                 <span className="text-xs text-zinc-300 font-medium">
                                   {enr.program}
                                 </span>
                               </div>
 
-                              {!isEnded && (
-                                <button
-                                  type="button"
-                                  onClick={() => setEndingEnrollment(enr)}
-                                  className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-300 border border-rose-500/20 transition-all self-start sm:self-auto"
-                                >
-                                  O&apos;qishni yakunlash
-                                </button>
-                              )}
+                              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                {!isVerified &&
+                                  !isEnded &&
+                                  (!enr.case_status ||
+                                    ["DRAFT", "NEEDS_INFO", "REJECTED"].includes(enr.case_status)) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setResubmittingEnrollment(enr)}
+                                      className="px-3 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-xs font-semibold text-blue-300 border border-blue-500/25 transition-all"
+                                    >
+                                      Hujjatni qayta yuborish
+                                    </button>
+                                  )}
+                                {!isEnded && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEndingEnrollment(enr)}
+                                    className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-300 border border-rose-500/20 transition-all"
+                                  >
+                                    O&apos;qishni yakunlash
+                                  </button>
+                                )}
+                              </div>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-[11px] text-zinc-400 pt-1 border-t border-white/[0.04]">
@@ -2456,6 +2477,15 @@ export default function CandidateProfileHub() {
             </div>
           </div>
         </div>
+      )}
+
+      {resubmittingEnrollment && (
+        <EnrollmentResubmitModal
+          key={resubmittingEnrollment.id}
+          enrollment={resubmittingEnrollment}
+          onClose={() => setResubmittingEnrollment(null)}
+          onSaved={() => void loadEnrollmentsData()}
+        />
       )}
 
       {/* AUTH MODAL */}
