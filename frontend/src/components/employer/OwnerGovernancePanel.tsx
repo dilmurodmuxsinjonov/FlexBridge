@@ -298,7 +298,7 @@ export default function OwnerGovernancePanel({ orgId }: { orgId: string | null }
             </span>
           </div>
           <Link
-            href="/nomzod/xavfsizlik"
+            href="/hisob"
             prefetch={false}
             className="skeuo-btn-obsidian shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-semibold"
           >

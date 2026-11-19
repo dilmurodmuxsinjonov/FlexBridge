@@ -50,7 +50,7 @@ async function callJson<T>(url: string, init: RequestInit, fallbackError: string
   return data as T;
 }
 
-const jsonInit = (method: "POST" | "DELETE", body: unknown): RequestInit => ({
+const jsonInit = (method: "POST" | "PATCH" | "DELETE", body: unknown): RequestInit => ({
   method,
   headers: { "Content-Type": "application/json", Accept: "application/json" },
   body: JSON.stringify(body),
@@ -176,5 +176,47 @@ export function finishPasskeyLogin(
       ...(portal ? { portal } : {}),
     }),
     "PASSKEY_VERIFICATION_FAILED"
+  );
+}
+
+export function updateMyProfile(displayName: string) {
+  return callJson<{ user_id: string; display_name: string }>(
+    "/api/bff/me/profile",
+    jsonInit("PATCH", { display_name: displayName }),
+    "PROFILE_UPDATE_FAILED"
+  );
+}
+
+export function changeMyPassword(currentPassword: string, newPassword: string, totpCode?: string) {
+  return callJson<{ password_updated: boolean; revoked_other_sessions: number; reauthentication_required?: boolean }>(
+    "/api/bff/me/security/password",
+    jsonInit("POST", {
+      current_password: currentPassword,
+      new_password: newPassword,
+      ...(totpCode ? { totp_code: totpCode } : {}),
+    }),
+    "PASSWORD_CHANGE_FAILED"
+  );
+}
+
+export function setPrimaryContact(contactId: string, currentPassword: string, totpCode?: string) {
+  return callJson<{ contact_id: string; channel: "EMAIL" | "PHONE"; is_primary: boolean }>(
+    `/api/bff/me/contacts/${encodeURIComponent(contactId)}/primary`,
+    jsonInit("PATCH", {
+      current_password: currentPassword,
+      ...(totpCode ? { totp_code: totpCode } : {}),
+    }),
+    "CONTACT_PRIMARY_UPDATE_FAILED"
+  );
+}
+
+export function removeMyContact(contactId: string, currentPassword: string, totpCode?: string) {
+  return callJson<{ contact_id: string; removed: boolean; promoted_primary_contact_id?: string | null }>(
+    `/api/bff/me/contacts/${encodeURIComponent(contactId)}`,
+    jsonInit("DELETE", {
+      current_password: currentPassword,
+      ...(totpCode ? { totp_code: totpCode } : {}),
+    }),
+    "CONTACT_REMOVE_FAILED"
   );
 }

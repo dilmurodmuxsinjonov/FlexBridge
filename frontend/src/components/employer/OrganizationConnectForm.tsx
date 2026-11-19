@@ -112,8 +112,8 @@ export default function OrganizationConnectForm() {
           </p>
           {!prereq.data?.totp ? (
             <p>
-              <Link href="/nomzod/xavfsizlik" className="underline underline-offset-2 font-semibold">
-                Xavfsizlik
+              <Link href="/hisob" className="underline underline-offset-2 font-semibold">
+                Hisob va xavfsizlik
               </Link>{" "}
               bo‘limida ikki bosqichli himoyani (authenticator) yoqing.
             </p>

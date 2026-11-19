@@ -302,7 +302,12 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link href="/operator" prefetch={false} className={textLinkClass}>
-                      Yordam Tiketlari & Insidentlar
+                      Yordam Tiketlari &amp; Insidentlar
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/hisob" prefetch={false} className={textLinkClass}>
+                      Hisob, Parol &amp; Xavfsizlik
                     </Link>
                   </li>
                 </ul>
@@ -315,17 +320,22 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link href="/university" prefetch={false} className={textLinkClass}>
-                      Yakuniy Akademik Xulosalar & E-Imzo
+                      Yakuniy Akademik Xulosalar &amp; E-Imzo
                     </Link>
                   </li>
                   <li>
                     <Link href="/university" prefetch={false} className={textLinkClass}>
-                      Kafedra Taqsimoti & Dars Jadvali
+                      Kafedra Taqsimoti &amp; Dars Jadvali
                     </Link>
                   </li>
                   <li>
                     <Link href="/university" prefetch={false} className={textLinkClass}>
-                      O‘qituvchi Vakolat & Tasdiqlash
+                      O‘qituvchi Vakolat &amp; Tasdiqlash
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/hisob" prefetch={false} className={textLinkClass}>
+                      Hisob, Parol &amp; Xavfsizlik
                     </Link>
                   </li>
                 </ul>
@@ -333,22 +343,27 @@ export default function Footer() {
                 <ul className="space-y-2 text-[11px] text-[var(--fb-ink-secondary)]">
                   <li>
                     <Link href="/employer" prefetch={false} className={textLinkClass}>
-                      Vakansiyalar & Nomzod Kanban
+                      Vakansiyalar &amp; Nomzod Kanban
                     </Link>
                   </li>
                   <li>
                     <Link href="/employer" prefetch={false} className={textLinkClass}>
-                      Amaliyot Shartnomalari & Mentor E-Imzo
+                      Amaliyot Shartnomalari &amp; Mentor E-Imzo
                     </Link>
                   </li>
                   <li>
                     <Link href="/employer" prefetch={false} className={textLinkClass}>
-                      Korxona Profili, Jamoa & Takliflar
+                      Korxona Profili, Jamoa &amp; Takliflar
                     </Link>
                   </li>
                   <li>
                     <Link href="/employer" prefetch={false} className={textLinkClass}>
-                      Obuna, Kvota & To‘lovlar
+                      Obuna, Kvota &amp; To‘lovlar
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/hisob" prefetch={false} className={textLinkClass}>
+                      Hisob, Parol &amp; Xavfsizlik
                     </Link>
                   </li>
                 </ul>
@@ -356,7 +371,7 @@ export default function Footer() {
                 <ul className="space-y-2 text-[11px] text-[var(--fb-ink-secondary)]">
                   <li>
                     <Link href="/nomzod/arizalar" prefetch={false} className={textLinkClass}>
-                      Arizalarim & Suhbatlar
+                      Arizalarim &amp; Suhbatlar
                     </Link>
                   </li>
                   <li>
@@ -376,12 +391,12 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link href="/nomzod/baholar" prefetch={false} className={textLinkClass}>
-                      Reytinglar & Sharhlar
+                      Reytinglar &amp; Sharhlar
                     </Link>
                   </li>
                   <li>
-                    <Link href="/nomzod/xavfsizlik" prefetch={false} className={textLinkClass}>
-                      Xavfsizlik, 2FA & Sessiyalar
+                    <Link href="/hisob" prefetch={false} className={textLinkClass}>
+                      Hisob, Parol &amp; Xavfsizlik
                     </Link>
                   </li>
                 </ul>
