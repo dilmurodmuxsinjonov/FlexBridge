@@ -791,10 +791,31 @@ export default function UniversityPortal() {
     setNominateStatusMsg(null);
 
     try {
+      const existingSups = await fetchInstitutionSupervisions(institutionId);
+      const matchedSup = existingSups.find((s) => s.enrollment_id === nominatePlacement.enrollment_id);
+      let supervisionId = matchedSup?.id;
+      if (!supervisionId) {
+        const agreements = await fetchInstitutionAcademicAgreements(institutionId);
+        const activeAg = agreements[0];
+        if (!activeAg) {
+          throw new Error("Muassasa uchun faol akademik kelishuv (Platform agreement) topilmadi.");
+        }
+        const createdSup = await createStudentSupervision({
+          institution_id: institutionId,
+          enrollment_id: nominatePlacement.enrollment_id,
+          agreement_id: activeAg.id,
+          purpose: activeAg.purposes?.[0] || "ACADEMIC_VIEW",
+          legal_basis: "OTM akademik amaliyot rahbarligi tayinlovi",
+        });
+        supervisionId = typeof createdSup.id === "string" ? createdSup.id : "";
+      }
+      if (!supervisionId) {
+        throw new Error("Talaba uchun ilmiy rahbarlik (supervision) yozuvi topilmadi.");
+      }
       await assignTeacherToPlacement(nominatePlacement.placement_id, {
         institution_id: institutionId,
         supervisor_id: selectedTeacherId,
-        supervision_id: nominatePlacement.id,
+        supervision_id: supervisionId,
       });
 
       setNominateStatusMsg({

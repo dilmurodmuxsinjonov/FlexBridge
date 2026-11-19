@@ -588,9 +588,11 @@ class InstitutionOnboardingService:
     def queue(self,actor,unassigned=False,limit=50):
         with transaction() as conn:
             moderator_authority(conn,actor)
-            cases,requests,members=(table(n) for n in ('verification_cases','institution_onboarding_requests','institution_memberships'))
+            cases,requests,members,insts=(table(n) for n in ('verification_cases','institution_onboarding_requests','institution_memberships','institutions'))
             query=select(cases.c.id,cases.c.kind,cases.c.status,cases.c.current_revision,cases.c.due_at,
-                cases.c.appointment_id,requests.c.institution_id).join(requests,requests.c.case_id==cases.c.id).where(
+                cases.c.assigned_reviewer_id,cases.c.appointment_id,requests.c.institution_id,
+                insts.c.name.label('institution_name')).join(requests,requests.c.case_id==cases.c.id).join(
+                insts,insts.c.id==requests.c.institution_id).where(
                 cases.c.kind==KIND,cases.c.status.in_(('PENDING','IN_REVIEW','NEEDS_INFO')),
                 requests.c.requester_user_id!=actor.user_id,requests.c.target_user_id!=actor.user_id,
                 ~select(members.c.id).where(members.c.institution_id==requests.c.institution_id,members.c.user_id==actor.user_id).exists())

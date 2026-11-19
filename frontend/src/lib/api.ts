@@ -893,6 +893,11 @@ export interface ApplicationHRDetailResponse {
     reason: string | null;
     occurred_at: string;
   }>;
+  latest_offer?: {
+    id: string;
+    status: string;
+  } | null;
+  placement_id?: string | null;
 }
 
 export interface ScheduleInterviewPayload {
@@ -1239,6 +1244,7 @@ export interface OperatorVerificationCaseItem {
   entity_id?: string;
   entity_type?: string;
   revision?: number;
+  current_revision?: number;
   status?: string;
   due_at?: string;
   assigned_to_id?: string | null;

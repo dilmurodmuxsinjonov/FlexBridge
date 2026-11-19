@@ -12,7 +12,7 @@ import DraftOpportunityEditorModal from "@/components/employer/DraftOpportunityE
 import OwnerGovernancePanel from "@/components/employer/OwnerGovernancePanel";
 import PlacementLifecycleModal from "@/components/employer/PlacementLifecycleModal";
 import RejectedAppealModal from "@/components/employer/RejectedAppealModal";
-import { acceptPlacementAssignment, fetchPlacementPlanNeutral } from "@/lib/placementLifecycle";
+import { acceptPlacementAssignment, createOrganizationPlacement, fetchPlacementPlanNeutral } from "@/lib/placementLifecycle";
 import {
   Users,
   Briefcase,
@@ -141,6 +141,7 @@ export default function EmployerPortal() {
   const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [appsError, setAppsError] = useState<string | null>(null);
   const [activeActionAppId, setActiveActionAppId] = useState<string | null>(null);
+  const [creatingPlacementAppId, setCreatingPlacementAppId] = useState<string | null>(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
   // FB-180: Opportunity Lifecycle State (API-081 & API-082)
@@ -454,6 +455,50 @@ export default function EmployerPortal() {
       setAppsError(err instanceof Error ? err.message : "Bosqichni o'zgartirishda xatolik");
     } finally {
       setActiveActionAppId(null);
+    }
+  };
+
+  const handleCreatePlacementFromAccepted = async (applicationId: string) => {
+    if (!orgId.trim()) {
+      setAppsError("Avval tashkilotni tanlang.");
+      return;
+    }
+    setCreatingPlacementAppId(applicationId);
+    setAppsError(null);
+    setActionSuccessMsg(null);
+    try {
+      const detail = await fetchApplicationHRDetail(applicationId);
+      if (detail.placement_id) {
+        setActionSuccessMsg("Bu ariza bo'yicha amaliyot allaqachon ochilgan.");
+        setActiveMainTab("MENTOR_HUB");
+        setMentorSubTab("PLACEMENTS");
+        setPlacementsTab("ORG_PLACEMENTS");
+        await loadPlacements();
+        return;
+      }
+      const offer = detail.latest_offer;
+      if (!offer || offer.status !== "ACCEPTED") {
+        throw new Error("Tasdiqlangan taklif (ACCEPTED offer) topilmadi.");
+      }
+      await createOrganizationPlacement({
+        application_id: detail.application_id,
+        offer_id: offer.id,
+        opportunity_id: detail.opportunity_id,
+        candidate_id: detail.candidate_id,
+        organization_id: orgId.trim(),
+      });
+      setActionSuccessMsg("Amaliyot (Placement) muvaffaqiyatli ochildi!");
+      setActiveMainTab("MENTOR_HUB");
+      setMentorSubTab("PLACEMENTS");
+      setPlacementsTab("ORG_PLACEMENTS");
+      await loadPlacements();
+      if (targetOppId) {
+        await loadApplications(targetOppId);
+      }
+    } catch (err: unknown) {
+      setAppsError(err instanceof Error ? err.message : "Amaliyot ochishda xatolik yuz berdi.");
+    } finally {
+      setCreatingPlacementAppId(null);
     }
   };
 
@@ -1805,6 +1850,23 @@ export default function EmployerPortal() {
                                     </button>
                                   </div>
                                 )}
+
+                                {app.status === "ACCEPTED" &&
+                                  managedOpps.find((o) => o.id === targetOppId)?.kind === "INTERNSHIP" && (
+                                    <button
+                                      type="button"
+                                      disabled={creatingPlacementAppId === app.application_id}
+                                      onClick={() => void handleCreatePlacementFromAccepted(app.application_id)}
+                                      className="w-full px-2 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold flex items-center justify-center gap-1 transition-all disabled:opacity-50"
+                                    >
+                                      {creatingPlacementAppId === app.application_id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      ) : (
+                                        <GraduationCap className="w-3 h-3" />
+                                      )}
+                                      <span>Amaliyot ochish</span>
+                                    </button>
+                                  )}
 
                                 {/* Always visible: HR Snapshot & Audit trail */}
                                 <button
@@ -4007,14 +4069,20 @@ export default function EmployerPortal() {
                         setCreateKind(val);
                         if (val === "PART_TIME_JOB") {
                           setCreateContract("LABOR_PART_TIME");
+                          if (createCompensation === "UNPAID_ACADEMIC") setCreateCompensation("HOURLY");
+                        } else if (val === "ACADEMIC_INTERNSHIP") {
+                          setCreateContract("ACADEMIC_TRIPARTITE");
+                          setCreateCompensation("UNPAID_ACADEMIC");
                         } else {
                           setCreateContract("INTERNSHIP_AGREEMENT");
+                          if (createCompensation === "UNPAID_ACADEMIC") setCreateCompensation("HOURLY");
                         }
                       }}
                       className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-2.5 text-xs text-zinc-200 focus:border-primary focus:outline-none"
                     >
                       <option value="PART_TIME_JOB">Yarim stavka ish</option>
                       <option value="GENERAL_INTERNSHIP">Amaliyot / Stajirovka</option>
+                      <option value="ACADEMIC_INTERNSHIP">Akademik amaliyot (OTM bilan)</option>
                     </select>
                   </div>
 
@@ -4030,25 +4098,28 @@ export default function EmployerPortal() {
                     >
                       <option value="HOURLY">Soatbay to‘lov</option>
                       <option value="STIPEND">Oylik stipendiya</option>
+                      <option value="UNPAID_ACADEMIC">Haq to‘lanmaydigan (Akademik kredit)</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="create-pay" className="block text-xs font-semibold text-zinc-300">
-                    {createCompensation === "HOURLY" ? "Soatbay stavka (UZS / soat)" : "Oylik miqdor (UZS)"}
-                  </label>
-                  <input
-                    id="create-pay"
-                    type="number"
-                    min="1"
-                    required
-                    value={createPay}
-                    onChange={(e) => setCreatePay(e.target.value)}
-                    placeholder="35000"
-                    className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
-                  />
-                </div>
+                {createCompensation !== "UNPAID_ACADEMIC" && (
+                  <div>
+                    <label htmlFor="create-pay" className="block text-xs font-semibold text-zinc-300">
+                      {createCompensation === "HOURLY" ? "Soatbay stavka (UZS / soat)" : "Oylik miqdor (UZS)"}
+                    </label>
+                    <input
+                      id="create-pay"
+                      type="number"
+                      min="1"
+                      required
+                      value={createPay}
+                      onChange={(e) => setCreatePay(e.target.value)}
+                      placeholder="35000"
+                      className="mt-1.5 w-full rounded-xl border border-white/[0.1] bg-surface-lowest p-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                )}
 
                 {createError && (
                   <div

@@ -352,3 +352,23 @@ export function submitModerationAppeal(actionId: string, reason: string) {
     "MODERATION_APPEAL_SUBMIT_FAILED"
   );
 }
+
+export function createOrganizationPlacement(payload: {
+  application_id: string;
+  offer_id: string;
+  opportunity_id: string;
+  candidate_id: string;
+  organization_id: string;
+}) {
+  return req<{
+    id: string;
+    status: string;
+    current_terms_id?: string | null;
+    version?: number;
+    intake_receipt?: Record<string, unknown>;
+  }>(
+    "/api/bff/employer/placements",
+    json("POST", { ...payload, idempotency_key: crypto.randomUUID() }),
+    "CREATE_PLACEMENT_FAILED"
+  );
+}

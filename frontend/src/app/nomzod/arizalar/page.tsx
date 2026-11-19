@@ -831,8 +831,10 @@ export default function CandidateApplicationsPage() {
                         )}
                       </div>
 
-                      {/* Offer Action Buttons if ISSUED */}
-                      {detail.offer.status === "ISSUED" && (
+                      {/* Offer Action Buttons if OFFERED / ISSUED / PENDING */}
+                      {(detail.offer.status === "OFFERED" ||
+                        detail.offer.status === "ISSUED" ||
+                        detail.offer.status === "PENDING") && (
                         <div className="mt-4 pt-3 border-t border-emerald-500/20 flex flex-col gap-2.5">
                           <p className="text-[11px] text-zinc-300">
                             Ushbu taklifni qabul qilasizmi yoki rad etasizmi? Qabul qilinsa, tashkilot bilan rasmiy ish/amaliyot shartnomasi rasmiylashtiriladi.

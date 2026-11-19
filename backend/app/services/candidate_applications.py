@@ -248,7 +248,7 @@ class CandidateApplicationService:
                     select(t_enr).where(
                         t_enr.c.id == enr_uuid,
                         t_enr.c.candidate_id == candidate_id,
-                        t_enr.c.status == "APPROVED",
+                        t_enr.c.status == "VERIFIED",
                     )
                 ).mappings().first()
                 if not enr:
@@ -258,12 +258,12 @@ class CandidateApplicationService:
                     )
                 resolved_enrollment_id = str(enr["id"])
             elif is_student_required:
-                # Look for an approved enrollment automatically
+                # Look for an approved/verified enrollment automatically
                 t_enr = table("enrollments")
                 enr = conn.execute(
                     select(t_enr).where(
                         t_enr.c.candidate_id == candidate_id,
-                        t_enr.c.status == "APPROVED",
+                        t_enr.c.status == "VERIFIED",
                     )
                 ).mappings().first()
                 if not enr:

@@ -458,6 +458,21 @@ class ApplicationHRService:
                 for e in event_rows
             ]
 
+            t_offers = table("offers")
+            offer_row = conn.execute(
+                select(t_offers)
+                .where(t_offers.c.application_id == app_uuid)
+                .order_by(t_offers.c.created_at.desc())
+                .limit(1)
+            ).mappings().first()
+
+            t_placements = table("placements")
+            placement_row = conn.execute(
+                select(t_placements)
+                .where(t_placements.c.application_id == app_uuid)
+                .limit(1)
+            ).mappings().first()
+
             return {
                 "contract_id": "API-084",
                 "application_id": str(app_uuid),
@@ -479,6 +494,12 @@ class ApplicationHRService:
                     "submitted_at": _to_utc_iso(attempt_row["submitted_at"]) if attempt_row else _to_utc_iso(app["created_at"]),
                 },
                 "events": events,
+                "latest_offer": (
+                    {"id": str(offer_row["id"]), "status": offer_row["status"]}
+                    if offer_row
+                    else None
+                ),
+                "placement_id": str(placement_row["id"]) if placement_row else None,
             }
 
 

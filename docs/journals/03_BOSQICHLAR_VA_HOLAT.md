@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-19, LOG-203)
+## Joriy holat (2026-11-19, LOG-204)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`c0dba37`). Joriy ish branchi: `feature/r1-final-flows-and-staging`.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`7b81e56`). Joriy ish branchi: `fix/teacher-and-mentor-assignment-flows`.
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-200 (#285); LOG-201 (#287 Phase C); LOG-202 (#289 Phase D); **LOG-203 (`feature/r1-final-flows-and-staging` Phase E): Jonli `flexbridge-r1` staging steki ishga tushirildi + qolgan 5 R1 user oqim (`confirm-start`, `academic-requests`, `matching/preview`, `enrollments/verification`, `moderation/actions/appeals`) hamda `PasskeysPanel.tsx` SSR/CSR hidratatsiya tuzatishi**.
-- **Staging**: 2026-11-19 da `feature/r1-final-flows-and-staging` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `9` ishchi servis `Up/Healthy`). `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Vitest **34/34 (`200/200`)**, Pytest **27/27 (`59.62s`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112/112`) OK, Edge CDP (`24` render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
+- **So'nggi ishlar**: LOG-201 (#287 Phase C); LOG-202 (#289 Phase D); LOG-203 (#291 `7b81e56` Phase E); **LOG-204 (`fix/teacher-and-mentor-assignment-flows`): OTM o‘qituvchisi va Korxona mentori tayinlash (staff onboarding + amaliyotga biriktirish) to‘liq brauzer E2E tekshiruvi hamda topilgan 5 ta backend/UI nuqsonni tuzatish**.
+- **Staging**: 2026-11-19 da `fix/teacher-and-mentor-assignment-flows` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `9` ishchi servis `Up/Healthy`). `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, Vitest **34/34 (`201/201`)**, Pytest **96/96 (`227.39s`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112/112`) OK, Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**).
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -293,4 +293,14 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - Frontend (`5` BFF route + UI): `/ishlar/[id]` jadval mosligi (`API-003` `previewScheduleMatch`), `/nomzod` talabalik hujjatini qayta yuborish (`EnrollmentResubmitModal`), `/nomzod/shartnomalar` start tasdig‘i + OTM nazorati so‘rovi (`confirmPlacementStart`, `requestPlacementAcademicTrack`), `PlacementLifecycleModal` korxona tasdig‘i, `/employer` rad etilgan e’lon apellyatsiyasi (`RejectedAppealModal`), `PhaseEFlows.test.tsx`.
   - Bug fix (Edge CDP): `PasskeysPanel.tsx` da SSR vs mijoz `isWebAuthnSupported()` nomuvofiqligi (`React #418`) `useSyncExternalStore` orqali bartaraf etildi.
 - **Tekshiruv**: Backend Pytest **27/27 (`59.62s`, PG `55440`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`200/200`) (`29.53s`)**, `docker compose -f infra/compose.yaml up -d --build` (`next build` `112/112` marshrut + `9` ishchi konteyner `Up/Healthy`), `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Edge CDP (`1440x900` + `390x844`, 12 marshrut / 24 render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-204 | PR -> OTM O‘qituvchisi va Korxona Mentori Tayinlash Oqimlari Tuzatishi & To‘liq Brauzer E2E
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. Foydalanuvchi savoli bo‘yicha avvalgi brauzer E2E da bajarilmagan har ikkala tayinlash zanjiri (OTM koordinatori -> OTM o‘qituvchisi; Korxona rahbari -> Korxona mentori) real Edge brauzerda bajarildi va topilgan 5 ta nuqson tuzatildi.
+- **Bajarildi (`fix/teacher-and-mentor-assignment-flows`, baza `7b81e56`)**:
+  - `backend/app/services/application_hr.py` (`GET /api/v1/applications/{id}/hr`): `latest_offer` va `placement_id` qo‘shildi; `frontend/src/app/api/bff/employer/placements/route.ts` ga `POST` handler + `placementLifecycle.ts` ga `createOrganizationPlacement`; `/employer` modaliga `ACADEMIC_INTERNSHIP` (`ACADEMIC_TRIPARTITE` / `UNPAID_ACADEMIC`) va `ACCEPTED` kartalarga `Amaliyot ochish` tugmasi qo‘shildi.
+  - `frontend/src/app/university/page.tsx` (`handleSubmitNomination`): `nominatePlacement.id` o‘rniga haqiqiy `student_supervisions.id` topib/yaratib (`fetchInstitutionSupervisions`, `fetchInstitutionAcademicAgreements`, `createStudentSupervision`) yuboradigan qilindi.
+  - Real Edge E2E paytida aniqlangan 3 ta nuqson: `candidate_applications.py` (`enrollments.status == "VERIFIED"`), `institution_onboarding.py` (`queue` + `institution_name` / `assigned_reviewer_id`) + `/operator` (`unassigned=true/false` birlashtirish, `current_revision`, `INSTITUTION_APPOINTMENT` yorlig‘i, bo‘sh navbatda `Yangilash`), hamda `nomzod/arizalar/page.tsx` (`OFFERED`/`ISSUED`/`PENDING` taklif tugmalari).
+  - Testlar: `backend/tests/security/test_teacher_mentor_assignment_read_models.py`, `PhaseEFlows.test.tsx`.
+- **Tekshiruv**: Backend Pytest **96/96 PASSED (`227.39s`, PG `55440`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`201/201`) PASSED (`26.91s`)**, `next build` OK (`112` marshrut), `docker compose -f infra/compose.yaml up -d --build` (`backend` va `frontend` `healthy`), Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**), `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, `check_publish.py` (`1467` fayl, `errors: []`) va `check_master_protocol.py`.
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
