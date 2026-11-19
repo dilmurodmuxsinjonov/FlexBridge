@@ -1,14 +1,14 @@
 # FlexBridge — texnik modellar va vositalar
 
-## Joriy holat (2026-11-18, LOG-200)
+## Joriy holat (2026-11-19, LOG-203)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (asos `e970174`). Joriy ish branchi: `feature/employer-draft-edit-and-continuity` (PR `integration/r1-agent-collaboration` ga).
+- **Integratsiya**: `integration/r1-agent-collaboration` (`c0dba37`). Joriy ish branchi: `feature/r1-final-flows-and-staging` (PR `integration/r1-agent-collaboration` ga).
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-200** (`feature/employer-draft-edit-and-continuity`): `DraftOpportunityEditorModal` (`API-078/079/080`), `OwnerGovernancePanel` (`API-071`, `owner-requests`, `owner-transfers`, `owner-continuity` + `me/contacts`), `14` BFF route, `proxyJsonBody`; **LOG-199 (`PR #284` -> `e970174`)**: `/tashkilot/[id]`, `/tariflar`, `ModerationReportModal`.
-- **Staging**: 2026-11-18 da `feature/employer-draft-edit-and-continuity` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` rejimda). `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, Vitest **31/31 (`190/190`)**, `tsc --noEmit` 0, `eslint` 0, `11/11` BFF `400/401`, Edge Playwright `/employer` (`hScroll=false`, `errs=0`).
+- **So'nggi ishlar**: **LOG-203** (`feature/r1-final-flows-and-staging` Phase E): `confirm-start` (`CANDIDATE` + `ORGANIZATION`), `academic-requests`, `matching/preview` (`API-003`), `me/enrollments/{id}/verification` (`EnrollmentResubmitModal`), `moderation/actions/{id}/appeals` (`RejectedAppealModal`), `workspaces.py` rejection appeal read model, `PasskeysPanel.tsx` `useSyncExternalStore` hidratatsiya tuzatishi va jonli `flexbridge-r1` stek ishga tushirildi; **LOG-202 (`PR #289` -> `c0dba37`)**: Passkeys WebAuthn + `me/contacts` + `API-021`; **LOG-201 (`PR #287` -> `603531c`)**: Placement/Mentor/Academic lifecycle.
+- **Staging**: 2026-11-19 da `feature/r1-final-flows-and-staging` dan qayta qurilgan (`flexbridge-r1`, `9` ishchi konteyner `Up/Healthy`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`). Pytest **27/27 PASSED (`59.62s`, PG `55440`)**, `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Vitest **34/34 (`200/200`)**, `tsc --noEmit` 0, `eslint --max-warnings=0` 0, `next build` (`112/112`) OK, Edge CDP (`24` render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -188,4 +188,5 @@ Quyidagi bo'limlar [archive/02_texnik_qarorlar_2026-11-07_11.md](archive/02_texn
 - OPPORTUNITY-API005-NOTIFICATIONS-API031 — Opportunity Details & Notification Inbox (2026-11-11)
 - PLACEMENT-PHASE-C-MENTOR-READ-MODELS — Host Organization Mentors (`GET /organizations/{org}/mentors`), Placement Mentor Assignments (`GET /placements/{id}/mentor-assignments`), Bilateral Closure/Export (`API-049/052`), Diary Evidence (`API-055`) & Academic Supervision Lifecycle (`LOG-201`, 2026-11-18)
 - IAM-PHASE-D-PASSKEYS-CONTACTS-RESEND — `/me/security` Safe Passkeys Metadata List (`id, device_type, backed_up`), WebAuthn Login/MFA/Enrollment/Revocation UI, Secondary Contact Binding (`GET/POST /me/contacts`) & `API-021` Challenge Resend (`LOG-202`, 2026-11-18)
+- PHASE-E-REMAINING-R1-FLOWS — `workspaces.py` Rejected Opportunity Action/Appeal Read Model, `confirm-start` UI, `academic-requests` UI, `API-003` Schedule Match Preview (`/api/bff/matching/preview`), Candidate Enrollment Resubmission (`EnrollmentResubmitModal`), Employer Appeal (`RejectedAppealModal`) & `PasskeysPanel` `useSyncExternalStore` SSR Fix (`LOG-203`, 2026-11-19)
 - Eski «Current LOG-…» qatorlari (36 ta): [archive/02_joriy_holat_tarixi.md](archive/02_joriy_holat_tarixi.md)

@@ -1,14 +1,14 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-18, LOG-200)
+## Joriy holat (2026-11-19, LOG-203)
 
 > Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`e970174`). Joriy ish branchi: `feature/employer-draft-edit-and-continuity`.
+- **Integratsiya**: `integration/r1-agent-collaboration` (`c0dba37`). Joriy ish branchi: `feature/r1-final-flows-and-staging`.
 - **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: LOG-198 (#283 -> `215eddf`); LOG-199 `/tashkilot/[id]`, `/tariflar`, `ModerationReportModal` (#284 -> `e970174`); **LOG-200 (`feature/employer-draft-edit-and-continuity`): Korxona qoralamani tahrirlash (`DraftOpportunityEditorModal`, `API-078..080`), tashkilot rekviziti (`API-071`), hamrahbar/o‘tkazish/vorislik (`OwnerGovernancePanel`) va `14` ta BFF route**.
-- **Staging**: 2026-11-18 da `feature/employer-draft-edit-and-continuity` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `@FlexBridgeAuthBot` `LIVE` pollingda). `run_all_staging_tests.py` **36/36 PASSED (`144.85s`)**, Vitest **31/31 (`190/190`)**, ESLint 0, `tsc` 0, `next build` OK, `11/11` BFF `400/401`, Edge Playwright `/employer` **toza**.
+- **So'nggi ishlar**: LOG-200 (#285); LOG-201 (#287 Phase C); LOG-202 (#289 Phase D); **LOG-203 (`feature/r1-final-flows-and-staging` Phase E): Jonli `flexbridge-r1` staging steki ishga tushirildi + qolgan 5 R1 user oqim (`confirm-start`, `academic-requests`, `matching/preview`, `enrollments/verification`, `moderation/actions/appeals`) hamda `PasskeysPanel.tsx` SSR/CSR hidratatsiya tuzatishi**.
+- **Staging**: 2026-11-19 da `feature/r1-final-flows-and-staging` dan qayta qurilgan (`flexbridge-r1`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`, `9` ishchi servis `Up/Healthy`). `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Vitest **34/34 (`200/200`)**, Pytest **27/27 (`59.62s`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112/112`) OK, Edge CDP (`24` render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
 - **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
 - **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
@@ -284,4 +284,13 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
   - Backend: `GET /api/v1/me/security` da faol `PASSKEY` metadata (`passkeys`, `passkeys_count`), `test_phase_d_security_read_models.py`.
   - Frontend (`6` yangi + `2` yangilangan BFF route + UI): `webauthn.ts`, `authSecurity.ts`, `PasskeysPanel.tsx` va `ContactsPanel.tsx` (`/nomzod/xavfsizlik`), `LoginPanel.tsx` (Passkey bilan kirish va MFA tasdiqlash), `PasswordRecovery.tsx` hamda 4 ta ro‘yxatdan o‘tish sahifasida `API-021` `resendAuthChallenge`, `PhaseDSecurityAndAuth.test.tsx`.
 - **Tekshiruv**: Backend Pytest **46/46 (`69.78s`, PG `55440`)**, ESLint 0, `tsc` 0, Vitest **33/33 (`197/197`)**, `next build` OK (`111/111`), `check_publish.py` `errors: []` (`1465` fayl), `check_master_protocol.py` PASS.
+- **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
+
+### 2026-11-19 | LOG-203 | PR -> Jonli Staging Ishga Tushirish, Qolgan R1 Oqimlar (`Phase E`) & Passkeys Hidratatsiya Tuzatishi
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`integration/r1-agent-collaboration`)**. PR #289 (`c0dba37`) birlashtirilgach, jonli loyiha ishga tushirilib qolgan barcha R1 oqimlar yakunlandi.
+- **Bajarildi (`feature/r1-final-flows-and-staging`, baza `c0dba37`)**:
+  - Backend: `workspaces.py` (`list_org_opportunities`) da `REJECTED` vakansiyalar uchun `latest_rejection_action_id` va `latest_appeal` qo‘shildi; `test_phase_e_remaining_flows.py` yaratildi.
+  - Frontend (`5` BFF route + UI): `/ishlar/[id]` jadval mosligi (`API-003` `previewScheduleMatch`), `/nomzod` talabalik hujjatini qayta yuborish (`EnrollmentResubmitModal`), `/nomzod/shartnomalar` start tasdig‘i + OTM nazorati so‘rovi (`confirmPlacementStart`, `requestPlacementAcademicTrack`), `PlacementLifecycleModal` korxona tasdig‘i, `/employer` rad etilgan e’lon apellyatsiyasi (`RejectedAppealModal`), `PhaseEFlows.test.tsx`.
+  - Bug fix (Edge CDP): `PasskeysPanel.tsx` da SSR vs mijoz `isWebAuthnSupported()` nomuvofiqligi (`React #418`) `useSyncExternalStore` orqali bartaraf etildi.
+- **Tekshiruv**: Backend Pytest **27/27 (`59.62s`, PG `55440`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, Vitest **34/34 (`200/200`) (`29.53s`)**, `docker compose -f infra/compose.yaml up -d --build` (`next build` `112/112` marshrut + `9` ishchi konteyner `Up/Healthy`), `run_all_staging_tests.py` **36/36 PASSED (`126.13s`)**, Edge CDP (`1440x900` + `390x844`, 12 marshrut / 24 render: `overflow: false`, `consoleErrors: []`, `exceptions: []`, `serverErrors: []`).
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
