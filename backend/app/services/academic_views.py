@@ -145,7 +145,14 @@ class AcademicViewService:
                 r.c.daily_log_id==l.c.id,r.c.status=='SUBMITTED',r.c.submitted_at.is_not(None),r.c.author_id==c.c.user_id,
                 c.c.user_id!=actor.user_id,func.flexbridge.academic_supervision_current(s.c.id,c.c.id),
                 text(BINDING_VERSION),
-                text('('+BOUND_COORDINATOR+' OR '+TEACHER_REVISION+')'))
+                text('('+BOUND_COORDINATOR+' OR '+TEACHER_REVISION+')'),
+                text('''NOT EXISTS(
+                  SELECT 1 FROM flexbridge.academic_log_reviews alr
+                  JOIN flexbridge.academic_assignments aa ON aa.id = alr.academic_assignment_id
+                  WHERE alr.revision_id = log_revisions.id
+                    AND alr.placement_id = placements.id
+                    AND aa.revoked_at IS NULL
+                )'''))
             return page(conn,query.params(actor=actor.user_id),r.c.id,r.c.submitted_at,limit=limit,after=after)
 
 

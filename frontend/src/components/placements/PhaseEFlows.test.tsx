@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import EnrollmentResubmitModal from "../nomzod/EnrollmentResubmitModal";
 import RejectedAppealModal from "../employer/RejectedAppealModal";
 import PlacementLifecycleModal from "../employer/PlacementLifecycleModal";
+import DraftOpportunityEditorModal from "../employer/DraftOpportunityEditorModal";
+import AcademicReviewModal from "../AcademicReviewModal";
+import { hasOrgManagementRole } from "@/lib/roles";
 import {
   confirmPlacementStart,
   createOrganizationPlacement,
@@ -269,5 +272,111 @@ describe("Phase E remaining R1 user flows", () => {
     expect(calls[0]?.body?.offer_id).toBe("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
     expect(calls[0]?.body?.organization_id).toBe(ORG_ID);
     expect(typeof calls[0]?.body?.idempotency_key).toBe("string");
+  });
+
+  it("distinguishes management roles from mentor-only workspace grants and preserves LABOR_PART_TIME in DraftOpportunityEditorModal", async () => {
+    expect(hasOrgManagementRole(["CANDIDATE", "MENTOR"])).toBe(false);
+    expect(hasOrgManagementRole(["CANDIDATE", "HR"])).toBe(true);
+    expect(hasOrgManagementRole(["OWNER", "MENTOR"])).toBe(true);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url === `/api/bff/opportunities/${OPP_ID}`) {
+          return new Response(
+            JSON.stringify({
+              id: OPP_ID,
+              kind: "PART_TIME",
+              capacity: 2,
+              revision: {
+                title: "Yarim stavka Python",
+                description: "Backend test",
+                region: "Toshkent shahri",
+                work_mode: "HYBRID",
+                eligibility: "STUDENTS_ONLY",
+                contract_type: "LABOR_PART_TIME",
+                is_paid: true,
+                salary_min: 50000,
+                salary_max: 70000,
+                salary_period: "HOUR",
+                salary_basis: "GROSS",
+                schedule_policy: "STRICT",
+              },
+              shifts: [],
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response("{}", { status: 404 });
+      })
+    );
+
+    render(
+      <DraftOpportunityEditorModal
+        isOpen
+        opportunityId={OPP_ID}
+        onClose={() => {}}
+        onSaved={() => {}}
+      />
+    );
+
+    const contractSelect = (await screen.findByLabelText(/Shartnoma turi/i)) as HTMLSelectElement;
+    expect(contractSelect.value).toBe("LABOR_PART_TIME");
+  });
+
+  it("renders APPROVED workplace mentor review as confirmed in AcademicReviewModal", async () => {
+    const revId = "88888888-8888-4888-8888-888888888888";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url === `/api/bff/university/log-revisions/${revId}/academic`) {
+          return new Response(
+            JSON.stringify({
+              id: revId,
+              revision: 2,
+              terms_id: TERMS_ID,
+              day_type: "WORKED",
+              summary: "Endpoint va testlar yakunlandi.",
+              total_minutes: 120,
+              submitted_at: "2026-11-19T12:00:00Z",
+              daily_log_id: "99999999-9999-4999-8999-999999999999",
+              local_date: "2026-11-19",
+              placement_id: PLC_ID,
+              placement_status: "ACTIVE",
+              is_current_revision: true,
+              institution_id: ORG_ID,
+              purpose: "ACADEMIC_VIEW",
+              terms_version: 2,
+              tasks: [],
+              workplace_reviews: [
+                {
+                  id: "rev-w-1",
+                  decision: "APPROVED",
+                  comment: "Mentor tomonidan ma'qullandi.",
+                  decided_at: "2026-11-19T12:30:00Z",
+                },
+              ],
+              academic_reviews: [],
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response("{}", { status: 404 });
+      })
+    );
+
+    render(
+      <AcademicReviewModal
+        isOpen
+        onClose={() => {}}
+        revisionId={revId}
+        studentName="Demo Talaba"
+        onSuccess={() => {}}
+      />
+    );
+
+    expect(await screen.findByText("Mentor tomonidan tasdiqlangan")).toBeInTheDocument();
   });
 });

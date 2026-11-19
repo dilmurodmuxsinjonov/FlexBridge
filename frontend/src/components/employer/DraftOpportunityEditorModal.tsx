@@ -33,9 +33,11 @@ const WEEKDAYS: Array<{ value: number; label: string }> = [
 ];
 
 const CONTRACT_OPTIONS = [
+  { value: "LABOR_PART_TIME", label: "Yarim stavka mehnat shartnomasi (MK)" },
   { value: "FIXED_TERM", label: "Muddatli mehnat shartnomasi" },
-  { value: "PART_TIME_CONTRACT", label: "Yarim stavka mehnat shartnomasi" },
-  { value: "INTERNSHIP_AGREEMENT", label: "Amaliyot shartnomasi (to‘lovli)" },
+  { value: "PART_TIME_CONTRACT", label: "Yarim stavka shartnomasi" },
+  { value: "PAID_INTERNSHIP_CONTRACT", label: "To‘lovli amaliyot shartnomasi" },
+  { value: "INTERNSHIP_AGREEMENT", label: "Amaliyot shartnomasi" },
   { value: "ACADEMIC_TRIPARTITE", label: "Uch tomonlama OTM shartnomasi" },
   { value: "APPRENTICESHIP", label: "Shogirdlik shartnomasi" },
 ];

@@ -1307,7 +1307,10 @@ export default function UniversityPortal() {
             </div>
           ) : (
             <ul className="flex flex-col gap-2">
-              {assignments.map((assignment) => (
+              {assignments.map((assignment) => {
+                const needsConsent =
+                  !assignment.accepted_at || assignment.consented_current_terms === false;
+                return (
                 <li key={assignment.id} className="fb-file-row flex-wrap sm:flex-nowrap">
                   <span className="fb-avatar h-9 w-9 shrink-0 text-xs" aria-hidden="true">
                     {initials(assignment.student_name)}
@@ -1318,10 +1321,14 @@ export default function UniversityPortal() {
                       {[assignment.organization_name, `biriktirilgan ${new Date(assignment.assigned_at).toLocaleDateString("uz-UZ")}`].filter(Boolean).join(" · ")}
                     </span>
                   </span>
-                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${assignment.accepted_at ? "fb-nav-active" : "fb-capsule"}`}>
-                    {assignment.accepted_at ? "Nazoratda" : "Qabul kutmoqda"}
+                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${!needsConsent ? "fb-nav-active" : "fb-capsule"}`}>
+                    {!needsConsent
+                      ? "Nazoratda"
+                      : assignment.accepted_at
+                      ? "Yangi reja tasdig‘i kutilmoqda"
+                      : "Qabul kutmoqda"}
                   </span>
-                  {!assignment.accepted_at && (
+                  {needsConsent && (
                     <button
                       type="button"
                       disabled={acceptingAssignmentId === assignment.id}
@@ -1329,7 +1336,7 @@ export default function UniversityPortal() {
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
                     >
                       {acceptingAssignmentId === assignment.id && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                      <span>Nazoratni qabul qilish</span>
+                      <span>{assignment.accepted_at ? "Yangi shartlarni tasdiqlash" : "Nazoratni qabul qilish"}</span>
                     </button>
                   )}
                   <button
@@ -1340,7 +1347,8 @@ export default function UniversityPortal() {
                     <Award className="h-3.5 w-3.5" /> Akademik xulosa
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>

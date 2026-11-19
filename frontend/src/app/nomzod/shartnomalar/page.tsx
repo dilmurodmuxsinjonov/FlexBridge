@@ -188,8 +188,7 @@ function ShartnomalarHubContent() {
         version: placementPlan.version,
       });
       setAcceptTermsSuccess("Amaliyot shartlari muvaffaqiyatli qabul qilindi va tasdiqlandi!");
-      // Reload placements list to reflect state updates
-      loadPlacements();
+      await Promise.all([loadPlacements(), handleOpenPlanModal(selectedPlacementId)]);
     } catch (err: unknown) {
       setPlanError(
         err instanceof Error ? err.message : "Shartlarni qabul qilishda xatolik yuz berdi"
@@ -904,11 +903,14 @@ function ShartnomalarHubContent() {
                   </div>
                 </div>
 
-                {/* Accept Terms Banner & Action (API-048) */}
-                {acceptTermsSuccess ? (
+                {/* Accept Terms & Start Confirmation (API-048) */}
+                {acceptTermsSuccess || placementPlan.candidate_accepted_at ? (
                   <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300 flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 shrink-0" />
-                    <span>{acceptTermsSuccess}</span>
+                    <span>
+                      {acceptTermsSuccess ||
+                        "Amaliyot shartlari va boshlanishi siz tomoningizdan tasdiqlangan!"}
+                    </span>
                   </div>
                 ) : (
                   <div className="rounded-lg border border-primary/30 bg-primary/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -939,34 +941,36 @@ function ShartnomalarHubContent() {
                 {(placementPlan.status === "PLANNED" ||
                   placementPlan.status === "PENDING_START_CONFIRMATION") && (
                   <div className="space-y-3 border-t border-white/10 pt-4">
-                    <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="text-xs font-bold text-white">
-                            Ikki tomonlama boshlash tasdig‘i
-                          </h5>
-                          <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono text-zinc-300">
-                            {enumLabel(placementPlan.status)}
-                          </span>
+                    {!(acceptTermsSuccess || placementPlan.candidate_accepted_at) && (
+                      <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h5 className="text-xs font-bold text-white">
+                              Ikki tomonlama boshlash tasdig‘i
+                            </h5>
+                            <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono text-zinc-300">
+                              {enumLabel(placementPlan.status)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5">
+                            Shartlarni va boshlanishni tasdiqlash (korxona bilan birgalikda amaliyotni faollashtiradi).
+                          </p>
                         </div>
-                        <p className="text-[11px] text-zinc-300 mt-0.5">
-                          Shartlarni qabul qilgandan so‘ng amaliyot boshlanishini tasdiqlang.
-                        </p>
+                        <button
+                          type="button"
+                          onClick={handleConfirmPlacementStart}
+                          disabled={isConfirmingStart}
+                          className="w-full sm:w-auto py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
+                        >
+                          {isConfirmingStart ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ShieldCheck className="h-4 w-4" />
+                          )}
+                          <span>Ish boshlashni tasdiqlash</span>
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleConfirmPlacementStart}
-                        disabled={isConfirmingStart}
-                        className="w-full sm:w-auto py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
-                      >
-                        {isConfirmingStart ? (
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <ShieldCheck className="h-4 w-4" />
-                        )}
-                        <span>Ish boshlashni tasdiqlash</span>
-                      </button>
-                    </div>
+                    )}
 
                     {startConfirmFeedback && (
                       <div
