@@ -23,14 +23,20 @@ build/
 coverage/
 *.tsbuildinfo
 
-# Logs & OS
+# Logs, AI temp & OS
 *.log
 .DS_Store
 Thumbs.db
 backend/.data/
+.agents/
+.claude/
+.gemini/
 reviews/**/agent_logs/
 reviews/**/copilot_raw.*
 reviews/**/copilot_*_raw.*
+archive/reviews/**/agent_logs/
+archive/reviews/**/copilot_raw.*
+archive/reviews/**/copilot_*_raw.*
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm

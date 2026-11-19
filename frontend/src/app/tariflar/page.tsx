@@ -64,6 +64,13 @@ export default function PublicServicesAndTariffsPage() {
         </Link>
         <div className="flex flex-wrap gap-2">
           <Link
+            href="/tolovlar"
+            prefetch={false}
+            className="skeuo-btn-secondary rounded-full px-4 py-1.5 text-xs font-semibold"
+          >
+            To‘lovlar sahifasi
+          </Link>
+          <Link
             href="/haqida"
             prefetch={false}
             className="skeuo-btn-secondary rounded-full px-4 py-1.5 text-xs font-semibold"
@@ -188,16 +195,27 @@ export default function PublicServicesAndTariffsPage() {
                         </p>
                       </div>
 
-                      <Link
-                        href="/employer"
-                        prefetch={false}
-                        className={`${
-                          isFeatured ? "skeuo-btn-obsidian" : "skeuo-btn-secondary"
-                        } inline-flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-semibold`}
-                      >
-                        <BriefcaseBusiness className="h-3.5 w-3.5" aria-hidden="true" />
-                        Kabinetda tanlash
-                      </Link>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          href="/employer"
+                          prefetch={false}
+                          className={`${
+                            isFeatured ? "skeuo-btn-obsidian" : "skeuo-btn-secondary"
+                          } inline-flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-semibold`}
+                        >
+                          <BriefcaseBusiness className="h-3.5 w-3.5" aria-hidden="true" />
+                          Kabinetda tanlash
+                        </Link>
+                        {plan.price_uzs > 0 && (
+                          <Link
+                            href={`/tolovlar?plan=${encodeURIComponent(plan.plan_code)}`}
+                            prefetch={false}
+                            className="skeuo-btn-secondary inline-flex w-full items-center justify-center gap-2 rounded-2xl py-2 text-xs font-semibold"
+                          >
+                            To‘lov sahifasi
+                          </Link>
+                        )}
+                      </div>
                     </article>
                   );
                 })}

@@ -1,16 +1,15 @@
 # FlexBridge — texnik modellar va vositalar
 
-## Joriy holat (2026-11-19, LOG-204)
+## Joriy holat (2026-11-19, LOG-207)
 
-> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
+> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `../../archive/ai-history/journals/` papkasida.
 
-- **Integratsiya**: `integration/r1-agent-collaboration` (`7b81e56`). Joriy ish branchi: `fix/teacher-and-mentor-assignment-flows` (PR `integration/r1-agent-collaboration` ga).
-- **main**: `2018d7b` (PR #281, 2026-11-17, muzlatilgan). Pre-push hook o'z joyida, main faqat PR orqali va foydalanuvchining yangi aniq ruxsati bilan o'zgaradi.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`31332d9`, PR #296). Keyingi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-204 (`fix/teacher-and-mentor-assignment-flows`)**: OTM o‘qituvchisi va Korxona mentori tayinlash E2E tuzatishlari (`application_hr.py` `latest_offer`/`placement_id`, `candidate_applications.py` `status == "VERIFIED"`, `institution_onboarding.queue` `institution_name`+`assigned_reviewer_id`, `POST /api/bff/employer/placements`, `/employer` `ACADEMIC_INTERNSHIP`+`Amaliyot ochish`, `/nomzod/arizalar` `OFFERED`/`PENDING` qabul tugmasi, `/operator` `unassigned+assigned` navbat, `/university` real `student_supervisions.id`); **LOG-203 (`PR #291` -> `7b81e56`)**: Phase E R1 oqimlari; **LOG-202 (`PR #289` -> `c0dba37`)**: Passkeys WebAuthn + `me/contacts` + `API-021`.
-- **Staging**: 2026-11-19 da `fix/teacher-and-mentor-assignment-flows` dan qayta qurilgan (`flexbridge-r1`, `9` ishchi konteyner `Up/Healthy`, frontend `127.0.0.1:3000`, backend `127.0.0.1:8000`). Pytest **96/96 PASSED (`227.39s`, PG `55440`)**, `run_all_staging_tests.py` **36/36 PASSED (`138.71s`)**, Vitest **34/34 (`201/201`)**, `tsc --noEmit` 0, `eslint --max-warnings=0` 0, `next build` (`112/112`) OK, Microsoft Edge E2E (**21/21 PASSED, `0 pageErrors`**).
-- **Ochiq masalalar (foydalanuvchi qarori)**: to'lov provayderi ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish va keyinroq vaqtinchalik `@FlexBridgeAuthBot` dan yakuniy haqiqiy botga o'tish; staging `.env` da `BFF_SESSION_SECRET` yo'q.
-- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
+- **So'nggi ishlar**: **LOG-204** (#293), **LOG-205** (#295), **LOG-206 (`Q-017`)** (`main` ga ko‘chirish), **LOG-207**: `/tolovlar` alohida to‘lovlar sahifasi (provayder ulanmagan), `Q-018` (`@FlexBridgeAuthBot`), `Q-019` (`R2` to‘xtatilgan, kengayish imkoni saqlangan), server paketi tuzilmasi (`archive/`, `.dockerignore`, `frontend/.dockerignore`, `backend/Dockerfile`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md`).
+- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi konteyner `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda (`run_all_staging_tests.py` **36/36 PASSED**).
+- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi ulanmagan (`/tolovlar` tayyor, buyurtmalar `PENDING_PAYMENT`); serverda `infra/.env` va `BFF_SESSION_SECRET` o‘rnatish; `R2` (`Q-011` / `Q-019`) to‘xtatilgan. Telegram bot (`Q-018`): `@FlexBridgeAuthBot` da qolindi.
+- **Qayerdan boshlash**: `docs/README.md`; server deploy — `docs/operations/SERVER_DEPLOY.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 ## Joriy texnik stek (qisqa xulosa, 2026-11-17)
@@ -156,7 +155,7 @@ Versiyalar manbalarda berilmagan; taxminan yozilmaydi. Keyingi aniq tanlov foyda
 
 ## Arxiv: vazifa bo'yicha texnik qarorlar
 
-Quyidagi bo'limlar [archive/02_texnik_qarorlar_2026-11-07_11.md](archive/02_texnik_qarorlar_2026-11-07_11.md) ga o'zgartirilmasdan ko'chirildi:
+Quyidagi bo'limlar [archive/ai-history/journals/02_texnik_qarorlar_2026-11-07_11.md](../../archive/ai-history/journals/02_texnik_qarorlar_2026-11-07_11.md) ga o'zgartirilmasdan ko'chirildi:
 
 - INT-CODEX-001 / current2026-11-10
 - AUTH-CODEX-006 - candidate current-session boundary2026-11-10
@@ -191,4 +190,4 @@ Quyidagi bo'limlar [archive/02_texnik_qarorlar_2026-11-07_11.md](archive/02_texn
 - PHASE-E-REMAINING-R1-FLOWS — `workspaces.py` Rejected Opportunity Action/Appeal Read Model, `confirm-start` UI, `academic-requests` UI, `API-003` Schedule Match Preview (`/api/bff/matching/preview`), Candidate Enrollment Resubmission (`EnrollmentResubmitModal`), Employer Appeal (`RejectedAppealModal`) & `PasskeysPanel` `useSyncExternalStore` SSR Fix (`LOG-203`, 2026-11-19)
 - TEACHER-MENTOR-ASSIGNMENT-FLOWS — `application_hr.py` `latest_offer`/`placement_id`, `candidate_applications.py` `VERIFIED` enrollment status check, `institution_onboarding.py` `queue` metadata + `/operator` queue merge & `INSTITUTION_APPOINTMENT` label, `POST /api/bff/employer/placements`, `/employer` `ACADEMIC_INTERNSHIP` + `Amaliyot ochish`, `/nomzod/arizalar` `OFFERED`/`PENDING` buttons & `/university` real `student_supervisions.id` lookup (`LOG-204`, 2026-11-19)
 - REMAINING-E2E-UX-READ-MODELS — `placement_admission.py` (`plan` `candidate_accepted_at`/`host_accepted_at`, `own_placements` & `host_placements` `academic_track`/`opportunity_title`/`organization_name`, `own_mentor_assignments` `consented_current_terms`), `academic_admission.py` (`own_assignments` `consented_current_terms`), `academic_views.py` (`review_queue` `NOT EXISTS academic_log_reviews`), `roles.ts` (`hasOrgManagementRole`), `nomzod/shartnomalar/page.tsx`, `employer/page.tsx`, `university/page.tsx`, `DraftOpportunityEditorModal.tsx` (`LABOR_PART_TIME`) & `AcademicReviewModal.tsx` (`APPROVED` badge) (`LOG-205`, 2026-11-19)
-- Eski «Current LOG-…» qatorlari (36 ta): [archive/02_joriy_holat_tarixi.md](archive/02_joriy_holat_tarixi.md)
+- Eski «Current LOG-…» qatorlari (36 ta): [02_joriy_holat_tarixi.md](../../archive/ai-history/journals/02_joriy_holat_tarixi.md)

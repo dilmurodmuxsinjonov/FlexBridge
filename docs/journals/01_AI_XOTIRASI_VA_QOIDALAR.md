@@ -1,16 +1,16 @@
 # FlexBridge — AI xotirasi va ish qoidalari
 
-## Joriy holat (2026-11-19, LOG-206)
+## Joriy holat (2026-11-19, LOG-207)
 
-> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
+> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `../../archive/ai-history/journals/` papkasida.
 
-- **Faol asosiy branch (`Q-017`)**: **`main`** (`release/main-2026-11-19` orqali tasdiqlangan `integration/r1-agent-collaboration` `f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295 holati ko‘chirilmoqda). Foydalanuvchi qayta alohida branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali; tashqi `pre-push` hook saqlangan holda) bajariladi.
-- **Zaxira & tarix**: oldingi `main` (`2018d7b`, PR #281) uchun `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b`, oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` hamda avvalgi `backup/main-2026-11-17-764fb98` / `03c09cb` saqlangan; `integration/r1-agent-collaboration` (`f3f5469`) tarix sifatida qoldirildi.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`31332d9`, PR #296 bilan `f3f5469` ko‘chirilgan; `LOG-207` ishi `chore/server-prep-and-payments-page` -> `main` PR orqali). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali; tashqi `pre-push` hook o‘z joyida) bajariladi.
+- **Zaxira & tarix**: avvalgi `main` zaxiralari (`764fb98`, `03c09cb`, `2018d7b`) saqlangan; `integration/r1-agent-collaboration` tarix sifatida qoldirilgan. Tarixiy AI jurnallari, `reviews/`, `presentations/` va `specs/v1_3/` [`archive/`](../../archive/README.md) ga ajratildi; lokal agent vaqtinchalik fayllari `D:/Codex/FlexBridge-archive/2026-11-19/` ga ko‘chirildi.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-204** (PR #293 `a9ea1aa`, OTM o‘qituvchisi & korxona mentori tayinlash E2E + 5 nuqson tuzatishi); **LOG-205** (PR #295 `f3f5469`, qolgan R1 oqimlar E2E + 7 nuqson tuzatishi: `placement_admission.py`, `academic_admission.py`, `academic_views.py`, `roles.ts`, `employer/page.tsx`, `university/page.tsx`, `nomzod/shartnomalar/page.tsx`, `DraftOpportunityEditorModal.tsx`, `AcademicReviewModal.tsx`); **LOG-206 (`Q-017`)**: `main` muzlatishini yechib `f3f5469` ni `main` ga ko‘chirish.
-- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda. So‘nggi verifikatsiyalar (`LOG-204` + `LOG-205`): `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, Vitest **34/34 (`203/203`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112` marshrut) OK, Pytest (`Test-Backend.ps1` **1737 passed**, `0` assert fail + MinIO/basetemp bilan **19/19 PASSED**; `LOG-205` targeted **14/14**; PR #295 CI **6/6** yashil), Edge E2E (**21/21** va **17/17 PASSED**, `0 pageErrors`). Tartib: `docs/operations/STAGING_VA_E2E.md`.
-- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi, korxona UI orqali real to‘lov bilan e'lon nashr qila olmaydi; `infra/.env` kalitlarini almashtirish, `BFF_SESSION_SECRET` sozlash va keyinchalik vaqtinchalik `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; `R2` frilanserlik (`Q-011`) hozircha o‘chirilgan (`R2_FREELANCE_MARKETPLACE=False`).
-- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; rollar vakolatlari — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md` + `docs/frontend/README.md`; backend — `backend/AGENTS.md` + `docs/backend/README.md`.
+- **So'nggi ishlar**: **LOG-204** (PR #293); **LOG-205** (PR #295); **LOG-206 (`Q-017`)** (`main` ga ko‘chirish, PR #296 `31332d9`); **LOG-207**: `/tolovlar` alohida to‘lovlar sahifasi (provayder ulanmagan holda), `Q-018` (`@FlexBridgeAuthBot` da qolish), `Q-019` (`R2` to‘xtatilgan, kengayish imkoni saqlangan), server deploy tuzilmasi (`archive/`, `.dockerignore`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md`).
+- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda (`run_all_staging_tests.py` **36/36 PASSED**).
+- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) hali ulanmagan (`/tolovlar` interfeysi tayyor, buyurtmalar `PENDING_PAYMENT` bo‘lib qoladi); ishlab chiqarish serveri uchun `infra/.env` maxfiy kalitlari va `BFF_SESSION_SECRET` o‘rnatish; `R2` frilanserlik (`Q-011` / `Q-019`) to‘xtatilgan (`R2_FREELANCE_MARKETPLACE=False`). Telegram bot (`Q-018`): `@FlexBridgeAuthBot` da qolish tasdiqlandi.
+- **Qayerdan boshlash**: hujjatlar xaritasi — `docs/README.md`; serverga yuklash — `docs/operations/SERVER_DEPLOY.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 Boshlanish: 2026-11-06. Ushbu to'rtta boshqaruv fayli barcha AIlar uchun umumiy ish xotirasidir.
@@ -80,10 +80,10 @@ Tekshiruvchi AI / tekshiruv natijasi:
 
 Eski yozuvlar (o'zgartirilmasdan) arxivda:
 
-- [01_ish_tarixi_LOG-001-035.md](archive/01_ish_tarixi_LOG-001-035.md) — LOG-001…LOG-035
-- [01_ish_tarixi_LOG-036-091.md](archive/01_ish_tarixi_LOG-036-091.md) — LOG-036…LOG-091
-- [01_ish_tarixi_LOG-092-162.md](archive/01_ish_tarixi_LOG-092-162.md) — LOG-092…LOG-162
-- [01_joriy_holat_tarixi.md](archive/01_joriy_holat_tarixi.md) — eski «Current LOG-…» qatorlari (60 ta)
+- [01_ish_tarixi_LOG-001-035.md](../../archive/ai-history/journals/01_ish_tarixi_LOG-001-035.md) — LOG-001…LOG-035
+- [01_ish_tarixi_LOG-036-091.md](../../archive/ai-history/journals/01_ish_tarixi_LOG-036-091.md) — LOG-036…LOG-091
+- [01_ish_tarixi_LOG-092-162.md](../../archive/ai-history/journals/01_ish_tarixi_LOG-092-162.md) — LOG-092…LOG-162
+- [01_joriy_holat_tarixi.md](../../archive/ai-history/journals/01_joriy_holat_tarixi.md) — eski «Current LOG-…» qatorlari (60 ta)
 
 ### Yozuvlar LOG-156 … LOG-190 (2026-11-17 da qo'shildi)
 
@@ -614,3 +614,13 @@ Current LOG-157 / Employer Isolated Login (/korxona/kirish), Invitation Onboardi
 - Bajarilgan zaxira (`2018d7b`): oldingi `main` (`2018d7b92149417be45e4370ba0c445979e93a84`, PR #281) uchun branch `backup/main-2026-11-19-2018d7b`, annotated tag `main-backup-2026-11-19-2018d7b` va oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` (`git bundle verify` OK) yaratildi; avvalgi `764fb98` va `03c09cb` zaxiralari saqlandi.
 - Ko‘chirish va qoidalar (`release/main-2026-11-19` -> `main`): `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) `release/main-2026-11-19` branchi orqali `main` ga PR bilan birlashtiriladi; `AGENTS.md`, `01_AI_XOTIRASI_VA_QOIDALAR.md`, `03_BOSQICHLAR_VA_HOLAT.md`, `04_TAKLIFLAR_VA_TANLOVLAR.md` va `ANTIGRAVITY_HANDOFF.md` `Q-017` tartibiga yangilandi. Tashqi `D:/Codex/FlexBridge-agents/hooks/pre-push` himoyasi saqlandi.
 - Keyingi tartib: foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+
+### LOG-207 — 2026-11-19 — To‘lovlar sahifasi (`/tolovlar`), `Q-018`/`Q-019` qarorlari va serverga yuklash uchun arxiv/fayl tartiblanishi
+
+- AI / sessiya / model: Antigravity (`37bc4c57-80dc-42b9-8186-86d25bbe262a`).
+- Issue / branch: `#297` (`chore/server-prep-and-payments-page`, baza `main` `31332d9`).
+- Bajarilgan ishlar:
+  1. **Alohida `/tolovlar` sahifasi (provayder ulanmagan holda)**: `frontend/src/app/tolovlar/page.tsx` va `page.test.tsx` yaratildi (`API-012` tariflar, `Click`/`Payme`/`Uzum Bank`/`Hisob-faktura` provayder tanlovi `"Tez orada ulanadi"`, disabled jonli to‘lov tugmasi, kirgan korxona `OWNER`/`BILLING` uchun `API-070`/`093`/`094` `PENDING_PAYMENT` buyurtma yaratish va tarix); `Footer.tsx`, `tariflar/page.tsx` va `employer/page.tsx` (`BILLING_HUB`) dan havolalar ulandi.
+  2. **Qarorlar (`Q-018`, `Q-019`)**: `04_TAKLIFLAR_VA_TANLOVLAR.md` ga jamoa `@FlexBridgeAuthBot` da qolishi (`Q-018`) hamda 2-bosqich (`R2_FREELANCE_MARKETPLACE=False`) to‘xtatilib kengayish imkoniyati saqlanishi (`Q-019`) qayd etildi.
+  3. **Serverga yuklash va arxiv ajratish**: Git’da kuzatiladigan `reviews/`, `docs/presentations/`, `docs/journals/archive/`, `docs/protocols/archive/` va `specs/v1_3/` fayllari `git mv` bilan [`archive/`](../../archive/README.md) ga ko‘chirildi (`check_publish.py` va `backend/app/core/config.py` yo‘llari yangilandi); kuzatilmaydigan lokal agent/SQLite/log qoldiqlari `D:\Codex\FlexBridge-archive\2026-11-19\` ga ajratildi (`pg_live` va `pg_tests` saqlandi); `.dockerignore`, `frontend/.dockerignore` va `backend/Dockerfile` (`specs/v1_4/`) ixchamlashtirildi; `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md` va `backend/tests/security/test_server_package_builder.py` qo‘shildi.
+- Tekshiruv: `check_publish.py` (**1471 fayl, 0 xato**), `check_master_protocol.py` (**11/11** `true`), `build_server_package.py` (**515 fayl, `5,710,003` -> `1,048,379` bayt, SHA-256 `2328b2e9003df52ec28251d65ab9a11802563cbc24538459925db13b6d5892c1`**), Backend pytest (**121/121 passed** PG `55440`), Frontend (`tsc` 0, `eslint --max-warnings=0` 0, Vitest **35/35 (`205/205`) PASSED**, `next build` `113/113`), Docker rebuild (`9/9` konteyner faol/healthy, HTTP `200`), Edge `/tolovlar` (`1440x900` light/dark & `390x844` mobile: `0 pageErrors`, `0` siljish), `run_all_staging_tests.py` (**36/36 PASSED, `128.5s`**).

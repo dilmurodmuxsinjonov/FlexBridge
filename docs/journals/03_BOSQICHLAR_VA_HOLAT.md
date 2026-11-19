@@ -1,16 +1,16 @@
 # FlexBridge — bosqichlar va bajarilish holati
 
-## Joriy holat (2026-11-19, LOG-206)
+## Joriy holat (2026-11-19, LOG-207)
 
-> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `archive/` papkasida.
+> Shu bo'lim har ishdan keyin **yangilanadi** — eski «Current LOG-…» qatorlarini faylning boshiga ustma-ust qo'shish to'xtatildi. Oldingi holat qatorlari o'zgarmagan holda `../../archive/ai-history/journals/` papkasida.
 
-- **Faol asosiy branch (`Q-017`)**: **`main`** (`release/main-2026-11-19` orqali `integration/r1-agent-collaboration` `f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295 holati ko‘chirilmoqda). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
-- **Zaxira & tarix**: oldingi `main` (`2018d7b`, PR #281) uchun `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b`, bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` saqlangan (`764fb98` va `03c09cb` zaxiralari ham mavjud); `integration/r1-agent-collaboration` tarix sifatida qoldirildi. Pre-push hook o‘z joyida.
+- **Faol asosiy branch (`Q-017`)**: **`main`** (`31332d9`, PR #296). Foydalanuvchi qayta branchga o‘tishni buyurguncha barcha yangi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+- **Zaxira & tarix**: avvalgi `main` (`764fb98`, `03c09cb`, `2018d7b`) zaxiralari va `integration/r1-agent-collaboration` saqlangan; AI arxivi, `reviews/`, `presentations/` va `specs/v1_3/` [`archive/`](../../archive/README.md) ga ajratildi (`Q-017`/`LOG-207`). Pre-push hook o‘z joyida.
 - **Koordinator**: `D:/Codex/FlexBridge-agents/coordinator_state.json` — egasi `CODEX`, holati `HANDED_BACK` (2026-11-14).
-- **So'nggi ishlar**: **LOG-204** (PR #293 `a9ea1aa`, OTM o‘qituvchi & korxona mentor tayinlash E2E + 5 nuqson tuzatishi); **LOG-205** (PR #295 `f3f5469`, qolgan R1 oqimlar E2E + 7 nuqson tuzatishi); **LOG-206 (`Q-017`)**: `main` muzlatishini yechib `f3f5469` ni `main` ga o‘tkazish va `main` ish tartibiga o‘tish.
-- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda. `run_all_staging_tests.py` **36/36 PASSED (`118.88s`)**, Vitest **34/34 (`203/203`)**, ESLint `--max-warnings=0` 0, `tsc --noEmit` 0, `next build` (`112` marshrut) OK, Pytest (`Test-Backend.ps1` **1737 passed**, `0` assert fail + MinIO/basetemp bilan **19/19 PASSED**; `LOG-205` targeted **14/14**; PR #295 CI **6/6** yashil), Edge E2E (**21/21** va **17/17 PASSED**, `0 pageErrors`).
-- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan — buyurtmalar `PENDING_PAYMENT` bo'lib qoladi; `infra/.env` kalitlarini almashtirish, `BFF_SESSION_SECRET` sozlash va keyinroq `@FlexBridgeAuthBot` o'rniga yakuniy haqiqiy Telegram botga o'tish; `R2` frilanserlik (`Q-011`) hozircha o‘chirilgan (`R2_FREELANCE_MARKETPLACE=False`).
-- **Qayerdan boshlash**: `docs/README.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
+- **So'nggi ishlar**: **LOG-204** (PR #293); **LOG-205** (PR #295); **LOG-206 (`Q-017`)** (`main` ga ko‘chirish, PR #296); **LOG-207**: `/tolovlar` to‘lovlar sahifasi (provayder ulanmagan holda), `Q-018` (`@FlexBridgeAuthBot`), `Q-019` (`R2` to‘xtatilgan, kengayish imkoni saqlangan), server deploy tayyorgarligi (`archive/`, `.dockerignore`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md`).
+- **Staging**: 2026-11-19 da `flexbridge-r1` (`9` ishchi servis `Up/Healthy`, `127.0.0.1:3000` / `:8000`) jonli ishlamoqda (`run_all_staging_tests.py` **36/36 PASSED**).
+- **Ochiq masalalar (foydalanuvchi/biznes qarori)**: to'lov provayderi (Click/Payme/Uzum) ulanmagan (`/tolovlar` interfeysi tayyor, buyurtmalar `PENDING_PAYMENT`); serverda `infra/.env` va `BFF_SESSION_SECRET` o‘rnatish; `R2` frilanserlik (`Q-011` / `Q-019`) to‘xtatilgan. Telegram bot (`Q-018`): `@FlexBridgeAuthBot` da qolindi.
+- **Qayerdan boshlash**: `docs/README.md`; serverga yuklash — `docs/operations/SERVER_DEPLOY.md`; rollar — `docs/backend/security_iam/ROLE_AUTHORITY_MATRIX.md`; frontend — `frontend/AGENTS.md`; backend — `backend/AGENTS.md`.
 
 
 Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `Bloklangan`. Bloklangan bandda sabab va ochish sharti yoziladi. Mas'uli tayinlanmagan ish boshlanmagan hisoblanadi.
@@ -19,9 +19,9 @@ Holatlar: `Rejada`, `Jarayonda`, `Tekshiruvda`, `Tuzatish kerak`, `Bajarildi`, `
 
 LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 
-- [03_bosqichlar_arxiv_1.md](archive/03_bosqichlar_arxiv_1.md) — «GH-CODEX-001 — Lokal tuzatishlarni GitHub bilan sinxronlash» dan boshlab
-- [03_bosqichlar_arxiv_2.md](archive/03_bosqichlar_arxiv_2.md) — «INT-CODEX-001 - Reachable host internship admission (Issue65» dan boshlab, LOG-069…LOG-169
-- [03_joriy_holat_tarixi.md](archive/03_joriy_holat_tarixi.md) — eski «Current LOG-…» qatorlari (74 ta)
+- [03_bosqichlar_arxiv_1.md](../../archive/ai-history/journals/03_bosqichlar_arxiv_1.md) — «GH-CODEX-001 — Lokal tuzatishlarni GitHub bilan sinxronlash» dan boshlab
+- [03_bosqichlar_arxiv_2.md](../../archive/ai-history/journals/03_bosqichlar_arxiv_2.md) — «INT-CODEX-001 - Reachable host internship admission (Issue65» dan boshlab, LOG-069…LOG-169
+- [03_joriy_holat_tarixi.md](../../archive/ai-history/journals/03_joriy_holat_tarixi.md) — eski «Current LOG-…» qatorlari (74 ta)
 
 ## So'nggi yozuvlar (LOG-170 dan)
 
@@ -317,7 +317,15 @@ LOG-169 gacha bo'lgan vazifa bo'limlari va yozuvlar (o'zgartirilmasdan):
 - **`main`**: `2018d7b` da qat’iyan muzlatilgan (o‘zgartirilmadi).
 
 ### 2026-11-19 | LOG-206 | release/main-2026-11-19 -> integration (f3f5469) ni main ga o‘tkazish va main da ishlash (Q-017)
-- **Holat**: **TAYYOR / PR KUTILMOQDA (`main` ga)**. Foydalanuvchining 2026-11-19 dagi aniq buyrug‘i (`"hozirdan boshlab ishlarni meinga kochirib bundan keyin brechga otishni buyutgunimcha meinda ishla"`) asosida `Q-015` dagi `main` muzlatishi yechildi (`Q-017`).
+- **Holat**: **BAJARILDI (`main` `31332d9`, PR #296)**. Foydalanuvchining 2026-11-19 dagi aniq buyrug‘i (`"hozirdan boshlab ishlarni meinga kochirib bundan keyin brechga otishni buyutgunimcha meinda ishla"`) asosida `Q-015` dagi `main` muzlatishi yechildi (`Q-017`).
 - **Zaxira (`2018d7b`)**: oldingi `main` (`2018d7b92149417be45e4370ba0c445979e93a84`) branch `backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b` va oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle` (`git bundle verify` OK) bilan saqlandi.
-- **Ko‘chirish**: `release/main-2026-11-19` branchi `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) asosida yaratildi, `AGENTS.md` hamda 4 ta boshqaruv/handoff hujjati `Q-017` ga yangilandi, va tashqi `pre-push` hook buzilmasdan PR + CI orqali `main` ga birlashtiriladi.
+- **Ko‘chirish**: `origin/integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) `release/main-2026-11-19` PR #296 (`6/6` CI yashil) orqali `main` ga birlashtirildi (`31332d9`).
 - **Qoida (`Q-017`)**: foydalanuvchi qayta branchga o‘tishni buyurguncha barcha keyingi ishlar `main` asosida (`main` ga PR + CI orqali) olib boriladi.
+
+### 2026-11-19 | LOG-207 | PR #297 -> `/tolovlar` sahifasi, `Q-018`/`Q-019` qarorlari va serverga yuklash uchun arxiv/fayl tartiblanishi
+- **Holat**: **TEKSHIRILGAN — PR TAYYOR (`main` ga)**. Branch: `chore/server-prep-and-payments-page` (Issue `#297`).
+- **Bajarildi**:
+  - **To‘lovlar sahifasi (`/tolovlar`)**: `frontend/src/app/tolovlar/page.tsx` va `page.test.tsx`, `Footer.tsx`, `tariflar/page.tsx`, `employer/page.tsx` havolalari (provayder ulanmagan, disabled jonli to‘lov tugmasi va kirgan `OWNER`/`BILLING` uchun `PENDING_PAYMENT` buyurtma yaratish).
+  - **Qarorlar**: `Q-018` (`@FlexBridgeAuthBot` da qolish), `Q-019` (`R2_FREELANCE_MARKETPLACE=False` bilan 2-bosqich to‘xtatilgan, kengayish imkoni saqlangan).
+  - **Arxiv va Server deploy paketi**: `reviews/`, `docs/presentations/`, `docs/journals/archive/`, `docs/protocols/archive/` va `specs/v1_3/` `archive/` ga ko‘chirildi (`check_publish.py`, `backend/app/core/config.py`, `docs/README.md`, `backend/README.md`, jurnal havolalari yangilandi); lokal `.agents`/`.claude`/`.gemini` va eski `.data` qoldiqlari `D:\Codex\FlexBridge-archive\2026-11-19\` ga ajratildi (`pg_live`/`pg_tests` saqlandi); `.dockerignore`, `frontend/.dockerignore`, `backend/Dockerfile`, `scripts/build_server_package.py`, `docs/operations/SERVER_DEPLOY.md` va `test_server_package_builder.py` qo‘shildi.
+- **Tekshiruv**: `check_publish.py` (`1471`, 0 xato), `check_master_protocol.py` (`11/11`), `build_server_package.py` (`515` fayl, `1,048,379` bayt, SHA-256 `2328b2e9003df52ec28251d65ab9a11802563cbc24538459925db13b6d5892c1`), Pytest **121/121** (PG `55440`), `tsc` 0, `eslint` 0, Vitest **35/35 (`205/205`)**, `next build` (`113/113`), Docker (`9/9`, HTTP `200`), Edge `/tolovlar` (`0 pageErrors`, `0` overflow), `run_all_staging_tests.py` **36/36 PASSED (`128.5s`)**.

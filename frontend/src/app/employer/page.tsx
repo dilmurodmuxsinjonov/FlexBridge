@@ -2727,15 +2727,25 @@ export default function EmployerPortal() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  disabled={isLoadingBilling || !orgId.trim()}
-                  onClick={() => loadBillingHubData(orgId.trim())}
-                  className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingBilling ? "animate-spin" : ""}`} />
-                  <span>Yangilash</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href="/tolovlar"
+                    prefetch={false}
+                    className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5"
+                  >
+                    <CreditCard className="w-3.5 h-3.5" />
+                    <span>To‘lovlar sahifasi</span>
+                  </Link>
+                  <button
+                    type="button"
+                    disabled={isLoadingBilling || !orgId.trim()}
+                    onClick={() => loadBillingHubData(orgId.trim())}
+                    className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingBilling ? "animate-spin" : ""}`} />
+                    <span>Yangilash</span>
+                  </button>
+                </div>
               </div>
 
               {/* Billing Error / Success */}
