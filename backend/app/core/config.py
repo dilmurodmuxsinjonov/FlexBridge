@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SPECS_V1_3_DIR = REPO_ROOT / "specs" / "v1_3"
+SPECS_V1_3_DIR = REPO_ROOT / "archive" / "specs" / "v1_3"
 SPECS_V1_4_DIR = REPO_ROOT / "specs" / "v1_4"
 
 FORBIDDEN_PDF_TOKENS: tuple[str, ...] = (

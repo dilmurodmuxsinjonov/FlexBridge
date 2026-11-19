@@ -9,6 +9,7 @@ import {
   FileText,
   Lock,
   Compass,
+  CreditCard,
   Briefcase,
   Building2,
   User,
@@ -409,6 +410,12 @@ export default function Footer() {
                   <Link href="/tariflar" prefetch={false} className={linkClass}>
                     <Briefcase className="w-3.5 h-3.5 text-[#c94f1d] dark:text-[#f47a3d]" />
                     <span>Xizmatlar & Tariflar</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tolovlar" prefetch={false} className={linkClass}>
+                    <CreditCard className="w-3.5 h-3.5 text-[#c94f1d] dark:text-[#f47a3d]" />
+                    <span>To‘lovlar sahifasi</span>
                   </Link>
                 </li>
                 <li>

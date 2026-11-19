@@ -148,4 +148,14 @@ Codex chooses a placement-wide server-derived current diary/review digest and mi
 
 - Manba: foydalanuvchining 2026-11-19 dagi aniq buyrug‘i: `"keyingi masala claude yozishni unutgan korinadi hozirdan boshlab ishlarni meinga kochirib bundan keyin brechga otishni buyutgunimcha meinda ishla"`.
 - Qaror: `Q-015` dagi `main`/`master` muzlatishi va faqat `integration/r1-agent-collaboration` ga PR yuborish cheklovi ushbu qaror bilan almashtirildi (`Q-017`). Tasdiqlangan `integration/r1-agent-collaboration` (`f3f5469591eb00f7b852ae3236b0a3b61dcf1ffd`, PR #282–#295) oldingi `main` (`2018d7b`) to‘liq zaxiralangach (`backup/main-2026-11-19-2018d7b`, tag `main-backup-2026-11-19-2018d7b`, oflayn bundle `D:/Codex/FlexBridge-backups/main-2018d7b-2026-11-19.bundle`) `release/main-2026-11-19` PR orqali `main` ga ko‘chiriladi.
-- Keyingi ish tartibi: foydalanuvchi qayta alohida branchga o‘tishni aniq buyurguncha barcha yangi ishlar `main` asosida bajariladi va PR + CI orqali `main` ga birlashtiriladi; tashqi `D:/Codex/FlexBridge-agents/hooks/pre-push` himoya hooki o‘z joyida qoladi. `Q-011` (`R2` frilans hozircha qo‘shilmaydi) va CI/test/hygiene talablari saqlanadi.
+- Keyingi tartib: foydalanuvchi qayta alohida branchga o‘tishni aniq buyurguncha barcha yangi ishlar `main` asosida bajariladi va PR + CI orqali `main` ga birlashtiriladi; tashqi `D:/Codex/FlexBridge-agents/hooks/pre-push` himoya hooki o‘z joyida qoladi. `Q-011` (`R2` frilans hozircha qo‘shilmaydi) va CI/test/hygiene talablari saqlanadi.
+
+### Q-018 - Telegram bot bo‘yicha yakuniy qaror (`@FlexBridgeAuthBot` da qolish, 2026-11-19)
+
+- Manba: foydalanuvchining 2026-11-19 dagi aniq buyrug‘i: `"2 jamo bilan shu botda qolishga kelishdik"`.
+- Qaror: `@FlexBridgeAuthBot` ni vaqtinchalik deb hisoblash va boshqa botga o‘tish bo‘yicha ochiq masala yopildi (`Q-018`). Jamoa `@FlexBridgeAuthBot` da qoladi (`TELEGRAM_BOT_USERNAME=FlexBridgeAuthBot`); ishlab chiqarish (production) serverida faqat `infra/.env` orqali haqiqiy token kiritilib `TELEGRAM_SIMULATION_MODE=false` yoqiladi.
+
+### Q-019 - 2-bosqich (`R2` frilanserlik) ni to‘xtatib kengayish imkonini saqlab qolish (2026-11-19)
+
+- Manba: foydalanuvchining 2026-11-19 dagi aniq buyrug‘i: `"3 2 bosqich qoshish imkoni qoldirilgan bolsa shunday tohtatiladi"`.
+- Qaror: `Q-011` ga muvofiq 2-bosqich (`R2_FREELANCE_MARKETPLACE=False` feature flag, `discovery_and_catalog.py` da `stage: 2, is_active: false` ko‘rinishi va kelgusi arxitektura kengayish nuqtalari) saqlangan holda `R2` rivojlantirishi to‘xtatilgan deb qayd etiladi; `R1` doirasida frilans oqimlari qo‘shilmaydi va bayroq o‘chiq holda qoladi.

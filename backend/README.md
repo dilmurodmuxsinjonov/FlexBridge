@@ -84,7 +84,7 @@ another Python process. S3/gateway tests use explicit test doubles; ClamAV proto
 a local TCP fixture. They do not certify live external services or a browser/UI.
 
 Twelve prototype test modules are preserved byte-for-byte under
-`reviews/2026-11-07/codex_fix/legacy_tests` with SHA-256 manifest. They asserted incompatible
+`archive/reviews/2026-11-07/codex_fix/legacy_tests` with SHA-256 manifest. They asserted incompatible
 contracts (unauthenticated writes, raw session IDs as bearer, fake PDF/provider success,
 in-memory dictionaries and unconditional readiness). SQL-backed regressions replace those
 fixtures. Retention policy tests remain, with a real authenticated audit identity.

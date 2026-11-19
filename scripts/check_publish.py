@@ -39,9 +39,10 @@ def main():
                 if isinstance(node,ast.Constant) and isinstance(node.value,str) and node.value in {
                     'child-org','VALID_PROVIDER_WEBHOOK_SIGNATURE','broken non-PDF'}:
                     errors.append({'file':name,'line':node.lineno,'reason':'runtime probe-specific literal'})
-    manifest=ROOT/'reviews/2026-11-07/codex_fix/legacy_tests/manifest.json'
+    archive_root = ROOT / 'archive'
+    manifest = archive_root / 'reviews/2026-11-07/codex_fix/legacy_tests/manifest.json'
     for entry in json.loads(manifest.read_text(encoding='utf-8')):
-        archive=ROOT/Path(entry['archive'].replace('\\','/'))
+        archive = archive_root / Path(entry['archive'].replace('\\', '/'))
         if hashlib.sha256(archive.read_bytes()).hexdigest()!=entry['sha256']:
             errors.append({'file':entry['archive'],'reason':'legacy archive hash mismatch'})
     result={'files_checked':checked,'errors':errors,'scope':'publication hygiene only; no live credential rotation or acceptance certification'}

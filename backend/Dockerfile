@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && useradd --uid 10001 --create-home app
 COPY --chown=app:app backend/ /workspace/backend/
 COPY --chown=app:app backend/FlexBridge_1_4_schema.sql /workspace/FlexBridge_1_4_schema.sql
-COPY --chown=app:app specs/ /workspace/specs/
+COPY --chown=app:app specs/v1_4/ /workspace/specs/v1_4/
 USER app
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
