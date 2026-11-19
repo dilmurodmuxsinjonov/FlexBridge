@@ -284,3 +284,71 @@ export function revokeAcademicAssignment(assignmentId: string) {
     "ACADEMIC_REVOKE_FAILED"
   );
 }
+
+export function confirmPlacementStart(
+  placementId: string,
+  termsId: string,
+  version: number,
+  party: "CANDIDATE" | "ORGANIZATION"
+) {
+  return req<Record<string, unknown>>(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/confirm-start`,
+    json("POST", {
+      terms_id: termsId,
+      version,
+      party,
+      idempotency_key: crypto.randomUUID(),
+    }),
+    "CONFIRM_START_FAILED"
+  );
+}
+
+export function requestPlacementAcademicTrack(
+  placementId: string,
+  enrollmentId: string,
+  termsId: string,
+  version: number
+) {
+  return req<Record<string, unknown>>(
+    `/api/bff/placements/${encodeURIComponent(placementId)}/academic-requests`,
+    json("POST", {
+      enrollment_id: enrollmentId,
+      terms_id: termsId,
+      version,
+      idempotency_key: crypto.randomUUID(),
+    }),
+    "ACADEMIC_REQUEST_FAILED"
+  );
+}
+
+export interface ScheduleMatchPreviewResult {
+  result: "MATCH" | "CONFLICT" | "UNKNOWN" | string;
+  reason_codes?: string[];
+  matched_group_codes?: string[];
+  checked_from?: string;
+  checked_to?: string;
+}
+
+export function previewScheduleMatch(
+  opportunityId: string,
+  scheduleMatchMode: "ALL_SHIFTS_IN_GROUP" | "ANY_SHIFT_IN_GROUP" = "ALL_SHIFTS_IN_GROUP",
+  commuteBufferMinutes = 30
+) {
+  return req<ScheduleMatchPreviewResult>(
+    "/api/bff/matching/preview",
+    json("POST", {
+      opportunity_id: opportunityId,
+      schedule_match_mode: scheduleMatchMode,
+      commute_buffer_minutes: commuteBufferMinutes,
+    }),
+    "MATCHING_PREVIEW_FAILED"
+  );
+}
+
+export function submitModerationAppeal(actionId: string, reason: string) {
+  return req<{ case_id: string; status: string }>(
+    `/api/bff/employer/moderation/actions/${encodeURIComponent(actionId)}/appeals`,
+    json("POST", { reason: reason.trim() }),
+    "MODERATION_APPEAL_SUBMIT_FAILED"
+  );
+}

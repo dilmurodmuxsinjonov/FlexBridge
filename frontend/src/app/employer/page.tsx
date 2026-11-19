@@ -11,6 +11,7 @@ import OrganizationTeamPanel from "@/components/employer/OrganizationTeamPanel";
 import DraftOpportunityEditorModal from "@/components/employer/DraftOpportunityEditorModal";
 import OwnerGovernancePanel from "@/components/employer/OwnerGovernancePanel";
 import PlacementLifecycleModal from "@/components/employer/PlacementLifecycleModal";
+import RejectedAppealModal from "@/components/employer/RejectedAppealModal";
 import { acceptPlacementAssignment, fetchPlacementPlanNeutral } from "@/lib/placementLifecycle";
 import {
   Users,
@@ -46,6 +47,7 @@ import {
   Coins,
   TrendingUp,
   Sparkles,
+  Gavel,
 } from "lucide-react";
 import {
   fetchAuthMe,
@@ -177,6 +179,7 @@ export default function EmployerPortal() {
   // -------------------------------------------------------------------------
   const [activeMainTab, setActiveMainTab] = useState<"KANBAN" | "MENTOR_HUB" | "ORG_HUB" | "BILLING_HUB" | "SEARCH_HUB">("KANBAN");
   const [editDraftOppId, setEditDraftOppId] = useState<string | null>(null);
+  const [appealOpp, setAppealOpp] = useState<ManagedOpportunityItem | null>(null);
   const [mentorSubTab, setMentorSubTab] = useState<"QUEUE" | "PLACEMENTS" | "DOCUMENTS">("QUEUE");
   const [selectedDocPlacementId, setSelectedDocPlacementId] = useState<string>("");
 
@@ -1463,6 +1466,38 @@ export default function EmployerPortal() {
                     <span>Qoralamani tahrirlash</span>
                   </button>
                 )}
+
+                {(() => {
+                  const selectedOpp = managedOpps.find((o) => o.id === targetOppId);
+                  if (selectedOpp?.status !== "REJECTED") return null;
+                  if (selectedOpp.latest_appeal) {
+                    return (
+                      <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold inline-flex items-center gap-1.5">
+                        <Gavel className="w-3.5 h-3.5" />
+                        <span>
+                          Apellyatsiya:{" "}
+                          {enumLabel(
+                            selectedOpp.latest_appeal.decision || selectedOpp.latest_appeal.status
+                          )}
+                        </span>
+                      </span>
+                    );
+                  }
+                  if (selectedOpp.latest_rejection_action_id) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => setAppealOpp(selectedOpp)}
+                        title="Rad etilgan vakansiya bo‘yicha moderatsiyaga apellyatsiya yuborish"
+                        className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/35 text-amber-200 text-xs font-semibold flex items-center gap-1"
+                      >
+                        <Gavel className="w-3.5 h-3.5" />
+                        <span>Apellyatsiya yuborish</span>
+                      </button>
+                    );
+                  }
+                  return null;
+                })()}
 
                 <button
                   type="button"
@@ -4817,6 +4852,18 @@ export default function EmployerPortal() {
           if (orgId.trim()) loadDashboard(orgId.trim());
         }}
       />
+      {appealOpp?.latest_rejection_action_id && (
+        <RejectedAppealModal
+          key={appealOpp.latest_rejection_action_id}
+          isOpen
+          opportunityTitle={appealOpp.title}
+          actionId={appealOpp.latest_rejection_action_id}
+          onClose={() => setAppealOpp(null)}
+          onSubmitted={() => {
+            if (orgId.trim()) loadDashboard(orgId.trim());
+          }}
+        />
+      )}
       <PlacementLifecycleModal
         isOpen={Boolean(lifecyclePlacement)}
         placement={lifecyclePlacement}

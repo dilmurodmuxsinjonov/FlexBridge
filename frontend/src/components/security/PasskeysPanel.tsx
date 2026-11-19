@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -19,6 +19,10 @@ import {
 } from "@/lib/authSecurity";
 import { createPasskeyCredential, isWebAuthnSupported } from "@/lib/webauthn";
 
+const emptySubscribe = () => () => {};
+const getClientWebAuthn = () => isWebAuthnSupported();
+const getServerWebAuthn = () => true;
+
 export default function PasskeysPanel({
   passkeys,
   totpEnabled,
@@ -36,7 +40,11 @@ export default function PasskeysPanel({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const webauthnOk = isWebAuthnSupported();
+  const webauthnOk = useSyncExternalStore(
+    emptySubscribe,
+    getClientWebAuthn,
+    getServerWebAuthn
+  );
 
   const resetForm = () => {
     setPassword("");

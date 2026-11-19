@@ -3688,6 +3688,8 @@ export interface CandidateEnrollmentItem {
   start_date: string;
   end_date?: string | null;
   student_ref?: string | null;
+  case_status?: string | null;
+  revision?: number | null;
   current_student: boolean;
   reviewed: boolean;
   status: string;
@@ -3816,6 +3818,37 @@ export async function endCandidateEnrollment(
     throw err;
   }
   return data;
+}
+
+export interface ResubmitEnrollmentPayload {
+  expected_revision: number;
+  program: string;
+  start_date: string;
+  end_date?: string | null;
+  student_ref?: string | null;
+  file_ids: string[];
+  evidence_note: string;
+}
+
+export async function resubmitCandidateEnrollmentVerification(
+  id: string,
+  payload: ResubmitEnrollmentPayload
+): Promise<CandidateEnrollmentItem> {
+  const res = await fetch(`/api/bff/candidate/enrollments/${encodeURIComponent(id)}/verification`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(errorText(data, "ENROLLMENT_VERIFICATION_FAILED"));
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
+  }
+  return data as CandidateEnrollmentItem;
 }
 
 export async function fetchVerifiedInstitutions(): Promise<VerifiedInstitutionItem[]> {
@@ -5662,6 +5695,13 @@ export interface ManagedOpportunityItem {
   published_at: string | null;
   expires_at: string | null;
   created_at: string | null;
+  latest_rejection_action_id?: string | null;
+  latest_appeal?: {
+    case_id: string;
+    status: string;
+    decision?: string | null;
+    decision_reason?: string | null;
+  } | null;
 }
 
 export async function fetchManagedOpportunities(organizationId: string, status?: string): Promise<ManagedOpportunityItem[]> {

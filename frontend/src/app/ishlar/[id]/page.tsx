@@ -32,6 +32,10 @@ import {
 import { enumLabel } from "@/lib/labels";
 import AuthModal from "@/components/AuthModal";
 import ModerationReportModal from "@/components/public/ModerationReportModal";
+import {
+  previewScheduleMatch,
+  type ScheduleMatchPreviewResult,
+} from "@/lib/placementLifecycle";
 
 const weekdayNames: Record<number, string> = {
   1: "Dushanba",
@@ -73,6 +77,9 @@ export default function OpportunityDetailPage({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [matchingPreview, setMatchingPreview] = useState<ScheduleMatchPreviewResult | null>(null);
+  const [matchingLoading, setMatchingLoading] = useState(false);
+  const [matchingError, setMatchingError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -138,6 +145,27 @@ export default function OpportunityDetailPage({
       console.error("Save error:", err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePreviewMatch = async () => {
+    if (!user) {
+      setPendingAuthIntent("apply");
+      setAuthModalOpen(true);
+      return;
+    }
+    if (!opportunity) return;
+    setMatchingLoading(true);
+    setMatchingError(null);
+    try {
+      const res = await previewScheduleMatch(opportunity.id);
+      setMatchingPreview(res);
+    } catch (err: unknown) {
+      setMatchingError(
+        err instanceof Error ? err.message : "Jadval mosligini tekshirib bo‘lmadi"
+      );
+    } finally {
+      setMatchingLoading(false);
     }
   };
 
@@ -470,7 +498,56 @@ export default function OpportunityDetailPage({
                 <Flag className="h-3.5 w-3.5" aria-hidden="true" />
                 E’lon ustidan shikoyat qilish
               </button>
+
+              {user && (
+                <button
+                  type="button"
+                  onClick={handlePreviewMatch}
+                  disabled={matchingLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl skeuo-btn-secondary py-2.5 text-xs font-semibold disabled:opacity-50"
+                >
+                  {matchingLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[#c94f1d]" />
+                  ) : (
+                    <CalendarDays className="h-3.5 w-3.5 text-[#c94f1d]" />
+                  )}
+                  Jadval mosligini tekshirish
+                </button>
+              )}
             </div>
+
+            {matchingError && (
+              <div role="alert" className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-700 dark:text-rose-300">
+                {matchingError}
+              </div>
+            )}
+
+            {matchingPreview && (
+              <div
+                className={`mt-3 rounded-xl border p-3 text-xs space-y-1.5 ${
+                  matchingPreview.result === "MATCH"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                    : matchingPreview.result === "CONFLICT"
+                    ? "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                    : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                }`}
+              >
+                <div className="font-bold flex items-center justify-between gap-2">
+                  <span>Jadval tekshiruvi:</span>
+                  <span>{enumLabel(matchingPreview.result)}</span>
+                </div>
+                {matchingPreview.matched_group_codes && matchingPreview.matched_group_codes.length > 0 && (
+                  <p className="text-[11px] opacity-90">
+                    Mos smenalar: {matchingPreview.matched_group_codes.join(", ")}
+                  </p>
+                )}
+                {matchingPreview.reason_codes && matchingPreview.reason_codes.length > 0 && (
+                  <p className="text-[11px] opacity-90">
+                    Sabablar: {matchingPreview.reason_codes.map((c) => enumLabel(c)).join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
 
             {user && (
               <div className="mt-4 flex items-center gap-2 border-t border-[var(--fb-border)] pt-3 text-xs text-[var(--fb-ink-muted)]">
