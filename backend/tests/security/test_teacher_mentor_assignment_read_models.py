@@ -224,3 +224,214 @@ def test_operator_verification_queue_includes_institution_appointment_metadata(c
     assert item["institution_name"] == "Reviewed Academic Institution"
     assert item["current_revision"] == 1
     assert item["assigned_reviewer_id"] is None
+
+
+def test_plan_read_model_exposes_candidate_and_host_acceptance_timestamps(client, identities, organization):
+    from test_admission_lifecycle import planned, publish, terms_request
+
+    candidate, host, mentor, p, assignment = planned(client, identities, organization)
+    plan_v2 = publish(client, host, p)
+
+    before = client.get(f"/api/v1/placements/{p['id']}/plan", headers=candidate["headers"])
+    assert before.status_code == 200, before.text
+    assert before.json()["candidate_accepted_at"] is None
+    assert before.json()["host_accepted_at"] is None
+
+    acc = client.post(
+        f"/api/v1/placements/{p['id']}/accept",
+        headers=candidate["headers"],
+        json=terms_request(plan_v2),
+    )
+    assert acc.status_code == 200, acc.text
+
+    after_cand = client.get(f"/api/v1/placements/{p['id']}/plan", headers=candidate["headers"])
+    assert after_cand.status_code == 200, after_cand.text
+    assert after_cand.json()["candidate_accepted_at"] is not None
+    assert after_cand.json()["host_accepted_at"] is None
+
+    m_acc = client.post(
+        f"/api/v1/placements/{p['id']}/assignments/{assignment['id']}/accept",
+        headers=mentor["headers"],
+        json=terms_request(plan_v2),
+    )
+    assert m_acc.status_code == 200, m_acc.text
+    h_act = client.post(
+        f"/api/v1/placements/{p['id']}/host-decisions",
+        headers=host["headers"],
+        json={**terms_request(plan_v2), "action": "ACTIVATE"},
+    )
+    assert h_act.status_code == 200, h_act.text
+
+    after_host = client.get(f"/api/v1/placements/{p['id']}/plan", headers=candidate["headers"])
+    assert after_host.status_code == 200, after_host.text
+    assert after_host.json()["host_accepted_at"] is not None
+
+
+def test_mentor_and_teacher_assignments_track_consented_current_terms_across_versions(client, identities, organization):
+    from test_academic_admission import nominate, pending_http
+    from test_admission_lifecycle import publish, terms_request
+
+    f = pending_http(client, identities, organization)
+    plc = f["placement"]
+    teacher_asg = nominate(client, f)
+
+    mentor_user = identities("MENTOR", organization)
+    mentor_asg = client.post(
+        f"/api/v1/placements/{plc['id']}/mentor-assignments",
+        headers=f["owner"]["headers"],
+        json={"mentor_id": mentor_user["user_id"], "idempotency_key": str(uuid4())},
+    )
+    assert mentor_asg.status_code == 201, mentor_asg.text
+    mentor_asg_id = mentor_asg.json()["id"]
+
+    plan_v2 = client.get(f"/api/v1/placements/{plc['id']}/plan", headers=mentor_user["headers"]).json()
+    assert plan_v2["version"] == 2
+
+    assert client.post(
+        f"/api/v1/placements/{plc['id']}/assignments/{mentor_asg_id}/accept",
+        headers=mentor_user["headers"],
+        json=terms_request(plan_v2),
+    ).status_code == 200
+    assert client.post(
+        f"/api/v1/placements/{plc['id']}/assignments/{teacher_asg['id']}/accept",
+        headers=f["teacher"]["headers"],
+        json={**terms_request(plan_v2), "assignment_kind": "TEACHER"},
+    ).status_code == 200
+
+    m_list_v2 = client.get("/api/v1/me/mentor-assignments", headers=mentor_user["headers"]).json()["items"]
+    t_list_v2 = client.get("/api/v1/me/academic-assignments", headers=f["teacher"]["headers"]).json()["items"]
+    assert next(x for x in m_list_v2 if x["id"] == mentor_asg_id)["consented_current_terms"] is True
+    assert next(x for x in t_list_v2 if x["id"] == teacher_asg["id"])["consented_current_terms"] is True
+
+    # Publishing a revised learning plan bumps terms to v3 and requires re-consent from both sides
+    plan_v3 = publish(
+        client,
+        f["owner"],
+        {"id": plc["id"], "current_terms_id": plan_v2["terms_id"], "version": plan_v2["version"]},
+    )
+    assert plan_v3["version"] == 3
+
+    m_list_v3 = client.get("/api/v1/me/mentor-assignments", headers=mentor_user["headers"]).json()["items"]
+    t_list_v3 = client.get("/api/v1/me/academic-assignments", headers=f["teacher"]["headers"]).json()["items"]
+    m_item_v3 = next(x for x in m_list_v3 if x["id"] == mentor_asg_id)
+    t_item_v3 = next(x for x in t_list_v3 if x["id"] == teacher_asg["id"])
+    assert m_item_v3["consented_current_terms"] is False
+    assert m_item_v3["current_terms_version"] == 3
+    assert t_item_v3["consented_current_terms"] is False
+    assert t_item_v3["current_terms_version"] == 3
+
+    # Re-accepting v3 flips consented_current_terms back to True
+    assert client.post(
+        f"/api/v1/placements/{plc['id']}/assignments/{mentor_asg_id}/accept",
+        headers=mentor_user["headers"],
+        json=terms_request(plan_v3),
+    ).status_code == 200
+    assert client.post(
+        f"/api/v1/placements/{plc['id']}/assignments/{teacher_asg['id']}/accept",
+        headers=f["teacher"]["headers"],
+        json={**terms_request(plan_v3), "assignment_kind": "TEACHER"},
+    ).status_code == 200
+
+    m_list_ok = client.get("/api/v1/me/mentor-assignments", headers=mentor_user["headers"]).json()["items"]
+    t_list_ok = client.get("/api/v1/me/academic-assignments", headers=f["teacher"]["headers"]).json()["items"]
+    assert next(x for x in m_list_ok if x["id"] == mentor_asg_id)["consented_current_terms"] is True
+    assert next(x for x in t_list_ok if x["id"] == teacher_asg["id"])["consented_current_terms"] is True
+
+
+def test_own_and_host_placements_expose_academic_track_and_display_metadata(client, identities, organization):
+    from test_academic_admission import nominate, pending_http
+    from test_admission_lifecycle import planned
+
+    # 1. Non-academic placement (academic_track=False)
+    cand1, host1, _, p_non_acad, _ = planned(client, identities, organization)
+    own1_res = client.get("/api/v1/me/placements", headers=cand1["headers"])
+    assert own1_res.status_code == 200, own1_res.text
+    own1 = next(row for row in own1_res.json()["items"] if row["id"] == p_non_acad["id"])
+    assert own1["academic_track"] is False
+    assert own1["organization_id"] == p_non_acad["organization_id"]
+    assert isinstance(own1["organization_name"], str) and own1["organization_name"].strip()
+    assert own1["opportunity_id"]
+    assert isinstance(own1["opportunity_title"], str) and own1["opportunity_title"].strip()
+    assert own1["created_at"]
+
+    host1_res = client.get(
+        f"/api/v1/organizations/{p_non_acad['organization_id']}/placements",
+        headers=host1["headers"],
+    )
+    assert host1_res.status_code == 200, host1_res.text
+    h1 = next(row for row in host1_res.json()["items"] if row["id"] == p_non_acad["id"])
+    assert h1["academic_track"] is False
+    assert h1["application_id"] == p_non_acad["application_id"]
+    assert h1["offer_id"] == p_non_acad["offer_id"]
+    assert h1["organization_id"] == p_non_acad["organization_id"]
+    assert h1["enrollment_id"] is None
+    assert isinstance(h1["opportunity_title"], str) and h1["opportunity_title"].strip()
+    assert h1["created_at"]
+
+    # 2. Academic-bound placement (academic_track=True after nominate binds supervision)
+    acad = pending_http(client, identities, organization)
+    nominate(client, acad)
+    p_acad = acad["placement"]
+    own2_res = client.get("/api/v1/me/placements", headers=acad["candidate"]["headers"])
+    assert own2_res.status_code == 200, own2_res.text
+    own2 = next(row for row in own2_res.json()["items"] if row["id"] == p_acad["id"])
+    assert own2["academic_track"] is True
+    assert own2["organization_name"]
+    assert own2["opportunity_id"]
+    assert own2["opportunity_title"]
+    assert own2["created_at"]
+
+    host2_res = client.get(
+        f"/api/v1/organizations/{p_acad['organization_id']}/placements",
+        headers=acad["owner"]["headers"],
+    )
+    assert host2_res.status_code == 200, host2_res.text
+    h2 = next(row for row in host2_res.json()["items"] if row["id"] == p_acad["id"])
+    assert h2["academic_track"] is True
+    assert h2["application_id"] == p_acad["application_id"]
+    assert h2["offer_id"] == p_acad["offer_id"]
+    assert h2["organization_id"] == p_acad["organization_id"]
+    assert h2["enrollment_id"] is not None
+    assert h2["opportunity_title"]
+    assert h2["created_at"]
+
+
+def test_academic_review_queue_excludes_already_reviewed_revisions(client, identities, organization):
+    from test_academic_admission import pending_http, post
+    from test_academic_views import active_revision
+
+    f = pending_http(client, identities, organization)
+    assignment, draft = active_revision(client, f)
+    post(client, f"/api/v1/logs/{draft['id']}/submit", f["candidate"], {}, 200)
+    rev_id = draft["current_revision_id"]
+
+    # Before academic review: revision is visible in both canonical & alias queues
+    for actor_key in ("teacher", "coord"):
+        q1 = client.get("/api/v1/me/academic-review-queue", headers=f[actor_key]["headers"])
+        q2 = client.get("/api/v1/me/teacher-review-queue", headers=f[actor_key]["headers"])
+        assert q1.status_code == 200 and q2.status_code == 200
+        assert any(item["id"] == rev_id for item in q1.json()["items"])
+        assert any(item["id"] == rev_id for item in q2.json()["items"])
+
+    rev_res = client.post(
+        f"/api/v1/log-revisions/{rev_id}/academic-reviews",
+        headers=f["teacher"]["headers"],
+        json={
+            "academic_assignment_id": assignment["id"],
+            "decision": "REVIEWED",
+            "comment": "Akademik talablarga muvofiq tekshirildi.",
+            "idempotency_key": str(uuid4()),
+        },
+    )
+    assert rev_res.status_code == 201, rev_res.text
+
+    # After academic review: revision is removed from both queues for teacher and coordinator
+    for actor_key in ("teacher", "coord"):
+        q1_after = client.get("/api/v1/me/academic-review-queue", headers=f[actor_key]["headers"])
+        q2_after = client.get("/api/v1/me/teacher-review-queue", headers=f[actor_key]["headers"])
+        assert q1_after.status_code == 200 and q2_after.status_code == 200
+        assert all(item["id"] != rev_id for item in q1_after.json()["items"])
+        assert all(item["id"] != rev_id for item in q2_after.json()["items"])
+
+
+

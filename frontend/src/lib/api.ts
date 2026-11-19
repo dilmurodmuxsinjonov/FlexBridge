@@ -1831,6 +1831,9 @@ export interface TeacherAcademicAssignmentItem {
   institution_id: string;
   assigned_at: string;
   accepted_at: string | null;
+  consented_current_terms?: boolean;
+  current_terms_version?: number;
+  placement_status?: string;
   student_name?: string;
   organization_name?: string;
   status?: string;
@@ -2060,6 +2063,9 @@ export interface MentorAssignmentItem {
   assigned_at: string;
   accepted_at: string | null;
   revoked_at: string | null;
+  consented_current_terms?: boolean;
+  current_terms_version?: number;
+  placement_status?: string;
 }
 
 export interface OrganizationPlacementItem {
@@ -2257,6 +2263,8 @@ export interface PlacementPlanDetail {
   weekly_limit_minutes: number;
   required_minutes: number;
   tasks: PlacementPlanTask[];
+  candidate_accepted_at?: string | null;
+  host_accepted_at?: string | null;
 }
 
 export interface PlacementAcceptPayload {

@@ -41,6 +41,19 @@ export const OPERATOR_ROLE_CODES = [
 
 export const SUPER_ADMIN_ROLE = "ADMIN" as const;
 
+export const ORG_MANAGEMENT_ROLE_CODES = [
+  "OWNER",
+  "HR",
+  "HOST_COORDINATOR",
+  "BILLING",
+] as const;
+
+export const ORG_MANAGEMENT_ROLE_SET = new Set<string>(ORG_MANAGEMENT_ROLE_CODES);
+
+export function hasOrgManagementRole(roles?: string[] | null): boolean {
+  return normalizeRoles(roles).some((role) => ORG_MANAGEMENT_ROLE_SET.has(role));
+}
+
 export const EMPLOYER_ROLE_SET = new Set<string>(EMPLOYER_ROLE_CODES);
 export const ACADEMIC_ROLE_SET = new Set<string>(ACADEMIC_ROLE_CODES);
 export const OPERATOR_ROLE_SET = new Set<string>(OPERATOR_ROLE_CODES);

@@ -13,6 +13,7 @@ import OwnerGovernancePanel from "@/components/employer/OwnerGovernancePanel";
 import PlacementLifecycleModal from "@/components/employer/PlacementLifecycleModal";
 import RejectedAppealModal from "@/components/employer/RejectedAppealModal";
 import { acceptPlacementAssignment, createOrganizationPlacement, fetchPlacementPlanNeutral } from "@/lib/placementLifecycle";
+import { hasOrgManagementRole } from "@/lib/roles";
 import {
   Users,
   Briefcase,
@@ -367,14 +368,58 @@ export default function EmployerPortal() {
     }
   }, []);
 
+  const loadMentorQueue = useCallback(async () => {
+    setIsLoadingQueue(true);
+    setQueueError(null);
+    try {
+      const res = await fetchMentorReviewQueue(50);
+      setReviewQueue(res.items || []);
+    } catch (err: unknown) {
+      setQueueError(err instanceof Error ? err.message : "Kundaliklar navbatini yuklashda xatolik.");
+      setReviewQueue([]);
+    } finally {
+      setIsLoadingQueue(false);
+    }
+  }, []);
+
+  const loadPlacements = useCallback(async (allowOrgPlacements?: boolean) => {
+    setIsLoadingPlacements(true);
+    setPlacementsError(null);
+    try {
+      const selectedOrg = workspaceOrgs?.find((o) => o.id === orgId);
+      const canFetchOrg = allowOrgPlacements ?? hasOrgManagementRole(selectedOrg?.roles);
+      const [assignments, placements] = await Promise.all([
+        fetchMentorAssignments(50).catch(() => []),
+        canFetchOrg && orgId.trim() ? fetchOrganizationPlacements(orgId.trim(), 50).catch(() => []) : Promise.resolve([]),
+      ]);
+      setMentorAssignments(assignments);
+      setOrgPlacements(placements);
+    } catch (err: unknown) {
+      setPlacementsError(err instanceof Error ? err.message : "Amaliyotchilar ro'yxatini yuklashda xatolik.");
+    } finally {
+      setIsLoadingPlacements(false);
+    }
+  }, [orgId, workspaceOrgs]);
+
   // After sign-in, pick the user's organization automatically (first one, or keep the current choice).
   const onWorkspacesLoaded = useEffectEvent((orgs: WorkspaceItem[]) => {
     setWorkspaceOrgs(orgs);
     const keep = orgs.find((o) => o.id === orgId);
     const next = keep ?? orgs[0];
-    if (next) {
-      setOrgId(next.id);
+    if (!next) return;
+    setOrgId(next.id);
+    if (hasOrgManagementRole(next.roles)) {
       loadDashboard(next.id);
+      return;
+    }
+    if (next.roles.some((r) => r.trim().toUpperCase() === "MENTOR")) {
+      setDashboard(null);
+      setDashboardError(null);
+      setActiveMainTab("MENTOR_HUB");
+      setMentorSubTab("PLACEMENTS");
+      setPlacementsTab("MY_MENTEES");
+      void loadMentorQueue();
+      void loadPlacements(false);
     }
   });
 
@@ -666,39 +711,8 @@ export default function EmployerPortal() {
   };
 
   // -------------------------------------------------------------------------
-  // FB-162: Mentor Callbacks & Handlers (API-090..092, 089, 069)
+  // FB-162: Mentor Handlers (API-090..092, 089, 069)
   // -------------------------------------------------------------------------
-  const loadMentorQueue = useCallback(async () => {
-    setIsLoadingQueue(true);
-    setQueueError(null);
-    try {
-      const res = await fetchMentorReviewQueue(50);
-      setReviewQueue(res.items || []);
-    } catch (err: unknown) {
-      setQueueError(err instanceof Error ? err.message : "Kundaliklar navbatini yuklashda xatolik.");
-      setReviewQueue([]);
-    } finally {
-      setIsLoadingQueue(false);
-    }
-  }, []);
-
-  const loadPlacements = useCallback(async () => {
-    setIsLoadingPlacements(true);
-    setPlacementsError(null);
-    try {
-      const [assignments, placements] = await Promise.all([
-        fetchMentorAssignments(50).catch(() => []),
-        orgId.trim() ? fetchOrganizationPlacements(orgId.trim(), 50).catch(() => []) : Promise.resolve([]),
-      ]);
-      setMentorAssignments(assignments);
-      setOrgPlacements(placements);
-    } catch (err: unknown) {
-      setPlacementsError(err instanceof Error ? err.message : "Amaliyotchilar ro'yxatini yuklashda xatolik.");
-    } finally {
-      setIsLoadingPlacements(false);
-    }
-  }, [orgId]);
-
   const handleAcceptMentorAssignment = async (asg: MentorAssignmentItem) => {
     setAcceptingMentorId(asg.id);
     setPlacementsError(null);
@@ -1269,9 +1283,18 @@ export default function EmployerPortal() {
                       id="orgPicker"
                       value={orgId}
                       onChange={(e) => {
-                        setOrgId(e.target.value);
+                        const nextId = e.target.value;
+                        setOrgId(nextId);
                         setTargetOppId("");
-                        loadDashboard(e.target.value);
+                        const nextOrg = workspaceOrgs.find((o) => o.id === nextId);
+                        if (hasOrgManagementRole(nextOrg?.roles)) {
+                          loadDashboard(nextId);
+                        } else {
+                          setDashboard(null);
+                          setDashboardError(null);
+                          void loadMentorQueue();
+                          void loadPlacements(false);
+                        }
                       }}
                       className="w-full max-w-sm px-3.5 py-2 rounded-2xl skeuo-input text-sm"
                     >
@@ -1298,7 +1321,15 @@ export default function EmployerPortal() {
                 <button
                   type="button"
                   disabled={isLoadingDashboard || !orgId}
-                  onClick={() => loadDashboard(orgId)}
+                  onClick={() => {
+                    const selected = workspaceOrgs.find((o) => o.id === orgId);
+                    if (hasOrgManagementRole(selected?.roles)) {
+                      loadDashboard(orgId);
+                    } else {
+                      void loadMentorQueue();
+                      void loadPlacements(false);
+                    }
+                  }}
                   className="px-4 py-2 rounded-full skeuo-btn-secondary text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoadingDashboard ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
@@ -2142,7 +2173,7 @@ export default function EmployerPortal() {
 
                     <button
                       type="button"
-                      onClick={loadPlacements}
+                      onClick={() => void loadPlacements()}
                       className="px-2.5 py-1 rounded-lg bg-surface hover:bg-surface-high border border-white/[0.08] text-xs text-zinc-300 flex items-center gap-1"
                     >
                       <RefreshCw className="w-3 h-3" />
@@ -2168,7 +2199,10 @@ export default function EmployerPortal() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {mentorAssignments.map((asg) => (
+                        {mentorAssignments.map((asg) => {
+                          const needsConsent =
+                            !asg.revoked_at && (!asg.accepted_at || asg.consented_current_terms === false);
+                          return (
                           <div
                             key={asg.id}
                             className="p-4 rounded-xl bg-surface border border-white/[0.08] flex flex-col gap-2"
@@ -2176,7 +2210,13 @@ export default function EmployerPortal() {
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-semibold text-white">Amaliyot · {new Date(asg.assigned_at).toLocaleDateString("uz-UZ")} dan</span>
                               <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                {asg.revoked_at ? "Tugallangan" : asg.accepted_at ? "Faol Mentorlik" : "Kutilmoqda"}
+                                {asg.revoked_at
+                                  ? "Tugallangan"
+                                  : needsConsent
+                                  ? asg.accepted_at
+                                    ? "Yangi reja tasdig‘i kutilmoqda"
+                                    : "Kutilmoqda"
+                                  : "Faol Mentorlik"}
                               </span>
                             </div>
                             <div className="text-xs text-zinc-400 flex flex-col gap-1 mt-1">
@@ -2185,7 +2225,7 @@ export default function EmployerPortal() {
                                 <div>Qabul qilingan: <span className="font-mono text-zinc-300">{new Date(asg.accepted_at).toLocaleDateString()}</span></div>
                               )}
                             </div>
-                            {!asg.accepted_at && !asg.revoked_at && (
+                            {needsConsent && (
                               <button
                                 type="button"
                                 disabled={acceptingMentorId === asg.id}
@@ -2193,11 +2233,12 @@ export default function EmployerPortal() {
                                 className="mt-2 px-3 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-xs font-semibold text-white inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
                               >
                                 {acceptingMentorId === asg.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                                <span>Mentorlikni qabul qilish</span>
+                                <span>{asg.accepted_at ? "Yangi shartlarni tasdiqlash" : "Mentorlikni qabul qilish"}</span>
                               </button>
                             )}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )
                   ) : (
