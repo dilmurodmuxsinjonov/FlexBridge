@@ -267,9 +267,24 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLElement>(null);
   const railGliderRef = useRef<HTMLSpanElement>(null);
+  const railWarmTimerRef = useRef<number | null>(null);
   const dockRef = useRef<HTMLDivElement>(null);
   const dockGliderRef = useRef<HTMLSpanElement>(null);
   useGlider(railRef, railGliderRef);
+
+  const handleRailMouseEnter = () => {
+    if (railWarmTimerRef.current !== null) window.clearTimeout(railWarmTimerRef.current);
+    railWarmTimerRef.current = window.setTimeout(() => {
+      railRef.current?.setAttribute("data-tip-warm", "true");
+    }, 340);
+  };
+
+  const handleRailMouseLeave = () => {
+    if (railWarmTimerRef.current !== null) window.clearTimeout(railWarmTimerRef.current);
+    railWarmTimerRef.current = window.setTimeout(() => {
+      railRef.current?.removeAttribute("data-tip-warm");
+    }, 220);
+  };
 
   const portalsOpen = portalsOpenPath === pathname;
   const activePortalTab = portalTabState?.path === pathname ? portalTabState.tab : null;
@@ -620,7 +635,14 @@ export default function Navbar() {
       </header>
 
       {/* Floating left rail with chrome knobs (desktop) */}
-      <nav ref={railRef} aria-label="Tezkor amallar" data-skeuo-dark="true" className="fb-rail skeuo-obsidian hidden lg:flex">
+      <nav
+        ref={railRef}
+        onMouseEnter={handleRailMouseEnter}
+        onMouseLeave={handleRailMouseLeave}
+        aria-label="Tezkor amallar"
+        data-skeuo-dark="true"
+        className="fb-rail skeuo-obsidian hidden lg:flex"
+      >
         <span className="fb-goo" aria-hidden="true">
           <span ref={railGliderRef} className="fb-glider fb-glider-knob" />
         </span>

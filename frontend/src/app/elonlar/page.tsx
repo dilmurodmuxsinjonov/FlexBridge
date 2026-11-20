@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { fetchOpportunities, type OpportunityPage } from "@/lib/api";
 import { useAsyncData } from "@/lib/useAsyncData";
@@ -117,6 +118,17 @@ export default function PublicCatalogPage() {
     setFilters({ query: draftQuery.trim(), region: draftRegion, paid: draftPaid });
   }
 
+  useEffect(() => {
+    const trimmed = draftQuery.trim();
+    if (trimmed === filters.query) return;
+    const timer = window.setTimeout(() => {
+      setHistory([]);
+      setCursor(null);
+      setFilters((prev) => (prev.query === trimmed ? prev : { ...prev, query: trimmed }));
+    }, 260);
+    return () => window.clearTimeout(timer);
+  }, [draftQuery, filters.query]);
+
   function clearFilters() {
     setDraftQuery("");
     setDraftRegion("");
@@ -153,6 +165,7 @@ export default function PublicCatalogPage() {
   }
 
   const hasActiveFilters = Boolean(filters.query || filters.region || filters.paid);
+  const isRefreshing = feed.isLoading && page !== null;
 
   return (
     <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-3.5 py-5 sm:px-6 sm:py-6 md:px-8">
@@ -200,20 +213,30 @@ export default function PublicCatalogPage() {
                   type="search"
                   value={draftQuery}
                   onChange={(event) => setDraftQuery(event.target.value)}
-                  placeholder="Lavozim, kompaniya yoki ko‘nikma..."
-                  className="w-full rounded-2xl bg-transparent py-2.5 pl-10 pr-3 text-sm text-[var(--fb-ink)] focus:outline-none"
+                  placeholder="Lavozim, kompaniya yoki ko‘nikma…"
+                  className="w-full rounded-2xl bg-transparent py-2.5 pl-10 pr-8 text-sm text-[var(--fb-ink)] focus:outline-none"
                 />
+                {draftQuery && (
+                  <button
+                    type="button"
+                    onClick={() => applyQuickFilter({ query: "" })}
+                    aria-label="Qidiruv so‘zini tozalash"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--fb-ink-muted)] hover:text-[var(--fb-ink)]"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                )}
               </label>
 
               <div className="hidden h-6 w-px bg-[var(--fb-border)] lg:block" aria-hidden="true" />
 
-              <label className="relative lg:w-[164px]">
+              <label className="relative lg:w-[152px]">
                 <span className="sr-only">Hudud</span>
                 <select
                   id="opportunity-region"
                   value={draftRegion}
-                  onChange={(event) => setDraftRegion(event.target.value)}
-                  className="w-full cursor-pointer appearance-none rounded-2xl bg-black/[0.03] py-2.5 pl-3.5 pr-8 text-sm font-medium text-[var(--fb-ink)] focus:outline-none dark:bg-white/[0.04] lg:bg-transparent"
+                  onChange={(event) => applyQuickFilter({ region: event.target.value })}
+                  className="w-full cursor-pointer appearance-none rounded-2xl bg-black/[0.03] py-2.5 pl-3 pr-7 text-sm font-medium text-[var(--fb-ink)] focus:outline-none dark:bg-white/[0.04] lg:bg-transparent"
                 >
                   <option value="">Barcha hududlar</option>
                   <option value="Toshkent">Toshkent</option>
@@ -224,27 +247,29 @@ export default function PublicCatalogPage() {
                   <option value="Namangan">Namangan</option>
                 </select>
                 <ChevronDown
-                  className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fb-ink-muted)]"
+                  className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fb-ink-muted)]"
                   aria-hidden="true"
                 />
               </label>
 
               <div className="hidden h-6 w-px bg-[var(--fb-border)] lg:block" aria-hidden="true" />
 
-              <label className="relative lg:w-[154px]">
+              <label className="relative lg:w-[144px]">
                 <span className="sr-only">To‘lov turi</span>
                 <select
                   id="opportunity-payment"
                   value={draftPaid}
-                  onChange={(event) => setDraftPaid(event.target.value as Filters["paid"])}
-                  className="w-full cursor-pointer appearance-none rounded-2xl bg-black/[0.03] py-2.5 pl-3.5 pr-8 text-sm font-medium text-[var(--fb-ink)] focus:outline-none dark:bg-white/[0.04] lg:bg-transparent"
+                  onChange={(event) =>
+                    applyQuickFilter({ paid: event.target.value as Filters["paid"] })
+                  }
+                  className="w-full cursor-pointer appearance-none rounded-2xl bg-black/[0.03] py-2.5 pl-3 pr-7 text-sm font-medium text-[var(--fb-ink)] focus:outline-none dark:bg-white/[0.04] lg:bg-transparent"
                 >
                   <option value="">Barcha to‘lovlar</option>
                   <option value="true">To‘lovli</option>
                   <option value="false">To‘lovsiz</option>
                 </select>
                 <ChevronDown
-                  className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fb-ink-muted)]"
+                  className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fb-ink-muted)]"
                   aria-hidden="true"
                 />
               </label>
@@ -374,7 +399,7 @@ export default function PublicCatalogPage() {
               checked={filters.paid === "true"}
               tone="orange"
               label="Faqat to‘lovli e’lonlar"
-              description={`${paidCount} ta maoshli vakansiya`}
+              description={`Joriy sahifada: ${paidCount} ta maoshli`}
               onChange={(next) =>
                 applyQuickFilter({ paid: next ? "true" : "" })
               }
@@ -383,7 +408,7 @@ export default function PublicCatalogPage() {
               checked={filters.region === "Toshkent"}
               tone="emerald"
               label="Toshkent sh. ustuvor"
-              description={`${tashkentCount} ta poytaxt vakansiyasi`}
+              description={`Joriy sahifada: ${tashkentCount} ta poytaxt e’loni`}
               onChange={(next) =>
                 applyQuickFilter({ region: next ? "Toshkent" : "" })
               }
@@ -433,15 +458,26 @@ export default function PublicCatalogPage() {
                   : "Eng so‘nggi tasdiqlangan e’lonlar yuklanmoqda"}
               </p>
             </div>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-xs font-semibold text-[#c94f1d] dark:text-[#f47a3d] hover:underline"
-              >
-                Filtrlarni tozalash
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {isRefreshing && (
+                <span
+                  role="status"
+                  className="inline-flex items-center gap-1.5 rounded-full skeuo-well-sm px-3 py-1 text-[11px] font-semibold text-[var(--fb-ink-secondary)]"
+                >
+                  <RotateCw className="h-3 w-3 animate-spin text-[#c94f1d] dark:text-[#f47a3d]" aria-hidden="true" />
+                  <span>Yangilanmoqda…</span>
+                </span>
+              )}
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-semibold text-[#c94f1d] dark:text-[#f47a3d] hover:underline"
+                >
+                  Filtrlarni tozalash
+                </button>
+              )}
+            </div>
           </div>
 
           <div aria-live="polite" aria-busy={feed.isLoading}>
@@ -493,7 +529,11 @@ export default function PublicCatalogPage() {
             )}
 
             {!feed.error && page && page.items.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div
+                className={`grid gap-4 md:grid-cols-2 transition-opacity duration-150 ${
+                  isRefreshing ? "opacity-65" : "opacity-100"
+                }`}
+              >
                 {page.items.map((job) => (
                   <VacancyCard key={job.id} job={job} />
                 ))}
@@ -509,7 +549,7 @@ export default function PublicCatalogPage() {
               <button
                 type="button"
                 onClick={previousPage}
-                disabled={history.length === 0}
+                disabled={history.length === 0 || feed.isLoading}
                 className="skeuo-btn-secondary rounded-full px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -521,7 +561,7 @@ export default function PublicCatalogPage() {
               <button
                 type="button"
                 onClick={nextPage}
-                disabled={!page.has_more || !page.next_after}
+                disabled={!page.has_more || !page.next_after || feed.isLoading}
                 className="skeuo-btn-secondary rounded-full px-3.5 py-2 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <span>Keyingi</span>

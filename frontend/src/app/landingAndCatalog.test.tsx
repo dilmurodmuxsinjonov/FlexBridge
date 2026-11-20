@@ -207,6 +207,15 @@ describe("Pre-Auth Bosh Sahifa (/) and Public Catalog (/elonlar)", () => {
     });
     expect(screen.getByText("Katalog balansi")).toBeInTheDocument();
     expect(screen.getByRole("switch", { name: /Faqat to‘lovli e’lonlar/i })).toBeInTheDocument();
+
+    // Selecting a region or payment filter in <select> applies immediately without requiring an extra submit click
+    fireEvent.change(screen.getByLabelText("Hudud"), { target: { value: "Toshkent" } });
+    await waitFor(() => {
+      const regionCalls = fetchMock.mock.calls.filter(([url]) =>
+        String(url).includes("region=Toshkent")
+      );
+      expect(regionCalls.length).toBeGreaterThanOrEqual(1);
+    });
   });
 
   it("deduplicates /api/auth/me across Navbar, Footer, and LandingPage into one request and includes Bosh sahifa + E’lonlar in public nav", async () => {

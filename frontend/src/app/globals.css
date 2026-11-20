@@ -1322,10 +1322,19 @@ html.dark {
   font-size: 0.6875rem;
   font-weight: 600;
   box-shadow: 0 8px 20px -8px rgba(12, 13, 16, 0.45), 0 0 0 1px rgba(12, 13, 16, 0.08);
-  transition: opacity 50ms ease, transform 50ms ease;
+  transition: opacity 70ms ease 0ms, transform 70ms ease 0ms;
 }
-.fb-rail-btn[data-tip]:hover::after,
-.fb-rail-btn[data-tip]:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+.fb-rail-btn[data-tip]:hover::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+  transition-delay: 340ms;
+}
+.fb-rail[data-tip-warm="true"] .fb-rail-btn[data-tip]:hover::after,
+.fb-rail-btn[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+  transition-delay: 0ms;
+}
 .fb-rail-sep { width: 1.25rem; height: 1px; margin: 0.2rem 0; background: rgba(255, 255, 255, 0.14); }
 
 /* Floating section capsule at the bottom: a portal sidebar re-housed */

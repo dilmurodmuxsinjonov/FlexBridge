@@ -82,20 +82,28 @@ async def authentication_boundary(request: Request, call_next):
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/invitations/[^/]+',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and request.url.path != '/api/v1/opportunities/feed' and bool(re.fullmatch(r'/api/v1/opportunities(?:/[^/]+)?',request.url.path)))
     public_path = public_path or (request.method in ('GET','HEAD') and bool(re.fullmatch(r'/api/v1/(?:help|policies)/[^/]+',request.url.path)))
+    from app.api.dependencies import reset_request_auth_cache, set_request_auth_cache
+    ctx_token=None
     if request.url.path.startswith('/api/v1/') and not public_path and not request.url.path.startswith(('/api/v1/webhooks/payments/', '/api/v1/internal/workers/')):
         value=request.headers.get('authorization','')
         if not value.startswith('Bearer '):
             return JSONResponse(status_code=401,content={'detail':{'code':'AUTH_REQUIRED'}})
         try:
-            session=await run_in_threadpool(auth_service.validate_session,value[7:].strip())
+            token=value[7:].strip()
+            session=await run_in_threadpool(auth_service.validate_session,token)
             self_service=request.url.path.startswith(('/api/v1/me/profile','/api/v1/me/security','/api/v1/me/contacts','/api/v1/me/sessions/','/api/v1/auth/sessions/')) or request.url.path=='/api/v1/auth/me'
             if set(session['roles']) & SENSITIVE_ROLES and session['assurance']!='MFA' and not self_service:
                 return JSONResponse(status_code=403,content={'detail':{'code':'MFA_ENROLLMENT_REQUIRED'}})
+            ctx_token=set_request_auth_cache(token,session)
         except AuthError as exc:
             return JSONResponse(status_code=exc.status_code,content={'detail':{'code':exc.code}})
         except (OperationalError, ProgrammingError, RuntimeError):
             return JSONResponse(status_code=503,content={'detail':{'code':'AUTH_STORAGE_UNAVAILABLE'}})
-    return await call_next(request)
+    try:
+        return await call_next(request)
+    finally:
+        if ctx_token is not None:
+            reset_request_auth_cache(ctx_token)
 
 from app.core.iam_http import IAMHTTPMiddleware
 from app.core.http_cache import HTTPCacheMiddleware

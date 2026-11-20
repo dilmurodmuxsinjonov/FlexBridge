@@ -102,4 +102,27 @@ describe("useAsyncData", () => {
 
     expect(result.current.data).toEqual([1, 3]);
   });
+
+  it("deduplicates concurrent requests for the same key and serves cached data in 0ms on remount", async () => {
+    const pending = deferred<string[]>();
+    const fetcher = vi.fn(() => pending.promise);
+
+    const h1 = renderHook(() => useAsyncData("shared-key", fetcher));
+    const h2 = renderHook(() => useAsyncData("shared-key", fetcher));
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      pending.resolve(["fast"]);
+    });
+
+    expect(h1.result.current.data).toEqual(["fast"]);
+    expect(h2.result.current.data).toEqual(["fast"]);
+
+    // Remounting with a cached key renders immediately in 0ms (isLoading: false, cached data present) and revalidates in background
+    const h3 = renderHook(() => useAsyncData("shared-key", fetcher));
+    expect(h3.result.current.isLoading).toBe(false);
+    expect(h3.result.current.data).toEqual(["fast"]);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
 });
