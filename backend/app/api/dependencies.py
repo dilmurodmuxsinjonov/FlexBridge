@@ -2,12 +2,28 @@
 
 from __future__ import annotations
 
+from contextvars import ContextVar, Token
 from dataclasses import dataclass
 from fastapi import Header, HTTPException
 from sqlalchemy import select
 from app.db.storage import table, transaction, now
 
 from app.services.auth import AuthError, auth_service
+
+_REQUEST_AUTH_CACHE: ContextVar[tuple[str, dict] | None] = ContextVar(
+    "flexbridge_request_auth_cache",
+    default=None,
+)
+
+
+def set_request_auth_cache(token: str, session: dict) -> Token:
+    """Bind validated (token, session) to the current async request context."""
+    return _REQUEST_AUTH_CACHE.set((token, session))
+
+
+def reset_request_auth_cache(ctx_token: Token) -> None:
+    """Reset the per-request validated session cache."""
+    _REQUEST_AUTH_CACHE.reset(ctx_token)
 
 
 @dataclass(frozen=True)
@@ -22,6 +38,13 @@ class ActorContext:
         return any(r in self.roles for r in allowed_roles)
 
 
+def _resolve_session_for_token(token: str) -> dict:
+    cached = _REQUEST_AUTH_CACHE.get()
+    if cached is not None and cached[0] == token:
+        return cached[1]
+    return auth_service.validate_session(token)
+
+
 def require_actor_context(authorization: str | None = Header(default=None)) -> ActorContext:
     """Resolve and validate the current `ActorContext` from `Authorization: Bearer <token>`."""
     if not authorization or not authorization.startswith("Bearer "):
@@ -34,7 +57,7 @@ def require_actor_context(authorization: str | None = Header(default=None)) -> A
         )
     token = authorization.removeprefix("Bearer ").strip()
     try:
-        sess = auth_service.validate_session(token)
+        sess = _resolve_session_for_token(token)
     except AuthError as exc:
         raise HTTPException(
             status_code=exc.status_code,
@@ -62,7 +85,7 @@ def optional_actor_context(authorization: str | None = Header(default=None)) -> 
         )
     token = authorization.removeprefix("Bearer ").strip()
     try:
-        sess = auth_service.validate_session(token)
+        sess = _resolve_session_for_token(token)
     except AuthError as exc:
         raise HTTPException(
             status_code=exc.status_code,
