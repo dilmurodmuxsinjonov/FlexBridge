@@ -1,6 +1,6 @@
 # Dizayn tizimi va harakat qatlami
 
-Manba: `frontend/src/app/globals.css` (tokenlar va sinflar), `src/components/shell/`, `src/components/motion/`, `src/lib/motion.ts`. Tarix: LOG-179 (monoxrom bento), LOG-188 («qurilma» qobig'i, #264), LOG-189 (harakat qatlami, #266).
+Manba: `frontend/src/app/globals.css` (tokenlar va sinflar), `src/components/shell/`, `src/components/motion/`, `src/components/glass/`, `src/lib/glassOptics.ts`, `src/lib/motion.ts`. Tarix: LOG-179 (monoxrom bento), LOG-188 («qurilma» qobig'i, #264), LOG-189 (harakat qatlami, #266), LOG-210 (haqiqiy optik suyuq shisha va WebGL2, #303).
 
 ## 1. Ranglar — faqat tokenlar
 
@@ -30,7 +30,8 @@ Bento elementlari: `.fb-panel`, `.fb-ink-card`, `.fb-display`, `.fb-nav-item` (+
 | Band holat | `watchBusy` → `.fb-busy`, `.fb-busy-sheen`, `aria-busy`, `.fb-settle` | Bosilgan tugma `disabled` bo'lsa (so'rov ketyapti) — avtomatik; sahifa o'zgarishi shart emas |
 | Suyuq pill/knob | `lib/motion.ts` → `useGlider` + `.fb-glider` | Faol band (`aria-current="page"`, `.fb-nav-active`, `data-active`) ostiga suyuqlik tomchisidek oqadi: to'rt chet alohida prujina (oldingi chet tez, orqadagisi kech), cho'zilganda ingichkalashadi, tezlik ≤ 21000 px/s, joyiga ~0.1–0.15 s da tushadi (LOG-195, 3x), og'ir render tugagach (≤ 30 ms) boshlanadi; matn rangi tomchi qoplagan bandga qarab (`data-under-glider`). Pozitsiya rAF'dan — CSS easing qo'shmang (LOG-191) |
 | Tomchi izi | `motion/GooFilter.tsx` (`#fb-goo`) + `.fb-goo` qatlami + `.fb-drop` | Glider `.fb-goo` ichida bo'lsa: harakat boshida orqa chetdan 1 kichik tomchi uziladi va tez qaytadi, tez harakatda kam sonli mayda tomchilar to'kilib tez so'nadi (LOG-193 da yumshatilgan); filtr yaqin shakllarni suyuq bo'yin bilan qo'shadi va soyani chizadi (LOG-192) |
-| Suyuq shisha | `#fb-goo` filtri | Pill/tomchi/rels tugmasi: 24% shaffof tana, `feSpecularLighting` bilan qavariq yaltiroq chetlar, ichki soya, yorug' chekka; ostidagi yorliq oq (LOG-193). Rang filtrda yorug'likdan olinadi — glider'ning o'z `background`i faqat shakl uchun |
+| Suyuq shisha (glider) | `#fb-goo` filtri | Pill/tomchi/rels tugmasi: 18% shaffof shisha tana, o'tkir `feSpecularLighting` (`surfaceScale="5.2"`, `specularConstant="1.05"`, `specularExponent="42"`), 42% Fresnel yorug' chet va niqoblangan iliq-kehribo/soviq-moviy prizmatik chekka dispersiyasi (LOG-210) |
+| Haqiqiy optik shisha | `src/lib/glassOptics.ts` + `glass/LiquidGlassEngine.tsx` + `glass/LiquidBackdropCanvas.tsx` + `glass/LiquidGlass3D.tsx` | Chromium da `backdrop-filter: url(#fb-glass-*)` orqali 5 ta Snell sindirish + RGB dispersiya + Fresnel xarita (`pill`, `rail`, `card`, `modal`, `orb`; `x="-6%" y="-6%" width="112%" height="112%"`, `feImage` `0%..100%`, ichki qism 0px buzilish); `html[data-liquid-glass="optical"|"fresnel"]`; binafsha rangsiz WebGL2 ipak fon (`backdrop`) va Hero o'ng panelida 3D ray-traced shisha (`LiquidGlass3D`) |
 | Mavzu almashinuvi | `ThemeProvider.toggleTheme(event)` | View Transitions API: bosilgan tugmadan doira; API bo'lmasa — darhol |
 | Sanovchi raqam | `motion/CountUp.tsx` | Dashboard raqamlari; server HTML'da yakuniy qiymat |
 | Kartalar paydo bo'lishi | `AppStage.revealCards` | Sahifa/tab almashganda ko'rinayotgan tashqi kartalar navbat bilan; qayta mount yo'q |

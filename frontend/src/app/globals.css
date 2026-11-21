@@ -3,122 +3,134 @@
 @tailwind utilities;
 
 /* ===========================================================================
-   FlexBridge "Liquid Glass" design layer (2026-11-16, Issue #231)
-   Frosted translucent surfaces over a soft, slowly drifting colour field.
-   Class names keep the historic `skeuo-*` prefix so every portal picks the
-   new look up without markup churn. Motion stays calm: no lifts, no sweeps.
+   FlexBridge "Real Optical Liquid Glass" design layer (LOG-210)
+   Calibrated refractive glass over live WebGL2 / silk light fields:
+   - True Snell rim refraction & RGB chromatic dispersion in Chromium
+   - Fresnel key + bounce rim specular highlights across cards & chrome
+   - Clean palette (zero purple AI-slop), keeping historic `skeuo-*` hooks
    =========================================================================== */
 @layer base {
   :root {
-    --background: 238 241 246;
+    --background: 235 240 246;
     --foreground: 15 23 42;
 
-    /* Canvas + ambient liquid colour field */
-    --fb-canvas: #edf0f5;
-    --fb-blob-1: rgba(255, 138, 76, 0.42);
-    --fb-blob-2: rgba(96, 165, 250, 0.40);
-    --fb-blob-3: rgba(167, 139, 250, 0.34);
-    --fb-blob-4: rgba(52, 211, 153, 0.26);
+    /* Canvas + ambient optical silk colour field (fallback when WebGL2 is off) */
+    --fb-canvas: #ebf0f6;
+    --fb-blob-1: rgba(240, 128, 68, 0.34);
+    --fb-blob-2: rgba(20, 184, 138, 0.24);
+    --fb-blob-3: rgba(56, 189, 248, 0.26);
+    --fb-blob-4: rgba(255, 255, 255, 0.62);
 
-    /* Glass surfaces */
-    --fb-glass-top: rgba(255, 255, 255, 0.74);
-    --fb-glass-bottom: rgba(255, 255, 255, 0.46);
-    --fb-glass-sheen: rgba(255, 255, 255, 0.70);
-    --fb-glass-border: rgba(255, 255, 255, 0.78);
-    --fb-glass-edge: rgba(15, 23, 42, 0.075);
-    --fb-glass-blur: 22px;
-    --fb-popover: rgba(255, 255, 255, 0.96);
+    /* Optical glass surfaces */
+    --fb-glass-top: rgba(255, 255, 255, 0.80);
+    --fb-glass-bottom: rgba(244, 248, 253, 0.62);
+    --fb-glass-sheen: rgba(255, 255, 255, 0.78);
+    --fb-glass-border: rgba(255, 255, 255, 0.86);
+    --fb-glass-edge: rgba(15, 23, 42, 0.085);
+    --fb-glass-blur: 18px;
+    --fb-popover: rgba(255, 255, 255, 0.84);
 
-    /* Legacy tokens (Tailwind `surface-*`, inline vars) mapped onto frosted glass */
-    --fb-stage: rgba(255, 255, 255, 0.62);
-    --fb-card-top: rgba(255, 255, 255, 0.92);
-    --fb-card-bottom: rgba(245, 247, 251, 0.86);
-    --fb-well: rgba(255, 255, 255, 0.58);
-    --fb-well-deep: rgba(15, 23, 42, 0.08);
-    --fb-obsidian: #12141b;
-    --fb-obsidian-elevated: #1d212b;
+    /* Legacy tokens mapped onto translucent optical glass */
+    --fb-stage: rgba(255, 255, 255, 0.36);
+    --fb-card-top: rgba(255, 255, 255, 0.78);
+    --fb-card-bottom: rgba(244, 248, 253, 0.66);
+    --fb-well: rgba(255, 255, 255, 0.56);
+    --fb-well-deep: rgba(15, 23, 42, 0.075);
+    --fb-obsidian: #10141c;
+    --fb-obsidian-elevated: #1b212d;
 
-    /* Ink — slate scale, AA on glass */
+    /* Ink — slate scale, AA on optical glass */
     --fb-ink: #0f172a;
-    --fb-ink-secondary: #3f4b5e;
-    --fb-ink-muted: #5f6b7d;
+    --fb-ink-secondary: #374357;
+    --fb-ink-muted: #586578;
     --fb-hairline: rgba(15, 23, 42, 0.09);
-    --fb-border: rgba(15, 23, 42, 0.1);
-    --fb-bevel: rgba(255, 255, 255, 0.9);
+    --fb-border: rgba(15, 23, 42, 0.11);
+    --fb-bevel: rgba(255, 255, 255, 0.94);
     --fb-accent: #e0622d;
     --fb-accent-strong: #c94f1d;
     --fb-focus: rgba(224, 98, 45, 0.28);
     --fb-key-chamfer: transparent;
 
+    /* Multi-layer Fresnel specular bevel shadows */
     --fb-shadow-stage:
-      inset 0 1px 1px rgba(255, 255, 255, 0.95),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.35),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.96),
+      inset 1px 0 0.5px rgba(255, 255, 255, 0.6),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.42),
       0 0 0 1px var(--fb-glass-edge),
-      0 24px 60px -24px rgba(15, 23, 42, 0.22);
+      0 26px 64px -26px rgba(15, 23, 42, 0.22);
     --fb-shadow-card:
-      inset 0 1px 1px rgba(255, 255, 255, 0.95),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.3),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.96),
+      inset 1px 0 0.5px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.38),
       0 0 0 1px var(--fb-glass-edge),
-      0 12px 32px -16px rgba(15, 23, 42, 0.22);
+      0 14px 34px -18px rgba(15, 23, 42, 0.2);
     --fb-shadow-well:
       inset 0 1px 2px rgba(15, 23, 42, 0.06),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.65),
       0 0 0 1px rgba(15, 23, 42, 0.06);
     --fb-shadow-dock:
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),
-      0 0 0 1px rgba(15, 23, 42, 0.2),
-      0 18px 40px -14px rgba(15, 23, 42, 0.45);
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.26),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(15, 23, 42, 0.24),
+      0 18px 42px -14px rgba(15, 23, 42, 0.45);
   }
 
   html.dark {
-    --background: 10 12 17;
+    --background: 6 9 12;
     --foreground: 244 245 247;
 
-    --fb-canvas: #0a0c11;
-    --fb-blob-1: rgba(249, 115, 22, 0.24);
-    --fb-blob-2: rgba(59, 130, 246, 0.24);
-    --fb-blob-3: rgba(139, 92, 246, 0.22);
-    --fb-blob-4: rgba(16, 185, 129, 0.14);
+    --fb-canvas: #06090c;
+    --fb-blob-1: rgba(16, 168, 118, 0.30);
+    --fb-blob-2: rgba(232, 98, 42, 0.28);
+    --fb-blob-3: rgba(20, 116, 148, 0.24);
+    --fb-blob-4: rgba(16, 185, 129, 0.16);
 
-    --fb-glass-top: rgba(38, 42, 54, 0.62);
-    --fb-glass-bottom: rgba(22, 25, 33, 0.52);
-    --fb-glass-sheen: rgba(255, 255, 255, 0.07);
-    --fb-glass-border: rgba(255, 255, 255, 0.1);
-    --fb-glass-edge: rgba(0, 0, 0, 0.35);
-    --fb-popover: rgba(26, 29, 38, 0.97);
+    --fb-glass-top: rgba(26, 33, 42, 0.68);
+    --fb-glass-bottom: rgba(14, 19, 25, 0.58);
+    --fb-glass-sheen: rgba(255, 255, 255, 0.11);
+    --fb-glass-border: rgba(255, 255, 255, 0.16);
+    --fb-glass-edge: rgba(0, 0, 0, 0.42);
+    --fb-popover: rgba(14, 19, 25, 0.82);
 
-    --fb-stage: rgba(22, 25, 33, 0.6);
-    --fb-card-top: rgba(34, 38, 49, 0.93);
-    --fb-card-bottom: rgba(22, 25, 34, 0.89);
-    --fb-well: rgba(255, 255, 255, 0.045);
-    --fb-well-deep: rgba(255, 255, 255, 0.09);
-    --fb-obsidian: #0e1016;
-    --fb-obsidian-elevated: #1a1d26;
+    --fb-stage: rgba(12, 16, 22, 0.36);
+    --fb-card-top: rgba(20, 26, 33, 0.72);
+    --fb-card-bottom: rgba(12, 16, 22, 0.62);
+    --fb-well: rgba(255, 255, 255, 0.055);
+    --fb-well-deep: rgba(255, 255, 255, 0.095);
+    --fb-obsidian: #0c1016;
+    --fb-obsidian-elevated: #171c25;
 
     --fb-ink: #f3f5f8;
-    --fb-ink-secondary: #b3bac7;
-    --fb-ink-muted: #8a93a3;
-    --fb-hairline: rgba(255, 255, 255, 0.09);
-    --fb-border: rgba(255, 255, 255, 0.1);
-    --fb-bevel: rgba(255, 255, 255, 0.08);
+    --fb-ink-secondary: #b7c0ce;
+    --fb-ink-muted: #8c96a7;
+    --fb-hairline: rgba(255, 255, 255, 0.10);
+    --fb-border: rgba(255, 255, 255, 0.12);
+    --fb-bevel: rgba(255, 255, 255, 0.12);
     --fb-accent: #f47a3d;
     --fb-accent-strong: #e0622d;
-    --fb-focus: rgba(244, 122, 61, 0.35);
+    --fb-focus: rgba(244, 122, 61, 0.36);
 
     --fb-shadow-stage:
-      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.2),
+      inset 1px 0 0.5px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(110, 231, 183, 0.08),
       0 0 0 1px var(--fb-glass-edge),
-      0 30px 70px -24px rgba(0, 0, 0, 0.75);
+      0 30px 72px -24px rgba(0, 0, 0, 0.78);
     --fb-shadow-card:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.18),
+      inset 1px 0 0.5px rgba(255, 255, 255, 0.09),
+      inset 0 -1px 0 rgba(110, 231, 183, 0.07),
       0 0 0 1px var(--fb-glass-edge),
-      0 14px 34px -16px rgba(0, 0, 0, 0.7);
+      0 14px 36px -16px rgba(0, 0, 0, 0.72);
     --fb-shadow-well:
-      inset 0 1px 2px rgba(0, 0, 0, 0.35),
+      inset 0 1px 2px rgba(0, 0, 0, 0.42),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05),
       0 0 0 1px rgba(255, 255, 255, 0.06);
     --fb-shadow-dock:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 0 0 1px rgba(0, 0, 0, 0.5),
-      0 20px 44px -12px rgba(0, 0, 0, 0.8);
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.24),
+      inset 0 -1px 0 rgba(110, 231, 183, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.55),
+      0 20px 46px -12px rgba(0, 0, 0, 0.84);
   }
 
   * {
@@ -241,15 +253,15 @@ html.dark .skeuo-well-sm {
   box-shadow: var(--fb-shadow-dock);
 }
 
-/* Only genuinely floating navigation chrome uses backdrop-filter blur. */
+/* Only genuinely floating navigation chrome uses backdrop-filter blur / optics. */
 .fb-topbar,
 .fb-rail,
 .fb-main-dock .skeuo-obsidian {
   background:
-    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
-    rgba(14, 16, 22, 0.84);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  backdrop-filter: blur(20px) saturate(160%);
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.14), transparent 55%),
+    linear-gradient(165deg, rgba(20, 26, 36, 0.74) 0%, rgba(10, 14, 20, 0.82) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%) brightness(1.04);
+  backdrop-filter: blur(18px) saturate(180%) brightness(1.04);
 }
 
 .skeuo-badge-recessed {
@@ -270,18 +282,23 @@ html.dark .skeuo-badge-recessed {
 }
 
 .skeuo-card-interactive:hover {
-  border-color: rgba(224, 98, 45, 0.4);
+  border-color: rgba(224, 98, 45, 0.45);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.95),
-    0 0 0 1px rgba(224, 98, 45, 0.18),
-    0 16px 36px -18px rgba(224, 98, 45, 0.35);
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.98),
+    inset 1px 0 0.5px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(224, 98, 45, 0.16),
+    0 0 0 1px rgba(224, 98, 45, 0.2),
+    0 18px 40px -18px rgba(224, 98, 45, 0.34);
 }
 
 html.dark .skeuo-card-interactive:hover {
+  border-color: rgba(244, 122, 61, 0.36);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 0 0 1px rgba(244, 122, 61, 0.28),
-    0 16px 36px -18px rgba(0, 0, 0, 0.8);
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.22),
+    inset 1px 0 0.5px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(16, 185, 129, 0.14),
+    0 0 0 1px rgba(244, 122, 61, 0.3),
+    0 18px 40px -18px rgba(0, 0, 0, 0.84);
 }
 
 .skeuo-input {
@@ -754,26 +771,31 @@ html:not(.dark) textarea {
 }
 
 @media (prefers-reduced-transparency: reduce) {
+  .fb-liquid-backdrop {
+    display: none !important;
+  }
   .skeuo-stage,
   .skeuo-card,
+  .fb-glass-optical,
   .skeuo-btn-secondary {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: #ffffff;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #ffffff !important;
   }
   html.dark .skeuo-stage,
   html.dark .skeuo-card,
+  html.dark .fb-glass-optical,
   html.dark .skeuo-btn-secondary {
-    background: #1a1d26;
+    background: #1a1d26 !important;
   }
   .skeuo-obsidian,
   .fb-topbar,
   .fb-rail,
   .fb-main-dock .skeuo-obsidian,
   .fb-section-dock {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: #12141b;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #12141b !important;
   }
 }
 
@@ -973,10 +995,13 @@ html.dark {
   border-radius: 28px;
   color: var(--fb-ink-card-text);
   background:
-    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.08), transparent 55%),
-    linear-gradient(165deg, var(--fb-ink-card-2) 0%, var(--fb-ink-card) 70%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 24px 50px -24px rgba(12, 13, 16, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.11), transparent 55%),
+    linear-gradient(165deg, rgba(24, 29, 37, 0.88) 0%, rgba(11, 15, 21, 0.92) 72%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0.5px rgba(16, 185, 129, 0.10),
+    0 24px 52px -24px rgba(12, 13, 16, 0.62);
 }
 .fb-ink-card .fb-muted { color: var(--fb-ink-card-muted); }
 
@@ -1156,9 +1181,9 @@ html.dark {
   border-radius: 30px;
   background:
     radial-gradient(140% 60% at 50% 0%, var(--fb-glass-sheen), transparent 60%),
-    linear-gradient(180deg, var(--fb-card-top) 0%, var(--fb-stage) 100%);
+    linear-gradient(180deg, color-mix(in srgb, var(--fb-card-top) 78%, transparent) 0%, var(--fb-stage) 100%);
   border: 1px solid var(--fb-glass-border);
-  box-shadow: var(--fb-shadow-stage), inset 0 0 0 6px color-mix(in srgb, var(--fb-card-top) 40%, transparent);
+  box-shadow: var(--fb-shadow-stage), inset 0 0 0 6px color-mix(in srgb, var(--fb-card-top) 32%, transparent);
 }
 .fb-slab::before,
 .fb-slab::after {
@@ -1592,3 +1617,57 @@ body[data-section-dock] .fb-main-dock { display: none !important; }
 }
 ::view-transition-old(root) { z-index: 1; }
 ::view-transition-new(root) { z-index: 2; }
+
+/* ===========================================================================
+   Chromium Real Optical Refraction Layer (LOG-210)
+   Active only when LiquidGlassEngine confirms Chromium `backdrop-filter: url()`
+   support (`html[data-liquid-glass="optical"]`). Interior stays razor-sharp;
+   rounded rims bend light & split RGB wavelengths cleanly.
+   =========================================================================== */
+html[data-liquid-glass="optical"] :is(.fb-topbar, .fb-section-dock, .fb-main-dock .skeuo-obsidian) {
+  background:
+    linear-gradient(165deg, rgba(20, 26, 36, 0.56) 0%, rgba(10, 14, 20, 0.62) 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(15, 23, 42, 0.26),
+    0 20px 48px -14px rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: url(#fb-glass-pill) saturate(145%) brightness(1.03);
+  backdrop-filter: url(#fb-glass-pill) saturate(145%) brightness(1.03);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+html[data-liquid-glass="optical"] .fb-rail {
+  background:
+    linear-gradient(165deg, rgba(20, 26, 36, 0.56) 0%, rgba(10, 14, 20, 0.62) 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(15, 23, 42, 0.26),
+    0 20px 48px -14px rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: url(#fb-glass-rail) saturate(145%) brightness(1.03);
+  backdrop-filter: url(#fb-glass-rail) saturate(145%) brightness(1.03);
+}
+
+html[data-liquid-glass="optical"] :is(
+  .skeuo-card:is(.absolute, .fixed):not(.inset-0),
+  .fixed.inset-0 :is(.skeuo-card, .skeuo-stage, .bg-zinc-900, .bg-surface-card, .bg-\[\#121214\], .bg-\[\#141417\])
+) {
+  -webkit-backdrop-filter: url(#fb-glass-modal) saturate(145%);
+  backdrop-filter: url(#fb-glass-modal) saturate(145%);
+}
+
+html[data-liquid-glass="optical"] .fb-glass-optical {
+  background:
+    radial-gradient(120% 70% at 0% 0%, var(--fb-glass-sheen), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--fb-card-top) 86%, transparent) 0%, color-mix(in srgb, var(--fb-card-bottom) 82%, transparent) 100%);
+  -webkit-backdrop-filter: url(#fb-glass-card) saturate(135%);
+  backdrop-filter: url(#fb-glass-card) saturate(135%);
+}
+
+html[data-liquid-glass="optical"] :is(.fb-orb, .fb-glass-orb) {
+  -webkit-backdrop-filter: url(#fb-glass-orb) saturate(160%);
+  backdrop-filter: url(#fb-glass-orb) saturate(160%);
+}

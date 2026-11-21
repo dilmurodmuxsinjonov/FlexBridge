@@ -34,6 +34,7 @@ import { resolvePortalDashboard } from "@/lib/roles";
 import { useAsyncData } from "@/lib/useAsyncData";
 import CountUp from "@/components/motion/CountUp";
 import VacancyCard from "@/components/public/VacancyCard";
+import LiquidGlass3D from "@/components/glass/LiquidGlass3D";
 
 const ROLE_CARDS = [
   {
@@ -203,7 +204,7 @@ export default function LandingPage() {
       {/* Hero Bento Grid */}
       <section className="grid gap-5 lg:grid-cols-[minmax(0,1.28fr)_minmax(0,0.72fr)]">
         {/* Left Hero Narrative & Primary CTAs */}
-        <div className="fb-panel skeuo-card flex min-w-0 flex-col justify-between gap-6 p-6 sm:p-8 md:p-10">
+        <div className="fb-panel skeuo-card fb-glass-optical flex min-w-0 flex-col justify-between gap-6 p-6 sm:p-8 md:p-10">
           <div className="space-y-4">
             <div className="inline-flex flex-wrap items-center gap-2 rounded-full skeuo-well-sm px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#c94f1d] dark:text-[#f47a3d]">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -304,6 +305,8 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+
+          <LiquidGlass3D className="h-[88px] w-full rounded-2xl" />
 
           <div className="space-y-3 border-t border-white/10 pt-5">
             <div className="flex items-center justify-between gap-2">
