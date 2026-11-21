@@ -308,7 +308,7 @@ export default function LoginPanel({ config }: { config: LoginPanelConfig }) {
       </aside>
 
       {/* Sign-in card */}
-      <section className="order-1 lg:order-2 skeuo-card rounded-[28px] p-6 sm:p-9 flex flex-col gap-6" aria-labelledby={`${ids}-title`}>
+      <section className="order-1 lg:order-2 skeuo-card fb-glass-optical rounded-[28px] p-6 sm:p-9 flex flex-col gap-6" aria-labelledby={`${ids}-title`}>
         <div className="space-y-2.5">
           <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${TONE_CHIP[config.tone]} ${TONE_TEXT[config.tone]}`}>
             <Icon className="h-3.5 w-3.5" aria-hidden="true" />

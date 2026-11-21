@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import AppStage from "@/components/shell/AppStage";
 import InteractionLayer from "@/components/motion/InteractionLayer";
 import GooFilter from "@/components/motion/GooFilter";
+import LiquidGlassEngine from "@/components/glass/LiquidGlassEngine";
+import LiquidBackdropCanvas from "@/components/glass/LiquidBackdropCanvas";
 
 // Self-hosted at build time by next/font: no runtime request to Google Fonts.
 const outfit = Outfit({
@@ -44,6 +46,8 @@ export default function RootLayout({
     <html lang="uz" suppressHydrationWarning className={`${outfit.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen flex flex-col bg-background text-on-surface antialiased">
         <ThemeProvider>
+          <LiquidBackdropCanvas />
+          <LiquidGlassEngine />
           <InteractionLayer />
           <GooFilter />
           <Navbar />
